@@ -8,6 +8,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [prevWeight, setPrevWeight] = useState(0);
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -38,9 +39,19 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     };
   }, []);
 
+  // Load previous weight when current step changes
+  useEffect(() => {
+    const loadPrevWeight = async () => {
+      if (currentStep?.exercise?.['Exercise Name']) {
+        const weight = await getExerciseWeight(currentStep.exercise['Exercise Name']);
+        setPrevWeight(weight);
+      }
+    };
+    loadPrevWeight();
+  }, [currentStepIndex, currentStep]);
+
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
-  const prevWeight = getExerciseWeight(exerciseName);
 
   const handleNext = (e) => {
     e.preventDefault();

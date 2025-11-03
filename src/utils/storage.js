@@ -26,8 +26,23 @@ export const getCurrentUserId = () => {
 };
 
 // Get workout history
-export const getWorkoutHistory = () => {
+export const getWorkoutHistory = async () => {
   try {
+    // If user is logged in, try to get data from Firebase first
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData && firebaseData.workoutHistory) {
+          // Update localStorage cache
+          localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(firebaseData.workoutHistory));
+          return firebaseData.workoutHistory;
+        }
+      } catch (error) {
+        console.error('Error loading workout history from Firebase, falling back to localStorage:', error);
+      }
+    }
+    
+    // Fallback to localStorage
     const history = localStorage.getItem(KEYS.WORKOUT_HISTORY);
     return history ? JSON.parse(history) : [];
   } catch (error) {
@@ -53,8 +68,23 @@ export const saveWorkout = async (workoutData) => {
 };
 
 // Get user stats
-export const getUserStats = () => {
+export const getUserStats = async () => {
   try {
+    // If user is logged in, try to get data from Firebase first
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData && firebaseData.userStats) {
+          // Update localStorage cache
+          localStorage.setItem(KEYS.USER_STATS, JSON.stringify(firebaseData.userStats));
+          return firebaseData.userStats;
+        }
+      } catch (error) {
+        console.error('Error loading user stats from Firebase, falling back to localStorage:', error);
+      }
+    }
+    
+    // Fallback to localStorage
     const stats = localStorage.getItem(KEYS.USER_STATS);
     return stats ? JSON.parse(stats) : { totalWorkouts: 0, totalTime: 0 };
   } catch (error) {
@@ -78,8 +108,23 @@ export const saveUserStats = async (stats) => {
 };
 
 // Get exercise weight (last recorded weight for an exercise)
-export const getExerciseWeight = (exerciseName) => {
+export const getExerciseWeight = async (exerciseName) => {
   try {
+    // If user is logged in, try to get data from Firebase first
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData && firebaseData.exerciseWeights) {
+          // Update localStorage cache
+          localStorage.setItem(KEYS.EXERCISE_WEIGHTS, JSON.stringify(firebaseData.exerciseWeights));
+          return firebaseData.exerciseWeights[exerciseName] || 0;
+        }
+      } catch (error) {
+        console.error('Error loading exercise weights from Firebase, falling back to localStorage:', error);
+      }
+    }
+    
+    // Fallback to localStorage
     const weights = localStorage.getItem(KEYS.EXERCISE_WEIGHTS);
     const weightsObj = weights ? JSON.parse(weights) : {};
     return weightsObj[exerciseName] || 0;

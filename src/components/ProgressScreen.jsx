@@ -1,9 +1,39 @@
+import { useState, useEffect } from 'react';
 import { getWorkoutHistory, getUserStats } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 
 const ProgressScreen = () => {
-  const stats = getUserStats();
-  const history = getWorkoutHistory();
+  const [stats, setStats] = useState({ totalWorkouts: 0, totalTime: 0 });
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [loadedStats, loadedHistory] = await Promise.all([
+          getUserStats(),
+          getWorkoutHistory()
+        ]);
+        setStats(loadedStats);
+        setHistory(loadedHistory);
+      } catch (error) {
+        console.error('Error loading progress data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="screen progress-screen">
+        <h1>Your Progress</h1>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="screen progress-screen">

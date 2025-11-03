@@ -106,7 +106,7 @@ const AuthScreen = () => {
                   backgroundClip: 'text',
                 }}
               >
-                GoodLift
+                GoodLife
               </Typography>
               <AnimatePresence mode="wait">
                 <motion.div

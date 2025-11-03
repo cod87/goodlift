@@ -10,6 +10,7 @@ const KEYS = {
   WORKOUT_HISTORY: 'goodlift_workout_history',
   USER_STATS: 'goodlift_user_stats',
   EXERCISE_WEIGHTS: 'goodlift_exercise_weights',
+  EXERCISE_TARGET_REPS: 'goodlift_exercise_target_reps',
 };
 
 // Store the current user ID for Firebase sync
@@ -148,6 +149,30 @@ export const setExerciseWeight = async (exerciseName, weight) => {
     }
   } catch (error) {
     console.error('Error saving exercise weight:', error);
+  }
+};
+
+// Get exercise target reps
+export const getExerciseTargetReps = async (exerciseName) => {
+  try {
+    const targetReps = localStorage.getItem(KEYS.EXERCISE_TARGET_REPS);
+    const targetRepsObj = targetReps ? JSON.parse(targetReps) : {};
+    return targetRepsObj[exerciseName] || 12; // Default to 12 reps
+  } catch (error) {
+    console.error('Error reading exercise target reps:', error);
+    return 12;
+  }
+};
+
+// Set exercise target reps
+export const setExerciseTargetReps = async (exerciseName, reps) => {
+  try {
+    const targetReps = localStorage.getItem(KEYS.EXERCISE_TARGET_REPS);
+    const targetRepsObj = targetReps ? JSON.parse(targetReps) : {};
+    targetRepsObj[exerciseName] = reps;
+    localStorage.setItem(KEYS.EXERCISE_TARGET_REPS, JSON.stringify(targetRepsObj));
+  } catch (error) {
+    console.error('Error saving exercise target reps:', error);
   }
 };
 

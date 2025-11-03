@@ -8,11 +8,12 @@ import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import AuthScreen from './components/AuthScreen';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
-import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight } from './utils/storage';
+import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps } from './utils/storage';
 import { SETS_PER_EXERCISE } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { Snackbar, Alert } from '@mui/material';
 
 // Create custom theme matching app colors
 const theme = createTheme({
@@ -49,13 +50,14 @@ const theme = createTheme({
 });
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState('selection');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [currentScreen, setCurrentScreen] = useState('progress');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState([]);
   const [workoutType, setWorkoutType] = useState('');
   const [completedWorkoutData, setCompletedWorkoutData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const { currentUser } = useAuth();
 
   const { generateWorkout, allExercises } = useWorkoutGenerator();
@@ -98,15 +100,19 @@ function App() {
   };
 
   const handleWorkoutComplete = async (workoutData) => {
-    // Save exercise weights
+    const progressionNotifications = [];
+    
+    // Save exercise weights and check for progression
     for (const [exerciseName, data] of Object.entries(workoutData.exercises)) {
       const lastSet = data.sets[data.sets.length - 1];
       if (lastSet.weight > 0) {
-        await setExerciseWeight(exerciseName, lastSet.weight);
+        // Get target reps for this exercise
+        const targetReps = await getExerciseTargetReps(exerciseName);
         
-        // Check for weight progression
-        const allSetsMetProgression = data.sets.every(set => set.reps >= 12);
-        if (allSetsMetProgression && data.sets.length >= SETS_PER_EXERCISE) {
+        // Check if all sets met or exceeded target reps
+        const allSetsMetTarget = data.sets.every(set => set.reps >= targetReps);
+        
+        if (allSetsMetTarget && data.sets.length >= SETS_PER_EXERCISE) {
           const exercise = currentWorkout.find(ex => ex['Exercise Name'] === exerciseName);
           if (exercise) {
             const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
@@ -123,11 +129,33 @@ function App() {
             }
 
             if (weightIncrease > 0) {
-              await setExerciseWeight(exerciseName, lastSet.weight + weightIncrease);
+              const newWeight = lastSet.weight + weightIncrease;
+              await setExerciseWeight(exerciseName, newWeight);
+              progressionNotifications.push({
+                exercise: exerciseName,
+                oldWeight: lastSet.weight,
+                newWeight: newWeight,
+                increase: weightIncrease,
+              });
             }
           }
+        } else {
+          // Just save the current weight without progression
+          await setExerciseWeight(exerciseName, lastSet.weight);
         }
       }
+    }
+
+    // Show progression notification if any exercises progressed
+    if (progressionNotifications.length > 0) {
+      const messages = progressionNotifications.map(prog => 
+        `${prog.exercise}: ${prog.oldWeight} → ${prog.newWeight} lbs (+${prog.increase} lbs)`
+      );
+      setNotification({
+        open: true,
+        message: `🎉 Progressive Overload! You hit your target reps!\n\n${messages.join('\n')}`,
+        severity: 'success',
+      });
     }
 
     // Update workout data with correct type
@@ -262,6 +290,27 @@ function App() {
           
           {currentScreen === 'progress' && <ProgressScreen />}
         </div>
+        
+        <Snackbar
+          open={notification.open}
+          autoHideDuration={8000}
+          onClose={() => setNotification({ ...notification, open: false })}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert 
+            onClose={() => setNotification({ ...notification, open: false })} 
+            severity={notification.severity}
+            sx={{ 
+              whiteSpace: 'pre-line',
+              '& .MuiAlert-message': {
+                fontSize: '1rem',
+                fontWeight: 500,
+              }
+            }}
+          >
+            {notification.message}
+          </Alert>
+        </Snackbar>
       </div>
     </ThemeProvider>
   );

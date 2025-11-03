@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem } from '@mui/material';
@@ -8,6 +8,24 @@ import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExercis
 const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
   const [exerciseSettings, setExerciseSettings] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // Generate weight options once
+  const weightOptions = useMemo(() => {
+    const options = [];
+    for (let i = 0; i <= 500; i += 2.5) {
+      options.push(i);
+    }
+    return options;
+  }, []);
+
+  // Generate target reps options once
+  const repsOptions = useMemo(() => {
+    const options = [];
+    for (let i = 1; i <= 20; i++) {
+      options.push(i);
+    }
+    return options;
+  }, []);
 
   // Load saved weights and target reps on mount
   useEffect(() => {
@@ -63,18 +81,6 @@ const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
     if (workout[i] && workout[i + 1]) {
       supersets.push([workout[i], workout[i + 1]]);
     }
-  }
-
-  // Generate weight options
-  const weightOptions = [];
-  for (let i = 0; i <= 500; i += 2.5) {
-    weightOptions.push(i);
-  }
-
-  // Generate target reps options
-  const repsOptions = [];
-  for (let i = 1; i <= 20; i++) {
-    repsOptions.push(i);
   }
 
   if (loading) {

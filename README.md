@@ -79,27 +79,36 @@ npm run dev
 npm run build
 ```
 
-The built files will be in the `dist/` directory.
+The built files will be in the `docs/` directory, ready for GitHub Pages deployment.
 
 ### Deploying to GitHub Pages
 
-This repository is configured for automatic deployment to GitHub Pages:
+This repository is configured for deployment to GitHub Pages from the `docs/` directory on the `main` branch:
 
-1. The app is automatically deployed when changes are pushed to the `main` branch
-2. The GitHub Actions workflow (`.github/workflows/deploy.yml`) handles the build and deployment
-3. The site will be available at: `https://cod87.github.io/goodlift/`
+1. **Build the application:**
+   ```bash
+   npm run build
+   ```
+   This creates/updates the `docs/` directory with production-ready files.
 
-**Manual Deployment:**
+2. **Commit and push the changes:**
+   ```bash
+   git add docs/
+   git commit -m "Build for GitHub Pages"
+   git push origin main
+   ```
 
-If you need to trigger a deployment manually:
-1. Go to the Actions tab in the GitHub repository
-2. Select "Deploy to GitHub Pages" workflow
-3. Click "Run workflow" and select the `main` branch
+3. **Configure GitHub Pages** (one-time setup):
+   - Go to your repository Settings → Pages
+   - Under "Build and deployment" → "Source", select "Deploy from a branch"
+   - Under "Branch", select `main` and `/docs` folder
+   - Click "Save"
 
-**Configuration:**
+4. **Access your site:**
+   - The site will be available at: `https://cod87.github.io/goodlift/`
+   - It may take a few minutes for changes to appear after pushing
 
-- The Vite configuration includes `base: '/goodlift/'` to ensure assets load correctly from the GitHub Pages subdirectory
-- The `.nojekyll` file prevents GitHub Pages from processing the site with Jekyll
+**Note:** The GitHub Actions workflow (`.github/workflows/deploy.yml`) is kept as an alternative deployment method but is not used with the main/docs approach.
 
 ## Usage
 

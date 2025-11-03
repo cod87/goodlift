@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Keep docs directory for GitHub Pages deployment
+# (Vite builds to docs/ for main/docs deployment)

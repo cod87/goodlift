@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Card, CardContent, Typography, Button, TextField, Grid } from '@mui/material';
-import { PlayArrow, Pause, Replay, Timer } from '@mui/icons-material';
+import { PlayArrow, Pause, Replay } from '@mui/icons-material';
 import { saveHiitSession } from '../utils/storage';
 import { formatDuration } from '../utils/helpers';
 

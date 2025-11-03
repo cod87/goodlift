@@ -49,12 +49,12 @@ function App() {
     }, 500);
   };
 
-  const handleWorkoutComplete = (workoutData) => {
+  const handleWorkoutComplete = async (workoutData) => {
     // Save exercise weights
-    Object.entries(workoutData.exercises).forEach(([exerciseName, data]) => {
+    for (const [exerciseName, data] of Object.entries(workoutData.exercises)) {
       const lastSet = data.sets[data.sets.length - 1];
       if (lastSet.weight > 0) {
-        setExerciseWeight(exerciseName, lastSet.weight);
+        await setExerciseWeight(exerciseName, lastSet.weight);
         
         // Check for weight progression
         const allSetsMetProgression = data.sets.every(set => set.reps >= 12);
@@ -75,24 +75,24 @@ function App() {
             }
 
             if (weightIncrease > 0) {
-              setExerciseWeight(exerciseName, lastSet.weight + weightIncrease);
+              await setExerciseWeight(exerciseName, lastSet.weight + weightIncrease);
             }
           }
         }
       }
-    });
+    }
 
     // Update workout data with correct type
     const finalWorkoutData = { ...workoutData, type: workoutType };
     
     // Save workout
-    saveWorkout(finalWorkoutData);
+    await saveWorkout(finalWorkoutData);
     
     // Update stats
     const stats = getUserStats();
     stats.totalWorkouts += 1;
     stats.totalTime += workoutData.duration;
-    saveUserStats(stats);
+    await saveUserStats(stats);
     
     setCompletedWorkoutData(finalWorkoutData);
     setCurrentScreen('completion');

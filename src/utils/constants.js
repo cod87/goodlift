@@ -8,7 +8,7 @@ export const WORKOUT_TYPES = {
 // Other constants
 export const SETS_PER_EXERCISE = 3;
 export const EXERCISES_PER_WORKOUT = 8;
-export const EXERCISES_DATA_PATH = '/data/exercises.json';
+export const EXERCISES_DATA_PATH = import.meta.env.BASE_URL + 'data/exercises.json';
 
 // Screen names
 export const SCREENS = {

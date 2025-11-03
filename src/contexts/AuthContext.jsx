@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // TEMPORARY: Skip Firebase auth for development
+    // TEMPORARY DEV BYPASS: Skip Firebase for testing
     const mockUser = { uid: 'dev-user', email: 'dev@example.com' };
     setCurrentUser(mockUser);
     setCurrentUserId(mockUser.uid);

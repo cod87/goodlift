@@ -1,7 +1,33 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { getWorkoutHistory, getUserStats } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import Calendar from './Calendar';
+import { Box, Card, CardContent, Typography, Grid, Stack } from '@mui/material';
+import { FitnessCenter, Timer, TrendingUp } from '@mui/icons-material';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const ProgressScreen = () => {
   const [stats, setStats] = useState({ totalWorkouts: 0, totalTime: 0 });
@@ -39,42 +65,266 @@ const ProgressScreen = () => {
   // Extract workout dates for calendar
   const workoutDates = history.map(workout => workout.date);
 
+  // Prepare chart data
+  const chartData = {
+    labels: history.slice(-7).reverse().map(w => formatDate(w.date)),
+    datasets: [
+      {
+        label: 'Workout Duration (minutes)',
+        data: history.slice(-7).reverse().map(w => Math.round(w.duration / 60)),
+        fill: true,
+        backgroundColor: 'rgba(138, 190, 185, 0.2)',
+        borderColor: '#8ABEB9',
+        tension: 0.4,
+        pointBackgroundColor: '#8ABEB9',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      title: {
+        display: true,
+        text: 'Last 7 Workouts',
+        font: {
+          size: 16,
+          weight: 600,
+          family: "'Ubuntu', sans-serif",
+        },
+        color: '#305669',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function(value) {
+            return value + 'm';
+          },
+        },
+      },
+    },
+  };
+
   return (
-    <div className="screen progress-screen">
-      <h1>Your Progress</h1>
+    <motion.div
+      className="screen progress-screen"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Typography variant="h3" component="h1" sx={{ 
+        fontWeight: 700,
+        mb: 4,
+        textAlign: 'center',
+        background: 'linear-gradient(135deg, #8ABEB9, #C1785A)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text'
+      }}>
+        Your Progress
+      </Typography>
       
-      <div className="stats-overview">
-        <div className="stat-card">
-          <h3>Total Workouts</h3>
-          <p>{stats.totalWorkouts}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Total Time</h3>
-          <p>{formatDuration(stats.totalTime)}</p>
-        </div>
-      </div>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={4}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card sx={{ 
+              height: '100%',
+              borderRadius: 3,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 24px rgba(48, 86, 105, 0.15)',
+              }
+            }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <FitnessCenter sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
+                  <Typography variant="h6" sx={{ 
+                    color: 'text.secondary',
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    letterSpacing: 1
+                  }}>
+                    Total Workouts
+                  </Typography>
+                </Box>
+                <Typography variant="h2" sx={{ 
+                  fontWeight: 700,
+                  color: 'primary.main'
+                }}>
+                  {stats.totalWorkouts}
+                </Typography>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={4}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card sx={{ 
+              height: '100%',
+              borderRadius: 3,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 24px rgba(48, 86, 105, 0.15)',
+              }
+            }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Timer sx={{ fontSize: 40, color: 'secondary.main', mr: 2 }} />
+                  <Typography variant="h6" sx={{ 
+                    color: 'text.secondary',
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    letterSpacing: 1
+                  }}>
+                    Total Time
+                  </Typography>
+                </Box>
+                <Typography variant="h2" sx={{ 
+                  fontWeight: 700,
+                  color: 'secondary.main'
+                }}>
+                  {formatDuration(stats.totalTime)}
+                </Typography>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </Grid>
+
+        <Grid item xs={12} sm={12} md={4}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card sx={{ 
+              height: '100%',
+              borderRadius: 3,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 24px rgba(48, 86, 105, 0.15)',
+              }
+            }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <TrendingUp sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
+                  <Typography variant="h6" sx={{ 
+                    color: 'text.secondary',
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    letterSpacing: 1
+                  }}>
+                    Avg Duration
+                  </Typography>
+                </Box>
+                <Typography variant="h2" sx={{ 
+                  fontWeight: 700,
+                  color: 'primary.main'
+                }}>
+                  {stats.totalWorkouts > 0 
+                    ? formatDuration(Math.round(stats.totalTime / stats.totalWorkouts))
+                    : '0m'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </Grid>
+      </Grid>
+
+      {history.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Card sx={{ 
+            mb: 4,
+            borderRadius: 3,
+            p: 2,
+          }}>
+            <Box sx={{ height: 300 }}>
+              <Line data={chartData} options={chartOptions} />
+            </Box>
+          </Card>
+        </motion.div>
+      )}
 
       <Calendar workoutDates={workoutDates} />
       
       <div className="workout-history-container">
-        <h2>Workout History</h2>
-        <div className="workout-history-list">
+        <Typography variant="h4" component="h2" sx={{ 
+          fontWeight: 700,
+          mb: 3,
+          color: 'text.primary'
+        }}>
+          Workout History
+        </Typography>
+        <Stack spacing={2}>
           {history.length === 0 ? (
-            <p>No workout history yet. Complete your first workout to see it here!</p>
+            <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+              No workout history yet. Complete your first workout to see it here!
+            </Typography>
           ) : (
             history.map((workout, idx) => (
-              <div key={idx} className="workout-history-item">
-                <h3>{workout.type} - {formatDate(workout.date)}</h3>
-                <p>Duration: {formatDuration(workout.duration)}</p>
-                <p>
-                  Exercises: {Object.keys(workout.exercises).join(', ')}
-                </p>
-              </div>
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 + idx * 0.05 }}
+              >
+                <Card sx={{ 
+                  borderLeft: '4px solid',
+                  borderLeftColor: 'primary.main',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateX(4px)',
+                    boxShadow: '0 4px 12px rgba(48, 86, 105, 0.15)',
+                    borderLeftColor: 'secondary.main',
+                  }
+                }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                      {workout.type} - {formatDate(workout.date)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                      Duration: {formatDuration(workout.duration)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Exercises: {Object.keys(workout.exercises).join(', ')}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))
           )}
-        </div>
+        </Stack>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

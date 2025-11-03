@@ -1,0 +1,224 @@
+import { motion } from 'framer-motion';
+import PropTypes from 'prop-types';
+import { Box, Typography, Card, CardContent, Button, Chip, Stack } from '@mui/material';
+import { FitnessCenter, PlayArrow, Close } from '@mui/icons-material';
+
+const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
+  // Group exercises into supersets (pairs of 2)
+  const supersets = [];
+  for (let i = 0; i < workout.length; i += 2) {
+    if (workout[i] && workout[i + 1]) {
+      supersets.push([workout[i], workout[i + 1]]);
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4 }}
+      style={{ 
+        maxWidth: '900px', 
+        margin: '0 auto',
+        padding: '2rem'
+      }}
+    >
+      <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+        >
+          <FitnessCenter sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
+        </motion.div>
+        <Typography variant="h3" component="h1" gutterBottom sx={{ 
+          fontWeight: 700,
+          background: 'linear-gradient(135deg, #8ABEB9, #C1785A)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
+          Your {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
+          {supersets.length} Supersets • {workout.length} Exercises • 3 Sets Each
+        </Typography>
+      </Box>
+
+      <Stack spacing={3}>
+        {supersets.map((superset, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 * idx, duration: 0.4 }}
+          >
+            <Card 
+              sx={{ 
+                background: 'linear-gradient(135deg, rgba(138, 190, 185, 0.1), rgba(193, 120, 90, 0.1))',
+                border: '2px solid',
+                borderColor: 'primary.main',
+                borderRadius: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 24px rgba(48, 86, 105, 0.2)',
+                }
+              }}
+            >
+              <CardContent>
+                <Typography 
+                  variant="h6" 
+                  gutterBottom 
+                  sx={{ 
+                    color: 'secondary.main',
+                    fontWeight: 600,
+                    mb: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  <Chip 
+                    label={`Superset ${idx + 1}`} 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: 'secondary.main',
+                      color: 'white',
+                      fontWeight: 600
+                    }} 
+                  />
+                </Typography>
+                
+                <Stack spacing={2}>
+                  {superset.map((exercise, exerciseIdx) => (
+                    <Box 
+                      key={exerciseIdx}
+                      sx={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        p: 2,
+                        bgcolor: 'white',
+                        borderRadius: 2,
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          bgcolor: 'rgba(138, 190, 185, 0.1)',
+                        }
+                      }}
+                    >
+                      <Typography 
+                        sx={{ 
+                          fontSize: '2rem',
+                          color: 'primary.main',
+                          fontWeight: 700,
+                          minWidth: '40px'
+                        }}
+                      >
+                        {exerciseIdx === 0 ? 'A' : 'B'}
+                      </Typography>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          {exercise['Exercise Name']}
+                        </Typography>
+                        <Stack direction="row" spacing={1} flexWrap="wrap">
+                          <Chip 
+                            label={exercise['Primary Muscle']} 
+                            size="small" 
+                            variant="outlined"
+                            sx={{ 
+                              borderColor: 'primary.main',
+                              color: 'primary.main',
+                              fontSize: '0.75rem'
+                            }}
+                          />
+                          <Chip 
+                            label={exercise['Equipment']} 
+                            size="small" 
+                            variant="outlined"
+                            sx={{ 
+                              borderColor: 'text.secondary',
+                              color: 'text.secondary',
+                              fontSize: '0.75rem'
+                            }}
+                          />
+                        </Stack>
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </Stack>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <Stack 
+          direction="row" 
+          spacing={2} 
+          sx={{ mt: 4 }}
+          justifyContent="center"
+        >
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<Close />}
+            onClick={onCancel}
+            sx={{
+              borderRadius: 2,
+              px: 4,
+              py: 1.5,
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              borderColor: 'text.secondary',
+              color: 'text.secondary',
+              '&:hover': {
+                borderColor: 'secondary.main',
+                bgcolor: 'rgba(193, 120, 90, 0.1)',
+              }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<PlayArrow />}
+            onClick={onStart}
+            sx={{
+              borderRadius: 2,
+              px: 4,
+              py: 1.5,
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              bgcolor: 'primary.main',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 8px 16px rgba(138, 190, 185, 0.3)',
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            Begin Workout
+          </Button>
+        </Stack>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+WorkoutPreview.propTypes = {
+  workout: PropTypes.array.isRequired,
+  workoutType: PropTypes.string.isRequired,
+  onStart: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+};
+
+export default WorkoutPreview;

@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl } from '../utils/helpers';
 import { getExerciseWeight } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
+import { Box, LinearProgress, Typography, IconButton } from '@mui/material';
+import { ArrowBack, ArrowForward, ExitToApp } from '@mui/icons-material';
 
 const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -143,59 +146,120 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
 
   return (
     <div className="screen">
-      <div className="workout-header">
-        <span>{formatTime(elapsedTime)}</span>
-        <span>Exercise {currentStepIndex + 1} / {workoutSequence.length}</span>
-      </div>
+      <Box sx={{ mb: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          mb: 1
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {formatTime(elapsedTime)}
+          </Typography>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Exercise {currentStepIndex + 1} / {workoutSequence.length}
+          </Typography>
+        </Box>
+        <LinearProgress 
+          variant="determinate" 
+          value={(currentStepIndex / workoutSequence.length) * 100}
+          sx={{ 
+            height: 8,
+            borderRadius: 4,
+            bgcolor: 'rgba(138, 190, 185, 0.2)',
+            '& .MuiLinearProgress-bar': {
+              bgcolor: 'primary.main',
+              borderRadius: 4,
+            }
+          }}
+        />
+      </Box>
       
       <div className="exercise-card-container">
-        <form onSubmit={handleNext}>
-          <div className="exercise-card">
-            <h2>{exerciseName}</h2>
-            <div className="youtube-embed">
-              <iframe
-                src={getYoutubeEmbedUrl(currentStep.exercise['YouTube_Demonstration_Link'])}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
-            <p className="set-info">Set {currentStep.setNumber} of {SETS_PER_EXERCISE}</p>
-            {prevWeight > 0 && (
-              <p className="prev-weight">Last time: {prevWeight} lbs</p>
-            )}
-            <div className="input-row">
-              <div className="input-group">
-                <label htmlFor="weight-select">Weight (lbs)</label>
-                <select id="weight-select" className="exercise-select" defaultValue={prevWeight || 0}>
-                  {weightOptions}
-                </select>
+        <AnimatePresence mode="wait">
+          <motion.form
+            key={currentStepIndex}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.3 }}
+            onSubmit={handleNext}
+          >
+            <motion.div
+              className="exercise-card"
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2>{exerciseName}</h2>
+              <div className="youtube-embed">
+                <iframe
+                  src={getYoutubeEmbedUrl(currentStep.exercise['YouTube_Demonstration_Link'])}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
               </div>
-              <div className="input-group">
-                <label htmlFor="reps-select">Reps</label>
-                <select id="reps-select" className="exercise-select" defaultValue={8}>
-                  {repsOptions}
-                </select>
-              </div>
-            </div>
-            <div className="workout-nav-buttons">
-              {currentStepIndex > 0 && (
-                <button type="button" className="back-btn" onClick={handleBack}>
-                  ← Back
-                </button>
+              <p className="set-info">Set {currentStep.setNumber} of {SETS_PER_EXERCISE}</p>
+              {prevWeight > 0 && (
+                <motion.p
+                  className="prev-weight"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  Last time: {prevWeight} lbs
+                </motion.p>
               )}
-              <button type="submit" className="next-btn">
-                Next →
-              </button>
-            </div>
-          </div>
-        </form>
+              <div className="input-row">
+                <div className="input-group">
+                  <label htmlFor="weight-select">Weight (lbs)</label>
+                  <select id="weight-select" className="exercise-select" defaultValue={prevWeight || 0}>
+                    {weightOptions}
+                  </select>
+                </div>
+                <div className="input-group">
+                  <label htmlFor="reps-select">Reps</label>
+                  <select id="reps-select" className="exercise-select" defaultValue={8}>
+                    {repsOptions}
+                  </select>
+                </div>
+              </div>
+              <div className="workout-nav-buttons">
+                {currentStepIndex > 0 && (
+                  <motion.button
+                    type="button"
+                    className="back-btn"
+                    onClick={handleBack}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <ArrowBack sx={{ fontSize: 18, mr: 0.5 }} /> Back
+                  </motion.button>
+                )}
+                <motion.button
+                  type="submit"
+                  className="next-btn"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Next <ArrowForward sx={{ fontSize: 18, ml: 0.5 }} />
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.form>
+        </AnimatePresence>
       </div>
       
       <div className="workout-controls">
-        <button className="exit-workout-btn" onClick={handleExit}>
-          Exit Workout
-        </button>
+        <motion.button
+          className="exit-workout-btn"
+          onClick={handleExit}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> Exit Workout
+        </motion.button>
       </div>
     </div>
   );

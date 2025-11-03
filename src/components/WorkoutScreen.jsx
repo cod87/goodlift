@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl } from '../utils/helpers';
-import { getExerciseWeight } from '../utils/storage';
+import { getExerciseWeight, getExerciseTargetReps } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
 import { Box, LinearProgress, Typography, IconButton } from '@mui/material';
 import { ArrowBack, ArrowForward, ExitToApp } from '@mui/icons-material';
@@ -12,6 +12,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [prevWeight, setPrevWeight] = useState(0);
+  const [targetReps, setTargetReps] = useState(12);
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -42,15 +43,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     };
   }, []);
 
-  // Load previous weight when current step changes
+  // Load previous weight and target reps when current step changes
   useEffect(() => {
-    const loadPrevWeight = async () => {
+    const loadSettings = async () => {
       if (currentStep?.exercise?.['Exercise Name']) {
         const weight = await getExerciseWeight(currentStep.exercise['Exercise Name']);
+        const reps = await getExerciseTargetReps(currentStep.exercise['Exercise Name']);
         setPrevWeight(weight);
+        setTargetReps(reps);
       }
     };
-    loadPrevWeight();
+    loadSettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStepIndex]);
 
@@ -134,9 +137,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     );
   }
 
-  // Generate reps options
+  // Generate reps options based on target reps
   const repsOptions = [];
-  for (let i = 1; i <= 12; i++) {
+  for (let i = 1; i <= 20; i++) {
     repsOptions.push(
       <option key={i} value={i}>
         {i}
@@ -208,7 +211,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  Last time: {prevWeight} lbs
+                  Last time: {prevWeight} lbs • Target: {targetReps} reps
                 </motion.p>
               )}
               <div className="input-row">

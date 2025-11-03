@@ -1,15 +1,94 @@
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
-import { Box, Typography, Card, CardContent, Button, Chip, Stack } from '@mui/material';
+import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem } from '@mui/material';
 import { FitnessCenter, PlayArrow, Close } from '@mui/icons-material';
+import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps } from '../utils/storage';
 
 const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
+  const [exerciseSettings, setExerciseSettings] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  // Generate weight options once
+  const weightOptions = useMemo(() => {
+    const options = [];
+    for (let i = 0; i <= 500; i += 2.5) {
+      options.push(i);
+    }
+    return options;
+  }, []);
+
+  // Generate target reps options once
+  const repsOptions = useMemo(() => {
+    const options = [];
+    for (let i = 1; i <= 20; i++) {
+      options.push(i);
+    }
+    return options;
+  }, []);
+
+  // Load saved weights and target reps on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      const settings = {};
+      for (const exercise of workout) {
+        const exerciseName = exercise['Exercise Name'];
+        const weight = await getExerciseWeight(exerciseName);
+        const targetReps = await getExerciseTargetReps(exerciseName);
+        settings[exerciseName] = {
+          weight: weight || 0,
+          targetReps: targetReps || 12,
+        };
+      }
+      setExerciseSettings(settings);
+      setLoading(false);
+    };
+    loadSettings();
+  }, [workout]);
+
+  const handleWeightChange = (exerciseName, value) => {
+    setExerciseSettings(prev => ({
+      ...prev,
+      [exerciseName]: {
+        ...prev[exerciseName],
+        weight: parseFloat(value) || 0,
+      }
+    }));
+  };
+
+  const handleTargetRepsChange = (exerciseName, value) => {
+    setExerciseSettings(prev => ({
+      ...prev,
+      [exerciseName]: {
+        ...prev[exerciseName],
+        targetReps: parseInt(value) || 12,
+      }
+    }));
+  };
+
+  const handleStartWorkout = async () => {
+    // Save all settings before starting workout
+    for (const [exerciseName, settings] of Object.entries(exerciseSettings)) {
+      await setExerciseWeight(exerciseName, settings.weight);
+      await setExerciseTargetReps(exerciseName, settings.targetReps);
+    }
+    onStart();
+  };
+
   // Group exercises into supersets (pairs of 2)
   const supersets = [];
   for (let i = 0; i < workout.length; i += 2) {
     if (workout[i] && workout[i + 1]) {
       supersets.push([workout[i], workout[i + 1]]);
     }
+  }
+
+  if (loading) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 8 }}>
+        <Typography>Loading workout...</Typography>
+      </Box>
+    );
   }
 
   return (
@@ -41,8 +120,11 @@ const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
         }}>
           Your {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1 }}>
           {supersets.length} Supersets • {workout.length} Exercises • 3 Sets Each
+        </Typography>
+        <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
+          Set your starting weight and target reps for each exercise
         </Typography>
       </Box>
 
@@ -92,61 +174,97 @@ const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
                 </Typography>
                 
                 <Stack spacing={2}>
-                  {superset.map((exercise, exerciseIdx) => (
-                    <Box 
-                      key={exerciseIdx}
-                      sx={{ 
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        p: 2,
-                        bgcolor: 'white',
-                        borderRadius: 2,
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          bgcolor: 'rgba(138, 190, 185, 0.1)',
-                        }
-                      }}
-                    >
-                      <Typography 
+                  {superset.map((exercise, exerciseIdx) => {
+                    const exerciseName = exercise['Exercise Name'];
+                    const settings = exerciseSettings[exerciseName] || { weight: 0, targetReps: 12 };
+                    
+                    return (
+                      <Box 
+                        key={exerciseIdx}
                         sx={{ 
-                          fontSize: '2rem',
-                          color: 'primary.main',
-                          fontWeight: 700,
-                          minWidth: '40px'
+                          p: 2,
+                          bgcolor: 'white',
+                          borderRadius: 2,
+                          transition: 'all 0.2s ease',
                         }}
                       >
-                        {exerciseIdx === 0 ? 'A' : 'B'}
-                      </Typography>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                          {exercise['Exercise Name']}
-                        </Typography>
-                        <Stack direction="row" spacing={1} flexWrap="wrap">
-                          <Chip 
-                            label={exercise['Primary Muscle']} 
-                            size="small" 
-                            variant="outlined"
+                        <Box sx={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          mb: 2
+                        }}>
+                          <Typography 
                             sx={{ 
-                              borderColor: 'primary.main',
+                              fontSize: '2rem',
                               color: 'primary.main',
-                              fontSize: '0.75rem'
+                              fontWeight: 700,
+                              minWidth: '40px'
                             }}
-                          />
-                          <Chip 
-                            label={exercise['Equipment']} 
-                            size="small" 
-                            variant="outlined"
-                            sx={{ 
-                              borderColor: 'text.secondary',
-                              color: 'text.secondary',
-                              fontSize: '0.75rem'
-                            }}
-                          />
+                          >
+                            {exerciseIdx === 0 ? 'A' : 'B'}
+                          </Typography>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                              {exerciseName}
+                            </Typography>
+                            <Stack direction="row" spacing={1} flexWrap="wrap">
+                              <Chip 
+                                label={exercise['Primary Muscle']} 
+                                size="small" 
+                                variant="outlined"
+                                sx={{ 
+                                  borderColor: 'primary.main',
+                                  color: 'primary.main',
+                                  fontSize: '0.75rem'
+                                }}
+                              />
+                              <Chip 
+                                label={exercise['Equipment']} 
+                                size="small" 
+                                variant="outlined"
+                                sx={{ 
+                                  borderColor: 'text.secondary',
+                                  color: 'text.secondary',
+                                  fontSize: '0.75rem'
+                                }}
+                              />
+                            </Stack>
+                          </Box>
+                        </Box>
+                        <Stack direction="row" spacing={2} sx={{ pl: 7 }}>
+                          <TextField
+                            select
+                            label="Weight (lbs)"
+                            value={settings.weight}
+                            onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
+                            size="small"
+                            sx={{ minWidth: 120 }}
+                          >
+                            {weightOptions.map((weight) => (
+                              <MenuItem key={weight} value={weight}>
+                                {weight} lbs
+                              </MenuItem>
+                            ))}
+                          </TextField>
+                          <TextField
+                            select
+                            label="Target Reps"
+                            value={settings.targetReps}
+                            onChange={(e) => handleTargetRepsChange(exerciseName, e.target.value)}
+                            size="small"
+                            sx={{ minWidth: 120 }}
+                          >
+                            {repsOptions.map((reps) => (
+                              <MenuItem key={reps} value={reps}>
+                                {reps} reps
+                              </MenuItem>
+                            ))}
+                          </TextField>
                         </Stack>
                       </Box>
-                    </Box>
-                  ))}
+                    );
+                  })}
                 </Stack>
               </CardContent>
             </Card>
@@ -190,7 +308,7 @@ const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
             variant="contained"
             size="large"
             startIcon={<PlayArrow />}
-            onClick={onStart}
+            onClick={handleStartWorkout}
             sx={{
               borderRadius: 2,
               px: 4,

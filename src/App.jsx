@@ -6,6 +6,7 @@ import WorkoutScreen from './components/WorkoutScreen';
 import WorkoutPreview from './components/WorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
+import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps } from './utils/storage';
@@ -19,20 +20,23 @@ import { Snackbar, Alert } from '@mui/material';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#8ABEB9',
-      dark: '#73a8a3',
+      main: 'rgb(19, 70, 134)', // Blue
+      dark: 'rgb(15, 56, 107)',
     },
     secondary: {
-      main: '#C1785A',
-      dark: '#a86549',
+      main: 'rgb(237, 63, 39)', // Red/Orange
+      dark: 'rgb(189, 50, 31)',
+    },
+    warning: {
+      main: 'rgb(254, 178, 26)', // Yellow
     },
     background: {
-      default: '#B7E5CD',
+      default: 'rgb(253, 244, 227)', // Cream
       paper: '#FFFFFF',
     },
     text: {
-      primary: '#305669',
-      secondary: '#8ABEB9',
+      primary: 'rgb(19, 70, 134)',
+      secondary: 'rgb(237, 63, 39)',
     },
   },
   typography: {
@@ -209,7 +213,7 @@ function App() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `GoodLift_Workout_${new Date(completedWorkoutData.date).toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `GoodLife_Workout_${new Date(completedWorkoutData.date).toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -289,6 +293,8 @@ function App() {
           )}
           
           {currentScreen === 'progress' && <ProgressScreen />}
+
+          {currentScreen === 'hiit' && <HiitTimerScreen />}
         </div>
         
         <Snackbar

@@ -12,6 +12,7 @@ const KEYS = {
   USER_STATS: 'goodlift_user_stats',
   EXERCISE_WEIGHTS: 'goodlift_exercise_weights',
   EXERCISE_TARGET_REPS: 'goodlift_exercise_target_reps',
+  HIIT_SESSIONS: 'goodlift_hiit_sessions',
 };
 
 // Store the current user ID for Firebase sync
@@ -88,10 +89,10 @@ export const getUserStats = async () => {
     
     // Fallback to localStorage
     const stats = localStorage.getItem(KEYS.USER_STATS);
-    return stats ? JSON.parse(stats) : { totalWorkouts: 0, totalTime: 0 };
+    return stats ? JSON.parse(stats) : { totalWorkouts: 0, totalTime: 0, totalHiitTime: 0 };
   } catch (error) {
     console.error('Error reading user stats:', error);
-    return { totalWorkouts: 0, totalTime: 0 };
+    return { totalWorkouts: 0, totalTime: 0, totalHiitTime: 0 };
   }
 };
 
@@ -257,5 +258,32 @@ export const loadUserDataFromCloud = async (userId) => {
   } catch (error) {
     console.error('Error loading user data from cloud:', error);
     // On error, we'll continue using local data
+  }
+};
+
+// Get HIIT sessions history
+export const getHiitSessions = () => {
+  try {
+    const sessions = localStorage.getItem(KEYS.HIIT_SESSIONS);
+    return sessions ? JSON.parse(sessions) : [];
+  } catch (error) {
+    console.error('Error reading HIIT sessions:', error);
+    return [];
+  }
+};
+
+// Save a HIIT session
+export const saveHiitSession = async (sessionData) => {
+  try {
+    const sessions = getHiitSessions();
+    sessions.unshift(sessionData); // Add to beginning
+    localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(sessions));
+    
+    // Update total HIIT time in stats
+    const stats = await getUserStats();
+    stats.totalHiitTime = (stats.totalHiitTime || 0) + sessionData.duration;
+    await saveUserStats(stats);
+  } catch (error) {
+    console.error('Error saving HIIT session:', error);
   }
 };

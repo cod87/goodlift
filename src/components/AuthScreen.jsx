@@ -68,7 +68,7 @@ const AuthScreen = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #B7E5CD 0%, #8ABEB9 100%)',
+        background: 'linear-gradient(135deg, rgb(253, 244, 227) 0%, rgb(254, 230, 200) 100%)',
         p: 2,
       }}
     >
@@ -82,7 +82,7 @@ const AuthScreen = () => {
             maxWidth: 440,
             width: '100%',
             borderRadius: 4,
-            boxShadow: '0 8px 32px rgba(48, 86, 105, 0.2)',
+            boxShadow: '0 8px 32px rgba(19, 70, 134, 0.2)',
           }}
         >
           <CardContent sx={{ p: 4 }}>
@@ -92,7 +92,7 @@ const AuthScreen = () => {
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
               >
-                <FaDumbbell size={60} style={{ color: '#8ABEB9', marginBottom: '1rem' }} />
+                <FaDumbbell size={60} style={{ color: 'rgb(19, 70, 134)', marginBottom: '1rem' }} />
               </motion.div>
               <Typography
                 variant="h4"
@@ -100,13 +100,13 @@ const AuthScreen = () => {
                 sx={{
                   fontWeight: 700,
                   mb: 1,
-                  background: 'linear-gradient(135deg, #8ABEB9, #C1785A)',
+                  background: 'linear-gradient(135deg, rgb(19, 70, 134), rgb(237, 63, 39))',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
                 }}
               >
-                GoodLift
+                GoodLife
               </Typography>
               <AnimatePresence mode="wait">
                 <motion.div

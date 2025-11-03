@@ -5,9 +5,11 @@ import Sidebar from './components/Sidebar';
 import WorkoutScreen from './components/WorkoutScreen';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
+import AuthScreen from './components/AuthScreen';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight } from './utils/storage';
 import { SETS_PER_EXERCISE } from './utils/constants';
+import { useAuth } from './contexts/AuthContext';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState('selection');
@@ -16,6 +18,7 @@ function App() {
   const [workoutType, setWorkoutType] = useState('');
   const [completedWorkoutData, setCompletedWorkoutData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { currentUser } = useAuth();
 
   const { generateWorkout, allExercises } = useWorkoutGenerator();
 
@@ -150,6 +153,11 @@ function App() {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [sidebarOpen, currentScreen]);
+
+  // Show auth screen if user is not logged in
+  if (!currentUser) {
+    return <AuthScreen />;
+  }
 
   return (
     <div>

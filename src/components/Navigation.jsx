@@ -1,6 +1,17 @@
 import PropTypes from 'prop-types';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navigation = ({ currentScreen, onNavigate }) => {
+  const { currentUser, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Failed to log out:', error);
+    }
+  };
+
   return (
     <nav className="main-nav">
       <div className="logo">GoodLift</div>
@@ -17,6 +28,11 @@ const Navigation = ({ currentScreen, onNavigate }) => {
         >
           Progress
         </button>
+        {currentUser && (
+          <button onClick={handleLogout} className="logout-btn">
+            Logout
+          </button>
+        )}
       </div>
     </nav>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getWorkoutHistory, getUserStats } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
+import Calendar from './Calendar';
 
 const ProgressScreen = () => {
   const [stats, setStats] = useState({ totalWorkouts: 0, totalTime: 0 });
@@ -35,6 +36,9 @@ const ProgressScreen = () => {
     );
   }
 
+  // Extract workout dates for calendar
+  const workoutDates = history.map(workout => workout.date);
+
   return (
     <div className="screen progress-screen">
       <h1>Your Progress</h1>
@@ -49,6 +53,8 @@ const ProgressScreen = () => {
           <p>{formatDuration(stats.totalTime)}</p>
         </div>
       </div>
+
+      <Calendar workoutDates={workoutDates} />
       
       <div className="workout-history-container">
         <h2>Workout History</h2>

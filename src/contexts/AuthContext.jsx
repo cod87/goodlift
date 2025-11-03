@@ -7,6 +7,7 @@ import {
   onAuthStateChanged
 } from 'firebase/auth';
 import { auth } from '../firebase';
+import { loadUserDataFromCloud, setCurrentUserId } from '../utils/storage';
 
 const AuthContext = createContext({});
 
@@ -32,8 +33,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      
+      if (user) {
+        // User is logged in, load their data from Firebase
+        try {
+          await loadUserDataFromCloud(user.uid);
+        } catch (error) {
+          console.error('Error loading user data:', error);
+        }
+      } else {
+        // User is logged out, clear the current user ID
+        setCurrentUserId(null);
+      }
+      
       setLoading(false);
     });
 

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
 import { useAuth } from '../contexts/AuthContext';
 
 const AuthScreen = () => {
@@ -45,7 +44,7 @@ const AuthScreen = () => {
       } else if (err.code === 'auth/weak-password') {
         setError('Password is too weak');
       } else {
-        setError('Failed to ' + (isLogin ? 'log in' : 'sign up') + '. Please try again.');
+        setError(`Failed to ${isLogin ? 'log in' : 'sign up'}. Please try again.`);
       }
     } finally {
       setLoading(false);
@@ -118,7 +117,5 @@ const AuthScreen = () => {
     </div>
   );
 };
-
-AuthScreen.propTypes = {};
 
 export default AuthScreen;

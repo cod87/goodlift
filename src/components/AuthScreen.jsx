@@ -1,5 +1,8 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import { FaDumbbell } from 'react-icons/fa';
+import { Box, TextField, Button, Typography, Alert, Card, CardContent } from '@mui/material';
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -59,62 +62,164 @@ const AuthScreen = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <div className="logo">GoodLift</div>
-          <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-          <p>{isLogin ? 'Log in to continue your fitness journey' : 'Sign up to start tracking your workouts'}</p>
-        </div>
-        
-        {error && (
-          <div className="auth-error">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              disabled={loading}
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              disabled={loading}
-              required
-            />
-          </div>
-          
-          <button type="submit" className="auth-submit" disabled={loading}>
-            {loading ? 'Please wait...' : (isLogin ? 'Log In' : 'Sign Up')}
-          </button>
-        </form>
-        
-        <div className="auth-toggle">
-          <p>
-            {isLogin ? "Don't have an account? " : 'Already have an account? '}
-            <button onClick={toggleMode} disabled={loading} className="auth-toggle-btn">
-              {isLogin ? 'Sign Up' : 'Log In'}
-            </button>
-          </p>
-        </div>
-      </div>
-    </div>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #B7E5CD 0%, #8ABEB9 100%)',
+        p: 2,
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card
+          sx={{
+            maxWidth: 440,
+            width: '100%',
+            borderRadius: 4,
+            boxShadow: '0 8px 32px rgba(48, 86, 105, 0.2)',
+          }}
+        >
+          <CardContent sx={{ p: 4 }}>
+            <Box sx={{ textAlign: 'center', mb: 4 }}>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+              >
+                <FaDumbbell size={60} style={{ color: '#8ABEB9', marginBottom: '1rem' }} />
+              </motion.div>
+              <Typography
+                variant="h4"
+                component="h1"
+                sx={{
+                  fontWeight: 700,
+                  mb: 1,
+                  background: 'linear-gradient(135deg, #8ABEB9, #C1785A)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                GoodLift
+              </Typography>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={isLogin ? 'login' : 'signup'}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+                    {isLogin ? 'Welcome Back' : 'Create Account'}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {isLogin
+                      ? 'Log in to continue your fitness journey'
+                      : 'Sign up to start tracking your workouts'}
+                  </Typography>
+                </motion.div>
+              </AnimatePresence>
+            </Box>
+
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Alert severity="error" sx={{ mb: 3 }}>
+                    {error}
+                  </Alert>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <Box component="form" onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                required
+                sx={{ mb: 2 }}
+              />
+
+              <TextField
+                fullWidth
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                required
+                sx={{ mb: 3 }}
+              />
+
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  disabled={loading}
+                  sx={{
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    bgcolor: 'primary.main',
+                    '&:hover': {
+                      bgcolor: 'primary.dark',
+                    },
+                  }}
+                >
+                  {loading ? 'Please wait...' : isLogin ? 'Log In' : 'Sign Up'}
+                </Button>
+              </motion.div>
+
+              <Box
+                sx={{
+                  mt: 3,
+                  pt: 3,
+                  borderTop: '1px solid',
+                  borderColor: 'divider',
+                  textAlign: 'center',
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  {isLogin ? "Don't have an account? " : 'Already have an account? '}
+                  <Button
+                    onClick={toggleMode}
+                    disabled={loading}
+                    sx={{
+                      color: 'primary.main',
+                      fontWeight: 600,
+                      textDecoration: 'underline',
+                      '&:hover': {
+                        bgcolor: 'transparent',
+                        textDecoration: 'underline',
+                      },
+                    }}
+                  >
+                    {isLogin ? 'Sign Up' : 'Log In'}
+                  </Button>
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </Box>
   );
 };
 

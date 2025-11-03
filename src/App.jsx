@@ -3,6 +3,7 @@ import './App.css';
 import Navigation from './components/Navigation';
 import Sidebar from './components/Sidebar';
 import WorkoutScreen from './components/WorkoutScreen';
+import WorkoutPreview from './components/WorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import AuthScreen from './components/AuthScreen';
@@ -10,6 +11,42 @@ import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight } from './utils/storage';
 import { SETS_PER_EXERCISE } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+
+// Create custom theme matching app colors
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#8ABEB9',
+      dark: '#73a8a3',
+    },
+    secondary: {
+      main: '#C1785A',
+      dark: '#a86549',
+    },
+    background: {
+      default: '#B7E5CD',
+      paper: '#FFFFFF',
+    },
+    text: {
+      primary: '#305669',
+      secondary: '#8ABEB9',
+    },
+  },
+  typography: {
+    fontFamily: "'Poppins', sans-serif",
+    h1: {
+      fontFamily: "'Ubuntu', sans-serif",
+    },
+    h2: {
+      fontFamily: "'Ubuntu', sans-serif",
+    },
+    h3: {
+      fontFamily: "'Ubuntu', sans-serif",
+    },
+  },
+});
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState('selection');
@@ -18,6 +55,7 @@ function App() {
   const [workoutType, setWorkoutType] = useState('');
   const [completedWorkoutData, setCompletedWorkoutData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const { currentUser } = useAuth();
 
   const { generateWorkout, allExercises } = useWorkoutGenerator();
@@ -42,11 +80,21 @@ function App() {
       setLoading(false);
       setSidebarOpen(false);
       
-      // Small delay before transitioning to workout screen
-      setTimeout(() => {
-        setCurrentScreen('workout');
-      }, 300);
+      // Show preview screen instead of going directly to workout
+      setShowPreview(true);
+      setCurrentScreen('preview');
     }, 500);
+  };
+
+  const handleBeginWorkout = () => {
+    setShowPreview(false);
+    setCurrentScreen('workout');
+  };
+
+  const handleCancelPreview = () => {
+    setShowPreview(false);
+    setCurrentScreen('selection');
+    setSidebarOpen(true);
   };
 
   const handleWorkoutComplete = async (workoutData) => {
@@ -156,49 +204,66 @@ function App() {
 
   // Show auth screen if user is not logged in
   if (!currentUser) {
-    return <AuthScreen />;
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthScreen />
+      </ThemeProvider>
+    );
   }
 
   return (
-    <div>
-      <Navigation currentScreen={currentScreen} onNavigate={handleNavigate} />
-      
-      <Sidebar
-        isOpen={sidebarOpen && currentScreen === 'selection'}
-        onStartWorkout={handleStartWorkout}
-        allExercises={allExercises}
-      />
-      
-      <div id="app" className={sidebarOpen && currentScreen === 'selection' ? 'sidebar-open' : ''}>
-        {currentScreen === 'selection' && (
-          <div className="screen selection-screen">
-            {loading && (
-              <div id="loading-indicator">
-                <i className="fas fa-spinner fa-spin"></i> Generating workout...
-              </div>
-            )}
-          </div>
-        )}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <div>
+        <Navigation currentScreen={currentScreen} onNavigate={handleNavigate} />
         
-        {currentScreen === 'workout' && currentWorkout.length > 0 && (
-          <WorkoutScreen
-            workoutPlan={currentWorkout}
-            onComplete={handleWorkoutComplete}
-            onExit={handleWorkoutExit}
-          />
-        )}
+        <Sidebar
+          isOpen={sidebarOpen && currentScreen === 'selection'}
+          onStartWorkout={handleStartWorkout}
+          allExercises={allExercises}
+        />
         
-        {currentScreen === 'completion' && completedWorkoutData && (
-          <CompletionScreen
-            workoutData={completedWorkoutData}
-            onFinish={handleFinish}
-            onExportCSV={handleExportCSV}
-          />
-        )}
-        
-        {currentScreen === 'progress' && <ProgressScreen />}
+        <div id="app" className={sidebarOpen && currentScreen === 'selection' ? 'sidebar-open' : ''}>
+          {currentScreen === 'selection' && (
+            <div className="screen selection-screen">
+              {loading && (
+                <div id="loading-indicator">
+                  <i className="fas fa-spinner fa-spin"></i> Generating workout...
+                </div>
+              )}
+            </div>
+          )}
+          
+          {currentScreen === 'preview' && showPreview && currentWorkout.length > 0 && (
+            <WorkoutPreview
+              workout={currentWorkout}
+              workoutType={workoutType}
+              onStart={handleBeginWorkout}
+              onCancel={handleCancelPreview}
+            />
+          )}
+          
+          {currentScreen === 'workout' && currentWorkout.length > 0 && (
+            <WorkoutScreen
+              workoutPlan={currentWorkout}
+              onComplete={handleWorkoutComplete}
+              onExit={handleWorkoutExit}
+            />
+          )}
+          
+          {currentScreen === 'completion' && completedWorkoutData && (
+            <CompletionScreen
+              workoutData={completedWorkoutData}
+              onFinish={handleFinish}
+              onExportCSV={handleExportCSV}
+            />
+          )}
+          
+          {currentScreen === 'progress' && <ProgressScreen />}
+        </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }
 

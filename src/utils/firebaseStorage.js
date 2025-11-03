@@ -102,3 +102,18 @@ export const saveExerciseWeightsToFirebase = async (userId, exerciseWeights) => 
     console.error('Error saving exercise weights to Firebase:', error);
   }
 };
+
+/**
+ * Save exercise target reps to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {object} exerciseTargetReps - The exercise target reps object
+ */
+export const saveExerciseTargetRepsToFirebase = async (userId, exerciseTargetReps) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { exerciseTargetReps });
+  } catch (error) {
+    console.error('Error saving exercise target reps to Firebase:', error);
+  }
+};

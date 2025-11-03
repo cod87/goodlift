@@ -2,6 +2,7 @@ import {
   saveWorkoutHistoryToFirebase,
   saveUserStatsToFirebase,
   saveExerciseWeightsToFirebase,
+  saveExerciseTargetRepsToFirebase,
   loadUserDataFromFirebase
 } from './firebaseStorage';
 
@@ -155,6 +156,21 @@ export const setExerciseWeight = async (exerciseName, weight) => {
 // Get exercise target reps
 export const getExerciseTargetReps = async (exerciseName) => {
   try {
+    // If user is logged in, try to get data from Firebase first
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData && firebaseData.exerciseTargetReps) {
+          // Update localStorage cache
+          localStorage.setItem(KEYS.EXERCISE_TARGET_REPS, JSON.stringify(firebaseData.exerciseTargetReps));
+          return firebaseData.exerciseTargetReps[exerciseName] || 12;
+        }
+      } catch (error) {
+        console.error('Error loading exercise target reps from Firebase, falling back to localStorage:', error);
+      }
+    }
+    
+    // Fallback to localStorage
     const targetReps = localStorage.getItem(KEYS.EXERCISE_TARGET_REPS);
     const targetRepsObj = targetReps ? JSON.parse(targetReps) : {};
     return targetRepsObj[exerciseName] || 12; // Default to 12 reps
@@ -171,6 +187,11 @@ export const setExerciseTargetReps = async (exerciseName, reps) => {
     const targetRepsObj = targetReps ? JSON.parse(targetReps) : {};
     targetRepsObj[exerciseName] = reps;
     localStorage.setItem(KEYS.EXERCISE_TARGET_REPS, JSON.stringify(targetRepsObj));
+    
+    // Sync to Firebase if user is logged in
+    if (currentUserId) {
+      await saveExerciseTargetRepsToFirebase(currentUserId, targetRepsObj);
+    }
   } catch (error) {
     console.error('Error saving exercise target reps:', error);
   }
@@ -210,6 +231,11 @@ export const loadUserDataFromCloud = async (userId) => {
         localStorage.setItem(KEYS.EXERCISE_WEIGHTS, JSON.stringify(firebaseData.exerciseWeights));
       }
       
+      // Sync exercise target reps
+      if (firebaseData.exerciseTargetReps) {
+        localStorage.setItem(KEYS.EXERCISE_TARGET_REPS, JSON.stringify(firebaseData.exerciseTargetReps));
+      }
+      
       console.log('User data synced from Firebase to localStorage');
     } else {
       // No data in Firebase, sync current localStorage data to Firebase
@@ -217,12 +243,15 @@ export const loadUserDataFromCloud = async (userId) => {
       const localStats = await getUserStats();
       const localWeights = localStorage.getItem(KEYS.EXERCISE_WEIGHTS);
       const weightsObj = localWeights ? JSON.parse(localWeights) : {};
+      const localTargetReps = localStorage.getItem(KEYS.EXERCISE_TARGET_REPS);
+      const targetRepsObj = localTargetReps ? JSON.parse(localTargetReps) : {};
       
-      if (localHistory.length > 0 || (localStats && localStats.totalWorkouts > 0) || Object.keys(weightsObj).length > 0) {
+      if (localHistory.length > 0 || (localStats && localStats.totalWorkouts > 0) || Object.keys(weightsObj).length > 0 || Object.keys(targetRepsObj).length > 0) {
         console.log('Syncing local data to Firebase for new user');
         await saveWorkoutHistoryToFirebase(userId, localHistory);
         await saveUserStatsToFirebase(userId, localStats);
         await saveExerciseWeightsToFirebase(userId, weightsObj);
+        await saveExerciseTargetRepsToFirebase(userId, targetRepsObj);
       }
     }
   } catch (error) {

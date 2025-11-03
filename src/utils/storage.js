@@ -188,8 +188,8 @@ export const loadUserDataFromCloud = async (userId) => {
       console.log('User data synced from Firebase to localStorage');
     } else {
       // No data in Firebase, sync current localStorage data to Firebase
-      const localHistory = getWorkoutHistory();
-      const localStats = getUserStats();
+      const localHistory = await getWorkoutHistory();
+      const localStats = await getUserStats();
       const localWeights = localStorage.getItem(KEYS.EXERCISE_WEIGHTS);
       const weightsObj = localWeights ? JSON.parse(localWeights) : {};
       

@@ -48,7 +48,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       }
     };
     loadPrevWeight();
-  }, [currentStepIndex, currentStep]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStepIndex]);
 
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];

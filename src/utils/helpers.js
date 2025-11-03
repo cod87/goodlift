@@ -9,8 +9,29 @@ export const formatTime = (seconds) => {
 // Convert YouTube URL to embed URL
 export const getYoutubeEmbedUrl = (url) => {
   if (!url) return '';
-  const videoId = url.split('v=')[1] || url.split('/').pop();
-  return `https://www.youtube.com/embed/${videoId.split('&')[0]}`;
+  
+  try {
+    // Parse URL safely using URL API
+    const urlObj = new URL(url);
+    
+    // Extract video ID from query parameter
+    let videoId = urlObj.searchParams.get('v');
+    
+    // If not in query params, try extracting from pathname (e.g., youtu.be/VIDEO_ID)
+    if (!videoId) {
+      const pathParts = urlObj.pathname.split('/');
+      videoId = pathParts[pathParts.length - 1];
+    }
+    
+    // Remove any additional query parameters from video ID
+    videoId = videoId.split('&')[0];
+    
+    return videoId ? `https://www.youtube.com/embed/${encodeURIComponent(videoId)}` : '';
+  } catch (error) {
+    // Fallback for invalid URLs
+    console.error('Invalid YouTube URL:', url, error);
+    return '';
+  }
 };
 
 // Format workout history date

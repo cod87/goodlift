@@ -1,9 +1,43 @@
+import { useState, useEffect } from 'react';
 import { getWorkoutHistory, getUserStats } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
+import Calendar from './Calendar';
 
 const ProgressScreen = () => {
-  const stats = getUserStats();
-  const history = getWorkoutHistory();
+  const [stats, setStats] = useState({ totalWorkouts: 0, totalTime: 0 });
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [loadedStats, loadedHistory] = await Promise.all([
+          getUserStats(),
+          getWorkoutHistory()
+        ]);
+        setStats(loadedStats);
+        setHistory(loadedHistory);
+      } catch (error) {
+        console.error('Error loading progress data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="screen progress-screen">
+        <h1>Your Progress</h1>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Extract workout dates for calendar
+  const workoutDates = history.map(workout => workout.date);
 
   return (
     <div className="screen progress-screen">
@@ -19,6 +53,8 @@ const ProgressScreen = () => {
           <p>{formatDuration(stats.totalTime)}</p>
         </div>
       </div>
+
+      <Calendar workoutDates={workoutDates} />
       
       <div className="workout-history-container">
         <h2>Workout History</h2>

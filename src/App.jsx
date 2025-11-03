@@ -89,7 +89,7 @@ function App() {
     await saveWorkout(finalWorkoutData);
     
     // Update stats
-    const stats = getUserStats();
+    const stats = await getUserStats();
     stats.totalWorkouts += 1;
     stats.totalTime += workoutData.duration;
     await saveUserStats(stats);

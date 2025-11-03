@@ -33,25 +33,32 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      
-      if (user) {
-        // User is logged in, load their data from Firebase
-        try {
-          await loadUserDataFromCloud(user.uid);
-        } catch (error) {
-          console.error('Error loading user data:', error);
-        }
-      } else {
-        // User is logged out, clear the current user ID
-        setCurrentUserId(null);
-      }
-      
-      setLoading(false);
-    });
+    // TEMPORARY: Skip Firebase auth for development
+    const mockUser = { uid: 'dev-user', email: 'dev@example.com' };
+    setCurrentUser(mockUser);
+    setCurrentUserId(mockUser.uid);
+    setLoading(false);
+    return () => {};
+    
+    // const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    //   setCurrentUser(user);
+    //   
+    //   if (user) {
+    //     // User is logged in, load their data from Firebase
+    //     try {
+    //       await loadUserDataFromCloud(user.uid);
+    //     } catch (error) {
+    //       console.error('Error loading user data:', error);
+    //     }
+    //   } else {
+    //     // User is logged out, clear the current user ID
+    //     setCurrentUserId(null);
+    //   }
+    //   
+    //   setLoading(false);
+    // });
 
-    return unsubscribe;
+    // return unsubscribe;
   }, []);
 
   const value = {

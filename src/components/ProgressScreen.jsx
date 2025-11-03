@@ -4,7 +4,7 @@ import { getWorkoutHistory, getUserStats } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import Calendar from './Calendar';
 import { Box, Card, CardContent, Typography, Grid, Stack } from '@mui/material';
-import { FitnessCenter, Timer, TrendingUp } from '@mui/icons-material';
+import { FitnessCenter, Timer, TrendingUp, Whatshot } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -56,7 +56,7 @@ const ProgressScreen = () => {
   if (loading) {
     return (
       <div className="screen progress-screen">
-        <h1>Your Progress</h1>
+        <h1>Home</h1>
         <p>Loading...</p>
       </div>
     );
@@ -73,10 +73,10 @@ const ProgressScreen = () => {
         label: 'Workout Duration (minutes)',
         data: history.slice(-7).reverse().map(w => Math.round(w.duration / 60)),
         fill: true,
-        backgroundColor: 'rgba(138, 190, 185, 0.2)',
-        borderColor: '#8ABEB9',
+        backgroundColor: 'rgba(19, 70, 134, 0.2)',
+        borderColor: 'rgb(19, 70, 134)',
         tension: 0.4,
-        pointBackgroundColor: '#8ABEB9',
+        pointBackgroundColor: 'rgb(19, 70, 134)',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
         pointRadius: 5,
@@ -100,7 +100,7 @@ const ProgressScreen = () => {
           weight: 600,
           family: "'Ubuntu', sans-serif",
         },
-        color: '#305669',
+        color: 'rgb(19, 70, 134)',
       },
     },
     scales: {
@@ -126,12 +126,12 @@ const ProgressScreen = () => {
         fontWeight: 700,
         mb: 4,
         textAlign: 'center',
-        background: 'linear-gradient(135deg, #8ABEB9, #C1785A)',
+        background: 'linear-gradient(135deg, rgb(19, 70, 134), rgb(237, 63, 39))',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
         backgroundClip: 'text'
       }}>
-        Your Progress
+        Home
       </Typography>
       
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -248,6 +248,45 @@ const ProgressScreen = () => {
                   {stats.totalWorkouts > 0 
                     ? formatDuration(Math.round(stats.totalTime / stats.totalWorkouts))
                     : '0m'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card sx={{ 
+              height: '100%',
+              borderRadius: 3,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 24px rgba(237, 63, 39, 0.15)',
+              }
+            }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Whatshot sx={{ fontSize: 40, color: 'secondary.main', mr: 2 }} />
+                  <Typography variant="h6" sx={{ 
+                    color: 'text.secondary',
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    letterSpacing: 1
+                  }}>
+                    HIIT Time
+                  </Typography>
+                </Box>
+                <Typography variant="h2" sx={{ 
+                  fontWeight: 700,
+                  color: 'secondary.main'
+                }}>
+                  {formatDuration(stats.totalHiitTime || 0)}
                 </Typography>
               </CardContent>
             </Card>

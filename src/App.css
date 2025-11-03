@@ -5,16 +5,17 @@
     --font-body: 'Poppins', sans-serif;
     --font-header: 'Ubuntu', sans-serif;
 
-    --color-bg: #B7E5CD; /* Light mint green */
+    --color-bg: rgb(253, 244, 227); /* Cream */
     --color-surface: #FFFFFF;
-    --color-primary: #8ABEB9; /* Teal */
-    --color-secondary: #C1785A; /* Terracotta */
-    --color-text: #305669; /* Dark blue-green */
-    --color-text-light: #8ABEB9;
-    --color-border: #8ABEB9;
-    --shadow: 0 4px 12px rgba(48, 86, 105, 0.1);
-    --shadow-hover: 0 8px 24px rgba(48, 86, 105, 0.15);
-    --shadow-large: 0 10px 40px rgba(48, 86, 105, 0.2);
+    --color-primary: rgb(19, 70, 134); /* Blue */
+    --color-secondary: rgb(237, 63, 39); /* Red/Orange */
+    --color-accent: rgb(254, 178, 26); /* Yellow */
+    --color-text: rgb(19, 70, 134); /* Blue */
+    --color-text-light: rgb(237, 63, 39); /* Red/Orange */
+    --color-border: rgb(19, 70, 134);
+    --shadow: 0 4px 12px rgba(19, 70, 134, 0.1);
+    --shadow-hover: 0 8px 24px rgba(19, 70, 134, 0.15);
+    --shadow-large: 0 10px 40px rgba(19, 70, 134, 0.2);
 }
 
 /* ===== GENERAL RESET & BASE STYLES ===== */
@@ -26,7 +27,7 @@
 
 body {
     font-family: var(--font-body);
-    background: linear-gradient(135deg, #B7E5CD 0%, #A8D9C4 100%);
+    background: linear-gradient(135deg, rgb(253, 244, 227) 0%, rgb(254, 240, 210) 100%);
     background-attachment: fixed;
     color: var(--color-text);
     line-height: 1.6;

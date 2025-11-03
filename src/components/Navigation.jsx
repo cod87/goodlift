@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { FaDumbbell } from 'react-icons/fa';
+import { FaHome } from 'react-icons/fa';
 
 const Navigation = ({ currentScreen, onNavigate }) => {
   const { currentUser, logout } = useAuth();
@@ -28,7 +28,7 @@ const Navigation = ({ currentScreen, onNavigate }) => {
         whileTap={{ scale: 0.95 }}
         style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
       >
-        <FaDumbbell /> GoodLift
+        <img src="/goodlift-logo.svg" alt="GoodLife" style={{ height: '40px' }} />
       </motion.div>
       <div className="nav-links">
         <motion.button
@@ -44,8 +44,17 @@ const Navigation = ({ currentScreen, onNavigate }) => {
           onClick={() => onNavigate('progress')}
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.95 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
         >
-          Progress
+          <FaHome /> Home
+        </motion.button>
+        <motion.button
+          className={currentScreen === 'hiit' ? 'active' : ''}
+          onClick={() => onNavigate('hiit')}
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          HIIT Timer
         </motion.button>
         {currentUser && (
           <motion.button

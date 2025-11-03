@@ -81,6 +81,26 @@ npm run build
 
 The built files will be in the `dist/` directory.
 
+### Deploying to GitHub Pages
+
+This repository is configured for automatic deployment to GitHub Pages:
+
+1. The app is automatically deployed when changes are pushed to the `main` branch
+2. The GitHub Actions workflow (`.github/workflows/deploy.yml`) handles the build and deployment
+3. The site will be available at: `https://cod87.github.io/goodlift/`
+
+**Manual Deployment:**
+
+If you need to trigger a deployment manually:
+1. Go to the Actions tab in the GitHub repository
+2. Select "Deploy to GitHub Pages" workflow
+3. Click "Run workflow" and select the `main` branch
+
+**Configuration:**
+
+- The Vite configuration includes `base: '/goodlift/'` to ensure assets load correctly from the GitHub Pages subdirectory
+- The `.nojekyll` file prevents GitHub Pages from processing the site with Jekyll
+
 ## Usage
 
 1. **Select Workout Type**: Choose between Full Body, Upper Body, or Lower Body

@@ -55,8 +55,8 @@ const NavigationSidebar = ({
           whileTap={{ scale: 0.9 }}
           style={{
             position: 'fixed',
-            top: '1rem',
-            left: '1rem',
+            top: 'max(1rem, env(safe-area-inset-top))',
+            left: 'max(1rem, env(safe-area-inset-left))',
             zIndex: 1001,
             background: 'rgba(19, 70, 134, 0.9)',
             color: 'white',
@@ -166,6 +166,7 @@ const NavigationSidebar = ({
             {currentUser && (
               <div style={{
                 padding: '1rem 1.5rem',
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
                 borderTop: '2px solid rgba(19, 70, 134, 0.1)',
                 marginTop: 'auto',
               }}>

@@ -129,7 +129,7 @@ const ProgressScreen = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      style={{ maxWidth: '900px', margin: '0 auto' }}
+      style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}
     >
       {/* Logo at the top */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
@@ -140,7 +140,7 @@ const ProgressScreen = () => {
         />
       </Box>
 
-      <Grid container spacing={2} sx={{ mb: 3, maxWidth: '100%' }}>
+      <Grid container spacing={2} sx={{ mb: 3, px: { xs: 0, sm: 0 } }}>
         <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}

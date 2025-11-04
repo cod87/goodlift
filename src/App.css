@@ -363,6 +363,9 @@ button:active {
 .exercise-card-container {
     max-width: 700px;
     margin: 0 auto;
+    padding: 0 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .exercise-card {
@@ -373,6 +376,9 @@ button:active {
     margin-bottom: 1rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     animation: slideUp 0.4s ease-out;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 @keyframes slideUp {
@@ -1070,10 +1076,11 @@ button:active {
         padding: 0.5rem 0.75rem;
     }
     .exercise-card {
-        padding: 1rem;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
     }
     .exercise-card h2 {
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         margin-bottom: 0.5rem;
     }
     .youtube-embed {

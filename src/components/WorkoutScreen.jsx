@@ -202,33 +202,39 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   return (
     <div className="screen"
       style={{
-        paddingBottom: '100px', // Add padding to ensure input is visible above mobile keyboard
+        paddingBottom: '100px',
+        padding: '0.5rem',
+        maxWidth: '100vw',
+        boxSizing: 'border-box',
       }}
     >
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 1.5, px: { xs: 0.5, sm: 0 } }}>
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          mb: 1
+          mb: 0.5,
+          gap: 1
         }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
             {formatTime(elapsedTime)}
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
             <IconButton 
               onClick={handleSaveToFavorites}
               disabled={isFavorite}
+              size="small"
               sx={{ 
                 color: isFavorite ? 'warning.main' : 'action.active',
-                '&:hover': { color: 'warning.main' }
+                '&:hover': { color: 'warning.main' },
+                p: { xs: 0.5, sm: 1 }
               }}
               aria-label="Save to favorites"
             >
-              {isFavorite ? <Star /> : <StarBorder />}
+              {isFavorite ? <Star sx={{ fontSize: { xs: 20, sm: 24 } }} /> : <StarBorder sx={{ fontSize: { xs: 20, sm: 24 } }} />}
             </IconButton>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Exercise {currentStepIndex + 1} / {workoutSequence.length}
+            <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
+              {currentStepIndex + 1}/{workoutSequence.length}
             </Typography>
           </Box>
         </Box>
@@ -236,7 +242,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
           variant="determinate" 
           value={(currentStepIndex / workoutSequence.length) * 100}
           sx={{ 
-            height: 8,
+            height: { xs: 6, sm: 8 },
             borderRadius: 4,
             bgcolor: 'rgba(138, 190, 185, 0.2)',
             '& .MuiLinearProgress-bar': {

@@ -1,9 +1,9 @@
 import { memo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip } from '@mui/material';
-import { ExpandMore, Delete, Star } from '@mui/icons-material';
-import { getFavoriteWorkouts, deleteFavoriteWorkout } from '../utils/storage';
+import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip, Checkbox, FormGroup, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItem, ListItemText } from '@mui/material';
+import { ExpandMore, Delete, Star, Edit } from '@mui/icons-material';
+import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName } from '../utils/storage';
 
 /**
  * SelectionScreen component for workout configuration
@@ -20,6 +20,10 @@ const SelectionScreen = memo(({
   loading,
 }) => {
   const [favoriteWorkouts, setFavoriteWorkouts] = useState([]);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [editedName, setEditedName] = useState('');
+  const [expandedFavorite, setExpandedFavorite] = useState(null);
 
   useEffect(() => {
     setFavoriteWorkouts(getFavoriteWorkouts());
@@ -29,7 +33,7 @@ const SelectionScreen = memo(({
     if (workoutType) {
       const equipmentFilter = selectedEquipment.has('all') 
         ? 'all' 
-        : Array.from(selectedEquipment).map(e => e.toLowerCase());
+        : Array.from(selectedEquipment);
       onStartWorkout(workoutType, equipmentFilter);
     }
   };
@@ -39,6 +43,28 @@ const SelectionScreen = memo(({
     setFavoriteWorkouts(getFavoriteWorkouts());
   };
 
+  const handleEditFavorite = (favorite) => {
+    setEditingWorkout(favorite);
+    setEditedName(favorite.name);
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingWorkout && editedName.trim()) {
+      updateFavoriteWorkoutName(editingWorkout.id, editedName.trim());
+      setFavoriteWorkouts(getFavoriteWorkouts());
+      setEditDialogOpen(false);
+      setEditingWorkout(null);
+      setEditedName('');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditDialogOpen(false);
+    setEditingWorkout(null);
+    setEditedName('');
+  };
+
   const handleLoadFavorite = (favoriteWorkout) => {
     onWorkoutTypeChange(favoriteWorkout.type);
     onEquipmentChange(favoriteWorkout.equipment || 'all');
@@ -46,6 +72,36 @@ const SelectionScreen = memo(({
       ? 'all' 
       : [favoriteWorkout.equipment];
     onStartWorkout(favoriteWorkout.type, equipmentFilter, favoriteWorkout.exercises);
+  };
+
+  const handleEquipmentToggle = (equipment) => {
+    const newSelected = new Set(selectedEquipment);
+    
+    if (equipment === 'all') {
+      // If "All Equipment" is clicked, clear all other selections
+      newSelected.clear();
+      newSelected.add('all');
+    } else {
+      // If any specific equipment is clicked
+      if (newSelected.has('all')) {
+        // Remove "All Equipment" if it was selected
+        newSelected.delete('all');
+      }
+      
+      // Toggle the specific equipment
+      if (newSelected.has(equipment)) {
+        newSelected.delete(equipment);
+      } else {
+        newSelected.add(equipment);
+      }
+      
+      // If no equipment is selected, default to "All Equipment"
+      if (newSelected.size === 0) {
+        newSelected.add('all');
+      }
+    }
+    
+    onEquipmentChange(newSelected);
   };
 
   return (
@@ -142,26 +198,32 @@ const SelectionScreen = memo(({
               }}>
                 Equipment
               </Typography>
-              <RadioGroup
-                value={selectedEquipment.has('all') ? 'all' : Array.from(selectedEquipment)[0] || ''}
-                onChange={(e) => onEquipmentChange(e.target.value)}
-              >
+              <FormGroup>
                 <FormControlLabel
-                  value="all"
-                  control={<Radio />}
+                  control={
+                    <Checkbox 
+                      checked={selectedEquipment.has('all')}
+                      onChange={() => handleEquipmentToggle('all')}
+                    />
+                  }
                   label="All Equipment"
                   sx={{ mb: 1 }}
                 />
                 {equipmentOptions.map((equipment) => (
                   <FormControlLabel
                     key={equipment}
-                    value={equipment.toLowerCase()}
-                    control={<Radio />}
+                    control={
+                      <Checkbox 
+                        checked={selectedEquipment.has(equipment.toLowerCase())}
+                        onChange={() => handleEquipmentToggle(equipment.toLowerCase())}
+                        disabled={selectedEquipment.has('all')}
+                      />
+                    }
                     label={equipment}
                     sx={{ mb: 1 }}
                   />
                 ))}
-              </RadioGroup>
+              </FormGroup>
             </Box>
 
             {/* Favorite Workouts */}
@@ -195,7 +257,7 @@ const SelectionScreen = memo(({
                           }}
                         >
                           <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
                               <Box sx={{ flex: 1 }}>
                                 <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
                                   {favorite.name}
@@ -213,23 +275,64 @@ const SelectionScreen = memo(({
                                     sx={{ fontSize: '0.7rem' }}
                                   />
                                 </Stack>
-                                <Button 
-                                  size="small"
-                                  variant="contained"
-                                  onClick={() => handleLoadFavorite(favorite)}
-                                  sx={{ fontSize: '0.8rem', textTransform: 'none' }}
-                                >
-                                  Load Workout
-                                </Button>
                               </Box>
-                              <IconButton 
-                                size="small"
-                                onClick={() => handleDeleteFavorite(favorite.id)}
-                                sx={{ color: 'error.main' }}
-                              >
-                                <Delete fontSize="small" />
-                              </IconButton>
+                              <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                <IconButton 
+                                  size="small"
+                                  onClick={() => handleEditFavorite(favorite)}
+                                  sx={{ color: 'primary.main' }}
+                                >
+                                  <Edit fontSize="small" />
+                                </IconButton>
+                                <IconButton 
+                                  size="small"
+                                  onClick={() => handleDeleteFavorite(favorite.id)}
+                                  sx={{ color: 'error.main' }}
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </Box>
                             </Box>
+                            
+                            {/* Expandable exercise list */}
+                            <Accordion 
+                              expanded={expandedFavorite === favorite.id}
+                              onChange={() => setExpandedFavorite(expandedFavorite === favorite.id ? null : favorite.id)}
+                              sx={{ boxShadow: 'none', '&:before': { display: 'none' }, bgcolor: 'transparent' }}
+                            >
+                              <AccordionSummary 
+                                expandIcon={<ExpandMore />}
+                                sx={{ minHeight: 'auto', '& .MuiAccordionSummary-content': { margin: '8px 0' } }}
+                              >
+                                <Typography variant="caption" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                                  View Exercises
+                                </Typography>
+                              </AccordionSummary>
+                              <AccordionDetails sx={{ pt: 0 }}>
+                                <List dense sx={{ py: 0 }}>
+                                  {favorite.exercises.map((exercise, idx) => (
+                                    <ListItem key={idx} sx={{ px: 0 }}>
+                                      <ListItemText 
+                                        primary={exercise['Exercise Name'] || exercise.name || 'Unknown Exercise'}
+                                        secondary={`${exercise.Equipment || exercise.equipment || 'N/A'} • ${exercise['Primary Muscle'] || exercise.primaryMuscle || 'N/A'}`}
+                                        primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
+                                        secondaryTypographyProps={{ variant: 'caption' }}
+                                      />
+                                    </ListItem>
+                                  ))}
+                                </List>
+                              </AccordionDetails>
+                            </Accordion>
+                            
+                            <Button 
+                              size="small"
+                              variant="contained"
+                              onClick={() => handleLoadFavorite(favorite)}
+                              sx={{ fontSize: '0.8rem', textTransform: 'none', mt: 1 }}
+                              fullWidth
+                            >
+                              Load Workout
+                            </Button>
                           </CardContent>
                         </Card>
                       ))}
@@ -259,6 +362,36 @@ const SelectionScreen = memo(({
           </CardContent>
         </Card>
       )}
+      
+      {/* Edit Favorite Name Dialog */}
+      <Dialog open={editDialogOpen} onClose={handleCancelEdit} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Workout Name</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Workout Name"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={editedName}
+            onChange={(e) => setEditedName(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleSaveEdit();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelEdit} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveEdit} variant="contained" disabled={!editedName.trim()}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </motion.div>
   );
 });

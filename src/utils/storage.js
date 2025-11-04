@@ -483,3 +483,25 @@ export const deleteFavoriteWorkout = (workoutId) => {
     throw error;
   }
 };
+
+/**
+ * Update the name of a favorite workout
+ * @param {string} workoutId - ID of the favorite workout to update
+ * @param {string} newName - New name for the workout
+ */
+export const updateFavoriteWorkoutName = (workoutId, newName) => {
+  try {
+    if (!workoutId || !newName) {
+      throw new Error('Workout ID and new name are required');
+    }
+    
+    const favorites = getFavoriteWorkouts();
+    const updatedFavorites = favorites.map(fav => 
+      fav.id === workoutId ? { ...fav, name: newName } : fav
+    );
+    localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(updatedFavorites));
+  } catch (error) {
+    console.error('Error updating favorite workout name:', error);
+    throw error;
+  }
+};

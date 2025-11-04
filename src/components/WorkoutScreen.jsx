@@ -2,10 +2,10 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl } from '../utils/helpers';
-import { getExerciseWeight, getExerciseTargetReps } from '../utils/storage';
+import { getExerciseWeight, getExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
-import { Box, LinearProgress, Typography, IconButton } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp } from '@mui/icons-material';
+import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert } from '@mui/material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder } from '@mui/icons-material';
 
 /**
  * WorkoutScreen component manages the active workout session
@@ -17,6 +17,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [prevWeight, setPrevWeight] = useState(0);
   const [targetReps, setTargetReps] = useState(12);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -174,6 +176,27 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     }
   };
 
+  const handleSaveToFavorites = () => {
+    try {
+      const workoutType = workoutPlan[0]?.['Primary Muscle']?.toLowerCase().includes('upper') ? 'upper' 
+                        : workoutPlan[0]?.['Primary Muscle']?.toLowerCase().includes('lower') ? 'lower' 
+                        : 'full';
+      
+      saveFavoriteWorkout({
+        name: `${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`,
+        type: workoutType,
+        equipment: 'all',
+        exercises: workoutPlan,
+      });
+      
+      setIsFavorite(true);
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error saving to favorites:', error);
+      alert('Failed to save workout to favorites');
+    }
+  };
+
   if (!currentStep) {
     return null;
   }
@@ -194,9 +217,22 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             {formatTime(elapsedTime)}
           </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Exercise {currentStepIndex + 1} / {workoutSequence.length}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IconButton 
+              onClick={handleSaveToFavorites}
+              disabled={isFavorite}
+              sx={{ 
+                color: isFavorite ? 'warning.main' : 'action.active',
+                '&:hover': { color: 'warning.main' }
+              }}
+              aria-label="Save to favorites"
+            >
+              {isFavorite ? <Star /> : <StarBorder />}
+            </IconButton>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Exercise {currentStepIndex + 1} / {workoutSequence.length}
+            </Typography>
+          </Box>
         </Box>
         <LinearProgress 
           variant="determinate" 
@@ -363,6 +399,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
           </motion.button>
         )}
       </div>
+      
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setSnackbarOpen(false)}>
+          Workout saved to favorites!
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

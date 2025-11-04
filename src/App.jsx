@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import './App.css';
+import Header from './components/Header';
 import NavigationSidebar from './components/NavigationSidebar';
 import SelectionScreen from './components/SelectionScreen';
 import WorkoutScreen from './components/WorkoutScreen';
@@ -108,9 +109,13 @@ function App() {
   };
 
   const handleEquipmentChange = (value) => {
-    const newSelected = new Set();
-    newSelected.add(value);
-    setSelectedEquipment(newSelected);
+    if (value instanceof Set) {
+      setSelectedEquipment(value);
+    } else {
+      const newSelected = new Set();
+      newSelected.add(value);
+      setSelectedEquipment(newSelected);
+    }
   };
 
   const handleToggleSidebar = () => {
@@ -286,9 +291,12 @@ function App() {
           onToggle={handleToggleSidebar}
         />
         
+        <Header isDesktop={isDesktop} />
+        
         <div id="app" style={{ 
           flex: 1,
           marginLeft: isDesktop ? '280px' : '0',
+          marginTop: '60px',
           transition: 'margin-left 0.3s ease',
         }}>
           {currentScreen === 'selection' && (
@@ -323,6 +331,7 @@ function App() {
           {currentScreen === 'completion' && completedWorkoutData && (
             <CompletionScreen
               workoutData={completedWorkoutData}
+              workoutPlan={currentWorkout}
               onFinish={handleFinish}
               onExportCSV={handleExportCSV}
             />

@@ -1,16 +1,46 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { formatTime } from '../utils/helpers';
-import { Box, Card, CardContent, Typography, Button, Stack, Chip } from '@mui/material';
-import { Download, Check, Celebration } from '@mui/icons-material';
+import { Box, Card, CardContent, Typography, Button, Stack, Chip, IconButton, Snackbar, Alert } from '@mui/material';
+import { Download, Check, Celebration, Star, StarBorder } from '@mui/icons-material';
+import { saveFavoriteWorkout } from '../utils/storage';
 
 /**
  * CompletionScreen component displays workout summary after completion
  * Shows exercise details, sets, reps, and weights used
  * Memoized to prevent unnecessary re-renders
  */
-const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV }) => {
+const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV }) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const handleSaveToFavorites = () => {
+    try {
+      if (!workoutPlan || workoutPlan.length === 0) {
+        alert('Cannot save workout: No exercise data available');
+        return;
+      }
+
+      const workoutType = workoutData.type?.toLowerCase().includes('upper') ? 'upper' 
+                        : workoutData.type?.toLowerCase().includes('lower') ? 'lower' 
+                        : 'full';
+      
+      saveFavoriteWorkout({
+        name: `${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`,
+        type: workoutType,
+        equipment: 'all',
+        exercises: workoutPlan,
+      });
+      
+      setIsFavorite(true);
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error saving to favorites:', error);
+      alert('Failed to save workout to favorites');
+    }
+  };
+
   return (
     <motion.div
       className="screen completion-screen"
@@ -24,6 +54,22 @@ const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV }) => {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
       >
+        <Box sx={{ position: 'relative' }}>
+          <IconButton 
+            onClick={handleSaveToFavorites}
+            disabled={isFavorite}
+            sx={{ 
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              color: isFavorite ? 'warning.main' : 'white',
+              '&:hover': { color: 'warning.main' }
+            }}
+            aria-label="Save to favorites"
+          >
+            {isFavorite ? <Star sx={{ fontSize: 32 }} /> : <StarBorder sx={{ fontSize: 32 }} />}
+          </IconButton>
+        </Box>
         <motion.div
           initial={{ y: -20 }}
           animate={{ y: [0, -10, 0] }}
@@ -178,6 +224,17 @@ const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV }) => {
           </Button>
         </Stack>
       </motion.div>
+      
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setSnackbarOpen(false)}>
+          Workout saved to favorites!
+        </Alert>
+      </Snackbar>
     </motion.div>
   );
 });
@@ -186,6 +243,7 @@ CompletionScreen.displayName = 'CompletionScreen';
 
 CompletionScreen.propTypes = {
   workoutData: PropTypes.object.isRequired,
+  workoutPlan: PropTypes.array,
   onFinish: PropTypes.func.isRequired,
   onExportCSV: PropTypes.func.isRequired,
 };

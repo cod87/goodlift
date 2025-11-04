@@ -134,17 +134,8 @@ const ProgressScreen = () => {
       transition={{ duration: 0.5 }}
       style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}
     >
-      {/* Logo at the top */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-        <img
-          src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
-          alt="GoodLift"
-          style={{ height: '64px', width: 'auto' }}
-        />
-      </Box>
-
       <Grid container spacing={2} sx={{ mb: 3, px: { xs: 0, sm: 0 } }}>
-        <Grid item xs={6}>
+        <Grid item xs={6} sm={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -186,7 +177,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
         
-        <Grid item xs={6}>
+        <Grid item xs={6} sm={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -228,7 +219,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={6}>
+        <Grid item xs={6} sm={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -272,7 +263,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={6}>
+        <Grid item xs={6} sm={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -346,7 +337,7 @@ const ProgressScreen = () => {
             overflow: 'hidden',
           }}>
             <Box sx={{ 
-              background: 'linear-gradient(135deg, rgb(19, 70, 134), rgb(237, 63, 39))',
+              background: 'rgb(19, 70, 134)',
               p: 2,
               display: 'flex',
               alignItems: 'center',
@@ -395,7 +386,7 @@ const ProgressScreen = () => {
                           size="small"
                           sx={{ 
                             fontWeight: 700,
-                            background: 'linear-gradient(135deg, rgb(19, 70, 134), rgb(237, 63, 39))',
+                            background: 'rgb(19, 70, 134)',
                             color: 'white',
                           }}
                         />

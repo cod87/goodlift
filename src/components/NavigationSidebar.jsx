@@ -110,7 +110,7 @@ const NavigationSidebar = ({
               backdropFilter: 'blur(10px)',
               boxShadow: '4px 0 20px rgba(19, 70, 134, 0.15)',
               zIndex: 1000,
-              overflowY: 'auto',
+              overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
             }}

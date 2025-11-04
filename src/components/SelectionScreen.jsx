@@ -38,8 +38,9 @@ const SelectionScreen = memo(({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '80vh',
-        padding: '2rem',
+        minHeight: 'calc(100vh - 4rem)',
+        padding: '1rem',
+        overflow: 'auto',
       }}
     >
       {loading ? (

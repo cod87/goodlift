@@ -129,9 +129,19 @@ const ProgressScreen = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      style={{ maxWidth: '900px', margin: '0 auto' }}
     >
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      {/* Logo at the top */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+        <img
+          src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
+          alt="GoodLift"
+          style={{ height: '64px', width: 'auto' }}
+        />
+      </Box>
+
+      <Grid container spacing={2} sx={{ mb: 3, maxWidth: '100%' }}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -170,7 +180,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -209,7 +219,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -250,7 +260,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -297,11 +307,11 @@ const ProgressScreen = () => {
           transition={{ delay: 0.4 }}
         >
           <Card sx={{ 
-            mb: 4,
+            mb: 3,
             borderRadius: 3,
             p: 2,
           }}>
-            <Box sx={{ height: 300 }}>
+            <Box sx={{ height: 250 }}>
               <Line data={chartData} options={chartOptions} />
             </Box>
           </Card>

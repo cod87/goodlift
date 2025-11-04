@@ -28,7 +28,7 @@ const Navigation = ({ currentScreen, onNavigate }) => {
         whileTap={{ scale: 0.95 }}
         style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
       >
-        <img src="/goodlift-logo.svg" alt="GoodLife" style={{ height: '40px' }} />
+        <img src={process.env.PUBLIC_URL + '/goodlift-logo.svg'} alt="GoodLife" style={{ height: '40px' }} />
       </motion.div>
       <div className="nav-links">
         <motion.button

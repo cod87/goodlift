@@ -146,7 +146,7 @@ const NavigationSidebar = ({
                 }}
               >
                 <img 
-                  src="/goodlift-logo.svg" 
+                  src={process.env.PUBLIC_URL + '/goodlift-logo.svg'} 
                   alt="GoodLift" 
                   style={{ height: '48px', width: 'auto' }} 
                 />

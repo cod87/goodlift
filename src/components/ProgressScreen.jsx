@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { getWorkoutHistory, getUserStats } from '../utils/storage';
+import { getWorkoutHistory, getUserStats, deleteWorkout } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import Calendar from './Calendar';
-import { Box, Card, CardContent, Typography, Grid, Stack } from '@mui/material';
-import { FitnessCenter, Timer, TrendingUp, Whatshot } from '@mui/icons-material';
+import { Box, Card, CardContent, Typography, Grid, Stack, IconButton } from '@mui/material';
+import { FitnessCenter, Timer, TrendingUp, Whatshot, Delete } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -34,29 +34,37 @@ const ProgressScreen = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [loadedStats, loadedHistory] = await Promise.all([
+        getUserStats(),
+        getWorkoutHistory()
+      ]);
+      setStats(loadedStats);
+      setHistory(loadedHistory);
+    } catch (error) {
+      console.error('Error loading progress data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        const [loadedStats, loadedHistory] = await Promise.all([
-          getUserStats(),
-          getWorkoutHistory()
-        ]);
-        setStats(loadedStats);
-        setHistory(loadedHistory);
-      } catch (error) {
-        console.error('Error loading progress data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadData();
   }, []);
+
+  const handleDeleteWorkout = async (index) => {
+    if (window.confirm('Are you sure you want to delete this workout? This action cannot be undone.')) {
+      await deleteWorkout(index);
+      // Reload data after deletion
+      await loadData();
+    }
+  };
 
   if (loading) {
     return (
       <div className="screen progress-screen">
-        <h1>Home</h1>
         <p>Loading...</p>
       </div>
     );
@@ -122,18 +130,6 @@ const ProgressScreen = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <Typography variant="h3" component="h1" sx={{ 
-        fontWeight: 700,
-        mb: 4,
-        textAlign: 'center',
-        background: 'linear-gradient(135deg, rgb(19, 70, 134), rgb(237, 63, 39))',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text'
-      }}>
-        Home
-      </Typography>
-      
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={4}>
           <motion.div
@@ -347,15 +343,43 @@ const ProgressScreen = () => {
                   }
                 }}>
                   <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                      {workout.type} - {formatDate(workout.date)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Duration: {formatDuration(workout.duration)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Exercises: {Object.keys(workout.exercises).join(', ')}
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                          {workout.type} - {formatDate(workout.date)}
+                          {workout.isPartial && (
+                            <Typography component="span" sx={{ 
+                              ml: 1, 
+                              fontSize: '0.875rem', 
+                              color: 'warning.main',
+                              fontWeight: 500,
+                            }}>
+                              (Partial)
+                            </Typography>
+                          )}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                          Duration: {formatDuration(workout.duration)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Exercises: {Object.keys(workout.exercises).join(', ')}
+                        </Typography>
+                      </Box>
+                      <IconButton
+                        onClick={() => handleDeleteWorkout(idx)}
+                        size="small"
+                        sx={{
+                          color: 'error.main',
+                          '&:hover': {
+                            backgroundColor: 'error.light',
+                            color: 'error.contrastText',
+                          }
+                        }}
+                        aria-label="Delete workout"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Box>
                   </CardContent>
                 </Card>
               </motion.div>

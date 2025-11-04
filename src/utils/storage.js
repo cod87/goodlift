@@ -70,6 +70,33 @@ export const saveWorkout = async (workoutData) => {
   }
 };
 
+// Delete a workout
+export const deleteWorkout = async (workoutIndex) => {
+  try {
+    const history = await getWorkoutHistory();
+    if (workoutIndex >= 0 && workoutIndex < history.length) {
+      const deletedWorkout = history[workoutIndex];
+      history.splice(workoutIndex, 1);
+      localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
+      
+      // Update stats to reflect deletion
+      const stats = await getUserStats();
+      if (stats.totalWorkouts > 0) {
+        stats.totalWorkouts -= 1;
+        stats.totalTime -= deletedWorkout.duration || 0;
+        await saveUserStats(stats);
+      }
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveWorkoutHistoryToFirebase(currentUserId, history);
+      }
+    }
+  } catch (error) {
+    console.error('Error deleting workout:', error);
+  }
+};
+
 // Get user stats
 export const getUserStats = async () => {
   try {

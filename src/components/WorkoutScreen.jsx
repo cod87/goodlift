@@ -113,6 +113,33 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     }
   };
 
+  const handlePartialComplete = () => {
+    if (window.confirm('Save this workout as partially complete? Your current progress will be saved.')) {
+      const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      
+      const finalData = {
+        date: new Date().toISOString(),
+        type: workoutPlan[0]?.['Primary Muscle'] || 'unknown',
+        duration: totalTime,
+        exercises: {},
+        isPartial: true,
+      };
+      
+      workoutData.forEach(step => {
+        const { exerciseName: exName, setNumber, weight: w, reps: r } = step;
+        if (!finalData.exercises[exName]) {
+          finalData.exercises[exName] = { sets: [] };
+        }
+        finalData.exercises[exName].sets.push({ set: setNumber, weight: w, reps: r });
+      });
+      
+      onComplete(finalData);
+    }
+  };
+
   const handleExit = () => {
     if (window.confirm('Are you sure you want to exit? Your progress will not be saved.')) {
       if (timerRef.current) {
@@ -289,9 +316,27 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
           onClick={handleExit}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          style={{
+            background: 'rgb(237, 63, 39)',
+            marginBottom: '8px',
+          }}
         >
-          <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> Exit Workout
+          <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> Abort Workout
         </motion.button>
+        {workoutData.length > 0 && (
+          <motion.button
+            className="partial-complete-btn"
+            onClick={handlePartialComplete}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              background: 'rgb(254, 178, 26)',
+              color: 'rgb(19, 70, 134)',
+            }}
+          >
+            Save as Partial
+          </motion.button>
+        )}
       </div>
     </div>
   );

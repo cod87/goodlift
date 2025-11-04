@@ -1,9 +1,15 @@
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Checkbox, FormGroup, Button } from '@mui/material';
 import { FitnessCenterRounded } from '@mui/icons-material';
 
-const SelectionScreen = ({ 
+/**
+ * SelectionScreen component for workout configuration
+ * Allows users to select workout type and equipment filters
+ * Memoized to prevent unnecessary re-renders
+ */
+const SelectionScreen = memo(({ 
   workoutType,
   selectedEquipment,
   equipmentOptions,
@@ -14,7 +20,9 @@ const SelectionScreen = ({
 }) => {
   const handleStartClick = () => {
     if (workoutType) {
-      const equipmentFilter = selectedEquipment.has('all') ? 'all' : Array.from(selectedEquipment).map(e => e.toLowerCase());
+      const equipmentFilter = selectedEquipment.has('all') 
+        ? 'all' 
+        : Array.from(selectedEquipment).map(e => e.toLowerCase());
       onStartWorkout(workoutType, equipmentFilter);
     }
   };
@@ -154,7 +162,9 @@ const SelectionScreen = ({
       )}
     </motion.div>
   );
-};
+});
+
+SelectionScreen.displayName = 'SelectionScreen';
 
 SelectionScreen.propTypes = {
   workoutType: PropTypes.string.isRequired,

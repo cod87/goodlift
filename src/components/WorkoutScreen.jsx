@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl } from '../utils/helpers';
@@ -7,6 +7,10 @@ import { SETS_PER_EXERCISE } from '../utils/constants';
 import { Box, LinearProgress, Typography, IconButton } from '@mui/material';
 import { ArrowBack, ArrowForward, ExitToApp } from '@mui/icons-material';
 
+/**
+ * WorkoutScreen component manages the active workout session
+ * Displays exercises in superset format, tracks time, and collects set data
+ */
 const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
@@ -16,17 +20,27 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
 
-  // Generate workout sequence (supersets)
-  const workoutSequence = [];
-  for (let i = 0; i < 4; i++) {
-    const ex1 = workoutPlan[i * 2];
-    const ex2 = workoutPlan[i * 2 + 1];
-    if (!ex1 || !ex2) continue;
-    for (let set = 1; set <= SETS_PER_EXERCISE; set++) {
-      workoutSequence.push({ exercise: ex1, setNumber: set });
-      workoutSequence.push({ exercise: ex2, setNumber: set });
+  // Generate workout sequence (supersets) - memoized to prevent recalculation
+  const workoutSequence = useMemo(() => {
+    const sequence = [];
+    const maxPairs = 4; // 4 supersets of 2 exercises each = 8 exercises total
+    
+    for (let i = 0; i < maxPairs; i++) {
+      const ex1 = workoutPlan[i * 2];
+      const ex2 = workoutPlan[i * 2 + 1];
+      
+      // Skip if either exercise is missing
+      if (!ex1 || !ex2) continue;
+      
+      // Add all sets for this superset pair
+      for (let set = 1; set <= SETS_PER_EXERCISE; set++) {
+        sequence.push({ exercise: ex1, setNumber: set });
+        sequence.push({ exercise: ex2, setNumber: set });
+      }
     }
-  }
+    
+    return sequence;
+  }, [workoutPlan]);
 
   // Start timer on mount
   useEffect(() => {
@@ -47,8 +61,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   useEffect(() => {
     const loadSettings = async () => {
       if (currentStep?.exercise?.['Exercise Name']) {
-        const weight = await getExerciseWeight(currentStep.exercise['Exercise Name']);
-        const reps = await getExerciseTargetReps(currentStep.exercise['Exercise Name']);
+        const [weight, reps] = await Promise.all([
+          getExerciseWeight(currentStep.exercise['Exercise Name']),
+          getExerciseTargetReps(currentStep.exercise['Exercise Name'])
+        ]);
         setPrevWeight(weight);
         setTargetReps(reps);
       }
@@ -63,11 +79,20 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const handleNext = (e) => {
     e.preventDefault();
     const form = e.target.closest('form') || document.querySelector('form');
-    const weightInput = form.querySelector('#weight-select');
-    const repsInput = form.querySelector('#reps-select');
+    const weightInput = form?.querySelector('#weight-select');
+    const repsInput = form?.querySelector('#reps-select');
     
-    const weight = parseFloat(weightInput.value) || 0;
-    const reps = parseInt(repsInput.value) || 0;
+    if (!weightInput || !repsInput) {
+      console.error('Form inputs not found');
+      return;
+    }
+    
+    // Parse and validate weight (should be non-negative)
+    const weight = Math.max(0, parseFloat(weightInput.value) || 0);
+    
+    // Parse and validate reps (should be positive integer)
+    const parsedReps = parseInt(repsInput.value, 10);
+    const reps = (parsedReps > 0) ? parsedReps : 0;
 
     const newData = {
       exerciseName: currentStep.exercise['Exercise Name'],

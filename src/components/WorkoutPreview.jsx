@@ -1,15 +1,20 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem } from '@mui/material';
 import { FitnessCenter, PlayArrow, Close } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps } from '../utils/storage';
 
-const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
+/**
+ * WorkoutPreview component displays a preview of the generated workout
+ * Allows users to set starting weights and target reps before beginning
+ * Memoized to prevent unnecessary re-renders
+ */
+const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
   const [exerciseSettings, setExerciseSettings] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // Generate weight options once
+  // Generate weight options once (0-500 lbs in 2.5 lb increments)
   const weightOptions = useMemo(() => {
     const options = [];
     for (let i = 0; i <= 500; i += 2.5) {
@@ -18,7 +23,7 @@ const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
     return options;
   }, []);
 
-  // Generate target reps options once
+  // Generate target reps options once (1-20 reps)
   const repsOptions = useMemo(() => {
     const options = [];
     for (let i = 1; i <= 20; i++) {
@@ -33,8 +38,10 @@ const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
       const settings = {};
       for (const exercise of workout) {
         const exerciseName = exercise['Exercise Name'];
-        const weight = await getExerciseWeight(exerciseName);
-        const targetReps = await getExerciseTargetReps(exerciseName);
+        const [weight, targetReps] = await Promise.all([
+          getExerciseWeight(exerciseName),
+          getExerciseTargetReps(exerciseName)
+        ]);
         settings[exerciseName] = {
           weight: weight || 0,
           targetReps: targetReps || 12,
@@ -330,7 +337,9 @@ const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
       </motion.div>
     </motion.div>
   );
-};
+});
+
+WorkoutPreview.displayName = 'WorkoutPreview';
 
 WorkoutPreview.propTypes = {
   workout: PropTypes.array.isRequired,

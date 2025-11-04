@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { EXERCISES_DATA_PATH, EXERCISES_PER_WORKOUT, SETS_PER_EXERCISE } from '../utils/constants';
+import { EXERCISES_DATA_PATH, EXERCISES_PER_WORKOUT } from '../utils/constants';
 
+/**
+ * Map of opposing muscle groups for optimal superset pairing
+ * Pairing opposing muscles allows one muscle group to rest while the other works
+ */
 const OPPOSING_MUSCLES = {
   'Chest': 'Back',
   'Back': 'Chest',
@@ -11,32 +15,39 @@ const OPPOSING_MUSCLES = {
   'Shoulders': 'Back',
 };
 
+/**
+ * Custom hook for generating randomized workout plans
+ * Loads exercise database and provides functions to generate workouts based on type and equipment
+ * @returns {Object} Workout generation functions and exercise data
+ */
 export const useWorkoutGenerator = () => {
   const [exerciseDB, setExerciseDB] = useState({});
   const [allExercises, setAllExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load exercises from JSON
+  // Load exercises from JSON on mount
   useEffect(() => {
     const loadExercises = async () => {
       try {
         setLoading(true);
         const response = await fetch(EXERCISES_DATA_PATH);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Failed to load exercises: ${response.status}`);
+        }
         const exercises = await response.json();
         
         setAllExercises(exercises);
         
-        // Group by muscle
-        const grouped = {};
-        for (const exercise of exercises) {
+        // Group exercises by primary muscle for efficient lookup
+        const grouped = exercises.reduce((acc, exercise) => {
           const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
-          if (!grouped[primaryMuscle]) {
-            grouped[primaryMuscle] = [];
+          if (!acc[primaryMuscle]) {
+            acc[primaryMuscle] = [];
           }
-          grouped[primaryMuscle].push(exercise);
-        }
+          acc[primaryMuscle].push(exercise);
+          return acc;
+        }, {});
         
         setExerciseDB(grouped);
         setLoading(false);
@@ -50,53 +61,77 @@ export const useWorkoutGenerator = () => {
     loadExercises();
   }, []);
 
-  // Get random exercises from a muscle group
+  /**
+   * Get random exercises from a specific muscle group with equipment filtering
+   * @param {string} muscle - The muscle group to select from
+   * @param {number} count - Number of exercises to return
+   * @param {Array} currentWorkout - Already selected exercises to avoid duplicates
+   * @param {string|Array} equipmentFilter - Equipment type(s) to filter by, or 'all'
+   * @returns {Array} Array of selected exercise objects
+   */
   const getRandomExercises = useCallback((muscle, count, currentWorkout = [], equipmentFilter = 'all') => {
+    // Filter out exercises already in the workout
     let available = (exerciseDB[muscle] || []).filter(ex => 
       !currentWorkout.some(wEx => wEx['Exercise Name'] === ex['Exercise Name'])
     );
     
-    // Apply equipment filter
+    // Apply equipment filter if specified
     if (equipmentFilter !== 'all') {
       const filters = Array.isArray(equipmentFilter) ? equipmentFilter : [equipmentFilter];
       
       available = available.filter(ex => {
         const equipment = ex.Equipment.toLowerCase();
         return filters.some(filter => {
-          if (filter === 'cable machine') {
+          const normalizedFilter = filter.toLowerCase();
+          // Handle special equipment naming cases
+          if (normalizedFilter === 'cable machine') {
             return equipment.includes('cable');
-          } else if (filter === 'dumbbells') {
-            return equipment.includes('dumbbell');
-          } else {
-            return equipment.includes(filter);
           }
+          if (normalizedFilter === 'dumbbells') {
+            return equipment.includes('dumbbell');
+          }
+          return equipment.includes(normalizedFilter);
         });
       });
     }
     
     if (available.length < count) {
-      console.warn(`Not enough exercises for muscle group: ${muscle}. Have ${available.length}, need ${count}.`);
+      console.warn(`Insufficient exercises for ${muscle}. Available: ${available.length}, Requested: ${count}`);
       return available;
     }
     
-    const shuffled = available.sort(() => 0.5 - Math.random());
+    // Fisher-Yates shuffle for better randomization
+    const shuffled = [...available];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
     return shuffled.slice(0, count);
   }, [exerciseDB]);
 
-  // Generate exercise list based on workout type
+  /**
+   * Generate exercise list based on workout type and equipment
+   * @param {string} type - Workout type: 'upper', 'lower', or 'full'
+   * @param {string|Array} equipmentFilter - Equipment filter(s) to apply
+   * @returns {Array} Array of selected exercises for the workout
+   */
   const generateExerciseList = useCallback((type, equipmentFilter = 'all') => {
     let workout = [];
     
     switch (type) {
       case 'upper':
+        // Upper body: 3 chest, 3 back, 1 biceps, 1 triceps
         workout.push(...getRandomExercises('Chest', 3, workout, equipmentFilter));
         workout.push(...getRandomExercises('Back', 3, workout, equipmentFilter));
         workout.push(...getRandomExercises('Biceps', 1, workout, equipmentFilter));
         workout.push(...getRandomExercises('Triceps', 1, workout, equipmentFilter));
         break;
+        
       case 'lower': {
-        const quadCount = Math.floor(Math.random() * 2) + 3;
-        const hamCount = Math.floor(Math.random() * 2) + 2;
+        // Lower body: Variable quads/hams, with optional calves
+        const quadCount = Math.floor(Math.random() * 2) + 3; // 3-4 exercises
+        const hamCount = Math.floor(Math.random() * 2) + 2; // 2-3 exercises
         const calfCount = EXERCISES_PER_WORKOUT - quadCount - hamCount;
         
         workout.push(...getRandomExercises('Quadriceps', quadCount, workout, equipmentFilter));
@@ -106,8 +141,10 @@ export const useWorkoutGenerator = () => {
         }
         break;
       }
+      
       case 'full': {
-        const hamFullCount = Math.floor(Math.random() * 2) + 1;
+        // Full body: Balanced selection across all major muscle groups
+        const hamFullCount = Math.floor(Math.random() * 2) + 1; // 1-2 exercises
         const calfFullCount = EXERCISES_PER_WORKOUT - 2 - 2 - 2 - hamFullCount;
         
         workout.push(...getRandomExercises('Chest', 2, workout, equipmentFilter));
@@ -119,25 +156,38 @@ export const useWorkoutGenerator = () => {
         }
         break;
       }
+      
       default:
+        console.warn(`Unknown workout type: ${type}`);
         break;
     }
     
-    // Fill if necessary
+    // Fill remaining slots if needed (safety measure)
     while (workout.length < EXERCISES_PER_WORKOUT && workout.length > 0) {
       const allMuscles = Object.keys(exerciseDB);
+      if (allMuscles.length === 0) break;
+      
       const randomMuscle = allMuscles[Math.floor(Math.random() * allMuscles.length)];
       const filler = getRandomExercises(randomMuscle, 1, workout, equipmentFilter);
-      if (filler.length > 0) workout.push(filler[0]);
+      if (filler.length > 0) {
+        workout.push(filler[0]);
+      } else {
+        break; // No more exercises available
+      }
     }
     
     return workout.slice(0, EXERCISES_PER_WORKOUT);
   }, [exerciseDB, getRandomExercises]);
 
-  // Pair exercises into supersets
+  /**
+   * Pair exercises into supersets based on opposing muscle groups
+   * Optimally pairs exercises to allow for active recovery between sets
+   * @param {Array} exercises - Array of exercise objects to pair
+   * @returns {Array} Array of exercises ordered for superset execution
+   */
   const pairExercises = useCallback((exercises) => {
-    let pairings = [];
-    let remaining = [...exercises];
+    const pairings = [];
+    const remaining = [...exercises];
 
     while (remaining.length >= 2) {
       const exercise1 = remaining.shift();
@@ -146,14 +196,21 @@ export const useWorkoutGenerator = () => {
 
       let bestPairIndex = -1;
       
+      // First, try to find an opposing muscle group
       if (opposingMuscle) {
-        bestPairIndex = remaining.findIndex(ex => ex['Primary Muscle'].includes(opposingMuscle));
+        bestPairIndex = remaining.findIndex(ex => 
+          ex['Primary Muscle'].includes(opposingMuscle)
+        );
       }
       
+      // If no opposing muscle found, pair with a different muscle group
       if (bestPairIndex === -1) {
-        bestPairIndex = remaining.findIndex(ex => !ex['Primary Muscle'].includes(primaryMuscle1));
+        bestPairIndex = remaining.findIndex(ex => 
+          !ex['Primary Muscle'].includes(primaryMuscle1)
+        );
       }
       
+      // Fallback: pair with any remaining exercise
       if (bestPairIndex === -1) {
         bestPairIndex = 0;
       }
@@ -162,6 +219,7 @@ export const useWorkoutGenerator = () => {
       pairings.push(exercise1, exercise2);
     }
     
+    // Add any remaining unpaired exercise
     if (remaining.length > 0) {
       pairings.push(...remaining);
     }
@@ -169,14 +227,21 @@ export const useWorkoutGenerator = () => {
     return pairings;
   }, []);
 
-  // Generate complete workout
+  /**
+   * Generate a complete workout plan with exercises paired into supersets
+   * @param {string} type - Workout type: 'upper', 'lower', or 'full'
+   * @param {string|Array} equipmentFilter - Equipment filter(s) to apply
+   * @returns {Array} Complete workout plan with exercises ordered for supersets
+   */
   const generateWorkout = useCallback((type, equipmentFilter = 'all') => {
     if (Object.keys(exerciseDB).length === 0) {
-      console.error("Exercise database is empty.");
+      console.error("Exercise database is empty. Cannot generate workout.");
       return [];
     }
+    
     const exerciseList = generateExerciseList(type, equipmentFilter);
     const pairedList = pairExercises(exerciseList);
+    
     return pairedList;
   }, [exerciseDB, generateExerciseList, pairExercises]);
 

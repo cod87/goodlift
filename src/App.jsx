@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import './App.css';
 import NavigationSidebar from './components/NavigationSidebar';
 import SelectionScreen from './components/SelectionScreen';
@@ -10,13 +10,15 @@ import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps } from './utils/storage';
-import { SETS_PER_EXERCISE } from './utils/constants';
+import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Snackbar, Alert } from '@mui/material';
 
-// Create custom theme matching app colors
+/**
+ * Custom theme configuration matching app brand colors
+ */
 const theme = createTheme({
   palette: {
     primary: {
@@ -41,30 +43,12 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: "'Poppins', sans-serif",
-    h1: {
-      fontFamily: "'Montserrat', sans-serif",
-      fontWeight: 800,
-    },
-    h2: {
-      fontFamily: "'Montserrat', sans-serif",
-      fontWeight: 800,
-    },
-    h3: {
-      fontFamily: "'Montserrat', sans-serif",
-      fontWeight: 700,
-    },
-    h4: {
-      fontFamily: "'Montserrat', sans-serif",
-      fontWeight: 700,
-    },
-    h5: {
-      fontFamily: "'Montserrat', sans-serif",
-      fontWeight: 700,
-    },
-    h6: {
-      fontFamily: "'Montserrat', sans-serif",
-      fontWeight: 700,
-    },
+    h1: { fontFamily: "'Montserrat', sans-serif", fontWeight: 800 },
+    h2: { fontFamily: "'Montserrat', sans-serif", fontWeight: 800 },
+    h3: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700 },
+    h4: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700 },
+    h5: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700 },
+    h6: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700 },
   },
 });
 
@@ -94,7 +78,7 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Extract unique equipment types from exercises
+  // Extract unique equipment types from exercises (memoized)
   useEffect(() => {
     if (allExercises.length > 0) {
       const equipmentSet = new Set();
@@ -178,35 +162,46 @@ function App() {
     setShowPreview(false);
     setCurrentScreen('selection');
   };
+  /**
+   * Calculate weight increase for progressive overload based on muscle group and equipment
+   * @param {string} primaryMuscle - Primary muscle group being worked
+   * @param {string} equipment - Equipment type being used
+   * @returns {number} Weight increase in lbs
+   */
+  const calculateWeightIncrease = useCallback((primaryMuscle, equipment) => {
+    const isDumbbell = equipment.includes('Dumbbell') || equipment.includes('Kettlebell');
 
-  const handleWorkoutComplete = async (workoutData) => {
+    if (MUSCLE_GROUPS.UPPER_BODY.includes(primaryMuscle)) {
+      return isDumbbell ? WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL : WEIGHT_INCREMENTS.UPPER_BODY.BARBELL;
+    }
+    
+    if (MUSCLE_GROUPS.LOWER_BODY.includes(primaryMuscle)) {
+      return isDumbbell ? WEIGHT_INCREMENTS.LOWER_BODY.DUMBBELL : WEIGHT_INCREMENTS.LOWER_BODY.BARBELL;
+    }
+    
+    return 0;
+  }, []);
+
+  /**
+   * Handle workout completion - save data, check for progression, update stats
+   * @param {Object} workoutData - Completed workout data with exercises and duration
+   */
+  const handleWorkoutComplete = useCallback(async (workoutData) => {
     const progressionNotifications = [];
     
-    // Save exercise weights and check for progression
+    // Process each exercise for weight tracking and progression
     for (const [exerciseName, data] of Object.entries(workoutData.exercises)) {
       const lastSet = data.sets[data.sets.length - 1];
-      if (lastSet.weight > 0) {
-        // Get target reps for this exercise
+      if (lastSet?.weight > 0) {
         const targetReps = await getExerciseTargetReps(exerciseName);
-        
-        // Check if all sets met or exceeded target reps
         const allSetsMetTarget = data.sets.every(set => set.reps >= targetReps);
         
+        // Check for progressive overload criteria
         if (allSetsMetTarget && data.sets.length >= SETS_PER_EXERCISE) {
           const exercise = currentWorkout.find(ex => ex['Exercise Name'] === exerciseName);
           if (exercise) {
             const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
-            const equipment = exercise['Equipment'];
-            let weightIncrease = 0;
-
-            const isLowerBody = ['Quadriceps', 'Hamstrings', 'Glutes', 'Calves'].includes(primaryMuscle);
-            const isUpperBody = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps'].includes(primaryMuscle);
-
-            if (isUpperBody) {
-              weightIncrease = equipment.includes('Dumbbell') || equipment.includes('Kettlebell') ? 5 : 2.5;
-            } else if (isLowerBody) {
-              weightIncrease = equipment.includes('Dumbbell') || equipment.includes('Kettlebell') ? 10 : 5;
-            }
+            const weightIncrease = calculateWeightIncrease(primaryMuscle, exercise['Equipment']);
 
             if (weightIncrease > 0) {
               const newWeight = lastSet.weight + weightIncrease;
@@ -214,19 +209,19 @@ function App() {
               progressionNotifications.push({
                 exercise: exerciseName,
                 oldWeight: lastSet.weight,
-                newWeight: newWeight,
+                newWeight,
                 increase: weightIncrease,
               });
             }
           }
         } else {
-          // Just save the current weight without progression
+          // Save current weight without progression
           await setExerciseWeight(exerciseName, lastSet.weight);
         }
       }
     }
 
-    // Show progression notification if any exercises progressed
+    // Display progression notification
     if (progressionNotifications.length > 0) {
       const messages = progressionNotifications.map(prog => 
         `${prog.exercise}: ${prog.oldWeight} → ${prog.newWeight} lbs (+${prog.increase} lbs)`
@@ -238,13 +233,10 @@ function App() {
       });
     }
 
-    // Update workout data with correct type
+    // Save workout and update stats
     const finalWorkoutData = { ...workoutData, type: workoutType };
-    
-    // Save workout
     await saveWorkout(finalWorkoutData);
     
-    // Update stats
     const stats = await getUserStats();
     stats.totalWorkouts += 1;
     stats.totalTime += workoutData.duration;
@@ -252,7 +244,7 @@ function App() {
     
     setCompletedWorkoutData(finalWorkoutData);
     setCurrentScreen('completion');
-  };
+  }, [workoutType, currentWorkout, calculateWeightIncrease]);
 
   const handleWorkoutExit = () => {
     setCurrentScreen('selection');

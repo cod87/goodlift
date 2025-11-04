@@ -1,10 +1,16 @@
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { formatTime } from '../utils/helpers';
 import { Box, Card, CardContent, Typography, Button, Stack, Chip } from '@mui/material';
 import { Download, Check, Celebration } from '@mui/icons-material';
 
-const CompletionScreen = ({ workoutData, onFinish, onExportCSV }) => {
+/**
+ * CompletionScreen component displays workout summary after completion
+ * Shows exercise details, sets, reps, and weights used
+ * Memoized to prevent unnecessary re-renders
+ */
+const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV }) => {
   return (
     <motion.div
       className="screen completion-screen"
@@ -174,7 +180,9 @@ const CompletionScreen = ({ workoutData, onFinish, onExportCSV }) => {
       </motion.div>
     </motion.div>
   );
-};
+});
+
+CompletionScreen.displayName = 'CompletionScreen';
 
 CompletionScreen.propTypes = {
   workoutData: PropTypes.object.isRequired,

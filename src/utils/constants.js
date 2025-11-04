@@ -1,19 +1,63 @@
-// Workout types
+/**
+ * Application constants for workout configuration and navigation
+ */
+
+/** Workout type identifiers */
 export const WORKOUT_TYPES = {
   UPPER: 'upper',
   LOWER: 'lower',
   FULL: 'full',
 };
 
-// Other constants
+/** Exercise and workout configuration */
 export const SETS_PER_EXERCISE = 3;
 export const EXERCISES_PER_WORKOUT = 8;
 export const EXERCISES_DATA_PATH = import.meta.env.BASE_URL + 'data/exercises.json';
 
-// Screen names
+/** Screen route identifiers */
 export const SCREENS = {
   SELECTION: 'selection',
+  PREVIEW: 'preview',
   WORKOUT: 'workout',
   COMPLETION: 'completion',
   PROGRESS: 'progress',
+  HIIT: 'hiit',
+};
+
+/** Muscle group categories for progressive overload calculations */
+export const MUSCLE_GROUPS = {
+  UPPER_BODY: ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps'],
+  LOWER_BODY: ['Quadriceps', 'Hamstrings', 'Glutes', 'Calves'],
+};
+
+/**
+ * Weight increments for progressive overload (in lbs)
+ * Applied when user completes all sets with target reps
+ * Different increments for upper/lower body and equipment types
+ * - Upper body uses smaller increments due to smaller muscle groups
+ * - Lower body uses larger increments due to larger muscle groups
+ * - Dumbbell/Kettlebell increments are larger (total weight across both hands)
+ * - Barbell increments are smaller (weight is on single bar)
+ */
+export const WEIGHT_INCREMENTS = {
+  UPPER_BODY: {
+    DUMBBELL: 5,    // 5 lbs per dumbbell (10 lbs total)
+    BARBELL: 2.5,   // 2.5 lbs per side (5 lbs total)
+  },
+  LOWER_BODY: {
+    DUMBBELL: 10,   // 10 lbs per dumbbell (20 lbs total)
+    BARBELL: 5,     // 5 lbs per side (10 lbs total)
+  },
+};
+
+/** Default target reps for exercises */
+export const DEFAULT_TARGET_REPS = 12;
+
+/** Equipment type normalization */
+export const EQUIPMENT_TYPES = {
+  CABLE_MACHINE: 'cable machine',
+  DUMBBELLS: 'dumbbells',
+  BARBELLS: 'barbells',
+  KETTLEBELLS: 'kettlebells',
+  BODYWEIGHT: 'bodyweight',
 };

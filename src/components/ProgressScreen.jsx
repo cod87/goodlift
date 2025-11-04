@@ -106,7 +106,7 @@ const ProgressScreen = () => {
         font: {
           size: 16,
           weight: 600,
-          family: "'Ubuntu', sans-serif",
+          family: "'Montserrat', sans-serif",
         },
         color: 'rgb(19, 70, 134)',
       },

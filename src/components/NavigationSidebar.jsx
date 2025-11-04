@@ -129,11 +129,11 @@ const NavigationSidebar = ({
                   marginBottom: '1rem',
                 }}
               >
-                <img 
-                  src="/goodlift-logo.svg" 
-                  alt="GoodLift" 
-                  style={{ height: '48px', width: 'auto' }} 
-                />
+             <img
+  src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
+  alt="GoodLift"
+  style={{ height: '48px', width: 'auto' }}
+/>
               </motion.div>
             </div>
 

@@ -108,28 +108,8 @@ function App() {
   };
 
   const handleEquipmentChange = (value) => {
-    const newSelected = new Set(selectedEquipment);
-    
-    if (value === 'all') {
-      if (selectedEquipment.has('all')) {
-        newSelected.delete('all');
-      } else {
-        newSelected.clear();
-        newSelected.add('all');
-      }
-    } else {
-      newSelected.delete('all');
-      if (newSelected.has(value)) {
-        newSelected.delete(value);
-      } else {
-        newSelected.add(value);
-      }
-      
-      if (newSelected.size === 0) {
-        newSelected.add('all');
-      }
-    }
-    
+    const newSelected = new Set();
+    newSelected.add(value);
     setSelectedEquipment(newSelected);
   };
 
@@ -137,12 +117,12 @@ function App() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleStartWorkout = (type, equipmentFilter) => {
+  const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null) => {
     setLoading(true);
     
     // Simulate loading to show user we're generating
     setTimeout(() => {
-      const workout = generateWorkout(type, equipmentFilter);
+      const workout = preGeneratedWorkout || generateWorkout(type, equipmentFilter);
       setCurrentWorkout(workout);
       setWorkoutType(type);
       setLoading(false);

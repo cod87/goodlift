@@ -58,13 +58,13 @@ const NavigationSidebar = ({
             top: 'max(1rem, env(safe-area-inset-top))',
             left: 'max(1rem, env(safe-area-inset-left))',
             zIndex: 1001,
-            background: 'rgba(19, 70, 134, 0.9)',
-            color: 'white',
+            background: 'transparent',
+            color: 'rgb(19, 70, 134)',
             border: 'none',
-            borderRadius: '8px',
-            padding: '12px',
+            borderRadius: '0',
+            padding: '8px',
             cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(19, 70, 134, 0.3)',
+            boxShadow: 'none',
           }}
         >
           {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}

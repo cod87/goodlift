@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { FaDumbbell } from 'react-icons/fa';
 import { Box, TextField, Button, Typography, Alert, Card, CardContent } from '@mui/material';
 
 const AuthScreen = () => {
@@ -91,23 +90,14 @@ const AuthScreen = () => {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                style={{ marginBottom: '1rem' }}
               >
-                <FaDumbbell size={60} style={{ color: 'rgb(19, 70, 134)', marginBottom: '1rem' }} />
+                <img 
+                  src="/goodlift-logo.svg" 
+                  alt="GoodLift" 
+                  style={{ height: '80px', width: 'auto' }} 
+                />
               </motion.div>
-              <Typography
-                variant="h4"
-                component="h1"
-                sx={{
-                  fontWeight: 700,
-                  mb: 1,
-                  background: 'linear-gradient(135deg, rgb(19, 70, 134), rgb(237, 63, 39))',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                GoodLife
-              </Typography>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={isLogin ? 'login' : 'signup'}

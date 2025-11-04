@@ -63,11 +63,11 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const handleNext = (e) => {
     e.preventDefault();
     const form = e.target.closest('form') || document.querySelector('form');
-    const weightSelect = form.querySelector('#weight-select');
-    const repsSelect = form.querySelector('#reps-select');
+    const weightInput = form.querySelector('#weight-select');
+    const repsInput = form.querySelector('#reps-select');
     
-    const weight = parseFloat(weightSelect.value) || 0;
-    const reps = parseInt(repsSelect.value) || 0;
+    const weight = parseFloat(weightInput.value) || 0;
+    const reps = parseInt(repsInput.value) || 0;
 
     const newData = {
       exerciseName: currentStep.exercise['Exercise Name'],
@@ -126,29 +126,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     return null;
   }
 
-  // Generate weight options
-  const weightOptions = [];
-  weightOptions.push(<option key="0" value="0">0 lbs</option>);
-  for (let i = 2.5; i <= 500; i += 2.5) {
-    weightOptions.push(
-      <option key={i} value={i}>
-        {i} lbs
-      </option>
-    );
-  }
-
-  // Generate reps options based on target reps
-  const repsOptions = [];
-  for (let i = 1; i <= 20; i++) {
-    repsOptions.push(
-      <option key={i} value={i}>
-        {i}
-      </option>
-    );
-  }
-
   return (
-    <div className="screen">
+    <div className="screen"
+      style={{
+        paddingBottom: '100px', // Add padding to ensure input is visible above mobile keyboard
+      }}
+    >
       <Box sx={{ mb: 2 }}>
         <Box sx={{ 
           display: 'flex', 
@@ -217,15 +200,61 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
               <div className="input-row">
                 <div className="input-group">
                   <label htmlFor="weight-select">Weight (lbs)</label>
-                  <select id="weight-select" className="exercise-select" defaultValue={prevWeight || 0}>
-                    {weightOptions}
-                  </select>
+                  <input
+                    id="weight-select"
+                    type="number"
+                    inputMode="decimal"
+                    step="2.5"
+                    min="0"
+                    max="500"
+                    className="exercise-input"
+                    defaultValue={prevWeight || 0}
+                    onFocus={(e) => {
+                      // Scroll input into view on mobile when keyboard appears
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '2px solid var(--color-border)',
+                      fontSize: '1rem',
+                      fontFamily: 'var(--font-body)',
+                      backgroundColor: 'var(--color-surface)',
+                      color: 'var(--color-text)',
+                    }}
+                  />
                 </div>
                 <div className="input-group">
                   <label htmlFor="reps-select">Reps</label>
-                  <select id="reps-select" className="exercise-select" defaultValue={8}>
-                    {repsOptions}
-                  </select>
+                  <input
+                    id="reps-select"
+                    type="number"
+                    inputMode="numeric"
+                    step="1"
+                    min="1"
+                    max="20"
+                    className="exercise-input"
+                    defaultValue={targetReps || 8}
+                    onFocus={(e) => {
+                      // Scroll input into view on mobile when keyboard appears
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '2px solid var(--color-border)',
+                      fontSize: '1rem',
+                      fontFamily: 'var(--font-body)',
+                      backgroundColor: 'var(--color-surface)',
+                      color: 'var(--color-text)',
+                    }}
+                  />
                 </div>
               </div>
               <div className="workout-nav-buttons">

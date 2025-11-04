@@ -10,7 +10,7 @@ import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps } from './utils/storage';
-import { SETS_PER_EXERCISE } from './utils/constants';
+import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -169,15 +169,16 @@ function App() {
    * @returns {number} Weight increase in lbs
    */
   const calculateWeightIncrease = useCallback((primaryMuscle, equipment) => {
-    const lowerBodyMuscles = ['Quadriceps', 'Hamstrings', 'Glutes', 'Calves'];
-    const upperBodyMuscles = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps'];
     const isDumbbell = equipment.includes('Dumbbell') || equipment.includes('Kettlebell');
 
-    if (upperBodyMuscles.includes(primaryMuscle)) {
-      return isDumbbell ? 5 : 2.5;
-    } else if (lowerBodyMuscles.includes(primaryMuscle)) {
-      return isDumbbell ? 10 : 5;
+    if (MUSCLE_GROUPS.UPPER_BODY.includes(primaryMuscle)) {
+      return isDumbbell ? WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL : WEIGHT_INCREMENTS.UPPER_BODY.BARBELL;
     }
+    
+    if (MUSCLE_GROUPS.LOWER_BODY.includes(primaryMuscle)) {
+      return isDumbbell ? WEIGHT_INCREMENTS.LOWER_BODY.DUMBBELL : WEIGHT_INCREMENTS.LOWER_BODY.BARBELL;
+    }
+    
     return 0;
   }, []);
 

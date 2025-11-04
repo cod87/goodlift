@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
-import { Box, LinearProgress, Typography, IconButton } from '@mui/material';
+import { Box, LinearProgress, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder } from '@mui/icons-material';
 
 /**
@@ -18,6 +18,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, workoutType }) => {
   const [prevWeight, setPrevWeight] = useState(0);
   const [targetReps, setTargetReps] = useState(12);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteDialogOpen, setFavoriteDialogOpen] = useState(false);
+  const [favoriteName, setFavoriteName] = useState('');
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -177,20 +179,30 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, workoutType }) => {
 
   const handleToggleFavorite = () => {
     if (!isFavorited) {
-      const workoutName = prompt('Enter a name for this workout:', `${workoutType} Workout`);
-      if (workoutName) {
-        saveFavoriteWorkout({
-          name: workoutName,
-          type: workoutType,
-          equipment: 'all', // Could be enhanced to track actual equipment used
-          exercises: workoutPlan,
-        });
-        setIsFavorited(true);
-        alert('Workout saved to favorites!');
-      }
+      setFavoriteName(`${workoutType} Workout`);
+      setFavoriteDialogOpen(true);
     } else {
       setIsFavorited(false);
     }
+  };
+
+  const handleSaveFavorite = () => {
+    if (favoriteName.trim()) {
+      saveFavoriteWorkout({
+        name: favoriteName.trim(),
+        type: workoutType,
+        equipment: 'all', // Could be enhanced to track actual equipment used
+        exercises: workoutPlan,
+      });
+      setIsFavorited(true);
+      setFavoriteDialogOpen(false);
+      setFavoriteName('');
+    }
+  };
+
+  const handleCancelFavorite = () => {
+    setFavoriteDialogOpen(false);
+    setFavoriteName('');
   };
 
   if (!currentStep) {
@@ -396,6 +408,30 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, workoutType }) => {
           </motion.button>
         )}
       </div>
+
+      {/* Save to Favorites Dialog */}
+      <Dialog open={favoriteDialogOpen} onClose={handleCancelFavorite} maxWidth="sm" fullWidth>
+        <DialogTitle>Save Workout to Favorites</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Workout Name"
+            type="text"
+            fullWidth
+            value={favoriteName}
+            onChange={(e) => setFavoriteName(e.target.value)}
+            variant="outlined"
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelFavorite}>Cancel</Button>
+          <Button onClick={handleSaveFavorite} variant="contained" disabled={!favoriteName.trim()}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

@@ -47,11 +47,11 @@ const AuthScreen = () => {
                 transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                 style={{ marginBottom: '1rem' }}
               >
-                <img 
-                  src="/goodlift-logo.svg" 
-                  alt="GoodLift" 
-                  style={{ height: '80px', width: 'auto' }} 
-                />
+               <img
+  src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
+  alt="GoodLift"
+  style={{ height: '80px', width: 'auto' }}
+/>
               </motion.div>
               <AnimatePresence mode="wait">
                 <motion.div

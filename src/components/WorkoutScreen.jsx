@@ -306,13 +306,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     defaultValue={prevWeight || 0}
                     onFocus={(e) => {
                       // Only scroll if input would be obscured by keyboard
-                      // Keyboard takes up ~40% of viewport, so check if input is below 45% threshold
+                      // Keyboard takes up ~40% of viewport, scroll only if input is in lower 45%
                       const rect = e.target.getBoundingClientRect();
                       const inputBottom = rect.bottom;
                       const viewportHeight = window.innerHeight;
-                      const threshold = viewportHeight * 0.45;
+                      const threshold = viewportHeight * 0.55; // 55% from top = lower 45%
                       
-                      // Only snap if input bottom is below the 45% threshold
+                      // Only snap if input bottom is in the lower 45% (below 55% threshold)
                       if (inputBottom > threshold) {
                         setTimeout(() => {
                           e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -348,13 +348,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     defaultValue={targetReps || 8}
                     onFocus={(e) => {
                       // Only scroll if input would be obscured by keyboard
-                      // Keyboard takes up ~40% of viewport, so check if input is below 45% threshold
+                      // Keyboard takes up ~40% of viewport, scroll only if input is in lower 45%
                       const rect = e.target.getBoundingClientRect();
                       const inputBottom = rect.bottom;
                       const viewportHeight = window.innerHeight;
-                      const threshold = viewportHeight * 0.45;
+                      const threshold = viewportHeight * 0.55; // 55% from top = lower 45%
                       
-                      // Only snap if input bottom is below the 45% threshold
+                      // Only snap if input bottom is in the lower 45% (below 55% threshold)
                       if (inputBottom > threshold) {
                         setTimeout(() => {
                           e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });

@@ -72,6 +72,7 @@ export const getWorkoutHistory = async () => {
 
 /**
  * Save a completed workout to storage
+ * Stats are automatically recalculated when getUserStats() is called
  * @param {Object} workoutData - Workout data including exercises, duration, etc.
  */
 export const saveWorkout = async (workoutData) => {
@@ -88,6 +89,8 @@ export const saveWorkout = async (workoutData) => {
     if (currentUserId) {
       await saveWorkoutHistoryToFirebase(currentUserId, history);
     }
+    
+    // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error saving workout:', error);
     throw error; // Re-throw to allow caller to handle
@@ -96,6 +99,7 @@ export const saveWorkout = async (workoutData) => {
 
 /**
  * Delete a workout from history
+ * Stats are automatically recalculated when getUserStats() is called
  * @param {number} workoutIndex - Index of workout to delete
  */
 export const deleteWorkout = async (workoutIndex) => {
@@ -106,23 +110,15 @@ export const deleteWorkout = async (workoutIndex) => {
       throw new Error('Invalid workout index');
     }
     
-    const deletedWorkout = history[workoutIndex];
     history.splice(workoutIndex, 1);
     localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
-    
-    // Update stats to reflect deletion
-    const stats = await getUserStats();
-    if (stats.totalWorkouts > 0) {
-      stats.totalWorkouts -= 1;
-      const duration = deletedWorkout.duration || 0;
-      stats.totalTime = Math.max(0, stats.totalTime - duration);
-      await saveUserStats(stats);
-    }
     
     // Sync to Firebase if user is logged in
     if (currentUserId) {
       await saveWorkoutHistoryToFirebase(currentUserId, history);
     }
+    
+    // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error deleting workout:', error);
     throw error;
@@ -131,28 +127,47 @@ export const deleteWorkout = async (workoutIndex) => {
 
 /**
  * Get user statistics (total workouts, time, etc.)
+ * IMPORTANT: Stats are now calculated from workout history to ensure they're always in sync
  * @returns {Promise<Object>} User stats object with totalWorkouts, totalTime, totalHiitTime
  */
 export const getUserStats = async () => {
   try {
-    // Try Firebase first if user is authenticated
-    if (currentUserId) {
-      try {
+    // Get workout history (this will fetch from Firebase or localStorage)
+    const history = await getWorkoutHistory();
+    
+    // Calculate stats from actual workout history
+    const totalWorkouts = history.length;
+    const totalTime = history.reduce((sum, workout) => sum + (workout.duration || 0), 0);
+    
+    // Get HIIT time separately (still stored independently)
+    let totalHiitTime = 0;
+    try {
+      if (currentUserId) {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
-        if (firebaseData?.userStats) {
-          localStorage.setItem(KEYS.USER_STATS, JSON.stringify(firebaseData.userStats));
-          return firebaseData.userStats;
+        if (firebaseData?.userStats?.totalHiitTime) {
+          totalHiitTime = firebaseData.userStats.totalHiitTime;
         }
-      } catch (error) {
-        console.error('Firebase fetch failed, using localStorage:', error);
       }
+      if (totalHiitTime === 0) {
+        const stats = localStorage.getItem(KEYS.USER_STATS);
+        const parsedStats = stats ? JSON.parse(stats) : {};
+        totalHiitTime = parsedStats.totalHiitTime || 0;
+      }
+    } catch (error) {
+      console.error('Error reading HIIT time:', error);
     }
     
-    // Fallback to localStorage
-    const stats = localStorage.getItem(KEYS.USER_STATS);
-    return stats ? JSON.parse(stats) : { totalWorkouts: 0, totalTime: 0, totalHiitTime: 0 };
+    const calculatedStats = { totalWorkouts, totalTime, totalHiitTime };
+    
+    // Save the calculated stats back to storage for HIIT time persistence
+    localStorage.setItem(KEYS.USER_STATS, JSON.stringify(calculatedStats));
+    if (currentUserId) {
+      await saveUserStatsToFirebase(currentUserId, calculatedStats);
+    }
+    
+    return calculatedStats;
   } catch (error) {
-    console.error('Error reading user stats:', error);
+    console.error('Error calculating user stats:', error);
     return { totalWorkouts: 0, totalTime: 0, totalHiitTime: 0 };
   }
 };

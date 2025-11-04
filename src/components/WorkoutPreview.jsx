@@ -345,43 +345,48 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
           justifyContent="center"
         >
           <Button
-            variant="outlined"
+            variant="contained"
             size="large"
-            startIcon={<Close />}
             onClick={onCancel}
             sx={{
               borderRadius: 2,
-              px: { xs: 2, sm: 4 },
+              minWidth: { xs: '60px', sm: '80px' },
+              px: { xs: 1, sm: 2 },
               py: 1.5,
-              fontSize: { xs: '0.9rem', sm: '1.1rem' },
+              fontSize: { xs: '1.2rem', sm: '1.5rem' },
               fontWeight: 600,
-              borderColor: 'text.secondary',
-              color: 'text.secondary',
+              bgcolor: 'rgb(237, 63, 39)',
+              color: 'white',
               '&:hover': {
-                borderColor: 'secondary.main',
-                bgcolor: 'rgba(193, 120, 90, 0.1)',
+                bgcolor: 'rgb(200, 50, 30)',
               }
             }}
           >
-            Cancel
+            ✕
           </Button>
           <Button
-            variant="outlined"
+            variant="contained"
             size="large"
             startIcon={savedToFavorites ? <Star /> : <StarOutline />}
             onClick={handleSaveToFavorites}
             disabled={savedToFavorites}
             sx={{
               borderRadius: 2,
-              px: { xs: 2, sm: 4 },
+              flex: 1,
+              maxWidth: { xs: '130px', sm: '150px' },
+              px: { xs: 2, sm: 3 },
               py: 1.5,
               fontSize: { xs: '0.9rem', sm: '1.1rem' },
               fontWeight: 600,
-              borderColor: savedToFavorites ? 'success.main' : 'warning.main',
-              color: savedToFavorites ? 'success.main' : 'warning.main',
+              bgcolor: savedToFavorites ? 'rgb(76, 175, 80)' : 'rgb(254, 178, 26)',
+              color: 'white',
               '&:hover': {
-                borderColor: 'warning.main',
-                bgcolor: 'rgba(254, 178, 26, 0.1)',
+                bgcolor: savedToFavorites ? 'rgb(56, 142, 60)' : 'rgb(245, 158, 11)',
+              },
+              '&:disabled': {
+                bgcolor: 'rgb(76, 175, 80)',
+                color: 'white',
+                opacity: 0.8,
               }
             }}
           >
@@ -394,15 +399,18 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
             onClick={handleStartWorkout}
             sx={{
               borderRadius: 2,
-              px: { xs: 2, sm: 4 },
+              flex: 1,
+              maxWidth: { xs: '130px', sm: '150px' },
+              px: { xs: 2, sm: 3 },
               py: 1.5,
               fontSize: { xs: '0.9rem', sm: '1.1rem' },
               fontWeight: 600,
-              bgcolor: 'primary.main',
+              bgcolor: 'rgb(19, 70, 134)',
+              color: 'white',
               '&:hover': {
-                bgcolor: 'primary.dark',
+                bgcolor: 'rgb(15, 56, 107)',
                 transform: 'translateY(-2px)',
-                boxShadow: '0 8px 16px rgba(138, 190, 185, 0.3)',
+                boxShadow: '0 8px 16px rgba(19, 70, 134, 0.3)',
               },
               transition: 'all 0.3s ease'
             }}

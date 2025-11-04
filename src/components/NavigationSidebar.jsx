@@ -45,7 +45,7 @@ const NavigationSidebar = ({
   return (
     <>
       {/* Hamburger Menu Button (Mobile Only) */}
-      {isMobile && (
+      {isMobile && !isOpen && (
         <motion.button
           className="hamburger-menu"
           onClick={onToggle}
@@ -67,7 +67,7 @@ const NavigationSidebar = ({
             boxShadow: 'none',
           }}
         >
-          {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+          <FaBars size={24} />
         </motion.button>
       )}
 

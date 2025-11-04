@@ -100,7 +100,10 @@ const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
       style={{ 
         maxWidth: '900px', 
         margin: '0 auto',
-        padding: '2rem'
+        padding: '1rem',
+        width: '100%',
+        boxSizing: 'border-box',
+        overflowX: 'hidden'
       }}
     >
       <Box sx={{ mb: 4, textAlign: 'center' }}>
@@ -113,10 +116,7 @@ const WorkoutPreview = ({ workout, workoutType, onStart, onCancel }) => {
         </motion.div>
         <Typography variant="h3" component="h1" gutterBottom sx={{ 
           fontWeight: 700,
-          background: 'linear-gradient(135deg, #8ABEB9, #C1785A)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
+          color: 'primary.main'
         }}>
           Your {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout
         </Typography>

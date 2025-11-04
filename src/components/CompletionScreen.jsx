@@ -1,45 +1,16 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { formatTime } from '../utils/helpers';
-import { Box, Card, CardContent, Typography, Button, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
-import { Download, Check, Celebration, Star } from '@mui/icons-material';
-import { saveFavoriteWorkout } from '../utils/storage';
+import { Box, Card, CardContent, Typography, Button, Stack, Chip } from '@mui/material';
+import { Download, Check, Celebration } from '@mui/icons-material';
 
 /**
  * CompletionScreen component displays workout summary after completion
  * Shows exercise details, sets, reps, and weights used
  * Memoized to prevent unnecessary re-renders
  */
-const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV, workoutPlan, workoutType }) => {
-  const [isSaved, setIsSaved] = useState(false);
-  const [favoriteDialogOpen, setFavoriteDialogOpen] = useState(false);
-  const [favoriteName, setFavoriteName] = useState('');
-
-  const handleSaveToFavorites = () => {
-    setFavoriteName(`${workoutType} Workout`);
-    setFavoriteDialogOpen(true);
-  };
-
-  const handleSaveFavorite = () => {
-    if (favoriteName.trim()) {
-      saveFavoriteWorkout({
-        name: favoriteName.trim(),
-        type: workoutType,
-        equipment: 'all',
-        exercises: workoutPlan || [],
-      });
-      setIsSaved(true);
-      setFavoriteDialogOpen(false);
-      setFavoriteName('');
-    }
-  };
-
-  const handleCancelFavorite = () => {
-    setFavoriteDialogOpen(false);
-    setFavoriteName('');
-  };
-
+const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV }) => {
   return (
     <motion.div
       className="screen completion-screen"
@@ -187,32 +158,6 @@ const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV, workoutPlan
             Download CSV
           </Button>
           <Button
-            variant="outlined"
-            size="large"
-            startIcon={<Star />}
-            onClick={handleSaveToFavorites}
-            disabled={isSaved}
-            sx={{
-              flex: 1,
-              borderRadius: 2,
-              py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 600,
-              borderColor: 'warning.main',
-              color: 'warning.main',
-              '&:hover': {
-                borderColor: 'warning.dark',
-                bgcolor: 'rgba(254, 178, 26, 0.1)',
-              },
-              '&.Mui-disabled': {
-                borderColor: 'rgba(0, 0, 0, 0.12)',
-                color: 'rgba(0, 0, 0, 0.26)',
-              }
-            }}
-          >
-            {isSaved ? 'Saved!' : 'Save to Favorites'}
-          </Button>
-          <Button
             variant="contained"
             size="large"
             startIcon={<Check />}
@@ -233,30 +178,6 @@ const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV, workoutPlan
           </Button>
         </Stack>
       </motion.div>
-
-      {/* Save to Favorites Dialog */}
-      <Dialog open={favoriteDialogOpen} onClose={handleCancelFavorite} maxWidth="sm" fullWidth>
-        <DialogTitle>Save Workout to Favorites</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Workout Name"
-            type="text"
-            fullWidth
-            value={favoriteName}
-            onChange={(e) => setFavoriteName(e.target.value)}
-            variant="outlined"
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelFavorite}>Cancel</Button>
-          <Button onClick={handleSaveFavorite} variant="contained" disabled={!favoriteName.trim()}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
     </motion.div>
   );
 });
@@ -267,8 +188,6 @@ CompletionScreen.propTypes = {
   workoutData: PropTypes.object.isRequired,
   onFinish: PropTypes.func.isRequired,
   onExportCSV: PropTypes.func.isRequired,
-  workoutPlan: PropTypes.array,
-  workoutType: PropTypes.string,
 };
 
 export default CompletionScreen;

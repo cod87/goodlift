@@ -144,7 +144,7 @@ const ProgressScreen = () => {
       </Box>
 
       <Grid container spacing={2} sx={{ mb: 3, px: { xs: 0, sm: 0 } }}>
-        <Grid item xs={6} sm={6} md={3}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -186,7 +186,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
         
-        <Grid item xs={6} sm={6} md={3}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -228,7 +228,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={6} sm={6} md={3}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -272,7 +272,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={6} sm={6} md={3}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -346,7 +346,7 @@ const ProgressScreen = () => {
             overflow: 'hidden',
           }}>
             <Box sx={{ 
-              background: 'rgb(19, 70, 134)',
+              background: 'linear-gradient(135deg, rgb(19, 70, 134), rgb(237, 63, 39))',
               p: 2,
               display: 'flex',
               alignItems: 'center',
@@ -395,7 +395,7 @@ const ProgressScreen = () => {
                           size="small"
                           sx={{ 
                             fontWeight: 700,
-                            background: 'rgb(19, 70, 134)',
+                            background: 'linear-gradient(135deg, rgb(19, 70, 134), rgb(237, 63, 39))',
                             color: 'white',
                           }}
                         />

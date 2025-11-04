@@ -83,7 +83,9 @@ export const deleteWorkout = async (workoutIndex) => {
       const stats = await getUserStats();
       if (stats.totalWorkouts > 0) {
         stats.totalWorkouts -= 1;
-        stats.totalTime -= deletedWorkout.duration || 0;
+        // Ensure duration is properly accounted for
+        const duration = deletedWorkout.duration || 0;
+        stats.totalTime = Math.max(0, stats.totalTime - duration);
         await saveUserStats(stats);
       }
       

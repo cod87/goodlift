@@ -58,19 +58,20 @@ export const formatDuration = (seconds) => {
 };
 
 // Format workout type for display
+const workoutTypeMap = {
+  'full': 'Full Body',
+  'upper': 'Upper Body',
+  'lower': 'Lower Body',
+  'fullbody': 'Full Body',
+  'upperbody': 'Upper Body',
+  'lowerbody': 'Lower Body',
+};
+
+const whitespaceRegex = /\s+/g;
+
 export const formatWorkoutType = (type) => {
   if (!type) return 'Unknown';
   
-  // Handle different formats
-  const typeMap = {
-    'full': 'Full Body',
-    'upper': 'Upper Body',
-    'lower': 'Lower Body',
-    'fullbody': 'Full Body',
-    'upperbody': 'Upper Body',
-    'lowerbody': 'Lower Body',
-  };
-  
-  const normalizedType = type.toLowerCase().replace(/\s+/g, '');
-  return typeMap[normalizedType] || type;
+  const normalizedType = type.toLowerCase().replace(whitespaceRegex, '');
+  return workoutTypeMap[normalizedType] || type;
 };

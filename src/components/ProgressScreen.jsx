@@ -372,7 +372,7 @@ const ProgressScreen = () => {
                           Duration: {formatDuration(workout.duration)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Exercises: {workout.exercises ? Object.keys(workout.exercises).join(', ') : 'N/A'}
+                          Exercises: {Object.keys(workout.exercises || {}).join(', ') || 'N/A'}
                         </Typography>
                       </Box>
                       <IconButton

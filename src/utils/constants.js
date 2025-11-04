@@ -30,15 +30,23 @@ export const MUSCLE_GROUPS = {
   LOWER_BODY: ['Quadriceps', 'Hamstrings', 'Glutes', 'Calves'],
 };
 
-/** Weight increments for progressive overload (in lbs) */
+/**
+ * Weight increments for progressive overload (in lbs)
+ * Applied when user completes all sets with target reps
+ * Different increments for upper/lower body and equipment types
+ * - Upper body uses smaller increments due to smaller muscle groups
+ * - Lower body uses larger increments due to larger muscle groups
+ * - Dumbbell/Kettlebell increments are larger (total weight across both hands)
+ * - Barbell increments are smaller (weight is on single bar)
+ */
 export const WEIGHT_INCREMENTS = {
   UPPER_BODY: {
-    DUMBBELL: 5,
-    BARBELL: 2.5,
+    DUMBBELL: 5,    // 5 lbs per dumbbell (10 lbs total)
+    BARBELL: 2.5,   // 2.5 lbs per side (5 lbs total)
   },
   LOWER_BODY: {
-    DUMBBELL: 10,
-    BARBELL: 5,
+    DUMBBELL: 10,   // 10 lbs per dumbbell (20 lbs total)
+    BARBELL: 5,     // 5 lbs per side (10 lbs total)
   },
 };
 

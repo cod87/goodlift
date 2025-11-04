@@ -87,8 +87,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       return;
     }
     
-    const weight = parseFloat(weightInput.value) || 0;
-    const reps = parseInt(repsInput.value, 10) || 0;
+    // Parse and validate weight (should be non-negative)
+    const weight = Math.max(0, parseFloat(weightInput.value) || 0);
+    
+    // Parse and validate reps (should be positive integer)
+    const parsedReps = parseInt(repsInput.value, 10);
+    const reps = (parsedReps > 0) ? parsedReps : 0;
 
     const newData = {
       exerciseName: currentStep.exercise['Exercise Name'],

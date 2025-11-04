@@ -1,6 +1,6 @@
 # GoodLift - React Workout Randomizer
 
-A modern React-based workout randomization application that helps you create randomized strength training workouts with exercise tracking and progress monitoring.
+A modern, optimized React-based workout randomization application that helps you create randomized strength training workouts with exercise tracking and progress monitoring.
 
 ## Features
 
@@ -14,36 +14,53 @@ A modern React-based workout randomization application that helps you create ran
 - **Data Export**: Download your workout data as CSV files
 - **Firebase Integration**: Ready for cloud storage and syncing (configured but not actively used in workout flow)
 
+## Performance Optimizations
+
+This application has been optimized for performance with:
+- **Code Splitting**: Intelligent bundle splitting reduces initial load time
+- **React.memo**: Optimized component re-rendering for smooth UX
+- **Efficient Algorithms**: Fisher-Yates shuffle for better exercise randomization
+- **Parallel Operations**: Promise.all for faster data synchronization
+- **Modular Architecture**: Clean separation of concerns for better maintainability
+
 ## Technologies Used
 
 - **React 19** - Modern UI framework
-- **Vite** - Fast build tool and dev server
+- **Vite** - Fast build tool and dev server with optimized bundling
+- **Material-UI (MUI)** - Component library for consistent design
 - **Firebase** - Backend infrastructure (pre-configured)
+- **Chart.js** - Data visualization for progress tracking
 - **LocalStorage** - Client-side workout and progress data storage
 
 ## Project Structure
 
 ```
 src/
-├── components/          # React components
-│   ├── Navigation.jsx
-│   ├── Sidebar.jsx
+├── components/          # React components (memoized for performance)
+│   ├── NavigationSidebar.jsx
+│   ├── SelectionScreen.jsx
 │   ├── WorkoutScreen.jsx
+│   ├── WorkoutPreview.jsx
 │   ├── CompletionScreen.jsx
-│   └── ProgressScreen.jsx
-├── hooks/              # Custom React hooks
+│   ├── ProgressScreen.jsx
+│   ├── HiitTimerScreen.jsx
+│   └── AuthScreen.jsx
+├── hooks/              # Custom React hooks with comprehensive documentation
 │   └── useWorkoutGenerator.js
-├── utils/              # Utility functions
-│   ├── constants.js
-│   ├── helpers.js
-│   └── storage.js
+├── utils/              # Utility functions with JSDoc documentation
+│   ├── constants.js    # Centralized configuration
+│   ├── helpers.js      # Helper utilities
+│   ├── storage.js      # Data persistence layer
+│   └── firebaseStorage.js
+├── contexts/           # React contexts
+│   └── AuthContext.jsx
 ├── App.jsx            # Main application component
 ├── App.css            # Application styles
 └── main.jsx           # Entry point
 
 public/
 └── data/
-    └── exercises.json  # Exercise database
+    └── exercises.json  # Exercise database (100+ exercises)
 ```
 
 ## Getting Started

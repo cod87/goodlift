@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaDumbbell, FaHome, FaClock, FaSignOutAlt, FaTimes, FaBars } from 'react-icons/fa';
+import { FaDumbbell, FaHome, FaClock, FaSignOutAlt, FaTimes, FaBars, FaStar } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 
 const NavigationSidebar = ({ 
@@ -152,6 +152,12 @@ const NavigationSidebar = ({
                 icon={<FaDumbbell />}
                 label="Workout"
                 isActive={currentScreen === 'selection' || currentScreen === 'preview'}
+                onClick={() => handleNavClick('selection')}
+              />
+              <NavLink
+                icon={<FaStar />}
+                label="Favourites"
+                isActive={false}
                 onClick={() => handleNavClick('selection')}
               />
               <NavLink

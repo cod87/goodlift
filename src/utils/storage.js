@@ -6,7 +6,13 @@ import {
   loadUserDataFromFirebase
 } from './firebaseStorage';
 
-// Storage keys
+/**
+ * Storage module for managing workout data in localStorage and Firebase
+ * Provides functions for persisting and retrieving workout history, stats, and exercise data
+ * Automatically syncs with Firebase when user is authenticated
+ */
+
+/** Storage keys for localStorage */
 const KEYS = {
   WORKOUT_HISTORY: 'goodlift_workout_history',
   USER_STATS: 'goodlift_user_stats',
@@ -15,33 +21,42 @@ const KEYS = {
   HIIT_SESSIONS: 'goodlift_hiit_sessions',
 };
 
-// Store the current user ID for Firebase sync
+/** Current authenticated user ID for Firebase sync */
 let currentUserId = null;
 
-// Set the current user ID (called when user logs in)
+/**
+ * Set the current user ID for Firebase synchronization
+ * @param {string} userId - Firebase user ID
+ */
 export const setCurrentUserId = (userId) => {
   currentUserId = userId;
 };
 
-// Get the current user ID
+/**
+ * Get the current user ID
+ * @returns {string|null} Current user ID or null if not authenticated
+ */
 export const getCurrentUserId = () => {
   return currentUserId;
 };
 
-// Get workout history
+/**
+ * Get workout history from Firebase (if authenticated) or localStorage
+ * @returns {Promise<Array>} Array of workout objects
+ */
 export const getWorkoutHistory = async () => {
   try {
-    // If user is logged in, try to get data from Firebase first
+    // Try Firebase first if user is authenticated
     if (currentUserId) {
       try {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
-        if (firebaseData && firebaseData.workoutHistory) {
-          // Update localStorage cache
+        if (firebaseData?.workoutHistory) {
+          // Update localStorage cache for offline access
           localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(firebaseData.workoutHistory));
           return firebaseData.workoutHistory;
         }
       } catch (error) {
-        console.error('Error loading workout history from Firebase, falling back to localStorage:', error);
+        console.error('Firebase fetch failed, using localStorage:', error);
       }
     }
     
@@ -54,11 +69,18 @@ export const getWorkoutHistory = async () => {
   }
 };
 
-// Save a workout
+/**
+ * Save a completed workout to storage
+ * @param {Object} workoutData - Workout data including exercises, duration, etc.
+ */
 export const saveWorkout = async (workoutData) => {
   try {
+    if (!workoutData) {
+      throw new Error('Workout data is required');
+    }
+    
     const history = await getWorkoutHistory();
-    history.unshift(workoutData); // Add to beginning
+    history.unshift(workoutData); // Add to beginning for chronological order
     localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
     
     // Sync to Firebase if user is logged in
@@ -67,52 +89,61 @@ export const saveWorkout = async (workoutData) => {
     }
   } catch (error) {
     console.error('Error saving workout:', error);
+    throw error; // Re-throw to allow caller to handle
   }
 };
 
-// Delete a workout
+/**
+ * Delete a workout from history
+ * @param {number} workoutIndex - Index of workout to delete
+ */
 export const deleteWorkout = async (workoutIndex) => {
   try {
     const history = await getWorkoutHistory();
-    if (workoutIndex >= 0 && workoutIndex < history.length) {
-      const deletedWorkout = history[workoutIndex];
-      history.splice(workoutIndex, 1);
-      localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
-      
-      // Update stats to reflect deletion
-      const stats = await getUserStats();
-      if (stats.totalWorkouts > 0) {
-        stats.totalWorkouts -= 1;
-        // Ensure duration is properly accounted for
-        const duration = deletedWorkout.duration || 0;
-        stats.totalTime = Math.max(0, stats.totalTime - duration);
-        await saveUserStats(stats);
-      }
-      
-      // Sync to Firebase if user is logged in
-      if (currentUserId) {
-        await saveWorkoutHistoryToFirebase(currentUserId, history);
-      }
+    
+    if (workoutIndex < 0 || workoutIndex >= history.length) {
+      throw new Error('Invalid workout index');
+    }
+    
+    const deletedWorkout = history[workoutIndex];
+    history.splice(workoutIndex, 1);
+    localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
+    
+    // Update stats to reflect deletion
+    const stats = await getUserStats();
+    if (stats.totalWorkouts > 0) {
+      stats.totalWorkouts -= 1;
+      const duration = deletedWorkout.duration || 0;
+      stats.totalTime = Math.max(0, stats.totalTime - duration);
+      await saveUserStats(stats);
+    }
+    
+    // Sync to Firebase if user is logged in
+    if (currentUserId) {
+      await saveWorkoutHistoryToFirebase(currentUserId, history);
     }
   } catch (error) {
     console.error('Error deleting workout:', error);
+    throw error;
   }
 };
 
-// Get user stats
+/**
+ * Get user statistics (total workouts, time, etc.)
+ * @returns {Promise<Object>} User stats object with totalWorkouts, totalTime, totalHiitTime
+ */
 export const getUserStats = async () => {
   try {
-    // If user is logged in, try to get data from Firebase first
+    // Try Firebase first if user is authenticated
     if (currentUserId) {
       try {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
-        if (firebaseData && firebaseData.userStats) {
-          // Update localStorage cache
+        if (firebaseData?.userStats) {
           localStorage.setItem(KEYS.USER_STATS, JSON.stringify(firebaseData.userStats));
           return firebaseData.userStats;
         }
       } catch (error) {
-        console.error('Error loading user stats from Firebase, falling back to localStorage:', error);
+        console.error('Firebase fetch failed, using localStorage:', error);
       }
     }
     
@@ -125,9 +156,16 @@ export const getUserStats = async () => {
   }
 };
 
-// Save user stats
+/**
+ * Save user statistics
+ * @param {Object} stats - Stats object with totalWorkouts, totalTime, totalHiitTime
+ */
 export const saveUserStats = async (stats) => {
   try {
+    if (!stats) {
+      throw new Error('Stats object is required');
+    }
+    
     localStorage.setItem(KEYS.USER_STATS, JSON.stringify(stats));
     
     // Sync to Firebase if user is logged in
@@ -136,23 +174,27 @@ export const saveUserStats = async (stats) => {
     }
   } catch (error) {
     console.error('Error saving user stats:', error);
+    throw error;
   }
 };
 
-// Get exercise weight (last recorded weight for an exercise)
+/**
+ * Get the last recorded weight for a specific exercise
+ * @param {string} exerciseName - Name of the exercise
+ * @returns {Promise<number>} Last recorded weight in lbs, or 0 if not found
+ */
 export const getExerciseWeight = async (exerciseName) => {
   try {
-    // If user is logged in, try to get data from Firebase first
+    // Try Firebase first if user is authenticated
     if (currentUserId) {
       try {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
-        if (firebaseData && firebaseData.exerciseWeights) {
-          // Update localStorage cache
+        if (firebaseData?.exerciseWeights) {
           localStorage.setItem(KEYS.EXERCISE_WEIGHTS, JSON.stringify(firebaseData.exerciseWeights));
           return firebaseData.exerciseWeights[exerciseName] || 0;
         }
       } catch (error) {
-        console.error('Error loading exercise weights from Firebase, falling back to localStorage:', error);
+        console.error('Firebase fetch failed, using localStorage:', error);
       }
     }
     
@@ -166,9 +208,20 @@ export const getExerciseWeight = async (exerciseName) => {
   }
 };
 
-// Set exercise weight
+/**
+ * Set/update the weight for a specific exercise
+ * @param {string} exerciseName - Name of the exercise
+ * @param {number} weight - Weight in lbs
+ */
 export const setExerciseWeight = async (exerciseName, weight) => {
   try {
+    if (!exerciseName) {
+      throw new Error('Exercise name is required');
+    }
+    if (typeof weight !== 'number' || weight < 0) {
+      throw new Error('Weight must be a positive number');
+    }
+    
     const weights = localStorage.getItem(KEYS.EXERCISE_WEIGHTS);
     const weightsObj = weights ? JSON.parse(weights) : {};
     weightsObj[exerciseName] = weight;
@@ -180,23 +233,27 @@ export const setExerciseWeight = async (exerciseName, weight) => {
     }
   } catch (error) {
     console.error('Error saving exercise weight:', error);
+    throw error;
   }
 };
 
-// Get exercise target reps
+/**
+ * Get the target rep count for a specific exercise
+ * @param {string} exerciseName - Name of the exercise
+ * @returns {Promise<number>} Target reps, defaults to 12 if not set
+ */
 export const getExerciseTargetReps = async (exerciseName) => {
   try {
-    // If user is logged in, try to get data from Firebase first
+    // Try Firebase first if user is authenticated
     if (currentUserId) {
       try {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
-        if (firebaseData && firebaseData.exerciseTargetReps) {
-          // Update localStorage cache
+        if (firebaseData?.exerciseTargetReps) {
           localStorage.setItem(KEYS.EXERCISE_TARGET_REPS, JSON.stringify(firebaseData.exerciseTargetReps));
           return firebaseData.exerciseTargetReps[exerciseName] || 12;
         }
       } catch (error) {
-        console.error('Error loading exercise target reps from Firebase, falling back to localStorage:', error);
+        console.error('Firebase fetch failed, using localStorage:', error);
       }
     }
     
@@ -210,9 +267,20 @@ export const getExerciseTargetReps = async (exerciseName) => {
   }
 };
 
-// Set exercise target reps
+/**
+ * Set/update the target rep count for a specific exercise
+ * @param {string} exerciseName - Name of the exercise
+ * @param {number} reps - Target rep count
+ */
 export const setExerciseTargetReps = async (exerciseName, reps) => {
   try {
+    if (!exerciseName) {
+      throw new Error('Exercise name is required');
+    }
+    if (typeof reps !== 'number' || reps < 1) {
+      throw new Error('Reps must be a positive number');
+    }
+    
     const targetReps = localStorage.getItem(KEYS.EXERCISE_TARGET_REPS);
     const targetRepsObj = targetReps ? JSON.parse(targetReps) : {};
     targetRepsObj[exerciseName] = reps;
@@ -224,13 +292,14 @@ export const setExerciseTargetReps = async (exerciseName, reps) => {
     }
   } catch (error) {
     console.error('Error saving exercise target reps:', error);
+    throw error;
   }
 };
 
 /**
  * Load user data from Firebase and sync to localStorage
- * This should be called when a user logs in
- * @param {string} userId - The authenticated user's UID
+ * Called when a user logs in to sync cloud data with local storage
+ * @param {string} userId - The authenticated user's Firebase UID
  */
 export const loadUserDataFromCloud = async (userId) => {
   if (!userId) {
@@ -239,24 +308,20 @@ export const loadUserDataFromCloud = async (userId) => {
   }
 
   try {
-    // Set the current user ID
     setCurrentUserId(userId);
     
-    // Load data from Firebase
     const firebaseData = await loadUserDataFromFirebase(userId);
     
     if (firebaseData) {
-      // Sync workout history
+      // Sync all data types from Firebase to localStorage
       if (firebaseData.workoutHistory) {
         localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(firebaseData.workoutHistory));
       }
       
-      // Sync user stats
       if (firebaseData.userStats) {
         localStorage.setItem(KEYS.USER_STATS, JSON.stringify(firebaseData.userStats));
       }
       
-      // Sync exercise weights
       if (firebaseData.exerciseWeights) {
         localStorage.setItem(KEYS.EXERCISE_WEIGHTS, JSON.stringify(firebaseData.exerciseWeights));
       }
@@ -276,21 +341,28 @@ export const loadUserDataFromCloud = async (userId) => {
       const localTargetReps = localStorage.getItem(KEYS.EXERCISE_TARGET_REPS);
       const targetRepsObj = localTargetReps ? JSON.parse(localTargetReps) : {};
       
-      if (localHistory.length > 0 || (localStats && localStats.totalWorkouts > 0) || Object.keys(weightsObj).length > 0 || Object.keys(targetRepsObj).length > 0) {
+      // If user has local data, sync it to Firebase
+      if (localHistory.length > 0 || localStats?.totalWorkouts > 0 || 
+          Object.keys(weightsObj).length > 0 || Object.keys(targetRepsObj).length > 0) {
         console.log('Syncing local data to Firebase for new user');
-        await saveWorkoutHistoryToFirebase(userId, localHistory);
-        await saveUserStatsToFirebase(userId, localStats);
-        await saveExerciseWeightsToFirebase(userId, weightsObj);
-        await saveExerciseTargetRepsToFirebase(userId, targetRepsObj);
+        await Promise.all([
+          saveWorkoutHistoryToFirebase(userId, localHistory),
+          saveUserStatsToFirebase(userId, localStats),
+          saveExerciseWeightsToFirebase(userId, weightsObj),
+          saveExerciseTargetRepsToFirebase(userId, targetRepsObj)
+        ]);
       }
     }
   } catch (error) {
     console.error('Error loading user data from cloud:', error);
-    // On error, we'll continue using local data
+    // Continue using local data on error
   }
 };
 
-// Get HIIT sessions history
+/**
+ * Get HIIT sessions history from localStorage
+ * @returns {Array} Array of HIIT session objects
+ */
 export const getHiitSessions = () => {
   try {
     const sessions = localStorage.getItem(KEYS.HIIT_SESSIONS);
@@ -301,18 +373,26 @@ export const getHiitSessions = () => {
   }
 };
 
-// Save a HIIT session
+/**
+ * Save a completed HIIT session
+ * @param {Object} sessionData - HIIT session data including duration
+ */
 export const saveHiitSession = async (sessionData) => {
   try {
+    if (!sessionData) {
+      throw new Error('Session data is required');
+    }
+    
     const sessions = getHiitSessions();
-    sessions.unshift(sessionData); // Add to beginning
+    sessions.unshift(sessionData); // Add to beginning for chronological order
     localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(sessions));
     
-    // Update total HIIT time in stats
+    // Update total HIIT time in user stats
     const stats = await getUserStats();
-    stats.totalHiitTime = (stats.totalHiitTime || 0) + sessionData.duration;
+    stats.totalHiitTime = (stats.totalHiitTime || 0) + (sessionData.duration || 0);
     await saveUserStats(stats);
   } catch (error) {
     console.error('Error saving HIIT session:', error);
+    throw error;
   }
 };

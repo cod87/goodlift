@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import './App.css';
 import NavigationSidebar from './components/NavigationSidebar';
+import SelectionScreen from './components/SelectionScreen';
 import WorkoutScreen from './components/WorkoutScreen';
 import WorkoutPreview from './components/WorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
@@ -294,12 +295,6 @@ function App() {
         <NavigationSidebar
           currentScreen={currentScreen}
           onNavigate={handleNavigate}
-          workoutType={workoutType}
-          selectedEquipment={selectedEquipment}
-          equipmentOptions={equipmentOptions}
-          onWorkoutTypeChange={handleWorkoutTypeChange}
-          onEquipmentChange={handleEquipmentChange}
-          onStartWorkout={handleStartWorkout}
           isOpen={sidebarOpen}
           onToggle={handleToggleSidebar}
         />
@@ -310,13 +305,15 @@ function App() {
           transition: 'margin-left 0.3s ease',
         }}>
           {currentScreen === 'selection' && (
-            <div className="screen selection-screen">
-              {loading && (
-                <div id="loading-indicator">
-                  <i className="fas fa-spinner fa-spin"></i> Generating workout...
-                </div>
-              )}
-            </div>
+            <SelectionScreen
+              workoutType={workoutType}
+              selectedEquipment={selectedEquipment}
+              equipmentOptions={equipmentOptions}
+              onWorkoutTypeChange={handleWorkoutTypeChange}
+              onEquipmentChange={handleEquipmentChange}
+              onStartWorkout={handleStartWorkout}
+              loading={loading}
+            />
           )}
           
           {currentScreen === 'preview' && showPreview && currentWorkout.length > 0 && (

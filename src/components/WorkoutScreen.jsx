@@ -305,15 +305,23 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     className="exercise-input"
                     defaultValue={prevWeight || 0}
                     onFocus={(e) => {
-                      // Scroll input into view on mobile when keyboard appears
-                      // Using 'start' to position input higher in viewport
-                      setTimeout(() => {
-                        e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        // Additional scroll to create more space above the input
+                      // Only scroll if input would be obscured by keyboard
+                      // Keyboard takes up ~40% of viewport, so check if input is below 45% threshold
+                      const rect = e.target.getBoundingClientRect();
+                      const inputBottom = rect.bottom;
+                      const viewportHeight = window.innerHeight;
+                      const threshold = viewportHeight * 0.45;
+                      
+                      // Only snap if input bottom is below the 45% threshold
+                      if (inputBottom > threshold) {
                         setTimeout(() => {
-                          window.scrollBy({ top: -80, behavior: 'smooth' });
-                        }, 100);
-                      }, 300);
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          // Additional scroll to create more space above the input
+                          setTimeout(() => {
+                            window.scrollBy({ top: -80, behavior: 'smooth' });
+                          }, 100);
+                        }, 300);
+                      }
                     }}
                     style={{
                       width: '100%',
@@ -339,15 +347,23 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     className="exercise-input"
                     defaultValue={targetReps || 8}
                     onFocus={(e) => {
-                      // Scroll input into view on mobile when keyboard appears
-                      // Using 'start' to position input higher in viewport
-                      setTimeout(() => {
-                        e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        // Additional scroll to create more space above the input
+                      // Only scroll if input would be obscured by keyboard
+                      // Keyboard takes up ~40% of viewport, so check if input is below 45% threshold
+                      const rect = e.target.getBoundingClientRect();
+                      const inputBottom = rect.bottom;
+                      const viewportHeight = window.innerHeight;
+                      const threshold = viewportHeight * 0.45;
+                      
+                      // Only snap if input bottom is below the 45% threshold
+                      if (inputBottom > threshold) {
                         setTimeout(() => {
-                          window.scrollBy({ top: -80, behavior: 'smooth' });
-                        }, 100);
-                      }, 300);
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          // Additional scroll to create more space above the input
+                          setTimeout(() => {
+                            window.scrollBy({ top: -80, behavior: 'smooth' });
+                          }, 100);
+                        }, 300);
+                      }
                     }}
                     style={{
                       width: '100%',

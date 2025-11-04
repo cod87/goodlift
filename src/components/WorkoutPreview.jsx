@@ -36,6 +36,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
 
   // Load saved weights and target reps on mount
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     const loadSettings = async () => {
       const settings = {};
       for (const exercise of workout) {
@@ -122,9 +125,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
       transition={{ duration: 0.4 }}
       className="screen"
       style={{ 
-        maxWidth: '100vw', 
+        maxWidth: '900px', 
         margin: '0 auto',
-        padding: '0.5rem',
+        padding: '1rem',
         width: '100%',
         boxSizing: 'border-box',
         overflowX: 'hidden'
@@ -336,7 +339,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
         transition={{ delay: 0.5 }}
       >
         <Stack 
-          direction={{ xs: 'column', sm: 'row' }} 
+          direction="row"
           spacing={2} 
           sx={{ mt: { xs: 3, sm: 4 }, px: { xs: 0.5, sm: 0 } }}
           justifyContent="center"
@@ -348,9 +351,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
             onClick={onCancel}
             sx={{
               borderRadius: 2,
-              px: { xs: 3, sm: 4 },
+              px: { xs: 2, sm: 4 },
               py: 1.5,
-              fontSize: '1.1rem',
+              fontSize: { xs: '0.9rem', sm: '1.1rem' },
               fontWeight: 600,
               borderColor: 'text.secondary',
               color: 'text.secondary',
@@ -370,7 +373,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
             disabled={savedToFavorites}
             sx={{
               borderRadius: 2,
-              px: { xs: 3, sm: 4 },
+              px: { xs: 2, sm: 4 },
               py: 1.5,
               fontSize: { xs: '0.9rem', sm: '1.1rem' },
               fontWeight: 600,
@@ -382,7 +385,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
               }
             }}
           >
-            {savedToFavorites ? 'Saved!' : 'Save to Favorites'}
+            {savedToFavorites ? 'Saved!' : 'Save'}
           </Button>
           <Button
             variant="contained"
@@ -391,7 +394,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
             onClick={handleStartWorkout}
             sx={{
               borderRadius: 2,
-              px: { xs: 3, sm: 4 },
+              px: { xs: 2, sm: 4 },
               py: 1.5,
               fontSize: { xs: '0.9rem', sm: '1.1rem' },
               fontWeight: 600,
@@ -404,7 +407,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
               transition: 'all 0.3s ease'
             }}
           >
-            Begin Workout
+            Begin
           </Button>
         </Stack>
       </motion.div>

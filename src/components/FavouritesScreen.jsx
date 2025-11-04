@@ -17,6 +17,8 @@ const FavouritesScreen = ({ onStartWorkout }) => {
   const [expandedFavorite, setExpandedFavorite] = useState(null);
 
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setFavoriteWorkouts(getFavoriteWorkouts());
   }, []);
 
@@ -63,7 +65,7 @@ const FavouritesScreen = ({ onStartWorkout }) => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
       style={{
-        padding: '2rem 1rem',
+        padding: '1rem',
         maxWidth: '900px',
         margin: '0 auto',
       }}

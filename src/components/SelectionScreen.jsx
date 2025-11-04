@@ -26,6 +26,8 @@ const SelectionScreen = memo(({
   const [expandedFavorite, setExpandedFavorite] = useState(null);
 
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setFavoriteWorkouts(getFavoriteWorkouts());
   }, []);
 

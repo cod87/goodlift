@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
@@ -14,6 +14,11 @@ import { saveFavoriteWorkout } from '../utils/storage';
 const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const handleSaveToFavorites = () => {
     try {
@@ -45,6 +50,7 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      style={{ padding: '1rem', maxWidth: '900px', margin: '0 auto' }}
     >
       <motion.div
         className="completion-header"

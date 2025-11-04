@@ -413,6 +413,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
           style={{
             background: 'rgb(237, 63, 39)',
             marginBottom: '12px',
+            color: 'white',
           }}
         >
           <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> End Workout

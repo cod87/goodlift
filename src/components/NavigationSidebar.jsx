@@ -7,12 +7,6 @@ import { useAuth } from '../contexts/AuthContext';
 const NavigationSidebar = ({ 
   currentScreen, 
   onNavigate, 
-  workoutType,
-  selectedEquipment,
-  equipmentOptions,
-  onWorkoutTypeChange,
-  onEquipmentChange,
-  onStartWorkout,
   isOpen,
   onToggle
 }) => {
@@ -35,16 +29,6 @@ const NavigationSidebar = ({
     } catch (error) {
       console.error('Failed to log out:', error);
       alert('Failed to log out. Please try again.');
-    }
-  };
-
-  const handleStartClick = () => {
-    if (workoutType) {
-      const equipmentFilter = selectedEquipment.has('all') ? 'all' : Array.from(selectedEquipment).map(e => e.toLowerCase());
-      onStartWorkout(workoutType, equipmentFilter);
-      if (isMobile) {
-        onToggle();
-      }
     }
   };
 
@@ -178,148 +162,6 @@ const NavigationSidebar = ({
               />
             </nav>
 
-            {/* Workout Filters (shown only on workout/selection screen) */}
-            {currentScreen === 'selection' && (
-              <div style={{ 
-                flex: 1,
-                padding: '1.5rem',
-                overflowY: 'auto',
-              }}>
-                <h3 style={{ 
-                  fontSize: '1.1rem',
-                  marginBottom: '1rem',
-                  color: 'rgb(237, 63, 39)',
-                  fontWeight: 600,
-                }}>
-                  Filter Your Workout
-                </h3>
-
-                {/* Workout Type */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h4 style={{ 
-                    fontSize: '0.95rem',
-                    marginBottom: '0.75rem',
-                    color: 'rgb(19, 70, 134)',
-                    fontWeight: 600,
-                  }}>
-                    Workout Type
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {['full', 'upper', 'lower'].map((type) => (
-                      <motion.label
-                        key={type}
-                        className="radio-option"
-                        whileHover={{ x: 5 }}
-                        whileTap={{ scale: 0.98 }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '8px 4px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          name="workout-type"
-                          value={type}
-                          checked={workoutType === type}
-                          onChange={() => onWorkoutTypeChange(type)}
-                          style={{ position: 'absolute', opacity: 0 }}
-                        />
-                        <span className="radio-circle"></span>
-                        <span className="radio-label">
-                          {type === 'full' ? 'Full Body' : type === 'upper' ? 'Upper Body' : 'Lower Body'}
-                        </span>
-                      </motion.label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Equipment */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h4 style={{ 
-                    fontSize: '0.95rem',
-                    marginBottom: '0.75rem',
-                    color: 'rgb(19, 70, 134)',
-                    fontWeight: 600,
-                  }}>
-                    Equipment
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <motion.label
-                      className="checkbox-option"
-                      whileHover={{ x: 5 }}
-                      whileTap={{ scale: 0.98 }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '8px 4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        name="equipment"
-                        value="all"
-                        checked={selectedEquipment.has('all')}
-                        onChange={() => onEquipmentChange('all')}
-                        style={{ position: 'absolute', opacity: 0 }}
-                      />
-                      <span className="checkbox-circle"></span>
-                      <span className="checkbox-label">All</span>
-                    </motion.label>
-                    {equipmentOptions.map((equipment) => (
-                      <motion.label
-                        key={equipment}
-                        className="checkbox-option"
-                        whileHover={{ x: 5 }}
-                        whileTap={{ scale: 0.98 }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '8px 4px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          name="equipment"
-                          value={equipment.toLowerCase()}
-                          checked={selectedEquipment.has(equipment.toLowerCase())}
-                          onChange={() => onEquipmentChange(equipment.toLowerCase())}
-                          style={{ position: 'absolute', opacity: 0 }}
-                        />
-                        <span className="checkbox-circle"></span>
-                        <span className="checkbox-label">{equipment}</span>
-                      </motion.label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Start Workout Button */}
-                <motion.button
-                  className="sidebar-start-btn"
-                  disabled={!workoutType}
-                  onClick={handleStartClick}
-                  whileHover={{ scale: workoutType ? 1.02 : 1 }}
-                  whileTap={{ scale: workoutType ? 0.98 : 1 }}
-                  style={{
-                    width: '100%',
-                    padding: '12px 24px',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    background: workoutType ? 'rgb(19, 70, 134)' : '#ccc',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '10px',
-                    cursor: workoutType ? 'pointer' : 'not-allowed',
-                  }}
-                >
-                  Start Workout
-                </motion.button>
-              </div>
-            )}
-
             {/* Logout Button */}
             {currentUser && (
               <div style={{
@@ -396,12 +238,6 @@ NavLink.propTypes = {
 NavigationSidebar.propTypes = {
   currentScreen: PropTypes.string.isRequired,
   onNavigate: PropTypes.func.isRequired,
-  workoutType: PropTypes.string.isRequired,
-  selectedEquipment: PropTypes.instanceOf(Set).isRequired,
-  equipmentOptions: PropTypes.array.isRequired,
-  onWorkoutTypeChange: PropTypes.func.isRequired,
-  onEquipmentChange: PropTypes.func.isRequired,
-  onStartWorkout: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
 };

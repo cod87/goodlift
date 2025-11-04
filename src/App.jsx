@@ -108,28 +108,8 @@ function App() {
   };
 
   const handleEquipmentChange = (value) => {
-    const newSelected = new Set(selectedEquipment);
-    
-    if (value === 'all') {
-      if (selectedEquipment.has('all')) {
-        newSelected.delete('all');
-      } else {
-        newSelected.clear();
-        newSelected.add('all');
-      }
-    } else {
-      newSelected.delete('all');
-      if (newSelected.has(value)) {
-        newSelected.delete(value);
-      } else {
-        newSelected.add(value);
-      }
-      
-      if (newSelected.size === 0) {
-        newSelected.add('all');
-      }
-    }
-    
+    const newSelected = new Set();
+    newSelected.add(value);
     setSelectedEquipment(newSelected);
   };
 

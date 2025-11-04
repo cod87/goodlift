@@ -1,8 +1,7 @@
 import { memo } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
-import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Checkbox, FormGroup, Button } from '@mui/material';
-import { FitnessCenterRounded } from '@mui/icons-material';
+import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button } from '@mui/material';
 
 /**
  * SelectionScreen component for workout configuration
@@ -40,6 +39,7 @@ const SelectionScreen = memo(({
         justifyContent: 'center',
         minHeight: 'calc(100vh - 4rem)',
         padding: '1rem',
+        paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))',
         overflow: 'auto',
       }}
     >
@@ -56,27 +56,33 @@ const SelectionScreen = memo(({
           borderRadius: 3,
           boxShadow: '0 8px 32px rgba(19, 70, 134, 0.12)',
         }}>
-          <CardContent sx={{ p: 4 }}>
-            <Box sx={{ textAlign: 'center', mb: 4 }}>
-              <FitnessCenterRounded sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
+          <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <img
+                src={`${import.meta.env.BASE_URL}goodlift-favicon.svg`}
+                alt="GoodLift"
+                style={{ height: '64px', width: 'auto', marginBottom: '1rem' }}
+              />
               <Typography variant="h4" component="h2" sx={{ 
                 fontWeight: 700,
                 color: 'primary.main',
                 mb: 1,
+                fontSize: { xs: '1.5rem', sm: '2rem' },
               }}>
                 Start Your Workout
               </Typography>
-              <Typography variant="body1" color="text.secondary">
+              <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                 Select your workout type and available equipment
               </Typography>
             </Box>
 
             {/* Workout Type */}
-            <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ 
                 mb: 2,
                 fontWeight: 600,
                 color: 'text.primary',
+                fontSize: { xs: '1rem', sm: '1.25rem' },
               }}>
                 Workout Type
               </Typography>
@@ -105,40 +111,35 @@ const SelectionScreen = memo(({
             </Box>
 
             {/* Equipment */}
-            <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ 
                 mb: 2,
                 fontWeight: 600,
                 color: 'text.primary',
+                fontSize: { xs: '1rem', sm: '1.25rem' },
               }}>
                 Equipment
               </Typography>
-              <FormGroup>
+              <RadioGroup
+                value={selectedEquipment.has('all') ? 'all' : Array.from(selectedEquipment)[0] || ''}
+                onChange={(e) => onEquipmentChange(e.target.value)}
+              >
                 <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedEquipment.has('all')}
-                      onChange={() => onEquipmentChange('all')}
-                    />
-                  }
+                  value="all"
+                  control={<Radio />}
                   label="All Equipment"
                   sx={{ mb: 1 }}
                 />
                 {equipmentOptions.map((equipment) => (
                   <FormControlLabel
                     key={equipment}
-                    control={
-                      <Checkbox
-                        checked={selectedEquipment.has(equipment.toLowerCase())}
-                        onChange={() => onEquipmentChange(equipment.toLowerCase())}
-                        disabled={selectedEquipment.has('all')}
-                      />
-                    }
+                    value={equipment.toLowerCase()}
+                    control={<Radio />}
                     label={equipment}
                     sx={{ mb: 1 }}
                   />
                 ))}
-              </FormGroup>
+              </RadioGroup>
             </Box>
 
             {/* Start Button */}

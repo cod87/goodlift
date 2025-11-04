@@ -158,13 +158,16 @@ const ProgressScreen = () => {
             }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <FitnessCenter sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
+                  <FitnessCenter sx={{ fontSize: 40, color: 'primary.main', mr: 2, flexShrink: 0 }} />
                   <Typography variant="h6" sx={{ 
                     color: 'text.secondary',
                     textTransform: 'uppercase',
                     fontSize: '0.875rem',
                     fontWeight: 600,
-                    letterSpacing: 1
+                    letterSpacing: 1,
+                    lineHeight: 1.2,
+                    wordBreak: 'break-word',
+                    flex: 1
                   }}>
                     Total Workouts
                   </Typography>
@@ -197,13 +200,16 @@ const ProgressScreen = () => {
             }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Timer sx={{ fontSize: 40, color: 'secondary.main', mr: 2 }} />
+                  <Timer sx={{ fontSize: 40, color: 'secondary.main', mr: 2, flexShrink: 0 }} />
                   <Typography variant="h6" sx={{ 
                     color: 'text.secondary',
                     textTransform: 'uppercase',
                     fontSize: '0.875rem',
                     fontWeight: 600,
-                    letterSpacing: 1
+                    letterSpacing: 1,
+                    lineHeight: 1.2,
+                    wordBreak: 'break-word',
+                    flex: 1
                   }}>
                     Total Time
                   </Typography>
@@ -236,13 +242,16 @@ const ProgressScreen = () => {
             }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <TrendingUp sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
+                  <TrendingUp sx={{ fontSize: 40, color: 'primary.main', mr: 2, flexShrink: 0 }} />
                   <Typography variant="h6" sx={{ 
                     color: 'text.secondary',
                     textTransform: 'uppercase',
                     fontSize: '0.875rem',
                     fontWeight: 600,
-                    letterSpacing: 1
+                    letterSpacing: 1,
+                    lineHeight: 1.2,
+                    wordBreak: 'break-word',
+                    flex: 1
                   }}>
                     Avg Duration
                   </Typography>
@@ -277,13 +286,16 @@ const ProgressScreen = () => {
             }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Whatshot sx={{ fontSize: 40, color: 'secondary.main', mr: 2 }} />
+                  <Whatshot sx={{ fontSize: 40, color: 'secondary.main', mr: 2, flexShrink: 0 }} />
                   <Typography variant="h6" sx={{ 
                     color: 'text.secondary',
                     textTransform: 'uppercase',
                     fontSize: '0.875rem',
                     fontWeight: 600,
-                    letterSpacing: 1
+                    letterSpacing: 1,
+                    lineHeight: 1.2,
+                    wordBreak: 'break-word',
+                    flex: 1
                   }}>
                     HIIT Time
                   </Typography>

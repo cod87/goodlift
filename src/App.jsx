@@ -117,12 +117,12 @@ function App() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleStartWorkout = (type, equipmentFilter) => {
+  const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null) => {
     setLoading(true);
     
     // Simulate loading to show user we're generating
     setTimeout(() => {
-      const workout = generateWorkout(type, equipmentFilter);
+      const workout = preGeneratedWorkout || generateWorkout(type, equipmentFilter);
       setCurrentWorkout(workout);
       setWorkoutType(type);
       setLoading(false);

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { getWorkoutHistory, getUserStats, deleteWorkout } from '../utils/storage';
+import { getWorkoutHistory, getUserStats, deleteWorkout, getAllExerciseWeights } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import Calendar from './Calendar';
-import { Box, Card, CardContent, Typography, Grid, Stack, IconButton } from '@mui/material';
-import { FitnessCenter, Timer, TrendingUp, Whatshot, Delete } from '@mui/icons-material';
+import { Box, Card, CardContent, Typography, Grid, Stack, IconButton, Chip } from '@mui/material';
+import { FitnessCenter, Timer, TrendingUp, Whatshot, Delete, TrendingUpRounded } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -33,16 +33,19 @@ const ProgressScreen = () => {
   const [stats, setStats] = useState({ totalWorkouts: 0, totalTime: 0 });
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [exerciseWeights, setExerciseWeights] = useState({});
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedStats, loadedHistory] = await Promise.all([
+      const [loadedStats, loadedHistory, loadedWeights] = await Promise.all([
         getUserStats(),
-        getWorkoutHistory()
+        getWorkoutHistory(),
+        getAllExerciseWeights()
       ]);
       setStats(loadedStats);
       setHistory(loadedHistory);
+      setExerciseWeights(loadedWeights);
     } catch (error) {
       console.error('Error loading progress data:', error);
     } finally {
@@ -326,6 +329,81 @@ const ProgressScreen = () => {
             <Box sx={{ height: 250 }}>
               <Line data={chartData} options={chartOptions} />
             </Box>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Progressive Overload Section */}
+      {Object.keys(exerciseWeights).length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Card sx={{ 
+            mb: 3,
+            borderRadius: 3,
+            overflow: 'hidden',
+          }}>
+            <Box sx={{ 
+              background: 'linear-gradient(135deg, rgb(19, 70, 134), rgb(237, 63, 39))',
+              p: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+            }}>
+              <TrendingUpRounded sx={{ fontSize: 32, color: 'white' }} />
+              <Typography variant="h5" sx={{ 
+                fontWeight: 700,
+                color: 'white',
+              }}>
+                Progressive Overload Tracking
+              </Typography>
+            </Box>
+            <CardContent sx={{ p: 2 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Track your strength gains across exercises. These are your current working weights.
+              </Typography>
+              <Grid container spacing={1.5}>
+                {Object.entries(exerciseWeights)
+                  .filter(([, weight]) => weight > 0)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([exercise, weight]) => (
+                    <Grid item xs={12} sm={6} md={4} key={exercise}>
+                      <Box sx={{ 
+                        p: 1.5,
+                        borderRadius: 2,
+                        background: 'rgba(19, 70, 134, 0.05)',
+                        border: '1px solid rgba(19, 70, 134, 0.1)',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          background: 'rgba(19, 70, 134, 0.1)',
+                          transform: 'translateY(-2px)',
+                        }
+                      }}>
+                        <Typography variant="body2" sx={{ 
+                          fontWeight: 600,
+                          color: 'text.primary',
+                          mb: 0.5,
+                          fontSize: '0.85rem',
+                          lineHeight: 1.3,
+                        }}>
+                          {exercise}
+                        </Typography>
+                        <Chip 
+                          label={`${weight} lbs`}
+                          size="small"
+                          sx={{ 
+                            fontWeight: 700,
+                            background: 'linear-gradient(135deg, rgb(19, 70, 134), rgb(237, 63, 39))',
+                            color: 'white',
+                          }}
+                        />
+                      </Box>
+                    </Grid>
+                  ))}
+              </Grid>
+            </CardContent>
           </Card>
         </motion.div>
       )}

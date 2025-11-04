@@ -19,6 +19,7 @@ const KEYS = {
   EXERCISE_WEIGHTS: 'goodlift_exercise_weights',
   EXERCISE_TARGET_REPS: 'goodlift_exercise_target_reps',
   HIIT_SESSIONS: 'goodlift_hiit_sessions',
+  FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -209,6 +210,34 @@ export const getExerciseWeight = async (exerciseName) => {
 };
 
 /**
+ * Get all exercise weights
+ * @returns {Promise<Object>} Object with exercise names as keys and weights as values
+ */
+export const getAllExerciseWeights = async () => {
+  try {
+    // Try Firebase first if user is authenticated
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData?.exerciseWeights) {
+          localStorage.setItem(KEYS.EXERCISE_WEIGHTS, JSON.stringify(firebaseData.exerciseWeights));
+          return firebaseData.exerciseWeights;
+        }
+      } catch (error) {
+        console.error('Firebase fetch failed, using localStorage:', error);
+      }
+    }
+    
+    // Fallback to localStorage
+    const weights = localStorage.getItem(KEYS.EXERCISE_WEIGHTS);
+    return weights ? JSON.parse(weights) : {};
+  } catch (error) {
+    console.error('Error reading exercise weights:', error);
+    return {};
+  }
+};
+
+/**
  * Set/update the weight for a specific exercise
  * @param {string} exerciseName - Name of the exercise
  * @param {number} weight - Weight in lbs
@@ -393,6 +422,63 @@ export const saveHiitSession = async (sessionData) => {
     await saveUserStats(stats);
   } catch (error) {
     console.error('Error saving HIIT session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get favorite workouts from localStorage
+ * @returns {Array} Array of favorite workout objects
+ */
+export const getFavoriteWorkouts = () => {
+  try {
+    const favorites = localStorage.getItem(KEYS.FAVORITE_WORKOUTS);
+    return favorites ? JSON.parse(favorites) : [];
+  } catch (error) {
+    console.error('Error reading favorite workouts:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a workout as a favorite
+ * @param {Object} workoutData - Workout data including exercises, type, and equipment
+ */
+export const saveFavoriteWorkout = (workoutData) => {
+  try {
+    if (!workoutData) {
+      throw new Error('Workout data is required');
+    }
+    
+    const favorites = getFavoriteWorkouts();
+    const favoriteWorkout = {
+      id: Date.now(),
+      name: workoutData.name || `${workoutData.type} Workout`,
+      type: workoutData.type,
+      equipment: workoutData.equipment || 'all',
+      exercises: workoutData.exercises,
+      savedAt: new Date().toISOString(),
+    };
+    
+    favorites.unshift(favoriteWorkout);
+    localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(favorites));
+  } catch (error) {
+    console.error('Error saving favorite workout:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a favorite workout
+ * @param {number} workoutId - ID of the favorite workout to delete
+ */
+export const deleteFavoriteWorkout = (workoutId) => {
+  try {
+    const favorites = getFavoriteWorkouts();
+    const filteredFavorites = favorites.filter(fav => fav.id !== workoutId);
+    localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(filteredFavorites));
+  } catch (error) {
+    console.error('Error deleting favorite workout:', error);
     throw error;
   }
 };

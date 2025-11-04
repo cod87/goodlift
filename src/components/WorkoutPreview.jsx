@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
-import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem } from '@mui/material';
-import { FitnessCenter, PlayArrow, Close } from '@mui/icons-material';
-import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps } from '../utils/storage';
+import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem, Snackbar, Alert } from '@mui/material';
+import { FitnessCenter, PlayArrow, Close, StarOutline, Star } from '@mui/icons-material';
+import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 
 /**
  * WorkoutPreview component displays a preview of the generated workout
@@ -13,6 +13,8 @@ import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExercis
 const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
   const [exerciseSettings, setExerciseSettings] = useState({});
   const [loading, setLoading] = useState(true);
+  const [savedToFavorites, setSavedToFavorites] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
 
   // Generate weight options once (0-500 lbs in 2.5 lb increments)
   const weightOptions = useMemo(() => {
@@ -80,6 +82,20 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
       await setExerciseTargetReps(exerciseName, settings.targetReps);
     }
     onStart();
+  };
+
+  const handleSaveToFavorites = () => {
+    try {
+      saveFavoriteWorkout({
+        name: `${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`,
+        type: workoutType,
+        exercises: workout,
+      });
+      setSavedToFavorites(true);
+      setShowNotification(true);
+    } catch (error) {
+      console.error('Error saving to favorites:', error);
+    }
   };
 
   // Group exercises into supersets (pairs of 2)
@@ -285,7 +301,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
         transition={{ delay: 0.5 }}
       >
         <Stack 
-          direction="row" 
+          direction={{ xs: 'column', sm: 'row' }} 
           spacing={2} 
           sx={{ mt: 4 }}
           justifyContent="center"
@@ -312,6 +328,28 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
             Cancel
           </Button>
           <Button
+            variant="outlined"
+            size="large"
+            startIcon={savedToFavorites ? <Star /> : <StarOutline />}
+            onClick={handleSaveToFavorites}
+            disabled={savedToFavorites}
+            sx={{
+              borderRadius: 2,
+              px: 4,
+              py: 1.5,
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              borderColor: savedToFavorites ? 'success.main' : 'warning.main',
+              color: savedToFavorites ? 'success.main' : 'warning.main',
+              '&:hover': {
+                borderColor: 'warning.main',
+                bgcolor: 'rgba(254, 178, 26, 0.1)',
+              }
+            }}
+          >
+            {savedToFavorites ? 'Saved!' : 'Save to Favorites'}
+          </Button>
+          <Button
             variant="contained"
             size="large"
             startIcon={<PlayArrow />}
@@ -335,6 +373,17 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
           </Button>
         </Stack>
       </motion.div>
+
+      <Snackbar
+        open={showNotification}
+        autoHideDuration={3000}
+        onClose={() => setShowNotification(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setShowNotification(false)}>
+          Workout saved to favorites!
+        </Alert>
+      </Snackbar>
     </motion.div>
   );
 });

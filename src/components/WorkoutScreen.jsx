@@ -72,6 +72,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       }
     };
     loadSettings();
+    
+    // Scroll to top when exercise changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStepIndex]);
 
@@ -303,8 +306,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     defaultValue={prevWeight || 0}
                     onFocus={(e) => {
                       // Scroll input into view on mobile when keyboard appears
+                      // Using 'start' to position input higher in viewport
                       setTimeout(() => {
-                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Additional scroll to create more space above the input
+                        setTimeout(() => {
+                          window.scrollBy({ top: -80, behavior: 'smooth' });
+                        }, 100);
                       }, 300);
                     }}
                     style={{
@@ -332,8 +340,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     defaultValue={targetReps || 8}
                     onFocus={(e) => {
                       // Scroll input into view on mobile when keyboard appears
+                      // Using 'start' to position input higher in viewport
                       setTimeout(() => {
-                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Additional scroll to create more space above the input
+                        setTimeout(() => {
+                          window.scrollBy({ top: -80, behavior: 'smooth' });
+                        }, 100);
                       }, 300);
                     }}
                     style={{

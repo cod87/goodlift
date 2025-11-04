@@ -120,54 +120,58 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.4 }}
+      className="screen"
       style={{ 
-        maxWidth: '900px', 
+        maxWidth: '100vw', 
         margin: '0 auto',
-        padding: '1rem',
+        padding: '0.5rem',
         width: '100%',
         boxSizing: 'border-box',
         overflowX: 'hidden'
       }}
     >
-      <Box sx={{ mb: 4, textAlign: 'center', position: 'relative' }}>
+      <Box sx={{ mb: { xs: 2, sm: 4 }, textAlign: 'center', position: 'relative', px: { xs: 0.5, sm: 0 } }}>
         <IconButton
           onClick={handleSaveToFavorites}
           disabled={savedToFavorites}
+          size="small"
           sx={{
             position: 'absolute',
             top: 0,
-            right: 0,
+            right: { xs: 0, sm: 0 },
             color: savedToFavorites ? 'warning.main' : 'action.active',
             '&:hover': {
               color: 'warning.main',
-            }
+            },
+            p: { xs: 0.5, sm: 1 }
           }}
           aria-label="Save to favorites"
         >
-          {savedToFavorites ? <Star sx={{ fontSize: 32 }} /> : <StarOutline sx={{ fontSize: 32 }} />}
+          {savedToFavorites ? <Star sx={{ fontSize: { xs: 24, sm: 32 } }} /> : <StarOutline sx={{ fontSize: { xs: 24, sm: 32 } }} />}
         </IconButton>
         <motion.div
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
         >
-          <FitnessCenter sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
+          <FitnessCenter sx={{ fontSize: { xs: 48, sm: 60 }, color: 'primary.main', mb: { xs: 1, sm: 2 } }} />
         </motion.div>
         <Typography variant="h3" component="h1" gutterBottom sx={{ 
           fontWeight: 700,
-          color: 'primary.main'
+          color: 'primary.main',
+          fontSize: { xs: '1.5rem', sm: '3rem' }
         }}>
           Your {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1 }}>
+        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
           {supersets.length} Supersets • {workout.length} Exercises • 3 Sets Each
         </Typography>
-        <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
+        <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
           Set your starting weight and target reps for each exercise
         </Typography>
       </Box>
 
-      <Stack spacing={3}>
+      <Stack spacing={{ xs: 2, sm: 3 }} sx={{ px: { xs: 0.5, sm: 0 } }}>
         {supersets.map((superset, idx) => (
           <motion.div
             key={idx}
@@ -182,13 +186,15 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
                 borderColor: 'primary.main',
                 borderRadius: 3,
                 transition: 'all 0.3s ease',
+                maxWidth: '100%',
+                boxSizing: 'border-box',
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   boxShadow: '0 12px 24px rgba(48, 86, 105, 0.2)',
                 }
               }}
             >
-              <CardContent>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                 <Typography 
                   variant="h6" 
                   gutterBottom 
@@ -212,7 +218,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
                   />
                 </Typography>
                 
-                <Stack spacing={2}>
+                <Stack spacing={{ xs: 1.5, sm: 2 }}>
                   {superset.map((exercise, exerciseIdx) => {
                     const exerciseName = exercise['Exercise Name'];
                     const settings = exerciseSettings[exerciseName] || { weight: 0, targetReps: 12 };
@@ -221,7 +227,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
                       <Box 
                         key={exerciseIdx}
                         sx={{ 
-                          p: 2,
+                          p: { xs: 1.5, sm: 2 },
                           bgcolor: 'white',
                           borderRadius: 2,
                           transition: 'all 0.2s ease',
@@ -230,21 +236,21 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
                         <Box sx={{ 
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 2,
-                          mb: 2
+                          gap: { xs: 1, sm: 2 },
+                          mb: { xs: 1.5, sm: 2 }
                         }}>
                           <Typography 
                             sx={{ 
-                              fontSize: '2rem',
+                              fontSize: { xs: '1.5rem', sm: '2rem' },
                               color: 'primary.main',
                               fontWeight: 700,
-                              minWidth: '40px'
+                              minWidth: { xs: '30px', sm: '40px' }
                             }}
                           >
                             {exerciseIdx === 0 ? 'A' : 'B'}
                           </Typography>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                               {exerciseName}
                             </Typography>
                             <Stack direction="row" spacing={1} flexWrap="wrap">
@@ -255,7 +261,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
                                 sx={{ 
                                   borderColor: 'primary.main',
                                   color: 'primary.main',
-                                  fontSize: '0.75rem'
+                                  fontSize: { xs: '0.65rem', sm: '0.75rem' }
                                 }}
                               />
                               <Chip 
@@ -265,20 +271,30 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
                                 sx={{ 
                                   borderColor: 'text.secondary',
                                   color: 'text.secondary',
-                                  fontSize: '0.75rem'
+                                  fontSize: { xs: '0.65rem', sm: '0.75rem' }
                                 }}
                               />
                             </Stack>
                           </Box>
                         </Box>
-                        <Stack direction="row" spacing={2} sx={{ pl: 7 }}>
+                        <Stack 
+                          direction="row" 
+                          spacing={{ xs: 1, sm: 2 }} 
+                          sx={{ 
+                            pl: { xs: 4, sm: 7 },
+                            flexWrap: { xs: 'wrap', sm: 'nowrap' }
+                          }}
+                        >
                           <TextField
                             select
                             label="Weight (lbs)"
                             value={settings.weight}
                             onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
                             size="small"
-                            sx={{ minWidth: 120 }}
+                            sx={{ 
+                              minWidth: { xs: 100, sm: 120 },
+                              flex: { xs: '1 1 45%', sm: 'none' }
+                            }}
                           >
                             {weightOptions.map((weight) => (
                               <MenuItem key={weight} value={weight}>
@@ -292,7 +308,10 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
                             value={settings.targetReps}
                             onChange={(e) => handleTargetRepsChange(exerciseName, e.target.value)}
                             size="small"
-                            sx={{ minWidth: 120 }}
+                            sx={{ 
+                              minWidth: { xs: 100, sm: 120 },
+                              flex: { xs: '1 1 45%', sm: 'none' }
+                            }}
                           >
                             {repsOptions.map((reps) => (
                               <MenuItem key={reps} value={reps}>
@@ -319,7 +338,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
         <Stack 
           direction={{ xs: 'column', sm: 'row' }} 
           spacing={2} 
-          sx={{ mt: 4 }}
+          sx={{ mt: { xs: 3, sm: 4 }, px: { xs: 0.5, sm: 0 } }}
           justifyContent="center"
         >
           <Button
@@ -329,7 +348,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
             onClick={onCancel}
             sx={{
               borderRadius: 2,
-              px: 4,
+              px: { xs: 3, sm: 4 },
               py: 1.5,
               fontSize: '1.1rem',
               fontWeight: 600,
@@ -351,9 +370,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
             disabled={savedToFavorites}
             sx={{
               borderRadius: 2,
-              px: 4,
+              px: { xs: 3, sm: 4 },
               py: 1.5,
-              fontSize: '1.1rem',
+              fontSize: { xs: '0.9rem', sm: '1.1rem' },
               fontWeight: 600,
               borderColor: savedToFavorites ? 'success.main' : 'warning.main',
               color: savedToFavorites ? 'success.main' : 'warning.main',
@@ -372,9 +391,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
             onClick={handleStartWorkout}
             sx={{
               borderRadius: 2,
-              px: 4,
+              px: { xs: 3, sm: 4 },
               py: 1.5,
-              fontSize: '1.1rem',
+              fontSize: { xs: '0.9rem', sm: '1.1rem' },
               fontWeight: 600,
               bgcolor: 'primary.main',
               '&:hover': {

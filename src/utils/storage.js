@@ -57,7 +57,7 @@ export const getWorkoutHistory = async () => {
 // Save a workout
 export const saveWorkout = async (workoutData) => {
   try {
-    const history = getWorkoutHistory();
+    const history = await getWorkoutHistory();
     history.unshift(workoutData); // Add to beginning
     localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
     

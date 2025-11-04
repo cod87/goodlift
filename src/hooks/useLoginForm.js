@@ -32,7 +32,7 @@ export const useLoginForm = () => {
         await signup(email, password);
       }
     } catch (err) {
-      console.error('Auth error:', err);
+      console.error('Auth error:', err.code || 'Unknown error');
       
       // Provide user-friendly error messages
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {

@@ -129,9 +129,19 @@ const ProgressScreen = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      style={{ maxWidth: '1200px', margin: '0 auto' }}
     >
+      <Typography variant="h3" component="h1" sx={{ 
+        mb: 4, 
+        fontWeight: 700,
+        color: 'primary.main',
+        textAlign: 'center'
+      }}>
+        Your Progress
+      </Typography>
+
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -170,7 +180,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -209,7 +219,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={12} sm={12} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -250,7 +260,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

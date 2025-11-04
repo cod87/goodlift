@@ -310,7 +310,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
         </AnimatePresence>
       </div>
       
-      <div className="workout-controls">
+      <div className="workout-controls" style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        gap: '12px',
+        alignItems: 'center' 
+      }}>
         <motion.button
           className="exit-workout-btn"
           onClick={handleExit}
@@ -318,10 +323,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
           whileTap={{ scale: 0.95 }}
           style={{
             background: 'rgb(237, 63, 39)',
-            marginBottom: '8px',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> Abort Workout
+          <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> End Workout
         </motion.button>
         {workoutData.length > 0 && (
           <motion.button
@@ -332,9 +344,16 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
             style={{
               background: 'rgb(254, 178, 26)',
               color: 'rgb(19, 70, 134)',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            Save as Partial
+            End and Save
           </motion.button>
         )}
       </div>

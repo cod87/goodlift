@@ -130,7 +130,7 @@ const NavigationSidebar = ({
                 }}
               >
                 <img 
-                  src={process.env.PUBLIC_URL + '/goodlift-logo.svg'} 
+                  src="/goodlift/goodlift-logo.svg" 
                   alt="GoodLift" 
                   style={{ height: '48px', width: 'auto' }} 
                 />
@@ -143,16 +143,16 @@ const NavigationSidebar = ({
               borderBottom: '2px solid rgba(19, 70, 134, 0.1)',
             }}>
               <NavLink
-                icon={<FaDumbbell />}
-                label="Workout"
-                isActive={currentScreen === 'selection' || currentScreen === 'preview'}
-                onClick={() => handleNavClick('selection')}
-              />
-              <NavLink
                 icon={<FaHome />}
                 label="Home"
                 isActive={currentScreen === 'progress'}
                 onClick={() => handleNavClick('progress')}
+              />
+              <NavLink
+                icon={<FaDumbbell />}
+                label="Workout"
+                isActive={currentScreen === 'selection' || currentScreen === 'preview'}
+                onClick={() => handleNavClick('selection')}
               />
               <NavLink
                 icon={<FaClock />}

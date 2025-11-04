@@ -42,13 +42,13 @@ const theme = createTheme({
   typography: {
     fontFamily: "'Poppins', sans-serif",
     h1: {
-      fontFamily: "'Ubuntu', sans-serif",
+      fontFamily: "'Momo Trust Display', 'Ubuntu', sans-serif",
     },
     h2: {
-      fontFamily: "'Ubuntu', sans-serif",
+      fontFamily: "'Momo Trust Display', 'Ubuntu', sans-serif",
     },
     h3: {
-      fontFamily: "'Ubuntu', sans-serif",
+      fontFamily: "'Momo Trust Display', 'Ubuntu', sans-serif",
     },
   },
 });

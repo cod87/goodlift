@@ -42,13 +42,10 @@ const SelectionScreen = memo(({
   const handleLoadFavorite = (favoriteWorkout) => {
     onWorkoutTypeChange(favoriteWorkout.type);
     onEquipmentChange(favoriteWorkout.equipment || 'all');
-    // Small delay to allow state to update before starting
-    setTimeout(() => {
-      const equipmentFilter = favoriteWorkout.equipment === 'all' 
-        ? 'all' 
-        : [favoriteWorkout.equipment];
-      onStartWorkout(favoriteWorkout.type, equipmentFilter, favoriteWorkout.exercises);
-    }, 100);
+    const equipmentFilter = favoriteWorkout.equipment === 'all' 
+      ? 'all' 
+      : [favoriteWorkout.equipment];
+    onStartWorkout(favoriteWorkout.type, equipmentFilter, favoriteWorkout.exercises);
   };
 
   return (

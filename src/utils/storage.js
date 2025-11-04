@@ -451,8 +451,9 @@ export const saveFavoriteWorkout = (workoutData) => {
     }
     
     const favorites = getFavoriteWorkouts();
+    // Use timestamp + random number for better uniqueness
     const favoriteWorkout = {
-      id: Date.now(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: workoutData.name || `${workoutData.type} Workout`,
       type: workoutData.type,
       equipment: workoutData.equipment || 'all',

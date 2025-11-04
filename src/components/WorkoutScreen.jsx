@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatTime, getYoutubeEmbedUrl } from '../utils/helpers';
+import { formatTime, getYoutubeEmbedUrl, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert } from '@mui/material';
@@ -178,9 +178,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
 
   const handleSaveToFavorites = () => {
     try {
-      const workoutType = workoutPlan[0]?.['Primary Muscle']?.toLowerCase().includes('upper') ? 'upper' 
-                        : workoutPlan[0]?.['Primary Muscle']?.toLowerCase().includes('lower') ? 'lower' 
-                        : 'full';
+      const workoutType = detectWorkoutType(workoutPlan[0]);
       
       saveFavoriteWorkout({
         name: `${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`,

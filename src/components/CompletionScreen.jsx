@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
-import { formatTime } from '../utils/helpers';
+import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { Box, Card, CardContent, Typography, Button, Stack, Chip, IconButton, Snackbar, Alert } from '@mui/material';
 import { Download, Check, Celebration, Star, StarBorder } from '@mui/icons-material';
 import { saveFavoriteWorkout } from '../utils/storage';
@@ -22,9 +22,7 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
         return;
       }
 
-      const workoutType = workoutData.type?.toLowerCase().includes('upper') ? 'upper' 
-                        : workoutData.type?.toLowerCase().includes('lower') ? 'lower' 
-                        : 'full';
+      const workoutType = detectWorkoutType(workoutData);
       
       saveFavoriteWorkout({
         name: `${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`,

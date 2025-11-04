@@ -1,16 +1,33 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { formatTime } from '../utils/helpers';
 import { Box, Card, CardContent, Typography, Button, Stack, Chip } from '@mui/material';
-import { Download, Check, Celebration } from '@mui/icons-material';
+import { Download, Check, Celebration, Star } from '@mui/icons-material';
+import { saveFavoriteWorkout } from '../utils/storage';
 
 /**
  * CompletionScreen component displays workout summary after completion
  * Shows exercise details, sets, reps, and weights used
  * Memoized to prevent unnecessary re-renders
  */
-const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV }) => {
+const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV, workoutPlan, workoutType }) => {
+  const [isSaved, setIsSaved] = useState(false);
+
+  const handleSaveToFavorites = () => {
+    const workoutName = prompt('Enter a name for this workout:', `${workoutType} Workout`);
+    if (workoutName) {
+      saveFavoriteWorkout({
+        name: workoutName,
+        type: workoutType,
+        equipment: 'all',
+        exercises: workoutPlan || [],
+      });
+      setIsSaved(true);
+      alert('Workout saved to favorites!');
+    }
+  };
+
   return (
     <motion.div
       className="screen completion-screen"
@@ -158,6 +175,32 @@ const CompletionScreen = memo(({ workoutData, onFinish, onExportCSV }) => {
             Download CSV
           </Button>
           <Button
+            variant="outlined"
+            size="large"
+            startIcon={<Star />}
+            onClick={handleSaveToFavorites}
+            disabled={isSaved}
+            sx={{
+              flex: 1,
+              borderRadius: 2,
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 600,
+              borderColor: 'warning.main',
+              color: 'warning.main',
+              '&:hover': {
+                borderColor: 'warning.dark',
+                bgcolor: 'rgba(254, 178, 26, 0.1)',
+              },
+              '&.Mui-disabled': {
+                borderColor: 'rgba(0, 0, 0, 0.12)',
+                color: 'rgba(0, 0, 0, 0.26)',
+              }
+            }}
+          >
+            {isSaved ? 'Saved!' : 'Save to Favorites'}
+          </Button>
+          <Button
             variant="contained"
             size="large"
             startIcon={<Check />}
@@ -188,6 +231,8 @@ CompletionScreen.propTypes = {
   workoutData: PropTypes.object.isRequired,
   onFinish: PropTypes.func.isRequired,
   onExportCSV: PropTypes.func.isRequired,
+  workoutPlan: PropTypes.array,
+  workoutType: PropTypes.string,
 };
 
 export default CompletionScreen;

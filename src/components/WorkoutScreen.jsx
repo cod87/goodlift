@@ -2,21 +2,22 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl } from '../utils/helpers';
-import { getExerciseWeight, getExerciseTargetReps } from '../utils/storage';
+import { getExerciseWeight, getExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
 import { Box, LinearProgress, Typography, IconButton } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder } from '@mui/icons-material';
 
 /**
  * WorkoutScreen component manages the active workout session
  * Displays exercises in superset format, tracks time, and collects set data
  */
-const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
+const WorkoutScreen = ({ workoutPlan, onComplete, onExit, workoutType }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [prevWeight, setPrevWeight] = useState(0);
   const [targetReps, setTargetReps] = useState(12);
+  const [isFavorited, setIsFavorited] = useState(false);
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -174,6 +175,24 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     }
   };
 
+  const handleToggleFavorite = () => {
+    if (!isFavorited) {
+      const workoutName = prompt('Enter a name for this workout:', `${workoutType} Workout`);
+      if (workoutName) {
+        saveFavoriteWorkout({
+          name: workoutName,
+          type: workoutType,
+          equipment: 'all', // Could be enhanced to track actual equipment used
+          exercises: workoutPlan,
+        });
+        setIsFavorited(true);
+        alert('Workout saved to favorites!');
+      }
+    } else {
+      setIsFavorited(false);
+    }
+  };
+
   if (!currentStep) {
     return null;
   }
@@ -194,9 +213,23 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             {formatTime(elapsedTime)}
           </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Exercise {currentStepIndex + 1} / {workoutSequence.length}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IconButton
+              onClick={handleToggleFavorite}
+              sx={{
+                color: isFavorited ? 'warning.main' : 'text.secondary',
+                '&:hover': {
+                  color: 'warning.main',
+                }
+              }}
+              aria-label="Save to favorites"
+            >
+              {isFavorited ? <Star /> : <StarBorder />}
+            </IconButton>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Exercise {currentStepIndex + 1} / {workoutSequence.length}
+            </Typography>
+          </Box>
         </Box>
         <LinearProgress 
           variant="determinate" 
@@ -371,6 +404,7 @@ WorkoutScreen.propTypes = {
   workoutPlan: PropTypes.array.isRequired,
   onComplete: PropTypes.func.isRequired,
   onExit: PropTypes.func.isRequired,
+  workoutType: PropTypes.string.isRequired,
 };
 
 export default WorkoutScreen;

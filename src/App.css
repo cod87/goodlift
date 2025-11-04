@@ -471,6 +471,38 @@ button:active {
     border-color: var(--color-primary);
 }
 
+/* Number input styling for workout */
+.exercise-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid var(--color-border);
+    font-size: 1rem;
+    font-family: var(--font-body);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+}
+
+.exercise-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+/* Remove spinner arrows on desktop but keep them on mobile */
+.exercise-input::-webkit-inner-spin-button,
+.exercise-input::-webkit-outer-spin-button {
+    opacity: 1;
+}
+
+/* Ensure inputs are visible when keyboard is shown on mobile */
+.exercise-card {
+    scroll-margin-top: 100px;
+}
+
+.exercise-input:focus {
+    scroll-margin-top: 100px;
+}
+
 .workout-nav-buttons {
     display: flex;
     gap: 0.75rem;

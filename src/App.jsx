@@ -14,7 +14,7 @@ import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/con
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Snackbar, Alert, Box } from '@mui/material';
+import { Snackbar, Alert } from '@mui/material';
 
 /**
  * Custom theme configuration matching app brand colors
@@ -108,33 +108,9 @@ function App() {
   };
 
   const handleEquipmentChange = (value) => {
-    setSelectedEquipment(prevSelected => {
-      const newSelected = new Set(prevSelected);
-      
-      if (value === 'all') {
-        // If "all" is selected, clear everything and select only "all"
-        return new Set(['all']);
-      } else {
-        // If "all" is currently selected, remove it
-        if (newSelected.has('all')) {
-          newSelected.delete('all');
-        }
-        
-        // Toggle the selected equipment
-        if (newSelected.has(value)) {
-          newSelected.delete(value);
-        } else {
-          newSelected.add(value);
-        }
-        
-        // If no equipment is selected, default to "all"
-        if (newSelected.size === 0) {
-          return new Set(['all']);
-        }
-      }
-      
-      return newSelected;
-    });
+    const newSelected = new Set();
+    newSelected.add(value);
+    setSelectedEquipment(newSelected);
   };
 
   const handleToggleSidebar = () => {
@@ -303,24 +279,6 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-        {/* Semi-transparent header strip with blur effect (mobile only) */}
-        {!isDesktop && (
-          <Box
-            sx={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 'calc(48px * 1.2)', // 120% of hamburger menu height
-              background: 'rgba(255, 255, 255, 0.7)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              zIndex: 900,
-              pointerEvents: 'none',
-            }}
-          />
-        )}
-        
         <NavigationSidebar
           currentScreen={currentScreen}
           onNavigate={handleNavigate}
@@ -359,7 +317,6 @@ function App() {
               workoutPlan={currentWorkout}
               onComplete={handleWorkoutComplete}
               onExit={handleWorkoutExit}
-              workoutType={workoutType}
             />
           )}
           
@@ -368,8 +325,6 @@ function App() {
               workoutData={completedWorkoutData}
               onFinish={handleFinish}
               onExportCSV={handleExportCSV}
-              workoutPlan={currentWorkout}
-              workoutType={workoutType}
             />
           )}
           

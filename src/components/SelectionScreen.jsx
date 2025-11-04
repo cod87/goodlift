@@ -1,9 +1,9 @@
 import { memo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip, Checkbox, FormGroup, TextField, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemText } from '@mui/material';
-import { ExpandMore, Delete, Star, Edit } from '@mui/icons-material';
-import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName } from '../utils/storage';
+import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip } from '@mui/material';
+import { ExpandMore, Delete, Star } from '@mui/icons-material';
+import { getFavoriteWorkouts, deleteFavoriteWorkout } from '../utils/storage';
 
 /**
  * SelectionScreen component for workout configuration
@@ -20,9 +20,6 @@ const SelectionScreen = memo(({
   loading,
 }) => {
   const [favoriteWorkouts, setFavoriteWorkouts] = useState([]);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingWorkout, setEditingWorkout] = useState(null);
-  const [editName, setEditName] = useState('');
 
   useEffect(() => {
     setFavoriteWorkouts(getFavoriteWorkouts());
@@ -49,28 +46,6 @@ const SelectionScreen = memo(({
       ? 'all' 
       : [favoriteWorkout.equipment];
     onStartWorkout(favoriteWorkout.type, equipmentFilter, favoriteWorkout.exercises);
-  };
-
-  const handleEditClick = (favorite) => {
-    setEditingWorkout(favorite);
-    setEditName(favorite.name);
-    setEditDialogOpen(true);
-  };
-
-  const handleSaveEdit = () => {
-    if (editingWorkout && editName.trim()) {
-      updateFavoriteWorkoutName(editingWorkout.id, editName.trim());
-      setFavoriteWorkouts(getFavoriteWorkouts());
-      setEditDialogOpen(false);
-      setEditingWorkout(null);
-      setEditName('');
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditDialogOpen(false);
-    setEditingWorkout(null);
-    setEditName('');
   };
 
   return (
@@ -167,32 +142,26 @@ const SelectionScreen = memo(({
               }}>
                 Equipment
               </Typography>
-              <FormGroup>
+              <RadioGroup
+                value={selectedEquipment.has('all') ? 'all' : Array.from(selectedEquipment)[0] || ''}
+                onChange={(e) => onEquipmentChange(e.target.value)}
+              >
                 <FormControlLabel
-                  control={
-                    <Checkbox 
-                      checked={selectedEquipment.has('all')}
-                      onChange={() => onEquipmentChange('all')}
-                    />
-                  }
+                  value="all"
+                  control={<Radio />}
                   label="All Equipment"
                   sx={{ mb: 1 }}
                 />
                 {equipmentOptions.map((equipment) => (
                   <FormControlLabel
                     key={equipment}
-                    control={
-                      <Checkbox 
-                        checked={selectedEquipment.has(equipment.toLowerCase())}
-                        onChange={() => onEquipmentChange(equipment.toLowerCase())}
-                        disabled={selectedEquipment.has('all')}
-                      />
-                    }
+                    value={equipment.toLowerCase()}
+                    control={<Radio />}
                     label={equipment}
                     sx={{ mb: 1 }}
                   />
                 ))}
-              </FormGroup>
+              </RadioGroup>
             </Box>
 
             {/* Favorite Workouts */}
@@ -226,7 +195,7 @@ const SelectionScreen = memo(({
                           }}
                         >
                           <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                               <Box sx={{ flex: 1 }}>
                                 <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
                                   {favorite.name}
@@ -244,65 +213,23 @@ const SelectionScreen = memo(({
                                     sx={{ fontSize: '0.7rem' }}
                                   />
                                 </Stack>
-                              </Box>
-                              <Box>
-                                <IconButton 
+                                <Button 
                                   size="small"
-                                  onClick={() => handleEditClick(favorite)}
-                                  sx={{ color: 'primary.main', mr: 0.5 }}
+                                  variant="contained"
+                                  onClick={() => handleLoadFavorite(favorite)}
+                                  sx={{ fontSize: '0.8rem', textTransform: 'none' }}
                                 >
-                                  <Edit fontSize="small" />
-                                </IconButton>
-                                <IconButton 
-                                  size="small"
-                                  onClick={() => handleDeleteFavorite(favorite.id)}
-                                  sx={{ color: 'error.main' }}
-                                >
-                                  <Delete fontSize="small" />
-                                </IconButton>
+                                  Load Workout
+                                </Button>
                               </Box>
-                            </Box>
-                            <Accordion sx={{ boxShadow: 'none', '&:before': { display: 'none' }, bgcolor: 'transparent' }}>
-                              <AccordionSummary 
-                                expandIcon={<ExpandMore />}
-                                sx={{ 
-                                  minHeight: 'auto',
-                                  '&.Mui-expanded': { minHeight: 'auto' },
-                                  '& .MuiAccordionSummary-content': { 
-                                    my: 0.5,
-                                    '&.Mui-expanded': { my: 0.5 } 
-                                  }
-                                }}
+                              <IconButton 
+                                size="small"
+                                onClick={() => handleDeleteFavorite(favorite.id)}
+                                sx={{ color: 'error.main' }}
                               >
-                                <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                                  View Exercises
-                                </Typography>
-                              </AccordionSummary>
-                              <AccordionDetails sx={{ pt: 0 }}>
-                                <List dense sx={{ py: 0 }}>
-                                  {favorite.exercises.map((exercise, idx) => (
-                                    <ListItem key={idx} sx={{ py: 0.5, px: 0 }}>
-                                      <ListItemText 
-                                        primary={exercise['Exercise Name'] || exercise}
-                                        primaryTypographyProps={{ 
-                                          variant: 'body2',
-                                          sx: { fontSize: '0.8rem' }
-                                        }}
-                                      />
-                                    </ListItem>
-                                  ))}
-                                </List>
-                              </AccordionDetails>
-                            </Accordion>
-                            <Button 
-                              size="small"
-                              variant="contained"
-                              onClick={() => handleLoadFavorite(favorite)}
-                              fullWidth
-                              sx={{ fontSize: '0.8rem', textTransform: 'none', mt: 1 }}
-                            >
-                              Load Workout
-                            </Button>
+                                <Delete fontSize="small" />
+                              </IconButton>
+                            </Box>
                           </CardContent>
                         </Card>
                       ))}
@@ -332,29 +259,6 @@ const SelectionScreen = memo(({
           </CardContent>
         </Card>
       )}
-
-      {/* Edit Workout Name Dialog */}
-      <Dialog open={editDialogOpen} onClose={handleCancelEdit} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Workout Name</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Workout Name"
-            type="text"
-            fullWidth
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            variant="outlined"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelEdit}>Cancel</Button>
-          <Button onClick={handleSaveEdit} variant="contained" disabled={!editName.trim()}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
     </motion.div>
   );
 });

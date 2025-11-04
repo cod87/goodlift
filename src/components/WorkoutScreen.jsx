@@ -2,24 +2,21 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl } from '../utils/helpers';
-import { getExerciseWeight, getExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
+import { getExerciseWeight, getExerciseTargetReps } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
-import { Box, LinearProgress, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder } from '@mui/icons-material';
+import { Box, LinearProgress, Typography, IconButton } from '@mui/material';
+import { ArrowBack, ArrowForward, ExitToApp } from '@mui/icons-material';
 
 /**
  * WorkoutScreen component manages the active workout session
  * Displays exercises in superset format, tracks time, and collects set data
  */
-const WorkoutScreen = ({ workoutPlan, onComplete, onExit, workoutType }) => {
+const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [prevWeight, setPrevWeight] = useState(0);
   const [targetReps, setTargetReps] = useState(12);
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [favoriteDialogOpen, setFavoriteDialogOpen] = useState(false);
-  const [favoriteName, setFavoriteName] = useState('');
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -177,34 +174,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, workoutType }) => {
     }
   };
 
-  const handleToggleFavorite = () => {
-    if (!isFavorited) {
-      setFavoriteName(`${workoutType} Workout`);
-      setFavoriteDialogOpen(true);
-    } else {
-      setIsFavorited(false);
-    }
-  };
-
-  const handleSaveFavorite = () => {
-    if (favoriteName.trim()) {
-      saveFavoriteWorkout({
-        name: favoriteName.trim(),
-        type: workoutType,
-        equipment: 'all', // Could be enhanced to track actual equipment used
-        exercises: workoutPlan,
-      });
-      setIsFavorited(true);
-      setFavoriteDialogOpen(false);
-      setFavoriteName('');
-    }
-  };
-
-  const handleCancelFavorite = () => {
-    setFavoriteDialogOpen(false);
-    setFavoriteName('');
-  };
-
   if (!currentStep) {
     return null;
   }
@@ -225,23 +194,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, workoutType }) => {
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             {formatTime(elapsedTime)}
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton
-              onClick={handleToggleFavorite}
-              sx={{
-                color: isFavorited ? 'warning.main' : 'text.secondary',
-                '&:hover': {
-                  color: 'warning.main',
-                }
-              }}
-              aria-label="Save to favorites"
-            >
-              {isFavorited ? <Star /> : <StarBorder />}
-            </IconButton>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Exercise {currentStepIndex + 1} / {workoutSequence.length}
-            </Typography>
-          </Box>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Exercise {currentStepIndex + 1} / {workoutSequence.length}
+          </Typography>
         </Box>
         <LinearProgress 
           variant="determinate" 
@@ -408,30 +363,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, workoutType }) => {
           </motion.button>
         )}
       </div>
-
-      {/* Save to Favorites Dialog */}
-      <Dialog open={favoriteDialogOpen} onClose={handleCancelFavorite} maxWidth="sm" fullWidth>
-        <DialogTitle>Save Workout to Favorites</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Workout Name"
-            type="text"
-            fullWidth
-            value={favoriteName}
-            onChange={(e) => setFavoriteName(e.target.value)}
-            variant="outlined"
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelFavorite}>Cancel</Button>
-          <Button onClick={handleSaveFavorite} variant="contained" disabled={!favoriteName.trim()}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 };
@@ -440,7 +371,6 @@ WorkoutScreen.propTypes = {
   workoutPlan: PropTypes.array.isRequired,
   onComplete: PropTypes.func.isRequired,
   onExit: PropTypes.func.isRequired,
-  workoutType: PropTypes.string.isRequired,
 };
 
 export default WorkoutScreen;

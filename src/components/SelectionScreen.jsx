@@ -129,7 +129,7 @@ const SelectionScreen = memo(({
         </Box>
       ) : (
         <Card sx={{ 
-          maxWidth: 600,
+          maxWidth: 800,
           width: '100%',
           borderRadius: 3,
           boxShadow: '0 8px 32px rgba(19, 70, 134, 0.12)',
@@ -139,163 +139,87 @@ const SelectionScreen = memo(({
               <img
                 src={`${import.meta.env.BASE_URL}goodlift-favicon.svg`}
                 alt="GoodLift"
-                style={{ height: '64px', width: 'auto', marginBottom: '1rem' }}
+                style={{ height: '64px', width: 'auto' }}
               />
-              <Typography variant="h4" component="h2" sx={{ 
-                fontWeight: 700,
-                color: 'primary.main',
-                mb: 1,
-                fontSize: { xs: '1.5rem', sm: '2rem' },
-              }}>
-                Start Your Workout
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}>
-                Select your workout type and available equipment
-              </Typography>
             </Box>
 
-            {/* Workout Type */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ 
-                mb: 2,
-                fontWeight: 600,
-                color: 'text.primary',
-                fontSize: { xs: '1rem', sm: '1.25rem' },
-              }}>
-                Workout Type
-              </Typography>
-              <RadioGroup
-                value={workoutType}
-                onChange={(e) => onWorkoutTypeChange(e.target.value)}
-              >
-                <FormControlLabel 
-                  value="full" 
-                  control={<Radio />} 
-                  label="Full Body"
-                  sx={{ mb: 1 }}
-                />
-                <FormControlLabel 
-                  value="upper" 
-                  control={<Radio />} 
-                  label="Upper Body"
-                  sx={{ mb: 1 }}
-                />
-                <FormControlLabel 
-                  value="lower" 
-                  control={<Radio />} 
-                  label="Lower Body"
-                />
-              </RadioGroup>
-            </Box>
-
-            {/* Equipment */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ 
-                mb: 2,
-                fontWeight: 600,
-                color: 'text.primary',
-                fontSize: { xs: '1rem', sm: '1.25rem' },
-              }}>
-                Equipment
-              </Typography>
-              <Stack spacing={1}>
-                <Box
-                  onClick={() => handleEquipmentToggle('all')}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                    p: 1.5,
-                    borderRadius: 2,
-                    cursor: 'pointer',
-                    bgcolor: selectedEquipment.has('all') ? 'primary.main' : 'background.paper',
-                    color: selectedEquipment.has('all') ? 'white' : 'text.primary',
-                    border: '2px solid',
-                    borderColor: selectedEquipment.has('all') ? 'primary.main' : 'divider',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      bgcolor: selectedEquipment.has('all') ? 'primary.dark' : 'rgba(19, 70, 134, 0.05)',
-                    }
-                  }}
+            {/* Two Column Layout for Workout Type and Equipment */}
+            <Box sx={{ 
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr' },
+              gap: 3,
+              mb: 3
+            }}>
+              {/* Workout Type */}
+              <Box>
+                <Typography variant="h6" sx={{ 
+                  mb: 2,
+                  fontWeight: 600,
+                  color: 'text.primary',
+                  fontSize: { xs: '1rem', sm: '1.25rem' },
+                }}>
+                  Workout Type
+                </Typography>
+                <RadioGroup
+                  value={workoutType}
+                  onChange={(e) => onWorkoutTypeChange(e.target.value)}
                 >
-                  <Box sx={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: '50%',
-                    border: '2px solid',
-                    borderColor: selectedEquipment.has('all') ? 'white' : 'primary.main',
-                    bgcolor: selectedEquipment.has('all') ? 'white' : 'transparent',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}>
-                    {selectedEquipment.has('all') && (
-                      <Box sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: '50%',
-                        bgcolor: 'primary.main',
-                      }} />
-                    )}
-                  </Box>
-                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                    All Equipment
-                  </Typography>
-                </Box>
-                
-                {equipmentOptions.map((equipment) => (
-                  <Box
-                    key={equipment}
-                    onClick={() => handleEquipmentToggle(equipment.toLowerCase())}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.5,
-                      p: 1.5,
-                      borderRadius: 2,
-                      cursor: 'pointer',
-                      bgcolor: selectedEquipment.has(equipment.toLowerCase()) ? 'primary.main' : 'background.paper',
-                      color: selectedEquipment.has(equipment.toLowerCase()) ? 'white' : 'text.primary',
-                      border: '2px solid',
-                      borderColor: selectedEquipment.has(equipment.toLowerCase()) ? 'primary.main' : 'divider',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        borderColor: 'primary.main',
-                        bgcolor: selectedEquipment.has(equipment.toLowerCase()) 
-                          ? 'primary.dark' 
-                          : 'rgba(19, 70, 134, 0.05)',
+                  <FormControlLabel 
+                    value="full" 
+                    control={<Radio />} 
+                    label="Full Body"
+                    sx={{ mb: 1 }}
+                  />
+                  <FormControlLabel 
+                    value="upper" 
+                    control={<Radio />} 
+                    label="Upper Body"
+                    sx={{ mb: 1 }}
+                  />
+                  <FormControlLabel 
+                    value="lower" 
+                    control={<Radio />} 
+                    label="Lower Body"
+                  />
+                </RadioGroup>
+              </Box>
+
+              {/* Equipment */}
+              <Box>
+                <Typography variant="h6" sx={{ 
+                  mb: 2,
+                  fontWeight: 600,
+                  color: 'text.primary',
+                  fontSize: { xs: '1rem', sm: '1.25rem' },
+                }}>
+                  Equipment
+                </Typography>
+                <Box component="div" role="group">
+                  <FormControlLabel 
+                    control={
+                      <Radio 
+                        checked={selectedEquipment.has('all')}
+                        onChange={() => handleEquipmentToggle('all')}
+                      />
+                    }
+                    label="All Equipment"
+                    sx={{ mb: 1, display: 'flex' }}
+                  />
+                  {equipmentOptions.map((equipment) => (
+                    <FormControlLabel
+                      key={equipment}
+                      control={
+                        <Radio 
+                          checked={selectedEquipment.has(equipment.toLowerCase())}
+                          onChange={() => handleEquipmentToggle(equipment.toLowerCase())}
+                        />
                       }
-                    }}
-                  >
-                    <Box sx={{
-                      width: 20,
-                      height: 20,
-                      borderRadius: '50%',
-                      border: '2px solid',
-                      borderColor: selectedEquipment.has(equipment.toLowerCase()) ? 'white' : 'primary.main',
-                      bgcolor: selectedEquipment.has(equipment.toLowerCase()) ? 'white' : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}>
-                      {selectedEquipment.has(equipment.toLowerCase()) && (
-                        <Box sx={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: '50%',
-                          bgcolor: 'primary.main',
-                        }} />
-                      )}
-                    </Box>
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                      {equipment}
-                    </Typography>
-                  </Box>
-                ))}
-              </Stack>
+                      label={equipment}
+                      sx={{ mb: 1, display: 'flex' }}
+                    />
+                  ))}
+                </Box>
+              </Box>
             </Box>
 
             {/* Favorite Workouts */}

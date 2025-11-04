@@ -130,8 +130,26 @@ const ProgressScreen = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      {/* Logo Section */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        mb: 3,
+        mt: { xs: 2, md: 0 }
+      }}>
+        <img
+          src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
+          alt="GoodLift"
+          style={{ height: '60px', width: 'auto' }}
+        />
+      </Box>
+
+      <Grid container spacing={3} sx={{ 
+        mb: 4,
+        maxWidth: { xs: '100%', md: '900px' }, // Match calendar width
+        margin: '0 auto',
+      }}>
+        <Grid item xs={6} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -170,7 +188,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -209,7 +227,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -250,7 +268,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -310,7 +328,10 @@ const ProgressScreen = () => {
 
       <Calendar workoutDates={workoutDates} />
       
-      <div className="workout-history-container">
+      <div className="workout-history-container" style={{ 
+        maxWidth: '900px', 
+        margin: '2rem auto 0' 
+      }}>
         <Typography variant="h4" component="h2" sx={{ 
           fontWeight: 700,
           mb: 3,

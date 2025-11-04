@@ -33,15 +33,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Temporary bypass for development: use mock user
-    const mockUser = { uid: 'test-user-id', email: 'test@example.com' };
-    setCurrentUser(mockUser);
-    setCurrentUserId('test-user-id');
-    setLoading(false);
-    return () => {};
-    
-    // Original auth code commented for now
-    /*
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       
@@ -61,7 +52,6 @@ export const AuthProvider = ({ children }) => {
     });
 
     return unsubscribe;
-    */
   }, []);
 
   const value = {

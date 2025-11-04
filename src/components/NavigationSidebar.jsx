@@ -106,6 +106,7 @@ const NavigationSidebar = ({
               left: 0,
               width: '280px',
               height: '100vh',
+              maxHeight: '100vh',
               background: 'rgba(255, 255, 255, 0.95)',
               backdropFilter: 'blur(10px)',
               boxShadow: '4px 0 20px rgba(19, 70, 134, 0.15)',

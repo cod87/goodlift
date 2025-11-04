@@ -38,8 +38,10 @@ const SelectionScreen = memo(({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '80vh',
-        padding: '2rem',
+        minHeight: '100vh',
+        maxHeight: '100vh',
+        padding: '1rem',
+        overflowY: 'auto',
       }}
     >
       {loading ? (
@@ -54,28 +56,32 @@ const SelectionScreen = memo(({
           width: '100%',
           borderRadius: 3,
           boxShadow: '0 8px 32px rgba(19, 70, 134, 0.12)',
+          maxHeight: { xs: '95vh', md: 'none' },
+          overflowY: { xs: 'auto', md: 'visible' },
         }}>
-          <CardContent sx={{ p: 4 }}>
-            <Box sx={{ textAlign: 'center', mb: 4 }}>
-              <FitnessCenterRounded sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
+          <CardContent sx={{ p: { xs: 2, md: 4 } }}>
+            <Box sx={{ textAlign: 'center', mb: { xs: 2, md: 4 } }}>
+              <FitnessCenterRounded sx={{ fontSize: { xs: 48, md: 64 }, color: 'primary.main', mb: { xs: 1, md: 2 } }} />
               <Typography variant="h4" component="h2" sx={{ 
                 fontWeight: 700,
                 color: 'primary.main',
                 mb: 1,
+                fontSize: { xs: '1.5rem', md: '2.125rem' },
               }}>
                 Start Your Workout
               </Typography>
-              <Typography variant="body1" color="text.secondary">
+              <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', md: '1rem' } }}>
                 Select your workout type and available equipment
               </Typography>
             </Box>
 
             {/* Workout Type */}
-            <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: { xs: 2, md: 4 } }}>
               <Typography variant="h6" sx={{ 
-                mb: 2,
+                mb: { xs: 1, md: 2 },
                 fontWeight: 600,
                 color: 'text.primary',
+                fontSize: { xs: '1rem', md: '1.25rem' },
               }}>
                 Workout Type
               </Typography>
@@ -87,13 +93,13 @@ const SelectionScreen = memo(({
                   value="full" 
                   control={<Radio />} 
                   label="Full Body"
-                  sx={{ mb: 1 }}
+                  sx={{ mb: { xs: 0.5, md: 1 } }}
                 />
                 <FormControlLabel 
                   value="upper" 
                   control={<Radio />} 
                   label="Upper Body"
-                  sx={{ mb: 1 }}
+                  sx={{ mb: { xs: 0.5, md: 1 } }}
                 />
                 <FormControlLabel 
                   value="lower" 
@@ -104,11 +110,12 @@ const SelectionScreen = memo(({
             </Box>
 
             {/* Equipment */}
-            <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: { xs: 2, md: 4 } }}>
               <Typography variant="h6" sx={{ 
-                mb: 2,
+                mb: { xs: 1, md: 2 },
                 fontWeight: 600,
                 color: 'text.primary',
+                fontSize: { xs: '1rem', md: '1.25rem' },
               }}>
                 Equipment
               </Typography>
@@ -121,7 +128,7 @@ const SelectionScreen = memo(({
                     />
                   }
                   label="All Equipment"
-                  sx={{ mb: 1 }}
+                  sx={{ mb: { xs: 0.5, md: 1 } }}
                 />
                 {equipmentOptions.map((equipment) => (
                   <FormControlLabel
@@ -134,7 +141,7 @@ const SelectionScreen = memo(({
                       />
                     }
                     label={equipment}
-                    sx={{ mb: 1 }}
+                    sx={{ mb: { xs: 0.5, md: 1 } }}
                   />
                 ))}
               </FormGroup>

@@ -141,7 +141,7 @@ const ProgressScreen = () => {
       </Box>
 
       <Grid container spacing={2} sx={{ mb: 3, maxWidth: '100%' }}>
-        <Grid item xs={6} sm={6}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -180,7 +180,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
         
-        <Grid item xs={6} sm={6}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -219,7 +219,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={6} sm={6}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -260,7 +260,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={6} sm={6}>
+        <Grid item xs={6}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

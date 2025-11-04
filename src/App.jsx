@@ -63,9 +63,20 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
   const { currentUser } = useAuth();
 
   const { generateWorkout, allExercises } = useWorkoutGenerator();
+
+  // Track screen size for responsive layout
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth > 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Extract unique equipment types from exercises
   useEffect(() => {
@@ -295,7 +306,7 @@ function App() {
         
         <div id="app" style={{ 
           flex: 1,
-          marginLeft: window.innerWidth > 768 ? '280px' : '0',
+          marginLeft: isDesktop ? '280px' : '0',
           transition: 'margin-left 0.3s ease',
         }}>
           {currentScreen === 'selection' && (

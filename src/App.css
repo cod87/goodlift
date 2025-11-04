@@ -16,6 +16,12 @@
     --shadow: 0 4px 12px rgba(19, 70, 134, 0.1);
     --shadow-hover: 0 8px 24px rgba(19, 70, 134, 0.15);
     --shadow-large: 0 10px 40px rgba(19, 70, 134, 0.2);
+    
+    /* Safe area inset variables for mobile devices */
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
 }
 
 /* ===== GENERAL RESET & BASE STYLES ===== */
@@ -627,6 +633,7 @@ button:active {
 .workout-controls {
     text-align: center;
     margin-top: 1rem;
+    margin-bottom: max(1rem, env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -1350,6 +1357,7 @@ button:active {
     display: flex;
     gap: 1rem;
     margin-top: 2rem;
+    margin-bottom: max(1rem, env(safe-area-inset-bottom));
     flex-wrap: wrap;
 }
 

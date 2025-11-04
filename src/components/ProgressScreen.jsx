@@ -134,177 +134,174 @@ const ProgressScreen = () => {
       transition={{ duration: 0.5 }}
       style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}
     >
-      <Grid container spacing={2} sx={{ mb: 3, px: { xs: 0, sm: 0 } }}>
-        <Grid item xs={6} sm={6}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card sx={{ 
-              height: '100%',
-              borderRadius: 3,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 24px rgba(48, 86, 105, 0.15)',
-              }
-            }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <FitnessCenter sx={{ fontSize: 40, color: 'primary.main', mr: 2, flexShrink: 0 }} />
-                  <Typography variant="h6" sx={{ 
-                    color: 'text.secondary',
-                    textTransform: 'uppercase',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    letterSpacing: 1,
-                    lineHeight: 1.2,
-                    wordBreak: 'break-word',
-                    flex: 1
+      {/* Stats Overview - Redesigned for mobile */}
+      <Box sx={{ mb: 3 }}>
+        <Stack spacing={2}>
+          {/* Row 1: Total Workouts & Total Time */}
+          <Stack direction="row" spacing={2}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              style={{ flex: 1 }}
+            >
+              <Card sx={{ 
+                height: '100%',
+                borderRadius: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 24px rgba(19, 70, 134, 0.15)',
+                }
+              }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                    <FitnessCenter sx={{ fontSize: 32, color: 'primary.main' }} />
+                    <Typography variant="body2" sx={{ 
+                      color: 'text.secondary',
+                      textTransform: 'uppercase',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                    }}>
+                      Total Workouts
+                    </Typography>
+                  </Stack>
+                  <Typography variant="h3" sx={{ 
+                    fontWeight: 700,
+                    color: 'primary.main',
+                    fontSize: { xs: '2rem', sm: '2.5rem' }
                   }}>
-                    Total Workouts
+                    {stats.totalWorkouts}
                   </Typography>
-                </Box>
-                <Typography variant="h2" sx={{ 
-                  fontWeight: 700,
-                  color: 'primary.main'
-                }}>
-                  {stats.totalWorkouts}
-                </Typography>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </Grid>
-        
-        <Grid item xs={6} sm={6}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card sx={{ 
-              height: '100%',
-              borderRadius: 3,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 24px rgba(48, 86, 105, 0.15)',
-              }
-            }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Timer sx={{ fontSize: 40, color: 'secondary.main', mr: 2, flexShrink: 0 }} />
-                  <Typography variant="h6" sx={{ 
-                    color: 'text.secondary',
-                    textTransform: 'uppercase',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    letterSpacing: 1,
-                    lineHeight: 1.2,
-                    wordBreak: 'break-word',
-                    flex: 1
-                  }}>
-                    Total Time
-                  </Typography>
-                </Box>
-                <Typography variant="h2" sx={{ 
-                  fontWeight: 700,
-                  color: 'secondary.main'
-                }}>
-                  {formatDuration(stats.totalTime)}
-                </Typography>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </Grid>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-        <Grid item xs={6} sm={6}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card sx={{ 
-              height: '100%',
-              borderRadius: 3,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 24px rgba(48, 86, 105, 0.15)',
-              }
-            }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <TrendingUp sx={{ fontSize: 40, color: 'primary.main', mr: 2, flexShrink: 0 }} />
-                  <Typography variant="h6" sx={{ 
-                    color: 'text.secondary',
-                    textTransform: 'uppercase',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    letterSpacing: 1,
-                    lineHeight: 1.2,
-                    wordBreak: 'break-word',
-                    flex: 1
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              style={{ flex: 1 }}
+            >
+              <Card sx={{ 
+                height: '100%',
+                borderRadius: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 24px rgba(19, 70, 134, 0.15)',
+                }
+              }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                    <Timer sx={{ fontSize: 32, color: 'secondary.main' }} />
+                    <Typography variant="body2" sx={{ 
+                      color: 'text.secondary',
+                      textTransform: 'uppercase',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                    }}>
+                      Total Time
+                    </Typography>
+                  </Stack>
+                  <Typography variant="h3" sx={{ 
+                    fontWeight: 700,
+                    color: 'secondary.main',
+                    fontSize: { xs: '2rem', sm: '2.5rem' }
                   }}>
-                    Avg Duration
+                    {formatDuration(stats.totalTime)}
                   </Typography>
-                </Box>
-                <Typography variant="h2" sx={{ 
-                  fontWeight: 700,
-                  color: 'primary.main'
-                }}>
-                  {stats.totalWorkouts > 0 
-                    ? formatDuration(Math.round(stats.totalTime / stats.totalWorkouts))
-                    : '0m'}
-                </Typography>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </Grid>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Stack>
 
-        <Grid item xs={6} sm={6}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card sx={{ 
-              height: '100%',
-              borderRadius: 3,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 24px rgba(237, 63, 39, 0.15)',
-              }
-            }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Whatshot sx={{ fontSize: 40, color: 'secondary.main', mr: 2, flexShrink: 0 }} />
-                  <Typography variant="h6" sx={{ 
-                    color: 'text.secondary',
-                    textTransform: 'uppercase',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    letterSpacing: 1,
-                    lineHeight: 1.2,
-                    wordBreak: 'break-word',
-                    flex: 1
+          {/* Row 2: Avg Duration & HIIT Time */}
+          <Stack direction="row" spacing={2}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              style={{ flex: 1 }}
+            >
+              <Card sx={{ 
+                height: '100%',
+                borderRadius: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 24px rgba(19, 70, 134, 0.15)',
+                }
+              }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                    <TrendingUp sx={{ fontSize: 32, color: 'primary.main' }} />
+                    <Typography variant="body2" sx={{ 
+                      color: 'text.secondary',
+                      textTransform: 'uppercase',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                    }}>
+                      Avg Duration
+                    </Typography>
+                  </Stack>
+                  <Typography variant="h3" sx={{ 
+                    fontWeight: 700,
+                    color: 'primary.main',
+                    fontSize: { xs: '2rem', sm: '2.5rem' }
                   }}>
-                    HIIT Time
+                    {stats.totalWorkouts > 0 
+                      ? formatDuration(Math.round(stats.totalTime / stats.totalWorkouts))
+                      : '0m'}
                   </Typography>
-                </Box>
-                <Typography variant="h2" sx={{ 
-                  fontWeight: 700,
-                  color: 'secondary.main'
-                }}>
-                  {formatDuration(stats.totalHiitTime || 0)}
-                </Typography>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </Grid>
-      </Grid>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              style={{ flex: 1 }}
+            >
+              <Card sx={{ 
+                height: '100%',
+                borderRadius: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 24px rgba(237, 63, 39, 0.15)',
+                }
+              }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                    <Whatshot sx={{ fontSize: 32, color: 'secondary.main' }} />
+                    <Typography variant="body2" sx={{ 
+                      color: 'text.secondary',
+                      textTransform: 'uppercase',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                    }}>
+                      HIIT Time
+                    </Typography>
+                  </Stack>
+                  <Typography variant="h3" sx={{ 
+                    fontWeight: 700,
+                    color: 'secondary.main',
+                    fontSize: { xs: '2rem', sm: '2.5rem' }
+                  }}>
+                    {formatDuration(stats.totalHiitTime || 0)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Stack>
+        </Stack>
+      </Box>
 
       {history.length > 0 && (
         <motion.div

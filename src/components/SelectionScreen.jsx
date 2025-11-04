@@ -1,7 +1,7 @@
 import { memo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip, Checkbox, FormGroup, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItem, ListItemText } from '@mui/material';
+import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItem, ListItemText } from '@mui/material';
 import { ExpandMore, Delete, Star, Edit } from '@mui/icons-material';
 import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName } from '../utils/storage';
 
@@ -198,32 +198,107 @@ const SelectionScreen = memo(({
               }}>
                 Equipment
               </Typography>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox 
-                      checked={selectedEquipment.has('all')}
-                      onChange={() => handleEquipmentToggle('all')}
-                    />
-                  }
-                  label="All Equipment"
-                  sx={{ mb: 1 }}
-                />
-                {equipmentOptions.map((equipment) => (
-                  <FormControlLabel
-                    key={equipment}
-                    control={
-                      <Checkbox 
-                        checked={selectedEquipment.has(equipment.toLowerCase())}
-                        onChange={() => handleEquipmentToggle(equipment.toLowerCase())}
-                        disabled={selectedEquipment.has('all')}
-                      />
+              <Stack spacing={1}>
+                <Box
+                  onClick={() => handleEquipmentToggle('all')}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    p: 1.5,
+                    borderRadius: 2,
+                    cursor: 'pointer',
+                    bgcolor: selectedEquipment.has('all') ? 'primary.main' : 'background.paper',
+                    color: selectedEquipment.has('all') ? 'white' : 'text.primary',
+                    border: '2px solid',
+                    borderColor: selectedEquipment.has('all') ? 'primary.main' : 'divider',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      bgcolor: selectedEquipment.has('all') ? 'primary.dark' : 'rgba(19, 70, 134, 0.05)',
                     }
-                    label={equipment}
-                    sx={{ mb: 1 }}
-                  />
+                  }}
+                >
+                  <Box sx={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    border: '2px solid',
+                    borderColor: selectedEquipment.has('all') ? 'white' : 'primary.main',
+                    bgcolor: selectedEquipment.has('all') ? 'white' : 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    {selectedEquipment.has('all') && (
+                      <Box sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        bgcolor: 'primary.main',
+                      }} />
+                    )}
+                  </Box>
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    All Equipment
+                  </Typography>
+                </Box>
+                
+                {equipmentOptions.map((equipment) => (
+                  <Box
+                    key={equipment}
+                    onClick={() => !selectedEquipment.has('all') && handleEquipmentToggle(equipment.toLowerCase())}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      p: 1.5,
+                      borderRadius: 2,
+                      cursor: selectedEquipment.has('all') ? 'not-allowed' : 'pointer',
+                      opacity: selectedEquipment.has('all') ? 0.5 : 1,
+                      bgcolor: selectedEquipment.has(equipment.toLowerCase()) ? 'primary.main' : 'background.paper',
+                      color: selectedEquipment.has(equipment.toLowerCase()) ? 'white' : 'text.primary',
+                      border: '2px solid',
+                      borderColor: selectedEquipment.has(equipment.toLowerCase()) ? 'primary.main' : 'divider',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        borderColor: selectedEquipment.has('all') ? 'divider' : 'primary.main',
+                        bgcolor: selectedEquipment.has('all') 
+                          ? 'background.paper' 
+                          : selectedEquipment.has(equipment.toLowerCase()) 
+                            ? 'primary.dark' 
+                            : 'rgba(19, 70, 134, 0.05)',
+                      }
+                    }}
+                  >
+                    <Box sx={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      border: '2px solid',
+                      borderColor: selectedEquipment.has(equipment.toLowerCase()) ? 'white' : 'primary.main',
+                      bgcolor: selectedEquipment.has(equipment.toLowerCase()) ? 'white' : 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      {selectedEquipment.has(equipment.toLowerCase()) && (
+                        <Box sx={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          bgcolor: 'primary.main',
+                        }} />
+                      )}
+                    </Box>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {equipment}
+                    </Typography>
+                  </Box>
                 ))}
-              </FormGroup>
+              </Stack>
             </Box>
 
             {/* Favorite Workouts */}

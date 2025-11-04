@@ -158,7 +158,7 @@ const NavigationSidebar = ({
                 icon={<FaStar />}
                 label="Favourites"
                 isActive={currentScreen === 'favourites'}
-                onClick={() => handleNavClick('selection')}
+                onClick={() => handleNavClick('favourites')}
               />
               <NavLink
                 icon={<FaClock />}

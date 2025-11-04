@@ -9,6 +9,7 @@ import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
+import FavouritesScreen from './components/FavouritesScreen';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps } from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
@@ -338,6 +339,10 @@ function App() {
           )}
           
           {currentScreen === 'progress' && <ProgressScreen />}
+
+          {currentScreen === 'favourites' && (
+            <FavouritesScreen onStartWorkout={handleStartWorkout} />
+          )}
 
           {currentScreen === 'hiit' && <HiitTimerScreen />}
         </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
-import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem, Snackbar, Alert, IconButton } from '@mui/material';
 import { FitnessCenter, PlayArrow, Close, StarOutline, Star } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 
@@ -129,7 +129,23 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
         overflowX: 'hidden'
       }}
     >
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
+      <Box sx={{ mb: 4, textAlign: 'center', position: 'relative' }}>
+        <IconButton
+          onClick={handleSaveToFavorites}
+          disabled={savedToFavorites}
+          sx={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            color: savedToFavorites ? 'warning.main' : 'action.active',
+            '&:hover': {
+              color: 'warning.main',
+            }
+          }}
+          aria-label="Save to favorites"
+        >
+          {savedToFavorites ? <Star sx={{ fontSize: 32 }} /> : <StarOutline sx={{ fontSize: 32 }} />}
+        </IconButton>
         <motion.div
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}

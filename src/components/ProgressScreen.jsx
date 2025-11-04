@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getWorkoutHistory, getUserStats, deleteWorkout } from '../utils/storage';
-import { formatDate, formatDuration } from '../utils/helpers';
+import { formatDate, formatDuration, formatWorkoutType } from '../utils/helpers';
 import Calendar from './Calendar';
 import { Box, Card, CardContent, Typography, Grid, Stack, IconButton } from '@mui/material';
 import { FitnessCenter, Timer, TrendingUp, Whatshot, Delete } from '@mui/icons-material';
@@ -356,7 +356,7 @@ const ProgressScreen = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                          {workout.type} - {formatDate(workout.date)}
+                          {formatWorkoutType(workout.type)} - {formatDate(workout.date)}
                           {workout.isPartial && (
                             <Typography component="span" sx={{ 
                               ml: 1, 
@@ -372,7 +372,7 @@ const ProgressScreen = () => {
                           Duration: {formatDuration(workout.duration)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Exercises: {Object.keys(workout.exercises).join(', ')}
+                          Exercises: {workout.exercises ? Object.keys(workout.exercises).join(', ') : 'N/A'}
                         </Typography>
                       </Box>
                       <IconButton

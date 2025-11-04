@@ -1,9 +1,9 @@
 /* ===== FONT & COLOR DEFINITIONS ===== */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Ubuntu:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Montserrat:wght@700;800;900&display=swap');
 
 :root {
     --font-body: 'Poppins', sans-serif;
-    --font-header: 'Ubuntu', sans-serif;
+    --font-header: 'Montserrat', sans-serif;
 
     --color-bg: rgb(253, 244, 227); /* Cream */
     --color-surface: #FFFFFF;
@@ -25,12 +25,18 @@
     padding: 0;
 }
 
+html {
+    overflow-x: hidden;
+}
+
 body {
     font-family: var(--font-body);
     background: linear-gradient(135deg, rgb(253, 244, 227) 0%, rgb(254, 240, 210) 100%);
     background-attachment: fixed;
     color: var(--color-text);
     line-height: 1.6;
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 h1, h2, h3 {
@@ -41,11 +47,8 @@ h1, h2, h3 {
 
 h1 {
     font-size: 2.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-weight: 800;
+    color: var(--color-primary);
 }
 
 a {
@@ -101,6 +104,8 @@ button:active {
     padding: 2rem;
     display: block;
     animation: fadeIn 0.4s ease-in;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 @keyframes fadeIn {
@@ -136,10 +141,7 @@ button:active {
     font-family: var(--font-header);
     font-size: 1.8rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--color-primary);
     transition: transform 0.3s ease;
 }
 
@@ -625,6 +627,10 @@ button:active {
 .workout-controls {
     text-align: center;
     margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
 }
 
 #exit-workout-btn {

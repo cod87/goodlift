@@ -318,10 +318,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
           whileTap={{ scale: 0.95 }}
           style={{
             background: 'rgb(237, 63, 39)',
-            marginBottom: '8px',
+            marginBottom: '12px',
           }}
         >
-          <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> Abort Workout
+          <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> End Workout
         </motion.button>
         {workoutData.length > 0 && (
           <motion.button
@@ -334,7 +334,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
               color: 'rgb(19, 70, 134)',
             }}
           >
-            Save as Partial
+            End and Save
           </motion.button>
         )}
       </div>

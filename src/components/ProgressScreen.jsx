@@ -106,7 +106,7 @@ const ProgressScreen = () => {
         font: {
           size: 16,
           weight: 600,
-          family: "'Ubuntu', sans-serif",
+          family: "'Montserrat', sans-serif",
         },
         color: 'rgb(19, 70, 134)',
       },
@@ -131,7 +131,7 @@ const ProgressScreen = () => {
       transition={{ duration: 0.5 }}
     >
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -170,7 +170,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -209,7 +209,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={12} sm={12} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -250,7 +250,7 @@ const ProgressScreen = () => {
           </motion.div>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

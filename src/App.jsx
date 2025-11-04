@@ -42,13 +42,28 @@ const theme = createTheme({
   typography: {
     fontFamily: "'Poppins', sans-serif",
     h1: {
-      fontFamily: "'Ubuntu', sans-serif",
+      fontFamily: "'Montserrat', sans-serif",
+      fontWeight: 800,
     },
     h2: {
-      fontFamily: "'Ubuntu', sans-serif",
+      fontFamily: "'Montserrat', sans-serif",
+      fontWeight: 800,
     },
     h3: {
-      fontFamily: "'Ubuntu', sans-serif",
+      fontFamily: "'Montserrat', sans-serif",
+      fontWeight: 700,
+    },
+    h4: {
+      fontFamily: "'Montserrat', sans-serif",
+      fontWeight: 700,
+    },
+    h5: {
+      fontFamily: "'Montserrat', sans-serif",
+      fontWeight: 700,
+    },
+    h6: {
+      fontFamily: "'Montserrat', sans-serif",
+      fontWeight: 700,
     },
   },
 });

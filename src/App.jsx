@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import './App.css';
-import Navigation from './components/Navigation';
-import Sidebar from './components/Sidebar';
+import NavigationSidebar from './components/NavigationSidebar';
 import WorkoutScreen from './components/WorkoutScreen';
 import WorkoutPreview from './components/WorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
@@ -58,6 +57,8 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState([]);
   const [workoutType, setWorkoutType] = useState('');
+  const [selectedEquipment, setSelectedEquipment] = useState(new Set(['all']));
+  const [equipmentOptions, setEquipmentOptions] = useState([]);
   const [completedWorkoutData, setCompletedWorkoutData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -66,13 +67,63 @@ function App() {
 
   const { generateWorkout, allExercises } = useWorkoutGenerator();
 
+  // Extract unique equipment types from exercises
+  useEffect(() => {
+    if (allExercises.length > 0) {
+      const equipmentSet = new Set();
+      allExercises.forEach(ex => {
+        const equipment = ex.Equipment;
+        if (equipment.includes('Cable')) {
+          equipmentSet.add('Cable Machine');
+        } else if (equipment.includes('Dumbbell')) {
+          equipmentSet.add('Dumbbells');
+        } else {
+          equipmentSet.add(equipment);
+        }
+      });
+      setEquipmentOptions(Array.from(equipmentSet).sort());
+    }
+  }, [allExercises]);
+
   const handleNavigate = (screen) => {
     setCurrentScreen(screen);
     if (screen === 'selection') {
       setSidebarOpen(true);
-    } else {
-      setSidebarOpen(false);
     }
+  };
+
+  const handleWorkoutTypeChange = (type) => {
+    setWorkoutType(type);
+  };
+
+  const handleEquipmentChange = (value) => {
+    const newSelected = new Set(selectedEquipment);
+    
+    if (value === 'all') {
+      if (selectedEquipment.has('all')) {
+        newSelected.delete('all');
+      } else {
+        newSelected.clear();
+        newSelected.add('all');
+      }
+    } else {
+      newSelected.delete('all');
+      if (newSelected.has(value)) {
+        newSelected.delete(value);
+      } else {
+        newSelected.add(value);
+      }
+      
+      if (newSelected.size === 0) {
+        newSelected.add('all');
+      }
+    }
+    
+    setSelectedEquipment(newSelected);
+  };
+
+  const handleToggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   const handleStartWorkout = (type, equipmentFilter) => {
@@ -84,7 +135,6 @@ function App() {
       setCurrentWorkout(workout);
       setWorkoutType(type);
       setLoading(false);
-      setSidebarOpen(false);
       
       // Show preview screen instead of going directly to workout
       setShowPreview(true);
@@ -100,7 +150,6 @@ function App() {
   const handleCancelPreview = () => {
     setShowPreview(false);
     setCurrentScreen('selection');
-    setSidebarOpen(true);
   };
 
   const handleWorkoutComplete = async (workoutData) => {
@@ -180,12 +229,10 @@ function App() {
 
   const handleWorkoutExit = () => {
     setCurrentScreen('selection');
-    setSidebarOpen(true);
   };
 
   const handleFinish = () => {
     setCurrentScreen('selection');
-    setSidebarOpen(true);
   };
 
   const handleExportCSV = () => {
@@ -219,21 +266,6 @@ function App() {
     document.body.removeChild(link);
   };
 
-  // Close sidebar when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      const sidebar = document.querySelector('.filter-sidebar');
-      const navWorkout = document.querySelector('.nav-links button:first-child');
-      
-      if (sidebar && !sidebar.contains(e.target) && navWorkout && !navWorkout.contains(e.target) && sidebarOpen && currentScreen === 'selection') {
-        setSidebarOpen(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [sidebarOpen, currentScreen]);
-
   // Show auth screen if user is not logged in
   if (!currentUser) {
     return (
@@ -247,16 +279,25 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div>
-        <Navigation currentScreen={currentScreen} onNavigate={handleNavigate} />
-        
-        <Sidebar
-          isOpen={sidebarOpen && currentScreen === 'selection'}
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <NavigationSidebar
+          currentScreen={currentScreen}
+          onNavigate={handleNavigate}
+          workoutType={workoutType}
+          selectedEquipment={selectedEquipment}
+          equipmentOptions={equipmentOptions}
+          onWorkoutTypeChange={handleWorkoutTypeChange}
+          onEquipmentChange={handleEquipmentChange}
           onStartWorkout={handleStartWorkout}
-          allExercises={allExercises}
+          isOpen={sidebarOpen}
+          onToggle={handleToggleSidebar}
         />
         
-        <div id="app" className={sidebarOpen && currentScreen === 'selection' ? 'sidebar-open' : ''}>
+        <div id="app" style={{ 
+          flex: 1,
+          marginLeft: window.innerWidth > 768 ? '280px' : '0',
+          transition: 'margin-left 0.3s ease',
+        }}>
           {currentScreen === 'selection' && (
             <div className="screen selection-screen">
               {loading && (

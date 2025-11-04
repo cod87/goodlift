@@ -248,27 +248,24 @@ const SelectionScreen = memo(({
                 {equipmentOptions.map((equipment) => (
                   <Box
                     key={equipment}
-                    onClick={() => !selectedEquipment.has('all') && handleEquipmentToggle(equipment.toLowerCase())}
+                    onClick={() => handleEquipmentToggle(equipment.toLowerCase())}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: 1.5,
                       p: 1.5,
                       borderRadius: 2,
-                      cursor: selectedEquipment.has('all') ? 'not-allowed' : 'pointer',
-                      opacity: selectedEquipment.has('all') ? 0.5 : 1,
+                      cursor: 'pointer',
                       bgcolor: selectedEquipment.has(equipment.toLowerCase()) ? 'primary.main' : 'background.paper',
                       color: selectedEquipment.has(equipment.toLowerCase()) ? 'white' : 'text.primary',
                       border: '2px solid',
                       borderColor: selectedEquipment.has(equipment.toLowerCase()) ? 'primary.main' : 'divider',
                       transition: 'all 0.2s ease',
                       '&:hover': {
-                        borderColor: selectedEquipment.has('all') ? 'divider' : 'primary.main',
-                        bgcolor: selectedEquipment.has('all') 
-                          ? 'background.paper' 
-                          : selectedEquipment.has(equipment.toLowerCase()) 
-                            ? 'primary.dark' 
-                            : 'rgba(19, 70, 134, 0.05)',
+                        borderColor: 'primary.main',
+                        bgcolor: selectedEquipment.has(equipment.toLowerCase()) 
+                          ? 'primary.dark' 
+                          : 'rgba(19, 70, 134, 0.05)',
                       }
                     }}
                   >

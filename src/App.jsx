@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import './App.css';
+import Header from './components/Header';
 import NavigationSidebar from './components/NavigationSidebar';
 import SelectionScreen from './components/SelectionScreen';
 import WorkoutScreen from './components/WorkoutScreen';
@@ -8,6 +9,7 @@ import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
+import FavouritesScreen from './components/FavouritesScreen';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps } from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
@@ -108,9 +110,13 @@ function App() {
   };
 
   const handleEquipmentChange = (value) => {
-    const newSelected = new Set();
-    newSelected.add(value);
-    setSelectedEquipment(newSelected);
+    if (value instanceof Set) {
+      setSelectedEquipment(value);
+    } else {
+      const newSelected = new Set();
+      newSelected.add(value);
+      setSelectedEquipment(newSelected);
+    }
   };
 
   const handleToggleSidebar = () => {
@@ -286,9 +292,12 @@ function App() {
           onToggle={handleToggleSidebar}
         />
         
+        <Header isDesktop={isDesktop} />
+        
         <div id="app" style={{ 
           flex: 1,
           marginLeft: isDesktop ? '280px' : '0',
+          marginTop: '60px',
           transition: 'margin-left 0.3s ease',
         }}>
           {currentScreen === 'selection' && (
@@ -323,12 +332,17 @@ function App() {
           {currentScreen === 'completion' && completedWorkoutData && (
             <CompletionScreen
               workoutData={completedWorkoutData}
+              workoutPlan={currentWorkout}
               onFinish={handleFinish}
               onExportCSV={handleExportCSV}
             />
           )}
           
           {currentScreen === 'progress' && <ProgressScreen />}
+
+          {currentScreen === 'favourites' && (
+            <FavouritesScreen onStartWorkout={handleStartWorkout} />
+          )}
 
           {currentScreen === 'hiit' && <HiitTimerScreen />}
         </div>

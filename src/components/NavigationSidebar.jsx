@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaDumbbell, FaHome, FaClock, FaSignOutAlt, FaTimes, FaBars } from 'react-icons/fa';
+import { FaDumbbell, FaHome, FaClock, FaSignOutAlt, FaTimes, FaBars, FaStar } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 
 const NavigationSidebar = ({ 
@@ -45,7 +45,7 @@ const NavigationSidebar = ({
   return (
     <>
       {/* Hamburger Menu Button (Mobile Only) */}
-      {isMobile && (
+      {isMobile && !isOpen && (
         <motion.button
           className="hamburger-menu"
           onClick={onToggle}
@@ -67,7 +67,7 @@ const NavigationSidebar = ({
             boxShadow: 'none',
           }}
         >
-          {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+          <FaBars size={24} />
         </motion.button>
       )}
 
@@ -153,6 +153,12 @@ const NavigationSidebar = ({
                 label="Workout"
                 isActive={currentScreen === 'selection' || currentScreen === 'preview'}
                 onClick={() => handleNavClick('selection')}
+              />
+              <NavLink
+                icon={<FaStar />}
+                label="Favourites"
+                isActive={currentScreen === 'favourites'}
+                onClick={() => handleNavClick('favourites')}
               />
               <NavLink
                 icon={<FaClock />}

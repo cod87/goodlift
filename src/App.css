@@ -37,7 +37,7 @@ html {
 
 body {
     font-family: var(--font-body);
-    background: linear-gradient(135deg, rgb(253, 244, 227) 0%, rgb(254, 240, 210) 100%);
+    background: rgb(253, 244, 227);
     background-attachment: fixed;
     color: var(--color-text);
     line-height: 1.6;
@@ -356,13 +356,16 @@ button:active {
     padding: 0.75rem 1rem;
     border-bottom: 2px solid var(--color-border);
     margin-bottom: 1rem;
-    background: linear-gradient(135deg, rgba(138, 190, 185, 0.1), rgba(193, 120, 90, 0.1));
+    background: rgba(138, 190, 185, 0.1);
     border-radius: 10px 10px 0 0;
 }
 
 .exercise-card-container {
     max-width: 700px;
     margin: 0 auto;
+    padding: 0 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .exercise-card {
@@ -373,6 +376,9 @@ button:active {
     margin-bottom: 1rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     animation: slideUp 0.4s ease-out;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 @keyframes slideUp {
@@ -618,12 +624,7 @@ button:active {
     right: 0;
     height: 36px;
     transform: translateY(-50%);
-    background: linear-gradient(to bottom, 
-        transparent 0%, 
-        rgba(129, 178, 154, 0.1) 20%, 
-        rgba(129, 178, 154, 0.15) 50%, 
-        rgba(129, 178, 154, 0.1) 80%, 
-        transparent 100%);
+    background: rgba(129, 178, 154, 0.15);
     border-top: 1px solid var(--color-border);
     border-bottom: 1px solid var(--color-border);
     pointer-events: none;
@@ -1075,10 +1076,11 @@ button:active {
         padding: 0.5rem 0.75rem;
     }
     .exercise-card {
-        padding: 1rem;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
     }
     .exercise-card h2 {
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         margin-bottom: 0.5rem;
     }
     .youtube-embed {
@@ -1106,7 +1108,7 @@ button:active {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-primary) 100%);
+    background: var(--color-bg);
     padding: 2rem;
 }
 
@@ -1263,7 +1265,7 @@ button:active {
     text-align: center;
     margin-bottom: 2rem;
     padding: 2rem;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    background: var(--color-primary);
     border-radius: 16px;
     color: white;
     animation: celebrationPulse 0.6s ease-out;

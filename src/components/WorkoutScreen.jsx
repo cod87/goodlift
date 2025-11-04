@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatTime, getYoutubeEmbedUrl } from '../utils/helpers';
-import { getExerciseWeight, getExerciseTargetReps } from '../utils/storage';
+import { formatTime, getYoutubeEmbedUrl, detectWorkoutType } from '../utils/helpers';
+import { getExerciseWeight, getExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
-import { Box, LinearProgress, Typography, IconButton } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp } from '@mui/icons-material';
+import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert } from '@mui/material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder } from '@mui/icons-material';
 
 /**
  * WorkoutScreen component manages the active workout session
@@ -17,6 +17,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [prevWeight, setPrevWeight] = useState(0);
   const [targetReps, setTargetReps] = useState(12);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -70,6 +72,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       }
     };
     loadSettings();
+    
+    // Scroll to top when exercise changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStepIndex]);
 
@@ -174,6 +179,25 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     }
   };
 
+  const handleSaveToFavorites = () => {
+    try {
+      const workoutType = detectWorkoutType(workoutPlan[0]);
+      
+      saveFavoriteWorkout({
+        name: `${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`,
+        type: workoutType,
+        equipment: 'all',
+        exercises: workoutPlan,
+      });
+      
+      setIsFavorite(true);
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error saving to favorites:', error);
+      alert('Failed to save workout to favorites');
+    }
+  };
+
   if (!currentStep) {
     return null;
   }
@@ -181,28 +205,47 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   return (
     <div className="screen"
       style={{
-        paddingBottom: '100px', // Add padding to ensure input is visible above mobile keyboard
+        paddingBottom: '100px',
+        padding: '0.5rem',
+        maxWidth: '100vw',
+        boxSizing: 'border-box',
       }}
     >
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 1.5, px: { xs: 0.5, sm: 0 } }}>
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          mb: 1
+          mb: 0.5,
+          gap: 1
         }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
             {formatTime(elapsedTime)}
           </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Exercise {currentStepIndex + 1} / {workoutSequence.length}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
+            <IconButton 
+              onClick={handleSaveToFavorites}
+              disabled={isFavorite}
+              size="small"
+              sx={{ 
+                color: isFavorite ? 'warning.main' : 'action.active',
+                '&:hover': { color: 'warning.main' },
+                p: { xs: 0.5, sm: 1 }
+              }}
+              aria-label="Save to favorites"
+            >
+              {isFavorite ? <Star sx={{ fontSize: { xs: 20, sm: 24 } }} /> : <StarBorder sx={{ fontSize: { xs: 20, sm: 24 } }} />}
+            </IconButton>
+            <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
+              {currentStepIndex + 1}/{workoutSequence.length}
+            </Typography>
+          </Box>
         </Box>
         <LinearProgress 
           variant="determinate" 
           value={(currentStepIndex / workoutSequence.length) * 100}
           sx={{ 
-            height: 8,
+            height: { xs: 6, sm: 8 },
             borderRadius: 4,
             bgcolor: 'rgba(138, 190, 185, 0.2)',
             '& .MuiLinearProgress-bar': {
@@ -262,10 +305,23 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     className="exercise-input"
                     defaultValue={prevWeight || 0}
                     onFocus={(e) => {
-                      // Scroll input into view on mobile when keyboard appears
-                      setTimeout(() => {
-                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }, 300);
+                      // Only scroll if input would be obscured by keyboard
+                      // Keyboard takes up ~40% of viewport, scroll only if input is in lower 45%
+                      const rect = e.target.getBoundingClientRect();
+                      const inputBottom = rect.bottom;
+                      const viewportHeight = window.innerHeight;
+                      const threshold = viewportHeight * 0.55; // 55% from top = lower 45%
+                      
+                      // Only snap if input bottom is in the lower 45% (below 55% threshold)
+                      if (inputBottom > threshold) {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          // Additional scroll to create more space above the input
+                          setTimeout(() => {
+                            window.scrollBy({ top: -80, behavior: 'smooth' });
+                          }, 100);
+                        }, 300);
+                      }
                     }}
                     style={{
                       width: '100%',
@@ -291,10 +347,23 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     className="exercise-input"
                     defaultValue={targetReps || 8}
                     onFocus={(e) => {
-                      // Scroll input into view on mobile when keyboard appears
-                      setTimeout(() => {
-                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }, 300);
+                      // Only scroll if input would be obscured by keyboard
+                      // Keyboard takes up ~40% of viewport, scroll only if input is in lower 45%
+                      const rect = e.target.getBoundingClientRect();
+                      const inputBottom = rect.bottom;
+                      const viewportHeight = window.innerHeight;
+                      const threshold = viewportHeight * 0.55; // 55% from top = lower 45%
+                      
+                      // Only snap if input bottom is in the lower 45% (below 55% threshold)
+                      if (inputBottom > threshold) {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          // Additional scroll to create more space above the input
+                          setTimeout(() => {
+                            window.scrollBy({ top: -80, behavior: 'smooth' });
+                          }, 100);
+                        }, 300);
+                      }
                     }}
                     style={{
                       width: '100%',
@@ -344,6 +413,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
           style={{
             background: 'rgb(237, 63, 39)',
             marginBottom: '12px',
+            color: 'white',
           }}
         >
           <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> End Workout
@@ -363,6 +433,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
           </motion.button>
         )}
       </div>
+      
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setSnackbarOpen(false)}>
+          Workout saved to favorites!
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

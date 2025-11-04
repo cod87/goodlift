@@ -76,3 +76,31 @@ export const formatDuration = (seconds) => {
   }
   return `${minutes}m`;
 };
+
+/**
+ * Detects workout type from exercise data or workout type string
+ * @param {string|Object} data - Workout type string, exercise object, or workout data
+ * @returns {string} Workout type: 'upper', 'lower', or 'full'
+ */
+export const detectWorkoutType = (data) => {
+  if (typeof data === 'string') {
+    const normalized = data.toLowerCase();
+    if (normalized.includes('upper')) return 'upper';
+    if (normalized.includes('lower')) return 'lower';
+    return 'full';
+  }
+  
+  // If it's an object with a type property
+  if (data?.type) {
+    return detectWorkoutType(data.type);
+  }
+  
+  // If it's an exercise with Primary Muscle
+  if (data?.['Primary Muscle']) {
+    const muscle = data['Primary Muscle'].toLowerCase();
+    if (muscle.includes('upper')) return 'upper';
+    if (muscle.includes('lower')) return 'lower';
+  }
+  
+  return 'full';
+};

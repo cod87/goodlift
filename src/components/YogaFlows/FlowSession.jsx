@@ -9,27 +9,21 @@ import {
   Button,
   IconButton,
   LinearProgress,
-  Chip,
   Stack,
   Tooltip,
-  List,
-  ListItem,
-  ListItemText,
-  Grid,
 } from '@mui/material';
 import {
   PlayArrow,
   Pause,
   Replay,
   Stop,
-  OpenInNew,
 } from '@mui/icons-material';
 import audioService from '../../utils/audioService';
 import wakeLockManager from '../../utils/wakeLock';
 
 /**
  * FlowSession Component
- * Displays and manages the active yoga flow session with timer
+ * Simplified: 10 min Sun Salutations + 5 min Do what feels good!
  */
 const FlowSession = ({ flow, onComplete, onExit }) => {
   const [timeLeft, setTimeLeft] = useState(flow.durationMinutes * 60); // Convert to seconds
@@ -39,6 +33,16 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
 
   const totalSeconds = flow.durationMinutes * 60;
   const progress = ((totalSeconds - timeLeft) / totalSeconds) * 100;
+  
+  // Determine current segment
+  const getCurrentSegment = () => {
+    const elapsed = totalSeconds - timeLeft;
+    if (elapsed < 600) { // First 10 minutes
+      return flow.segments[0]; // Sun Salutations
+    } else {
+      return flow.segments[1]; // Do what feels good!
+    }
+  };
 
   // Manage wake lock
   useEffect(() => {
@@ -109,24 +113,13 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getDifficultyColor = (level) => {
-    switch (level) {
-      case 'Beginner':
-        return 'success';
-      case 'Intermediate':
-        return 'warning';
-      case 'Advanced':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
+  const currentSegment = getCurrentSegment();
 
   return (
     <Box
       sx={{
-        padding: { xs: '1rem', sm: '2rem', md: '3rem' },
-        maxWidth: '1000px',
+        padding: { xs: '1rem', sm: '2rem' },
+        maxWidth: '600px',
         margin: '0 auto',
         minHeight: 'calc(100vh - 60px)',
         width: '100%',
@@ -137,65 +130,42 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        style={{ width: '100%', boxSizing: 'border-box' }}
       >
         {/* Main Flow Card */}
         <Card
           sx={{
             background: 'linear-gradient(135deg, rgba(19, 70, 134, 0.05) 0%, rgba(156, 39, 176, 0.05) 100%)',
             boxShadow: 4,
-            marginBottom: 3,
             width: '100%',
             boxSizing: 'border-box',
           }}
         >
-          <CardContent sx={{ padding: { xs: 2, sm: 3, md: 4 }, width: '100%', boxSizing: 'border-box' }}>
+          <CardContent sx={{ padding: { xs: 2, sm: 3 }, width: '100%', boxSizing: 'border-box' }}>
             {/* Flow Header */}
-            <Box sx={{ marginBottom: 3 }}>
-              <Box
+            <Box sx={{ marginBottom: 3, textAlign: 'center' }}>
+              <Typography
+                variant="h4"
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontWeight: 800,
+                  color: 'primary.main',
                   marginBottom: 2,
+                  fontSize: { xs: '1.5rem', sm: '2rem' }
                 }}
               >
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontFamily: "'Montserrat', sans-serif",
-                    fontWeight: 800,
-                    color: 'primary.main',
-                    flexGrow: 1,
-                    marginRight: 2,
-                  }}
-                >
-                  {flow.flowName}
-                </Typography>
-                <Chip
-                  label={flow.difficultyLevel}
-                  color={getDifficultyColor(flow.difficultyLevel)}
-                  sx={{ fontWeight: 600 }}
-                />
-              </Box>
-
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                <Chip
-                  label={`${flow.durationMinutes} minutes`}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-                <Chip
-                  label={flow.pace}
-                  size="small"
-                  variant="outlined"
-                />
-                <Chip
-                  label={flow.primaryFocus}
-                  size="small"
-                  variant="outlined"
-                />
-              </Stack>
+                {flow.flowName}
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  color: 'secondary.main',
+                  fontSize: { xs: '1rem', sm: '1.25rem' }
+                }}
+              >
+                {currentSegment.name}
+              </Typography>
             </Box>
 
             {/* Timer Display */}
@@ -207,7 +177,7 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
                     fontFamily: "'Montserrat', sans-serif",
                     fontWeight: 800,
                     color: isPaused ? 'grey.500' : 'secondary.main',
-                    fontSize: { xs: '4rem', sm: '6rem' },
+                    fontSize: { xs: '3.5rem', sm: '5rem' },
                     marginBottom: 1,
                   }}
                 >
@@ -244,6 +214,7 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
                     fontWeight: 800,
                     color: 'success.main',
                     marginBottom: 2,
+                    fontSize: { xs: '1.75rem', sm: '2.5rem' }
                   }}
                 >
                   Flow Complete! 🎉
@@ -271,12 +242,12 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
                     sx={{
                       backgroundColor: 'secondary.main',
                       color: 'white',
-                      width: 64,
-                      height: 64,
+                      width: { xs: 56, sm: 64 },
+                      height: { xs: 56, sm: 64 },
                       '&:hover': { backgroundColor: 'secondary.dark' },
                     }}
                   >
-                    {isPaused ? <PlayArrow sx={{ fontSize: 40 }} /> : <Pause sx={{ fontSize: 40 }} />}
+                    {isPaused ? <PlayArrow sx={{ fontSize: { xs: 32, sm: 40 } }} /> : <Pause sx={{ fontSize: { xs: 32, sm: 40 } }} />}
                   </IconButton>
                 </Tooltip>
 
@@ -286,32 +257,24 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
                     sx={{
                       backgroundColor: 'primary.main',
                       color: 'white',
+                      width: { xs: 48, sm: 56 },
+                      height: { xs: 48, sm: 56 },
                       '&:hover': { backgroundColor: 'primary.dark' },
                     }}
                   >
-                    <Replay />
+                    <Replay sx={{ fontSize: { xs: 24, sm: 28 } }} />
                   </IconButton>
                 </Tooltip>
               </Box>
             )}
 
             {/* Action Buttons */}
-            <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} justifyContent="center">
-              {flow.youtubeLink && (
-                <Button
-                  variant="outlined"
-                  startIcon={<OpenInNew />}
-                  onClick={() => window.open(flow.youtubeLink, '_blank')}
-                  sx={{ minWidth: '180px' }}
-                >
-                  Watch Video
-                </Button>
-              )}
+            <Stack spacing={2} sx={{ width: '100%', boxSizing: 'border-box' }}>
               {isComplete ? (
                 <Button
                   variant="contained"
                   onClick={handleFinish}
-                  sx={{ minWidth: '180px', fontWeight: 600 }}
+                  sx={{ width: '100%', fontWeight: 600, boxSizing: 'border-box' }}
                 >
                   Finish
                 </Button>
@@ -321,80 +284,28 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
                   color="error"
                   startIcon={<Stop />}
                   onClick={handleExit}
-                  sx={{ minWidth: '180px' }}
+                  sx={{ width: '100%', boxSizing: 'border-box' }}
                 >
                   End Session
                 </Button>
               )}
             </Stack>
+
+            {/* Flow Breakdown */}
+            <Box sx={{ marginTop: 3, padding: 2, bgcolor: 'rgba(156, 39, 176, 0.05)', borderRadius: 2 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: 'primary.main' }}>
+                Flow Breakdown:
+              </Typography>
+              {flow.segments.map((segment, index) => (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {segment.duration} min: {segment.name}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
           </CardContent>
         </Card>
-
-        {/* Flow Details */}
-        <Grid container spacing={3} sx={{ width: '100%', margin: 0 }}>
-          <Grid item xs={12} md={6} sx={{ paddingLeft: { xs: 0, md: '12px' } }}>
-            <Card sx={{ width: '100%', boxSizing: 'border-box' }}>
-              <CardContent sx={{ width: '100%', boxSizing: 'border-box' }}>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 700, marginBottom: 2, color: 'primary.main' }}
-                >
-                  Poses in This Flow
-                </Typography>
-                <List dense>
-                  {flow.posesIncluded.map((pose, index) => (
-                    <ListItem key={index} sx={{ paddingLeft: 0 }}>
-                      <ListItemText
-                        primary={pose}
-                        primaryTypographyProps={{
-                          fontSize: '0.95rem',
-                        }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={6} sx={{ paddingLeft: { xs: 0, md: '12px' } }}>
-            <Card sx={{ width: '100%', boxSizing: 'border-box' }}>
-              <CardContent sx={{ width: '100%', boxSizing: 'border-box' }}>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 700, marginBottom: 2, color: 'primary.main' }}
-                >
-                  About This Flow
-                </Typography>
-                
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, marginTop: 2 }}>
-                  Target Muscles:
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 2 }}>
-                  {flow.targetMuscles}
-                </Typography>
-
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                  Suitable For:
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 2 }}>
-                  {flow.suitableFor}
-                </Typography>
-
-                {flow.propsNeeded && (
-                  <>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                      Props Needed:
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {flow.propsNeeded}
-                    </Typography>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
       </motion.div>
     </Box>
   );
@@ -404,14 +315,10 @@ FlowSession.propTypes = {
   flow: PropTypes.shape({
     flowName: PropTypes.string.isRequired,
     durationMinutes: PropTypes.number.isRequired,
-    difficultyLevel: PropTypes.string.isRequired,
-    primaryFocus: PropTypes.string.isRequired,
-    posesIncluded: PropTypes.arrayOf(PropTypes.string).isRequired,
-    targetMuscles: PropTypes.string.isRequired,
-    suitableFor: PropTypes.string.isRequired,
-    pace: PropTypes.string.isRequired,
-    propsNeeded: PropTypes.string,
-    youtubeLink: PropTypes.string,
+    segments: PropTypes.arrayOf(PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      duration: PropTypes.number.isRequired,
+    })).isRequired,
   }).isRequired,
   onComplete: PropTypes.func.isRequired,
   onExit: PropTypes.func.isRequired,

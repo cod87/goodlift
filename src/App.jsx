@@ -14,6 +14,7 @@ import StretchScreen from './components/Stretch/StretchScreen';
 import YogaFlowsScreen from './components/YogaFlows/YogaFlowsScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
+import { useFavoriteExercises } from './hooks/useFavoriteExercises';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps, loadUserDataFromCloud } from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
@@ -75,6 +76,7 @@ function App() {
   const { currentUser, isGuest, hasGuestData } = useAuth();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
+  const favoriteExercises = useFavoriteExercises();
 
   // Check if guest snackbar should be shown
   useEffect(() => {
@@ -197,54 +199,103 @@ function App() {
   };
 
   /**
-   * Randomize a single exercise in the workout
-   * @param {number} supersetIdx - Index of the superset
-   * @param {number} exerciseIdx - Index of the exercise within the superset (0 or 1)
-   * @param {string} primaryMuscle - Primary muscle group to maintain
-   * @param {string|Array} equipmentFilter - Equipment filter to apply
+   * Randomize a single exercise in the workout with enhanced logic
+   * - Filters by Primary Muscle, Equipment, Exercise Type
+   * - Applies 2x bias to favorited exercises
+   * - Retries up to 3 times if no alternatives or duplicates found
+   * - Preserves customized weight/reps settings
+   * @param {Object} exercise - The current exercise object
+   * @param {number} globalIndex - Index in the workout array
    */
-  const handleRandomizeExercise = useCallback((supersetIdx, exerciseIdx, primaryMuscle, equipmentFilter) => {
+  const handleRandomizeExercise = useCallback((exercise, globalIndex) => {
     if (!exerciseDB || Object.keys(exerciseDB).length === 0) {
       console.error('Exercise database not available');
+      setNotification({
+        open: true,
+        message: 'Exercise database not loaded',
+        severity: 'error'
+      });
       return;
     }
 
+    const primaryMuscle = exercise['Primary Muscle'];
+    const exerciseType = exercise['Exercise Type'];
+    const currentExerciseName = exercise['Exercise Name'];
+    
     // Get exercises for the same primary muscle
     const muscleExercises = exerciseDB[primaryMuscle] || [];
     
-    // Apply equipment filter
-    let filteredExercises = muscleExercises;
-    if (equipmentFilter && equipmentFilter !== 'all') {
-      const equipmentList = Array.isArray(equipmentFilter) ? equipmentFilter : [equipmentFilter];
-      filteredExercises = muscleExercises.filter(ex => {
-        const equipment = ex.Equipment;
-        return equipmentList.some(filter => {
-          if (filter === 'Cable Machine') return equipment.includes('Cable');
-          if (filter === 'Dumbbells') return equipment.includes('Dumbbell');
-          return equipment === filter;
+    let attempts = 0;
+    const maxAttempts = 3;
+    let selectedExercise = null;
+
+    while (attempts < maxAttempts && !selectedExercise) {
+      attempts++;
+      
+      // Apply equipment filter
+      let filteredExercises = muscleExercises;
+      const equipmentFilter = Array.from(selectedEquipment);
+      
+      if (!equipmentFilter.includes('all')) {
+        filteredExercises = muscleExercises.filter(ex => {
+          const equipment = ex.Equipment;
+          return equipmentFilter.some(filter => {
+            if (filter === 'Cable Machine') return equipment.includes('Cable');
+            if (filter === 'Dumbbells') return equipment.includes('Dumbbell');
+            return equipment.includes(filter);
+          });
         });
+      }
+
+      // Filter by Exercise Type to maintain compound/isolation balance
+      filteredExercises = filteredExercises.filter(ex => 
+        ex['Exercise Type'] === exerciseType
+      );
+
+      // Remove current exercise and any duplicates already in workout
+      const workoutExerciseNames = currentWorkout.map(ex => ex['Exercise Name']);
+      let availableExercises = filteredExercises.filter(
+        ex => ex['Exercise Name'] !== currentExerciseName && 
+              !workoutExerciseNames.includes(ex['Exercise Name'])
+      );
+
+      if (availableExercises.length === 0) {
+        // Relax duplicate constraint on retry
+        availableExercises = filteredExercises.filter(
+          ex => ex['Exercise Name'] !== currentExerciseName
+        );
+      }
+
+      if (availableExercises.length === 0) {
+        continue; // Try again with next attempt
+      }
+
+      // Apply favorite bias: include favorites twice in the pool
+      const exercisePool = [...availableExercises];
+      availableExercises.forEach(ex => {
+        if (favoriteExercises.has(ex['Exercise Name'])) {
+          exercisePool.push(ex); // Add favorite a second time for 2x probability
+        }
       });
+
+      // Select random exercise from biased pool
+      selectedExercise = exercisePool[Math.floor(Math.random() * exercisePool.length)];
     }
 
-    // Remove current exercise from options
-    const currentExercise = currentWorkout[supersetIdx * 2 + exerciseIdx];
-    const availableExercises = filteredExercises.filter(
-      ex => ex['Exercise Name'] !== currentExercise['Exercise Name']
-    );
-
-    if (availableExercises.length === 0) {
-      console.warn('No alternative exercises available');
+    if (!selectedExercise) {
+      setNotification({
+        open: true,
+        message: 'No alternative exercises available',
+        severity: 'warning'
+      });
       return;
     }
 
-    // Select a random exercise
-    const randomExercise = availableExercises[Math.floor(Math.random() * availableExercises.length)];
-
     // Update the workout array
     const updatedWorkout = [...currentWorkout];
-    updatedWorkout[supersetIdx * 2 + exerciseIdx] = randomExercise;
+    updatedWorkout[globalIndex] = selectedExercise;
     setCurrentWorkout(updatedWorkout);
-  }, [exerciseDB, currentWorkout]);
+  }, [exerciseDB, currentWorkout, selectedEquipment, favoriteExercises]);
 
   /**
    * Calculate weight increase for progressive overload based on muscle group and equipment

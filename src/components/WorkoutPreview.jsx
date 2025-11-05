@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, Snackbar, Alert, IconButton } from '@mui/material';
@@ -10,11 +10,13 @@ import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExercis
  * Allows users to set starting weights and target reps before beginning
  * Memoized to prevent unnecessary re-renders
  */
-const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise, equipmentFilter }) => {
+const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise }) => {
   const [exerciseSettings, setExerciseSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [savedToFavorites, setSavedToFavorites] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [customizedSettings, setCustomizedSettings] = useState({});
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
 
   // Load saved weights and target reps on mount
   useEffect(() => {
@@ -40,25 +42,110 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
     loadSettings();
   }, [workout]);
 
-  const handleWeightChange = (exerciseName, value) => {
-    setExerciseSettings(prev => ({
-      ...prev,
-      [exerciseName]: {
-        ...prev[exerciseName],
-        weight: parseFloat(value) || 0,
+  // Handle workout changes (e.g., from randomization) and preserve customized settings
+  useEffect(() => {
+    const updateNewExercises = async () => {
+      const currentExerciseNames = Object.keys(exerciseSettings);
+      
+      // Find new exercises that need settings loaded
+      const newExercises = workout.filter(
+        ex => !currentExerciseNames.includes(ex['Exercise Name'])
+      );
+      
+      if (newExercises.length > 0) {
+        const newSettings = { ...exerciseSettings };
+        
+        for (const exercise of newExercises) {
+          const exerciseName = exercise['Exercise Name'];
+          // Only load if not already customized
+          if (!customizedSettings[exerciseName]) {
+            const [weight, targetReps] = await Promise.all([
+              getExerciseWeight(exerciseName),
+              getExerciseTargetReps(exerciseName)
+            ]);
+            newSettings[exerciseName] = {
+              weight: weight || 0,
+              targetReps: targetReps || 12,
+            };
+          }
+        }
+        
+        setExerciseSettings(newSettings);
       }
-    }));
+    };
+    
+    if (!loading && Object.keys(exerciseSettings).length > 0) {
+      updateNewExercises();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workout, loading]); // Intentionally excluding exerciseSettings and customizedSettings to avoid loops
+
+  const handleWeightChange = (exerciseName, value) => {
+    // Validate: only allow non-negative numbers (strict validation)
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      const numValue = value === '' ? 0 : parseFloat(value);
+      setExerciseSettings(prev => ({
+        ...prev,
+        [exerciseName]: {
+          ...prev[exerciseName],
+          weight: numValue,
+        }
+      }));
+      // Track as customized
+      setCustomizedSettings(prev => ({
+        ...prev,
+        [exerciseName]: { ...prev[exerciseName], weightCustomized: true }
+      }));
+    }
+  };
+
+  const handleWeightBlur = (exerciseName, value) => {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue > 0) {
+      // Round to nearest 2.5 lbs
+      const rounded = Math.round(numValue / 2.5) * 2.5;
+      if (rounded !== numValue) {
+        setExerciseSettings(prev => ({
+          ...prev,
+          [exerciseName]: {
+            ...prev[exerciseName],
+            weight: rounded,
+          }
+        }));
+        // Show notification
+        setSnackbar({
+          open: true,
+          message: `Weight adjusted to ${rounded} lbs (nearest 2.5 lb increment)`,
+          severity: 'info'
+        });
+      }
+    }
   };
 
   const handleTargetRepsChange = (exerciseName, value) => {
-    setExerciseSettings(prev => ({
-      ...prev,
-      [exerciseName]: {
-        ...prev[exerciseName],
-        targetReps: parseInt(value) || 12,
-      }
-    }));
+    // Validate: only allow positive integers (strict validation)
+    if (value === '' || /^\d+$/.test(value)) {
+      const numValue = value === '' ? 12 : parseInt(value, 10);
+      setExerciseSettings(prev => ({
+        ...prev,
+        [exerciseName]: {
+          ...prev[exerciseName],
+          targetReps: numValue,
+        }
+      }));
+      // Track as customized
+      setCustomizedSettings(prev => ({
+        ...prev,
+        [exerciseName]: { ...prev[exerciseName], repsCustomized: true }
+      }));
+    }
   };
+
+  const handleRandomizeExercise = useCallback((exercise, globalIndex) => {
+    if (onRandomizeExercise) {
+      onRandomizeExercise(exercise, globalIndex);
+    }
+  }, [onRandomizeExercise]);
 
   const handleStartWorkout = async () => {
     // Save all settings before starting workout
@@ -125,6 +212,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             top: 0,
             right: { xs: 0, sm: 0 },
             color: savedToFavorites ? 'warning.main' : 'action.active',
+            minWidth: '44px',
+            minHeight: '44px',
             '&:hover': {
               color: 'warning.main',
             },
@@ -242,14 +331,20 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               {onRandomizeExercise && (
                                 <IconButton
                                   size="small"
-                                  onClick={() => onRandomizeExercise(idx, exerciseIdx, exercise['Primary Muscle'], equipmentFilter)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const globalIndex = idx * 2 + exerciseIdx;
+                                    handleRandomizeExercise(exercise, globalIndex);
+                                  }}
                                   sx={{
                                     color: 'primary.main',
+                                    minWidth: '44px',
+                                    minHeight: '44px',
                                     '&:hover': {
                                       backgroundColor: 'rgba(19, 70, 134, 0.08)',
                                     },
                                   }}
-                                  aria-label="Randomize exercise"
+                                  aria-label={`Randomize ${exerciseName}`}
                                 >
                                   <Shuffle fontSize="small" />
                                 </IconButton>
@@ -293,11 +388,13 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             label="Weight (lbs)"
                             value={settings.weight}
                             onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
+                            onBlur={(e) => handleWeightBlur(exerciseName, e.target.value)}
                             size="small"
                             inputProps={{
                               min: 0,
                               max: 500,
-                              step: 2.5
+                              step: 2.5,
+                              'aria-label': `Weight in pounds for ${exerciseName}`,
                             }}
                             sx={{ 
                               minWidth: { xs: 100, sm: 120 },
@@ -314,7 +411,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             inputProps={{
                               min: 1,
                               max: 20,
-                              step: 1
+                              step: 1,
+                              'aria-label': `Target repetitions for ${exerciseName}`,
                             }}
                             sx={{ 
                               minWidth: { xs: 100, sm: 120 },
@@ -427,6 +525,17 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
       >
         <Alert severity="success" onClose={() => setShowNotification(false)}>
           Workout saved to favorites!
+        </Alert>
+      </Snackbar>
+      
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </motion.div>

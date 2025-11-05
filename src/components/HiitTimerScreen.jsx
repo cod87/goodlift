@@ -4,6 +4,8 @@ import { Box, Card, CardContent, Typography, Button, TextField, Grid } from '@mu
 import { PlayArrow, Pause, Replay } from '@mui/icons-material';
 import { saveHiitSession } from '../utils/storage';
 import { formatDuration } from '../utils/helpers';
+import audioService from '../utils/audioService';
+import wakeLockManager from '../utils/wakeLock';
 
 const HiitTimerScreen = () => {
   const [workTime, setWorkTime] = useState(30);
@@ -18,10 +20,29 @@ const HiitTimerScreen = () => {
   const intervalRef = useRef(null);
   const startTimeRef = useRef(null);
 
+  // Manage wake lock
+  useEffect(() => {
+    if (isRunning && !isSetup) {
+      // Request wake lock when timer starts
+      wakeLockManager.requestWakeLock();
+    } else {
+      // Release wake lock when timer stops
+      wakeLockManager.releaseWakeLock();
+    }
+
+    return () => {
+      // Cleanup: release wake lock on unmount
+      wakeLockManager.releaseWakeLock();
+    };
+  }, [isRunning, isSetup]);
+
   const handleComplete = useCallback(async () => {
     setIsRunning(false);
     const endTime = Date.now();
     const duration = Math.floor((endTime - startTimeRef.current) / 1000);
+    
+    // Play completion sound
+    audioService.playCompletionFanfare();
     
     // Save session
     await saveHiitSession({
@@ -42,12 +63,12 @@ const HiitTimerScreen = () => {
           if (prev <= 1) {
             // Phase complete
             if (isWorkPhase) {
-              // Switch to rest
+              // Switch to rest - play low beep
+              audioService.playLowBeep();
               setIsWorkPhase(false);
               return restTime;
             } else {
               // Switch to work
-              setIsWorkPhase(true);
               setCurrentRound((r) => r + 1);
               
               // Check if workout is complete
@@ -55,6 +76,10 @@ const HiitTimerScreen = () => {
                 handleComplete();
                 return 0;
               }
+              
+              // Play high beep for work period
+              audioService.playHighBeep();
+              setIsWorkPhase(true);
               return workTime;
             }
           }
@@ -82,6 +107,8 @@ const HiitTimerScreen = () => {
       setIsWorkPhase(true);
       setTotalElapsed(0);
       startTimeRef.current = Date.now();
+      // Play start beep
+      audioService.playHighBeep();
     }
     setIsRunning(true);
   };

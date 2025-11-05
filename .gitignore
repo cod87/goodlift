@@ -25,3 +25,5 @@ dist-ssr
 
 # Keep docs directory for GitHub Pages deployment
 # (Vite builds to docs/ for main/docs deployment)
+*_backup.json
+*_updated.json

@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo, memo } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
-import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem, Snackbar, Alert, IconButton } from '@mui/material';
+import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, Snackbar, Alert, IconButton } from '@mui/material';
 import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 
@@ -15,24 +15,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [loading, setLoading] = useState(true);
   const [savedToFavorites, setSavedToFavorites] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
-
-  // Generate weight options once (0-500 lbs in 2.5 lb increments)
-  const weightOptions = useMemo(() => {
-    const options = [];
-    for (let i = 0; i <= 500; i += 2.5) {
-      options.push(i);
-    }
-    return options;
-  }, []);
-
-  // Generate target reps options once (1-20 reps)
-  const repsOptions = useMemo(() => {
-    const options = [];
-    for (let i = 1; i <= 20; i++) {
-      options.push(i);
-    }
-    return options;
-  }, []);
 
   // Load saved weights and target reps on mount
   useEffect(() => {
@@ -306,39 +288,39 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                           }}
                         >
                           <TextField
-                            select
+                            type="number"
+                            inputMode="numeric"
                             label="Weight (lbs)"
                             value={settings.weight}
                             onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
                             size="small"
+                            inputProps={{
+                              min: 0,
+                              max: 500,
+                              step: 2.5
+                            }}
                             sx={{ 
                               minWidth: { xs: 100, sm: 120 },
                               flex: { xs: '1 1 45%', sm: 'none' }
                             }}
-                          >
-                            {weightOptions.map((weight) => (
-                              <MenuItem key={weight} value={weight}>
-                                {weight} lbs
-                              </MenuItem>
-                            ))}
-                          </TextField>
+                          />
                           <TextField
-                            select
+                            type="number"
+                            inputMode="numeric"
                             label="Target Reps"
                             value={settings.targetReps}
                             onChange={(e) => handleTargetRepsChange(exerciseName, e.target.value)}
                             size="small"
+                            inputProps={{
+                              min: 1,
+                              max: 20,
+                              step: 1
+                            }}
                             sx={{ 
                               minWidth: { xs: 100, sm: 120 },
                               flex: { xs: '1 1 45%', sm: 'none' }
                             }}
-                          >
-                            {repsOptions.map((reps) => (
-                              <MenuItem key={reps} value={reps}>
-                                {reps} reps
-                              </MenuItem>
-                            ))}
-                          </TextField>
+                          />
                         </Stack>
                       </Box>
                     );

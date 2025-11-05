@@ -216,14 +216,6 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=nEF0bv2FW94"
   },
   {
-    "Exercise Name": "Close Grip Bench Press",
-    "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Front Delts, Chest",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=nEF0bv2FW94"
-  },
-  {
     "Exercise Name": "Deadlift",
     "Primary Muscle": "Hamstrings",
     "Secondary Muscles": "Glutes, Quads, Lower Back",
@@ -414,14 +406,6 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=roCP6wCXPqo"
-  },
-  {
-    "Exercise Name": "Dumbbell Pullovers",
-    "Primary Muscle": "Lats",
-    "Secondary Muscles": "Chest, Triceps",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=kiuVA0gs3EI"
   },
   {
     "Exercise Name": "Dumbbell Pullovers",
@@ -664,14 +648,6 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=QAQ64hK4Xxs"
   },
   {
-    "Exercise Name": "Landmine Press",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Landmine",
-    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=QAQ64hK4Xxs"
-  },
-  {
     "Exercise Name": "Landmine Rotation",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Shoulders, Chest",
@@ -694,14 +670,6 @@
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=pAplQXk3dkU"
-  },
-  {
-    "Exercise Name": "Landmine Row",
-    "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Landmine",
-    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=FWJR5Ve8bnQ"
   },
   {
     "Exercise Name": "Landmine Row",

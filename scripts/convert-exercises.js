@@ -73,7 +73,7 @@ async function convertExercises() {
     // Parse CSV
     const parseResult = Papa.parse(csvContent, {
       header: true,
-      skipEmptyLines: false, // We'll handle empty lines manually
+      skipEmptyLines: true, // Skip rows with all empty fields
       transformHeader: (header) => {
         // Normalize header names to match expected format
         return header.trim();
@@ -91,13 +91,27 @@ async function convertExercises() {
     const exercises = convertToJSON(parseResult.data);
     console.log(`Converted ${exercises.length} exercises (filtered empty rows)`);
     
+    // Remove duplicates by exercise name (keep first occurrence)
+    const uniqueExercises = [];
+    const seenNames = new Set();
+    for (const exercise of exercises) {
+      const name = exercise["Exercise Name"];
+      if (!seenNames.has(name)) {
+        seenNames.add(name);
+        uniqueExercises.push(exercise);
+      } else {
+        console.warn(`  Skipping duplicate: ${name}`);
+      }
+    }
+    console.log(`Removed ${exercises.length - uniqueExercises.length} duplicate(s), ${uniqueExercises.length} unique exercises`);
+    
     // Validate exercises
-    if (exercises.length === 0) {
+    if (uniqueExercises.length === 0) {
       throw new Error('No exercises found after conversion. Check CSV format.');
     }
     
     // Sort exercises alphabetically by name for consistency
-    exercises.sort((a, b) => 
+    uniqueExercises.sort((a, b) => 
       a["Exercise Name"].localeCompare(b["Exercise Name"])
     );
     
@@ -110,10 +124,10 @@ async function convertExercises() {
     // Write JSON to public/data/exercises.json
     fs.writeFileSync(
       JSON_OUTPUT_PATH,
-      JSON.stringify(exercises, null, 2),
+      JSON.stringify(uniqueExercises, null, 2),
       'utf-8'
     );
-    console.log(`✓ Successfully wrote ${exercises.length} exercises to: ${JSON_OUTPUT_PATH}`);
+    console.log(`✓ Successfully wrote ${uniqueExercises.length} exercises to: ${JSON_OUTPUT_PATH}`);
     
     // Also write to docs/data/exercises.json for production build
     const docsDir = path.dirname(DOCS_JSON_OUTPUT_PATH);
@@ -123,19 +137,19 @@ async function convertExercises() {
     
     fs.writeFileSync(
       DOCS_JSON_OUTPUT_PATH,
-      JSON.stringify(exercises, null, 2),
+      JSON.stringify(uniqueExercises, null, 2),
       'utf-8'
     );
-    console.log(`✓ Successfully wrote ${exercises.length} exercises to: ${DOCS_JSON_OUTPUT_PATH}`);
+    console.log(`✓ Successfully wrote ${uniqueExercises.length} exercises to: ${DOCS_JSON_OUTPUT_PATH}`);
     
     // Display sample exercises
     console.log('\nSample exercises (first 3):');
-    exercises.slice(0, 3).forEach(ex => {
+    uniqueExercises.slice(0, 3).forEach(ex => {
       console.log(`  - ${ex["Exercise Name"]} (${ex["Primary Muscle"]})`);
     });
     
     console.log('\n✓ Conversion completed successfully!');
-    return exercises;
+    return uniqueExercises;
   } catch (error) {
     console.error('❌ Error during conversion:');
     console.error(error.message);

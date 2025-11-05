@@ -89,6 +89,7 @@ class TextToSpeechService {
    * @param {number} options.pitch - Speech pitch (0 to 2, default 1)
    * @param {number} options.volume - Speech volume (0 to 1, default 1)
    * @param {string} options.lang - Language (default 'en-US')
+   * @param {string} options.voiceName - Specific voice name to use (optional)
    * @returns {Promise<void>}
    */
   speak(text, options = {}) {
@@ -115,6 +116,37 @@ class TextToSpeechService {
       utterance.volume = options.volume || 1;
       utterance.lang = options.lang || 'en-US';
 
+      // Try to select a more natural voice
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        // Prefer voices with 'female' or 'natural' in the name for a calming effect
+        // Or voices that are explicitly marked as high quality
+        let preferredVoice = voices.find(voice => 
+          voice.lang.startsWith('en') && (
+            voice.name.toLowerCase().includes('female') ||
+            voice.name.toLowerCase().includes('natural') ||
+            voice.name.toLowerCase().includes('premium') ||
+            voice.name.toLowerCase().includes('neural')
+          )
+        );
+        
+        // If no preferred voice, try to find any high-quality English voice
+        if (!preferredVoice) {
+          preferredVoice = voices.find(voice => 
+            voice.lang.startsWith('en') && voice.localService === false
+          );
+        }
+        
+        // Fall back to first English voice
+        if (!preferredVoice) {
+          preferredVoice = voices.find(voice => voice.lang.startsWith('en'));
+        }
+        
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+      }
+
       utterance.onend = () => {
         this.currentUtterance = null;
         resolve();
@@ -137,7 +169,8 @@ class TextToSpeechService {
    */
   async announceExercise(name) {
     try {
-      await this.speak(name, { rate: 0.9 });
+      // Use slower rate and slightly lower pitch for a more calming effect
+      await this.speak(name, { rate: 0.85, pitch: 0.95 });
     } catch (e) {
       console.warn('Could not announce exercise:', e);
     }

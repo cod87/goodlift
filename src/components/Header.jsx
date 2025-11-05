@@ -49,7 +49,7 @@ const Header = ({ isDesktop }) => {
         height: '60px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         padding: '0 1rem',
         background: 'rgba(255, 255, 255, 0.75)',
         backdropFilter: 'blur(10px)',
@@ -59,18 +59,37 @@ const Header = ({ isDesktop }) => {
         transition: 'left 0.3s ease',
       }}
     >
-      {/* Left spacer for mobile */}
-      <Box sx={{ width: '40px' }} />
+      {/* Left controls */}
+      <Box sx={{ 
+        position: 'absolute', 
+        left: '1rem',
+        display: 'flex', 
+        gap: 0.5 
+      }}>
+        {/* Placeholder to balance layout - hidden */}
+        <Box sx={{ width: '40px', visibility: 'hidden' }} />
+      </Box>
       
-      {/* Center logo */}
-      <img
-        src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
-        alt="GoodLift"
-        style={{ height: '40px', width: 'auto' }}
-      />
+      {/* Center logo - absolutely centered */}
+      <Box sx={{
+        position: 'absolute',
+        left: '50%',
+        transform: 'translateX(-50%)',
+      }}>
+        <img
+          src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
+          alt="GoodLift"
+          style={{ height: '40px', width: 'auto', display: 'block' }}
+        />
+      </Box>
       
       {/* Right controls */}
-      <Box sx={{ display: 'flex', gap: 0.5 }}>
+      <Box sx={{ 
+        position: 'absolute',
+        right: '1rem',
+        display: 'flex', 
+        gap: 0.5 
+      }}>
         {/* Sound Toggle */}
         <Tooltip title={isMuted ? 'Unmute sounds' : 'Mute sounds'}>
           <IconButton

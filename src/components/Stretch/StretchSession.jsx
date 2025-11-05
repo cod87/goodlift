@@ -146,10 +146,12 @@ const StretchSession = ({ stretches, onComplete, onExit }) => {
   return (
     <Box
       sx={{
-        padding: { xs: '2rem 1rem', sm: '2rem', md: '3rem' },
+        padding: { xs: '0.5rem', sm: '1rem', md: '2rem' },
         maxWidth: '900px',
         margin: '0 auto',
         minHeight: 'calc(100vh - 60px)',
+        width: '100%',
+        boxSizing: 'border-box',
       }}
     >
       {/* Overall Progress */}
@@ -191,31 +193,33 @@ const StretchSession = ({ stretches, onComplete, onExit }) => {
               boxShadow: 4,
             }}
           >
-            <CardContent sx={{ padding: { xs: 3, sm: 4 } }}>
+            <CardContent sx={{ padding: { xs: 2, sm: 3 }, width: '100%', boxSizing: 'border-box' }}>
               {/* Stretch Name */}
               <Typography
-                variant="h3"
+                variant="h4"
                 sx={{
                   fontFamily: "'Montserrat', sans-serif",
                   fontWeight: 800,
                   color: 'primary.main',
-                  marginBottom: 2,
+                  marginBottom: { xs: 1, sm: 2 },
                   textAlign: 'center',
+                  fontSize: { xs: '1.5rem', sm: '2rem' },
                 }}
               >
                 {currentStretch.name}
               </Typography>
 
               {/* Timer */}
-              <Box sx={{ marginBottom: 3, textAlign: 'center' }}>
+              <Box sx={{ marginBottom: { xs: 2, sm: 3 }, textAlign: 'center' }}>
                 <Typography
                   variant="h1"
                   sx={{
                     fontFamily: "'Montserrat', sans-serif",
                     fontWeight: 800,
                     color: isPaused ? 'grey.500' : 'secondary.main',
-                    fontSize: { xs: '4rem', sm: '6rem' },
+                    fontSize: { xs: '3rem', sm: '4rem', md: '5rem' },
                     marginBottom: 1,
+                    lineHeight: 1,
                   }}
                 >
                   {formatTime(timeLeft)}
@@ -224,7 +228,7 @@ const StretchSession = ({ stretches, onComplete, onExit }) => {
                   variant="determinate"
                   value={progress}
                   sx={{
-                    height: 12,
+                    height: { xs: 8, sm: 12 },
                     borderRadius: 6,
                     backgroundColor: 'rgba(237, 63, 39, 0.1)',
                     '& .MuiLinearProgress-bar': {
@@ -235,14 +239,14 @@ const StretchSession = ({ stretches, onComplete, onExit }) => {
               </Box>
 
               {/* Muscle Groups */}
-              <Box sx={{ marginBottom: 3 }}>
+              <Box sx={{ marginBottom: { xs: 2, sm: 3 } }}>
                 <Typography
                   variant="subtitle2"
-                  sx={{ fontWeight: 600, marginBottom: 1, color: 'primary.main' }}
+                  sx={{ fontWeight: 600, marginBottom: 0.5, color: 'primary.main', fontSize: { xs: '0.875rem', sm: '1rem' } }}
                 >
                   Primary Muscles:
                 </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, marginBottom: 2 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, marginBottom: { xs: 1, sm: 2 } }}>
                   {currentStretch.primaryMuscles.split(',').map((muscle, idx) => (
                     <Chip
                       key={idx}
@@ -257,11 +261,11 @@ const StretchSession = ({ stretches, onComplete, onExit }) => {
                   <>
                     <Typography
                       variant="subtitle2"
-                      sx={{ fontWeight: 600, marginBottom: 1, color: 'text.secondary' }}
+                      sx={{ fontWeight: 600, marginBottom: 0.5, color: 'text.secondary', fontSize: { xs: '0.875rem', sm: '1rem' } }}
                     >
                       Secondary Muscles:
                     </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                       {currentStretch.secondaryMuscles.split(',').map((muscle, idx) => {
                         const trimmed = muscle.trim();
                         return trimmed ? (
@@ -285,7 +289,7 @@ const StretchSession = ({ stretches, onComplete, onExit }) => {
                   startIcon={<OpenInNew />}
                   onClick={() => window.open(currentStretch.youtubeLink, '_blank')}
                   fullWidth
-                  sx={{ marginBottom: 3 }}
+                  sx={{ marginBottom: { xs: 2, sm: 3 }, fontSize: { xs: '0.875rem', sm: '1rem' } }}
                 >
                   Watch Demonstration
                 </Button>
@@ -297,8 +301,9 @@ const StretchSession = ({ stretches, onComplete, onExit }) => {
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  gap: 2,
-                  marginBottom: 2,
+                  gap: { xs: 1, sm: 2 },
+                  marginBottom: { xs: 1, sm: 2 },
+                  flexWrap: 'wrap',
                 }}
               >
                 <Tooltip title="Previous stretch">
@@ -327,12 +332,12 @@ const StretchSession = ({ stretches, onComplete, onExit }) => {
                     sx={{
                       backgroundColor: 'secondary.main',
                       color: 'white',
-                      width: 64,
-                      height: 64,
+                      width: { xs: 56, sm: 64 },
+                      height: { xs: 56, sm: 64 },
                       '&:hover': { backgroundColor: 'secondary.dark' },
                     }}
                   >
-                    {isPaused ? <PlayArrow sx={{ fontSize: 40 }} /> : <Pause sx={{ fontSize: 40 }} />}
+                    {isPaused ? <PlayArrow sx={{ fontSize: { xs: 32, sm: 40 } }} /> : <Pause sx={{ fontSize: { xs: 32, sm: 40 } }} />}
                   </IconButton>
                 </Tooltip>
 

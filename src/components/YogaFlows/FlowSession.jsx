@@ -125,10 +125,12 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
   return (
     <Box
       sx={{
-        padding: { xs: '2rem 1rem', sm: '2rem', md: '3rem' },
+        padding: { xs: '1rem', sm: '2rem', md: '3rem' },
         maxWidth: '1000px',
         margin: '0 auto',
         minHeight: 'calc(100vh - 60px)',
+        width: '100%',
+        boxSizing: 'border-box',
       }}
     >
       <motion.div
@@ -142,9 +144,11 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
             background: 'linear-gradient(135deg, rgba(19, 70, 134, 0.05) 0%, rgba(156, 39, 176, 0.05) 100%)',
             boxShadow: 4,
             marginBottom: 3,
+            width: '100%',
+            boxSizing: 'border-box',
           }}
         >
-          <CardContent sx={{ padding: { xs: 3, sm: 4 } }}>
+          <CardContent sx={{ padding: { xs: 2, sm: 3, md: 4 }, width: '100%', boxSizing: 'border-box' }}>
             {/* Flow Header */}
             <Box sx={{ marginBottom: 3 }}>
               <Box

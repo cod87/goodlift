@@ -263,6 +263,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                                 size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  console.log('Toggle favorite clicked:', exerciseName);
+                                  console.log('Current favorite state:', isFavoriteExercise(exerciseName));
                                   toggleFavorite(exercise);
                                 }}
                                 disableRipple
@@ -272,23 +274,13 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                                   minHeight: '44px',
                                   padding: 1,
                                   '&:hover': {
-                                    backgroundColor: 'action.hover',
-                                    color: 'secondary.main',
-                                    transform: 'scale(1.1)',
+                                    backgroundColor: 'transparent',
                                   },
-                                  transition: 'all 0.2s ease-in-out',
+                                  transition: 'none',
                                 }}
                                 aria-label={isFavoriteExercise(exerciseName) ? 'Remove from favorites' : 'Add to favorites'}
                               >
-                                <motion.div
-                                  initial={false}
-                                  animate={{ 
-                                    scale: isFavoriteExercise(exerciseName) ? [1, 1.2, 1] : 1,
-                                  }}
-                                  transition={{ duration: 0.2, ease: 'easeInOut' }}
-                                >
-                                  {isFavoriteExercise(exerciseName) ? <Favorite fontSize="small" /> : <FavoriteBorder fontSize="small" />}
-                                </motion.div>
+                                {isFavoriteExercise(exerciseName) ? <Favorite fontSize="small" /> : <FavoriteBorder fontSize="small" />}
                               </IconButton>
                               {onRandomizeExercise && (
                                 <IconButton

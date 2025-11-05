@@ -72,6 +72,8 @@ export const useFavoriteExercises = () => {
 
       // Optimistically update
       const exerciseId = generateExerciseId(exercise['Exercise Name']);
+      console.log('onMutate (add):', { exerciseId, exerciseName: exercise['Exercise Name'], previousCount: previousFavorites?.length });
+      
       queryClient.setQueryData(['favoriteExercises', currentUser?.uid], (old = []) => [
         ...old,
         {
@@ -87,11 +89,15 @@ export const useFavoriteExercises = () => {
     },
     onError: (err, exercise, context) => {
       // Rollback on error
+      console.error('Error adding favorite (rolling back):', err);
       queryClient.setQueryData(['favoriteExercises', currentUser?.uid], context.previousFavorites);
-      console.error('Error adding favorite:', err);
+    },
+    onSuccess: (data) => {
+      console.log('Successfully added favorite:', data);
     },
     onSettled: () => {
       // Refetch after mutation
+      console.log('Settled (add) - invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['favoriteExercises', currentUser?.uid] });
     },
   });
@@ -118,6 +124,8 @@ export const useFavoriteExercises = () => {
 
       // Optimistically update
       const exerciseId = generateExerciseId(exerciseName);
+      console.log('onMutate (remove):', { exerciseId, exerciseName, previousCount: previousFavorites?.length });
+      
       queryClient.setQueryData(['favoriteExercises', currentUser?.uid], (old = []) =>
         old.filter(fav => fav.id !== exerciseId)
       );
@@ -126,11 +134,15 @@ export const useFavoriteExercises = () => {
     },
     onError: (err, exerciseName, context) => {
       // Rollback on error
+      console.error('Error removing favorite (rolling back):', err);
       queryClient.setQueryData(['favoriteExercises', currentUser?.uid], context.previousFavorites);
-      console.error('Error removing favorite:', err);
+    },
+    onSuccess: (data) => {
+      console.log('Successfully removed favorite:', data);
     },
     onSettled: () => {
       // Refetch after mutation
+      console.log('Settled (remove) - invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['favoriteExercises', currentUser?.uid] });
     },
   });
@@ -140,9 +152,13 @@ export const useFavoriteExercises = () => {
     const exerciseName = exercise['Exercise Name'];
     const isFavorite = isFavoriteExercise(exerciseName);
     
+    console.log('toggleFavorite called:', { exerciseName, isFavorite, currentUser: currentUser?.uid });
+    
     if (isFavorite) {
+      console.log('Removing favorite:', exerciseName);
       removeFavoriteMutation.mutate(exerciseName);
     } else {
+      console.log('Adding favorite:', exerciseName);
       addFavoriteMutation.mutate(exercise);
     }
   };

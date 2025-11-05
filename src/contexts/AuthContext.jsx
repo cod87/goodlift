@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { loadUserDataFromCloud, setCurrentUserId } from '../utils/storage';
+import { isGuestMode, enableGuestMode, disableGuestMode } from '../utils/guestStorage';
 
 const AuthContext = createContext({});
 
@@ -19,6 +20,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
 
   const signup = (email, password) => {
     return createUserWithEmailAndPassword(auth, email, password);
@@ -29,22 +31,56 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    if (isGuest) {
+      // For guest users, just clear the guest state
+      setIsGuest(false);
+      disableGuestMode();
+      setCurrentUser(null);
+      return Promise.resolve();
+    }
     return signOut(auth);
   };
 
+  const continueAsGuest = () => {
+    enableGuestMode();
+    setIsGuest(true);
+    // Create a guest user object for compatibility
+    setCurrentUser({
+      uid: 'guest',
+      email: null,
+      isGuest: true,
+    });
+  };
+
   useEffect(() => {
+    // Check if returning as guest on mount
+    if (isGuestMode()) {
+      setIsGuest(true);
+      setCurrentUser({
+        uid: 'guest',
+        email: null,
+        isGuest: true,
+      });
+      setLoading(false);
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      
       if (user) {
-        // User is logged in, load their data from Firebase
+        // Real user is logged in
+        setIsGuest(false);
+        disableGuestMode();
+        setCurrentUser(user);
+        
+        // Load their data from Firebase
         try {
           await loadUserDataFromCloud(user.uid);
         } catch (error) {
           console.error('Error loading user data:', error);
         }
-      } else {
-        // User is logged out, clear the current user ID
+      } else if (!isGuestMode()) {
+        // User is logged out and not in guest mode
+        setIsGuest(false);
+        setCurrentUser(null);
         setCurrentUserId(null);
       }
       
@@ -56,9 +92,11 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     currentUser,
+    isGuest,
     signup,
     login,
-    logout
+    logout,
+    continueAsGuest,
   };
 
   return (

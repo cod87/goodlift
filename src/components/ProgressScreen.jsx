@@ -14,8 +14,8 @@ import {
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import Calendar from './Calendar';
-import { Box, Card, CardContent, Typography, Grid, Stack, IconButton } from '@mui/material';
-import { FitnessCenter, Timer, TrendingUp, Whatshot, Delete, TrendingUpRounded, SelfImprovement } from '@mui/icons-material';
+import { Box, Card, CardContent, Typography, Grid, Stack, IconButton, Chip } from '@mui/material';
+import { FitnessCenter, Timer, TrendingUp, Whatshot, Delete, TrendingUpRounded, SelfImprovement, DirectionsRun } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -347,13 +347,52 @@ const ProgressScreen = () => {
             </motion.div>
           </Stack>
 
-          {/* Row 3: Mobility Time (single card, centered) */}
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          {/* Row 3: Stretch Time & Yoga Time */}
+          <Stack direction="row" spacing={2}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              style={{ width: '50%', minWidth: '250px' }}
+              style={{ flex: 1 }}
+            >
+              <Card sx={{ 
+                height: '100%',
+                borderRadius: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 24px rgba(76, 175, 80, 0.15)',
+                }
+              }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                    <DirectionsRun sx={{ fontSize: 32, color: 'success.main' }} />
+                    <Typography variant="body2" sx={{ 
+                      color: 'text.secondary',
+                      textTransform: 'uppercase',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                    }}>
+                      Stretch Time
+                    </Typography>
+                  </Stack>
+                  <Typography variant="h3" sx={{ 
+                    fontWeight: 700,
+                    color: 'success.main',
+                    fontSize: { xs: '2rem', sm: '2.5rem' }
+                  }}>
+                    {formatDuration(stats.totalStretchTime || 0)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              style={{ flex: 1 }}
             >
               <Card sx={{ 
                 height: '100%',
@@ -374,7 +413,7 @@ const ProgressScreen = () => {
                       fontWeight: 600,
                       letterSpacing: 0.5,
                     }}>
-                      Mobility Time
+                      Yoga Time
                     </Typography>
                   </Stack>
                   <Typography variant="h3" sx={{ 
@@ -382,12 +421,12 @@ const ProgressScreen = () => {
                     color: '#9c27b0',
                     fontSize: { xs: '2rem', sm: '2.5rem' }
                   }}>
-                    {formatDuration((stats.totalStretchTime || 0) + (stats.totalYogaTime || 0))}
+                    {formatDuration(stats.totalYogaTime || 0)}
                   </Typography>
                 </CardContent>
               </Card>
             </motion.div>
-          </Box>
+          </Stack>
         </Stack>
       </Box>
 
@@ -564,7 +603,7 @@ const ProgressScreen = () => {
         </Stack>
       </div>
 
-      {/* HIIT History */}
+      {/* HIIT Sessions History */}
       {hiitSessions.length > 0 && (
         <div className="workout-history-container" style={{ marginTop: '2rem' }}>
           <Typography variant="h4" component="h2" sx={{ 
@@ -572,7 +611,7 @@ const ProgressScreen = () => {
             mb: 3,
             color: 'text.primary'
           }}>
-            HIIT History
+            HIIT Sessions
           </Typography>
           <Stack spacing={2}>
             {hiitSessions.map((session) => (
@@ -628,77 +667,148 @@ const ProgressScreen = () => {
         </div>
       )}
 
-      {/* Mobility History (Combined Stretch & Yoga Sessions) */}
-      {(stretchSessions.length > 0 || yogaSessions.length > 0) && (
+      {/* Stretch Sessions History */}
+      {stretchSessions.length > 0 && (
         <div className="workout-history-container" style={{ marginTop: '2rem' }}>
           <Typography variant="h4" component="h2" sx={{ 
             fontWeight: 700,
             mb: 3,
             color: 'text.primary'
           }}>
-            Mobility History
+            Stretch Sessions
           </Typography>
           <Stack spacing={2}>
-            {/* Combine and sort stretch and yoga sessions by date */}
-            {[...stretchSessions.map(s => ({...s, type: 'stretch'})), ...yogaSessions.map(s => ({...s, type: 'yoga'}))]
-              .sort((a, b) => new Date(b.date) - new Date(a.date))
-              .map((session) => (
-                <motion.div
-                  key={session.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 }}
-                >
-                  <Card sx={{ 
-                    borderLeft: '4px solid',
-                    borderLeftColor: '#9c27b0',
-                    borderRadius: 2,
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateX(4px)',
-                      boxShadow: '0 4px 12px rgba(156, 39, 176, 0.15)',
-                    }
-                  }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <Box sx={{ flex: 1 }}>
-                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                            <SelfImprovement sx={{ color: '#9c27b0', fontSize: 20 }} />
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                              {session.type === 'stretch' 
-                                ? `${session.type === 'full' ? 'Full Body' : 'Custom'} Stretch`
-                                : session.flowName || 'Yoga Flow'
-                              } - {formatDate(session.date)}
-                            </Typography>
-                          </Stack>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                            Duration: {formatDuration(session.duration)}
+            {stretchSessions.map((session) => (
+              <motion.div
+                key={session.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.05 }}
+              >
+                <Card sx={{ 
+                  borderLeft: '4px solid',
+                  borderLeftColor: 'success.main',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateX(4px)',
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.15)',
+                  }
+                }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Box sx={{ flex: 1 }}>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                          <DirectionsRun sx={{ color: 'success.main', fontSize: 20 }} />
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {session.type === 'full' ? 'Full Body' : 'Custom'} Stretch - {formatDate(session.date)}
                           </Typography>
-                          {session.type === 'stretch' && session.stretchesCompleted && (
-                            <Typography variant="body2" color="text.secondary">
-                              Stretches: {session.stretchesCompleted} completed
-                            </Typography>
-                          )}
-                        </Box>
-                        <IconButton
-                          onClick={() => session.type === 'stretch' ? handleDeleteStretch(session.id) : handleDeleteYoga(session.id)}
-                          size="small"
-                          sx={{
-                            color: 'error.main',
-                            '&:hover': {
-                              backgroundColor: 'error.light',
-                              color: 'error.contrastText',
-                            }
-                          }}
-                          aria-label="Delete session"
-                        >
-                          <Delete />
-                        </IconButton>
+                        </Stack>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                          Duration: {formatDuration(session.duration)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Stretches: {session.stretchesCompleted} completed
+                        </Typography>
                       </Box>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                      <IconButton
+                        onClick={() => handleDeleteStretch(session.id)}
+                        size="small"
+                        sx={{
+                          color: 'error.main',
+                          '&:hover': {
+                            backgroundColor: 'error.light',
+                            color: 'error.contrastText',
+                          }
+                        }}
+                        aria-label="Delete stretch session"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </Stack>
+        </div>
+      )}
+
+      {/* Yoga Sessions History */}
+      {yogaSessions.length > 0 && (
+        <div className="workout-history-container" style={{ marginTop: '2rem' }}>
+          <Typography variant="h4" component="h2" sx={{ 
+            fontWeight: 700,
+            mb: 3,
+            color: 'text.primary'
+          }}>
+            Yoga Sessions
+          </Typography>
+          <Stack spacing={2}>
+            {yogaSessions.map((session) => (
+              <motion.div
+                key={session.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.05 }}
+              >
+                <Card sx={{ 
+                  borderLeft: '4px solid',
+                  borderLeftColor: '#9c27b0',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateX(4px)',
+                    boxShadow: '0 4px 12px rgba(156, 39, 176, 0.15)',
+                  }
+                }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Box sx={{ flex: 1 }}>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                          <SelfImprovement sx={{ color: '#9c27b0', fontSize: 20 }} />
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {session.flowName} - {formatDate(session.date)}
+                          </Typography>
+                        </Stack>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                          Duration: {formatDuration(session.duration)}
+                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Chip 
+                            label={session.difficultyLevel} 
+                            size="small" 
+                            sx={{ 
+                              bgcolor: session.difficultyLevel === 'Beginner' ? '#4caf50' : 
+                                       session.difficultyLevel === 'Intermediate' ? '#ff9800' : '#f44336',
+                              color: 'white',
+                              fontSize: '0.75rem',
+                            }}
+                          />
+                          <Typography variant="body2" color="text.secondary">
+                            {session.posesCompleted} poses
+                          </Typography>
+                        </Stack>
+                      </Box>
+                      <IconButton
+                        onClick={() => handleDeleteYoga(session.id)}
+                        size="small"
+                        sx={{
+                          color: 'error.main',
+                          '&:hover': {
+                            backgroundColor: 'error.light',
+                            color: 'error.contrastText',
+                          }
+                        }}
+                        aria-label="Delete yoga session"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </Stack>
         </div>
       )}

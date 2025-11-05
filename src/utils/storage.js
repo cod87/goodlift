@@ -141,27 +141,42 @@ export const getUserStats = async () => {
     const totalWorkouts = history.length;
     const totalTime = history.reduce((sum, workout) => sum + (workout.duration || 0), 0);
     
-    // Get HIIT time separately (still stored independently)
+    // Calculate HIIT time from HIIT sessions
     let totalHiitTime = 0;
     try {
-      if (currentUserId) {
-        const firebaseData = await loadUserDataFromFirebase(currentUserId);
-        if (firebaseData?.userStats?.totalHiitTime) {
-          totalHiitTime = firebaseData.userStats.totalHiitTime;
-        }
-      }
-      if (totalHiitTime === 0) {
-        const stats = localStorage.getItem(KEYS.USER_STATS);
-        const parsedStats = stats ? JSON.parse(stats) : {};
-        totalHiitTime = parsedStats.totalHiitTime || 0;
-      }
+      const hiitSessions = getHiitSessions();
+      totalHiitTime = hiitSessions.reduce((sum, session) => sum + (session.duration || 0), 0);
     } catch (error) {
-      console.error('Error reading HIIT time:', error);
+      console.error('Error calculating HIIT time:', error);
     }
     
-    const calculatedStats = { totalWorkouts, totalTime, totalHiitTime };
+    // Calculate stretch time from stretch sessions
+    let totalStretchTime = 0;
+    try {
+      const stretchSessions = getStretchSessions();
+      totalStretchTime = stretchSessions.reduce((sum, session) => sum + (session.duration || 0), 0);
+    } catch (error) {
+      console.error('Error calculating stretch time:', error);
+    }
     
-    // Save the calculated stats back to storage for HIIT time persistence
+    // Calculate yoga time from yoga sessions
+    let totalYogaTime = 0;
+    try {
+      const yogaSessions = getYogaSessions();
+      totalYogaTime = yogaSessions.reduce((sum, session) => sum + (session.duration || 0), 0);
+    } catch (error) {
+      console.error('Error calculating yoga time:', error);
+    }
+    
+    const calculatedStats = { 
+      totalWorkouts, 
+      totalTime, 
+      totalHiitTime,
+      totalStretchTime,
+      totalYogaTime
+    };
+    
+    // Save the calculated stats back to storage
     localStorage.setItem(KEYS.USER_STATS, JSON.stringify(calculatedStats));
     if (currentUserId) {
       await saveUserStatsToFirebase(currentUserId, calculatedStats);
@@ -170,7 +185,7 @@ export const getUserStats = async () => {
     return calculatedStats;
   } catch (error) {
     console.error('Error calculating user stats:', error);
-    return { totalWorkouts: 0, totalTime: 0, totalHiitTime: 0 };
+    return { totalWorkouts: 0, totalTime: 0, totalHiitTime: 0, totalStretchTime: 0, totalYogaTime: 0 };
   }
 };
 
@@ -433,10 +448,7 @@ export const saveHiitSession = async (sessionData) => {
     sessions.unshift(sessionData); // Add to beginning for chronological order
     localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(sessions));
     
-    // Update total HIIT time in user stats
-    const stats = await getUserStats();
-    stats.totalHiitTime = (stats.totalHiitTime || 0) + (sessionData.duration || 0);
-    await saveUserStats(stats);
+    // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error saving HIIT session:', error);
     throw error;
@@ -551,10 +563,7 @@ export const saveStretchSession = async (sessionData) => {
     sessions.unshift(sessionData); // Add to beginning for chronological order
     localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(sessions));
     
-    // Update total stretch time in user stats
-    const stats = await getUserStats();
-    stats.totalStretchTime = (stats.totalStretchTime || 0) + (sessionData.duration || 0);
-    await saveUserStats(stats);
+    // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error saving stretch session:', error);
     throw error;
@@ -568,16 +577,10 @@ export const saveStretchSession = async (sessionData) => {
 export const deleteStretchSession = async (sessionId) => {
   try {
     const sessions = getStretchSessions();
-    const sessionToDelete = sessions.find(s => s.id === sessionId);
     const filteredSessions = sessions.filter(s => s.id !== sessionId);
     localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(filteredSessions));
     
-    // Update stats if session had duration
-    if (sessionToDelete?.duration) {
-      const stats = await getUserStats();
-      stats.totalStretchTime = Math.max(0, (stats.totalStretchTime || 0) - sessionToDelete.duration);
-      await saveUserStats(stats);
-    }
+    // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error deleting stretch session:', error);
     throw error;
@@ -612,10 +615,7 @@ export const saveYogaSession = async (sessionData) => {
     sessions.unshift(sessionData); // Add to beginning for chronological order
     localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(sessions));
     
-    // Update total yoga time in user stats
-    const stats = await getUserStats();
-    stats.totalYogaTime = (stats.totalYogaTime || 0) + (sessionData.duration || 0);
-    await saveUserStats(stats);
+    // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error saving yoga session:', error);
     throw error;
@@ -629,16 +629,10 @@ export const saveYogaSession = async (sessionData) => {
 export const deleteYogaSession = async (sessionId) => {
   try {
     const sessions = getYogaSessions();
-    const sessionToDelete = sessions.find(s => s.id === sessionId);
     const filteredSessions = sessions.filter(s => s.id !== sessionId);
     localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(filteredSessions));
     
-    // Update stats if session had duration
-    if (sessionToDelete?.duration) {
-      const stats = await getUserStats();
-      stats.totalYogaTime = Math.max(0, (stats.totalYogaTime || 0) - sessionToDelete.duration);
-      await saveUserStats(stats);
-    }
+    // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error deleting yoga session:', error);
     throw error;
@@ -652,16 +646,10 @@ export const deleteYogaSession = async (sessionId) => {
 export const deleteHiitSession = async (sessionId) => {
   try {
     const sessions = getHiitSessions();
-    const sessionToDelete = sessions.find(s => s.id === sessionId);
     const filteredSessions = sessions.filter(s => s.id !== sessionId);
     localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(filteredSessions));
     
-    // Update stats if session had duration
-    if (sessionToDelete?.duration) {
-      const stats = await getUserStats();
-      stats.totalHiitTime = Math.max(0, (stats.totalHiitTime || 0) - sessionToDelete.duration);
-      await saveUserStats(stats);
-    }
+    // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error deleting HIIT session:', error);
     throw error;

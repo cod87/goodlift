@@ -768,7 +768,7 @@ const ProgressScreen = () => {
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
                           <SelfImprovement sx={{ color: '#9c27b0', fontSize: 20 }} />
                           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {session.flowName} - {formatDate(session.date)}
+                            Yoga Session - {formatDate(session.date)}
                           </Typography>
                         </Stack>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
@@ -776,17 +776,25 @@ const ProgressScreen = () => {
                         </Typography>
                         <Stack direction="row" spacing={1} alignItems="center">
                           <Chip 
-                            label={session.difficultyLevel} 
+                            label={`Flow: ${session.flowLength}min`}
                             size="small" 
                             sx={{ 
-                              bgcolor: session.difficultyLevel === 'Beginner' ? '#4caf50' : 
-                                       session.difficultyLevel === 'Intermediate' ? '#ff9800' : '#f44336',
+                              bgcolor: '#9c27b0',
+                              color: 'white',
+                              fontSize: '0.75rem',
+                            }}
+                          />
+                          <Chip 
+                            label={`Cool Down: ${session.coolDownLength}min`}
+                            size="small" 
+                            sx={{ 
+                              bgcolor: '#7b1fa2',
                               color: 'white',
                               fontSize: '0.75rem',
                             }}
                           />
                           <Typography variant="body2" color="text.secondary">
-                            {session.posesCompleted} poses
+                            {session.poseCount} poses
                           </Typography>
                         </Stack>
                       </Box>

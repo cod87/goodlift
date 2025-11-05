@@ -3,7 +3,10 @@ import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaDumbbell, FaHome, FaClock, FaSignOutAlt, FaTimes, FaBars, FaStar, FaRunning } from 'react-icons/fa';
 import { MdSelfImprovement } from 'react-icons/md';
+import { Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
+import GuestLogoutDialog from './GuestLogoutDialog';
+import { clearGuestData } from '../utils/guestStorage';
 
 const NavigationSidebar = ({ 
   currentScreen, 
@@ -11,8 +14,9 @@ const NavigationSidebar = ({
   isOpen,
   onToggle
 }) => {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, isGuest, logout } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
+  const [showGuestLogoutDialog, setShowGuestLogoutDialog] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -25,8 +29,26 @@ const NavigationSidebar = ({
   }, []);
 
   const handleLogout = async () => {
+    // Show confirmation dialog for guest users
+    if (isGuest) {
+      setShowGuestLogoutDialog(true);
+      return;
+    }
+    
+    // Regular logout for authenticated users
     try {
       await logout();
+    } catch (error) {
+      console.error('Failed to log out:', error);
+      alert('Failed to log out. Please try again.');
+    }
+  };
+
+  const handleConfirmGuestLogout = async () => {
+    try {
+      clearGuestData();
+      await logout();
+      setShowGuestLogoutDialog(false);
     } catch (error) {
       console.error('Failed to log out:', error);
       alert('Failed to log out. Please try again.');
@@ -136,6 +158,32 @@ const NavigationSidebar = ({
   style={{ height: '48px', width: 'auto' }}
 />
               </motion.div>
+              
+              {/* Guest Mode Indicator */}
+              {isGuest && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginTop: '0.5rem',
+                  }}
+                >
+                  <Tooltip title="You're in guest mode. Sign up to save your data permanently!" arrow>
+                    <Chip
+                      label="Guest Mode"
+                      size="small"
+                      sx={{
+                        bgcolor: 'warning.main',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                      }}
+                    />
+                  </Tooltip>
+                </motion.div>
+              )}
             </div>
 
             {/* Navigation Links */}
@@ -216,6 +264,13 @@ const NavigationSidebar = ({
           </motion.aside>
         )}
       </AnimatePresence>
+      
+      {/* Guest Logout Confirmation Dialog */}
+      <GuestLogoutDialog
+        open={showGuestLogoutDialog}
+        onClose={() => setShowGuestLogoutDialog(false)}
+        onConfirm={handleConfirmGuestLogout}
+      />
     </>
   );
 };

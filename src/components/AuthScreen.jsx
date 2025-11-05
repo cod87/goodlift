@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, TextField, Button, Typography, Alert, Card, CardContent } from '@mui/material';
+import { Box, TextField, Button, Typography, Alert, Card, CardContent, Divider } from '@mui/material';
 import { useLoginForm } from '../hooks/useLoginForm';
+import { useAuth } from '../contexts/AuthContext';
 
 const AuthScreen = () => {
   const {
@@ -14,6 +15,8 @@ const AuthScreen = () => {
     handleSubmit,
     toggleMode,
   } = useLoginForm();
+  
+  const { continueAsGuest } = useAuth();
 
   return (
     <Box
@@ -129,6 +132,31 @@ const AuthScreen = () => {
                   }}
                 >
                   {loading ? 'Please wait...' : isLogin ? 'Log In' : 'Sign Up'}
+                </Button>
+              </motion.div>
+
+              <Divider sx={{ my: 2 }}>OR</Divider>
+
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  size="large"
+                  disabled={loading}
+                  onClick={continueAsGuest}
+                  sx={{
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    borderColor: 'secondary.main',
+                    color: 'secondary.main',
+                    '&:hover': {
+                      borderColor: 'secondary.dark',
+                      bgcolor: 'rgba(237, 63, 39, 0.05)',
+                    },
+                  }}
+                >
+                  Continue as Guest
                 </Button>
               </motion.div>
 

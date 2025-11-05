@@ -5,6 +5,7 @@ import {
   saveExerciseTargetRepsToFirebase,
   loadUserDataFromFirebase
 } from './firebaseStorage';
+import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
 
 /**
  * Storage module for managing workout data in localStorage and Firebase
@@ -49,6 +50,12 @@ export const getCurrentUserId = () => {
  */
 export const getWorkoutHistory = async () => {
   try {
+    // Check if in guest mode first
+    if (isGuestMode()) {
+      const guestData = getGuestData('workout_history');
+      return guestData || [];
+    }
+
     // Try Firebase first if user is authenticated
     if (currentUserId) {
       try {
@@ -85,11 +92,17 @@ export const saveWorkout = async (workoutData) => {
     
     const history = await getWorkoutHistory();
     history.unshift(workoutData); // Add to beginning for chronological order
-    localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
     
-    // Sync to Firebase if user is logged in
-    if (currentUserId) {
-      await saveWorkoutHistoryToFirebase(currentUserId, history);
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('workout_history', history);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveWorkoutHistoryToFirebase(currentUserId, history);
+      }
     }
     
     // Stats will be recalculated automatically next time getUserStats() is called
@@ -113,11 +126,17 @@ export const deleteWorkout = async (workoutIndex) => {
     }
     
     history.splice(workoutIndex, 1);
-    localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
     
-    // Sync to Firebase if user is logged in
-    if (currentUserId) {
-      await saveWorkoutHistoryToFirebase(currentUserId, history);
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('workout_history', history);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveWorkoutHistoryToFirebase(currentUserId, history);
+      }
     }
     
     // Stats will be recalculated automatically next time getUserStats() is called
@@ -144,13 +163,16 @@ export const getUserStats = async () => {
     // Get HIIT time separately (still stored independently)
     let totalHiitTime = 0;
     try {
-      if (currentUserId) {
+      if (isGuestMode()) {
+        const guestStats = getGuestData('user_stats');
+        totalHiitTime = guestStats?.totalHiitTime || 0;
+      } else if (currentUserId) {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
         if (firebaseData?.userStats?.totalHiitTime) {
           totalHiitTime = firebaseData.userStats.totalHiitTime;
         }
       }
-      if (totalHiitTime === 0) {
+      if (totalHiitTime === 0 && !isGuestMode()) {
         const stats = localStorage.getItem(KEYS.USER_STATS);
         const parsedStats = stats ? JSON.parse(stats) : {};
         totalHiitTime = parsedStats.totalHiitTime || 0;
@@ -162,9 +184,13 @@ export const getUserStats = async () => {
     const calculatedStats = { totalWorkouts, totalTime, totalHiitTime };
     
     // Save the calculated stats back to storage for HIIT time persistence
-    localStorage.setItem(KEYS.USER_STATS, JSON.stringify(calculatedStats));
-    if (currentUserId) {
-      await saveUserStatsToFirebase(currentUserId, calculatedStats);
+    if (isGuestMode()) {
+      setGuestData('user_stats', calculatedStats);
+    } else {
+      localStorage.setItem(KEYS.USER_STATS, JSON.stringify(calculatedStats));
+      if (currentUserId) {
+        await saveUserStatsToFirebase(currentUserId, calculatedStats);
+      }
     }
     
     return calculatedStats;
@@ -184,11 +210,16 @@ export const saveUserStats = async (stats) => {
       throw new Error('Stats object is required');
     }
     
-    localStorage.setItem(KEYS.USER_STATS, JSON.stringify(stats));
-    
-    // Sync to Firebase if user is logged in
-    if (currentUserId) {
-      await saveUserStatsToFirebase(currentUserId, stats);
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('user_stats', stats);
+    } else {
+      localStorage.setItem(KEYS.USER_STATS, JSON.stringify(stats));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveUserStatsToFirebase(currentUserId, stats);
+      }
     }
   } catch (error) {
     console.error('Error saving user stats:', error);
@@ -203,6 +234,12 @@ export const saveUserStats = async (stats) => {
  */
 export const getExerciseWeight = async (exerciseName) => {
   try {
+    // Check if in guest mode first
+    if (isGuestMode()) {
+      const guestWeights = getGuestData('exercise_weights');
+      return guestWeights?.[exerciseName] || 0;
+    }
+
     // Try Firebase first if user is authenticated
     if (currentUserId) {
       try {
@@ -232,6 +269,12 @@ export const getExerciseWeight = async (exerciseName) => {
  */
 export const getAllExerciseWeights = async () => {
   try {
+    // Check if in guest mode first
+    if (isGuestMode()) {
+      const guestWeights = getGuestData('exercise_weights');
+      return guestWeights || {};
+    }
+
     // Try Firebase first if user is authenticated
     if (currentUserId) {
       try {
@@ -268,14 +311,20 @@ export const setExerciseWeight = async (exerciseName, weight) => {
       throw new Error('Weight must be a positive number');
     }
     
-    const weights = localStorage.getItem(KEYS.EXERCISE_WEIGHTS);
-    const weightsObj = weights ? JSON.parse(weights) : {};
+    // Get current weights
+    const weightsObj = await getAllExerciseWeights();
     weightsObj[exerciseName] = weight;
-    localStorage.setItem(KEYS.EXERCISE_WEIGHTS, JSON.stringify(weightsObj));
     
-    // Sync to Firebase if user is logged in
-    if (currentUserId) {
-      await saveExerciseWeightsToFirebase(currentUserId, weightsObj);
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('exercise_weights', weightsObj);
+    } else {
+      localStorage.setItem(KEYS.EXERCISE_WEIGHTS, JSON.stringify(weightsObj));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveExerciseWeightsToFirebase(currentUserId, weightsObj);
+      }
     }
   } catch (error) {
     console.error('Error saving exercise weight:', error);
@@ -290,6 +339,12 @@ export const setExerciseWeight = async (exerciseName, weight) => {
  */
 export const getExerciseTargetReps = async (exerciseName) => {
   try {
+    // Check if in guest mode first
+    if (isGuestMode()) {
+      const guestReps = getGuestData('exercise_target_reps');
+      return guestReps?.[exerciseName] || 12;
+    }
+
     // Try Firebase first if user is authenticated
     if (currentUserId) {
       try {
@@ -327,14 +382,27 @@ export const setExerciseTargetReps = async (exerciseName, reps) => {
       throw new Error('Reps must be a positive number');
     }
     
-    const targetReps = localStorage.getItem(KEYS.EXERCISE_TARGET_REPS);
-    const targetRepsObj = targetReps ? JSON.parse(targetReps) : {};
-    targetRepsObj[exerciseName] = reps;
-    localStorage.setItem(KEYS.EXERCISE_TARGET_REPS, JSON.stringify(targetRepsObj));
+    // Get current target reps
+    let targetRepsObj = {};
+    if (isGuestMode()) {
+      targetRepsObj = getGuestData('exercise_target_reps') || {};
+    } else {
+      const targetReps = localStorage.getItem(KEYS.EXERCISE_TARGET_REPS);
+      targetRepsObj = targetReps ? JSON.parse(targetReps) : {};
+    }
     
-    // Sync to Firebase if user is logged in
-    if (currentUserId) {
-      await saveExerciseTargetRepsToFirebase(currentUserId, targetRepsObj);
+    targetRepsObj[exerciseName] = reps;
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('exercise_target_reps', targetRepsObj);
+    } else {
+      localStorage.setItem(KEYS.EXERCISE_TARGET_REPS, JSON.stringify(targetRepsObj));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveExerciseTargetRepsToFirebase(currentUserId, targetRepsObj);
+      }
     }
   } catch (error) {
     console.error('Error saving exercise target reps:', error);
@@ -411,6 +479,9 @@ export const loadUserDataFromCloud = async (userId) => {
  */
 export const getHiitSessions = () => {
   try {
+    if (isGuestMode()) {
+      return getGuestData('hiit_sessions') || [];
+    }
     const sessions = localStorage.getItem(KEYS.HIIT_SESSIONS);
     return sessions ? JSON.parse(sessions) : [];
   } catch (error) {
@@ -431,7 +502,13 @@ export const saveHiitSession = async (sessionData) => {
     
     const sessions = getHiitSessions();
     sessions.unshift(sessionData); // Add to beginning for chronological order
-    localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(sessions));
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('hiit_sessions', sessions);
+    } else {
+      localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(sessions));
+    }
     
     // Update total HIIT time in user stats
     const stats = await getUserStats();
@@ -449,6 +526,9 @@ export const saveHiitSession = async (sessionData) => {
  */
 export const getFavoriteWorkouts = () => {
   try {
+    if (isGuestMode()) {
+      return getGuestData('favorite_workouts') || [];
+    }
     const favorites = localStorage.getItem(KEYS.FAVORITE_WORKOUTS);
     return favorites ? JSON.parse(favorites) : [];
   } catch (error) {
@@ -479,7 +559,13 @@ export const saveFavoriteWorkout = (workoutData) => {
     };
     
     favorites.unshift(favoriteWorkout);
-    localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(favorites));
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('favorite_workouts', favorites);
+    } else {
+      localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(favorites));
+    }
   } catch (error) {
     console.error('Error saving favorite workout:', error);
     throw error;
@@ -494,7 +580,13 @@ export const deleteFavoriteWorkout = (workoutId) => {
   try {
     const favorites = getFavoriteWorkouts();
     const filteredFavorites = favorites.filter(fav => fav.id !== workoutId);
-    localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(filteredFavorites));
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('favorite_workouts', filteredFavorites);
+    } else {
+      localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(filteredFavorites));
+    }
   } catch (error) {
     console.error('Error deleting favorite workout:', error);
     throw error;
@@ -516,7 +608,13 @@ export const updateFavoriteWorkoutName = (workoutId, newName) => {
     const updatedFavorites = favorites.map(fav => 
       fav.id === workoutId ? { ...fav, name: newName } : fav
     );
-    localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(updatedFavorites));
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('favorite_workouts', updatedFavorites);
+    } else {
+      localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(updatedFavorites));
+    }
   } catch (error) {
     console.error('Error updating favorite workout name:', error);
     throw error;
@@ -529,6 +627,9 @@ export const updateFavoriteWorkoutName = (workoutId, newName) => {
  */
 export const getStretchSessions = () => {
   try {
+    if (isGuestMode()) {
+      return getGuestData('stretch_sessions') || [];
+    }
     const sessions = localStorage.getItem(KEYS.STRETCH_SESSIONS);
     return sessions ? JSON.parse(sessions) : [];
   } catch (error) {
@@ -549,7 +650,13 @@ export const saveStretchSession = async (sessionData) => {
     
     const sessions = getStretchSessions();
     sessions.unshift(sessionData); // Add to beginning for chronological order
-    localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(sessions));
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('stretch_sessions', sessions);
+    } else {
+      localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(sessions));
+    }
     
     // Update total stretch time in user stats
     const stats = await getUserStats();
@@ -570,7 +677,13 @@ export const deleteStretchSession = async (sessionId) => {
     const sessions = getStretchSessions();
     const sessionToDelete = sessions.find(s => s.id === sessionId);
     const filteredSessions = sessions.filter(s => s.id !== sessionId);
-    localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(filteredSessions));
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('stretch_sessions', filteredSessions);
+    } else {
+      localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(filteredSessions));
+    }
     
     // Update stats if session had duration
     if (sessionToDelete?.duration) {
@@ -590,6 +703,9 @@ export const deleteStretchSession = async (sessionId) => {
  */
 export const getYogaSessions = () => {
   try {
+    if (isGuestMode()) {
+      return getGuestData('yoga_sessions') || [];
+    }
     const sessions = localStorage.getItem(KEYS.YOGA_SESSIONS);
     return sessions ? JSON.parse(sessions) : [];
   } catch (error) {
@@ -610,7 +726,13 @@ export const saveYogaSession = async (sessionData) => {
     
     const sessions = getYogaSessions();
     sessions.unshift(sessionData); // Add to beginning for chronological order
-    localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(sessions));
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('yoga_sessions', sessions);
+    } else {
+      localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(sessions));
+    }
     
     // Update total yoga time in user stats
     const stats = await getUserStats();
@@ -631,7 +753,13 @@ export const deleteYogaSession = async (sessionId) => {
     const sessions = getYogaSessions();
     const sessionToDelete = sessions.find(s => s.id === sessionId);
     const filteredSessions = sessions.filter(s => s.id !== sessionId);
-    localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(filteredSessions));
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('yoga_sessions', filteredSessions);
+    } else {
+      localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(filteredSessions));
+    }
     
     // Update stats if session had duration
     if (sessionToDelete?.duration) {
@@ -654,7 +782,13 @@ export const deleteHiitSession = async (sessionId) => {
     const sessions = getHiitSessions();
     const sessionToDelete = sessions.find(s => s.id === sessionId);
     const filteredSessions = sessions.filter(s => s.id !== sessionId);
-    localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(filteredSessions));
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('hiit_sessions', filteredSessions);
+    } else {
+      localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(filteredSessions));
+    }
     
     // Update stats if session had duration
     if (sessionToDelete?.duration) {

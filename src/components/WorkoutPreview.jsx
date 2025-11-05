@@ -2,9 +2,8 @@ import { useState, useEffect, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem, Snackbar, Alert, IconButton } from '@mui/material';
-import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle, Favorite, FavoriteBorder } from '@mui/icons-material';
+import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
-import { useFavoriteExercises } from '../hooks/useFavoriteExercises';
 
 /**
  * WorkoutPreview component displays a preview of the generated workout
@@ -16,7 +15,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [loading, setLoading] = useState(true);
   const [savedToFavorites, setSavedToFavorites] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
-  const { toggleFavorite, isFavoriteExercise } = useFavoriteExercises();
 
   // Generate weight options once (0-500 lbs in 2.5 lb increments)
   const weightOptions = useMemo(() => {
@@ -259,29 +257,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               <Typography variant="body1" sx={{ fontWeight: 600, flex: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                                 {exerciseName}
                               </Typography>
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  console.log('Toggle favorite clicked:', exerciseName);
-                                  console.log('Current favorite state:', isFavoriteExercise(exerciseName));
-                                  toggleFavorite(exercise);
-                                }}
-                                disableRipple
-                                sx={{
-                                  color: isFavoriteExercise(exerciseName) ? 'secondary.main' : 'text.secondary',
-                                  minWidth: '44px',
-                                  minHeight: '44px',
-                                  padding: 1,
-                                  '&:hover': {
-                                    backgroundColor: 'transparent',
-                                  },
-                                  transition: 'none',
-                                }}
-                                aria-label={isFavoriteExercise(exerciseName) ? 'Remove from favorites' : 'Add to favorites'}
-                              >
-                                {isFavoriteExercise(exerciseName) ? <Favorite fontSize="small" /> : <FavoriteBorder fontSize="small" />}
-                              </IconButton>
                               {onRandomizeExercise && (
                                 <IconButton
                                   size="small"

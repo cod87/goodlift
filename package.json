@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/convert-exercises.js",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "convert:exercises": "node scripts/convert-exercises.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

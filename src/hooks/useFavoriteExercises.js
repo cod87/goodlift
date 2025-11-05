@@ -4,6 +4,15 @@ import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 
 /**
+ * Generate a Firestore-safe ID from an exercise name
+ * @param {string} exerciseName - The exercise name to convert
+ * @returns {string} A sanitized ID suitable for Firestore document IDs
+ */
+const generateExerciseId = (exerciseName) => {
+  return exerciseName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+};
+
+/**
  * Custom hook for managing favorite exercises
  * Stores favorites in Firestore: users/{userId}/favoriteExercises/{exerciseId}
  * Uses @tanstack/react-query for cache and optimistic updates
@@ -42,7 +51,7 @@ export const useFavoriteExercises = () => {
         throw new Error('User not authenticated');
       }
 
-      const exerciseId = exercise['Exercise Name'].replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+      const exerciseId = generateExerciseId(exercise['Exercise Name']);
       const favoriteRef = doc(db, 'users', currentUser.uid, 'favoriteExercises', exerciseId);
       
       await setDoc(favoriteRef, {
@@ -62,7 +71,7 @@ export const useFavoriteExercises = () => {
       const previousFavorites = queryClient.getQueryData(['favoriteExercises', currentUser?.uid]);
 
       // Optimistically update
-      const exerciseId = exercise['Exercise Name'].replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+      const exerciseId = generateExerciseId(exercise['Exercise Name']);
       queryClient.setQueryData(['favoriteExercises', currentUser?.uid], (old = []) => [
         ...old,
         {
@@ -94,7 +103,7 @@ export const useFavoriteExercises = () => {
         throw new Error('User not authenticated');
       }
 
-      const exerciseId = exerciseName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+      const exerciseId = generateExerciseId(exerciseName);
       const favoriteRef = doc(db, 'users', currentUser.uid, 'favoriteExercises', exerciseId);
       
       await deleteDoc(favoriteRef);
@@ -108,7 +117,7 @@ export const useFavoriteExercises = () => {
       const previousFavorites = queryClient.getQueryData(['favoriteExercises', currentUser?.uid]);
 
       // Optimistically update
-      const exerciseId = exerciseName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+      const exerciseId = generateExerciseId(exerciseName);
       queryClient.setQueryData(['favoriteExercises', currentUser?.uid], (old = []) =>
         old.filter(fav => fav.id !== exerciseId)
       );

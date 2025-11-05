@@ -103,12 +103,11 @@ export const useWorkoutGenerator = () => {
     }
     
     // Create weighted pool: favorites appear twice for 2x probability
-    const weightedPool = [];
-    available.forEach(exercise => {
-      weightedPool.push(exercise);
-      if (favoriteExerciseNames.has(exercise['Exercise Name'])) {
-        weightedPool.push(exercise); // Add favorite exercises twice
-      }
+    const weightedPool = available.flatMap(exercise => {
+      // Add exercise once, and add again if it's a favorite (2x weight)
+      return favoriteExerciseNames.has(exercise['Exercise Name'])
+        ? [exercise, exercise]
+        : [exercise];
     });
     
     // Fisher-Yates shuffle for better randomization

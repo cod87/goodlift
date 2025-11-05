@@ -26,9 +26,20 @@ export const SCREENS = {
 
 /** Muscle group categories for progressive overload calculations */
 export const MUSCLE_GROUPS = {
-  UPPER_BODY: ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps'],
-  LOWER_BODY: ['Quadriceps', 'Hamstrings', 'Glutes', 'Calves'],
+  UPPER_BODY: ['Chest', 'Upper Chest', 'Lower Chest', 'Inner Chest', 'Back', 'Lats', 'Upper Back', 'Lower Back', 'Delts', 'Front Delts', 'Rear Delts', 'Side Delts', 'Biceps', 'Triceps', 'Forearms', 'Traps'],
+  LOWER_BODY: ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Hip Flexors'],
 };
+
+/** All available muscle groups for selection */
+export const ALL_MUSCLE_GROUPS = [
+  'Chest', 'Upper Chest', 'Lower Chest', 'Inner Chest',
+  'Back', 'Lats', 'Upper Back', 'Lower Back',
+  'Delts', 'Front Delts', 'Rear Delts', 'Side Delts',
+  'Quads', 'Hamstrings', 'Glutes', 'Calves',
+  'Biceps', 'Triceps', 'Forearms',
+  'Core', 'Abs', 'Obliques',
+  'Traps', 'Hip Flexors', 'Neck'
+];
 
 /**
  * Weight increments for progressive overload (in lbs)

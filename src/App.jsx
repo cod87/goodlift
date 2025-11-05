@@ -13,7 +13,6 @@ import FavouritesScreen from './components/FavouritesScreen';
 import StretchScreen from './components/Stretch/StretchScreen';
 import YogaFlowsScreen from './components/YogaFlows/YogaFlowsScreen';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
-import { useFavoriteExercises } from './hooks/useFavoriteExercises';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps } from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
@@ -72,7 +71,6 @@ function App() {
   const { currentUser } = useAuth();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
-  const { favoriteExerciseNames } = useFavoriteExercises();
 
   // Track screen size for responsive layout
   useEffect(() => {
@@ -132,7 +130,7 @@ function App() {
     
     // Simulate loading to show user we're generating
     setTimeout(() => {
-      const workout = preGeneratedWorkout || generateWorkout(type, equipmentFilter, favoriteExerciseNames);
+      const workout = preGeneratedWorkout || generateWorkout(type, equipmentFilter);
       setCurrentWorkout(workout);
       setWorkoutType(type);
       setLoading(false);

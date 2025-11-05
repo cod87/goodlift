@@ -347,52 +347,13 @@ const ProgressScreen = () => {
             </motion.div>
           </Stack>
 
-          {/* Row 3: HIIT Time & Mobility Time */}
-          <Stack direction="row" spacing={2}>
+          {/* Row 3: Mobility Time (single card, centered) */}
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              style={{ flex: 1 }}
-            >
-              <Card sx={{ 
-                height: '100%',
-                borderRadius: 3,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 8px 24px rgba(237, 63, 39, 0.15)',
-                }
-              }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-                    <Whatshot sx={{ fontSize: 32, color: 'secondary.main' }} />
-                    <Typography variant="body2" sx={{ 
-                      color: 'text.secondary',
-                      textTransform: 'uppercase',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      letterSpacing: 0.5,
-                    }}>
-                      HIIT Time
-                    </Typography>
-                  </Stack>
-                  <Typography variant="h3" sx={{ 
-                    fontWeight: 700,
-                    color: 'secondary.main',
-                    fontSize: { xs: '2rem', sm: '2.5rem' }
-                  }}>
-                    {formatDuration(stats.totalHiitTime || 0)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              style={{ flex: 1 }}
+              style={{ width: '50%', minWidth: '250px' }}
             >
               <Card sx={{ 
                 height: '100%',
@@ -426,7 +387,7 @@ const ProgressScreen = () => {
                 </CardContent>
               </Card>
             </motion.div>
-          </Stack>
+          </Box>
         </Stack>
       </Box>
 

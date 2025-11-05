@@ -259,36 +259,37 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               <Typography variant="body1" sx={{ fontWeight: 600, flex: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                                 {exerciseName}
                               </Typography>
-                              <motion.div
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleFavorite(exercise);
+                                }}
+                                disableRipple
+                                sx={{
+                                  color: isFavoriteExercise(exerciseName) ? 'secondary.main' : 'text.secondary',
+                                  minWidth: '44px',
+                                  minHeight: '44px',
+                                  padding: 1,
+                                  '&:hover': {
+                                    backgroundColor: 'action.hover',
+                                    color: 'secondary.main',
+                                    transform: 'scale(1.1)',
+                                  },
+                                  transition: 'all 0.2s ease-in-out',
+                                }}
+                                aria-label={isFavoriteExercise(exerciseName) ? 'Remove from favorites' : 'Add to favorites'}
                               >
-                                <IconButton
-                                  size="small"
-                                  onClick={() => toggleFavorite(exercise)}
-                                  disableRipple
-                                  sx={{
-                                    color: isFavoriteExercise(exerciseName) ? 'secondary.main' : 'action.active',
-                                    padding: 0.5,
-                                    '&:hover': {
-                                      backgroundColor: 'transparent',
-                                    },
-                                    transition: 'color 0.3s ease',
+                                <motion.div
+                                  initial={false}
+                                  animate={{ 
+                                    scale: isFavoriteExercise(exerciseName) ? [1, 1.2, 1] : 1,
                                   }}
-                                  aria-label={isFavoriteExercise(exerciseName) ? 'Remove from favorites' : 'Add to favorites'}
+                                  transition={{ duration: 0.2, ease: 'easeInOut' }}
                                 >
-                                  <motion.div
-                                    initial={false}
-                                    animate={{ 
-                                      scale: isFavoriteExercise(exerciseName) ? [1, 1.3, 1] : 1,
-                                      opacity: 1
-                                    }}
-                                    transition={{ duration: 0.3 }}
-                                  >
-                                    {isFavoriteExercise(exerciseName) ? <Favorite fontSize="small" /> : <FavoriteBorder fontSize="small" />}
-                                  </motion.div>
-                                </IconButton>
-                              </motion.div>
+                                  {isFavoriteExercise(exerciseName) ? <Favorite fontSize="small" /> : <FavoriteBorder fontSize="small" />}
+                                </motion.div>
+                              </IconButton>
                               {onRandomizeExercise && (
                                 <IconButton
                                   size="small"

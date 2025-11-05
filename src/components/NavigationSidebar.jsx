@@ -223,7 +223,7 @@ const NavigationSidebar = ({
               />
               <NavLink
                 icon={<MdSelfImprovement />}
-                label="Yoga Flows"
+                label="Yoga"
                 isActive={currentScreen === 'yoga'}
                 onClick={() => handleNavClick('yoga')}
               />

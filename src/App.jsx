@@ -11,7 +11,7 @@ import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
 import FavouritesScreen from './components/FavouritesScreen';
 import StretchScreen from './components/Stretch/StretchScreen';
-import YogaFlowsScreen from './components/YogaFlows/YogaFlowsScreen';
+import YogaScreen from './pages/YogaScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
@@ -499,7 +499,7 @@ function App() {
 
           {currentScreen === 'stretch' && <StretchScreen />}
 
-          {currentScreen === 'yoga' && <YogaFlowsScreen />}
+          {currentScreen === 'yoga' && <YogaScreen />}
         </div>
         
         {/* Guest Data Migration Dialog */}

@@ -6,13 +6,13 @@ import { EXERCISES_DATA_PATH, EXERCISES_PER_WORKOUT } from '../utils/constants';
  * Pairing opposing muscles allows one muscle group to rest while the other works
  */
 const OPPOSING_MUSCLES = {
-  'Chest': 'Back',
-  'Back': 'Chest',
-  'Quadriceps': 'Hamstrings',
-  'Hamstrings': 'Quadriceps',
+  'Chest': 'Lats',
+  'Lats': 'Chest',
+  'Quads': 'Hamstrings',
+  'Hamstrings': 'Quads',
   'Biceps': 'Triceps',
   'Triceps': 'Biceps',
-  'Shoulders': 'Back',
+  'Shoulders': 'Lats',
 };
 
 /**
@@ -121,23 +121,23 @@ export const useWorkoutGenerator = () => {
     
     switch (type) {
       case 'upper':
-        // Upper body: 3 chest, 3 back, 1 biceps, 1 triceps
+        // Upper body: 3 chest, 3 lats, 1 biceps, 1 triceps
         workout.push(...getRandomExercises('Chest', 3, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Back', 3, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Lats', 3, workout, equipmentFilter));
         workout.push(...getRandomExercises('Biceps', 1, workout, equipmentFilter));
         workout.push(...getRandomExercises('Triceps', 1, workout, equipmentFilter));
         break;
         
       case 'lower': {
-        // Lower body: Variable quads/hams, with optional calves
+        // Lower body: Variable quads/hams, with optional core
         const quadCount = Math.floor(Math.random() * 2) + 3; // 3-4 exercises
         const hamCount = Math.floor(Math.random() * 2) + 2; // 2-3 exercises
-        const calfCount = EXERCISES_PER_WORKOUT - quadCount - hamCount;
+        const coreCount = EXERCISES_PER_WORKOUT - quadCount - hamCount;
         
-        workout.push(...getRandomExercises('Quadriceps', quadCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Quads', quadCount, workout, equipmentFilter));
         workout.push(...getRandomExercises('Hamstrings', hamCount, workout, equipmentFilter));
-        if (calfCount > 0) {
-          workout.push(...getRandomExercises('Calves', calfCount, workout, equipmentFilter));
+        if (coreCount > 0) {
+          workout.push(...getRandomExercises('Core', coreCount, workout, equipmentFilter));
         }
         break;
       }
@@ -145,14 +145,14 @@ export const useWorkoutGenerator = () => {
       case 'full': {
         // Full body: Balanced selection across all major muscle groups
         const hamFullCount = Math.floor(Math.random() * 2) + 1; // 1-2 exercises
-        const calfFullCount = EXERCISES_PER_WORKOUT - 2 - 2 - 2 - hamFullCount;
+        const coreFullCount = EXERCISES_PER_WORKOUT - 2 - 2 - 2 - hamFullCount;
         
         workout.push(...getRandomExercises('Chest', 2, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Back', 2, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Quadriceps', 2, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Lats', 2, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Quads', 2, workout, equipmentFilter));
         workout.push(...getRandomExercises('Hamstrings', hamFullCount, workout, equipmentFilter));
-        if (calfFullCount > 0) {
-          workout.push(...getRandomExercises('Calves', calfFullCount, workout, equipmentFilter));
+        if (coreFullCount > 0) {
+          workout.push(...getRandomExercises('Core', coreFullCount, workout, equipmentFilter));
         }
         break;
       }

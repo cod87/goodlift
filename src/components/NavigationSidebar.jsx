@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaDumbbell, FaHome, FaClock, FaSignOutAlt, FaTimes, FaBars, FaStar } from 'react-icons/fa';
+import { FaDumbbell, FaHome, FaClock, FaSignOutAlt, FaTimes, FaBars, FaStar, FaRunning } from 'react-icons/fa';
+import { MdSelfImprovement } from 'react-icons/md';
 import { useAuth } from '../contexts/AuthContext';
 
 const NavigationSidebar = ({ 
@@ -165,6 +166,18 @@ const NavigationSidebar = ({
                 label="HIIT Timer"
                 isActive={currentScreen === 'hiit'}
                 onClick={() => handleNavClick('hiit')}
+              />
+              <NavLink
+                icon={<FaRunning />}
+                label="Stretch"
+                isActive={currentScreen === 'stretch'}
+                onClick={() => handleNavClick('stretch')}
+              />
+              <NavLink
+                icon={<MdSelfImprovement />}
+                label="Yoga Flows"
+                isActive={currentScreen === 'yoga'}
+                onClick={() => handleNavClick('yoga')}
               />
             </nav>
 

@@ -10,6 +10,8 @@ import ProgressScreen from './components/ProgressScreen';
 import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
 import FavouritesScreen from './components/FavouritesScreen';
+import StretchScreen from './components/Stretch/StretchScreen';
+import YogaFlowsScreen from './components/YogaFlows/YogaFlowsScreen';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps } from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
@@ -68,7 +70,7 @@ function App() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
   const { currentUser } = useAuth();
 
-  const { generateWorkout, allExercises } = useWorkoutGenerator();
+  const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
 
   // Track screen size for responsive layout
   useEffect(() => {
@@ -148,6 +150,57 @@ function App() {
     setShowPreview(false);
     setCurrentScreen('selection');
   };
+
+  /**
+   * Randomize a single exercise in the workout
+   * @param {number} supersetIdx - Index of the superset
+   * @param {number} exerciseIdx - Index of the exercise within the superset (0 or 1)
+   * @param {string} primaryMuscle - Primary muscle group to maintain
+   * @param {string|Array} equipmentFilter - Equipment filter to apply
+   */
+  const handleRandomizeExercise = useCallback((supersetIdx, exerciseIdx, primaryMuscle, equipmentFilter) => {
+    if (!exerciseDB || Object.keys(exerciseDB).length === 0) {
+      console.error('Exercise database not available');
+      return;
+    }
+
+    // Get exercises for the same primary muscle
+    const muscleExercises = exerciseDB[primaryMuscle] || [];
+    
+    // Apply equipment filter
+    let filteredExercises = muscleExercises;
+    if (equipmentFilter && equipmentFilter !== 'all') {
+      const equipmentList = Array.isArray(equipmentFilter) ? equipmentFilter : [equipmentFilter];
+      filteredExercises = muscleExercises.filter(ex => {
+        const equipment = ex.Equipment;
+        return equipmentList.some(filter => {
+          if (filter === 'Cable Machine') return equipment.includes('Cable');
+          if (filter === 'Dumbbells') return equipment.includes('Dumbbell');
+          return equipment === filter;
+        });
+      });
+    }
+
+    // Remove current exercise from options
+    const currentExercise = currentWorkout[supersetIdx * 2 + exerciseIdx];
+    const availableExercises = filteredExercises.filter(
+      ex => ex['Exercise Name'] !== currentExercise['Exercise Name']
+    );
+
+    if (availableExercises.length === 0) {
+      console.warn('No alternative exercises available');
+      return;
+    }
+
+    // Select a random exercise
+    const randomExercise = availableExercises[Math.floor(Math.random() * availableExercises.length)];
+
+    // Update the workout array
+    const updatedWorkout = [...currentWorkout];
+    updatedWorkout[supersetIdx * 2 + exerciseIdx] = randomExercise;
+    setCurrentWorkout(updatedWorkout);
+  }, [exerciseDB, currentWorkout]);
+
   /**
    * Calculate weight increase for progressive overload based on muscle group and equipment
    * @param {string} primaryMuscle - Primary muscle group being worked
@@ -318,6 +371,8 @@ function App() {
               workoutType={workoutType}
               onStart={handleBeginWorkout}
               onCancel={handleCancelPreview}
+              onRandomizeExercise={handleRandomizeExercise}
+              equipmentFilter={Array.from(selectedEquipment)}
             />
           )}
           
@@ -345,6 +400,10 @@ function App() {
           )}
 
           {currentScreen === 'hiit' && <HiitTimerScreen />}
+
+          {currentScreen === 'stretch' && <StretchScreen />}
+
+          {currentScreen === 'yoga' && <YogaFlowsScreen />}
         </div>
         
         <Snackbar

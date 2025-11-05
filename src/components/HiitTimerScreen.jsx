@@ -4,6 +4,8 @@ import { Box, Card, CardContent, Typography, Button, TextField, Grid } from '@mu
 import { PlayArrow, Pause, Replay } from '@mui/icons-material';
 import { saveHiitSession } from '../utils/storage';
 import { formatDuration } from '../utils/helpers';
+import audioService from '../utils/audioService';
+import wakeLockManager from '../utils/wakeLock';
 
 const HiitTimerScreen = () => {
   const [workTime, setWorkTime] = useState(30);
@@ -18,13 +20,33 @@ const HiitTimerScreen = () => {
   const intervalRef = useRef(null);
   const startTimeRef = useRef(null);
 
+  // Manage wake lock
+  useEffect(() => {
+    if (isRunning && !isSetup) {
+      // Request wake lock when timer starts
+      wakeLockManager.requestWakeLock();
+    } else {
+      // Release wake lock when timer stops
+      wakeLockManager.releaseWakeLock();
+    }
+
+    return () => {
+      // Cleanup: release wake lock on unmount
+      wakeLockManager.releaseWakeLock();
+    };
+  }, [isRunning, isSetup]);
+
   const handleComplete = useCallback(async () => {
     setIsRunning(false);
     const endTime = Date.now();
     const duration = Math.floor((endTime - startTimeRef.current) / 1000);
     
+    // Play completion sound
+    audioService.playCompletionFanfare();
+    
     // Save session
     await saveHiitSession({
+      id: `hiit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       date: new Date().toISOString(),
       duration: duration,
       workTime: workTime,
@@ -42,12 +64,12 @@ const HiitTimerScreen = () => {
           if (prev <= 1) {
             // Phase complete
             if (isWorkPhase) {
-              // Switch to rest
+              // Switch to rest - play low beep
+              audioService.playLowBeep();
               setIsWorkPhase(false);
               return restTime;
             } else {
               // Switch to work
-              setIsWorkPhase(true);
               setCurrentRound((r) => r + 1);
               
               // Check if workout is complete
@@ -55,6 +77,10 @@ const HiitTimerScreen = () => {
                 handleComplete();
                 return 0;
               }
+              
+              // Play high beep for work period
+              audioService.playHighBeep();
+              setIsWorkPhase(true);
               return workTime;
             }
           }
@@ -82,6 +108,8 @@ const HiitTimerScreen = () => {
       setIsWorkPhase(true);
       setTotalElapsed(0);
       startTimeRef.current = Date.now();
+      // Play start beep
+      audioService.playHighBeep();
     }
     setIsRunning(true);
   };
@@ -211,11 +239,12 @@ const HiitTimerScreen = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      style={{ width: '100%', maxWidth: '100vw', boxSizing: 'border-box' }}
     >
-      <Box sx={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
+      <Box sx={{ maxWidth: 600, margin: '0 auto', textAlign: 'center', padding: { xs: '1rem', sm: '2rem' }, width: '100%', boxSizing: 'border-box' }}>
         <Card sx={{ 
           borderRadius: 3, 
-          p: 4,
+          p: { xs: 2, sm: 3, md: 4 },
           bgcolor: getPhaseColor(),
           color: 'white',
           minHeight: '400px',
@@ -228,7 +257,7 @@ const HiitTimerScreen = () => {
             <Typography variant="h2" sx={{ 
               fontWeight: 700, 
               mb: 2,
-              fontSize: '3rem',
+              fontSize: { xs: '2rem', sm: '3rem' },
               textTransform: 'uppercase',
               letterSpacing: 2
             }}>
@@ -237,7 +266,7 @@ const HiitTimerScreen = () => {
 
             <Typography variant="h1" sx={{ 
               fontWeight: 700, 
-              fontSize: '8rem',
+              fontSize: { xs: '5rem', sm: '6rem', md: '8rem' },
               mb: 2,
               fontFamily: 'monospace',
               lineHeight: 1
@@ -245,7 +274,7 @@ const HiitTimerScreen = () => {
               {timeLeft}
             </Typography>
 
-            <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
+            <Typography variant="h5" sx={{ mb: 4, opacity: 0.9, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
               Round {currentRound + 1} of {rounds}
             </Typography>
 
@@ -296,11 +325,11 @@ const HiitTimerScreen = () => {
             </Box>
 
             {currentRound >= rounds && (
-              <Box sx={{ mt: 4 }}>
-                <Typography variant="h4" sx={{ mb: 2 }}>
+              <Box sx={{ mt: 4, width: '100%' }}>
+                <Typography variant="h4" sx={{ mb: 2, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
                   🎉 Workout Complete!
                 </Typography>
-                <Typography variant="h6">
+                <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                   Total Time: {formatDuration(totalElapsed)}
                 </Typography>
               </Box>

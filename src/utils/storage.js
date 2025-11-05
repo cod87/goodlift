@@ -22,6 +22,7 @@ const KEYS = {
   STRETCH_SESSIONS: 'goodlift_stretch_sessions',
   YOGA_SESSIONS: 'goodlift_yoga_sessions',
   FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
+  FAVORITE_EXERCISES: 'goodlift_favorite_exercises',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -519,6 +520,61 @@ export const updateFavoriteWorkoutName = (workoutId, newName) => {
     localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(updatedFavorites));
   } catch (error) {
     console.error('Error updating favorite workout name:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get favorite exercises from localStorage
+ * @returns {Array} Array of favorite exercise names
+ */
+export const getFavoriteExercises = () => {
+  try {
+    const favorites = localStorage.getItem(KEYS.FAVORITE_EXERCISES);
+    return favorites ? JSON.parse(favorites) : [];
+  } catch (error) {
+    console.error('Error reading favorite exercises:', error);
+    return [];
+  }
+};
+
+/**
+ * Check if an exercise is favorited
+ * @param {string} exerciseName - Name of the exercise to check
+ * @returns {boolean} True if exercise is favorited
+ */
+export const isExerciseFavorite = (exerciseName) => {
+  const favorites = getFavoriteExercises();
+  return favorites.includes(exerciseName);
+};
+
+/**
+ * Toggle favorite status of an exercise
+ * @param {string} exerciseName - Name of the exercise to toggle
+ * @returns {boolean} New favorite status (true if now favorited, false if unfavorited)
+ */
+export const toggleFavoriteExercise = (exerciseName) => {
+  try {
+    if (!exerciseName) {
+      throw new Error('Exercise name is required');
+    }
+    
+    const favorites = getFavoriteExercises();
+    const index = favorites.indexOf(exerciseName);
+    
+    if (index > -1) {
+      // Remove from favorites
+      favorites.splice(index, 1);
+      localStorage.setItem(KEYS.FAVORITE_EXERCISES, JSON.stringify(favorites));
+      return false;
+    } else {
+      // Add to favorites
+      favorites.push(exerciseName);
+      localStorage.setItem(KEYS.FAVORITE_EXERCISES, JSON.stringify(favorites));
+      return true;
+    }
+  } catch (error) {
+    console.error('Error toggling favorite exercise:', error);
     throw error;
   }
 };

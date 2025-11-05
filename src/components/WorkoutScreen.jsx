@@ -2,10 +2,10 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl, detectWorkoutType } from '../utils/helpers';
-import { getExerciseWeight, getExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
+import { getExerciseWeight, getExerciseTargetReps, saveFavoriteWorkout, isExerciseFavorite, toggleFavoriteExercise } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Favorite, FavoriteBorder } from '@mui/icons-material';
 
 /**
  * WorkoutScreen component manages the active workout session
@@ -19,6 +19,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [targetReps, setTargetReps] = useState(12);
   const [isFavorite, setIsFavorite] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [exerciseIsFavorite, setExerciseIsFavorite] = useState(false);
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -69,6 +70,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
         ]);
         setPrevWeight(weight);
         setTargetReps(reps);
+        setExerciseIsFavorite(isExerciseFavorite(currentStep.exercise['Exercise Name']));
       }
     };
     loadSettings();
@@ -198,6 +200,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     }
   };
 
+  const handleToggleFavoriteExercise = () => {
+    try {
+      if (exerciseName) {
+        const newStatus = toggleFavoriteExercise(exerciseName);
+        setExerciseIsFavorite(newStatus);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite exercise:', error);
+    }
+  };
+
   if (!currentStep) {
     return null;
   }
@@ -272,7 +285,22 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <h2>{exerciseName}</h2>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
+                <h2 style={{ margin: 0 }}>{exerciseName}</h2>
+                <IconButton
+                  size="small"
+                  onClick={handleToggleFavoriteExercise}
+                  sx={{
+                    color: exerciseIsFavorite ? 'error.main' : 'action.disabled',
+                    '&:hover': {
+                      backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                    },
+                  }}
+                  aria-label={exerciseIsFavorite ? "Remove from favorites" : "Add to favorites"}
+                >
+                  {exerciseIsFavorite ? <Favorite fontSize="small" /> : <FavoriteBorder fontSize="small" />}
+                </IconButton>
+              </Box>
               <div className="youtube-embed">
                 <iframe
                   src={getYoutubeEmbedUrl(currentStep.exercise['YouTube_Demonstration_Link'])}

@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem, Snackbar, Alert, IconButton } from '@mui/material';
-import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle } from '@mui/icons-material';
-import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
+import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle, Favorite, FavoriteBorder } from '@mui/icons-material';
+import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout, isExerciseFavorite, toggleFavoriteExercise } from '../utils/storage';
 
 /**
  * WorkoutPreview component displays a preview of the generated workout
@@ -15,6 +15,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [loading, setLoading] = useState(true);
   const [savedToFavorites, setSavedToFavorites] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [favoriteExercises, setFavoriteExercises] = useState({});
 
   // Generate weight options once (0-500 lbs in 2.5 lb increments)
   const weightOptions = useMemo(() => {
@@ -41,6 +42,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
     
     const loadSettings = async () => {
       const settings = {};
+      const favorites = {};
       for (const exercise of workout) {
         const exerciseName = exercise['Exercise Name'];
         const [weight, targetReps] = await Promise.all([
@@ -51,8 +53,10 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           weight: weight || 0,
           targetReps: targetReps || 12,
         };
+        favorites[exerciseName] = isExerciseFavorite(exerciseName);
       }
       setExerciseSettings(settings);
+      setFavoriteExercises(favorites);
       setLoading(false);
     };
     loadSettings();
@@ -98,6 +102,18 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
       setShowNotification(true);
     } catch (error) {
       console.error('Error saving to favorites:', error);
+    }
+  };
+
+  const handleToggleFavoriteExercise = (exerciseName) => {
+    try {
+      const newStatus = toggleFavoriteExercise(exerciseName);
+      setFavoriteExercises(prev => ({
+        ...prev,
+        [exerciseName]: newStatus
+      }));
+    } catch (error) {
+      console.error('Error toggling favorite exercise:', error);
     }
   };
 
@@ -257,6 +273,19 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               <Typography variant="body1" sx={{ fontWeight: 600, flex: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                                 {exerciseName}
                               </Typography>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleToggleFavoriteExercise(exerciseName)}
+                                sx={{
+                                  color: favoriteExercises[exerciseName] ? 'error.main' : 'action.disabled',
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                                  },
+                                }}
+                                aria-label={favoriteExercises[exerciseName] ? "Remove from favorites" : "Add to favorites"}
+                              >
+                                {favoriteExercises[exerciseName] ? <Favorite fontSize="small" /> : <FavoriteBorder fontSize="small" />}
+                              </IconButton>
                               {onRandomizeExercise && (
                                 <IconButton
                                   size="small"

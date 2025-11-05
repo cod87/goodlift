@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { EXERCISES_DATA_PATH, EXERCISES_PER_WORKOUT } from '../utils/constants';
+import { getFavoriteExercises } from '../utils/storage';
 
 /**
  * Map of opposing muscle groups for optimal superset pairing
@@ -63,6 +64,7 @@ export const useWorkoutGenerator = () => {
 
   /**
    * Get random exercises from a specific muscle group with equipment filtering
+   * Favorited exercises have 3x higher probability of being selected
    * @param {string} muscle - The muscle group to select from
    * @param {number} count - Number of exercises to return
    * @param {Array} currentWorkout - Already selected exercises to avoid duplicates
@@ -100,14 +102,40 @@ export const useWorkoutGenerator = () => {
       return available;
     }
     
+    // Get favorited exercises for weighted selection
+    const favoriteExercises = getFavoriteExercises();
+    const favoriteWeight = 3; // Favorited exercises are 3x more likely to be selected
+    
+    // Create weighted pool for selection
+    const weightedPool = [];
+    available.forEach(ex => {
+      const isFavorite = favoriteExercises.includes(ex['Exercise Name']);
+      const weight = isFavorite ? favoriteWeight : 1;
+      // Add exercise to pool 'weight' times
+      for (let i = 0; i < weight; i++) {
+        weightedPool.push(ex);
+      }
+    });
+    
     // Fisher-Yates shuffle for better randomization
-    const shuffled = [...available];
+    const shuffled = [...weightedPool];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     
-    return shuffled.slice(0, count);
+    // Select unique exercises from the weighted pool
+    const selected = [];
+    const selectedNames = new Set();
+    for (const ex of shuffled) {
+      if (!selectedNames.has(ex['Exercise Name'])) {
+        selected.push(ex);
+        selectedNames.add(ex['Exercise Name']);
+        if (selected.length >= count) break;
+      }
+    }
+    
+    return selected;
   }, [exerciseDB]);
 
   /**

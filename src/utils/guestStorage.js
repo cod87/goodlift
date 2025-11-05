@@ -78,7 +78,8 @@ export const getGuestData = (category) => {
     // Check version for future migrations
     if (parsed.version && parsed.version !== GUEST_DATA_VERSION) {
       console.warn(`Data version mismatch for ${category}: ${parsed.version} vs ${GUEST_DATA_VERSION}`);
-      // Future: handle migrations here
+      // Future: implement migration based on version
+      // For now, attempt to return data as-is since v1 is current version
     }
 
     return parsed.data !== undefined ? parsed.data : parsed;
@@ -195,8 +196,10 @@ export const dismissGuestSnackbar = () => {
 const handleQuotaError = (error) => {
   if (error.name === 'QuotaExceededError' || error.code === 22) {
     console.error('localStorage quota exceeded. Some data may not be saved.');
-    // In a production app, you might want to show a user-facing error message
-    // or implement a cleanup strategy for old data
+    // Note: In production, consider implementing:
+    // 1. User-facing error notification
+    // 2. Automatic cleanup of old data
+    // 3. Prompting user to sign up for cloud storage
   }
 };
 

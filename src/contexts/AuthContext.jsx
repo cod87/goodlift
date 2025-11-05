@@ -65,6 +65,28 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  // Handle user login with optional guest data migration
+  const handleUserLogin = async (user, hadGuestData) => {
+    setIsGuest(false);
+    
+    // Don't disable guest mode yet if there's data to migrate
+    // The migration dialog will handle cleanup
+    if (!hadGuestData) {
+      disableGuestMode();
+    }
+    
+    setCurrentUser(user);
+    
+    // Load user data from Firebase only if no migration is pending
+    if (!hadGuestData) {
+      try {
+        await loadUserDataFromCloud(user.uid);
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     // Check if returning as guest on mount
     if (isGuestMode()) {
@@ -80,26 +102,9 @@ export const AuthProvider = ({ children }) => {
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Real user is logged in
+        // Real user is logged in - check for guest data migration
         const hadGuestData = checkGuestData();
-        setIsGuest(false);
-        
-        // Note: We don't disable guest mode or clear data here
-        // The migration dialog will handle that
-        if (!hadGuestData) {
-          disableGuestMode();
-        }
-        
-        setCurrentUser(user);
-        
-        // Load their data from Firebase (only if no migration pending)
-        if (!hadGuestData) {
-          try {
-            await loadUserDataFromCloud(user.uid);
-          } catch (error) {
-            console.error('Error loading user data:', error);
-          }
-        }
+        await handleUserLogin(user, hadGuestData);
       } else if (!isGuestMode()) {
         // User is logged out and not in guest mode
         setIsGuest(false);

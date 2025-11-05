@@ -8,7 +8,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { loadUserDataFromCloud, setCurrentUserId } from '../utils/storage';
-import { isGuestMode, enableGuestMode, disableGuestMode } from '../utils/guestStorage';
+import { isGuestMode, enableGuestMode, disableGuestMode, getAllGuestData } from '../utils/guestStorage';
 
 const AuthContext = createContext({});
 
@@ -21,6 +21,19 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
+  const [hasGuestData, setHasGuestData] = useState(false);
+
+  // Check if there's guest data to migrate
+  const checkGuestData = () => {
+    if (isGuestMode()) {
+      const guestData = getAllGuestData();
+      const hasData = Object.keys(guestData).length > 0;
+      setHasGuestData(hasData);
+      return hasData;
+    }
+    setHasGuestData(false);
+    return false;
+  };
 
   const signup = (email, password) => {
     return createUserWithEmailAndPassword(auth, email, password);
@@ -61,25 +74,36 @@ export const AuthProvider = ({ children }) => {
         email: null,
         isGuest: true,
       });
+      checkGuestData();
       setLoading(false);
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Real user is logged in
+        const hadGuestData = checkGuestData();
         setIsGuest(false);
-        disableGuestMode();
+        
+        // Note: We don't disable guest mode or clear data here
+        // The migration dialog will handle that
+        if (!hadGuestData) {
+          disableGuestMode();
+        }
+        
         setCurrentUser(user);
         
-        // Load their data from Firebase
-        try {
-          await loadUserDataFromCloud(user.uid);
-        } catch (error) {
-          console.error('Error loading user data:', error);
+        // Load their data from Firebase (only if no migration pending)
+        if (!hadGuestData) {
+          try {
+            await loadUserDataFromCloud(user.uid);
+          } catch (error) {
+            console.error('Error loading user data:', error);
+          }
         }
       } else if (!isGuestMode()) {
         // User is logged out and not in guest mode
         setIsGuest(false);
+        setHasGuestData(false);
         setCurrentUser(null);
         setCurrentUserId(null);
       }
@@ -93,10 +117,12 @@ export const AuthProvider = ({ children }) => {
   const value = {
     currentUser,
     isGuest,
+    hasGuestData,
     signup,
     login,
     logout,
     continueAsGuest,
+    checkGuestData,
   };
 
   return (

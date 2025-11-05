@@ -12,13 +12,15 @@ import AuthScreen from './components/AuthScreen';
 import FavouritesScreen from './components/FavouritesScreen';
 import StretchScreen from './components/Stretch/StretchScreen';
 import YogaFlowsScreen from './components/YogaFlows/YogaFlowsScreen';
+import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
-import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps } from './utils/storage';
+import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps, loadUserDataFromCloud } from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Snackbar, Alert } from '@mui/material';
+import { Snackbar, Alert, Button } from '@mui/material';
+import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 
 /**
  * Custom theme configuration matching app brand colors
@@ -68,9 +70,52 @@ function App() {
   const [showPreview, setShowPreview] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
-  const { currentUser } = useAuth();
+  const [showGuestSnackbar, setShowGuestSnackbar] = useState(false);
+  const [showMigrationDialog, setShowMigrationDialog] = useState(false);
+  const { currentUser, isGuest, hasGuestData } = useAuth();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
+
+  // Check if guest snackbar should be shown
+  useEffect(() => {
+    if (isGuest) {
+      setShowGuestSnackbar(shouldShowGuestSnackbar());
+    } else {
+      setShowGuestSnackbar(false);
+    }
+  }, [isGuest]);
+
+  // Show migration dialog when user logs in with guest data
+  useEffect(() => {
+    if (currentUser && !isGuest && hasGuestData) {
+      setShowMigrationDialog(true);
+    }
+  }, [currentUser, isGuest, hasGuestData]);
+
+  // Handle migration dialog close
+  const handleMigrationClose = async (migrated) => {
+    setShowMigrationDialog(false);
+    
+    // If data was not migrated, still clear guest mode
+    if (!migrated) {
+      disableGuestMode();
+    }
+    
+    // Load user data from cloud after migration
+    if (currentUser && currentUser.uid) {
+      try {
+        await loadUserDataFromCloud(currentUser.uid);
+      } catch (error) {
+        console.error('Error loading user data after migration:', error);
+      }
+    }
+  };
+
+  // Handle guest snackbar dismissal
+  const handleDismissGuestSnackbar = () => {
+    dismissGuestSnackbar();
+    setShowGuestSnackbar(false);
+  };
 
   // Track screen size for responsive layout
   useEffect(() => {
@@ -405,6 +450,45 @@ function App() {
 
           {currentScreen === 'yoga' && <YogaFlowsScreen />}
         </div>
+        
+        {/* Guest Data Migration Dialog */}
+        <GuestDataMigrationDialog
+          open={showMigrationDialog}
+          onClose={handleMigrationClose}
+          userId={currentUser?.uid}
+        />
+        
+        {/* Guest Mode Snackbar */}
+        <Snackbar
+          open={showGuestSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          sx={{ bottom: { xs: 80, sm: 24 } }}
+        >
+          <Alert 
+            severity="info"
+            onClose={handleDismissGuestSnackbar}
+            action={
+              <Button 
+                color="inherit" 
+                size="small" 
+                onClick={() => setCurrentScreen('progress')}
+                sx={{ fontWeight: 600 }}
+              >
+                Sign Up
+              </Button>
+            }
+            sx={{ 
+              width: '100%',
+              maxWidth: '600px',
+              '& .MuiAlert-message': {
+                fontSize: '0.95rem',
+                fontWeight: 500,
+              }
+            }}
+          >
+            You're in guest mode. Sign up to save your data permanently!
+          </Alert>
+        </Snackbar>
         
         <Snackbar
           open={notification.open}

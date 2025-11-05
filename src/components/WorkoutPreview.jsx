@@ -2,8 +2,9 @@ import { useState, useEffect, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem, Snackbar, Alert, IconButton } from '@mui/material';
-import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle } from '@mui/icons-material';
+import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle, Favorite, FavoriteBorder } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
+import { useFavoriteExercises } from '../hooks/useFavoriteExercises';
 
 /**
  * WorkoutPreview component displays a preview of the generated workout
@@ -15,6 +16,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [loading, setLoading] = useState(true);
   const [savedToFavorites, setSavedToFavorites] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const { toggleFavorite, isFavoriteExercise } = useFavoriteExercises();
 
   // Generate weight options once (0-500 lbs in 2.5 lb increments)
   const weightOptions = useMemo(() => {
@@ -257,6 +259,34 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               <Typography variant="body1" sx={{ fontWeight: 600, flex: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                                 {exerciseName}
                               </Typography>
+                              <motion.div
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                              >
+                                <IconButton
+                                  size="small"
+                                  onClick={() => toggleFavorite(exercise)}
+                                  sx={{
+                                    color: isFavoriteExercise(exerciseName) ? 'error.main' : 'action.active',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(237, 63, 39, 0.08)',
+                                    },
+                                    transition: 'color 0.3s ease',
+                                  }}
+                                  aria-label={isFavoriteExercise(exerciseName) ? 'Remove from favorites' : 'Add to favorites'}
+                                >
+                                  <motion.div
+                                    initial={false}
+                                    animate={{ 
+                                      scale: isFavoriteExercise(exerciseName) ? [1, 1.3, 1] : 1,
+                                      opacity: isFavoriteExercise(exerciseName) ? 1 : 0.7
+                                    }}
+                                    transition={{ duration: 0.3 }}
+                                  >
+                                    {isFavoriteExercise(exerciseName) ? <Favorite fontSize="small" /> : <FavoriteBorder fontSize="small" />}
+                                  </motion.div>
+                                </IconButton>
+                              </motion.div>
                               {onRandomizeExercise && (
                                 <IconButton
                                   size="small"

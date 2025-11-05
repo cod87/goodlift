@@ -63,13 +63,15 @@ export const useWorkoutGenerator = () => {
 
   /**
    * Get random exercises from a specific muscle group with equipment filtering
+   * Favorited exercises have 2x probability weight
    * @param {string} muscle - The muscle group to select from
    * @param {number} count - Number of exercises to return
    * @param {Array} currentWorkout - Already selected exercises to avoid duplicates
    * @param {string|Array} equipmentFilter - Equipment type(s) to filter by, or 'all'
+   * @param {Set} favoriteExerciseNames - Set of favorited exercise names for weighted selection
    * @returns {Array} Array of selected exercise objects
    */
-  const getRandomExercises = useCallback((muscle, count, currentWorkout = [], equipmentFilter = 'all') => {
+  const getRandomExercises = useCallback((muscle, count, currentWorkout = [], equipmentFilter = 'all', favoriteExerciseNames = new Set()) => {
     // Filter out exercises already in the workout
     let available = (exerciseDB[muscle] || []).filter(ex => 
       !currentWorkout.some(wEx => wEx['Exercise Name'] === ex['Exercise Name'])
@@ -100,32 +102,53 @@ export const useWorkoutGenerator = () => {
       return available;
     }
     
+    // Create weighted pool: favorites appear twice for 2x probability
+    const weightedPool = [];
+    available.forEach(exercise => {
+      weightedPool.push(exercise);
+      if (favoriteExerciseNames.has(exercise['Exercise Name'])) {
+        weightedPool.push(exercise); // Add favorite exercises twice
+      }
+    });
+    
     // Fisher-Yates shuffle for better randomization
-    const shuffled = [...available];
+    const shuffled = [...weightedPool];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     
-    return shuffled.slice(0, count);
+    // Remove duplicates while maintaining weighted selection order
+    const selected = [];
+    const selectedNames = new Set();
+    for (const exercise of shuffled) {
+      if (!selectedNames.has(exercise['Exercise Name'])) {
+        selected.push(exercise);
+        selectedNames.add(exercise['Exercise Name']);
+        if (selected.length >= count) break;
+      }
+    }
+    
+    return selected;
   }, [exerciseDB]);
 
   /**
    * Generate exercise list based on workout type and equipment
    * @param {string} type - Workout type: 'upper', 'lower', or 'full'
    * @param {string|Array} equipmentFilter - Equipment filter(s) to apply
+   * @param {Set} favoriteExerciseNames - Set of favorited exercise names for weighted selection
    * @returns {Array} Array of selected exercises for the workout
    */
-  const generateExerciseList = useCallback((type, equipmentFilter = 'all') => {
+  const generateExerciseList = useCallback((type, equipmentFilter = 'all', favoriteExerciseNames = new Set()) => {
     let workout = [];
     
     switch (type) {
       case 'upper':
         // Upper body: 3 chest, 3 lats, 1 biceps, 1 triceps
-        workout.push(...getRandomExercises('Chest', 3, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Lats', 3, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Biceps', 1, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Triceps', 1, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Chest', 3, workout, equipmentFilter, favoriteExerciseNames));
+        workout.push(...getRandomExercises('Lats', 3, workout, equipmentFilter, favoriteExerciseNames));
+        workout.push(...getRandomExercises('Biceps', 1, workout, equipmentFilter, favoriteExerciseNames));
+        workout.push(...getRandomExercises('Triceps', 1, workout, equipmentFilter, favoriteExerciseNames));
         break;
         
       case 'lower': {
@@ -134,10 +157,10 @@ export const useWorkoutGenerator = () => {
         const hamCount = Math.floor(Math.random() * 2) + 2; // 2-3 exercises
         const coreCount = EXERCISES_PER_WORKOUT - quadCount - hamCount;
         
-        workout.push(...getRandomExercises('Quads', quadCount, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Hamstrings', hamCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Quads', quadCount, workout, equipmentFilter, favoriteExerciseNames));
+        workout.push(...getRandomExercises('Hamstrings', hamCount, workout, equipmentFilter, favoriteExerciseNames));
         if (coreCount > 0) {
-          workout.push(...getRandomExercises('Core', coreCount, workout, equipmentFilter));
+          workout.push(...getRandomExercises('Core', coreCount, workout, equipmentFilter, favoriteExerciseNames));
         }
         break;
       }
@@ -147,12 +170,12 @@ export const useWorkoutGenerator = () => {
         const hamFullCount = Math.floor(Math.random() * 2) + 1; // 1-2 exercises
         const coreFullCount = EXERCISES_PER_WORKOUT - 2 - 2 - 2 - hamFullCount;
         
-        workout.push(...getRandomExercises('Chest', 2, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Lats', 2, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Quads', 2, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Hamstrings', hamFullCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Chest', 2, workout, equipmentFilter, favoriteExerciseNames));
+        workout.push(...getRandomExercises('Lats', 2, workout, equipmentFilter, favoriteExerciseNames));
+        workout.push(...getRandomExercises('Quads', 2, workout, equipmentFilter, favoriteExerciseNames));
+        workout.push(...getRandomExercises('Hamstrings', hamFullCount, workout, equipmentFilter, favoriteExerciseNames));
         if (coreFullCount > 0) {
-          workout.push(...getRandomExercises('Core', coreFullCount, workout, equipmentFilter));
+          workout.push(...getRandomExercises('Core', coreFullCount, workout, equipmentFilter, favoriteExerciseNames));
         }
         break;
       }
@@ -168,7 +191,7 @@ export const useWorkoutGenerator = () => {
       if (allMuscles.length === 0) break;
       
       const randomMuscle = allMuscles[Math.floor(Math.random() * allMuscles.length)];
-      const filler = getRandomExercises(randomMuscle, 1, workout, equipmentFilter);
+      const filler = getRandomExercises(randomMuscle, 1, workout, equipmentFilter, favoriteExerciseNames);
       if (filler.length > 0) {
         workout.push(filler[0]);
       } else {
@@ -231,15 +254,16 @@ export const useWorkoutGenerator = () => {
    * Generate a complete workout plan with exercises paired into supersets
    * @param {string} type - Workout type: 'upper', 'lower', or 'full'
    * @param {string|Array} equipmentFilter - Equipment filter(s) to apply
+   * @param {Set} favoriteExerciseNames - Set of favorited exercise names for weighted selection
    * @returns {Array} Complete workout plan with exercises ordered for supersets
    */
-  const generateWorkout = useCallback((type, equipmentFilter = 'all') => {
+  const generateWorkout = useCallback((type, equipmentFilter = 'all', favoriteExerciseNames = new Set()) => {
     if (Object.keys(exerciseDB).length === 0) {
       console.error("Exercise database is empty. Cannot generate workout.");
       return [];
     }
     
-    const exerciseList = generateExerciseList(type, equipmentFilter);
+    const exerciseList = generateExerciseList(type, equipmentFilter, favoriteExerciseNames);
     const pairedList = pairExercises(exerciseList);
     
     return pairedList;

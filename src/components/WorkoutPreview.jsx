@@ -81,14 +81,14 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   }, [workout, loading]); // Intentionally excluding exerciseSettings and customizedSettings to avoid loops
 
   const handleWeightChange = (exerciseName, value) => {
-    const numValue = parseFloat(value);
-    // Validate: only allow non-negative numbers
-    if (value === '' || (!isNaN(numValue) && numValue >= 0)) {
+    // Validate: only allow non-negative numbers (strict validation)
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      const numValue = value === '' ? 0 : parseFloat(value);
       setExerciseSettings(prev => ({
         ...prev,
         [exerciseName]: {
           ...prev[exerciseName],
-          weight: value === '' ? 0 : numValue,
+          weight: numValue,
         }
       }));
       // Track as customized
@@ -123,14 +123,14 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   };
 
   const handleTargetRepsChange = (exerciseName, value) => {
-    const numValue = parseInt(value);
-    // Validate: only allow positive integers
-    if (value === '' || (!isNaN(numValue) && numValue >= 1)) {
+    // Validate: only allow positive integers (strict validation)
+    if (value === '' || /^\d+$/.test(value)) {
+      const numValue = value === '' ? 12 : parseInt(value, 10);
       setExerciseSettings(prev => ({
         ...prev,
         [exerciseName]: {
           ...prev[exerciseName],
-          targetReps: value === '' ? 1 : numValue,
+          targetReps: numValue,
         }
       }));
       // Track as customized

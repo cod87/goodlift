@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { getFavoriteWorkouts } from '../utils/storage';
 
 /**
@@ -7,22 +7,33 @@ import { getFavoriteWorkouts } from '../utils/storage';
  * @returns {Set<string>} Set of exercise names that appear in favorite workouts
  */
 export const useFavoriteExercises = () => {
-  const favoriteExercises = useMemo(() => {
-    const favorites = getFavoriteWorkouts();
-    const exerciseSet = new Set();
+  const [favoriteExercises, setFavoriteExercises] = useState(new Set());
+  
+  useEffect(() => {
+    const loadFavorites = () => {
+      const favorites = getFavoriteWorkouts();
+      const exerciseSet = new Set();
+      
+      favorites.forEach(fav => {
+        if (fav.exercises && Array.isArray(fav.exercises)) {
+          fav.exercises.forEach(exercise => {
+            if (exercise && exercise['Exercise Name']) {
+              exerciseSet.add(exercise['Exercise Name']);
+            }
+          });
+        }
+      });
+      
+      setFavoriteExercises(exerciseSet);
+    };
     
-    favorites.forEach(fav => {
-      if (fav.exercises && Array.isArray(fav.exercises)) {
-        fav.exercises.forEach(exercise => {
-          if (exercise && exercise['Exercise Name']) {
-            exerciseSet.add(exercise['Exercise Name']);
-          }
-        });
-      }
-    });
+    loadFavorites();
     
-    return exerciseSet;
-  }, []); // Empty deps - only compute once per component mount
+    // Set up an interval to refresh favorites periodically
+    const intervalId = setInterval(loadFavorites, 30000); // Refresh every 30 seconds
+    
+    return () => clearInterval(intervalId);
+  }, []);
 
   return favoriteExercises;
 };

@@ -266,10 +266,12 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                                 <IconButton
                                   size="small"
                                   onClick={() => toggleFavorite(exercise)}
+                                  disableRipple
                                   sx={{
-                                    color: isFavoriteExercise(exerciseName) ? 'error.main' : 'action.active',
+                                    color: isFavoriteExercise(exerciseName) ? 'secondary.main' : 'action.active',
+                                    padding: 0.5,
                                     '&:hover': {
-                                      backgroundColor: 'rgba(237, 63, 39, 0.08)',
+                                      backgroundColor: 'transparent',
                                     },
                                     transition: 'color 0.3s ease',
                                   }}
@@ -279,7 +281,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                                     initial={false}
                                     animate={{ 
                                       scale: isFavoriteExercise(exerciseName) ? [1, 1.3, 1] : 1,
-                                      opacity: isFavoriteExercise(exerciseName) ? 1 : 0.7
+                                      opacity: 1
                                     }}
                                     transition={{ duration: 0.3 }}
                                   >

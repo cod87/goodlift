@@ -15,6 +15,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Grid,
 } from '@mui/material';
 import {
   PlayArrow,
@@ -394,9 +395,6 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
     </Box>
   );
 };
-
-// Add missing Grid import
-import { Grid } from '@mui/material';
 
 FlowSession.propTypes = {
   flow: PropTypes.shape({

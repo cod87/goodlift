@@ -110,7 +110,7 @@ export const stretchesData = [
     secondaryMuscles: 'Lower Back',
     type: 'Static',
     duration: 60,
-    youtubeLink: 'https://www.youtube.com/watch?v=0_zDфренс6kQ',
+    youtubeLink: 'https://www.youtube.com/watch?v=0_zDd6kQ',
     difficulty: 'Intermediate',
   },
   {

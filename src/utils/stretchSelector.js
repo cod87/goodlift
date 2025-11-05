@@ -46,7 +46,7 @@ const BODY_AREAS = {
 /**
  * Check if a stretch covers a body area
  * @param {Object} stretch - Stretch object
- * @param {string[]} areaMusc les - Muscles in the body area
+ * @param {string[]} areaMuscles - Muscles in the body area
  * @returns {boolean} True if stretch targets that area
  */
 const coversArea = (stretch, areaMuscles) => {

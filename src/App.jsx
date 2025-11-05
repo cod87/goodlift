@@ -10,6 +10,8 @@ import ProgressScreen from './components/ProgressScreen';
 import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
 import FavouritesScreen from './components/FavouritesScreen';
+import StretchScreen from './components/Stretch/StretchScreen';
+import YogaFlowsScreen from './components/YogaFlows/YogaFlowsScreen';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps } from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
@@ -345,6 +347,10 @@ function App() {
           )}
 
           {currentScreen === 'hiit' && <HiitTimerScreen />}
+
+          {currentScreen === 'stretch' && <StretchScreen />}
+
+          {currentScreen === 'yoga' && <YogaFlowsScreen />}
         </div>
         
         <Snackbar

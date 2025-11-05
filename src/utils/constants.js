@@ -22,6 +22,8 @@ export const SCREENS = {
   COMPLETION: 'completion',
   PROGRESS: 'progress',
   HIIT: 'hiit',
+  STRETCH: 'stretch',
+  YOGA: 'yoga',
 };
 
 /** Muscle group categories for progressive overload calculations */

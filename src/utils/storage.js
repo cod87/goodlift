@@ -19,6 +19,8 @@ const KEYS = {
   EXERCISE_WEIGHTS: 'goodlift_exercise_weights',
   EXERCISE_TARGET_REPS: 'goodlift_exercise_target_reps',
   HIIT_SESSIONS: 'goodlift_hiit_sessions',
+  STRETCH_SESSIONS: 'goodlift_stretch_sessions',
+  YOGA_SESSIONS: 'goodlift_yoga_sessions',
   FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
 };
 
@@ -517,6 +519,151 @@ export const updateFavoriteWorkoutName = (workoutId, newName) => {
     localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(updatedFavorites));
   } catch (error) {
     console.error('Error updating favorite workout name:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get stretch sessions from localStorage
+ * @returns {Array} Array of stretch session objects
+ */
+export const getStretchSessions = () => {
+  try {
+    const sessions = localStorage.getItem(KEYS.STRETCH_SESSIONS);
+    return sessions ? JSON.parse(sessions) : [];
+  } catch (error) {
+    console.error('Error reading stretch sessions:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a completed stretch session
+ * @param {Object} sessionData - Stretch session data including stretches and duration
+ */
+export const saveStretchSession = async (sessionData) => {
+  try {
+    if (!sessionData) {
+      throw new Error('Session data is required');
+    }
+    
+    const sessions = getStretchSessions();
+    sessions.unshift(sessionData); // Add to beginning for chronological order
+    localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(sessions));
+    
+    // Update total stretch time in user stats
+    const stats = await getUserStats();
+    stats.totalStretchTime = (stats.totalStretchTime || 0) + (sessionData.duration || 0);
+    await saveUserStats(stats);
+  } catch (error) {
+    console.error('Error saving stretch session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a stretch session
+ * @param {string} sessionId - ID of the session to delete
+ */
+export const deleteStretchSession = async (sessionId) => {
+  try {
+    const sessions = getStretchSessions();
+    const sessionToDelete = sessions.find(s => s.id === sessionId);
+    const filteredSessions = sessions.filter(s => s.id !== sessionId);
+    localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(filteredSessions));
+    
+    // Update stats if session had duration
+    if (sessionToDelete?.duration) {
+      const stats = await getUserStats();
+      stats.totalStretchTime = Math.max(0, (stats.totalStretchTime || 0) - sessionToDelete.duration);
+      await saveUserStats(stats);
+    }
+  } catch (error) {
+    console.error('Error deleting stretch session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get yoga sessions from localStorage
+ * @returns {Array} Array of yoga session objects
+ */
+export const getYogaSessions = () => {
+  try {
+    const sessions = localStorage.getItem(KEYS.YOGA_SESSIONS);
+    return sessions ? JSON.parse(sessions) : [];
+  } catch (error) {
+    console.error('Error reading yoga sessions:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a completed yoga session
+ * @param {Object} sessionData - Yoga session data including flow name and duration
+ */
+export const saveYogaSession = async (sessionData) => {
+  try {
+    if (!sessionData) {
+      throw new Error('Session data is required');
+    }
+    
+    const sessions = getYogaSessions();
+    sessions.unshift(sessionData); // Add to beginning for chronological order
+    localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(sessions));
+    
+    // Update total yoga time in user stats
+    const stats = await getUserStats();
+    stats.totalYogaTime = (stats.totalYogaTime || 0) + (sessionData.duration || 0);
+    await saveUserStats(stats);
+  } catch (error) {
+    console.error('Error saving yoga session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a yoga session
+ * @param {string} sessionId - ID of the session to delete
+ */
+export const deleteYogaSession = async (sessionId) => {
+  try {
+    const sessions = getYogaSessions();
+    const sessionToDelete = sessions.find(s => s.id === sessionId);
+    const filteredSessions = sessions.filter(s => s.id !== sessionId);
+    localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(filteredSessions));
+    
+    // Update stats if session had duration
+    if (sessionToDelete?.duration) {
+      const stats = await getUserStats();
+      stats.totalYogaTime = Math.max(0, (stats.totalYogaTime || 0) - sessionToDelete.duration);
+      await saveUserStats(stats);
+    }
+  } catch (error) {
+    console.error('Error deleting yoga session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a HIIT session
+ * @param {string} sessionId - ID of the session to delete
+ */
+export const deleteHiitSession = async (sessionId) => {
+  try {
+    const sessions = getHiitSessions();
+    const sessionToDelete = sessions.find(s => s.id === sessionId);
+    const filteredSessions = sessions.filter(s => s.id !== sessionId);
+    localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(filteredSessions));
+    
+    // Update stats if session had duration
+    if (sessionToDelete?.duration) {
+      const stats = await getUserStats();
+      stats.totalHiitTime = Math.max(0, (stats.totalHiitTime || 0) - sessionToDelete.duration);
+      await saveUserStats(stats);
+    }
+  } catch (error) {
+    console.error('Error deleting HIIT session:', error);
     throw error;
   }
 };

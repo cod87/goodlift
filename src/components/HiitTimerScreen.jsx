@@ -46,6 +46,7 @@ const HiitTimerScreen = () => {
     
     // Save session
     await saveHiitSession({
+      id: `hiit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       date: new Date().toISOString(),
       duration: duration,
       workTime: workTime,

@@ -6,6 +6,7 @@ import { CheckCircle } from '@mui/icons-material';
 import StretchSelection from './StretchSelection';
 import StretchSession from './StretchSession';
 import { selectFullBodyStretches, selectCustomStretches } from '../../utils/stretchSelector';
+import { saveStretchSession } from '../../utils/storage';
 
 /**
  * Main Stretch Screen Component
@@ -14,6 +15,7 @@ import { selectFullBodyStretches, selectCustomStretches } from '../../utils/stre
 const StretchScreen = () => {
   const [screen, setScreen] = useState('selection'); // 'selection', 'session', 'complete'
   const [selectedStretches, setSelectedStretches] = useState([]);
+  const [sessionType, setSessionType] = useState('');
 
   const handleStartSession = (type, muscles) => {
     let stretches;
@@ -23,10 +25,25 @@ const StretchScreen = () => {
       stretches = selectCustomStretches(muscles, 10);
     }
     setSelectedStretches(stretches);
+    setSessionType(type);
     setScreen('session');
   };
 
-  const handleSessionComplete = () => {
+  const handleSessionComplete = async () => {
+    // Save the session
+    try {
+      const sessionData = {
+        id: `stretch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        date: new Date().toISOString(),
+        type: sessionType,
+        stretchesCompleted: selectedStretches.length,
+        stretches: selectedStretches.map(s => s.name),
+        duration: selectedStretches.length * 60, // 60 seconds per stretch
+      };
+      await saveStretchSession(sessionData);
+    } catch (error) {
+      console.error('Failed to save stretch session:', error);
+    }
     setScreen('complete');
   };
 

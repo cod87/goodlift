@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, MenuItem, Snackbar, Alert, IconButton } from '@mui/material';
-import { FitnessCenter, PlayArrow, Close, StarOutline, Star } from '@mui/icons-material';
+import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 
 /**
@@ -10,7 +10,7 @@ import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExercis
  * Allows users to set starting weights and target reps before beginning
  * Memoized to prevent unnecessary re-renders
  */
-const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
+const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise, equipmentFilter }) => {
   const [exerciseSettings, setExerciseSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [savedToFavorites, setSavedToFavorites] = useState(false);
@@ -238,7 +238,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
                       >
                         <Box sx={{ 
                           display: 'flex',
-                          alignItems: 'center',
+                          alignItems: 'flex-start',
                           gap: { xs: 1, sm: 2 },
                           mb: { xs: 1.5, sm: 2 }
                         }}>
@@ -253,9 +253,26 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel }) => {
                             {exerciseIdx === 0 ? 'A' : 'B'}
                           </Typography>
                           <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
-                              {exerciseName}
-                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                              <Typography variant="body1" sx={{ fontWeight: 600, flex: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+                                {exerciseName}
+                              </Typography>
+                              {onRandomizeExercise && (
+                                <IconButton
+                                  size="small"
+                                  onClick={() => onRandomizeExercise(idx, exerciseIdx, exercise['Primary Muscle'], equipmentFilter)}
+                                  sx={{
+                                    color: 'primary.main',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                                    },
+                                  }}
+                                  aria-label="Randomize exercise"
+                                >
+                                  <Shuffle fontSize="small" />
+                                </IconButton>
+                              )}
+                            </Box>
                             <Stack direction="row" spacing={1} flexWrap="wrap">
                               <Chip 
                                 label={exercise['Primary Muscle']} 
@@ -441,6 +458,8 @@ WorkoutPreview.propTypes = {
   workoutType: PropTypes.string.isRequired,
   onStart: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
+  onRandomizeExercise: PropTypes.func,
+  equipmentFilter: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 };
 
 export default WorkoutPreview;

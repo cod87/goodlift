@@ -5,6 +5,7 @@ import { Box, Card, CardContent, Typography, Button } from '@mui/material';
 import { CheckCircle } from '@mui/icons-material';
 import FlowSelection from './FlowSelection';
 import FlowSession from './FlowSession';
+import { saveYogaSession } from '../../utils/storage';
 
 /**
  * Main Yoga Flows Screen Component
@@ -19,7 +20,21 @@ const YogaFlowsScreen = () => {
     setScreen('session');
   };
 
-  const handleSessionComplete = () => {
+  const handleSessionComplete = async () => {
+    // Save the session
+    try {
+      const sessionData = {
+        id: `yoga_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        date: new Date().toISOString(),
+        flowName: selectedFlow.flowName,
+        difficultyLevel: selectedFlow.difficultyLevel,
+        duration: selectedFlow.durationMinutes * 60, // Convert to seconds
+        posesCompleted: selectedFlow.posesIncluded.length,
+      };
+      await saveYogaSession(sessionData);
+    } catch (error) {
+      console.error('Failed to save yoga session:', error);
+    }
     setScreen('complete');
   };
 

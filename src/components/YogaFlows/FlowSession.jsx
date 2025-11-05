@@ -331,10 +331,10 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
         </Card>
 
         {/* Flow Details */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
+        <Grid container spacing={3} sx={{ width: '100%', margin: 0 }}>
+          <Grid item xs={12} md={6} sx={{ paddingLeft: { xs: 0, md: '12px' } }}>
+            <Card sx={{ width: '100%', boxSizing: 'border-box' }}>
+              <CardContent sx={{ width: '100%', boxSizing: 'border-box' }}>
                 <Typography
                   variant="h6"
                   sx={{ fontWeight: 700, marginBottom: 2, color: 'primary.main' }}
@@ -357,9 +357,9 @@ const FlowSession = ({ flow, onComplete, onExit }) => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
+          <Grid item xs={12} md={6} sx={{ paddingLeft: { xs: 0, md: '12px' } }}>
+            <Card sx={{ width: '100%', boxSizing: 'border-box' }}>
+              <CardContent sx={{ width: '100%', boxSizing: 'border-box' }}>
                 <Typography
                   variant="h6"
                   sx={{ fontWeight: 700, marginBottom: 2, color: 'primary.main' }}

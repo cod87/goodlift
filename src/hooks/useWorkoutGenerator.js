@@ -248,6 +248,7 @@ export const useWorkoutGenerator = () => {
   return {
     generateWorkout,
     allExercises,
+    exerciseDB,
     loading,
     error,
   };

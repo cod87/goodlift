@@ -12,6 +12,8 @@ import AuthScreen from './components/AuthScreen';
 import FavouritesScreen from './components/FavouritesScreen';
 import StretchScreen from './components/Stretch/StretchScreen';
 import YogaScreen from './pages/YogaScreen';
+import CardioScreen from './pages/CardioScreen';
+import LogCardioScreen from './pages/LogCardioScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
@@ -496,6 +498,10 @@ function App() {
           )}
 
           {currentScreen === 'hiit' && <HiitTimerScreen />}
+
+          {currentScreen === 'cardio' && <CardioScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'log-cardio' && <LogCardioScreen onNavigate={handleNavigate} />}
 
           {currentScreen === 'stretch' && <StretchScreen />}
 

@@ -8,9 +8,11 @@ import {
   getStretchSessions,
   getYogaSessions,
   getHiitSessions,
+  getCardioSessions,
   deleteStretchSession,
   deleteYogaSession,
-  deleteHiitSession
+  deleteHiitSession,
+  deleteCardioSession
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import Calendar from './Calendar';
@@ -40,25 +42,30 @@ ChartJS.register(
   Filler
 );
 
+// Constants
+const SECONDS_PER_MINUTE = 60;
+
 const ProgressScreen = () => {
   const [stats, setStats] = useState({ totalWorkouts: 0, totalTime: 0 });
   const [history, setHistory] = useState([]);
   const [stretchSessions, setStretchSessions] = useState([]);
   const [yogaSessions, setYogaSessions] = useState([]);
   const [hiitSessions, setHiitSessions] = useState([]);
+  const [cardioSessions, setCardioSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [exerciseWeights, setExerciseWeights] = useState({});
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedStats, loadedHistory, loadedWeights, loadedStretches, loadedYoga, loadedHiit] = await Promise.all([
+      const [loadedStats, loadedHistory, loadedWeights, loadedStretches, loadedYoga, loadedHiit, loadedCardio] = await Promise.all([
         getUserStats(),
         getWorkoutHistory(),
         getAllExerciseWeights(),
         getStretchSessions(),
         getYogaSessions(),
-        getHiitSessions()
+        getHiitSessions(),
+        getCardioSessions()
       ]);
       setStats(loadedStats);
       setHistory(loadedHistory);
@@ -66,6 +73,7 @@ const ProgressScreen = () => {
       setStretchSessions(loadedStretches);
       setYogaSessions(loadedYoga);
       setHiitSessions(loadedHiit);
+      setCardioSessions(loadedCardio);
     } catch (error) {
       console.error('Error loading progress data:', error);
     } finally {
@@ -106,6 +114,13 @@ const ProgressScreen = () => {
     }
   };
 
+  const handleDeleteCardio = async (sessionId) => {
+    if (window.confirm('Are you sure you want to delete this cardio session? This action cannot be undone.')) {
+      await deleteCardioSession(sessionId);
+      await loadData();
+    }
+  };
+
   if (loading) {
     return (
       <div className="screen progress-screen">
@@ -118,6 +133,7 @@ const ProgressScreen = () => {
   const workoutDates = [
     ...history.map(workout => workout.date),
     ...hiitSessions.map(session => session.date),
+    ...cardioSessions.map(session => session.date),
     ...stretchSessions.map(session => session.date),
     ...yogaSessions.map(session => session.date)
   ];
@@ -426,6 +442,50 @@ const ProgressScreen = () => {
                 </CardContent>
               </Card>
             </motion.div>
+          </Stack>
+
+          {/* Row 4: Cardio Time */}
+          <Stack direction="row" spacing={2}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              style={{ flex: 1 }}
+            >
+              <Card sx={{ 
+                height: '100%',
+                borderRadius: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 24px rgba(33, 150, 243, 0.15)',
+                }
+              }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                    <FitnessCenter sx={{ fontSize: 32, color: '#2196f3' }} />
+                    <Typography variant="body2" sx={{ 
+                      color: 'text.secondary',
+                      textTransform: 'uppercase',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                    }}>
+                      Cardio Time
+                    </Typography>
+                  </Stack>
+                  <Typography variant="h3" sx={{ 
+                    fontWeight: 700,
+                    color: '#2196f3',
+                    fontSize: { xs: '2rem', sm: '2.5rem' }
+                  }}>
+                    {formatDuration(stats.totalCardioTime || 0)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </motion.div>
+            {/* Empty placeholder for consistent grid */}
+            <Box sx={{ flex: 1 }} />
           </Stack>
         </Stack>
       </Box>
@@ -809,6 +869,70 @@ const ProgressScreen = () => {
                           }
                         }}
                         aria-label="Delete yoga session"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </Stack>
+        </div>
+      )}
+
+      {/* Cardio Sessions History */}
+      {cardioSessions.length > 0 && (
+        <div className="workout-history-container" style={{ marginTop: '2rem' }}>
+          <Typography variant="h4" component="h2" sx={{ 
+            fontWeight: 700,
+            mb: 3,
+            color: 'text.primary'
+          }}>
+            Cardio Sessions
+          </Typography>
+          <Stack spacing={2}>
+            {cardioSessions.map((session) => (
+              <motion.div
+                key={session.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.05 }}
+              >
+                <Card sx={{ 
+                  borderLeft: '4px solid',
+                  borderLeftColor: '#2196f3',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateX(4px)',
+                    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.15)',
+                  }
+                }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Box sx={{ flex: 1 }}>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                          <FitnessCenter sx={{ color: '#2196f3', fontSize: 20 }} />
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {session.cardioType} - {formatDate(session.date)}
+                          </Typography>
+                        </Stack>
+                        <Typography variant="body2" color="text.secondary">
+                          Duration: {Math.round(session.duration / SECONDS_PER_MINUTE)} minutes
+                        </Typography>
+                      </Box>
+                      <IconButton
+                        onClick={() => handleDeleteCardio(session.id)}
+                        size="small"
+                        sx={{
+                          color: 'error.main',
+                          '&:hover': {
+                            backgroundColor: 'error.light',
+                            color: 'error.contrastText',
+                          }
+                        }}
+                        aria-label="Delete cardio session"
                       >
                         <Delete />
                       </IconButton>

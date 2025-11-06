@@ -42,6 +42,9 @@ ChartJS.register(
   Filler
 );
 
+// Constants
+const SECONDS_PER_MINUTE = 60;
+
 const ProgressScreen = () => {
   const [stats, setStats] = useState({ totalWorkouts: 0, totalTime: 0 });
   const [history, setHistory] = useState([]);
@@ -916,7 +919,7 @@ const ProgressScreen = () => {
                           </Typography>
                         </Stack>
                         <Typography variant="body2" color="text.secondary">
-                          Duration: {Math.round(session.duration / 60)} minutes
+                          Duration: {Math.round(session.duration / SECONDS_PER_MINUTE)} minutes
                         </Typography>
                       </Box>
                       <IconButton

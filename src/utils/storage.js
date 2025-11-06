@@ -550,7 +550,7 @@ export const saveCardioSession = async (sessionData) => {
     
     const sessions = getCardioSessions();
     const newSession = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       cardioType: sessionData.cardioType,
       duration: sessionData.duration,
       date: sessionData.date || Date.now(),

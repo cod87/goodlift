@@ -6,6 +6,10 @@ import { FitnessCenter } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 import { saveCardioSession } from '../utils/storage';
 
+// Constants
+const SECONDS_PER_MINUTE = 60;
+const NAVIGATION_DELAY_MS = 1500;
+
 const LogCardioScreen = ({ onNavigate }) => {
   const [notification, setNotification] = useState({ show: false, message: '', severity: 'success' });
 
@@ -34,7 +38,7 @@ const LogCardioScreen = ({ onNavigate }) => {
     try {
       const sessionData = {
         cardioType: values.cardioType.trim(),
-        duration: parseFloat(values.duration) * 60, // Convert minutes to seconds
+        duration: parseFloat(values.duration) * SECONDS_PER_MINUTE,
         date: Date.now(),
       };
 
@@ -53,7 +57,7 @@ const LogCardioScreen = ({ onNavigate }) => {
         if (onNavigate) {
           onNavigate('progress');
         }
-      }, 1500);
+      }, NAVIGATION_DELAY_MS);
     } catch (error) {
       console.error('Error saving cardio session:', error);
       setNotification({

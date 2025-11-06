@@ -212,12 +212,6 @@ const NavigationSidebar = ({
                 onClick={() => handleNavClick('favourites')}
               />
               <NavLink
-                icon={<EditCalendarIcon />}
-                label="Log Activity"
-                isActive={currentScreen === 'log-activity' || currentScreen === 'log-activity-workout' || currentScreen === 'log-activity-yoga' || currentScreen === 'log-activity-hiit'}
-                onClick={() => handleNavClick('log-activity')}
-              />
-              <NavLink
                 icon={<DirectionsRunIcon />}
                 label="Cardio"
                 isActive={currentScreen === 'cardio'}
@@ -234,6 +228,12 @@ const NavigationSidebar = ({
                 label="Yoga"
                 isActive={currentScreen === 'yoga'}
                 onClick={() => handleNavClick('yoga')}
+              />
+              <NavLink
+                icon={<EditCalendarIcon />}
+                label="Log Activity"
+                isActive={currentScreen === 'log-activity' || currentScreen === 'log-activity-workout' || currentScreen === 'log-activity-yoga' || currentScreen === 'log-activity-hiit'}
+                onClick={() => handleNavClick('log-activity')}
               />
             </nav>
 

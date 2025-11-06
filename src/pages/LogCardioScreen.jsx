@@ -3,6 +3,9 @@ import { motion } from 'framer-motion';
 import { Box, Card, CardContent, Typography, TextField, Button, Alert } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import { FitnessCenter } from '@mui/icons-material';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import PropTypes from 'prop-types';
 import { saveCardioSession } from '../utils/storage';
 
@@ -14,12 +17,17 @@ const LogCardioScreen = ({ onNavigate }) => {
   const [notification, setNotification] = useState({ show: false, message: '', severity: 'success' });
 
   const initialValues = {
+    date: new Date(),
     cardioType: '',
     duration: '',
   };
 
   const validate = (values) => {
     const errors = {};
+    
+    if (!values.date) {
+      errors.date = 'Date is required';
+    }
     
     if (!values.cardioType || values.cardioType.trim() === '') {
       errors.cardioType = 'Cardio type is required';
@@ -39,7 +47,7 @@ const LogCardioScreen = ({ onNavigate }) => {
       const sessionData = {
         cardioType: values.cardioType.trim(),
         duration: parseFloat(values.duration) * SECONDS_PER_MINUTE,
-        date: Date.now(),
+        date: values.date.getTime(),
       };
 
       await saveCardioSession(sessionData);
@@ -71,16 +79,17 @@ const LogCardioScreen = ({ onNavigate }) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{ 
-        maxWidth: '600px', 
-        margin: '0 auto', 
-        padding: '2rem 1rem' 
-      }}
-    >
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        style={{ 
+          maxWidth: '600px', 
+          margin: '0 auto', 
+          padding: '2rem 1rem' 
+        }}
+      >
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Box sx={{ 
           display: 'flex', 
@@ -134,9 +143,27 @@ const LogCardioScreen = ({ onNavigate }) => {
             validate={validate}
             onSubmit={handleSubmit}
           >
-            {({ errors, touched, isSubmitting, isValid, dirty }) => (
+            {({ errors, touched, isSubmitting, isValid, dirty, values, setFieldValue }) => (
               <Form>
                 <Box sx={{ mb: 3 }}>
+                  <Field name="date">
+                    {() => (
+                      <DatePicker
+                        label="Date"
+                        value={values.date}
+                        onChange={(newValue) => setFieldValue('date', newValue)}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            error: touched.date && Boolean(errors.date),
+                            helperText: touched.date && errors.date,
+                            sx: { mb: 2 }
+                          }
+                        }}
+                      />
+                    )}
+                  </Field>
+
                   <Field name="cardioType">
                     {({ field }) => (
                       <TextField
@@ -189,6 +216,7 @@ const LogCardioScreen = ({ onNavigate }) => {
         </CardContent>
       </Card>
     </motion.div>
+    </LocalizationProvider>
   );
 };
 

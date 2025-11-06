@@ -1,25 +1,18 @@
 import { motion } from 'framer-motion';
 import { Box, Card, CardContent, Typography, Button, Stack } from '@mui/material';
 import { Whatshot, FitnessCenter } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 const CardioScreen = ({ onNavigate }) => {
-  const navigate = useNavigate();
-
   const handleHiitClick = () => {
     if (onNavigate) {
       onNavigate('hiit');
-    } else {
-      navigate('/hiit-timer');
     }
   };
 
   const handleLogCardioClick = () => {
     if (onNavigate) {
       onNavigate('log-cardio');
-    } else {
-      navigate('/log-cardio');
     }
   };
 

@@ -129,13 +129,13 @@ const ProgressScreen = () => {
     );
   }
 
-  // Extract workout dates for calendar - include all session types
-  const workoutDates = [
-    ...history.map(workout => workout.date),
-    ...hiitSessions.map(session => session.date),
-    ...cardioSessions.map(session => session.date),
-    ...stretchSessions.map(session => session.date),
-    ...yogaSessions.map(session => session.date)
+  // Extract workout dates for calendar - include all session types with their types
+  const workoutSessions = [
+    ...history.map(workout => ({ date: workout.date, type: 'workout' })),
+    ...hiitSessions.map(session => ({ date: session.date, type: 'hiit' })),
+    ...cardioSessions.map(session => ({ date: session.date, type: 'cardio' })),
+    ...stretchSessions.map(session => ({ date: session.date, type: 'stretch' })),
+    ...yogaSessions.map(session => ({ date: session.date, type: 'yoga' }))
   ];
 
   // Prepare chart data
@@ -583,7 +583,7 @@ const ProgressScreen = () => {
         </motion.div>
       )}
 
-      <Calendar workoutDates={workoutDates} />
+      <Calendar workoutSessions={workoutSessions} />
       
       <div className="workout-history-container">
         <Typography variant="h4" component="h2" sx={{ 

@@ -28,11 +28,6 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
     return workoutDateMap.get(dateStr) || [];
   };
 
-  // Check if a date has a workout
-  const hasWorkout = (date) => {
-    return getSessionTypes(date).length > 0;
-  };
-
   // Get days for monthly view
   const getMonthDays = () => {
     const year = currentDate.getFullYear();

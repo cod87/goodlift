@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaDumbbell, FaHome, FaSignOutAlt, FaTimes, FaBars, FaStar, FaRunning } from 'react-icons/fa';
 import { MdSelfImprovement } from 'react-icons/md';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import { Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import GuestLogoutDialog from './GuestLogoutDialog';
@@ -209,6 +210,12 @@ const NavigationSidebar = ({
                 label="Favourites"
                 isActive={currentScreen === 'favourites'}
                 onClick={() => handleNavClick('favourites')}
+              />
+              <NavLink
+                icon={<EditCalendarIcon />}
+                label="Log Activity"
+                isActive={currentScreen === 'log-activity' || currentScreen === 'log-activity-workout' || currentScreen === 'log-activity-yoga' || currentScreen === 'log-activity-hiit'}
+                onClick={() => handleNavClick('log-activity')}
               />
               <NavLink
                 icon={<DirectionsRunIcon />}

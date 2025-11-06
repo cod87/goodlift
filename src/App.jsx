@@ -14,6 +14,10 @@ import StretchScreen from './components/Stretch/StretchScreen';
 import YogaScreen from './pages/YogaScreen';
 import CardioScreen from './pages/CardioScreen';
 import LogCardioScreen from './pages/LogCardioScreen';
+import LogActivityScreen from './pages/LogActivityScreen';
+import LogWorkoutScreen from './pages/LogWorkoutScreen';
+import LogYogaScreen from './pages/LogYogaScreen';
+import LogHiitScreen from './pages/LogHiitScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
@@ -502,6 +506,14 @@ function App() {
           {currentScreen === 'cardio' && <CardioScreen onNavigate={handleNavigate} />}
 
           {currentScreen === 'log-cardio' && <LogCardioScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'log-activity' && <LogActivityScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'log-activity-workout' && <LogWorkoutScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'log-activity-yoga' && <LogYogaScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'log-activity-hiit' && <LogHiitScreen onNavigate={handleNavigate} />}
 
           {currentScreen === 'stretch' && <StretchScreen />}
 

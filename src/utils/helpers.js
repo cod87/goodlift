@@ -104,3 +104,13 @@ export const detectWorkoutType = (data) => {
   
   return 'full';
 };
+
+/**
+ * Generates a unique session ID using timestamp and random string
+ * @returns {string} Unique session ID in format: timestamp-randomstring
+ * @example
+ * generateSessionId() // Returns "1699123456789-x7k2m9p1q"
+ */
+export const generateSessionId = () => {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+};

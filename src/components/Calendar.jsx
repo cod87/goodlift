@@ -1,26 +1,55 @@
 import { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { Box } from '@mui/material';
+import { FitnessCenter, SelfImprovement, Timer, DirectionsRun } from '@mui/icons-material';
 import '../styles/Calendar.css';
 
-const Calendar = ({ workoutDates }) => {
+// Helper function to get icon for session type
+const getIconForSessionType = (type) => {
+  switch (type) {
+    case 'workout':
+      return <FitnessCenter sx={{ fontSize: 'small', color: 'primary.main' }} />;
+    case 'yoga':
+      return <SelfImprovement sx={{ fontSize: 'small', color: '#9c27b0' }} />;
+    case 'hiit':
+      return <Timer sx={{ fontSize: 'small', color: 'secondary.main' }} />;
+    case 'cardio':
+    case 'stretch':
+      return <DirectionsRun sx={{ fontSize: 'small', color: 'success.main' }} />;
+    default:
+      return null;
+  }
+};
+
+const Calendar = ({ workoutSessions = [] }) => {
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' or 'weekly'
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Create a set of workout dates for quick lookup (format: YYYY-MM-DD)
-  const workoutDateSet = useMemo(() => {
-    const dateSet = new Set();
-    workoutDates.forEach(date => {
-      const d = new Date(date);
+  // Create a map of dates to session types for quick lookup (format: YYYY-MM-DD -> [types])
+  const workoutDateMap = useMemo(() => {
+    const dateMap = new Map();
+    workoutSessions.forEach(session => {
+      const d = new Date(session.date);
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      dateSet.add(dateStr);
+      if (!dateMap.has(dateStr)) {
+        dateMap.set(dateStr, []);
+      }
+      if (!dateMap.get(dateStr).includes(session.type)) {
+        dateMap.get(dateStr).push(session.type);
+      }
     });
-    return dateSet;
-  }, [workoutDates]);
+    return dateMap;
+  }, [workoutSessions]);
+
+  // Get session types for a date
+  const getSessionTypes = (date) => {
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    return workoutDateMap.get(dateStr) || [];
+  };
 
   // Check if a date has a workout
   const hasWorkout = (date) => {
-    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    return workoutDateSet.has(dateStr);
+    return getSessionTypes(date).length > 0;
   };
 
   // Get days for monthly view
@@ -147,25 +176,63 @@ const Calendar = ({ workoutDates }) => {
         ))}
         
         {/* Calendar days */}
-        {days.map((date, index) => (
-          <div
-            key={index}
-            className={`calendar-day ${!date ? 'empty' : ''} ${isToday(date) ? 'today' : ''} ${date && hasWorkout(date) ? 'workout-day' : ''}`}
-          >
-            {date && (
-              <>
-                <span className="day-number">{date.getDate()}</span>
-                {hasWorkout(date) && <div className="workout-indicator">●</div>}
-              </>
-            )}
-          </div>
-        ))}
+        {days.map((date, index) => {
+          const sessionTypes = date ? getSessionTypes(date) : [];
+          return (
+            <div
+              key={index}
+              className={`calendar-day ${!date ? 'empty' : ''} ${isToday(date) ? 'today' : ''} ${date && hasWorkout(date) ? 'workout-day' : ''}`}
+            >
+              {date && (
+                <>
+                  <span className="day-number">{date.getDate()}</span>
+                  {sessionTypes.length > 0 && (
+                    <Box 
+                      display="flex" 
+                      flexWrap="wrap" 
+                      gap={0.25} 
+                      justifyContent="center" 
+                      alignItems="center"
+                      sx={{ mt: 0.5 }}
+                    >
+                      {sessionTypes.map((type, idx) => (
+                        <Box key={idx} sx={{ display: 'flex', alignItems: 'center' }}>
+                          {getIconForSessionType(type)}
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="calendar-legend">
         <div className="legend-item">
-          <span className="legend-dot workout">●</span>
-          <span>Workout Day</span>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            {getIconForSessionType('workout')}
+            <span>Workout</span>
+          </Box>
+        </div>
+        <div className="legend-item">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            {getIconForSessionType('yoga')}
+            <span>Yoga</span>
+          </Box>
+        </div>
+        <div className="legend-item">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            {getIconForSessionType('hiit')}
+            <span>HIIT</span>
+          </Box>
+        </div>
+        <div className="legend-item">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            {getIconForSessionType('cardio')}
+            <span>Cardio/Stretch</span>
+          </Box>
         </div>
         <div className="legend-item">
           <span className="legend-dot today">◆</span>
@@ -177,7 +244,12 @@ const Calendar = ({ workoutDates }) => {
 };
 
 Calendar.propTypes = {
-  workoutDates: PropTypes.arrayOf(PropTypes.string).isRequired,
+  workoutSessions: PropTypes.arrayOf(
+    PropTypes.shape({
+      date: PropTypes.number.isRequired,
+      type: PropTypes.string.isRequired,
+    })
+  ),
 };
 
 export default Calendar;

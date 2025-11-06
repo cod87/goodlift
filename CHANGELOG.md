@@ -2,6 +2,57 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Yoga Session UI Enhancement] - 2025-11-06
+
+### Added
+- New `YogaConfig` component with compact MUI Select controls for session configuration
+  - Flow Duration options: 10, 15, or 20 minutes
+  - Cool Down Duration options: No cool down (0), 5, or 10 minutes
+  - Pose Suggestion Interval options: Every 1-5 minutes
+  - Responsive layout (horizontal on desktop, stacked on mobile)
+  - Real-time session preview card showing Flow, Cool Down, and Total Duration
+  - Inline validation: prevents pose interval > flow duration
+  - Success/error Snackbar notifications on save
+  - Full accessibility support with InputLabel and aria-labels
+  - Touch-friendly design with minimum 44px touch targets
+- New `useYogaSessions` hook with react-query for session persistence
+  - `useSaveYogaSession()` mutation for saving completed sessions
+  - `useGetYogaSessions()` query for fetching session history
+  - Automatic persistence to Firestore for authenticated users
+  - localStorage fallback for guest users
+  - Optimistic updates and cache invalidation
+  - Session records include cooldownDisabled flag when cool down is set to 0
+- "No cool down" option (value 0) in Cool Down Select
+  - Displays as "None" in preview summary
+  - Session automatically skips cooldown phase when disabled
+  - No cool down poses suggested when cooldown is 0
+
+### Changed
+- Updated `YogaScreen` component to use new `YogaConfig` component
+  - Replaced RadioGroup controls with compact Select dropdowns
+  - Removed local TTS toggle (now uses global TTS from `useYogaTTS` hook)
+  - Added graceful handling for missing `yoga-poses.json` with user-friendly error message
+  - Cleaner, more compact UI layout
+- Updated `YogaSession` component to handle cooldown === 0
+  - Automatically skips cooldown phase when Cool Down Duration is set to 0
+  - Uses new `useSaveYogaSession` hook for persisting sessions
+  - Session duration calculation accounts for disabled cooldown
+- Enhanced theme consistency across Yoga components
+  - All components now use theme tokens (`primary.main`, `text.secondary`, spacing)
+  - Consistent color usage instead of hardcoded hex values
+
+### Removed
+- Local TTS toggle from Yoga configuration screen
+  - Now relies on global TTS setting from `useYogaTTS` hook
+  - Eliminates redundant TTS storage in Yoga-specific config
+
+### Technical Improvements
+- React-query integration for yoga session management
+- Better separation of concerns with dedicated hooks
+- Improved data persistence patterns following existing Firestore/localStorage architecture
+- Enhanced form validation with Formik
+- More maintainable code structure with clearer component responsibilities
+
 ## [Optimization Update] - 2024-11-04
 
 ### Added

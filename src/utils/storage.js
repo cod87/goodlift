@@ -22,6 +22,7 @@ const KEYS = {
   HIIT_SESSIONS: 'goodlift_hiit_sessions',
   STRETCH_SESSIONS: 'goodlift_stretch_sessions',
   YOGA_SESSIONS: 'goodlift_yoga_sessions',
+  CARDIO_SESSIONS: 'goodlift_cardio_sessions',
   FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
 };
 
@@ -516,6 +517,93 @@ export const saveHiitSession = async (sessionData) => {
     await saveUserStats(stats);
   } catch (error) {
     console.error('Error saving HIIT session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get cardio sessions history from localStorage
+ * @returns {Array} Array of cardio session objects
+ */
+export const getCardioSessions = () => {
+  try {
+    if (isGuestMode()) {
+      return getGuestData('cardio_sessions') || [];
+    }
+    const sessions = localStorage.getItem(KEYS.CARDIO_SESSIONS);
+    return sessions ? JSON.parse(sessions) : [];
+  } catch (error) {
+    console.error('Error reading cardio sessions:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a completed cardio session
+ * @param {Object} sessionData - Cardio session data including cardioType, duration, date
+ */
+export const saveCardioSession = async (sessionData) => {
+  try {
+    if (!sessionData) {
+      throw new Error('Session data is required');
+    }
+    
+    const sessions = getCardioSessions();
+    const newSession = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      cardioType: sessionData.cardioType,
+      duration: sessionData.duration,
+      date: sessionData.date || Date.now(),
+    };
+    
+    sessions.unshift(newSession); // Add to beginning for chronological order
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('cardio_sessions', sessions);
+    } else {
+      localStorage.setItem(KEYS.CARDIO_SESSIONS, JSON.stringify(sessions));
+    }
+    
+    // Update total cardio time in user stats
+    const stats = await getUserStats();
+    stats.totalCardioTime = (stats.totalCardioTime || 0) + (sessionData.duration || 0);
+    await saveUserStats(stats);
+  } catch (error) {
+    console.error('Error saving cardio session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a cardio session by ID
+ * @param {string} sessionId - ID of the cardio session to delete
+ */
+export const deleteCardioSession = async (sessionId) => {
+  try {
+    const sessions = getCardioSessions();
+    const sessionToDelete = sessions.find(s => s.id === sessionId);
+    
+    if (!sessionToDelete) {
+      throw new Error('Session not found');
+    }
+    
+    const updatedSessions = sessions.filter(s => s.id !== sessionId);
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('cardio_sessions', updatedSessions);
+    } else {
+      localStorage.setItem(KEYS.CARDIO_SESSIONS, JSON.stringify(updatedSessions));
+    }
+    
+    // Update stats to subtract the deleted session's duration
+    const stats = await getUserStats();
+    stats.totalCardioTime = (stats.totalCardioTime || 0) - (sessionToDelete.duration || 0);
+    if (stats.totalCardioTime < 0) stats.totalCardioTime = 0;
+    await saveUserStats(stats);
+  } catch (error) {
+    console.error('Error deleting cardio session:', error);
     throw error;
   }
 };

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaDumbbell, FaHome, FaClock, FaSignOutAlt, FaTimes, FaBars, FaStar, FaRunning } from 'react-icons/fa';
+import { FaDumbbell, FaHome, FaSignOutAlt, FaTimes, FaBars, FaStar, FaRunning } from 'react-icons/fa';
 import { MdSelfImprovement } from 'react-icons/md';
+import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import { Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import GuestLogoutDialog from './GuestLogoutDialog';
@@ -210,10 +211,10 @@ const NavigationSidebar = ({
                 onClick={() => handleNavClick('favourites')}
               />
               <NavLink
-                icon={<FaClock />}
-                label="HIIT Timer"
-                isActive={currentScreen === 'hiit'}
-                onClick={() => handleNavClick('hiit')}
+                icon={<DirectionsRunIcon />}
+                label="Cardio"
+                isActive={currentScreen === 'cardio'}
+                onClick={() => handleNavClick('cardio')}
               />
               <NavLink
                 icon={<FaRunning />}

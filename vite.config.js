@@ -42,7 +42,6 @@ export default defineConfig({
     // Increase chunk size warning limit since we're splitting properly
     chunkSizeWarningLimit: 600,
   },
-  // Ensure PWA files (manifest.json, service-worker.js) are copied from public/ to build output
-  // Vite automatically copies everything from public/ folder to build output root
-  publicDir: 'public',
+  // Note: Vite automatically copies everything from public/ folder to build output root
+  // This includes manifest.json, service-worker.js, and icons for PWA functionality
 })

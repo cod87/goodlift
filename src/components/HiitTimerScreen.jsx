@@ -8,9 +8,9 @@ import audioService from '../utils/audioService';
 import wakeLockManager from '../utils/wakeLock';
 
 const HiitTimerScreen = () => {
-  const [workTime, setWorkTime] = useState(30);
-  const [restTime, setRestTime] = useState(15);
-  const [rounds, setRounds] = useState(8);
+  const [workTime, setWorkTime] = useState('30');
+  const [restTime, setRestTime] = useState('15');
+  const [rounds, setRounds] = useState('8');
   const [currentRound, setCurrentRound] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [isRunning, setIsRunning] = useState(false);
@@ -49,9 +49,9 @@ const HiitTimerScreen = () => {
       id: `hiit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       date: new Date().toISOString(),
       duration: duration,
-      workTime: workTime,
-      restTime: restTime,
-      rounds: rounds,
+      workTime: parseInt(workTime),
+      restTime: parseInt(restTime),
+      rounds: parseInt(rounds),
     });
 
     setTotalElapsed(duration);
@@ -67,13 +67,13 @@ const HiitTimerScreen = () => {
               // Switch to rest - play low beep
               audioService.playLowBeep();
               setIsWorkPhase(false);
-              return restTime;
+              return parseInt(restTime);
             } else {
               // Switch to work
               setCurrentRound((r) => r + 1);
               
               // Check if workout is complete
-              if (currentRound + 1 >= rounds) {
+              if (currentRound + 1 >= parseInt(rounds)) {
                 handleComplete();
                 return 0;
               }
@@ -81,7 +81,7 @@ const HiitTimerScreen = () => {
               // Play high beep for work period
               audioService.playHighBeep();
               setIsWorkPhase(true);
-              return workTime;
+              return parseInt(workTime);
             }
           }
           return prev - 1;
@@ -104,7 +104,7 @@ const HiitTimerScreen = () => {
     if (isSetup) {
       setIsSetup(false);
       setCurrentRound(0);
-      setTimeLeft(workTime);
+      setTimeLeft(parseInt(workTime));
       setIsWorkPhase(true);
       setTotalElapsed(0);
       startTimeRef.current = Date.now();
@@ -122,10 +122,22 @@ const HiitTimerScreen = () => {
     setIsRunning(false);
     setIsSetup(true);
     setCurrentRound(0);
-    setTimeLeft(workTime);
+    setTimeLeft(parseInt(workTime));
     setIsWorkPhase(true);
     setTotalElapsed(0);
     startTimeRef.current = null;
+  };
+
+  // Validation helpers
+  const isValidPositiveNumber = (value) => {
+    const num = parseInt(value);
+    return value !== '' && !isNaN(num) && num > 0;
+  };
+
+  const isFormValid = () => {
+    return isValidPositiveNumber(workTime) && 
+           isValidPositiveNumber(restTime) && 
+           isValidPositiveNumber(rounds);
   };
 
   const getPhaseColor = () => {
@@ -169,8 +181,10 @@ const HiitTimerScreen = () => {
                     label="Work Time (seconds)"
                     type="number"
                     value={workTime}
-                    onChange={(e) => setWorkTime(Math.max(1, parseInt(e.target.value) || 30))}
+                    onChange={(e) => setWorkTime(e.target.value)}
                     fullWidth
+                    error={!isValidPositiveNumber(workTime)}
+                    helperText={!isValidPositiveNumber(workTime) ? 'Must be a positive number' : ''}
                     InputProps={{ inputProps: { min: 1 } }}
                   />
                 </Grid>
@@ -179,8 +193,10 @@ const HiitTimerScreen = () => {
                     label="Rest Time (seconds)"
                     type="number"
                     value={restTime}
-                    onChange={(e) => setRestTime(Math.max(1, parseInt(e.target.value) || 15))}
+                    onChange={(e) => setRestTime(e.target.value)}
                     fullWidth
+                    error={!isValidPositiveNumber(restTime)}
+                    helperText={!isValidPositiveNumber(restTime) ? 'Must be a positive number' : ''}
                     InputProps={{ inputProps: { min: 1 } }}
                   />
                 </Grid>
@@ -189,8 +205,10 @@ const HiitTimerScreen = () => {
                     label="Rounds"
                     type="number"
                     value={rounds}
-                    onChange={(e) => setRounds(Math.max(1, parseInt(e.target.value) || 8))}
+                    onChange={(e) => setRounds(e.target.value)}
                     fullWidth
+                    error={!isValidPositiveNumber(rounds)}
+                    helperText={!isValidPositiveNumber(rounds) ? 'Must be a positive number' : ''}
                     InputProps={{ inputProps: { min: 1 } }}
                   />
                 </Grid>
@@ -198,7 +216,7 @@ const HiitTimerScreen = () => {
 
               <Box sx={{ mt: 3 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Total estimated time: {formatDuration((workTime + restTime) * rounds)}
+                  Total estimated time: {isFormValid() ? formatDuration((parseInt(workTime) + parseInt(restTime)) * parseInt(rounds)) : 'N/A'}
                 </Typography>
               </Box>
 
@@ -210,8 +228,9 @@ const HiitTimerScreen = () => {
                 onClick={handleStart}
                 startIcon={<PlayArrow />}
                 sx={{ mt: 3 }}
+                disabled={!isFormValid()}
               >
-                Start Timer
+                Start Session
               </Button>
             </CardContent>
           </Card>
@@ -275,11 +294,11 @@ const HiitTimerScreen = () => {
             </Typography>
 
             <Typography variant="h5" sx={{ mb: 4, opacity: 0.9, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
-              Round {currentRound + 1} of {rounds}
+              Round {currentRound + 1} of {parseInt(rounds)}
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-              {!isRunning && currentRound < rounds ? (
+              {!isRunning && currentRound < parseInt(rounds) ? (
                 <Button
                   variant="contained"
                   size="large"
@@ -324,7 +343,7 @@ const HiitTimerScreen = () => {
               </Button>
             </Box>
 
-            {currentRound >= rounds && (
+            {currentRound >= parseInt(rounds) && (
               <Box sx={{ mt: 4, width: '100%' }}>
                 <Typography variant="h4" sx={{ mb: 2, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
                   🎉 Workout Complete!
@@ -345,7 +364,7 @@ const HiitTimerScreen = () => {
                   Work Time
                 </Typography>
                 <Typography variant="h6" color="primary">
-                  {workTime}s
+                  {parseInt(workTime)}s
                 </Typography>
               </Box>
               <Box>
@@ -353,7 +372,7 @@ const HiitTimerScreen = () => {
                   Rest Time
                 </Typography>
                 <Typography variant="h6" color="primary">
-                  {restTime}s
+                  {parseInt(restTime)}s
                 </Typography>
               </Box>
               <Box>
@@ -361,7 +380,7 @@ const HiitTimerScreen = () => {
                   Total Rounds
                 </Typography>
                 <Typography variant="h6" color="primary">
-                  {rounds}
+                  {parseInt(rounds)}
                 </Typography>
               </Box>
             </Box>

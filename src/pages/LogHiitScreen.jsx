@@ -8,6 +8,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import PropTypes from 'prop-types';
 import { saveHiitSession } from '../utils/storage';
+import { generateSessionId } from '../utils/helpers';
 
 // Constants
 const SECONDS_PER_MINUTE = 60;
@@ -40,7 +41,7 @@ const LogHiitScreen = ({ onNavigate }) => {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       const sessionData = {
-        id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        id: generateSessionId(),
         date: values.date.getTime(),
         duration: parseFloat(values.duration) * SECONDS_PER_MINUTE,
         type: 'Manual Log',

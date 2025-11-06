@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { PlayArrow, Pause, Stop } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
-import { saveYogaSession } from '../../utils/storage';
+import { useSaveYogaSession } from '../../hooks/useYogaSessions';
 import audioService from '../../utils/audioService';
 import wakeLockManager from '../../utils/wakeLock';
 
@@ -32,6 +32,8 @@ const YogaSession = ({ config, onComplete, onExit }) => {
   const [sessionStartTime, setSessionStartTime] = useState(null);
   const intervalRef = useRef(null);
   const nextPoseSuggestionRef = useRef(0);
+  
+  const saveYogaSessionMutation = useSaveYogaSession();
 
   // Load yoga poses data using react-query
   const { data: yogaPoses = [], isLoading } = useQuery({
@@ -89,15 +91,15 @@ const YogaSession = ({ config, onComplete, onExit }) => {
       const endTime = Date.now();
       const actualDuration = Math.floor((endTime - sessionStartTime) / 1000);
 
-      // Save session
-      await saveYogaSession({
-        id: `yoga_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      // Save session using react-query mutation
+      await saveYogaSessionMutation.mutateAsync({
         date: new Date().toISOString(),
-        duration: actualDuration || (config.flowLength + config.coolDownLength) * 60,
-        flowLength: config.flowLength,
-        coolDownLength: config.coolDownLength,
+        flow: config.flowLength,
+        cooldown: config.coolDownLength,
+        interval: config.poseSuggestionFrequency,
         poseCount: poseCount,
-        totalDuration: (config.flowLength + config.coolDownLength) * 60,
+        duration: actualDuration || (config.flowLength + config.coolDownLength) * 60,
+        cooldownDisabled: config.coolDownLength === 0,
       });
 
       audioService.playCompletionFanfare();
@@ -105,7 +107,7 @@ const YogaSession = ({ config, onComplete, onExit }) => {
     } catch (error) {
       console.error('Error saving yoga session:', error);
     }
-  }, [sessionStartTime, config.flowLength, config.coolDownLength, poseCount, speak]);
+  }, [sessionStartTime, config.flowLength, config.coolDownLength, config.poseSuggestionFrequency, poseCount, speak, saveYogaSessionMutation]);
 
   // Timer logic
   useEffect(() => {
@@ -125,6 +127,14 @@ const YogaSession = ({ config, onComplete, onExit }) => {
               audioService.playHighBeep();
               return config.flowLength * 60;
             } else if (phase === 'flow') {
+              // Check if cooldown is disabled (coolDownLength === 0)
+              if (config.coolDownLength === 0) {
+                // Skip cooldown, go directly to complete
+                setPhase('complete');
+                handleComplete();
+                return 0;
+              }
+              
               // Start cooldown phase
               setPhase('cooldown');
               setCurrentPose('Cool Down');

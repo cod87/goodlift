@@ -16,7 +16,7 @@ import {
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import Calendar from './Calendar';
-import { Box, Card, CardContent, Typography, Grid, Stack, IconButton, Chip } from '@mui/material';
+import { Box, Card, CardContent, Typography, Grid, Stack, IconButton, Chip, Button } from '@mui/material';
 import { FitnessCenter, Timer, TrendingUp, Whatshot, Delete, TrendingUpRounded, SelfImprovement, DirectionsRun } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {

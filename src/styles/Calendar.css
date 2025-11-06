@@ -140,17 +140,11 @@
   box-shadow: 0 0 0 3px rgba(138, 190, 185, 0.3);
 }
 
-.calendar-day.workout-day {
-  background: var(--color-secondary);
-  color: white;
-  font-weight: 600;
+.calendar-day.has-activity {
+  cursor: pointer;
 }
 
-.calendar-day.workout-day.today {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-}
-
-.calendar-day:hover:not(.empty) {
+.calendar-day.has-activity:hover {
   transform: scale(1.05);
   box-shadow: var(--shadow);
 }
@@ -158,6 +152,7 @@
 .day-number {
   font-size: 1rem;
   line-height: 1;
+  z-index: 1;
 }
 
 .workout-indicator {

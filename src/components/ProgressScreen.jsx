@@ -42,9 +42,6 @@ ChartJS.register(
   Filler
 );
 
-// Constants
-const SECONDS_PER_MINUTE = 60;
-
 const ProgressScreen = () => {
   const [stats, setStats] = useState({ totalWorkouts: 0, totalTime: 0 });
   const [history, setHistory] = useState([]);
@@ -54,6 +51,7 @@ const ProgressScreen = () => {
   const [cardioSessions, setCardioSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [exerciseWeights, setExerciseWeights] = useState({});
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -138,6 +136,56 @@ const ProgressScreen = () => {
     ...yogaSessions.map(session => ({ date: session.date, type: 'yoga' }))
   ];
 
+  // Handle day click in calendar
+  const handleDayClick = (date) => {
+    setSelectedDate(date);
+    // Scroll to the session list
+    setTimeout(() => {
+      const sessionList = document.querySelector('.workout-history-container');
+      if (sessionList) {
+        sessionList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
+  // Filter sessions by selected date
+  const isSameDay = (date1, date2) => {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return d1.getFullYear() === d2.getFullYear() &&
+           d1.getMonth() === d2.getMonth() &&
+           d1.getDate() === d2.getDate();
+  };
+
+  const getFilteredSessions = () => {
+    if (!selectedDate) {
+      return {
+        workouts: history,
+        hiit: hiitSessions,
+        stretch: stretchSessions,
+        yoga: yogaSessions,
+        cardio: cardioSessions
+      };
+    }
+
+    return {
+      workouts: history.filter(w => isSameDay(w.date, selectedDate)),
+      hiit: hiitSessions.filter(s => isSameDay(s.date, selectedDate)),
+      stretch: stretchSessions.filter(s => isSameDay(s.date, selectedDate)),
+      yoga: yogaSessions.filter(s => isSameDay(s.date, selectedDate)),
+      cardio: cardioSessions.filter(s => isSameDay(s.date, selectedDate))
+    };
+  };
+
+  const filteredSessions = getFilteredSessions();
+  const hasSessionsOnSelectedDay = selectedDate && (
+    filteredSessions.workouts.length > 0 ||
+    filteredSessions.hiit.length > 0 ||
+    filteredSessions.stretch.length > 0 ||
+    filteredSessions.yoga.length > 0 ||
+    filteredSessions.cardio.length > 0
+  );
+
   // Prepare chart data
   const chartData = {
     labels: history.slice(-7).reverse().map(w => formatDate(w.date)),
@@ -196,6 +244,9 @@ const ProgressScreen = () => {
       transition={{ duration: 0.5 }}
       style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}
     >
+      {/* Calendar at the top */}
+      <Calendar workoutSessions={workoutSessions} onDayClick={handleDayClick} />
+      
       {/* Stats Overview - Redesigned for mobile */}
       <Box sx={{ mb: 3 }}>
         <Stack spacing={2}>
@@ -583,367 +634,334 @@ const ProgressScreen = () => {
         </motion.div>
       )}
 
-      <Calendar workoutSessions={workoutSessions} />
-      
       <div className="workout-history-container">
         <Typography variant="h4" component="h2" sx={{ 
           fontWeight: 700,
-          mb: 3,
+          mb: 2,
           color: 'text.primary'
         }}>
-          Workout History
+          {selectedDate 
+            ? `Activities on ${selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+            : 'All Activities'}
         </Typography>
+        {selectedDate && (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => setSelectedDate(null)}
+            sx={{ mb: 2 }}
+          >
+            Show All Activities
+          </Button>
+        )}
         <Stack spacing={2}>
-          {history.length === 0 ? (
+          {selectedDate && !hasSessionsOnSelectedDay ? (
             <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-              No workout history yet. Complete your first workout to see it here!
+              No activities logged for this day.
             </Typography>
           ) : (
-            history.map((workout, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + idx * 0.05 }}
-              >
-                <Card sx={{ 
-                  borderLeft: '4px solid',
-                  borderLeftColor: 'primary.main',
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateX(4px)',
-                    boxShadow: '0 4px 12px rgba(48, 86, 105, 0.15)',
-                    borderLeftColor: 'secondary.main',
-                  }
-                }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                          {workout.type} - {formatDate(workout.date)}
-                          {workout.isPartial && (
-                            <Typography component="span" sx={{ 
-                              ml: 1, 
-                              fontSize: '0.875rem', 
-                              color: 'warning.main',
-                              fontWeight: 500,
-                            }}>
-                              (Partial)
-                            </Typography>
-                          )}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                          Duration: {formatDuration(workout.duration)}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Exercises: {Object.keys(workout.exercises).join(', ')}
-                        </Typography>
+            <>
+              {/* Workout Sessions */}
+              {filteredSessions.workouts.length > 0 && filteredSessions.workouts.map((workout, idx) => (
+                <motion.div
+                  key={`workout-${idx}`}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 * idx }}
+                >
+                  <Card sx={{ 
+                    borderLeft: '4px solid',
+                    borderLeftColor: 'primary.main',
+                    borderRadius: 2,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateX(4px)',
+                      boxShadow: '0 4px 12px rgba(48, 86, 105, 0.15)',
+                      borderLeftColor: 'secondary.main',
+                    }
+                  }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                            {workout.type} - {formatDate(workout.date)}
+                            {workout.isPartial && (
+                              <Typography component="span" sx={{ 
+                                ml: 1, 
+                                fontSize: '0.875rem', 
+                                color: 'warning.main',
+                                fontWeight: 500,
+                              }}>
+                                (Partial)
+                              </Typography>
+                            )}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                            Duration: {formatDuration(workout.duration)}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Exercises: {Object.keys(workout.exercises).join(', ')}
+                          </Typography>
+                        </Box>
+                        <IconButton
+                          onClick={() => handleDeleteWorkout(idx)}
+                          size="small"
+                          sx={{
+                            color: 'error.main',
+                            '&:hover': {
+                              backgroundColor: 'error.light',
+                              color: 'error.contrastText',
+                            }
+                          }}
+                          aria-label="Delete workout"
+                        >
+                          <Delete />
+                        </IconButton>
                       </Box>
-                      <IconButton
-                        onClick={() => handleDeleteWorkout(idx)}
-                        size="small"
-                        sx={{
-                          color: 'error.main',
-                          '&:hover': {
-                            backgroundColor: 'error.light',
-                            color: 'error.contrastText',
-                          }
-                        }}
-                        aria-label="Delete workout"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+
+              {/* HIIT Sessions */}
+              {filteredSessions.hiit.length > 0 && filteredSessions.hiit.map((session) => (
+                <motion.div
+                  key={session.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 }}
+                >
+                  <Card sx={{ 
+                    borderLeft: '4px solid',
+                    borderLeftColor: 'secondary.main',
+                    borderRadius: 2,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateX(4px)',
+                      boxShadow: '0 4px 12px rgba(237, 63, 39, 0.15)',
+                    }
+                  }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                            <Whatshot sx={{ color: 'secondary.main', fontSize: 20 }} />
+                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                              HIIT Session - {formatDate(session.date)}
+                            </Typography>
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary">
+                            Duration: {formatDuration(session.duration)}
+                          </Typography>
+                        </Box>
+                        <IconButton
+                          onClick={() => handleDeleteHiit(session.id)}
+                          size="small"
+                          sx={{
+                            color: 'error.main',
+                            '&:hover': {
+                              backgroundColor: 'error.light',
+                              color: 'error.contrastText',
+                            }
+                          }}
+                          aria-label="Delete HIIT session"
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+
+              {/* Stretch Sessions */}
+              {filteredSessions.stretch.length > 0 && filteredSessions.stretch.map((session) => (
+                <motion.div
+                  key={session.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 }}
+                >
+                  <Card sx={{ 
+                    borderLeft: '4px solid',
+                    borderLeftColor: 'success.main',
+                    borderRadius: 2,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateX(4px)',
+                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.15)',
+                    }
+                  }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                            <DirectionsRun sx={{ color: 'success.main', fontSize: 20 }} />
+                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                              {session.type === 'full' ? 'Full Body' : 'Custom'} Stretch - {formatDate(session.date)}
+                            </Typography>
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                            Duration: {formatDuration(session.duration)}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Stretches: {session.stretchesCompleted} completed
+                          </Typography>
+                        </Box>
+                        <IconButton
+                          onClick={() => handleDeleteStretch(session.id)}
+                          size="small"
+                          sx={{
+                            color: 'error.main',
+                            '&:hover': {
+                              backgroundColor: 'error.light',
+                              color: 'error.contrastText',
+                            }
+                          }}
+                          aria-label="Delete stretch session"
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+
+              {/* Yoga Sessions */}
+              {filteredSessions.yoga.length > 0 && filteredSessions.yoga.map((session) => (
+                <motion.div
+                  key={session.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 }}
+                >
+                  <Card sx={{ 
+                    borderLeft: '4px solid',
+                    borderLeftColor: '#9c27b0',
+                    borderRadius: 2,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateX(4px)',
+                      boxShadow: '0 4px 12px rgba(156, 39, 176, 0.15)',
+                    }
+                  }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                            <SelfImprovement sx={{ color: '#9c27b0', fontSize: 20 }} />
+                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                              Yoga Session - {formatDate(session.date)}
+                            </Typography>
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                            Duration: {formatDuration(session.duration)}
+                          </Typography>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Chip 
+                              label={`Flow: ${session.flowLength}min`}
+                              size="small" 
+                              sx={{ 
+                                bgcolor: '#9c27b0',
+                                color: 'white',
+                                fontSize: '0.75rem',
+                              }}
+                            />
+                            <Chip 
+                              label={`Cool Down: ${session.coolDownLength}min`}
+                              size="small" 
+                              sx={{ 
+                                bgcolor: '#7b1fa2',
+                                color: 'white',
+                                fontSize: '0.75rem',
+                              }}
+                            />
+                            <Typography variant="body2" color="text.secondary">
+                              {session.poseCount} poses
+                            </Typography>
+                          </Stack>
+                        </Box>
+                        <IconButton
+                          onClick={() => handleDeleteYoga(session.id)}
+                          size="small"
+                          sx={{
+                            color: 'error.main',
+                            '&:hover': {
+                              backgroundColor: 'error.light',
+                              color: 'error.contrastText',
+                            }
+                          }}
+                          aria-label="Delete yoga session"
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+
+              {/* Cardio Sessions */}
+              {filteredSessions.cardio.length > 0 && filteredSessions.cardio.map((session) => (
+                <motion.div
+                  key={session.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 }}
+                >
+                  <Card sx={{ 
+                    borderLeft: '4px solid',
+                    borderLeftColor: '#2196f3',
+                    borderRadius: 2,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateX(4px)',
+                      boxShadow: '0 4px 12px rgba(33, 150, 243, 0.15)',
+                    }
+                  }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                            <FitnessCenter sx={{ color: '#2196f3', fontSize: 20 }} />
+                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                              {session.cardioType} - {formatDate(session.date)}
+                            </Typography>
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary">
+                            Duration: {formatDuration(session.duration)}
+                          </Typography>
+                        </Box>
+                        <IconButton
+                          onClick={() => handleDeleteCardio(session.id)}
+                          size="small"
+                          sx={{
+                            color: 'error.main',
+                            '&:hover': {
+                              backgroundColor: 'error.light',
+                              color: 'error.contrastText',
+                            }
+                          }}
+                          aria-label="Delete cardio session"
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+
+              {!selectedDate && history.length === 0 && hiitSessions.length === 0 && stretchSessions.length === 0 && yogaSessions.length === 0 && cardioSessions.length === 0 && (
+                <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                  No activity history yet. Complete your first activity to see it here!
+                </Typography>
+              )}
+            </>
           )}
         </Stack>
       </div>
-
-      {/* HIIT Sessions History */}
-      {hiitSessions.length > 0 && (
-        <div className="workout-history-container" style={{ marginTop: '2rem' }}>
-          <Typography variant="h4" component="h2" sx={{ 
-            fontWeight: 700,
-            mb: 3,
-            color: 'text.primary'
-          }}>
-            HIIT Sessions
-          </Typography>
-          <Stack spacing={2}>
-            {hiitSessions.map((session) => (
-              <motion.div
-                key={session.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.05 }}
-              >
-                <Card sx={{ 
-                  borderLeft: '4px solid',
-                  borderLeftColor: 'secondary.main',
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateX(4px)',
-                    boxShadow: '0 4px 12px rgba(237, 63, 39, 0.15)',
-                  }
-                }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box sx={{ flex: 1 }}>
-                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                          <Whatshot sx={{ color: 'secondary.main', fontSize: 20 }} />
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            HIIT Session - {formatDate(session.date)}
-                          </Typography>
-                        </Stack>
-                        <Typography variant="body2" color="text.secondary">
-                          Duration: {formatDuration(session.duration)}
-                        </Typography>
-                      </Box>
-                      <IconButton
-                        onClick={() => handleDeleteHiit(session.id)}
-                        size="small"
-                        sx={{
-                          color: 'error.main',
-                          '&:hover': {
-                            backgroundColor: 'error.light',
-                            color: 'error.contrastText',
-                          }
-                        }}
-                        aria-label="Delete HIIT session"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </Stack>
-        </div>
-      )}
-
-      {/* Stretch Sessions History */}
-      {stretchSessions.length > 0 && (
-        <div className="workout-history-container" style={{ marginTop: '2rem' }}>
-          <Typography variant="h4" component="h2" sx={{ 
-            fontWeight: 700,
-            mb: 3,
-            color: 'text.primary'
-          }}>
-            Stretch Sessions
-          </Typography>
-          <Stack spacing={2}>
-            {stretchSessions.map((session) => (
-              <motion.div
-                key={session.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.05 }}
-              >
-                <Card sx={{ 
-                  borderLeft: '4px solid',
-                  borderLeftColor: 'success.main',
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateX(4px)',
-                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.15)',
-                  }
-                }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box sx={{ flex: 1 }}>
-                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                          <DirectionsRun sx={{ color: 'success.main', fontSize: 20 }} />
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {session.type === 'full' ? 'Full Body' : 'Custom'} Stretch - {formatDate(session.date)}
-                          </Typography>
-                        </Stack>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                          Duration: {formatDuration(session.duration)}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Stretches: {session.stretchesCompleted} completed
-                        </Typography>
-                      </Box>
-                      <IconButton
-                        onClick={() => handleDeleteStretch(session.id)}
-                        size="small"
-                        sx={{
-                          color: 'error.main',
-                          '&:hover': {
-                            backgroundColor: 'error.light',
-                            color: 'error.contrastText',
-                          }
-                        }}
-                        aria-label="Delete stretch session"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </Stack>
-        </div>
-      )}
-
-      {/* Yoga Sessions History */}
-      {yogaSessions.length > 0 && (
-        <div className="workout-history-container" style={{ marginTop: '2rem' }}>
-          <Typography variant="h4" component="h2" sx={{ 
-            fontWeight: 700,
-            mb: 3,
-            color: 'text.primary'
-          }}>
-            Yoga Sessions
-          </Typography>
-          <Stack spacing={2}>
-            {yogaSessions.map((session) => (
-              <motion.div
-                key={session.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.05 }}
-              >
-                <Card sx={{ 
-                  borderLeft: '4px solid',
-                  borderLeftColor: '#9c27b0',
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateX(4px)',
-                    boxShadow: '0 4px 12px rgba(156, 39, 176, 0.15)',
-                  }
-                }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box sx={{ flex: 1 }}>
-                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                          <SelfImprovement sx={{ color: '#9c27b0', fontSize: 20 }} />
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            Yoga Session - {formatDate(session.date)}
-                          </Typography>
-                        </Stack>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                          Duration: {formatDuration(session.duration)}
-                        </Typography>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Chip 
-                            label={`Flow: ${session.flowLength}min`}
-                            size="small" 
-                            sx={{ 
-                              bgcolor: '#9c27b0',
-                              color: 'white',
-                              fontSize: '0.75rem',
-                            }}
-                          />
-                          <Chip 
-                            label={`Cool Down: ${session.coolDownLength}min`}
-                            size="small" 
-                            sx={{ 
-                              bgcolor: '#7b1fa2',
-                              color: 'white',
-                              fontSize: '0.75rem',
-                            }}
-                          />
-                          <Typography variant="body2" color="text.secondary">
-                            {session.poseCount} poses
-                          </Typography>
-                        </Stack>
-                      </Box>
-                      <IconButton
-                        onClick={() => handleDeleteYoga(session.id)}
-                        size="small"
-                        sx={{
-                          color: 'error.main',
-                          '&:hover': {
-                            backgroundColor: 'error.light',
-                            color: 'error.contrastText',
-                          }
-                        }}
-                        aria-label="Delete yoga session"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </Stack>
-        </div>
-      )}
-
-      {/* Cardio Sessions History */}
-      {cardioSessions.length > 0 && (
-        <div className="workout-history-container" style={{ marginTop: '2rem' }}>
-          <Typography variant="h4" component="h2" sx={{ 
-            fontWeight: 700,
-            mb: 3,
-            color: 'text.primary'
-          }}>
-            Cardio Sessions
-          </Typography>
-          <Stack spacing={2}>
-            {cardioSessions.map((session) => (
-              <motion.div
-                key={session.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.05 }}
-              >
-                <Card sx={{ 
-                  borderLeft: '4px solid',
-                  borderLeftColor: '#2196f3',
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateX(4px)',
-                    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.15)',
-                  }
-                }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Box sx={{ flex: 1 }}>
-                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                          <FitnessCenter sx={{ color: '#2196f3', fontSize: 20 }} />
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {session.cardioType} - {formatDate(session.date)}
-                          </Typography>
-                        </Stack>
-                        <Typography variant="body2" color="text.secondary">
-                          Duration: {Math.round(session.duration / SECONDS_PER_MINUTE)} minutes
-                        </Typography>
-                      </Box>
-                      <IconButton
-                        onClick={() => handleDeleteCardio(session.id)}
-                        size="small"
-                        sx={{
-                          color: 'error.main',
-                          '&:hover': {
-                            backgroundColor: 'error.light',
-                            color: 'error.contrastText',
-                          }
-                        }}
-                        aria-label="Delete cardio session"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </Stack>
-        </div>
-      )}
     </motion.div>
   );
 };

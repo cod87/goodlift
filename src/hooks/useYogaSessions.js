@@ -24,7 +24,7 @@ export const useSaveYogaSession = () => {
       } = sessionData;
 
       const session = {
-        id: `yoga_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `yoga_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         date: date || new Date().toISOString(),
         flowLength: flow,
         coolDownLength: cooldown,

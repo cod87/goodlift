@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 const LogActivityScreen = ({ onNavigate }) => {
   const activities = [
     {
-      icon: <FitnessCenter sx={{ fontSize: 48 }} />,
+      icon: <FitnessCenter sx={{ fontSize: { xs: 32, sm: 48 } }} />,
       title: 'Log Workout',
       description: 'Track a completed workout session',
       color: 'primary.main',
@@ -14,7 +14,7 @@ const LogActivityScreen = ({ onNavigate }) => {
       onClick: () => onNavigate('log-activity-workout'),
     },
     {
-      icon: <SelfImprovement sx={{ fontSize: 48 }} />,
+      icon: <SelfImprovement sx={{ fontSize: { xs: 32, sm: 48 } }} />,
       title: 'Log Yoga Session',
       description: 'Record your yoga practice',
       color: '#9c27b0',
@@ -22,7 +22,7 @@ const LogActivityScreen = ({ onNavigate }) => {
       onClick: () => onNavigate('log-activity-yoga'),
     },
     {
-      icon: <Timer sx={{ fontSize: 48 }} />,
+      icon: <Timer sx={{ fontSize: { xs: 32, sm: 48 } }} />,
       title: 'Log HIIT Session',
       description: 'Log your high-intensity training',
       color: 'secondary.main',
@@ -30,7 +30,7 @@ const LogActivityScreen = ({ onNavigate }) => {
       onClick: () => onNavigate('log-activity-hiit'),
     },
     {
-      icon: <DirectionsRun sx={{ fontSize: 48 }} />,
+      icon: <DirectionsRun sx={{ fontSize: { xs: 32, sm: 48 } }} />,
       title: 'Log General Cardio',
       description: 'Track your cardio activities',
       color: '#2196f3',
@@ -65,9 +65,9 @@ const LogActivityScreen = ({ onNavigate }) => {
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         {activities.map((activity, index) => (
-          <Grid item xs={12} sm={6} key={index}>
+          <Grid item xs={6} sm={6} key={index}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -87,14 +87,14 @@ const LogActivityScreen = ({ onNavigate }) => {
                   }
                 }}
               >
-                <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3 }, textAlign: 'center' }}>
                   <Box sx={{ 
                     display: 'flex', 
                     justifyContent: 'center', 
-                    mb: 2 
+                    mb: { xs: 1, sm: 2 }
                   }}>
                     <Box sx={{ 
-                      p: 2, 
+                      p: { xs: 1.5, sm: 2 }, 
                       borderRadius: '50%', 
                       bgcolor: activity.bgColor,
                       display: 'flex',
@@ -108,12 +108,14 @@ const LogActivityScreen = ({ onNavigate }) => {
                   <Typography variant="h5" sx={{ 
                     fontWeight: 700, 
                     mb: 1,
-                    color: 'text.primary'
+                    color: 'text.primary',
+                    fontSize: { xs: '1rem', sm: '1.5rem' }
                   }}>
                     {activity.title}
                   </Typography>
                   <Typography variant="body2" sx={{ 
                     color: 'text.secondary',
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' }
                   }}>
                     {activity.description}
                   </Typography>

@@ -16,7 +16,7 @@ import {
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import Calendar from './Calendar';
-import { Box, Card, CardContent, Typography, Grid, Stack, IconButton, Chip } from '@mui/material';
+import { Box, Card, CardContent, Typography, Grid, Stack, IconButton, Chip, Button } from '@mui/material';
 import { FitnessCenter, Timer, TrendingUp, Whatshot, Delete, TrendingUpRounded, SelfImprovement, DirectionsRun } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {
@@ -244,9 +244,6 @@ const ProgressScreen = () => {
       transition={{ duration: 0.5 }}
       style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}
     >
-      {/* Calendar at the top */}
-      <Calendar workoutSessions={workoutSessions} onDayClick={handleDayClick} />
-      
       {/* Stats Overview - Redesigned for mobile */}
       <Box sx={{ mb: 3 }}>
         <Stack spacing={2}>
@@ -540,6 +537,9 @@ const ProgressScreen = () => {
           </Stack>
         </Stack>
       </Box>
+
+      {/* Calendar - positioned after stats, before history */}
+      <Calendar workoutSessions={workoutSessions} onDayClick={handleDayClick} />
 
       {history.length > 0 && (
         <motion.div

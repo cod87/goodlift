@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@mui/material';
+import { Star } from '@mui/icons-material';
 import '../styles/Calendar.css';
 
 const Calendar = ({ workoutSessions = [], onDayClick }) => {
@@ -134,6 +135,9 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
         {days.map((date, index) => {
           const sessionTypes = date ? getSessionTypes(date) : [];
           const hasActivity = sessionTypes.length > 0;
+          const hasMultipleTypes = sessionTypes.length > 1;
+          const singleType = sessionTypes.length === 1 ? sessionTypes[0] : null;
+          
           return (
             <div
               key={index}
@@ -143,42 +147,49 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
             >
               {date && (
                 <>
-                  <Box sx={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <Box sx={{ 
+                    position: 'relative', 
+                    width: '100%', 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center' 
+                  }}>
+                    {/* Marker for sessions */}
                     {hasActivity && (
                       <Box sx={{ 
                         position: 'absolute',
-                        fontSize: { xs: '1.2rem', sm: '1.5rem' },
-                        fontWeight: 700,
-                        color: 'rgba(0, 0, 0, 0.15)',
                         top: '50%',
                         left: '50%',
-                        transform: 'translate(-50%, -50%)'
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 0,
                       }}>
-                        ✕
+                        {hasMultipleTypes ? (
+                          // Gold star for multiple session types
+                          <Star sx={{ 
+                            fontSize: { xs: '2rem', sm: '2.5rem' },
+                            color: '#FFD700',
+                            opacity: 0.8,
+                          }} />
+                        ) : (
+                          // Large X for single session type with color coding
+                          <Box sx={{ 
+                            fontSize: { xs: '2.5rem', sm: '3rem' },
+                            fontWeight: 900,
+                            lineHeight: 1,
+                            color: getColorForType(singleType),
+                            opacity: 0.6,
+                            fontFamily: 'Arial, sans-serif',
+                          }}>
+                            ✕
+                          </Box>
+                        )}
                       </Box>
                     )}
-                    <span className="day-number">{date.getDate()}</span>
-                    {sessionTypes.length > 0 && (
-                      <Box 
-                        display="flex" 
-                        gap={0.25} 
-                        justifyContent="center" 
-                        alignItems="center"
-                        sx={{ mt: 0.25 }}
-                      >
-                        {sessionTypes.map((type, idx) => (
-                          <Box 
-                            key={idx} 
-                            sx={{ 
-                              width: 6, 
-                              height: 6, 
-                              borderRadius: '50%', 
-                              bgcolor: getColorForType(type)
-                            }}
-                          />
-                        ))}
-                      </Box>
-                    )}
+                    <span className="day-number" style={{ zIndex: 1, position: 'relative' }}>
+                      {date.getDate()}
+                    </span>
                   </Box>
                 </>
               )}
@@ -189,16 +200,20 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
 
       <div className="calendar-legend">
         <div className="legend-item">
-          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#3f51b5' }} />
+          <Box sx={{ fontSize: '1rem', fontWeight: 900, color: '#3f51b5' }}>✕</Box>
           <span>Workout</span>
         </div>
         <div className="legend-item">
-          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#4caf50' }} />
+          <Box sx={{ fontSize: '1rem', fontWeight: 900, color: '#4caf50' }}>✕</Box>
           <span>Cardio</span>
         </div>
         <div className="legend-item">
-          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#9c27b0' }} />
+          <Box sx={{ fontSize: '1rem', fontWeight: 900, color: '#9c27b0' }}>✕</Box>
           <span>Yoga/Stretch</span>
+        </div>
+        <div className="legend-item">
+          <Star sx={{ fontSize: '1rem', color: '#FFD700' }} />
+          <span>Multiple Types</span>
         </div>
       </div>
     </div>

@@ -127,8 +127,10 @@ const ExerciseListPage = () => {
   const handleSaveSettings = async () => {
     if (selectedExercise) {
       try {
-        await setExerciseWeight(selectedExercise['Exercise Name'], exerciseWeight);
-        await setExerciseTargetReps(selectedExercise['Exercise Name'], exerciseReps);
+        const weight = exerciseWeight === '' ? 0 : exerciseWeight;
+        const reps = exerciseReps === '' ? 12 : exerciseReps;
+        await setExerciseWeight(selectedExercise['Exercise Name'], weight);
+        await setExerciseTargetReps(selectedExercise['Exercise Name'], reps);
         setSettingsDialogOpen(false);
         setSelectedExercise(null);
       } catch (error) {
@@ -372,8 +374,19 @@ const ExerciseListPage = () => {
             <TextField
               label="Preferred Weight (lbs)"
               type="number"
-              value={exerciseWeight}
-              onChange={(e) => setExerciseWeightState(Math.max(0, Number(e.target.value)))}
+              value={exerciseWeight === '' ? '' : exerciseWeight}
+              onChange={(e) => {
+                const val = e.target.value;
+                setExerciseWeightState(val === '' ? '' : Math.max(0, Number(val)));
+              }}
+              onBlur={(e) => {
+                const val = e.target.value;
+                if (val === '' || val === null || val === undefined) {
+                  setExerciseWeightState(0);
+                }
+              }}
+              onFocus={(e) => e.target.select()}
+              placeholder="–"
               InputProps={{
                 inputProps: { min: 0, step: 5 },
               }}
@@ -382,8 +395,19 @@ const ExerciseListPage = () => {
             <TextField
               label="Target Reps"
               type="number"
-              value={exerciseReps}
-              onChange={(e) => setExerciseRepsState(Math.max(1, Number(e.target.value)))}
+              value={exerciseReps === '' ? '' : exerciseReps}
+              onChange={(e) => {
+                const val = e.target.value;
+                setExerciseRepsState(val === '' ? '' : Math.max(1, Number(val)));
+              }}
+              onBlur={(e) => {
+                const val = e.target.value;
+                if (val === '' || val === null || val === undefined) {
+                  setExerciseRepsState(12);
+                }
+              }}
+              onFocus={(e) => e.target.select()}
+              placeholder="–"
               InputProps={{
                 inputProps: { min: 1, step: 1 },
               }}

@@ -81,9 +81,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   }, [workout, loading]); // Intentionally excluding exerciseSettings and customizedSettings to avoid loops
 
   const handleWeightChange = (exerciseName, value) => {
-    // Validate: only allow non-negative numbers (strict validation)
+    // Allow empty state and validate: only allow non-negative numbers
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      const numValue = value === '' ? 0 : parseFloat(value);
+      const numValue = value === '' ? '' : parseFloat(value);
       setExerciseSettings(prev => ({
         ...prev,
         [exerciseName]: {
@@ -100,6 +100,18 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   };
 
   const handleWeightBlur = (exerciseName, value) => {
+    // If empty, set to 0 on blur
+    if (value === '' || value === null || value === undefined) {
+      setExerciseSettings(prev => ({
+        ...prev,
+        [exerciseName]: {
+          ...prev[exerciseName],
+          weight: 0,
+        }
+      }));
+      return;
+    }
+    
     const numValue = parseFloat(value);
     if (!isNaN(numValue) && numValue > 0) {
       // Round to nearest 2.5 lbs
@@ -119,13 +131,22 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           severity: 'info'
         });
       }
+    } else if (numValue === 0 || isNaN(numValue)) {
+      // Set to 0 if invalid
+      setExerciseSettings(prev => ({
+        ...prev,
+        [exerciseName]: {
+          ...prev[exerciseName],
+          weight: 0,
+        }
+      }));
     }
   };
 
   const handleTargetRepsChange = (exerciseName, value) => {
-    // Validate: only allow positive integers (strict validation)
+    // Allow empty state and validate: only allow positive integers
     if (value === '' || /^\d+$/.test(value)) {
-      const numValue = value === '' ? 12 : parseInt(value, 10);
+      const numValue = value === '' ? '' : parseInt(value, 10);
       setExerciseSettings(prev => ({
         ...prev,
         [exerciseName]: {
@@ -141,6 +162,32 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
     }
   };
 
+  const handleTargetRepsBlur = (exerciseName, value) => {
+    // If empty, set to default 12 on blur
+    if (value === '' || value === null || value === undefined) {
+      setExerciseSettings(prev => ({
+        ...prev,
+        [exerciseName]: {
+          ...prev[exerciseName],
+          targetReps: 12,
+        }
+      }));
+      return;
+    }
+    
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue) || numValue < 1) {
+      // Set to default 12 if invalid
+      setExerciseSettings(prev => ({
+        ...prev,
+        [exerciseName]: {
+          ...prev[exerciseName],
+          targetReps: 12,
+        }
+      }));
+    }
+  };
+
   const handleRandomizeExercise = useCallback((exercise, globalIndex) => {
     if (onRandomizeExercise) {
       onRandomizeExercise(exercise, globalIndex);
@@ -148,10 +195,12 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   }, [onRandomizeExercise]);
 
   const handleStartWorkout = async () => {
-    // Save all settings before starting workout
+    // Save all settings before starting workout, converting empty strings to defaults
     for (const [exerciseName, settings] of Object.entries(exerciseSettings)) {
-      await setExerciseWeight(exerciseName, settings.weight);
-      await setExerciseTargetReps(exerciseName, settings.targetReps);
+      const weight = settings.weight === '' ? 0 : settings.weight;
+      const targetReps = settings.targetReps === '' ? 12 : settings.targetReps;
+      await setExerciseWeight(exerciseName, weight);
+      await setExerciseTargetReps(exerciseName, targetReps);
     }
     onStart();
   };
@@ -386,9 +435,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             type="number"
                             inputMode="numeric"
                             label="Weight (lbs)"
-                            value={settings.weight}
+                            value={settings.weight === '' ? '' : settings.weight}
                             onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
                             onBlur={(e) => handleWeightBlur(exerciseName, e.target.value)}
+                            onFocus={(e) => e.target.select()}
+                            placeholder="–"
                             size="small"
                             inputProps={{
                               min: 0,
@@ -405,8 +456,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             type="number"
                             inputMode="numeric"
                             label="Target Reps"
-                            value={settings.targetReps}
+                            value={settings.targetReps === '' ? '' : settings.targetReps}
                             onChange={(e) => handleTargetRepsChange(exerciseName, e.target.value)}
+                            onBlur={(e) => handleTargetRepsBlur(exerciseName, e.target.value)}
+                            onFocus={(e) => e.target.select()}
+                            placeholder="–"
                             size="small"
                             inputProps={{
                               min: 1,

@@ -304,7 +304,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     max="500"
                     className="exercise-input"
                     defaultValue={prevWeight || 0}
+                    placeholder="–"
                     onFocus={(e) => {
+                      e.target.select();
                       // Only scroll if input would be obscured by keyboard
                       // Keyboard takes up ~40% of viewport, scroll only if input is in lower 45%
                       const rect = e.target.getBoundingClientRect();
@@ -346,7 +348,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     max="20"
                     className="exercise-input"
                     defaultValue={targetReps || 8}
+                    placeholder="–"
                     onFocus={(e) => {
+                      e.target.select();
                       // Only scroll if input would be obscured by keyboard
                       // Keyboard takes up ~40% of viewport, scroll only if input is in lower 45%
                       const rect = e.target.getBoundingClientRect();

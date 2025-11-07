@@ -110,11 +110,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
    * Apply conditional persist rules after workout completion
    * 
    * Persist Rules:
-   * 1. Only update Target Weight if ALL sets' reps >= current Target Reps (treat null/empty as 0)
-   *    - Use the latest weight entered (last set's weight)
-   * 2. Only update Target Reps if ALL sets' reps > current Target Reps AND reps vary across sets
+   * 1. Only update Target Reps if ALL sets' reps > current Target Reps
    *    - Set to min(recorded reps)
-   * 3. If ANY set's reps < current Target Reps, do NOT update either Target Weight or Target Reps
+   * 2. Only update Target Weight if weight is DIFFERENT AND ALL sets' reps >= current Target Reps
+   *    - Use the latest weight entered (last set's weight)
    */
   const applyConditionalPersistRules = async (workoutDataArray) => {
     // Group sets by exercise
@@ -130,6 +129,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     for (const [exName, sets] of Object.entries(exerciseData)) {
       const initialTarget = initialTargets[exName] || { weight: null, reps: null };
       const currentTargetReps = initialTarget.reps ?? 0; // Treat null/empty as 0 for comparison
+      const currentTargetWeight = initialTarget.weight;
       
       // Get all reps from sets (already validated as numbers in handleNext)
       const allReps = sets.map(s => s.reps).filter(r => typeof r === 'number' && !isNaN(r));
@@ -138,8 +138,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       if (allReps.length === 0) continue;
       
       const minReps = Math.min(...allReps);
-      const maxReps = Math.max(...allReps);
-      const repsVary = minReps !== maxReps;
       
       // Check if all sets' reps >= current target reps
       const allSetsMetTarget = allReps.every(r => r >= currentTargetReps);
@@ -147,20 +145,21 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       // Check if all sets' reps > current target reps
       const allSetsExceededTarget = allReps.every(r => r > currentTargetReps);
       
+      // Update Target Reps only if all sets exceeded target
+      if (allSetsExceededTarget && minReps > 0) {
+        await setExerciseTargetReps(exName, minReps);
+      }
+      
+      // Update Target Weight only if weight is different AND all sets met target
       if (allSetsMetTarget) {
-        // Update Target Weight: use latest weight (last set's weight)
-        // Validate it's a non-negative number
         const latestWeight = sets[sets.length - 1].weight;
         if (typeof latestWeight === 'number' && !isNaN(latestWeight) && latestWeight >= 0) {
-          await setExerciseWeight(exName, latestWeight);
-        }
-        
-        // Update Target Reps only if all sets exceeded target AND reps vary
-        if (allSetsExceededTarget && repsVary && minReps > 0) {
-          await setExerciseTargetReps(exName, minReps);
+          // Only update if weight has changed
+          if (latestWeight !== currentTargetWeight) {
+            await setExerciseWeight(exName, latestWeight);
+          }
         }
       }
-      // If any set's reps < current target reps, don't update either value
     }
   };
 
@@ -432,9 +431,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                   <label htmlFor="reps-select">Reps</label>
                   <input
                     id="reps-select"
-                    type="tel"
+                    type="number"
                     inputMode="numeric"
-                    pattern="\\d*"
                     step="1"
                     min="1"
                     max="20"

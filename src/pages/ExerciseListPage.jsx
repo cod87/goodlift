@@ -1,30 +1,32 @@
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   TextField,
   InputAdornment,
   IconButton,
   Chip,
   Stack,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
   Tooltip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   FavoriteBorderOutlined,
   FavoriteOutlined,
   FitnessCenter,
-  Edit as EditIcon,
 } from '@mui/icons-material';
 import { useWorkoutGenerator } from '../hooks/useWorkoutGenerator';
 import {
@@ -38,36 +40,51 @@ import {
 
 /**
  * ExerciseListPage component
- * Displays all exercises with favorite toggle, filtering, and settings
+ * Displays all exercises in a compact table format with inline controls
  */
 const ExerciseListPage = () => {
   const { allExercises, loading } = useWorkoutGenerator();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedEquipment, setSelectedEquipment] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
   const [favoriteExercises, setFavoriteExercises] = useState(new Set());
-  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState(null);
-  const [exerciseWeight, setExerciseWeightState] = useState(0);
-  const [exerciseReps, setExerciseRepsState] = useState(12);
+  const [exerciseWeights, setExerciseWeights] = useState({});
+  const [exerciseReps, setExerciseReps] = useState({});
 
-  // Load favorites on mount
+  // Load favorites and exercise settings on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    const loadFavorites = () => {
+    const loadData = async () => {
       const favorites = new Set();
-      allExercises.forEach(ex => {
-        if (isFavoriteExercise(ex['Exercise Name'])) {
-          favorites.add(ex['Exercise Name']);
+      const weights = {};
+      const reps = {};
+      
+      for (const ex of allExercises) {
+        const exerciseName = ex['Exercise Name'];
+        if (isFavoriteExercise(exerciseName)) {
+          favorites.add(exerciseName);
         }
-      });
+        
+        // Load weight and reps for each exercise
+        const [weight, targetReps] = await Promise.all([
+          getExerciseWeight(exerciseName),
+          getExerciseTargetReps(exerciseName)
+        ]);
+        weights[exerciseName] = weight;
+        reps[exerciseName] = targetReps;
+      }
+      
       setFavoriteExercises(favorites);
+      setExerciseWeights(weights);
+      setExerciseReps(reps);
     };
     
-    loadFavorites();
+    loadData();
   }, [allExercises]);
 
-  // Extract unique categories from exercises
+  // Extract unique categories, equipment types, and exercise types
   const categories = useMemo(() => {
     const cats = new Set();
     allExercises.forEach(ex => {
@@ -77,7 +94,23 @@ const ExerciseListPage = () => {
     return ['all', ...Array.from(cats).sort()];
   }, [allExercises]);
 
-  // Filter exercises based on search and category
+  const equipmentTypes = useMemo(() => {
+    const types = new Set();
+    allExercises.forEach(ex => {
+      types.add(ex['Equipment']);
+    });
+    return ['all', ...Array.from(types).sort()];
+  }, [allExercises]);
+
+  const exerciseTypes = useMemo(() => {
+    const types = new Set();
+    allExercises.forEach(ex => {
+      types.add(ex['Exercise Type']);
+    });
+    return ['all', ...Array.from(types).sort()];
+  }, [allExercises]);
+
+  // Filter exercises based on search, category, equipment, and type
   const filteredExercises = useMemo(() => {
     return allExercises.filter(exercise => {
       const matchesSearch = searchTerm === '' ||
@@ -87,13 +120,14 @@ const ExerciseListPage = () => {
 
       const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
       const matchesCategory = selectedCategory === 'all' || primaryMuscle === selectedCategory;
+      const matchesEquipment = selectedEquipment === 'all' || exercise['Equipment'] === selectedEquipment;
+      const matchesType = selectedType === 'all' || exercise['Exercise Type'] === selectedType;
 
-      return matchesSearch && matchesCategory;
+      return matchesSearch && matchesCategory && matchesEquipment && matchesType;
     });
-  }, [allExercises, searchTerm, selectedCategory]);
+  }, [allExercises, searchTerm, selectedCategory, selectedEquipment, selectedType]);
 
-  const handleToggleFavorite = (exerciseName, event) => {
-    event.stopPropagation();
+  const handleToggleFavorite = (exerciseName) => {
     const isFavorited = toggleFavoriteExercise(exerciseName);
     
     setFavoriteExercises(prev => {
@@ -107,44 +141,16 @@ const ExerciseListPage = () => {
     });
   };
 
-  const handleOpenSettings = async (exercise) => {
-    try {
-      setSelectedExercise(exercise);
-      const weight = await getExerciseWeight(exercise['Exercise Name']);
-      const reps = await getExerciseTargetReps(exercise['Exercise Name']);
-      setExerciseWeightState(weight);
-      setExerciseRepsState(reps);
-      setSettingsDialogOpen(true);
-    } catch (error) {
-      console.error('Failed to load exercise settings:', error);
-      // Still open the dialog with default values
-      setExerciseWeightState(0);
-      setExerciseRepsState(12);
-      setSettingsDialogOpen(true);
-    }
+  const handleWeightChange = async (exerciseName, value) => {
+    const numValue = value === '' ? 0 : Math.max(0, Number(value));
+    setExerciseWeights(prev => ({ ...prev, [exerciseName]: numValue }));
+    await setExerciseWeight(exerciseName, numValue);
   };
 
-  const handleSaveSettings = async () => {
-    if (selectedExercise) {
-      try {
-        const weight = exerciseWeight === '' ? 0 : exerciseWeight;
-        const reps = exerciseReps === '' ? 12 : exerciseReps;
-        await setExerciseWeight(selectedExercise['Exercise Name'], weight);
-        await setExerciseTargetReps(selectedExercise['Exercise Name'], reps);
-        setSettingsDialogOpen(false);
-        setSelectedExercise(null);
-      } catch (error) {
-        console.error('Failed to save exercise settings:', error);
-        // Still close the dialog
-        setSettingsDialogOpen(false);
-        setSelectedExercise(null);
-      }
-    }
-  };
-
-  const handleCloseSettings = () => {
-    setSettingsDialogOpen(false);
-    setSelectedExercise(null);
+  const handleRepsChange = async (exerciseName, value) => {
+    const numValue = value === '' ? 12 : Math.max(1, Number(value));
+    setExerciseReps(prev => ({ ...prev, [exerciseName]: numValue }));
+    await setExerciseTargetReps(exerciseName, numValue);
   };
 
   if (loading) {
@@ -162,7 +168,7 @@ const ExerciseListPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}
+      style={{ padding: '1rem', maxWidth: '1400px', margin: '0 auto' }}
     >
       {/* Header */}
       <Box sx={{ mb: 3, textAlign: 'center' }}>
@@ -174,263 +180,291 @@ const ExerciseListPage = () => {
             sx={{
               fontWeight: 700,
               color: 'primary.main',
-              fontSize: { xs: '2rem', sm: '2.5rem' },
+              fontSize: { xs: '1.75rem', sm: '2.5rem' },
             }}
           >
-            Exercise List
+            Exercise Database
           </Typography>
         </Box>
-        <Typography variant="body1" color="text.secondary">
-          Browse all exercises and mark your favorites
+        <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+          Browse {allExercises.length} exercises • Configure weight & reps inline
         </Typography>
       </Box>
 
-      {/* Filter Bar */}
+      {/* Compact Filter Bar */}
       <Card
         sx={{
-          mb: 3,
-          p: 2,
-          borderRadius: 3,
-          boxShadow: '0 4px 12px rgba(19, 70, 134, 0.08)',
+          mb: 2,
+          p: { xs: 1.5, sm: 2 },
+          borderRadius: 2,
+          boxShadow: '0 2px 8px rgba(19, 70, 134, 0.08)',
         }}
       >
-        <Stack spacing={2}>
+        <Stack spacing={1.5}>
           {/* Search */}
           <TextField
             fullWidth
+            size="small"
             placeholder="Search exercises..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon />
+                  <SearchIcon fontSize="small" />
                 </InputAdornment>
               ),
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
+                borderRadius: 1.5,
               },
             }}
           />
 
-          {/* Category Chips */}
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {categories.map(category => (
-              <Chip
-                key={category}
-                label={category === 'all' ? 'All Muscles' : category}
-                onClick={() => setSelectedCategory(category)}
-                color={selectedCategory === category ? 'primary' : 'default'}
-                sx={{
-                  fontWeight: selectedCategory === category ? 600 : 400,
-                  textTransform: 'capitalize',
-                }}
-              />
-            ))}
-          </Box>
+          {/* Compact Filter Row */}
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ width: '100%' }}>
+            <FormControl size="small" sx={{ minWidth: 120, flex: 1 }}>
+              <InputLabel>Muscle</InputLabel>
+              <Select
+                value={selectedCategory}
+                label="Muscle"
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <MenuItem value="all">All Muscles</MenuItem>
+                {categories.filter(c => c !== 'all').map(category => (
+                  <MenuItem key={category} value={category}>{category}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small" sx={{ minWidth: 120, flex: 1 }}>
+              <InputLabel>Equipment</InputLabel>
+              <Select
+                value={selectedEquipment}
+                label="Equipment"
+                onChange={(e) => setSelectedEquipment(e.target.value)}
+              >
+                <MenuItem value="all">All Equipment</MenuItem>
+                {equipmentTypes.filter(e => e !== 'all').map(equipment => (
+                  <MenuItem key={equipment} value={equipment}>{equipment}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small" sx={{ minWidth: 120, flex: 1 }}>
+              <InputLabel>Type</InputLabel>
+              <Select
+                value={selectedType}
+                label="Type"
+                onChange={(e) => setSelectedType(e.target.value)}
+              >
+                <MenuItem value="all">All Types</MenuItem>
+                {exerciseTypes.filter(t => t !== 'all').map(type => (
+                  <MenuItem key={type} value={type}>{type}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
         </Stack>
       </Card>
 
       {/* Results Count */}
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'center' }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, textAlign: 'center', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
         Showing {filteredExercises.length} of {allExercises.length} exercises
       </Typography>
 
-      {/* Exercise Grid */}
-      <Grid container spacing={2}>
-        {filteredExercises.map(exercise => {
-          const isFavorited = favoriteExercises.has(exercise['Exercise Name']);
-          
-          return (
-            <Grid item xs={12} sm={6} md={4} key={exercise['Exercise Name']}>
-              <Card
-                sx={{
-                  height: '100%',
-                  borderRadius: 3,
-                  boxShadow: '0 2px 8px rgba(19, 70, 134, 0.08)',
-                  transition: 'box-shadow 0.2s ease',
-                  '&:hover': {
-                    boxShadow: '0 4px 16px rgba(19, 70, 134, 0.15)',
-                  },
-                }}
-              >
-                <CardContent>
-                  {/* Exercise Header */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 600,
-                        fontSize: '1rem',
-                        color: 'primary.main',
-                        flex: 1,
-                        pr: 1,
-                      }}
-                    >
-                      {exercise['Exercise Name']}
-                    </Typography>
-                    
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      {/* Settings Button */}
-                      <Tooltip title="Set weight & reps">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenSettings(exercise)}
-                          sx={{
-                            color: 'primary.main',
-                            '&:hover': {
-                              backgroundColor: 'rgba(19, 70, 134, 0.08)',
-                            },
-                          }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-
-                      {/* Favorite Button */}
+      {/* Exercise Table */}
+      {filteredExercises.length > 0 ? (
+        <TableContainer 
+          component={Paper} 
+          sx={{ 
+            borderRadius: 2,
+            boxShadow: '0 2px 8px rgba(19, 70, 134, 0.08)',
+            maxHeight: 'calc(100vh - 350px)',
+            overflow: 'auto'
+          }}
+        >
+          <Table stickyHeader size="small" sx={{ minWidth: { xs: 300, sm: 650 } }}>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 600, bgcolor: 'primary.main', color: 'white', py: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <span>★</span>
+                  </Box>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: 'primary.main', color: 'white', py: 1.5 }}>
+                  Exercise Name
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: 'primary.main', color: 'white', py: 1.5, display: { xs: 'none', sm: 'table-cell' } }}>
+                  Type
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: 'primary.main', color: 'white', py: 1.5, display: { xs: 'none', md: 'table-cell' } }}>
+                  Equipment
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: 'primary.main', color: 'white', py: 1.5, textAlign: 'center' }}>
+                  Weight (lbs)
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, bgcolor: 'primary.main', color: 'white', py: 1.5, textAlign: 'center' }}>
+                  Reps
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredExercises.map((exercise, index) => {
+                const isFavorited = favoriteExercises.has(exercise['Exercise Name']);
+                const exerciseName = exercise['Exercise Name'];
+                const weight = exerciseWeights[exerciseName] || 0;
+                const reps = exerciseReps[exerciseName] || 12;
+                
+                return (
+                  <TableRow 
+                    key={exerciseName}
+                    sx={{
+                      '&:hover': {
+                        bgcolor: 'rgba(138, 190, 185, 0.05)',
+                      },
+                      bgcolor: index % 2 === 0 ? 'background.paper' : 'rgba(0, 0, 0, 0.02)',
+                    }}
+                  >
+                    {/* Favorite Icon */}
+                    <TableCell sx={{ py: 1 }}>
                       <Tooltip title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}>
                         <IconButton
                           size="small"
-                          onClick={(e) => handleToggleFavorite(exercise['Exercise Name'], e)}
+                          onClick={() => handleToggleFavorite(exerciseName)}
                           sx={{
                             color: isFavorited ? 'rgb(237, 63, 39)' : 'action.disabled',
+                            p: 0.5,
                           }}
                         >
-                          <AnimatePresence mode="wait">
-                            <motion.div
-                              key={isFavorited ? 'favorited' : 'not-favorited'}
-                              initial={{ scale: 0.8, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
-                              exit={{ scale: 0.8, opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              {isFavorited ? (
-                                <FavoriteOutlined fontSize="small" />
-                              ) : (
-                                <FavoriteBorderOutlined fontSize="small" />
-                              )}
-                            </motion.div>
-                          </AnimatePresence>
+                          {isFavorited ? (
+                            <FavoriteOutlined fontSize="small" />
+                          ) : (
+                            <FavoriteBorderOutlined fontSize="small" />
+                          )}
                         </IconButton>
                       </Tooltip>
-                    </Box>
-                  </Box>
+                    </TableCell>
 
-                  {/* Exercise Details */}
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Primary:</strong> {exercise['Primary Muscle']}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Equipment:</strong> {exercise['Equipment']}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Type:</strong> {exercise['Exercise Type']}
-                    </Typography>
-                    {exercise['Secondary Muscles'] && (
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                        <strong>Secondary:</strong> {exercise['Secondary Muscles']}
+                    {/* Exercise Name */}
+                    <TableCell sx={{ py: 1 }}>
+                      <Box>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            fontWeight: 600,
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            color: 'primary.main'
+                          }}
+                        >
+                          {exerciseName}
+                        </Typography>
+                        <Typography 
+                          variant="caption" 
+                          color="text.secondary"
+                          sx={{ 
+                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                            display: { xs: 'block', sm: 'none' }
+                          }}
+                        >
+                          {exercise['Exercise Type']} • {exercise['Equipment']}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+
+                    {/* Type (hidden on mobile) */}
+                    <TableCell sx={{ py: 1, display: { xs: 'none', sm: 'table-cell' } }}>
+                      <Chip 
+                        label={exercise['Exercise Type']} 
+                        size="small"
+                        variant="outlined"
+                        sx={{ 
+                          fontSize: '0.7rem',
+                          height: 22,
+                          borderColor: exercise['Exercise Type'] === 'Compound' ? 'primary.main' : 'text.secondary',
+                          color: exercise['Exercise Type'] === 'Compound' ? 'primary.main' : 'text.secondary',
+                        }}
+                      />
+                    </TableCell>
+
+                    {/* Equipment (hidden on mobile and tablet) */}
+                    <TableCell sx={{ py: 1, display: { xs: 'none', md: 'table-cell' } }}>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        {exercise['Equipment']}
                       </Typography>
-                    )}
-                  </Stack>
+                    </TableCell>
 
-                  {/* YouTube Link */}
-                  {exercise['YouTube_Demonstration_Link'] && (
-                    <Button
-                      size="small"
-                      href={exercise['YouTube_Demonstration_Link']}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      sx={{
-                        mt: 1,
-                        fontSize: '0.75rem',
-                        textTransform: 'none',
-                      }}
-                    >
-                      Watch Demo
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-          );
-        })}
-      </Grid>
+                    {/* Weight Input */}
+                    <TableCell sx={{ py: 1 }}>
+                      <TextField
+                        type="number"
+                        size="small"
+                        value={weight === '' ? '' : weight}
+                        onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
+                        onFocus={(e) => e.target.select()}
+                        placeholder="–"
+                        inputProps={{
+                          min: 0,
+                          step: 5,
+                          style: { 
+                            textAlign: 'center',
+                            fontSize: '0.875rem',
+                            padding: '4px 8px'
+                          }
+                        }}
+                        sx={{
+                          width: { xs: 60, sm: 70 },
+                          '& .MuiOutlinedInput-root': {
+                            '& input': {
+                              textAlign: 'center',
+                            }
+                          }
+                        }}
+                      />
+                    </TableCell>
 
-      {/* Exercise Settings Dialog */}
-      <Dialog open={settingsDialogOpen} onClose={handleCloseSettings} maxWidth="xs" fullWidth>
-        <DialogTitle>
-          Exercise Settings
-          {selectedExercise && (
-            <Typography variant="body2" color="text.secondary">
-              {selectedExercise['Exercise Name']}
-            </Typography>
-          )}
-        </DialogTitle>
-        <DialogContent>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField
-              label="Preferred Weight (lbs)"
-              type="number"
-              value={exerciseWeight === '' ? '' : exerciseWeight}
-              onChange={(e) => {
-                const val = e.target.value;
-                setExerciseWeightState(val === '' ? '' : Math.max(0, Number(val)));
-              }}
-              onBlur={(e) => {
-                const val = e.target.value;
-                if (val === '' || val === null || val === undefined) {
-                  setExerciseWeightState(0);
-                }
-              }}
-              onFocus={(e) => e.target.select()}
-              placeholder="–"
-              InputProps={{
-                inputProps: { min: 0, step: 5 },
-              }}
-              fullWidth
-            />
-            <TextField
-              label="Target Reps"
-              type="number"
-              value={exerciseReps === '' ? '' : exerciseReps}
-              onChange={(e) => {
-                const val = e.target.value;
-                setExerciseRepsState(val === '' ? '' : Math.max(1, Number(val)));
-              }}
-              onBlur={(e) => {
-                const val = e.target.value;
-                if (val === '' || val === null || val === undefined) {
-                  setExerciseRepsState(12);
-                }
-              }}
-              onFocus={(e) => e.target.select()}
-              placeholder="–"
-              InputProps={{
-                inputProps: { min: 1, step: 1 },
-              }}
-              fullWidth
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseSettings}>Cancel</Button>
-          <Button onClick={handleSaveSettings} variant="contained">
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* No Results */}
-      {filteredExercises.length === 0 && (
+                    {/* Reps Input */}
+                    <TableCell sx={{ py: 1 }}>
+                      <TextField
+                        type="number"
+                        size="small"
+                        value={reps === '' ? '' : reps}
+                        onChange={(e) => handleRepsChange(exerciseName, e.target.value)}
+                        onFocus={(e) => e.target.select()}
+                        placeholder="–"
+                        inputProps={{
+                          min: 1,
+                          step: 1,
+                          style: { 
+                            textAlign: 'center',
+                            fontSize: '0.875rem',
+                            padding: '4px 8px'
+                          }
+                        }}
+                        sx={{
+                          width: { xs: 60, sm: 70 },
+                          '& .MuiOutlinedInput-root': {
+                            '& input': {
+                              textAlign: 'center',
+                            }
+                          }
+                        }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary">
             No exercises found
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Try adjusting your search or filter
+            Try adjusting your search or filters
           </Typography>
         </Box>
       )}

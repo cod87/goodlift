@@ -86,6 +86,52 @@ const SelectionScreen = memo(({
     onStartWorkout(favoriteWorkout.type, equipmentFilter, favoriteWorkout.exercises);
   };
 
+  const handleEquipmentToggle = (equipment) => {
+    const newSelected = new Set(selectedEquipment);
+    
+    if (equipment === 'all') {
+      // If "All Equipment" is clicked, clear all other selections
+      newSelected.clear();
+      newSelected.add('all');
+    } else {
+      // If any specific equipment is clicked
+      if (newSelected.has('all')) {
+        // Remove "All Equipment" if it was selected
+        newSelected.delete('all');
+      }
+      
+      // Toggle the specific equipment
+      if (newSelected.has(equipment)) {
+        newSelected.delete(equipment);
+      } else {
+        newSelected.add(equipment);
+      }
+      
+      // If no equipment is selected, default to "All Equipment"
+      if (newSelected.size === 0) {
+        newSelected.add('all');
+      }
+    }
+    
+    onEquipmentChange(newSelected);
+  };
+
+  // Get display text for equipment selection
+  const getEquipmentDisplayText = () => {
+    if (selectedEquipment.has('all')) {
+      return 'All Equipment';
+    }
+    const selected = Array.from(selectedEquipment);
+    if (selected.length === 0) {
+      return 'All Equipment';
+    }
+    if (selected.length === 1) {
+      const equipment = equipmentOptions.find(e => e.toLowerCase() === selected[0]);
+      return equipment || selected[0];
+    }
+    return `${selected.length} selected`;
+  };
+
   return (
     <motion.div
       className="screen selection-screen"
@@ -148,33 +194,85 @@ const SelectionScreen = memo(({
                   </Select>
                 </FormControl>
 
-                {/* Equipment Dropdown */}
-                <FormControl fullWidth>
-                  <InputLabel id="equipment-label">Equipment</InputLabel>
-                  <Select
-                    labelId="equipment-label"
-                    id="equipment-select"
-                    value={selectedEquipment.has('all') ? 'all' : (selectedEquipment.size > 0 ? Array.from(selectedEquipment)[0] : 'all')}
-                    label="Equipment"
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      const newSelected = new Set();
-                      if (value === 'all') {
-                        newSelected.add('all');
-                      } else {
-                        newSelected.add(value);
-                      }
-                      onEquipmentChange(newSelected);
+                {/* Equipment Accordion */}
+                <Box sx={{ width: '100%' }}>
+                  <Accordion 
+                    sx={{ 
+                      boxShadow: 'none',
+                      border: '1px solid rgba(0, 0, 0, 0.23)',
+                      borderRadius: '4px',
+                      '&:before': { display: 'none' },
+                      '&.Mui-expanded': {
+                        margin: 0,
+                      },
                     }}
                   >
-                    <MenuItem value="all">All Equipment</MenuItem>
-                    {equipmentOptions.map((equipment) => (
-                      <MenuItem key={equipment} value={equipment.toLowerCase()}>
-                        {equipment}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    <AccordionSummary
+                      expandIcon={<ExpandMore />}
+                      sx={{
+                        minHeight: '56px',
+                        '&.Mui-expanded': {
+                          minHeight: '56px',
+                        },
+                        '& .MuiAccordionSummary-content': {
+                          margin: '16px 0',
+                          '&.Mui-expanded': {
+                            margin: '16px 0',
+                          },
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            color: 'rgba(0, 0, 0, 0.6)',
+                            fontSize: '0.75rem',
+                            lineHeight: 1,
+                            mb: 0.5,
+                          }}
+                        >
+                          Equipment
+                        </Typography>
+                        <Typography 
+                          sx={{ 
+                            color: 'rgba(0, 0, 0, 0.87)',
+                            fontSize: '1rem',
+                          }}
+                        >
+                          {getEquipmentDisplayText()}
+                        </Typography>
+                      </Box>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ pt: 0, pb: 2 }}>
+                      <Box component="div" role="group">
+                        <FormControlLabel 
+                          control={
+                            <Radio 
+                              checked={selectedEquipment.has('all')}
+                              onChange={() => handleEquipmentToggle('all')}
+                            />
+                          }
+                          label="All Equipment"
+                          sx={{ mb: 1, display: 'flex' }}
+                        />
+                        {equipmentOptions.map((equipment) => (
+                          <FormControlLabel
+                            key={equipment}
+                            control={
+                              <Radio 
+                                checked={selectedEquipment.has(equipment.toLowerCase())}
+                                onChange={() => handleEquipmentToggle(equipment.toLowerCase())}
+                              />
+                            }
+                            label={equipment}
+                            sx={{ mb: 1, display: 'flex' }}
+                          />
+                        ))}
+                      </Box>
+                    </AccordionDetails>
+                  </Accordion>
+                </Box>
               </Stack>
             </Box>
 

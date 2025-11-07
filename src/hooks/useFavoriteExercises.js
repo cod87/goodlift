@@ -1,30 +1,37 @@
 import { useState, useEffect } from 'react';
-import { getFavoriteWorkouts } from '../utils/storage';
+import { getFavoriteExercises, getFavoriteWorkouts } from '../utils/storage';
 
 /**
  * Custom hook to get a set of favorited exercises
  * Used to bias exercise randomization towards user's favorite exercises
- * @returns {Set<string>} Set of exercise names that appear in favorite workouts
+ * Combines both directly favorited exercises AND exercises from favorite workouts
+ * @returns {Set<string>} Set of exercise names that are favorited
  */
 export const useFavoriteExercises = () => {
   const [favoriteExercises, setFavoriteExercises] = useState(new Set());
   
   useEffect(() => {
     const loadFavorites = () => {
-      const favorites = getFavoriteWorkouts();
-      const exerciseSet = new Set();
+      // Get directly favorited exercises
+      const directFavorites = getFavoriteExercises();
       
-      favorites.forEach(fav => {
+      // Get exercises from favorite workouts
+      const favoriteWorkouts = getFavoriteWorkouts();
+      const workoutExercises = new Set();
+      
+      favoriteWorkouts.forEach(fav => {
         if (fav.exercises && Array.isArray(fav.exercises)) {
           fav.exercises.forEach(exercise => {
             if (exercise && exercise['Exercise Name']) {
-              exerciseSet.add(exercise['Exercise Name']);
+              workoutExercises.add(exercise['Exercise Name']);
             }
           });
         }
       });
       
-      setFavoriteExercises(exerciseSet);
+      // Combine both sets
+      const combinedFavorites = new Set([...directFavorites, ...workoutExercises]);
+      setFavoriteExercises(combinedFavorites);
     };
     
     loadFavorites();

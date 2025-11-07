@@ -5,6 +5,7 @@ import { FaDumbbell, FaHome, FaSignOutAlt, FaTimes, FaBars, FaStar, FaRunning } 
 import { MdSelfImprovement } from 'react-icons/md';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import { Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import GuestLogoutDialog from './GuestLogoutDialog';
@@ -210,6 +211,12 @@ const NavigationSidebar = ({
                 label="Favourites"
                 isActive={currentScreen === 'favourites'}
                 onClick={() => handleNavClick('favourites')}
+              />
+              <NavLink
+                icon={<FitnessCenterIcon />}
+                label="Exercise List"
+                isActive={currentScreen === 'exercise-list'}
+                onClick={() => handleNavClick('exercise-list')}
               />
               <NavLink
                 icon={<DirectionsRunIcon />}

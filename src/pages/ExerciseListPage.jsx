@@ -108,20 +108,35 @@ const ExerciseListPage = () => {
   };
 
   const handleOpenSettings = async (exercise) => {
-    setSelectedExercise(exercise);
-    const weight = await getExerciseWeight(exercise['Exercise Name']);
-    const reps = await getExerciseTargetReps(exercise['Exercise Name']);
-    setExerciseWeightState(weight);
-    setExerciseRepsState(reps);
-    setSettingsDialogOpen(true);
+    try {
+      setSelectedExercise(exercise);
+      const weight = await getExerciseWeight(exercise['Exercise Name']);
+      const reps = await getExerciseTargetReps(exercise['Exercise Name']);
+      setExerciseWeightState(weight);
+      setExerciseRepsState(reps);
+      setSettingsDialogOpen(true);
+    } catch (error) {
+      console.error('Failed to load exercise settings:', error);
+      // Still open the dialog with default values
+      setExerciseWeightState(0);
+      setExerciseRepsState(12);
+      setSettingsDialogOpen(true);
+    }
   };
 
   const handleSaveSettings = async () => {
     if (selectedExercise) {
-      await setExerciseWeight(selectedExercise['Exercise Name'], exerciseWeight);
-      await setExerciseTargetReps(selectedExercise['Exercise Name'], exerciseReps);
-      setSettingsDialogOpen(false);
-      setSelectedExercise(null);
+      try {
+        await setExerciseWeight(selectedExercise['Exercise Name'], exerciseWeight);
+        await setExerciseTargetReps(selectedExercise['Exercise Name'], exerciseReps);
+        setSettingsDialogOpen(false);
+        setSelectedExercise(null);
+      } catch (error) {
+        console.error('Failed to save exercise settings:', error);
+        // Still close the dialog
+        setSettingsDialogOpen(false);
+        setSelectedExercise(null);
+      }
     }
   };
 
@@ -398,7 +413,5 @@ const ExerciseListPage = () => {
     </motion.div>
   );
 };
-
-ExerciseListPage.propTypes = {};
 
 export default ExerciseListPage;

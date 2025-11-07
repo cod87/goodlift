@@ -18,6 +18,7 @@ const GUEST_KEYS = {
   YOGA_SESSIONS: 'goodlift_guest_yoga_sessions',
   CARDIO_SESSIONS: 'goodlift_guest_cardio_sessions',
   FAVORITE_WORKOUTS: 'goodlift_guest_favorite_workouts',
+  FAVORITE_EXERCISES: 'goodlift_guest_favorite_exercises',
   SNACKBAR_DISMISSED: 'goodlift_guest_snackbar_dismissed',
   YOGA_CONFIG: 'goodlift_guest_yoga_config',
   YOGA_TTS_ENABLED: 'goodlift_guest_yoga_tts_enabled',

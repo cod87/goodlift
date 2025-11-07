@@ -65,8 +65,8 @@ const CustomWorkoutPreview = memo(({
           getExerciseTargetReps(exerciseName)
         ]);
         settings[exerciseName] = {
-          weight: weight || 0,
-          targetReps: targetReps || 12,
+          weight: weight ?? '', // Use empty string for null/undefined
+          targetReps: targetReps ?? '', // Use empty string for null/undefined
         };
       }
       setExerciseSettings(settings);
@@ -76,8 +76,9 @@ const CustomWorkoutPreview = memo(({
   }, [workout]);
 
   const handleWeightChange = (exerciseName, value) => {
+    // Allow empty state and validate: only allow non-negative numbers
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      const numValue = value === '' ? 0 : parseFloat(value);
+      const numValue = value === '' ? '' : parseFloat(value);
       setExerciseSettings(prev => ({
         ...prev,
         [exerciseName]: {
@@ -89,6 +90,11 @@ const CustomWorkoutPreview = memo(({
   };
 
   const handleWeightBlur = (exerciseName, value) => {
+    // If empty, keep empty on blur (don't force to 0)
+    if (value === '' || value === null || value === undefined) {
+      return;
+    }
+    
     const numValue = parseFloat(value);
     if (!isNaN(numValue) && numValue > 0) {
       const rounded = Math.round(numValue / WEIGHT_INCREMENT) * WEIGHT_INCREMENT;
@@ -110,8 +116,9 @@ const CustomWorkoutPreview = memo(({
   };
 
   const handleTargetRepsChange = (exerciseName, value) => {
+    // Allow empty state and validate: only allow positive integers
     if (value === '' || /^\d+$/.test(value)) {
-      const numValue = value === '' ? 12 : parseInt(value, 10);
+      const numValue = value === '' ? '' : parseInt(value, 10);
       setExerciseSettings(prev => ({
         ...prev,
         [exerciseName]: {
@@ -123,10 +130,12 @@ const CustomWorkoutPreview = memo(({
   };
 
   const handleStartWorkout = async () => {
-    // Save all settings before starting workout
+    // Save all settings before starting workout, storing null for empty strings
     for (const [exerciseName, settings] of Object.entries(exerciseSettings)) {
-      await setExerciseWeight(exerciseName, settings.weight);
-      await setExerciseTargetReps(exerciseName, settings.targetReps);
+      const weight = settings.weight === '' ? null : settings.weight;
+      const targetReps = settings.targetReps === '' ? null : settings.targetReps;
+      await setExerciseWeight(exerciseName, weight);
+      await setExerciseTargetReps(exerciseName, targetReps);
     }
     onStart(workout);
   };
@@ -224,7 +233,7 @@ const CustomWorkoutPreview = memo(({
         <Stack spacing={{ xs: 2, sm: 3 }} sx={{ px: { xs: 0.5, sm: 0 } }}>
           {workout.map((exercise, idx) => {
             const exerciseName = exercise['Exercise Name'];
-            const settings = exerciseSettings[exerciseName] || { weight: 0, targetReps: 12 };
+            const settings = exerciseSettings[exerciseName] || { weight: '', targetReps: '' };
             
             return (
               <Reorder.Item 
@@ -311,18 +320,21 @@ const CustomWorkoutPreview = memo(({
                             sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}
                           >
                             <TextField
-                              type="number"
-                              inputMode="numeric"
-                              label="Weight (lbs)"
-                              value={settings.weight}
+                              type="tel"
+                              inputMode="decimal"
+                              label="Target Weight (lbs)"
+                              value={settings.weight === '' ? '' : settings.weight}
                               onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
                               onBlur={(e) => handleWeightBlur(exerciseName, e.target.value)}
+                              onFocus={(e) => e.target.select()}
+                              placeholder="–"
                               size="small"
                               inputProps={{
                                 min: 0,
                                 max: 500,
                                 step: 2.5,
-                                'aria-label': `Weight in pounds for ${exerciseName}`,
+                                pattern: '[0-9]*([.,][0-9]+)?',
+                                'aria-label': `Target weight in pounds for ${exerciseName}`,
                               }}
                               sx={{ 
                                 minWidth: { xs: 100, sm: 120 },
@@ -330,16 +342,19 @@ const CustomWorkoutPreview = memo(({
                               }}
                             />
                             <TextField
-                              type="number"
+                              type="tel"
                               inputMode="numeric"
                               label="Target Reps"
-                              value={settings.targetReps}
+                              value={settings.targetReps === '' ? '' : settings.targetReps}
                               onChange={(e) => handleTargetRepsChange(exerciseName, e.target.value)}
+                              onFocus={(e) => e.target.select()}
+                              placeholder="–"
                               size="small"
                               inputProps={{
                                 min: 1,
                                 max: 20,
                                 step: 1,
+                                pattern: '\\d*',
                                 'aria-label': `Target repetitions for ${exerciseName}`,
                               }}
                               sx={{ 

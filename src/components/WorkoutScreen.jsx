@@ -131,8 +131,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       const initialTarget = initialTargets[exName] || { weight: null, reps: null };
       const currentTargetReps = initialTarget.reps ?? 0; // Treat null/empty as 0 for comparison
       
-      // Get all reps from sets
-      const allReps = sets.map(s => s.reps);
+      // Get all reps from sets (already validated as numbers in handleNext)
+      const allReps = sets.map(s => s.reps).filter(r => typeof r === 'number' && !isNaN(r));
+      
+      // Skip if no valid reps data
+      if (allReps.length === 0) continue;
+      
       const minReps = Math.min(...allReps);
       const maxReps = Math.max(...allReps);
       const repsVary = minReps !== maxReps;
@@ -145,11 +149,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       
       if (allSetsMetTarget) {
         // Update Target Weight: use latest weight (last set's weight)
+        // Validate it's a non-negative number
         const latestWeight = sets[sets.length - 1].weight;
-        await setExerciseWeight(exName, latestWeight);
+        if (typeof latestWeight === 'number' && !isNaN(latestWeight) && latestWeight >= 0) {
+          await setExerciseWeight(exName, latestWeight);
+        }
         
         // Update Target Reps only if all sets exceeded target AND reps vary
-        if (allSetsExceededTarget && repsVary) {
+        if (allSetsExceededTarget && repsVary && minReps > 0) {
           await setExerciseTargetReps(exName, minReps);
         }
       }

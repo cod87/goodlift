@@ -145,15 +145,27 @@ const ExerciseListPage = () => {
   };
 
   const handleWeightChange = async (exerciseName, value) => {
-    const numValue = value === '' ? null : Math.max(0, Number(value));
-    setExerciseWeights(prev => ({ ...prev, [exerciseName]: numValue === null ? '' : numValue }));
-    await setExerciseWeight(exerciseName, numValue);
+    // Store empty string for display, null for storage
+    if (value === '') {
+      setExerciseWeights(prev => ({ ...prev, [exerciseName]: '' }));
+      await setExerciseWeight(exerciseName, null);
+    } else {
+      const numValue = Math.max(0, Number(value));
+      setExerciseWeights(prev => ({ ...prev, [exerciseName]: numValue }));
+      await setExerciseWeight(exerciseName, numValue);
+    }
   };
 
   const handleRepsChange = async (exerciseName, value) => {
-    const numValue = value === '' ? null : Math.max(1, Number(value));
-    setExerciseReps(prev => ({ ...prev, [exerciseName]: numValue === null ? '' : numValue }));
-    await setExerciseTargetReps(exerciseName, numValue);
+    // Store empty string for display, null for storage
+    if (value === '') {
+      setExerciseReps(prev => ({ ...prev, [exerciseName]: '' }));
+      await setExerciseTargetReps(exerciseName, null);
+    } else {
+      const numValue = Math.max(1, Number(value));
+      setExerciseReps(prev => ({ ...prev, [exerciseName]: numValue }));
+      await setExerciseTargetReps(exerciseName, numValue);
+    }
   };
 
   if (loading) {

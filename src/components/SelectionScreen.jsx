@@ -1,7 +1,7 @@
 import { memo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItem, ListItemText } from '@mui/material';
+import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItem, ListItemText, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { ExpandMore, Delete, Star, Edit } from '@mui/icons-material';
 import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName } from '../utils/storage';
 
@@ -17,6 +17,7 @@ const SelectionScreen = memo(({
   onWorkoutTypeChange,
   onEquipmentChange,
   onStartWorkout,
+  onCustomize,
   loading,
 }) => {
   const [favoriteWorkouts, setFavoriteWorkouts] = useState([]);
@@ -37,6 +38,15 @@ const SelectionScreen = memo(({
         ? 'all' 
         : Array.from(selectedEquipment);
       onStartWorkout(workoutType, equipmentFilter);
+    }
+  };
+
+  const handleCustomizeClick = () => {
+    if (workoutType && onCustomize) {
+      const equipmentFilter = selectedEquipment.has('all') 
+        ? 'all' 
+        : Array.from(selectedEquipment);
+      onCustomize(workoutType, equipmentFilter);
     }
   };
 
@@ -145,83 +155,55 @@ const SelectionScreen = memo(({
               />
             </Box>
 
-            {/* Two Column Layout for Workout Type and Equipment */}
-            <Box sx={{ 
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr' },
-              gap: 3,
-              mb: 3
-            }}>
-              {/* Workout Type */}
-              <Box>
-                <Typography variant="h6" sx={{ 
-                  mb: 2,
-                  fontWeight: 600,
-                  color: 'text.primary',
-                  fontSize: { xs: '1rem', sm: '1.25rem' },
-                }}>
-                  Workout Type
-                </Typography>
-                <RadioGroup
-                  value={workoutType}
-                  onChange={(e) => onWorkoutTypeChange(e.target.value)}
-                >
-                  <FormControlLabel 
-                    value="full" 
-                    control={<Radio />} 
-                    label="Full Body"
-                    sx={{ mb: 1 }}
-                  />
-                  <FormControlLabel 
-                    value="upper" 
-                    control={<Radio />} 
-                    label="Upper Body"
-                    sx={{ mb: 1 }}
-                  />
-                  <FormControlLabel 
-                    value="lower" 
-                    control={<Radio />} 
-                    label="Lower Body"
-                  />
-                </RadioGroup>
-              </Box>
+            {/* Workout Type and Equipment Dropdowns in Single Row */}
+            <Box sx={{ mb: 3 }}>
+              <Stack 
+                direction={{ xs: 'column', sm: 'row' }} 
+                spacing={2}
+                sx={{ width: '100%' }}
+              >
+                {/* Workout Type Dropdown */}
+                <FormControl fullWidth>
+                  <InputLabel id="workout-type-label">Workout Type</InputLabel>
+                  <Select
+                    labelId="workout-type-label"
+                    id="workout-type-select"
+                    value={workoutType || 'full'}
+                    label="Workout Type"
+                    onChange={(e) => onWorkoutTypeChange(e.target.value)}
+                  >
+                    <MenuItem value="full">Full Body</MenuItem>
+                    <MenuItem value="upper">Upper Body</MenuItem>
+                    <MenuItem value="lower">Lower Body</MenuItem>
+                  </Select>
+                </FormControl>
 
-              {/* Equipment */}
-              <Box>
-                <Typography variant="h6" sx={{ 
-                  mb: 2,
-                  fontWeight: 600,
-                  color: 'text.primary',
-                  fontSize: { xs: '1rem', sm: '1.25rem' },
-                }}>
-                  Equipment
-                </Typography>
-                <Box component="div" role="group">
-                  <FormControlLabel 
-                    control={
-                      <Radio 
-                        checked={selectedEquipment.has('all')}
-                        onChange={() => handleEquipmentToggle('all')}
-                      />
-                    }
-                    label="All Equipment"
-                    sx={{ mb: 1, display: 'flex' }}
-                  />
-                  {equipmentOptions.map((equipment) => (
-                    <FormControlLabel
-                      key={equipment}
-                      control={
-                        <Radio 
-                          checked={selectedEquipment.has(equipment.toLowerCase())}
-                          onChange={() => handleEquipmentToggle(equipment.toLowerCase())}
-                        />
+                {/* Equipment Dropdown */}
+                <FormControl fullWidth>
+                  <InputLabel id="equipment-label">Equipment</InputLabel>
+                  <Select
+                    labelId="equipment-label"
+                    id="equipment-select"
+                    value={selectedEquipment.has('all') ? 'all' : Array.from(selectedEquipment)[0] || 'all'}
+                    label="Equipment"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === 'all') {
+                        handleEquipmentToggle('all');
+                      } else {
+                        handleEquipmentToggle(value);
                       }
-                      label={equipment}
-                      sx={{ mb: 1, display: 'flex' }}
-                    />
-                  ))}
-                </Box>
-              </Box>
+                    }}
+                  >
+                    <MenuItem value="all">All Equipment</MenuItem>
+                    {equipmentOptions.map((equipment) => (
+                      <MenuItem key={equipment} value={equipment.toLowerCase()}>
+                        {equipment}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Stack>
             </Box>
 
             {/* Favorite Workouts */}
@@ -340,23 +322,49 @@ const SelectionScreen = memo(({
               </Box>
             )}
 
-            {/* Start Button */}
-            <Button
-              variant="contained"
-              size="large"
-              fullWidth
-              disabled={!workoutType}
-              onClick={handleStartClick}
-              sx={{
-                py: 2,
-                fontSize: '1.1rem',
-                fontWeight: 600,
-                borderRadius: 2,
-                textTransform: 'none',
-              }}
+            {/* Customize and Generate Buttons */}
+            <Stack 
+              direction="row" 
+              spacing={2}
+              sx={{ width: '100%' }}
             >
-              Start Workout
-            </Button>
+              <Button
+                variant="outlined"
+                size="large"
+                fullWidth
+                disabled={!workoutType}
+                onClick={handleCustomizeClick}
+                sx={{
+                  py: 2,
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  borderWidth: 2,
+                  '&:hover': {
+                    borderWidth: 2,
+                  }
+                }}
+              >
+                Customize
+              </Button>
+              <Button
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={!workoutType}
+                onClick={handleStartClick}
+                sx={{
+                  py: 2,
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                }}
+              >
+                Generate
+              </Button>
+            </Stack>
           </CardContent>
         </Card>
       )}
@@ -403,6 +411,7 @@ SelectionScreen.propTypes = {
   onWorkoutTypeChange: PropTypes.func.isRequired,
   onEquipmentChange: PropTypes.func.isRequired,
   onStartWorkout: PropTypes.func.isRequired,
+  onCustomize: PropTypes.func,
   loading: PropTypes.bool.isRequired,
 };
 

@@ -24,6 +24,7 @@ const KEYS = {
   YOGA_SESSIONS: 'goodlift_yoga_sessions',
   CARDIO_SESSIONS: 'goodlift_cardio_sessions',
   FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
+  FAVORITE_EXERCISES: 'goodlift_favorite_exercises',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -860,4 +861,70 @@ export const deleteHiitSession = async (sessionId) => {
     console.error('Error deleting HIIT session:', error);
     throw error;
   }
+};
+
+/**
+ * Get favorite exercises from localStorage
+ * @returns {Set<string>} Set of favorite exercise names
+ */
+export const getFavoriteExercises = () => {
+  try {
+    if (isGuestMode()) {
+      const favorites = getGuestData('favorite_exercises') || [];
+      return new Set(favorites);
+    }
+    const favorites = localStorage.getItem(KEYS.FAVORITE_EXERCISES);
+    return new Set(favorites ? JSON.parse(favorites) : []);
+  } catch (error) {
+    console.error('Error reading favorite exercises:', error);
+    return new Set();
+  }
+};
+
+/**
+ * Toggle an exercise as favorite (add if not favorited, remove if already favorited)
+ * @param {string} exerciseName - Name of the exercise
+ * @returns {boolean} True if exercise is now favorited, false if unfavorited
+ */
+export const toggleFavoriteExercise = (exerciseName) => {
+  try {
+    if (!exerciseName) {
+      throw new Error('Exercise name is required');
+    }
+    
+    const favorites = getFavoriteExercises();
+    let isFavorited;
+    
+    if (favorites.has(exerciseName)) {
+      favorites.delete(exerciseName);
+      isFavorited = false;
+    } else {
+      favorites.add(exerciseName);
+      isFavorited = true;
+    }
+    
+    const favoritesArray = Array.from(favorites);
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('favorite_exercises', favoritesArray);
+    } else {
+      localStorage.setItem(KEYS.FAVORITE_EXERCISES, JSON.stringify(favoritesArray));
+    }
+    
+    return isFavorited;
+  } catch (error) {
+    console.error('Error toggling favorite exercise:', error);
+    throw error;
+  }
+};
+
+/**
+ * Check if an exercise is favorited
+ * @param {string} exerciseName - Name of the exercise
+ * @returns {boolean} True if exercise is favorited
+ */
+export const isFavoriteExercise = (exerciseName) => {
+  const favorites = getFavoriteExercises();
+  return favorites.has(exerciseName);
 };

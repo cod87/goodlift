@@ -20,6 +20,7 @@ import LogActivityScreen from './pages/LogActivityScreen';
 import LogWorkoutScreen from './pages/LogWorkoutScreen';
 import LogYogaScreen from './pages/LogYogaScreen';
 import LogHiitScreen from './pages/LogHiitScreen';
+import ExerciseListPage from './pages/ExerciseListPage';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
@@ -564,6 +565,8 @@ function App() {
           {currentScreen === 'stretch' && <StretchScreen />}
 
           {currentScreen === 'yoga' && <YogaScreen />}
+
+          {currentScreen === 'exercise-list' && <ExerciseListPage />}
         </div>
         
         {/* Guest Data Migration Dialog */}

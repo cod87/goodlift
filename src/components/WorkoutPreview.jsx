@@ -32,8 +32,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           getExerciseTargetReps(exerciseName)
         ]);
         settings[exerciseName] = {
-          weight: weight || 0,
-          targetReps: targetReps || 12,
+          weight: weight ?? '', // Use empty string for null/undefined
+          targetReps: targetReps ?? '', // Use empty string for null/undefined
         };
       }
       setExerciseSettings(settings);
@@ -64,8 +64,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
               getExerciseTargetReps(exerciseName)
             ]);
             newSettings[exerciseName] = {
-              weight: weight || 0,
-              targetReps: targetReps || 12,
+              weight: weight ?? '', // Use empty string for null/undefined
+              targetReps: targetReps ?? '', // Use empty string for null/undefined
             };
           }
         }
@@ -100,15 +100,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   };
 
   const handleWeightBlur = (exerciseName, value) => {
-    // If empty, set to 0 on blur
+    // If empty, keep empty on blur (don't force to 0)
     if (value === '' || value === null || value === undefined) {
-      setExerciseSettings(prev => ({
-        ...prev,
-        [exerciseName]: {
-          ...prev[exerciseName],
-          weight: 0,
-        }
-      }));
       return;
     }
     
@@ -131,15 +124,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           severity: 'info'
         });
       }
-    } else if (numValue === 0 || isNaN(numValue)) {
-      // Set to 0 if invalid
-      setExerciseSettings(prev => ({
-        ...prev,
-        [exerciseName]: {
-          ...prev[exerciseName],
-          weight: 0,
-        }
-      }));
     }
   };
 
@@ -163,26 +147,19 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   };
 
   const handleTargetRepsBlur = (exerciseName, value) => {
-    // If empty, set to default 12 on blur
+    // If empty, keep empty on blur (don't force to default)
     if (value === '' || value === null || value === undefined) {
-      setExerciseSettings(prev => ({
-        ...prev,
-        [exerciseName]: {
-          ...prev[exerciseName],
-          targetReps: 12,
-        }
-      }));
       return;
     }
     
     const numValue = parseInt(value, 10);
     if (isNaN(numValue) || numValue < 1) {
-      // Set to default 12 if invalid
+      // Keep empty if invalid
       setExerciseSettings(prev => ({
         ...prev,
         [exerciseName]: {
           ...prev[exerciseName],
-          targetReps: 12,
+          targetReps: '',
         }
       }));
     }
@@ -195,11 +172,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   }, [onRandomizeExercise]);
 
   const handleStartWorkout = async () => {
-    // Save all settings before starting workout, converting empty strings to defaults
+    // Save all settings before starting workout, storing null for empty strings
     await Promise.all(
       Object.entries(exerciseSettings).map(async ([exerciseName, settings]) => {
-        const weight = settings.weight === '' ? 0 : settings.weight;
-        const targetReps = settings.targetReps === '' ? 12 : settings.targetReps;
+        const weight = settings.weight === '' ? null : settings.weight;
+        const targetReps = settings.targetReps === '' ? null : settings.targetReps;
         await Promise.all([
           setExerciseWeight(exerciseName, weight),
           setExerciseTargetReps(exerciseName, targetReps)
@@ -294,7 +271,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           {supersets.length} Supersets • {workout.length} Exercises • 3 Sets Each
         </Typography>
         <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-          Set your starting weight and target reps for each exercise
+          Set your starting target weight and target reps for each exercise
         </Typography>
       </Box>
 
@@ -348,7 +325,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                 <Stack spacing={{ xs: 1.5, sm: 2 }}>
                   {superset.map((exercise, exerciseIdx) => {
                     const exerciseName = exercise['Exercise Name'];
-                    const settings = exerciseSettings[exerciseName] || { weight: 0, targetReps: 12 };
+                    const settings = exerciseSettings[exerciseName] || { weight: '', targetReps: '' };
                     
                     return (
                       <Box 
@@ -436,9 +413,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                           }}
                         >
                           <TextField
-                            type="number"
-                            inputMode="numeric"
-                            label="Weight (lbs)"
+                            type="tel"
+                            inputMode="decimal"
+                            label="Target Weight (lbs)"
                             value={settings.weight === '' ? '' : settings.weight}
                             onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
                             onBlur={(e) => handleWeightBlur(exerciseName, e.target.value)}
@@ -449,7 +426,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               min: 0,
                               max: 500,
                               step: 2.5,
-                              'aria-label': `Weight in pounds for ${exerciseName}`,
+                              pattern: '[0-9]*([.,][0-9]+)?',
+                              'aria-label': `Target weight in pounds for ${exerciseName}`,
                             }}
                             sx={{ 
                               minWidth: { xs: 100, sm: 120 },
@@ -457,7 +435,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             }}
                           />
                           <TextField
-                            type="number"
+                            type="tel"
                             inputMode="numeric"
                             label="Target Reps"
                             value={settings.targetReps === '' ? '' : settings.targetReps}
@@ -470,6 +448,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               min: 1,
                               max: 20,
                               step: 1,
+                              pattern: '\\d*',
                               'aria-label': `Target repetitions for ${exerciseName}`,
                             }}
                             sx={{ 

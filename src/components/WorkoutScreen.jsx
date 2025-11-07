@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl, detectWorkoutType } from '../utils/helpers';
-import { getExerciseWeight, getExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
+import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert } from '@mui/material';
 import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder } from '@mui/icons-material';
@@ -15,10 +15,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [prevWeight, setPrevWeight] = useState(0);
-  const [targetReps, setTargetReps] = useState(12);
+  const [prevWeight, setPrevWeight] = useState(null);
+  const [targetReps, setTargetReps] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  // Store initial target values for each exercise at workout start
+  const [initialTargets, setInitialTargets] = useState({});
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -44,7 +46,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     return sequence;
   }, [workoutPlan]);
 
-  // Start timer on mount
+  // Start timer on mount and load initial target values
   useEffect(() => {
     startTimeRef.current = Date.now();
     timerRef.current = setInterval(() => {
@@ -52,12 +54,35 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       setElapsedTime(elapsed);
     }, 1000);
 
+    // Load initial target values for all exercises at workout start
+    const loadInitialTargets = async () => {
+      const targets = {};
+      const uniqueExercises = [...new Set(workoutPlan.map(ex => ex['Exercise Name']))];
+      
+      await Promise.all(
+        uniqueExercises.map(async (exerciseName) => {
+          const [weight, reps] = await Promise.all([
+            getExerciseWeight(exerciseName),
+            getExerciseTargetReps(exerciseName)
+          ]);
+          targets[exerciseName] = {
+            weight: weight ?? null,
+            reps: reps ?? null
+          };
+        })
+      );
+      
+      setInitialTargets(targets);
+    };
+    
+    loadInitialTargets();
+
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
-  }, []);
+  }, [workoutPlan]);
 
   // Load previous weight and target reps when current step changes
   useEffect(() => {
@@ -81,7 +106,58 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
 
-  const handleNext = (e) => {
+  /**
+   * Apply conditional persist rules after workout completion
+   * 
+   * Persist Rules:
+   * 1. Only update Target Weight if ALL sets' reps >= current Target Reps (treat null/empty as 0)
+   *    - Use the latest weight entered (last set's weight)
+   * 2. Only update Target Reps if ALL sets' reps > current Target Reps AND reps vary across sets
+   *    - Set to min(recorded reps)
+   * 3. If ANY set's reps < current Target Reps, do NOT update either Target Weight or Target Reps
+   */
+  const applyConditionalPersistRules = async (workoutDataArray) => {
+    // Group sets by exercise
+    const exerciseData = {};
+    workoutDataArray.forEach(({ exerciseName: exName, setNumber, weight, reps }) => {
+      if (!exerciseData[exName]) {
+        exerciseData[exName] = [];
+      }
+      exerciseData[exName].push({ setNumber, weight, reps });
+    });
+
+    // Apply persist rules for each exercise
+    for (const [exName, sets] of Object.entries(exerciseData)) {
+      const initialTarget = initialTargets[exName] || { weight: null, reps: null };
+      const currentTargetReps = initialTarget.reps ?? 0; // Treat null/empty as 0 for comparison
+      
+      // Get all reps from sets
+      const allReps = sets.map(s => s.reps);
+      const minReps = Math.min(...allReps);
+      const maxReps = Math.max(...allReps);
+      const repsVary = minReps !== maxReps;
+      
+      // Check if all sets' reps >= current target reps
+      const allSetsMetTarget = allReps.every(r => r >= currentTargetReps);
+      
+      // Check if all sets' reps > current target reps
+      const allSetsExceededTarget = allReps.every(r => r > currentTargetReps);
+      
+      if (allSetsMetTarget) {
+        // Update Target Weight: use latest weight (last set's weight)
+        const latestWeight = sets[sets.length - 1].weight;
+        await setExerciseWeight(exName, latestWeight);
+        
+        // Update Target Reps only if all sets exceeded target AND reps vary
+        if (allSetsExceededTarget && repsVary) {
+          await setExerciseTargetReps(exName, minReps);
+        }
+      }
+      // If any set's reps < current target reps, don't update either value
+    }
+  };
+
+  const handleNext = async (e) => {
     e.preventDefault();
     const form = e.target.closest('form') || document.querySelector('form');
     const weightInput = form?.querySelector('#weight-select');
@@ -106,10 +182,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       reps,
     };
 
-    setWorkoutData(prev => [...prev, newData]);
+    const updatedWorkoutData = [...workoutData, newData];
+    setWorkoutData(updatedWorkoutData);
     
     if (currentStepIndex + 1 >= workoutSequence.length) {
-      // Workout complete
+      // Workout complete - apply conditional persist rules
+      await applyConditionalPersistRules(updatedWorkoutData);
+      
       const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -122,7 +201,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
         exercises: {},
       };
       
-      [...workoutData, newData].forEach(step => {
+      updatedWorkoutData.forEach(step => {
         const { exerciseName: exName, setNumber, weight: w, reps: r } = step;
         if (!finalData.exercises[exName]) {
           finalData.exercises[exName] = { sets: [] };
@@ -143,8 +222,11 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     }
   };
 
-  const handlePartialComplete = () => {
+  const handlePartialComplete = async () => {
     if (window.confirm('Save this workout as partially complete? Your current progress will be saved.')) {
+      // Apply conditional persist rules for partial workout
+      await applyConditionalPersistRules(workoutData);
+      
       const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -282,14 +364,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                 ></iframe>
               </div>
               <p className="set-info">Set {currentStep.setNumber} of {SETS_PER_EXERCISE}</p>
-              {prevWeight > 0 && (
+              {(prevWeight !== null || targetReps !== null) && (
                 <motion.p
                   className="prev-weight"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  Last time: {prevWeight} lbs • Target: {targetReps} reps
+                  Target: {prevWeight ?? '–'} lbs • {targetReps ?? '–'} reps
                 </motion.p>
               )}
               <div className="input-row">
@@ -297,14 +379,16 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                   <label htmlFor="weight-select">Weight (lbs)</label>
                   <input
                     id="weight-select"
-                    type="number"
+                    type="tel"
                     inputMode="decimal"
+                    pattern="[0-9]*([.,][0-9]+)?"
                     step="2.5"
                     min="0"
                     max="500"
                     className="exercise-input"
-                    defaultValue={prevWeight || 0}
+                    defaultValue={prevWeight ?? ''}
                     placeholder="–"
+                    aria-label="Weight in pounds"
                     onFocus={(e) => {
                       e.target.select();
                       // Only scroll if input would be obscured by keyboard
@@ -341,14 +425,16 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                   <label htmlFor="reps-select">Reps</label>
                   <input
                     id="reps-select"
-                    type="number"
+                    type="tel"
                     inputMode="numeric"
+                    pattern="\d*"
                     step="1"
                     min="1"
                     max="20"
                     className="exercise-input"
-                    defaultValue={targetReps || 8}
+                    defaultValue={targetReps ?? ''}
                     placeholder="–"
+                    aria-label="Repetitions"
                     onFocus={(e) => {
                       e.target.select();
                       // Only scroll if input would be obscured by keyboard

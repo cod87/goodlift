@@ -434,7 +434,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     id="reps-select"
                     type="tel"
                     inputMode="numeric"
-                    pattern="\d*"
+                    pattern="\\d*"
                     step="1"
                     min="1"
                     max="20"

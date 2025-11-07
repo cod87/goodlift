@@ -173,16 +173,13 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
 
   const handleStartWorkout = async () => {
     // Save all settings before starting workout, storing null for empty strings
-    await Promise.all(
-      Object.entries(exerciseSettings).map(async ([exerciseName, settings]) => {
-        const weight = settings.weight === '' ? null : settings.weight;
-        const targetReps = settings.targetReps === '' ? null : settings.targetReps;
-        await Promise.all([
-          setExerciseWeight(exerciseName, weight),
-          setExerciseTargetReps(exerciseName, targetReps)
-        ]);
-      })
-    );
+    // Save sequentially to avoid race conditions with localStorage reads/writes
+    for (const [exerciseName, settings] of Object.entries(exerciseSettings)) {
+      const weight = settings.weight === '' ? null : settings.weight;
+      const targetReps = settings.targetReps === '' ? null : settings.targetReps;
+      await setExerciseWeight(exerciseName, weight);
+      await setExerciseTargetReps(exerciseName, targetReps);
+    }
     onStart();
   };
 
@@ -415,12 +412,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                           <TextField
                             type="tel"
                             inputMode="decimal"
-                            label="Target Weight (lbs)"
                             value={settings.weight === '' ? '' : settings.weight}
                             onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
                             onBlur={(e) => handleWeightBlur(exerciseName, e.target.value)}
                             onFocus={(e) => e.target.select()}
-                            placeholder="–"
+                            placeholder="Weight (lbs)"
                             size="small"
                             inputProps={{
                               min: 0,
@@ -437,12 +433,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                           <TextField
                             type="tel"
                             inputMode="numeric"
-                            label="Target Reps"
                             value={settings.targetReps === '' ? '' : settings.targetReps}
                             onChange={(e) => handleTargetRepsChange(exerciseName, e.target.value)}
                             onBlur={(e) => handleTargetRepsBlur(exerciseName, e.target.value)}
                             onFocus={(e) => e.target.select()}
-                            placeholder="–"
+                            placeholder="Reps"
                             size="small"
                             inputProps={{
                               min: 1,

@@ -74,8 +74,8 @@ const ExerciseListPage = () => {
             getExerciseWeight(exerciseName),
             getExerciseTargetReps(exerciseName)
           ]);
-          weights[exerciseName] = weight;
-          reps[exerciseName] = targetReps;
+          weights[exerciseName] = weight ?? ''; // Use empty string for null/undefined
+          reps[exerciseName] = targetReps ?? ''; // Use empty string for null/undefined
         })
       );
       
@@ -145,15 +145,27 @@ const ExerciseListPage = () => {
   };
 
   const handleWeightChange = async (exerciseName, value) => {
-    const numValue = value === '' ? 0 : Math.max(0, Number(value));
-    setExerciseWeights(prev => ({ ...prev, [exerciseName]: numValue }));
-    await setExerciseWeight(exerciseName, numValue);
+    // Store empty string for display, null for storage
+    if (value === '') {
+      setExerciseWeights(prev => ({ ...prev, [exerciseName]: '' }));
+      await setExerciseWeight(exerciseName, null);
+    } else {
+      const numValue = Math.max(0, Number(value));
+      setExerciseWeights(prev => ({ ...prev, [exerciseName]: numValue }));
+      await setExerciseWeight(exerciseName, numValue);
+    }
   };
 
   const handleRepsChange = async (exerciseName, value) => {
-    const numValue = value === '' ? 12 : Math.max(1, Number(value));
-    setExerciseReps(prev => ({ ...prev, [exerciseName]: numValue }));
-    await setExerciseTargetReps(exerciseName, numValue);
+    // Store empty string for display, null for storage
+    if (value === '') {
+      setExerciseReps(prev => ({ ...prev, [exerciseName]: '' }));
+      await setExerciseTargetReps(exerciseName, null);
+    } else {
+      const numValue = Math.max(1, Number(value));
+      setExerciseReps(prev => ({ ...prev, [exerciseName]: numValue }));
+      await setExerciseTargetReps(exerciseName, numValue);
+    }
   };
 
   if (loading) {
@@ -306,10 +318,10 @@ const ExerciseListPage = () => {
                   Equipment
                 </TableCell>
                 <TableCell sx={{ fontWeight: 600, bgcolor: 'primary.main', color: 'white', py: 1.5, textAlign: 'center' }}>
-                  Weight (lbs)
+                  Target Weight (lbs)
                 </TableCell>
                 <TableCell sx={{ fontWeight: 600, bgcolor: 'primary.main', color: 'white', py: 1.5, textAlign: 'center' }}>
-                  Reps
+                  Target Reps
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -317,8 +329,8 @@ const ExerciseListPage = () => {
               {filteredExercises.map((exercise, index) => {
                 const isFavorited = favoriteExercises.has(exercise['Exercise Name']);
                 const exerciseName = exercise['Exercise Name'];
-                const weight = exerciseWeights[exerciseName] || 0;
-                const reps = exerciseReps[exerciseName] || 12;
+                const weight = exerciseWeights[exerciseName];
+                const reps = exerciseReps[exerciseName];
                 
                 return (
                   <TableRow 
@@ -398,10 +410,11 @@ const ExerciseListPage = () => {
                       </Typography>
                     </TableCell>
 
-                    {/* Weight Input */}
+                    {/* Target Weight Input */}
                     <TableCell sx={{ py: 1 }}>
                       <TextField
-                        type="number"
+                        type="tel"
+                        inputMode="decimal"
                         size="small"
                         value={weight === '' ? '' : weight}
                         onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
@@ -410,6 +423,8 @@ const ExerciseListPage = () => {
                         inputProps={{
                           min: 0,
                           step: 5,
+                          pattern: '[0-9]*([.,][0-9]+)?',
+                          'aria-label': `Target weight in pounds for ${exerciseName}`,
                           style: { 
                             textAlign: 'center',
                             fontSize: '0.875rem',
@@ -427,10 +442,11 @@ const ExerciseListPage = () => {
                       />
                     </TableCell>
 
-                    {/* Reps Input */}
+                    {/* Target Reps Input */}
                     <TableCell sx={{ py: 1 }}>
                       <TextField
-                        type="number"
+                        type="tel"
+                        inputMode="numeric"
                         size="small"
                         value={reps === '' ? '' : reps}
                         onChange={(e) => handleRepsChange(exerciseName, e.target.value)}
@@ -439,6 +455,8 @@ const ExerciseListPage = () => {
                         inputProps={{
                           min: 1,
                           step: 1,
+                          pattern: '\\d*',
+                          'aria-label': `Target repetitions for ${exerciseName}`,
                           style: { 
                             textAlign: 'center',
                             fontSize: '0.875rem',

@@ -236,16 +236,17 @@ export const saveUserStats = async (stats) => {
 };
 
 /**
- * Get the last recorded weight for a specific exercise
+ * Get the target weight for a specific exercise
  * @param {string} exerciseName - Name of the exercise
- * @returns {Promise<number>} Last recorded weight in lbs, or 0 if not found
+ * @returns {Promise<number|null>} Target weight in lbs (float, 2.5 lb increments), or null if not set
  */
 export const getExerciseWeight = async (exerciseName) => {
   try {
     // Check if in guest mode first
     if (isGuestMode()) {
       const guestWeights = getGuestData('exercise_weights');
-      return guestWeights?.[exerciseName] || 0;
+      const value = guestWeights?.[exerciseName];
+      return value !== undefined ? value : null;
     }
 
     // Try Firebase first if user is authenticated
@@ -254,7 +255,8 @@ export const getExerciseWeight = async (exerciseName) => {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
         if (firebaseData?.exerciseWeights) {
           localStorage.setItem(KEYS.EXERCISE_WEIGHTS, JSON.stringify(firebaseData.exerciseWeights));
-          return firebaseData.exerciseWeights[exerciseName] || 0;
+          const value = firebaseData.exerciseWeights[exerciseName];
+          return value !== undefined ? value : null;
         }
       } catch (error) {
         console.error('Firebase fetch failed, using localStorage:', error);
@@ -264,10 +266,11 @@ export const getExerciseWeight = async (exerciseName) => {
     // Fallback to localStorage
     const weights = localStorage.getItem(KEYS.EXERCISE_WEIGHTS);
     const weightsObj = weights ? JSON.parse(weights) : {};
-    return weightsObj[exerciseName] || 0;
+    const value = weightsObj[exerciseName];
+    return value !== undefined ? value : null;
   } catch (error) {
     console.error('Error reading exercise weight:', error);
-    return 0;
+    return null;
   }
 };
 
@@ -306,22 +309,24 @@ export const getAllExerciseWeights = async () => {
 };
 
 /**
- * Set/update the weight for a specific exercise
+ * Set/update the target weight for a specific exercise
  * @param {string} exerciseName - Name of the exercise
- * @param {number} weight - Weight in lbs
+ * @param {number|null} weight - Target weight in lbs (float, 2.5 lb increments) or null to unset
  */
 export const setExerciseWeight = async (exerciseName, weight) => {
   try {
     if (!exerciseName) {
       throw new Error('Exercise name is required');
     }
-    if (typeof weight !== 'number' || weight < 0) {
-      throw new Error('Weight must be a positive number');
+    // Allow null/undefined to unset the weight, otherwise validate as non-negative number
+    if (weight !== null && weight !== undefined && (typeof weight !== 'number' || weight < 0)) {
+      throw new Error('Weight must be a positive number or null');
     }
     
     // Get current weights
     const weightsObj = await getAllExerciseWeights();
-    weightsObj[exerciseName] = weight;
+    // Store null for unset, otherwise store the numeric value
+    weightsObj[exerciseName] = (weight === null || weight === undefined) ? null : weight;
     
     // Save based on mode
     if (isGuestMode()) {
@@ -343,14 +348,15 @@ export const setExerciseWeight = async (exerciseName, weight) => {
 /**
  * Get the target rep count for a specific exercise
  * @param {string} exerciseName - Name of the exercise
- * @returns {Promise<number>} Target reps, defaults to 12 if not set
+ * @returns {Promise<number|null>} Target reps (integer), or null if not set
  */
 export const getExerciseTargetReps = async (exerciseName) => {
   try {
     // Check if in guest mode first
     if (isGuestMode()) {
       const guestReps = getGuestData('exercise_target_reps');
-      return guestReps?.[exerciseName] || 12;
+      const value = guestReps?.[exerciseName];
+      return value !== undefined ? value : null;
     }
 
     // Try Firebase first if user is authenticated
@@ -359,7 +365,8 @@ export const getExerciseTargetReps = async (exerciseName) => {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
         if (firebaseData?.exerciseTargetReps) {
           localStorage.setItem(KEYS.EXERCISE_TARGET_REPS, JSON.stringify(firebaseData.exerciseTargetReps));
-          return firebaseData.exerciseTargetReps[exerciseName] || 12;
+          const value = firebaseData.exerciseTargetReps[exerciseName];
+          return value !== undefined ? value : null;
         }
       } catch (error) {
         console.error('Firebase fetch failed, using localStorage:', error);
@@ -369,25 +376,27 @@ export const getExerciseTargetReps = async (exerciseName) => {
     // Fallback to localStorage
     const targetReps = localStorage.getItem(KEYS.EXERCISE_TARGET_REPS);
     const targetRepsObj = targetReps ? JSON.parse(targetReps) : {};
-    return targetRepsObj[exerciseName] || 12; // Default to 12 reps
+    const value = targetRepsObj[exerciseName];
+    return value !== undefined ? value : null;
   } catch (error) {
     console.error('Error reading exercise target reps:', error);
-    return 12;
+    return null;
   }
 };
 
 /**
  * Set/update the target rep count for a specific exercise
  * @param {string} exerciseName - Name of the exercise
- * @param {number} reps - Target rep count
+ * @param {number|null} reps - Target rep count (integer) or null to unset
  */
 export const setExerciseTargetReps = async (exerciseName, reps) => {
   try {
     if (!exerciseName) {
       throw new Error('Exercise name is required');
     }
-    if (typeof reps !== 'number' || reps < 1) {
-      throw new Error('Reps must be a positive number');
+    // Allow null/undefined to unset the reps, otherwise validate as positive integer
+    if (reps !== null && reps !== undefined && (typeof reps !== 'number' || reps < 1)) {
+      throw new Error('Reps must be a positive number or null');
     }
     
     // Get current target reps
@@ -399,7 +408,8 @@ export const setExerciseTargetReps = async (exerciseName, reps) => {
       targetRepsObj = targetReps ? JSON.parse(targetReps) : {};
     }
     
-    targetRepsObj[exerciseName] = reps;
+    // Store null for unset, otherwise store the numeric value
+    targetRepsObj[exerciseName] = (reps === null || reps === undefined) ? null : reps;
     
     // Save based on mode
     if (isGuestMode()) {

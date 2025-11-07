@@ -5,6 +5,8 @@ import NavigationSidebar from './components/NavigationSidebar';
 import SelectionScreen from './components/SelectionScreen';
 import WorkoutScreen from './components/WorkoutScreen';
 import WorkoutPreview from './components/WorkoutPreview';
+import CustomizeExerciseScreen from './components/CustomizeExerciseScreen';
+import CustomWorkoutPreview from './components/CustomWorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import HiitTimerScreen from './components/HiitTimerScreen';
@@ -69,7 +71,7 @@ function App() {
   const [currentScreen, setCurrentScreen] = useState('progress');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState([]);
-  const [workoutType, setWorkoutType] = useState('');
+  const [workoutType, setWorkoutType] = useState('full');
   const [selectedEquipment, setSelectedEquipment] = useState(new Set(['all']));
   const [equipmentOptions, setEquipmentOptions] = useState([]);
   const [completedWorkoutData, setCompletedWorkoutData] = useState(null);
@@ -192,6 +194,30 @@ function App() {
       setShowPreview(true);
       setCurrentScreen('preview');
     }, 500);
+  };
+
+  const handleCustomize = (type) => {
+    setWorkoutType(type);
+    setCurrentScreen('customize');
+  };
+
+  const handleCustomizeContinue = (selectedExercises) => {
+    setCurrentWorkout(selectedExercises);
+    setCurrentScreen('custom-preview');
+  };
+
+  const handleCustomizeCancel = () => {
+    setCurrentScreen('selection');
+  };
+
+  const handleCustomPreviewStart = (workout) => {
+    setCurrentWorkout(workout);
+    setShowPreview(false);
+    setCurrentScreen('workout');
+  };
+
+  const handleCustomPreviewCancel = () => {
+    setCurrentScreen('selection');
   };
 
   const handleBeginWorkout = () => {
@@ -463,7 +489,27 @@ function App() {
               onWorkoutTypeChange={handleWorkoutTypeChange}
               onEquipmentChange={handleEquipmentChange}
               onStartWorkout={handleStartWorkout}
+              onCustomize={handleCustomize}
               loading={loading}
+            />
+          )}
+
+          {currentScreen === 'customize' && (
+            <CustomizeExerciseScreen
+              workoutType={workoutType}
+              equipmentFilter={selectedEquipment.has('all') ? 'all' : Array.from(selectedEquipment)}
+              allExercises={allExercises}
+              onCancel={handleCustomizeCancel}
+              onContinue={handleCustomizeContinue}
+            />
+          )}
+
+          {currentScreen === 'custom-preview' && currentWorkout.length > 0 && (
+            <CustomWorkoutPreview
+              workout={currentWorkout}
+              workoutType={workoutType}
+              onStart={handleCustomPreviewStart}
+              onCancel={handleCustomPreviewCancel}
             />
           )}
           

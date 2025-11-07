@@ -15,10 +15,11 @@ import {
   IconButton
 } from '@mui/material';
 import { CheckCircle, Cancel } from '@mui/icons-material';
+import { EXERCISES_PER_WORKOUT, MUSCLE_GROUPS } from '../utils/constants';
 
 /**
  * CustomizeExerciseScreen component for selecting custom exercises
- * Allows users to select exactly 8 exercises from filtered list
+ * Allows users to select exactly EXERCISES_PER_WORKOUT exercises from filtered list
  * Filters by workout type and equipment
  */
 const CustomizeExerciseScreen = memo(({ 
@@ -29,7 +30,7 @@ const CustomizeExerciseScreen = memo(({
   onContinue,
 }) => {
   const [selectedExercises, setSelectedExercises] = useState([]);
-  const REQUIRED_COUNT = 8;
+  const REQUIRED_COUNT = EXERCISES_PER_WORKOUT;
 
   // Filter exercises based on workout type and equipment
   const filteredExercises = useMemo(() => {
@@ -39,14 +40,12 @@ const CustomizeExerciseScreen = memo(({
     if (workoutType === 'upper') {
       filtered = filtered.filter(ex => {
         const muscle = ex['Primary Muscle'].split('(')[0].trim();
-        return ['Chest', 'Upper Chest', 'Lower Chest', 'Inner Chest', 'Lats', 'Upper Back', 'Lower Back', 
-                'Shoulders', 'Delts', 'Front Delts', 'Rear Delts', 'Side Delts', 
-                'Biceps', 'Triceps', 'Traps', 'Forearms'].includes(muscle);
+        return MUSCLE_GROUPS.UPPER_BODY.includes(muscle);
       });
     } else if (workoutType === 'lower') {
       filtered = filtered.filter(ex => {
         const muscle = ex['Primary Muscle'].split('(')[0].trim();
-        return ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Hip Flexors', 'Core', 'Abs', 'Obliques'].includes(muscle);
+        return MUSCLE_GROUPS.LOWER_BODY.includes(muscle) || ['Core', 'Abs', 'Obliques'].includes(muscle);
       });
     }
 

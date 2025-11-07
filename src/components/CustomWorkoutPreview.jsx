@@ -31,6 +31,9 @@ import {
   saveFavoriteWorkout 
 } from '../utils/storage';
 
+/** Weight rounding increment in pounds */
+const WEIGHT_INCREMENT = 2.5;
+
 /**
  * CustomWorkoutPreview component displays a preview of custom workout
  * Allows users to reorder exercises via drag-and-drop
@@ -88,7 +91,7 @@ const CustomWorkoutPreview = memo(({
   const handleWeightBlur = (exerciseName, value) => {
     const numValue = parseFloat(value);
     if (!isNaN(numValue) && numValue > 0) {
-      const rounded = Math.round(numValue / 2.5) * 2.5;
+      const rounded = Math.round(numValue / WEIGHT_INCREMENT) * WEIGHT_INCREMENT;
       if (rounded !== numValue) {
         setExerciseSettings(prev => ({
           ...prev,
@@ -99,7 +102,7 @@ const CustomWorkoutPreview = memo(({
         }));
         setSnackbar({
           open: true,
-          message: `Weight adjusted to ${rounded} lbs (nearest 2.5 lb increment)`,
+          message: `Weight adjusted to ${rounded} lbs (nearest ${WEIGHT_INCREMENT} lb increment)`,
           severity: 'info'
         });
       }

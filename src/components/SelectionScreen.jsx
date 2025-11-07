@@ -86,36 +86,6 @@ const SelectionScreen = memo(({
     onStartWorkout(favoriteWorkout.type, equipmentFilter, favoriteWorkout.exercises);
   };
 
-  const handleEquipmentToggle = (equipment) => {
-    const newSelected = new Set(selectedEquipment);
-    
-    if (equipment === 'all') {
-      // If "All Equipment" is clicked, clear all other selections
-      newSelected.clear();
-      newSelected.add('all');
-    } else {
-      // If any specific equipment is clicked
-      if (newSelected.has('all')) {
-        // Remove "All Equipment" if it was selected
-        newSelected.delete('all');
-      }
-      
-      // Toggle the specific equipment
-      if (newSelected.has(equipment)) {
-        newSelected.delete(equipment);
-      } else {
-        newSelected.add(equipment);
-      }
-      
-      // If no equipment is selected, default to "All Equipment"
-      if (newSelected.size === 0) {
-        newSelected.add('all');
-      }
-    }
-    
-    onEquipmentChange(newSelected);
-  };
-
   return (
     <motion.div
       className="screen selection-screen"
@@ -184,15 +154,17 @@ const SelectionScreen = memo(({
                   <Select
                     labelId="equipment-label"
                     id="equipment-select"
-                    value={selectedEquipment.has('all') ? 'all' : Array.from(selectedEquipment)[0] || 'all'}
+                    value={selectedEquipment.has('all') ? 'all' : (selectedEquipment.size > 0 ? Array.from(selectedEquipment)[0] : 'all')}
                     label="Equipment"
                     onChange={(e) => {
                       const value = e.target.value;
+                      const newSelected = new Set();
                       if (value === 'all') {
-                        handleEquipmentToggle('all');
+                        newSelected.add('all');
                       } else {
-                        handleEquipmentToggle(value);
+                        newSelected.add(value);
                       }
+                      onEquipmentChange(newSelected);
                     }}
                   >
                     <MenuItem value="all">All Equipment</MenuItem>

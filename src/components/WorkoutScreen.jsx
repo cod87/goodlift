@@ -90,10 +90,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     if (step?.exercise?.['Exercise Name']) {
       const exerciseName = step.exercise['Exercise Name'];
       const initialTarget = initialTargets[exerciseName];
-      if (initialTarget) {
-        setPrevWeight(initialTarget.weight);
-        setTargetReps(initialTarget.reps);
-      }
+      // Set values from initialTarget if it exists, otherwise use null
+      // This ensures we don't show stale values from a previous exercise
+      setPrevWeight(initialTarget?.weight ?? null);
+      setTargetReps(initialTarget?.reps ?? null);
     }
     
     // Scroll to top when exercise changes

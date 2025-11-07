@@ -28,7 +28,7 @@ import {
   Close as CloseIcon,
   Link as LinkIcon
 } from '@mui/icons-material';
-import { EXERCISES_PER_WORKOUT, MUSCLE_GROUPS, ALL_MUSCLE_GROUPS } from '../utils/constants';
+import { EXERCISES_PER_WORKOUT, MUSCLE_GROUPS } from '../utils/constants';
 
 /** Superset grouping size */
 const SUPERSET_SIZE = 2;
@@ -409,7 +409,7 @@ const CustomizeExerciseScreen = memo(({
               </Stack>
             </Reorder.Group>
             
-            {selectedExercises.length >= 2 && (
+            {selectedExercises.length >= SUPERSET_SIZE && selectedExercises.length % SUPERSET_SIZE === 0 && (
               <Alert severity="info" sx={{ mt: 2, py: 0.5 }}>
                 <Typography variant="caption">
                   <span role="img" aria-label="light bulb">💡</span> Exercises are grouped in pairs as supersets (perform back-to-back with minimal rest)

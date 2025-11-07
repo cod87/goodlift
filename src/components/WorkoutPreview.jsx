@@ -196,12 +196,16 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
 
   const handleStartWorkout = async () => {
     // Save all settings before starting workout, converting empty strings to defaults
-    for (const [exerciseName, settings] of Object.entries(exerciseSettings)) {
-      const weight = settings.weight === '' ? 0 : settings.weight;
-      const targetReps = settings.targetReps === '' ? 12 : settings.targetReps;
-      await setExerciseWeight(exerciseName, weight);
-      await setExerciseTargetReps(exerciseName, targetReps);
-    }
+    await Promise.all(
+      Object.entries(exerciseSettings).map(async ([exerciseName, settings]) => {
+        const weight = settings.weight === '' ? 0 : settings.weight;
+        const targetReps = settings.targetReps === '' ? 12 : settings.targetReps;
+        await Promise.all([
+          setExerciseWeight(exerciseName, weight),
+          setExerciseTargetReps(exerciseName, targetReps)
+        ]);
+      })
+    );
     onStart();
   };
 

@@ -61,20 +61,23 @@ const ExerciseListPage = () => {
       const weights = {};
       const reps = {};
       
-      for (const ex of allExercises) {
-        const exerciseName = ex['Exercise Name'];
-        if (isFavoriteExercise(exerciseName)) {
-          favorites.add(exerciseName);
-        }
-        
-        // Load weight and reps for each exercise
-        const [weight, targetReps] = await Promise.all([
-          getExerciseWeight(exerciseName),
-          getExerciseTargetReps(exerciseName)
-        ]);
-        weights[exerciseName] = weight;
-        reps[exerciseName] = targetReps;
-      }
+      // Load all exercise data in parallel
+      await Promise.all(
+        allExercises.map(async (ex) => {
+          const exerciseName = ex['Exercise Name'];
+          if (isFavoriteExercise(exerciseName)) {
+            favorites.add(exerciseName);
+          }
+          
+          // Load weight and reps for each exercise
+          const [weight, targetReps] = await Promise.all([
+            getExerciseWeight(exerciseName),
+            getExerciseTargetReps(exerciseName)
+          ]);
+          weights[exerciseName] = weight;
+          reps[exerciseName] = targetReps;
+        })
+      );
       
       setFavoriteExercises(favorites);
       setExerciseWeights(weights);

@@ -84,24 +84,21 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     };
   }, [workoutPlan]);
 
-  // Load previous weight and target reps when current step changes
+  // Load initial target values for current exercise when step changes
   useEffect(() => {
-    const loadSettings = async () => {
-      if (currentStep?.exercise?.['Exercise Name']) {
-        const [weight, reps] = await Promise.all([
-          getExerciseWeight(currentStep.exercise['Exercise Name']),
-          getExerciseTargetReps(currentStep.exercise['Exercise Name'])
-        ]);
-        setPrevWeight(weight);
-        setTargetReps(reps);
-      }
-    };
-    loadSettings();
+    const step = workoutSequence[currentStepIndex];
+    if (step?.exercise?.['Exercise Name']) {
+      const exerciseName = step.exercise['Exercise Name'];
+      const initialTarget = initialTargets[exerciseName];
+      // Set values from initialTarget if it exists, otherwise use null
+      // This ensures we don't show stale values from a previous exercise
+      setPrevWeight(initialTarget?.weight ?? null);
+      setTargetReps(initialTarget?.reps ?? null);
+    }
     
     // Scroll to top when exercise changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStepIndex]);
+  }, [currentStepIndex, initialTargets, workoutSequence]);
 
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];

@@ -202,7 +202,7 @@ const ExerciseListPage = () => {
           </Typography>
         </Box>
         <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-          Browse {allExercises.length} exercises • Configure weight & reps inline
+          Configure weight & reps inline
         </Typography>
       </Box>
 
@@ -210,7 +210,7 @@ const ExerciseListPage = () => {
       <Card
         sx={{
           mb: 2,
-          p: { xs: 1.5, sm: 2 },
+          p: { xs: 1, sm: 2 },
           borderRadius: 2,
           boxShadow: '0 2px 8px rgba(19, 70, 134, 0.08)',
         }}

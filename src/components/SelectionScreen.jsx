@@ -245,7 +245,7 @@ const SelectionScreen = memo(({
                       </Box>
                     </AccordionSummary>
                     <AccordionDetails sx={{ pt: 0, pb: 2 }}>
-                      <Box component="div" role="group">
+                      <Box component="div" role="group" aria-label="Equipment selection">
                         <FormControlLabel 
                           control={
                             <Radio 

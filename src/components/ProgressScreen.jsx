@@ -4,7 +4,6 @@ import {
   getWorkoutHistory, 
   getUserStats, 
   deleteWorkout, 
-  getAllExerciseWeights,
   getStretchSessions,
   getYogaSessions,
   getHiitSessions,
@@ -12,12 +11,52 @@ import {
   deleteStretchSession,
   deleteYogaSession,
   deleteHiitSession,
-  deleteCardioSession
+  deleteCardioSession,
+  getPinnedExercises,
+  updatePinnedExerciseMode,
+  removePinnedExercise,
+  addPinnedExercise
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
+import { 
+  getExerciseProgression, 
+  getUniqueExercises,
+  formatProgressionForChart 
+} from '../utils/progressionHelpers';
 import Calendar from './Calendar';
-import { Box, Card, CardContent, Typography, Grid, Stack, IconButton, Chip, Button } from '@mui/material';
-import { FitnessCenter, Timer, TrendingUp, Whatshot, Delete, TrendingUpRounded, SelfImprovement, DirectionsRun } from '@mui/icons-material';
+import { 
+  Box, 
+  Card, 
+  CardContent, 
+  Typography, 
+  Grid, 
+  Stack, 
+  IconButton, 
+  Chip, 
+  Button,
+  Switch,
+  FormControlLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText
+} from '@mui/material';
+import { 
+  FitnessCenter, 
+  Timer, 
+  TrendingUp, 
+  Whatshot, 
+  Delete, 
+  TrendingUpRounded, 
+  SelfImprovement, 
+  DirectionsRun,
+  Add,
+  Close
+} from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -50,16 +89,17 @@ const ProgressScreen = () => {
   const [hiitSessions, setHiitSessions] = useState([]);
   const [cardioSessions, setCardioSessions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [exerciseWeights, setExerciseWeights] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
+  const [pinnedExercises, setPinnedExercisesState] = useState([]);
+  const [addExerciseDialogOpen, setAddExerciseDialogOpen] = useState(false);
+  const [availableExercises, setAvailableExercises] = useState([]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedStats, loadedHistory, loadedWeights, loadedStretches, loadedYoga, loadedHiit, loadedCardio] = await Promise.all([
+      const [loadedStats, loadedHistory, loadedStretches, loadedYoga, loadedHiit, loadedCardio] = await Promise.all([
         getUserStats(),
         getWorkoutHistory(),
-        getAllExerciseWeights(),
         getStretchSessions(),
         getYogaSessions(),
         getHiitSessions(),
@@ -67,11 +107,18 @@ const ProgressScreen = () => {
       ]);
       setStats(loadedStats);
       setHistory(loadedHistory);
-      setExerciseWeights(loadedWeights);
       setStretchSessions(loadedStretches);
       setYogaSessions(loadedYoga);
       setHiitSessions(loadedHiit);
       setCardioSessions(loadedCardio);
+      
+      // Load pinned exercises
+      const pinned = getPinnedExercises();
+      setPinnedExercisesState(pinned);
+      
+      // Get unique exercises from history for selection
+      const unique = getUniqueExercises(loadedHistory);
+      setAvailableExercises(unique);
     } catch (error) {
       console.error('Error loading progress data:', error);
     } finally {
@@ -116,6 +163,27 @@ const ProgressScreen = () => {
     if (window.confirm('Are you sure you want to delete this cardio session? This action cannot be undone.')) {
       await deleteCardioSession(sessionId);
       await loadData();
+    }
+  };
+
+  const handleToggleTrackingMode = (exerciseName, currentMode) => {
+    const newMode = currentMode === 'weight' ? 'reps' : 'weight';
+    updatePinnedExerciseMode(exerciseName, newMode);
+    const updated = pinnedExercises.map(p => 
+      p.exerciseName === exerciseName ? { ...p, trackingMode: newMode } : p
+    );
+    setPinnedExercisesState(updated);
+  };
+
+  const handleRemovePinnedExercise = (exerciseName) => {
+    removePinnedExercise(exerciseName);
+    setPinnedExercisesState(pinnedExercises.filter(p => p.exerciseName !== exerciseName));
+  };
+
+  const handleAddPinnedExercise = (exerciseName) => {
+    if (addPinnedExercise(exerciseName, 'weight')) {
+      setPinnedExercisesState([...pinnedExercises, { exerciseName, trackingMode: 'weight' }]);
+      setAddExerciseDialogOpen(false);
     }
   };
 
@@ -560,7 +628,7 @@ const ProgressScreen = () => {
       )}
 
       {/* Progressive Overload Section */}
-      {Object.keys(exerciseWeights).length > 0 && (
+      {history.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -573,71 +641,191 @@ const ProgressScreen = () => {
           }}>
             <Box sx={{ 
               background: 'rgb(19, 70, 134)',
-              p: 2,
+              p: 1.5,
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'space-between',
               gap: 1,
             }}>
-              <TrendingUpRounded sx={{ fontSize: 32, color: 'white' }} />
-              <Typography variant="h5" sx={{ 
-                fontWeight: 700,
-                color: 'white',
-              }}>
-                Progressive Overload Tracking
-              </Typography>
+              <Stack direction="row" alignItems="center" gap={1}>
+                <TrendingUpRounded sx={{ fontSize: 28, color: 'white' }} />
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700,
+                  color: 'white',
+                }}>
+                  Progressive Overload Tracking
+                </Typography>
+              </Stack>
+              {pinnedExercises.length < 10 && (
+                <IconButton 
+                  onClick={() => setAddExerciseDialogOpen(true)}
+                  size="small"
+                  sx={{ color: 'white' }}
+                  aria-label="Add exercise to track"
+                >
+                  <Add />
+                </IconButton>
+              )}
             </Box>
             <CardContent sx={{ p: 2 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Track your strength gains across exercises. These are your current working weights.
-              </Typography>
-              <Grid container spacing={1.5}>
-                {Object.entries(exerciseWeights)
-                  .filter(([, weight]) => weight > 0)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([exercise, weight]) => (
-                    <Grid item xs={12} sm={6} md={4} key={exercise}>
-                      <Box sx={{ 
-                        p: 1.5,
-                        borderRadius: 2,
-                        background: 'rgba(19, 70, 134, 0.05)',
-                        border: '1px solid rgba(19, 70, 134, 0.1)',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          background: 'rgba(19, 70, 134, 0.1)',
-                          transform: 'translateY(-2px)',
+              {pinnedExercises.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 3 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    No exercises pinned for tracking yet. Click the + button to add exercises.
+                  </Typography>
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<Add />}
+                    onClick={() => setAddExerciseDialogOpen(true)}
+                  >
+                    Add Exercise to Track
+                  </Button>
+                </Box>
+              ) : (
+                <Grid container spacing={2}>
+                  {pinnedExercises.map((pinned) => {
+                    const progression = getExerciseProgression(
+                      history, 
+                      pinned.exerciseName, 
+                      pinned.trackingMode
+                    );
+                    const chartData = formatProgressionForChart(
+                      progression,
+                      pinned.trackingMode === 'weight' ? 'Weight (lbs)' : 'Reps'
+                    );
+
+                    const chartOptions = {
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: { display: false },
+                        title: { display: false },
+                      },
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          ticks: {
+                            callback: function(value) {
+                              return pinned.trackingMode === 'weight' 
+                                ? `${value} lbs` 
+                                : value;
+                            },
+                          },
+                        },
+                        x: {
+                          ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                          }
                         }
-                      }}>
-                        <Typography variant="body2" sx={{ 
-                          fontWeight: 600,
-                          color: 'text.primary',
-                          mb: 0.5,
-                          fontSize: '0.85rem',
-                          lineHeight: 1.3,
+                      },
+                    };
+
+                    return (
+                      <Grid item xs={12} sm={6} md={6} key={pinned.exerciseName}>
+                        <Box sx={{ 
+                          p: 1.5,
+                          borderRadius: 2,
+                          border: '1px solid rgba(19, 70, 134, 0.2)',
+                          background: 'rgba(19, 70, 134, 0.02)',
                         }}>
-                          {exercise}
-                        </Typography>
-                        <Chip 
-                          label={`${weight} lbs`}
-                          size="small"
-                          sx={{ 
-                            fontWeight: 700,
-                            background: 'rgb(19, 70, 134)',
-                            color: 'white',
-                          }}
-                        />
-                      </Box>
-                    </Grid>
-                  ))}
-              </Grid>
+                          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+                            <Typography variant="body2" sx={{ 
+                              fontWeight: 600,
+                              fontSize: '0.875rem',
+                              flex: 1,
+                            }}>
+                              {pinned.exerciseName}
+                            </Typography>
+                            <IconButton
+                              onClick={() => handleRemovePinnedExercise(pinned.exerciseName)}
+                              size="small"
+                              sx={{ 
+                                ml: 1,
+                                color: 'text.secondary',
+                                '&:hover': { color: 'error.main' }
+                              }}
+                            >
+                              <Close sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          </Stack>
+                          
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                checked={pinned.trackingMode === 'reps'}
+                                onChange={() => handleToggleTrackingMode(pinned.exerciseName, pinned.trackingMode)}
+                                size="small"
+                              />
+                            }
+                            label={
+                              <Typography variant="caption">
+                                {pinned.trackingMode === 'weight' ? 'Weight' : 'Reps'}
+                              </Typography>
+                            }
+                            sx={{ mb: 1 }}
+                          />
+                          
+                          <Box sx={{ height: 180 }}>
+                            {progression.length > 0 ? (
+                              <Line data={chartData} options={chartOptions} />
+                            ) : (
+                              <Typography 
+                                variant="caption" 
+                                color="text.secondary"
+                                sx={{ display: 'block', textAlign: 'center', py: 4 }}
+                              >
+                                No data available for this exercise
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              )}
             </CardContent>
           </Card>
         </motion.div>
       )}
 
+      {/* Add Exercise Dialog */}
+      <Dialog 
+        open={addExerciseDialogOpen} 
+        onClose={() => setAddExerciseDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Add Exercise to Track</DialogTitle>
+        <DialogContent>
+          {availableExercises.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              No exercises available. Complete some workouts first.
+            </Typography>
+          ) : (
+            <List>
+              {availableExercises
+                .filter(ex => !pinnedExercises.some(p => p.exerciseName === ex))
+                .map((exerciseName) => (
+                  <ListItem key={exerciseName} disablePadding>
+                    <ListItemButton onClick={() => handleAddPinnedExercise(exerciseName)}>
+                      <ListItemText primary={exerciseName} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+            </List>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddExerciseDialogOpen(false)}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+
       <div className="workout-history-container">
-        <Typography variant="h4" component="h2" sx={{ 
+        <Typography variant="h5" component="h2" sx={{ 
           fontWeight: 700,
-          mb: 2,
+          mb: 1.5,
           color: 'text.primary'
         }}>
           {selectedDate 
@@ -649,14 +837,14 @@ const ProgressScreen = () => {
             variant="outlined"
             size="small"
             onClick={() => setSelectedDate(null)}
-            sx={{ mb: 2 }}
+            sx={{ mb: 1.5 }}
           >
             Show All Activities
           </Button>
         )}
-        <Stack spacing={2}>
+        <Stack spacing={0.75}>
           {selectedDate && !hasSessionsOnSelectedDay ? (
-            <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+            <Typography sx={{ textAlign: 'center', py: 3, color: 'text.secondary', fontSize: '0.875rem' }}>
               No activities logged for this day.
             </Typography>
           ) : (
@@ -667,55 +855,66 @@ const ProgressScreen = () => {
                   key={`workout-${idx}`}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 * idx }}
+                  transition={{ delay: 0.02 * idx }}
                 >
                   <Card sx={{ 
-                    borderLeft: '4px solid',
+                    borderLeft: '3px solid',
                     borderLeftColor: 'primary.main',
-                    borderRadius: 2,
-                    transition: 'all 0.3s ease',
+                    borderRadius: 1,
+                    transition: 'all 0.2s ease',
                     '&:hover': {
-                      transform: 'translateX(4px)',
-                      boxShadow: '0 4px 12px rgba(48, 86, 105, 0.15)',
-                      borderLeftColor: 'secondary.main',
+                      transform: 'translateX(2px)',
+                      boxShadow: '0 2px 8px rgba(48, 86, 105, 0.12)',
                     }
                   }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                            {workout.type} - {formatDate(workout.date)}
+                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.25 }}>
+                            <FitnessCenter sx={{ fontSize: 16, color: 'primary.main' }} />
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                              {workout.type}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              • {formatDate(workout.date)}
+                            </Typography>
                             {workout.isPartial && (
-                              <Typography component="span" sx={{ 
-                                ml: 1, 
-                                fontSize: '0.875rem', 
-                                color: 'warning.main',
-                                fontWeight: 500,
-                              }}>
-                                (Partial)
-                              </Typography>
+                              <Chip 
+                                label="Partial" 
+                                size="small" 
+                                sx={{ 
+                                  height: 18,
+                                  fontSize: '0.65rem',
+                                  color: 'warning.main',
+                                  borderColor: 'warning.main'
+                                }}
+                                variant="outlined"
+                              />
                             )}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                            Duration: {formatDuration(workout.duration)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Exercises: {Object.keys(workout.exercises).join(', ')}
-                          </Typography>
+                          </Stack>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              {formatDuration(workout.duration)}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              • {Object.keys(workout.exercises).length} exercises
+                            </Typography>
+                          </Stack>
                         </Box>
                         <IconButton
                           onClick={() => handleDeleteWorkout(idx)}
                           size="small"
                           sx={{
-                            color: 'error.main',
+                            ml: 1,
+                            color: 'text.secondary',
                             '&:hover': {
                               backgroundColor: 'error.light',
-                              color: 'error.contrastText',
+                              color: 'error.main',
                             }
                           }}
                           aria-label="Delete workout"
                         >
-                          <Delete />
+                          <Delete sx={{ fontSize: 18 }} />
                         </IconButton>
                       </Box>
                     </CardContent>
@@ -729,44 +928,48 @@ const ProgressScreen = () => {
                   key={session.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 }}
+                  transition={{ delay: 0.02 }}
                 >
                   <Card sx={{ 
-                    borderLeft: '4px solid',
+                    borderLeft: '3px solid',
                     borderLeftColor: 'secondary.main',
-                    borderRadius: 2,
-                    transition: 'all 0.3s ease',
+                    borderRadius: 1,
+                    transition: 'all 0.2s ease',
                     '&:hover': {
-                      transform: 'translateX(4px)',
-                      boxShadow: '0 4px 12px rgba(237, 63, 39, 0.15)',
+                      transform: 'translateX(2px)',
+                      boxShadow: '0 2px 8px rgba(237, 63, 39, 0.12)',
                     }
                   }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box sx={{ flex: 1 }}>
-                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                            <Whatshot sx={{ color: 'secondary.main', fontSize: 20 }} />
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                              HIIT Session - {formatDate(session.date)}
+                          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.25 }}>
+                            <Whatshot sx={{ fontSize: 16, color: 'secondary.main' }} />
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                              HIIT Session
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              • {formatDate(session.date)}
                             </Typography>
                           </Stack>
-                          <Typography variant="body2" color="text.secondary">
-                            Duration: {formatDuration(session.duration)}
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                            {formatDuration(session.duration)}
                           </Typography>
                         </Box>
                         <IconButton
                           onClick={() => handleDeleteHiit(session.id)}
                           size="small"
                           sx={{
-                            color: 'error.main',
+                            ml: 1,
+                            color: 'text.secondary',
                             '&:hover': {
                               backgroundColor: 'error.light',
-                              color: 'error.contrastText',
+                              color: 'error.main',
                             }
                           }}
                           aria-label="Delete HIIT session"
                         >
-                          <Delete />
+                          <Delete sx={{ fontSize: 18 }} />
                         </IconButton>
                       </Box>
                     </CardContent>
@@ -780,47 +983,53 @@ const ProgressScreen = () => {
                   key={session.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 }}
+                  transition={{ delay: 0.02 }}
                 >
                   <Card sx={{ 
-                    borderLeft: '4px solid',
+                    borderLeft: '3px solid',
                     borderLeftColor: 'success.main',
-                    borderRadius: 2,
-                    transition: 'all 0.3s ease',
+                    borderRadius: 1,
+                    transition: 'all 0.2s ease',
                     '&:hover': {
-                      transform: 'translateX(4px)',
-                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.15)',
+                      transform: 'translateX(2px)',
+                      boxShadow: '0 2px 8px rgba(76, 175, 80, 0.12)',
                     }
                   }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box sx={{ flex: 1 }}>
-                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                            <DirectionsRun sx={{ color: 'success.main', fontSize: 20 }} />
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                              {session.type === 'full' ? 'Full Body' : 'Custom'} Stretch - {formatDate(session.date)}
+                          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.25 }}>
+                            <DirectionsRun sx={{ fontSize: 16, color: 'success.main' }} />
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                              {session.type === 'full' ? 'Full Body' : 'Custom'} Stretch
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              • {formatDate(session.date)}
                             </Typography>
                           </Stack>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                            Duration: {formatDuration(session.duration)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Stretches: {session.stretchesCompleted} completed
-                          </Typography>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              {formatDuration(session.duration)}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              • {session.stretchesCompleted} stretches
+                            </Typography>
+                          </Stack>
                         </Box>
                         <IconButton
                           onClick={() => handleDeleteStretch(session.id)}
                           size="small"
                           sx={{
-                            color: 'error.main',
+                            ml: 1,
+                            color: 'text.secondary',
                             '&:hover': {
                               backgroundColor: 'error.light',
-                              color: 'error.contrastText',
+                              color: 'error.main',
                             }
                           }}
                           aria-label="Delete stretch session"
                         >
-                          <Delete />
+                          <Delete sx={{ fontSize: 18 }} />
                         </IconButton>
                       </Box>
                     </CardContent>
@@ -834,51 +1043,39 @@ const ProgressScreen = () => {
                   key={session.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 }}
+                  transition={{ delay: 0.02 }}
                 >
                   <Card sx={{ 
-                    borderLeft: '4px solid',
+                    borderLeft: '3px solid',
                     borderLeftColor: '#9c27b0',
-                    borderRadius: 2,
-                    transition: 'all 0.3s ease',
+                    borderRadius: 1,
+                    transition: 'all 0.2s ease',
                     '&:hover': {
-                      transform: 'translateX(4px)',
-                      boxShadow: '0 4px 12px rgba(156, 39, 176, 0.15)',
+                      transform: 'translateX(2px)',
+                      boxShadow: '0 2px 8px rgba(156, 39, 176, 0.12)',
                     }
                   }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box sx={{ flex: 1 }}>
-                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                            <SelfImprovement sx={{ color: '#9c27b0', fontSize: 20 }} />
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                              Yoga Session - {formatDate(session.date)}
+                          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.25 }}>
+                            <SelfImprovement sx={{ fontSize: 16, color: '#9c27b0' }} />
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                              Yoga Session
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              • {formatDate(session.date)}
                             </Typography>
                           </Stack>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                            Duration: {formatDuration(session.duration)}
-                          </Typography>
                           <Stack direction="row" spacing={1} alignItems="center">
-                            <Chip 
-                              label={`Flow: ${session.flowLength}min`}
-                              size="small" 
-                              sx={{ 
-                                bgcolor: '#9c27b0',
-                                color: 'white',
-                                fontSize: '0.75rem',
-                              }}
-                            />
-                            <Chip 
-                              label={`Cool Down: ${session.coolDownLength}min`}
-                              size="small" 
-                              sx={{ 
-                                bgcolor: '#7b1fa2',
-                                color: 'white',
-                                fontSize: '0.75rem',
-                              }}
-                            />
-                            <Typography variant="body2" color="text.secondary">
-                              {session.poseCount} poses
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              {formatDuration(session.duration)}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              • Flow: {session.flowLength}m
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              • {session.poseCount} poses
                             </Typography>
                           </Stack>
                         </Box>
@@ -886,15 +1083,16 @@ const ProgressScreen = () => {
                           onClick={() => handleDeleteYoga(session.id)}
                           size="small"
                           sx={{
-                            color: 'error.main',
+                            ml: 1,
+                            color: 'text.secondary',
                             '&:hover': {
                               backgroundColor: 'error.light',
-                              color: 'error.contrastText',
+                              color: 'error.main',
                             }
                           }}
                           aria-label="Delete yoga session"
                         >
-                          <Delete />
+                          <Delete sx={{ fontSize: 18 }} />
                         </IconButton>
                       </Box>
                     </CardContent>
@@ -908,44 +1106,48 @@ const ProgressScreen = () => {
                   key={session.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 }}
+                  transition={{ delay: 0.02 }}
                 >
                   <Card sx={{ 
-                    borderLeft: '4px solid',
+                    borderLeft: '3px solid',
                     borderLeftColor: '#2196f3',
-                    borderRadius: 2,
-                    transition: 'all 0.3s ease',
+                    borderRadius: 1,
+                    transition: 'all 0.2s ease',
                     '&:hover': {
-                      transform: 'translateX(4px)',
-                      boxShadow: '0 4px 12px rgba(33, 150, 243, 0.15)',
+                      transform: 'translateX(2px)',
+                      boxShadow: '0 2px 8px rgba(33, 150, 243, 0.12)',
                     }
                   }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box sx={{ flex: 1 }}>
-                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                            <FitnessCenter sx={{ color: '#2196f3', fontSize: 20 }} />
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                              {session.cardioType} - {formatDate(session.date)}
+                          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.25 }}>
+                            <FitnessCenter sx={{ fontSize: 16, color: '#2196f3' }} />
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                              {session.cardioType}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              • {formatDate(session.date)}
                             </Typography>
                           </Stack>
-                          <Typography variant="body2" color="text.secondary">
-                            Duration: {formatDuration(session.duration)}
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                            {formatDuration(session.duration)}
                           </Typography>
                         </Box>
                         <IconButton
                           onClick={() => handleDeleteCardio(session.id)}
                           size="small"
                           sx={{
-                            color: 'error.main',
+                            ml: 1,
+                            color: 'text.secondary',
                             '&:hover': {
                               backgroundColor: 'error.light',
-                              color: 'error.contrastText',
+                              color: 'error.main',
                             }
                           }}
                           aria-label="Delete cardio session"
                         >
-                          <Delete />
+                          <Delete sx={{ fontSize: 18 }} />
                         </IconButton>
                       </Box>
                     </CardContent>
@@ -954,7 +1156,7 @@ const ProgressScreen = () => {
               ))}
 
               {!selectedDate && history.length === 0 && hiitSessions.length === 0 && stretchSessions.length === 0 && yogaSessions.length === 0 && cardioSessions.length === 0 && (
-                <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                <Typography sx={{ textAlign: 'center', py: 3, color: 'text.secondary', fontSize: '0.875rem' }}>
                   No activity history yet. Complete your first activity to see it here!
                 </Typography>
               )}

@@ -25,6 +25,7 @@ const KEYS = {
   CARDIO_SESSIONS: 'goodlift_cardio_sessions',
   FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
   FAVORITE_EXERCISES: 'goodlift_favorite_exercises',
+  PINNED_EXERCISES: 'goodlift_pinned_exercises',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -937,4 +938,112 @@ export const toggleFavoriteExercise = (exerciseName) => {
 export const isFavoriteExercise = (exerciseName) => {
   const favorites = getFavoriteExercises();
   return favorites.has(exerciseName);
+};
+
+/**
+ * Get pinned exercises for progress tracking
+ * @returns {Array} Array of pinned exercise configurations
+ */
+export const getPinnedExercises = () => {
+  try {
+    if (isGuestMode()) {
+      const guestPinned = getGuestData('pinned_exercises');
+      return guestPinned || [];
+    }
+    
+    const pinned = localStorage.getItem(KEYS.PINNED_EXERCISES);
+    return pinned ? JSON.parse(pinned) : [];
+  } catch (error) {
+    console.error('Error reading pinned exercises:', error);
+    return [];
+  }
+};
+
+/**
+ * Save pinned exercises for progress tracking
+ * @param {Array} pinnedExercises - Array of pinned exercise configurations
+ * Each config: { exerciseName: string, trackingMode: 'weight' | 'reps' }
+ */
+export const setPinnedExercises = (pinnedExercises) => {
+  try {
+    if (!Array.isArray(pinnedExercises)) {
+      throw new Error('Pinned exercises must be an array');
+    }
+    
+    // Limit to 10 pinned exercises
+    const limitedPinned = pinnedExercises.slice(0, 10);
+    
+    if (isGuestMode()) {
+      setGuestData('pinned_exercises', limitedPinned);
+    } else {
+      localStorage.setItem(KEYS.PINNED_EXERCISES, JSON.stringify(limitedPinned));
+    }
+  } catch (error) {
+    console.error('Error saving pinned exercises:', error);
+    throw error;
+  }
+};
+
+/**
+ * Add an exercise to pinned exercises
+ * @param {string} exerciseName - Name of the exercise
+ * @param {string} trackingMode - 'weight' or 'reps'
+ * @returns {boolean} True if added, false if already at limit
+ */
+export const addPinnedExercise = (exerciseName, trackingMode = 'weight') => {
+  try {
+    const pinned = getPinnedExercises();
+    
+    // Check if already pinned
+    if (pinned.some(p => p.exerciseName === exerciseName)) {
+      return false;
+    }
+    
+    // Check if at limit
+    if (pinned.length >= 10) {
+      return false;
+    }
+    
+    pinned.push({ exerciseName, trackingMode });
+    setPinnedExercises(pinned);
+    return true;
+  } catch (error) {
+    console.error('Error adding pinned exercise:', error);
+    return false;
+  }
+};
+
+/**
+ * Remove an exercise from pinned exercises
+ * @param {string} exerciseName - Name of the exercise
+ */
+export const removePinnedExercise = (exerciseName) => {
+  try {
+    const pinned = getPinnedExercises();
+    const filtered = pinned.filter(p => p.exerciseName !== exerciseName);
+    setPinnedExercises(filtered);
+  } catch (error) {
+    console.error('Error removing pinned exercise:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update tracking mode for a pinned exercise
+ * @param {string} exerciseName - Name of the exercise
+ * @param {string} trackingMode - 'weight' or 'reps'
+ */
+export const updatePinnedExerciseMode = (exerciseName, trackingMode) => {
+  try {
+    const pinned = getPinnedExercises();
+    const updated = pinned.map(p => 
+      p.exerciseName === exerciseName 
+        ? { ...p, trackingMode } 
+        : p
+    );
+    setPinnedExercises(updated);
+  } catch (error) {
+    console.error('Error updating pinned exercise mode:', error);
+    throw error;
+  }
 };

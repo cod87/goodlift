@@ -30,6 +30,12 @@ import {
 } from '@mui/icons-material';
 import { EXERCISES_PER_WORKOUT, MUSCLE_GROUPS, ALL_MUSCLE_GROUPS } from '../utils/constants';
 
+/** Superset grouping size */
+const SUPERSET_SIZE = 2;
+
+/** Core muscle groups for lower body workouts */
+const CORE_MUSCLES = ['Core', 'Abs', 'Obliques'];
+
 /**
  * CustomizeExerciseScreen component for selecting custom exercises
  * Features:
@@ -66,7 +72,7 @@ const CustomizeExerciseScreen = memo(({
     } else if (workoutType === 'lower') {
       filtered = filtered.filter(ex => {
         const muscle = ex['Primary Muscle'].split('(')[0].trim();
-        return MUSCLE_GROUPS.LOWER_BODY.includes(muscle) || ['Core', 'Abs', 'Obliques'].includes(muscle);
+        return MUSCLE_GROUPS.LOWER_BODY.includes(muscle) || CORE_MUSCLES.includes(muscle);
       });
     }
 
@@ -136,7 +142,7 @@ const CustomizeExerciseScreen = memo(({
     } else if (workoutType === 'lower') {
       base = base.filter(ex => {
         const muscle = ex['Primary Muscle'].split('(')[0].trim();
-        return MUSCLE_GROUPS.LOWER_BODY.includes(muscle) || ['Core', 'Abs', 'Obliques'].includes(muscle);
+        return MUSCLE_GROUPS.LOWER_BODY.includes(muscle) || CORE_MUSCLES.includes(muscle);
       });
     }
 
@@ -276,9 +282,11 @@ const CustomizeExerciseScreen = memo(({
               border: '2px solid',
               borderColor: 'primary.main',
             }}
+            role="region"
+            aria-label="Selected exercises preview"
           >
             <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'primary.main' }}>
-              📋 Your Workout Order (drag to reorder)
+              <span role="img" aria-label="clipboard">📋</span> Your Workout Order (drag to reorder)
             </Typography>
             <Reorder.Group 
               axis="y" 
@@ -288,8 +296,9 @@ const CustomizeExerciseScreen = memo(({
             >
               <Stack spacing={1}>
                 {selectedExercises.map((exercise, idx) => {
-                  const isSuperset = idx % 2 === 0 && idx < selectedExercises.length - 1;
-                  const isSupersetPair = idx % 2 === 1;
+                  // Determine if this exercise is part of a superset pair
+                  const isSuperset = idx % SUPERSET_SIZE === 0 && idx < selectedExercises.length - 1;
+                  const isSupersetPair = idx % SUPERSET_SIZE === 1;
                   
                   return (
                     <Reorder.Item 
@@ -403,7 +412,7 @@ const CustomizeExerciseScreen = memo(({
             {selectedExercises.length >= 2 && (
               <Alert severity="info" sx={{ mt: 2, py: 0.5 }}>
                 <Typography variant="caption">
-                  💡 Exercises are grouped in pairs as supersets (perform back-to-back with minimal rest)
+                  <span role="img" aria-label="light bulb">💡</span> Exercises are grouped in pairs as supersets (perform back-to-back with minimal rest)
                 </Typography>
               </Alert>
             )}

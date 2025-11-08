@@ -565,7 +565,7 @@ const ProgressScreen = () => {
                       fontWeight: 600,
                       letterSpacing: 0.5,
                     }}>
-                      Yoga Sessions
+                      Total Mobility
                     </Typography>
                   </Stack>
                   <Typography variant="h3" sx={{ 
@@ -605,7 +605,7 @@ const ProgressScreen = () => {
                       fontWeight: 600,
                       letterSpacing: 0.5,
                     }}>
-                      Avg Yoga
+                      AVG Mobility
                     </Typography>
                   </Stack>
                   <Typography variant="h3" sx={{ 

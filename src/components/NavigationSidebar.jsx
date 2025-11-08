@@ -213,6 +213,24 @@ const NavigationSidebar = ({
                 onClick={() => handleNavClick('favourites')}
               />
               <NavLink
+                icon={<DirectionsRunIcon />}
+                label="Cardio"
+                isActive={currentScreen === 'cardio'}
+                onClick={() => handleNavClick('cardio')}
+              />
+              <NavLink
+                icon={<MdSelfImprovement />}
+                label="Mobility"
+                isActive={currentScreen === 'stretch' || currentScreen === 'yoga'}
+                onClick={() => handleNavClick('stretch')}
+              />
+              <NavSubLink
+                icon={<MdSelfImprovement />}
+                label="Yoga"
+                isActive={currentScreen === 'yoga'}
+                onClick={() => handleNavClick('yoga')}
+              />
+              <NavLink
                 icon={<EditCalendarIcon />}
                 label="Log Activity"
                 isActive={currentScreen === 'log-activity' || currentScreen === 'log-activity-workout' || currentScreen === 'log-activity-yoga' || currentScreen === 'log-activity-hiit'}
@@ -223,24 +241,6 @@ const NavigationSidebar = ({
                 label="Exercise List"
                 isActive={currentScreen === 'exercise-list'}
                 onClick={() => handleNavClick('exercise-list')}
-              />
-              <NavLink
-                icon={<DirectionsRunIcon />}
-                label="Cardio"
-                isActive={currentScreen === 'cardio'}
-                onClick={() => handleNavClick('cardio')}
-              />
-              <NavLink
-                icon={<FaRunning />}
-                label="Stretch"
-                isActive={currentScreen === 'stretch'}
-                onClick={() => handleNavClick('stretch')}
-              />
-              <NavLink
-                icon={<MdSelfImprovement />}
-                label="Yoga"
-                isActive={currentScreen === 'yoga'}
-                onClick={() => handleNavClick('yoga')}
               />
             </nav>
 
@@ -319,6 +319,41 @@ const NavLink = ({ icon, label, isActive, onClick }) => (
 );
 
 NavLink.propTypes = {
+  icon: PropTypes.node.isRequired,
+  label: PropTypes.string.isRequired,
+  isActive: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
+};
+
+// NavSubLink component for subsection navigation (indented)
+const NavSubLink = ({ icon, label, isActive, onClick }) => (
+  <motion.button
+    onClick={onClick}
+    whileHover={{ x: 5, backgroundColor: 'rgba(19, 70, 134, 0.05)' }}
+    whileTap={{ scale: 0.98 }}
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+      width: '100%',
+      padding: '10px 1.5rem 10px 2.5rem',
+      fontSize: '0.95rem',
+      fontWeight: 500,
+      background: isActive ? 'rgba(19, 70, 134, 0.1)' : 'transparent',
+      color: isActive ? 'rgb(19, 70, 134)' : 'rgb(237, 63, 39)',
+      border: 'none',
+      borderLeft: isActive ? '4px solid rgb(19, 70, 134)' : '4px solid transparent',
+      textAlign: 'left',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+    }}
+  >
+    {icon}
+    <span>{label}</span>
+  </motion.button>
+);
+
+NavSubLink.propTypes = {
   icon: PropTypes.node.isRequired,
   label: PropTypes.string.isRequired,
   isActive: PropTypes.bool.isRequired,

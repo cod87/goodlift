@@ -218,22 +218,27 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
                     alignItems: 'center', 
                     justifyContent: 'center' 
                   }}>
-                    {/* Icon for main session */}
+                    {/* Day number at top left */}
+                    <span className="day-number">
+                      {date.getDate()}
+                    </span>
+                    
+                    {/* Icon for main session - centered */}
                     {displayInfo.icon && (
                       <Box sx={{ 
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        zIndex: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '100%',
+                        height: '100%',
                       }}>
                         <img 
                           src={getIconPath(displayInfo.icon)} 
                           alt={displayInfo.icon}
                           style={{ 
-                            width: '28px', 
-                            height: '28px',
-                            opacity: 0.7,
+                            width: '40px', 
+                            height: '40px',
+                            opacity: 0.8,
                           }}
                         />
                       </Box>
@@ -264,10 +269,6 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
                         ))}
                       </Box>
                     )}
-                    
-                    <span className="day-number" style={{ zIndex: 1, position: 'relative' }}>
-                      {date.getDate()}
-                    </span>
                   </Box>
                 </>
               )}
@@ -294,8 +295,8 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
           <span>Cardio</span>
         </div>
         <div className="legend-item">
-          <img src={`${import.meta.env.BASE_URL}icons/yoga-calendaricon.svg`} alt="Yoga" style={{ width: '16px', height: '16px' }} />
-          <span>Yoga</span>
+          <img src={`${import.meta.env.BASE_URL}icons/yoga-calendaricon.svg`} alt="Mobility" style={{ width: '16px', height: '16px' }} />
+          <span>Mobility</span>
         </div>
         <div className="legend-item">
           <Box sx={{

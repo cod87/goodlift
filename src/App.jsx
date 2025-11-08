@@ -478,7 +478,7 @@ function App() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `GoodLife_Workout_${new Date(completedWorkoutData.date).toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `GoodLift_Workout_${new Date(completedWorkoutData.date).toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -505,7 +505,7 @@ function App() {
           onToggle={handleToggleSidebar}
         />
         
-        <Header isDesktop={isDesktop} />
+        <Header />
         
         <div id="app" style={{ 
           flex: 1,

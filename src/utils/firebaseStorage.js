@@ -117,3 +117,63 @@ export const saveExerciseTargetRepsToFirebase = async (userId, exerciseTargetRep
     console.error('Error saving exercise target reps to Firebase:', error);
   }
 };
+
+/**
+ * Save HIIT sessions to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} hiitSessions - The HIIT sessions array
+ */
+export const saveHiitSessionsToFirebase = async (userId, hiitSessions) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { hiitSessions });
+  } catch (error) {
+    console.error('Error saving HIIT sessions to Firebase:', error);
+  }
+};
+
+/**
+ * Save cardio sessions to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} cardioSessions - The cardio sessions array
+ */
+export const saveCardioSessionsToFirebase = async (userId, cardioSessions) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { cardioSessions });
+  } catch (error) {
+    console.error('Error saving cardio sessions to Firebase:', error);
+  }
+};
+
+/**
+ * Save stretch sessions to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} stretchSessions - The stretch sessions array
+ */
+export const saveStretchSessionsToFirebase = async (userId, stretchSessions) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { stretchSessions });
+  } catch (error) {
+    console.error('Error saving stretch sessions to Firebase:', error);
+  }
+};
+
+/**
+ * Save yoga sessions to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} yogaSessions - The yoga sessions array
+ */
+export const saveYogaSessionsToFirebase = async (userId, yogaSessions) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { yogaSessions });
+  } catch (error) {
+    console.error('Error saving yoga sessions to Firebase:', error);
+  }
+};

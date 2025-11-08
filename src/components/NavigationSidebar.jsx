@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaDumbbell, FaHome, FaSignOutAlt, FaTimes, FaBars, FaStar, FaRunning } from 'react-icons/fa';
+import { FaDumbbell, FaHome, FaSignOutAlt, FaTimes, FaBars, FaRunning } from 'react-icons/fa';
 import { MdSelfImprovement } from 'react-icons/md';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
@@ -207,12 +207,6 @@ const NavigationSidebar = ({
                 onClick={() => handleNavClick('selection')}
               />
               <NavLink
-                icon={<FaStar />}
-                label="Favourites"
-                isActive={currentScreen === 'favourites'}
-                onClick={() => handleNavClick('favourites')}
-              />
-              <NavLink
                 icon={<DirectionsRunIcon />}
                 label="Cardio"
                 isActive={currentScreen === 'cardio'}
@@ -227,7 +221,7 @@ const NavigationSidebar = ({
               <NavLink
                 icon={<EditCalendarIcon />}
                 label="Log Activity"
-                isActive={currentScreen === 'log-activity' || currentScreen === 'log-activity-workout' || currentScreen === 'log-activity-yoga' || currentScreen === 'log-activity-hiit'}
+                isActive={currentScreen === 'log-activity'}
                 onClick={() => handleNavClick('log-activity')}
               />
               <NavLink

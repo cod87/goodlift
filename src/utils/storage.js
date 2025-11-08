@@ -154,6 +154,39 @@ export const deleteWorkout = async (workoutIndex) => {
 };
 
 /**
+ * Update a workout in history
+ * @param {number} index - Index of the workout to update
+ * @param {Object} updatedData - Updated workout data
+ */
+export const updateWorkout = async (index, updatedData) => {
+  try {
+    const history = await getWorkoutHistory();
+    
+    if (index < 0 || index >= history.length) {
+      throw new Error('Invalid workout index');
+    }
+    
+    // Update the workout
+    history[index] = { ...history[index], ...updatedData };
+    
+    // Save updated history
+    if (isGuestMode()) {
+      setGuestData('workout_history', history);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_HISTORY, JSON.stringify(history));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveWorkoutHistoryToFirebase(currentUserId, history);
+      }
+    }
+  } catch (error) {
+    console.error('Error updating workout:', error);
+    throw error;
+  }
+};
+
+/**
  * Get user statistics (total workouts, time, etc.)
  * IMPORTANT: Stats are now calculated from actual session data to ensure they're always in sync
  * @returns {Promise<Object>} User stats object with totalWorkouts, totalTime, and all session type times
@@ -605,6 +638,7 @@ export const saveCardioSession = async (sessionData) => {
       cardioType: sessionData.cardioType,
       duration: sessionData.duration,
       date: sessionData.date || Date.now(),
+      notes: sessionData.notes || '',
     };
     
     sessions.unshift(newSession); // Add to beginning for chronological order
@@ -658,6 +692,40 @@ export const deleteCardioSession = async (sessionId) => {
     // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error deleting cardio session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update a cardio session
+ * @param {string} sessionId - ID of the session to update
+ * @param {Object} updatedData - Updated session data
+ */
+export const updateCardioSession = async (sessionId, updatedData) => {
+  try {
+    const sessions = getCardioSessions();
+    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
+    
+    if (sessionIndex === -1) {
+      throw new Error('Session not found');
+    }
+    
+    // Update the session
+    sessions[sessionIndex] = { ...sessions[sessionIndex], ...updatedData };
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('cardio_sessions', sessions);
+    } else {
+      localStorage.setItem(KEYS.CARDIO_SESSIONS, JSON.stringify(sessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveCardioSessionsToFirebase(currentUserId, sessions);
+      }
+    }
+  } catch (error) {
+    console.error('Error updating cardio session:', error);
     throw error;
   }
 };
@@ -890,6 +958,40 @@ export const saveYogaSession = async (sessionData) => {
 };
 
 /**
+ * Update a yoga session
+ * @param {string} sessionId - ID of the session to update
+ * @param {Object} updatedData - Updated session data
+ */
+export const updateYogaSession = async (sessionId, updatedData) => {
+  try {
+    const sessions = getYogaSessions();
+    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
+    
+    if (sessionIndex === -1) {
+      throw new Error('Session not found');
+    }
+    
+    // Update the session
+    sessions[sessionIndex] = { ...sessions[sessionIndex], ...updatedData };
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('yoga_sessions', sessions);
+    } else {
+      localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(sessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveYogaSessionsToFirebase(currentUserId, sessions);
+      }
+    }
+  } catch (error) {
+    console.error('Error updating yoga session:', error);
+    throw error;
+  }
+};
+
+/**
  * Delete a yoga session
  * @param {string} sessionId - ID of the session to delete
  */
@@ -941,6 +1043,40 @@ export const deleteHiitSession = async (sessionId) => {
     // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error deleting HIIT session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update a HIIT session
+ * @param {string} sessionId - ID of the session to update
+ * @param {Object} updatedData - Updated session data
+ */
+export const updateHiitSession = async (sessionId, updatedData) => {
+  try {
+    const sessions = getHiitSessions();
+    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
+    
+    if (sessionIndex === -1) {
+      throw new Error('Session not found');
+    }
+    
+    // Update the session
+    sessions[sessionIndex] = { ...sessions[sessionIndex], ...updatedData };
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('hiit_sessions', sessions);
+    } else {
+      localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(sessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveHiitSessionsToFirebase(currentUserId, sessions);
+      }
+    }
+  } catch (error) {
+    console.error('Error updating HIIT session:', error);
     throw error;
   }
 };

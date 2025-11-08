@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@mui/material';
+import { Box, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
 import '../styles/Calendar.css';
 
-const Calendar = ({ workoutSessions = [], scheduledWorkouts = [], onDayClick }) => {
+const Calendar = ({ workoutSessions = [], scheduledWorkouts = [], onDayClick, onDeferWorkout, onCompleteWorkout }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedScheduled, setSelectedScheduled] = useState(null);
+  const [showScheduledDialog, setShowScheduledDialog] = useState(false);
 
   // Create a map of dates to session info for quick lookup
   const workoutDateMap = useMemo(() => {
@@ -178,9 +180,30 @@ const Calendar = ({ workoutSessions = [], scheduledWorkouts = [], onDayClick }) 
     }
   };
 
-  const handleDayClick = (date) => {
-    if (date && onDayClick) {
+  const handleDayClick = (date, sessionInfo) => {
+    // If there's a scheduled workout, show the dialog
+    if (sessionInfo?.scheduled && sessionInfo.scheduled.status !== 'completed') {
+      setSelectedScheduled(sessionInfo.scheduled);
+      setShowScheduledDialog(true);
+    } else if (date && onDayClick) {
+      // Otherwise, call the regular day click handler
       onDayClick(date);
+    }
+  };
+
+  const handleDefer = () => {
+    if (selectedScheduled && onDeferWorkout) {
+      onDeferWorkout(selectedScheduled.date);
+      setShowScheduledDialog(false);
+      setSelectedScheduled(null);
+    }
+  };
+
+  const handleComplete = () => {
+    if (selectedScheduled && onCompleteWorkout) {
+      onCompleteWorkout(selectedScheduled.date);
+      setShowScheduledDialog(false);
+      setSelectedScheduled(null);
     }
   };
 
@@ -207,15 +230,15 @@ const Calendar = ({ workoutSessions = [], scheduledWorkouts = [], onDayClick }) 
         
         {/* Calendar days */}
         {days.map((date, index) => {
-          const sessionInfo = date ? getSessionInfo(date) : { sessions: [], durations: {} };
-          const hasActivity = sessionInfo.sessions.length > 0;
-          const displayInfo = hasActivity ? getDisplayInfo(sessionInfo) : { icon: null, bookmarks: [] };
+          const sessionInfo = date ? getSessionInfo(date) : { sessions: [], durations: {}, scheduled: null };
+          const hasActivity = sessionInfo.sessions.length > 0 || sessionInfo.scheduled;
+          const displayInfo = sessionInfo.sessions.length > 0 ? getDisplayInfo(sessionInfo) : { icon: null, bookmarks: [] };
           
           return (
             <div
               key={index}
               className={`calendar-day ${!date ? 'empty' : ''} ${isToday(date) ? 'today' : ''} ${hasActivity ? 'has-activity' : ''}`}
-              onClick={() => handleDayClick(date)}
+              onClick={() => handleDayClick(date, sessionInfo)}
               style={{ cursor: date && hasActivity ? 'pointer' : 'default' }}
             >
               {date && (
@@ -342,6 +365,42 @@ const Calendar = ({ workoutSessions = [], scheduledWorkouts = [], onDayClick }) 
           <span>Additional Sessions</span>
         </div>
       </div>
+
+      {/* Scheduled Workout Dialog */}
+      <Dialog open={showScheduledDialog} onClose={() => setShowScheduledDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Scheduled Workout</DialogTitle>
+        <DialogContent>
+          {selectedScheduled && (
+            <>
+              <Typography variant="h6" gutterBottom>
+                {selectedScheduled.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Type: {selectedScheduled.type}
+              </Typography>
+              {selectedScheduled.phase && (
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Phase: {selectedScheduled.phase}
+                </Typography>
+              )}
+              {selectedScheduled.dayNumber && (
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Day {selectedScheduled.dayNumber} of program
+                </Typography>
+              )}
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowScheduledDialog(false)}>Cancel</Button>
+          <Button onClick={handleDefer} color="warning">
+            Defer to Tomorrow
+          </Button>
+          <Button onClick={handleComplete} variant="contained" color="success">
+            Mark Complete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
@@ -363,6 +422,8 @@ Calendar.propTypes = {
     })
   ),
   onDayClick: PropTypes.func,
+  onDeferWorkout: PropTypes.func,
+  onCompleteWorkout: PropTypes.func,
 };
 
 export default Calendar;

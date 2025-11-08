@@ -20,7 +20,9 @@ import {
   updatePinnedExerciseMode,
   removePinnedExercise,
   addPinnedExercise,
-  getScheduledWorkouts
+  getScheduledWorkouts,
+  markWorkoutComplete,
+  deferWorkout
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import { 
@@ -374,6 +376,28 @@ const ProgressScreen = () => {
     }, 100);
   };
 
+  // Handle deferring a scheduled workout
+  const handleDeferWorkout = async (date) => {
+    try {
+      deferWorkout(date);
+      await loadData(); // Reload to show updated schedule
+    } catch (error) {
+      console.error('Error deferring workout:', error);
+      alert('Failed to defer workout. Please try again.');
+    }
+  };
+
+  // Handle marking a workout as complete
+  const handleCompleteWorkout = async (date) => {
+    try {
+      markWorkoutComplete(date);
+      await loadData(); // Reload to show updated status
+    } catch (error) {
+      console.error('Error marking workout complete:', error);
+      alert('Failed to mark workout complete. Please try again.');
+    }
+  };
+
   // Filter sessions by selected date
   const isSameDay = (date1, date2) => {
     const d1 = new Date(date1);
@@ -705,7 +729,9 @@ const ProgressScreen = () => {
       <Calendar 
         workoutSessions={workoutSessions} 
         scheduledWorkouts={scheduledWorkouts}
-        onDayClick={handleDayClick} 
+        onDayClick={handleDayClick}
+        onDeferWorkout={handleDeferWorkout}
+        onCompleteWorkout={handleCompleteWorkout}
       />
 
       {/* Progressive Overload Section */}

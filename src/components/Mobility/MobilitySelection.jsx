@@ -35,7 +35,7 @@ const MobilitySelection = ({ onStartStretchSession, onStartYogaSession }) => {
   
   const [yogaConfig, setYogaConfig] = useState({
     flowLength: savedConfig?.flowLength || 15,
-    coolDownLength: savedConfig?.coolDownLength || 5,
+    coolDownLength: 0, // Cooldown removed as per requirements
     poseSuggestionFrequency: savedConfig?.poseSuggestionFrequency || 1,
   });
   
@@ -571,49 +571,31 @@ const MobilitySelection = ({ onStartStretchSession, onStartYogaSession }) => {
 
                 <Grid container spacing={3} sx={{ mb: 3 }}>
                   {/* Flow Duration */}
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={6}>
                     <FormControl fullWidth variant="outlined">
                       <InputLabel id="flow-duration-label" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                        Flow Duration
+                        Session Duration
                       </InputLabel>
                       <Select
                         labelId="flow-duration-label"
                         id="flow-duration"
                         value={yogaConfig.flowLength}
                         onChange={(e) => setYogaConfig({ ...yogaConfig, flowLength: e.target.value })}
-                        label="Flow Duration"
+                        label="Session Duration"
                       >
                         <MenuItem value={10}>10 minutes</MenuItem>
                         <MenuItem value={15}>15 minutes</MenuItem>
                         <MenuItem value={20}>20 minutes</MenuItem>
+                        <MenuItem value={30}>30 minutes</MenuItem>
+                        <MenuItem value={45}>45 minutes</MenuItem>
+                        <MenuItem value={60}>60 minutes</MenuItem>
                       </Select>
-                      <FormHelperText>Length of active flow</FormHelperText>
-                    </FormControl>
-                  </Grid>
-
-                  {/* Cool Down Duration */}
-                  <Grid item xs={12} sm={4}>
-                    <FormControl fullWidth variant="outlined">
-                      <InputLabel id="cooldown-duration-label" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                        Cool Down
-                      </InputLabel>
-                      <Select
-                        labelId="cooldown-duration-label"
-                        id="cooldown-duration"
-                        value={yogaConfig.coolDownLength}
-                        onChange={(e) => setYogaConfig({ ...yogaConfig, coolDownLength: e.target.value })}
-                        label="Cool Down"
-                      >
-                        <MenuItem value={0}>No cool down</MenuItem>
-                        <MenuItem value={5}>5 minutes</MenuItem>
-                        <MenuItem value={10}>10 minutes</MenuItem>
-                      </Select>
-                      <FormHelperText>Post-flow relaxation</FormHelperText>
+                      <FormHelperText>Total yoga session length</FormHelperText>
                     </FormControl>
                   </Grid>
 
                   {/* Pose Suggestion Interval */}
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={6}>
                     <FormControl fullWidth variant="outlined" error={isYogaStartDisabled}>
                       <InputLabel 
                         id="pose-interval-label" 
@@ -658,16 +640,10 @@ const MobilitySelection = ({ onStartStretchSession, onStartYogaSession }) => {
                   </Typography>
                   <Stack spacing={0.5}>
                     <Typography variant="body2" color="text.secondary">
-                      <strong>Flow:</strong> {yogaConfig.flowLength} min
+                      <strong>Duration:</strong> {yogaConfig.flowLength} min
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      <strong>Cool Down:</strong> {yogaConfig.coolDownLength === 0 ? 'None' : `${yogaConfig.coolDownLength} min`}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Total Duration:</strong> {yogaConfig.flowLength + yogaConfig.coolDownLength} min
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Pose Suggestions:</strong> Every {yogaConfig.poseSuggestionFrequency} min during flow
+                      <strong>Pose Suggestions:</strong> Every {yogaConfig.poseSuggestionFrequency} min
                     </Typography>
                   </Stack>
                 </Box>

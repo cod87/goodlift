@@ -1,12 +1,18 @@
 import { motion } from 'framer-motion';
 import { Box, Card, CardContent, Typography, Button, Stack } from '@mui/material';
-import { Whatshot, FitnessCenter } from '@mui/icons-material';
+import { Whatshot, FitnessCenter, DirectionsRun } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 
 const CardioScreen = ({ onNavigate }) => {
   const handleHiitClick = () => {
     if (onNavigate) {
       onNavigate('hiit');
+    }
+  };
+
+  const handlePlyoClick = () => {
+    if (onNavigate) {
+      onNavigate('plyo');
     }
   };
 
@@ -100,11 +106,67 @@ const CardioScreen = ({ onNavigate }) => {
           </Card>
         </motion.div>
 
-        {/* Log General Cardio Card */}
+        {/* Plyo Session Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+        >
+          <Card sx={{ 
+            borderRadius: 3,
+            transition: 'all 0.3s ease',
+            cursor: 'pointer',
+            '&:hover': {
+              transform: 'translateY(-4px)',
+              boxShadow: '0 8px 24px rgba(254, 178, 26, 0.2)',
+            }
+          }}
+          onClick={handlePlyoClick}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+                <Box sx={{ 
+                  p: 2, 
+                  borderRadius: 2, 
+                  bgcolor: 'rgba(254, 178, 26, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <DirectionsRun sx={{ fontSize: 40, color: 'warning.main' }} />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+                    Plyometric Training
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Explosive lower body power workouts with 3 specialized versions
+                  </Typography>
+                </Box>
+              </Stack>
+              <Button
+                variant="contained"
+                fullWidth
+                sx={{ 
+                  bgcolor: 'warning.main',
+                  '&:hover': { bgcolor: 'warning.dark' },
+                  py: 1.5,
+                  fontWeight: 600,
+                  color: 'text.primary'
+                }}
+                onClick={handlePlyoClick}
+              >
+                Start Plyo Session
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Log General Cardio Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
         >
           <Card sx={{ 
             borderRadius: 3,

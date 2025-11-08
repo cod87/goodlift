@@ -1,5 +1,29 @@
 [
   {
+    "Exercise Name": "11\"",
+    "Primary Muscle": "Round 1",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=11\"+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "5",
+    "Primary Muscle": "7",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=5+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "9",
+    "Primary Muscle": "12",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=9+exercise+demonstration"
+  },
+  {
     "Exercise Name": "Archer Push-Up",
     "Primary Muscle": "Chest",
     "Secondary Muscles": "Front Delts, Triceps",
@@ -14,6 +38,14 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=C_VtOYc6j5c"
+  },
+  {
+    "Exercise Name": "Barbell Back Squat",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Barbell+Back+Squat+exercise+demonstration"
   },
   {
     "Exercise Name": "Barbell Bench Press",
@@ -38,6 +70,14 @@
     "Exercise Type": "Isolation",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=ykJmrZ5v0Oo"
+  },
+  {
+    "Exercise Name": "Barbell Curls",
+    "Primary Muscle": "Biceps",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Barbell",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Barbell+Curls+exercise+demonstration"
   },
   {
     "Exercise Name": "Barbell Incline Bench Press",
@@ -128,6 +168,14 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=2C-uNgKwPLE"
   },
   {
+    "Exercise Name": "Bulgarian Split Squats",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Bulgarian+Split+Squats+exercise+demonstration"
+  },
+  {
     "Exercise Name": "Cable Lat Pulldown (Close Grip)",
     "Primary Muscle": "Lats",
     "Secondary Muscles": "Biceps, Core",
@@ -198,6 +246,14 @@
     "Exercise Type": "Isolation",
     "Equipment": "Cable Machine",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=6gKROT7AjQ0"
+  },
+  {
+    "Exercise Name": "Cable Tricep Kickback",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Cable+Tricep+Kickback+exercise+demonstration"
   },
   {
     "Exercise Name": "Chin-Up (Strict)",
@@ -304,6 +360,14 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=uUGDRwge4F8"
   },
   {
+    "Exercise Name": "Dumbbell Flyes",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbells",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Dumbbell+Flyes+exercise+demonstration"
+  },
+  {
     "Exercise Name": "Dumbbell Front Raise",
     "Primary Muscle": "Delts",
     "Secondary Muscles": "Delts",
@@ -326,6 +390,14 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=MeIiIdhvXT4"
+  },
+  {
+    "Exercise Name": "Dumbbell Hammer Curls",
+    "Primary Muscle": "Biceps",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbells",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Dumbbell+Hammer+Curls+exercise+demonstration"
   },
   {
     "Exercise Name": "Dumbbell High Pull",
@@ -366,6 +438,14 @@
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=M8w9Y7oHYiU"
+  },
+  {
+    "Exercise Name": "Dumbbell Lateral Raises",
+    "Primary Muscle": "Shoulders",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbells",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Dumbbell+Lateral+Raises+exercise+demonstration"
   },
   {
     "Exercise Name": "Dumbbell Lunge",
@@ -464,6 +544,14 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=qEwKCR5JCog"
   },
   {
+    "Exercise Name": "Dumbbell Shrugs",
+    "Primary Muscle": "Shoulders",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbells",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Dumbbell+Shrugs+exercise+demonstration"
+  },
+  {
     "Exercise Name": "Dumbbell Single-Arm Row",
     "Primary Muscle": "Lats",
     "Secondary Muscles": "Biceps, Core",
@@ -536,6 +624,14 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=eKxf7Vvs4f8"
   },
   {
+    "Exercise Name": "EZ Bar Skull Crushers",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=EZ+Bar+Skull+Crushers+exercise+demonstration"
+  },
+  {
     "Exercise Name": "Farmer Carry (Dumbbell)",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Shoulders, Traps",
@@ -550,6 +646,14 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=4vzPnS6SOtA"
+  },
+  {
+    "Exercise Name": "Fifer Scissors",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Fifer+Scissors+exercise+demonstration"
   },
   {
     "Exercise Name": "Front Squat",
@@ -600,12 +704,52 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=HQapklc5v38"
   },
   {
+    "Exercise Name": "Heels to Heaven",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Heels+to+Heaven+exercise+demonstration"
+  },
+  {
     "Exercise Name": "High Pull",
     "Primary Muscle": "Traps",
     "Secondary Muscles": "Traps, Delts",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=o6QniJ9FaGA"
+  },
+  {
+    "Exercise Name": "Hip Thrusts / Weighted Glute Bridges",
+    "Primary Muscle": "Glutes",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Hip+Thrusts+/+Weighted+Glute+Bridges+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Hip Thrusts or Weighted Glute Bridges",
+    "Primary Muscle": "Glutes",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Hip+Thrusts+or+Weighted+Glute+Bridges+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "In and Out (Crunches)",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=In+and+Out+(Crunches)+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Incline Dumbbell Bench Press",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbells",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Incline+Dumbbell+Bench+Press+exercise+demonstration"
   },
   {
     "Exercise Name": "Kettlebell Goblet Squat",
@@ -696,6 +840,38 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=ultWZbUMPL8"
   },
   {
+    "Exercise Name": "Lat Pulldown",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Lat+Pulldown+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Leg Climbers",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Leg+Climbers+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Leg Curls",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Machine",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Leg+Curls+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Leg Press or Goblet Squat",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Machine",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Leg+Press+or+Goblet+Squat+exercise+demonstration"
+  },
+  {
     "Exercise Name": "Leg Raises",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Obliques",
@@ -704,12 +880,28 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=HQapklc5v38"
   },
   {
+    "Exercise Name": "Mason Twist",
+    "Primary Muscle": "Obliques",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Mason+Twist+exercise+demonstration"
+  },
+  {
     "Exercise Name": "Pistol Squat",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Core, Glutes",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=ultWZbUMPL8"
+  },
+  {
+    "Exercise Name": "Plate Raises",
+    "Primary Muscle": "Shoulders",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Plates",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Plate+Raises+exercise+demonstration"
   },
   {
     "Exercise Name": "Plyo Push-Up",
@@ -736,6 +928,14 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=27YYEpCJnMU"
   },
   {
+    "Exercise Name": "Pulse Ups",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Pulse+Ups+exercise+demonstration"
+  },
+  {
     "Exercise Name": "Push Press",
     "Primary Muscle": "Delts",
     "Secondary Muscles": "Triceps, Chest, Core",
@@ -758,6 +958,38 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=mut9P1fqo34"
+  },
+  {
+    "Exercise Name": "Reverse Bicycle",
+    "Primary Muscle": "Obliques",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Reverse+Bicycle+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Reverse Crunches",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Reverse+Crunches+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Reverse Pec Deck Fly",
+    "Primary Muscle": "Shoulders",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Machine",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Reverse+Pec+Deck+Fly+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Romanian Deadlift",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Romanian+Deadlift+exercise+demonstration"
   },
   {
     "Exercise Name": "Romanian Deadlift (RDL)",
@@ -784,6 +1016,22 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=roCP6wCXPqo"
   },
   {
+    "Exercise Name": "Seated Bicycle",
+    "Primary Muscle": "Obliques",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Seated+Bicycle+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Seated Cable Row",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Seated+Cable+Row+exercise+demonstration"
+  },
+  {
     "Exercise Name": "Single Leg Deadlift",
     "Primary Muscle": "Hamstrings",
     "Secondary Muscles": "Glutes, Hamstrings, Core",
@@ -798,6 +1046,22 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=2C-uNgKwPLE"
+  },
+  {
+    "Exercise Name": "Standing Calf Raises",
+    "Primary Muscle": "Calves",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Standing+Calf+Raises+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Step-Ups",
+    "Primary Muscle": "Glutes",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Step-Ups+exercise+demonstration"
   },
   {
     "Exercise Name": "Stiff Leg Deadlift",
@@ -848,6 +1112,14 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=op9kVnSso6Q"
   },
   {
+    "Exercise Name": "Tricep Rope Pushdown",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Tricep+Rope+Pushdown+exercise+demonstration"
+  },
+  {
     "Exercise Name": "Underhand Barbell Row",
     "Primary Muscle": "Lats",
     "Secondary Muscles": "Biceps, Core",
@@ -862,6 +1134,22 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=yaWj0cwS2DM"
+  },
+  {
+    "Exercise Name": "V-Up Rollup",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=V-Up+Rollup+exercise+demonstration"
+  },
+  {
+    "Exercise Name": "Walking Lunges",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/results?search_query=Walking+Lunges+exercise+demonstration"
   },
   {
     "Exercise Name": "Zottman Curl",

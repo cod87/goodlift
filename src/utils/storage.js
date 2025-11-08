@@ -27,6 +27,7 @@ const KEYS = {
   STRETCH_SESSIONS: 'goodlift_stretch_sessions',
   YOGA_SESSIONS: 'goodlift_yoga_sessions',
   CARDIO_SESSIONS: 'goodlift_cardio_sessions',
+  PLYO_SESSIONS: 'goodlift_plyo_sessions',
   FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
   FAVORITE_EXERCISES: 'goodlift_favorite_exercises',
   PINNED_EXERCISES: 'goodlift_pinned_exercises',
@@ -601,6 +602,80 @@ export const saveHiitSession = async (sessionData) => {
     // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error saving HIIT session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get plyo sessions history from localStorage
+ * @returns {Array} Array of plyo session objects
+ */
+export const getPlyoSessions = () => {
+  try {
+    if (isGuestMode()) {
+      return getGuestData('plyo_sessions') || [];
+    }
+    
+    const sessions = localStorage.getItem(KEYS.PLYO_SESSIONS);
+    return sessions ? JSON.parse(sessions) : [];
+  } catch (error) {
+    console.error('Error reading plyo sessions:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a completed plyo session
+ * @param {Object} sessionData - Plyo session data including duration and workout type
+ */
+export const savePlyoSession = async (sessionData) => {
+  try {
+    if (!sessionData) {
+      throw new Error('Session data is required');
+    }
+    
+    const sessions = getPlyoSessions();
+    sessions.unshift(sessionData); // Add to beginning for chronological order
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('plyo_sessions', sessions);
+    } else {
+      localStorage.setItem(KEYS.PLYO_SESSIONS, JSON.stringify(sessions));
+      
+      // Sync to Firebase if user is logged in (will need to add to Firebase storage later)
+      if (currentUserId) {
+        // TODO: Add savePlyoSessionsToFirebase when Firebase integration is ready
+        // await savePlyoSessionsToFirebase(currentUserId, sessions);
+      }
+    }
+  } catch (error) {
+    console.error('Error saving plyo session:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a plyo session
+ * @param {string} sessionId - ID of session to delete
+ */
+export const deletePlyoSession = async (sessionId) => {
+  try {
+    const sessions = getPlyoSessions();
+    const filteredSessions = sessions.filter(s => s.id !== sessionId);
+    
+    if (isGuestMode()) {
+      setGuestData('plyo_sessions', filteredSessions);
+    } else {
+      localStorage.setItem(KEYS.PLYO_SESSIONS, JSON.stringify(filteredSessions));
+      
+      if (currentUserId) {
+        // TODO: Add savePlyoSessionsToFirebase when Firebase integration is ready
+        // await savePlyoSessionsToFirebase(currentUserId, filteredSessions);
+      }
+    }
+  } catch (error) {
+    console.error('Error deleting plyo session:', error);
     throw error;
   }
 };

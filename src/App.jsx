@@ -13,6 +13,7 @@ import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
 import MobilityScreen from './components/Mobility/MobilityScreen';
 import CardioScreen from './pages/CardioScreen';
+import PlyoScreen from './pages/PlyoScreen';
 import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
@@ -572,6 +573,8 @@ function App() {
           {currentScreen === 'hiit' && <HiitTimerScreen />}
 
           {currentScreen === 'cardio' && <CardioScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'plyo' && <PlyoScreen onNavigate={handleNavigate} />}
 
           {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} />}
 

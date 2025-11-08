@@ -1,0 +1,38 @@
+Workout Session,Grouping,Exercise Name,Type,Sets,Reps,Rest,Muscle Group
+Chest & Back,Superset 1,Barbell Bench Press,Heavy Compound,4,8,2-3 min rest,Upper Body - Chest
+Chest & Back,Superset 1,Seated Cable Row,Heavy Compound,4,10,Minimal,Upper Body - Back
+Chest & Back,Superset 2,Incline Dumbbell Bench Press,Chest Secondary,3,10,30-60 sec,Upper Body - Chest
+Chest & Back,Superset 2,Lat Pulldown,Back Secondary,3,12,Minimal,Upper Body - Back
+Chest & Back,Superset 3 (Triset),Dumbbell Shoulder Press,Triset 3A,3,10,30 sec,Upper Body - Shoulders
+Chest & Back,Superset 3 (Triset),Barbell Curls,Triset 3B,3,10,30 sec,Upper Body - Biceps
+Chest & Back,Superset 3 (Triset),Tricep Rope Pushdown,Triset 3C,3,12,Minimal,Upper Body - Triceps
+Chest & Back,Accessory,Dumbbell Flyes,Chest Isolation,3,12,30 sec,Upper Body - Chest
+Chest & Back,Accessory,Reverse Pec Deck Fly,Back Isolation,3,12,30 sec,Upper Body - Shoulders
+Core,Core Routine,In and Out (Crunches),Core Exercise,1,25,Continuous,Core
+Core,Core Routine,Seated Bicycle,Core Exercise,1,25,Continuous,Core
+Core,Core Routine,Reverse Bicycle,Core Exercise,1,25,Continuous,Core
+Core,Core Routine,Pulse Ups,Core Exercise,1,25,Continuous,Core
+Core,Core Routine,V-Up Rollup,Core Exercise,1,25,Continuous,Core
+Core,Core Routine,Leg Climbers,Core Exercise,1,25,Continuous,Core
+Core,Core Routine,Fifer Scissors,Core Exercise,1,25,Continuous,Core
+Core,Core Routine,Reverse Crunches,Core Exercise,1,25,Continuous,Core
+Core,Core Routine,Heels to Heaven,Core Exercise,1,25,Continuous,Core
+Core,Core Routine,Mason Twist,Core Exercise,1,25,Continuous (each side),Core
+Shoulders & Arms,Superset 1,Dumbbell Shoulder Press,Heavy Compound,4,8,2 min rest,Upper Body - Shoulders
+Shoulders & Arms,Superset 1,Barbell Curls,Heavy Compound,4,10,Minimal,Upper Body - Biceps
+Shoulders & Arms,Superset 2,Dumbbell Lateral Raises,Shoulder Isolation,3,12,45 sec,Upper Body - Shoulders
+Shoulders & Arms,Superset 2,Dumbbell Hammer Curls,Bicep Variation,3,12,Minimal,Upper Body - Biceps
+Shoulders & Arms,Superset 3 (Triset),Reverse Pec Deck Fly,Triset 3A,3,15,30 sec,Upper Body - Shoulders
+Shoulders & Arms,Superset 3 (Triset),EZ Bar Skull Crushers,Triset 3B,3,10,30 sec,Upper Body - Triceps
+Shoulders & Arms,Superset 3 (Triset),Cable Tricep Kickback,Triset 3C,3,15,Minimal,Upper Body - Triceps
+Shoulders & Arms,Accessory,Dumbbell Shrugs,Shoulder Isolation,3,12,30 sec,Upper Body - Shoulders
+Shoulders & Arms,Accessory,Plate Raises,Shoulder Isolation,3,12,30 sec,Upper Body - Shoulders
+Legs & Lower Body,Superset 1,Barbell Back Squat,Heavy Compound,4,8,2-3 min rest,Lower Body - Quads
+Legs & Lower Body,Superset 1,Romanian Deadlift,Heavy Compound,4,10,Minimal,Lower Body - Hamstrings
+Legs & Lower Body,Superset 2,Leg Press or Goblet Squat,Leg Variation,3,12,60 sec,Lower Body - Quads
+Legs & Lower Body,Superset 2,Standing Calf Raises,Calf Isolation,3,15,Minimal,Lower Body - Calves
+Legs & Lower Body,Superset 3 (Triset),Bulgarian Split Squats,Triset 3A,3,10,60 sec (per leg),Lower Body - Quads/Glutes
+Legs & Lower Body,Superset 3 (Triset),Walking Lunges,Triset 3B,3,12,Minimal (per leg),Lower Body - Quads/Glutes
+Legs & Lower Body,Superset 3 (Triset),Step-Ups,Triset 3C,3,12,Minimal (per leg),Lower Body - Glutes
+Legs & Lower Body,Accessory,Leg Curls,Hamstring Isolation,3,12,30 sec,Lower Body - Hamstrings
+Legs & Lower Body,Accessory,Hip Thrusts or Weighted Glute Bridges,Glute Isolation,3,12,30 sec,Lower Body - Glutes

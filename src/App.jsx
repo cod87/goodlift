@@ -11,14 +11,9 @@ import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
-import FavouritesScreen from './components/FavouritesScreen';
 import MobilityScreen from './components/Mobility/MobilityScreen';
 import CardioScreen from './pages/CardioScreen';
-import LogCardioScreen from './pages/LogCardioScreen';
-import LogActivityScreen from './pages/LogActivityScreen';
-import LogWorkoutScreen from './pages/LogWorkoutScreen';
-import LogYogaScreen from './pages/LogYogaScreen';
-import LogHiitScreen from './pages/LogHiitScreen';
+import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
@@ -574,23 +569,11 @@ function App() {
           
           {currentScreen === 'progress' && <ProgressScreen />}
 
-          {currentScreen === 'favourites' && (
-            <FavouritesScreen onStartWorkout={handleStartWorkout} />
-          )}
-
           {currentScreen === 'hiit' && <HiitTimerScreen />}
 
           {currentScreen === 'cardio' && <CardioScreen onNavigate={handleNavigate} />}
 
-          {currentScreen === 'log-cardio' && <LogCardioScreen onNavigate={handleNavigate} />}
-
-          {currentScreen === 'log-activity' && <LogActivityScreen onNavigate={handleNavigate} />}
-
-          {currentScreen === 'log-activity-workout' && <LogWorkoutScreen onNavigate={handleNavigate} />}
-
-          {currentScreen === 'log-activity-yoga' && <LogYogaScreen onNavigate={handleNavigate} />}
-
-          {currentScreen === 'log-activity-hiit' && <LogHiitScreen onNavigate={handleNavigate} />}
+          {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} />}
 
           {currentScreen === 'stretch' && <MobilityScreen />}
 

@@ -1,0 +1,215 @@
+[
+  {
+    "id": "plyo-v1-balanced",
+    "name": "Balanced Lower Body",
+    "description": "General lower body conditioning with overall muscle development",
+    "duration": 45,
+    "focus": "Mixed exercise selection, moderate impact, all muscle groups targeted",
+    "warmup": {
+      "duration": 8,
+      "exercises": [
+        { "name": "Arm circles and shoulder rolls", "duration": 30 },
+        { "name": "Hip circles (each direction)", "duration": 30 },
+        { "name": "Leg swings (front-to-back, side-to-side)", "duration": 60 },
+        { "name": "Walking lunges with torso twist", "duration": 60 },
+        { "name": "Inchworms to downward dog", "duration": 60 },
+        { "name": "High knees (light pace)", "duration": 60 },
+        { "name": "Butt kicks (light pace)", "duration": 60 },
+        { "name": "Bodyweight squats", "duration": 60 },
+        { "name": "Step-ups (moderate pace)", "duration": 30 },
+        { "name": "Glute bridges", "duration": 30 },
+        { "name": "Plank hold", "duration": 30 },
+        { "name": "Rest", "duration": 30 }
+      ]
+    },
+    "rounds": 4,
+    "workDuration": 40,
+    "restDuration": 20,
+    "extendedRest": 90,
+    "exercises": [
+      [
+        { "name": "Jump squats (controlled depth)", "target": "Quads, explosive" },
+        { "name": "Step-ups with knee drive (alternating)", "target": "Glutes" },
+        { "name": "Lateral bounds (side-to-side jumps)", "target": "Lateral power" },
+        { "name": "Step-downs with control (step to ground)", "target": "Eccentric control" },
+        { "name": "Skater hops (medium range)", "target": "Lateral agility" },
+        { "name": "Single-leg glute bridges (alternating)", "target": "Unilateral glutes" }
+      ],
+      [
+        { "name": "Split jump lunges (alternating, lower impact)", "target": "Lower impact power" },
+        { "name": "Step-ups with explosive knee drive (both legs)", "target": "Hip drive" },
+        { "name": "Lateral step-overs (side-to-side over step)", "target": "Lateral control" },
+        { "name": "Jump lunges (controlled, medium height)", "target": "Unilateral power" },
+        { "name": "Single-leg hops in place (each leg)", "target": "Single-leg stability" },
+        { "name": "Glute kickback pulses (rapid tempo)", "target": "Glute activation" }
+      ],
+      [
+        { "name": "Frog jumps (lower height, controlled landings)", "target": "Quad power" },
+        { "name": "Reverse step-ups (facing away from step)", "target": "Eccentric control" },
+        { "name": "Ice skaters (controlled range)", "target": "Lateral agility" },
+        { "name": "Step-up to single-leg balance (alternating)", "target": "Balance" },
+        { "name": "Box squat jumps to step (explosive squat, land on step)", "target": "Explosive power" },
+        { "name": "Fire hydrants (rapid tempo)", "target": "Hip mobility" }
+      ],
+      [
+        { "name": "Jump lunges with controlled landing", "target": "Unilateral power" },
+        { "name": "Double-leg step-ups (fast pace)", "target": "Cardio endurance" },
+        { "name": "Lateral shuffle to lateral lunge (side-to-side)", "target": "Agility" },
+        { "name": "Bulgarian split squats (explosive push off back leg)", "target": "Single-leg strength" },
+        { "name": "Squat pulses (rapid, small range)", "target": "Muscular endurance" },
+        { "name": "Calf raises (rapid tempo, maximum height)", "target": "Calves" }
+      ]
+    ],
+    "cooldown": {
+      "duration": 5,
+      "exercises": [
+        { "name": "Light walking in place", "duration": 60 },
+        { "name": "Controlled breathing with gentle leg swings", "duration": 60 },
+        { "name": "Standing quad stretch (each leg)", "duration": 45 },
+        { "name": "Hip flexor stretch (each side)", "duration": 45 },
+        { "name": "Hamstring stretch (seated or standing)", "duration": 45 },
+        { "name": "Pigeon pose or figure-4 stretch", "duration": 45 }
+      ]
+    }
+  },
+  {
+    "id": "plyo-v2-glute-power",
+    "name": "Glute & Power Emphasis",
+    "description": "Building explosive glute strength and posterior chain development",
+    "duration": 45,
+    "focus": "Heavy glute activation, single-leg work, hip extension focus",
+    "warmup": {
+      "duration": 8,
+      "exercises": [
+        { "name": "Cat-cow stretches", "duration": 60 },
+        { "name": "Hip circles and figure-4 stretch (standing)", "duration": 60 },
+        { "name": "Walking lunges with glute squeeze", "duration": 60 },
+        { "name": "Leg swings (high range)", "duration": 60 },
+        { "name": "Lateral lunges", "duration": 60 },
+        { "name": "Glute bridges with pulse", "duration": 60 },
+        { "name": "Single-leg glute bridges", "duration": 30 },
+        { "name": "Bodyweight squats with glute focus", "duration": 30 },
+        { "name": "Rest", "duration": 60 }
+      ]
+    },
+    "rounds": 4,
+    "workDuration": 40,
+    "restDuration": 20,
+    "extendedRest": 90,
+    "exercises": [
+      [
+        { "name": "Explosive glute bridges (jump at top)", "target": "Glute power" },
+        { "name": "Single-leg hop squats (each leg)", "target": "Unilateral power" },
+        { "name": "Step-up with glute squeeze (both legs, controlled)", "target": "Glute activation" },
+        { "name": "Donkey kick pulses (rapid tempo, each leg)", "target": "Glute isolation" },
+        { "name": "Jump lunges with glute focus", "target": "Glute power" },
+        { "name": "Lateral bounds", "target": "Lateral power" }
+      ],
+      [
+        { "name": "Single-leg glute bridge hops (each leg)", "target": "Unilateral glutes" },
+        { "name": "Bulgarian split squats on step (explosive)", "target": "Single-leg power" },
+        { "name": "Lateral step-ups with knee drive", "target": "Hip drive" },
+        { "name": "Fire hydrant pulses (rapid, high range)", "target": "Hip mobility" },
+        { "name": "Frog jumps (glute emphasis)", "target": "Glute power" },
+        { "name": "Single-leg deadlift hops (each leg)", "target": "Balance and glutes" }
+      ],
+      [
+        { "name": "Jump squats with glute focus (deep, explosive)", "target": "Explosive glutes" },
+        { "name": "Reverse step-ups (maximum range)", "target": "Eccentric control" },
+        { "name": "Skater hops with glute drive", "target": "Lateral power" },
+        { "name": "Glute kickback pulses with single-leg hold", "target": "Glute endurance" },
+        { "name": "Split squat jumps (alternating)", "target": "Unilateral power" },
+        { "name": "Step-down eccentric focus (slow lowering)", "target": "Eccentric strength" }
+      ],
+      [
+        { "name": "Double-leg explosive glute bridges", "target": "Maximum glute power" },
+        { "name": "Step-ups to single-leg balance (squeeze at top)", "target": "Balance and glutes" },
+        { "name": "Lateral shuffle to reverse lunge", "target": "Agility" },
+        { "name": "Wall sit pulse jumps", "target": "Quad endurance" },
+        { "name": "Single-leg Romanian deadlift hops (each leg)", "target": "Balance and hamstrings" },
+        { "name": "Calf raise holds (maximum height hold, pulse)", "target": "Calves" }
+      ]
+    ],
+    "cooldown": {
+      "duration": 5,
+      "exercises": [
+        { "name": "Light walking with glute engagement", "duration": 60 },
+        { "name": "Deep breathing", "duration": 60 },
+        { "name": "Deep glute stretch (pigeon pose)", "duration": 60 },
+        { "name": "Hip flexor stretch", "duration": 60 },
+        { "name": "Hamstring stretch", "duration": 60 }
+      ]
+    }
+  },
+  {
+    "id": "plyo-v3-quad-agility",
+    "name": "Quad & Agility Emphasis",
+    "description": "Speed development, directional agility, and sport-specific quickness",
+    "duration": 45,
+    "focus": "Rapid movements, maximum cadence work, lateral agility emphasis",
+    "warmup": {
+      "duration": 8,
+      "exercises": [
+        { "name": "Quad circles (standing)", "duration": 30 },
+        { "name": "Knee hugs walking", "duration": 30 },
+        { "name": "High knees (light pace)", "duration": 60 },
+        { "name": "Walking lunges (deep range)", "duration": 60 },
+        { "name": "Lateral shuffles", "duration": 60 },
+        { "name": "Calf stretches (walking)", "duration": 30 },
+        { "name": "Bodyweight squats", "duration": 60 },
+        { "name": "Step-ups with rapid tempo", "duration": 30 },
+        { "name": "Leg raises", "duration": 30 },
+        { "name": "Rest", "duration": 60 }
+      ]
+    },
+    "rounds": 4,
+    "workDuration": 40,
+    "restDuration": 20,
+    "extendedRest": 90,
+    "exercises": [
+      [
+        { "name": "Jump squats (maximum height)", "target": "Explosive quads" },
+        { "name": "Rapid step-ups (fast cadence)", "target": "Cardio endurance" },
+        { "name": "Lateral shuffle with sprint steps", "target": "Agility" },
+        { "name": "Tuck jumps", "target": "Explosive power" },
+        { "name": "Step-up to lateral extension (alternating)", "target": "Balance" },
+        { "name": "High knees at maximum speed", "target": "Speed endurance" }
+      ],
+      [
+        { "name": "Split jump lunges (rapid alternation)", "target": "Rapid power" },
+        { "name": "Lateral bounds with quick feet", "target": "Lateral agility" },
+        { "name": "Step-up with knee drive (maximum height)", "target": "Power" },
+        { "name": "Skater hops (wide range, explosive)", "target": "Lateral power" },
+        { "name": "Single-leg hops (rapid, each leg)", "target": "Speed" },
+        { "name": "Lateral step-overs (fast paced)", "target": "Agility" }
+      ],
+      [
+        { "name": "Frog jumps (explosive power)", "target": "Quad power" },
+        { "name": "Double-leg hops forward and back", "target": "Coordination" },
+        { "name": "Lateral lunges on step (alternating)", "target": "Lateral strength" },
+        { "name": "Step-ups with cross-body knee drive", "target": "Coordination" },
+        { "name": "Ice skaters (maximum speed)", "target": "Speed agility" },
+        { "name": "Diagonal bounds (front corner to back corner)", "target": "Multi-directional" }
+      ],
+      [
+        { "name": "Jump lunges with speed (continuous)", "target": "Speed endurance" },
+        { "name": "Step-up sprint (alternating legs, fast)", "target": "Cardio power" },
+        { "name": "Lateral shuffle with directional change", "target": "Agility" },
+        { "name": "Squat hold with rapid pulse", "target": "Muscular endurance" },
+        { "name": "Single-leg squat hold (15-20 seconds each leg)", "target": "Strength" },
+        { "name": "Calf raises at maximum speed", "target": "Speed calves" }
+      ]
+    ],
+    "cooldown": {
+      "duration": 5,
+      "exercises": [
+        { "name": "Light walking with gradual pace reduction", "duration": 60 },
+        { "name": "Standing quad activation and breathing", "duration": 60 },
+        { "name": "Standing quad stretch (each leg)", "duration": 45 },
+        { "name": "Lunge hold stretch (each leg)", "duration": 45 },
+        { "name": "Lateral lunge stretch (each side)", "duration": 45 },
+        { "name": "Full-body standing stretch", "duration": 45 }
+      ]
+    }
+  }
+]

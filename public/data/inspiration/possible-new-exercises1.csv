@@ -1,0 +1,110 @@
+Workout Type,Schedule,Grouping,Exercise Name,Muscle Group,Type,Sets,Reps/Duration,Rest,Focus
+Chest & Back,Monday,Superset 1,Barbell Bench Press,Upper Body - Chest,Compound,4,8,2-3 min,Heavy strength
+Chest & Back,Monday,Superset 1,Seated Cable Row,Upper Body - Back,Compound,4,10,Minimal,Heavy strength
+Chest & Back,Monday,Superset 2,Incline Dumbbell Bench Press,Upper Body - Chest,Compound,3,10,30-60 sec,Hypertrophy
+Chest & Back,Monday,Superset 2,Lat Pulldown,Upper Body - Back,Compound,3,12,Minimal,Hypertrophy
+Chest & Back,Monday,Superset 3 (Triset),Dumbbell Shoulder Press,Upper Body - Shoulders,Compound,3,10,30 sec,Accessory
+Chest & Back,Monday,Superset 3 (Triset),Barbell Curls,Upper Body - Biceps,Isolation,3,10,30 sec,Accessory
+Chest & Back,Monday,Superset 3 (Triset),Tricep Rope Pushdown,Upper Body - Triceps,Isolation,3,12,Minimal,Accessory
+Chest & Back,Monday,Accessory,Dumbbell Flyes,Upper Body - Chest,Isolation,3,12,30 sec,Chest finisher
+Chest & Back,Monday,Accessory,Reverse Pec Deck Fly,Upper Body - Shoulders,Isolation,3,12,30 sec,Back finisher
+Shoulders & Arms,Wednesday,Superset 1,Dumbbell Shoulder Press,Upper Body - Shoulders,Compound,4,8,2 min,Heavy strength
+Shoulders & Arms,Wednesday,Superset 1,Barbell Curls,Upper Body - Biceps,Compound,4,10,Minimal,Heavy strength
+Shoulders & Arms,Wednesday,Superset 2,Dumbbell Lateral Raises,Upper Body - Shoulders,Isolation,3,12,45 sec,Hypertrophy
+Shoulders & Arms,Wednesday,Superset 2,Dumbbell Hammer Curls,Upper Body - Biceps,Isolation,3,12,Minimal,Hypertrophy
+Shoulders & Arms,Wednesday,Superset 3 (Triset),Reverse Pec Deck Fly,Upper Body - Shoulders,Isolation,3,15,30 sec,Shoulder finisher
+Shoulders & Arms,Wednesday,Superset 3 (Triset),EZ Bar Skull Crushers,Upper Body - Triceps,Compound,3,10,30 sec,Tricep work
+Shoulders & Arms,Wednesday,Superset 3 (Triset),Cable Tricep Kickback,Upper Body - Triceps,Isolation,3,15,Minimal,Tricep finisher
+Shoulders & Arms,Wednesday,Accessory,Dumbbell Shrugs,Upper Body - Shoulders,Isolation,3,12,30 sec,Trap work
+Shoulders & Arms,Wednesday,Accessory,Plate Raises,Upper Body - Shoulders,Isolation,3,12,30 sec,Shoulder finisher
+Legs & Lower Body,Friday,Superset 1,Barbell Back Squat,Lower Body - Quads,Compound,4,8,2-3 min,Heavy strength
+Legs & Lower Body,Friday,Superset 1,Romanian Deadlift,Lower Body - Hamstrings,Compound,4,10,Minimal,Heavy strength
+Legs & Lower Body,Friday,Superset 2,Leg Press or Goblet Squat,Lower Body - Quads,Compound,3,12,60 sec,Hypertrophy
+Legs & Lower Body,Friday,Superset 2,Standing Calf Raises,Lower Body - Calves,Isolation,3,15,Minimal,Calf work
+Legs & Lower Body,Friday,Superset 3 (Triset),Bulgarian Split Squats,Lower Body - Quads/Glutes,Compound,3,10,60 sec (per leg),Unilateral strength
+Legs & Lower Body,Friday,Superset 3 (Triset),Walking Lunges,Lower Body - Quads/Glutes,Compound,3,12,Minimal (per leg),Unilateral strength
+Legs & Lower Body,Friday,Superset 3 (Triset),Step-Ups,Lower Body - Glutes,Compound,3,12,Minimal (per leg),Glute finisher
+Legs & Lower Body,Friday,Accessory,Leg Curls,Lower Body - Hamstrings,Isolation,3,12,30 sec,Hamstring work
+Legs & Lower Body,Friday,Accessory,Hip Thrusts / Weighted Glute Bridges,Lower Body - Glutes,Isolation,3,12,30 sec,Glute finisher
+Core,Mon/Wed/Fri,Core Routine,In and Out (Crunches),Core - Abs,Bodyweight,1,25,Continuous,Core strength
+Core,Mon/Wed/Fri,Core Routine,Seated Bicycle,Core - Obliques,Bodyweight,1,25,Continuous,Core strength
+Core,Mon/Wed/Fri,Core Routine,Reverse Bicycle,Core - Obliques,Bodyweight,1,25,Continuous,Core strength
+Core,Mon/Wed/Fri,Core Routine,Pulse Ups,Core - Lower Abs,Bodyweight,1,25,Continuous,Core strength
+Core,Mon/Wed/Fri,Core Routine,V-Up Rollup,Core - Full Body,Bodyweight,1,25,Continuous,Core strength
+Core,Mon/Wed/Fri,Core Routine,Leg Climbers,Core - Hip Flexors,Bodyweight,1,25,Continuous,Core endurance
+Core,Mon/Wed/Fri,Core Routine,Fifer Scissors,Core - Lower Abs,Bodyweight,1,25,Continuous,Core endurance
+Core,Mon/Wed/Fri,Core Routine,Reverse Crunches,Core - Lower Abs,Bodyweight,1,25,Continuous,Core strength
+Core,Mon/Wed/Fri,Core Routine,Heels to Heaven,Core - Lower Abs,Bodyweight,1,25,Continuous,Core strength
+Core,Mon/Wed/Fri,Core Routine,Mason Twist,Core - Obliques,Bodyweight,1,25,Continuous (each side),Core strength
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 1,Jump Squats,Lower Body - Explosive,Plyometric,1,40s,20s,Quad dominant
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 1,Step-Ups with Knee Drive,Lower Body - Explosive,Plyometric,1,40s,20s,Glute dominant
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 1,Lateral Bounds,Lower Body - Explosive,Plyometric,1,40s,20s,Lateral power
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 1,Step-Downs with Control,Lower Body - Explosive,Plyometric,1,40s,20s,Eccentric control
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 1,Skater Hops,Lower Body - Explosive,Plyometric,1,40s,20s,Lateral agility
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 1,Single-Leg Glute Bridges,Lower Body - Glutes,Plyometric,1,40s,20s,Unilateral glute
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 2,Split Jump Lunges,Lower Body - Explosive,Plyometric,1,40s,20s,Lower impact
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 2,Step-Ups Explosive Knee Drive,Lower Body - Explosive,Plyometric,1,40s,20s,Powerful hip drive
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 2,Lateral Step-Overs,Lower Body - Explosive,Plyometric,1,40s,20s,Lateral control
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 2,Jump Lunges,Lower Body - Explosive,Plyometric,1,40s,20s,Unilateral power
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 2,Single-Leg Hops In Place,Lower Body - Explosive,Plyometric,1,40s,20s,Single-leg stability
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 2,Glute Kickback Pulses,Lower Body - Glutes,Plyometric,1,40s,20s,Glute activation
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 3,Frog Jumps,Lower Body - Explosive,Plyometric,1,40s,20s,Full body power
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 3,Reverse Step-Ups,Lower Body - Glutes,Plyometric,1,40s,20s,Glute focus
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 3,Ice Skaters,Lower Body - Explosive,Plyometric,1,40s,20s,Lateral stability
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 3,Step-Up to Single-Leg Balance,Lower Body - Balance,Plyometric,1,40s,20s,Balance control
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 3,Box Squat Jumps to Step,Lower Body - Explosive,Plyometric,1,40s,20s,Explosive squat
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 3,Fire Hydrants,Lower Body - Glutes,Plyometric,1,40s,20s,Hip abductor
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 4,Jump Lunges Controlled,Lower Body - Explosive,Plyometric,1,40s,20s,Controlled landing
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 4,Double-Leg Step-Ups,Lower Body - Explosive,Plyometric,1,40s,20s,Fast paced
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 4,Lateral Shuffle to Lateral Lunge,Lower Body - Explosive,Plyometric,1,40s,20s,Directional change
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 4,Bulgarian Split Squats,Lower Body - Explosive,Plyometric,1,40s,20s,Unilateral strength
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 4,Squat Pulses,Lower Body - Quads,Plyometric,1,40s,20s,Quad endurance
+Plyometrics V1: Balanced,"Tuesday Weeks 1,2,5,7,10",Round 4,Calf Raises,Lower Body - Calves,Plyometric,1,40s,20s,Calf power
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 1,Explosive Glute Bridges,Lower Body - Glutes,Plyometric,1,40s,20s,Glute power
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 1,Single-Leg Hop Squats,Lower Body - Explosive,Plyometric,1,40s,20s,Single-leg power
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 1,Step-Up with Glute Squeeze,Lower Body - Glutes,Plyometric,1,40s,20s,Glute focus
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 1,Donkey Kick Pulses,Lower Body - Glutes,Plyometric,1,40s,20s,Glute isolation
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 1,Jump Lunges Glute Focus,Lower Body - Glutes,Plyometric,1,40s,20s,Glute emphasis
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 1,Lateral Bounds,Lower Body - Explosive,Plyometric,1,40s,20s,Glute drive
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 2,Single-Leg Glute Bridge Hops,Lower Body - Glutes,Plyometric,1,40s,20s,Unilateral glute power
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 2,Bulgarian Split Squats Explosive,Lower Body - Glutes,Plyometric,1,40s,20s,Explosive glute
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 2,Lateral Step-Ups Knee Drive,Lower Body - Glutes,Plyometric,1,40s,20s,Lateral glute work
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 2,Fire Hydrant Pulses,Lower Body - Glutes,Plyometric,1,40s,20s,Hip abductor
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 2,Frog Jumps Glute,Lower Body - Glutes,Plyometric,1,40s,20s,Glute emphasis
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 2,Single-Leg Deadlift Hops,Lower Body - Glutes,Plyometric,1,40s,20s,Unilateral glute RDL
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 3,Jump Squats Deep,Lower Body - Glutes,Plyometric,1,40s,20s,Deep glute squat
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 3,Reverse Step-Ups,Lower Body - Glutes,Plyometric,1,40s,20s,Glute engagement
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 3,Skater Hops Glute Drive,Lower Body - Glutes,Plyometric,1,40s,20s,Glute-driven lateral
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 3,Glute Kickback Pulses Single-Leg,Lower Body - Glutes,Plyometric,1,40s,20s,Unilateral glute pulse
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 3,Split Squat Jumps,Lower Body - Glutes,Plyometric,1,40s,20s,Alternating glute jumps
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 3,Step-Down Eccentric,Lower Body - Glutes,Plyometric,1,40s,20s,Slow glute control
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 4,Double-Leg Explosive Glute Bridges,Lower Body - Glutes,Plyometric,1,40s,20s,Maximum glute power
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 4,Step-Ups Single-Leg Balance,Lower Body - Glutes,Plyometric,1,40s,20s,Glute squeeze balance
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 4,Lateral Shuffle to Reverse Lunge,Lower Body - Glutes,Plyometric,1,40s,20s,Lateral glute lunge
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 4,Wall Sit Pulse Jumps,Lower Body - Glutes,Plyometric,1,40s,20s,Glute endurance
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 4,Single-Leg RDL Hops,Lower Body - Glutes,Plyometric,1,40s,20s,Unilateral RDL hop
+Plyometrics V2: Glute & Power,"Tuesday Weeks 2,6,9,12,4,8 deload",Round 4,Calf Raise Holds Pulse,Lower Body - Calves,Plyometric,1,40s,20s,Calf endurance
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 1,Jump Squats Maximum,Lower Body - Quads,Plyometric,1,40s,20s,Max height jump
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 1,Rapid Step-Ups,Lower Body - Quads,Plyometric,1,40s,20s,Fast cadence
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 1,Lateral Shuffle Sprint Steps,Lower Body - Agility,Plyometric,1,40s,20s,Sprint agility
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 1,Tuck Jumps,Lower Body - Quads,Plyometric,1,40s,20s,Explosive height
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 1,Step-Up Lateral Extension,Lower Body - Quads,Plyometric,1,40s,20s,Lateral reach
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 1,High Knees Maximum Speed,Lower Body - Quads,Plyometric,1,40s,20s,Max speed knees
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 2,Split Jump Lunges Rapid,Lower Body - Quads,Plyometric,1,40s,20s,Rapid alternation
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 2,Lateral Bounds Quick Feet,Lower Body - Agility,Plyometric,1,40s,20s,Quick feet bounds
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 2,Step-Up Knee Drive Maximum,Lower Body - Quads,Plyometric,1,40s,20s,Max knee height
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 2,Skater Hops Wide Explosive,Lower Body - Agility,Plyometric,1,40s,20s,Wide explosive jump
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 2,Single-Leg Hops Rapid,Lower Body - Agility,Plyometric,1,40s,20s,Rapid single-leg
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 2,Lateral Step-Overs Fast,Lower Body - Agility,Plyometric,1,40s,20s,Fast paced
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 3,Frog Jumps Explosive,Lower Body - Quads,Plyometric,1,40s,20s,Explosive power
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 3,Double-Leg Hops Forward Back,Lower Body - Agility,Plyometric,1,40s,20s,Directional hops
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 3,Lateral Lunges on Step,Lower Body - Quads,Plyometric,1,40s,20s,Lateral stepping
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 3,Step-Ups Cross-Body Knee,Lower Body - Quads,Plyometric,1,40s,20s,Knee drive
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 3,Ice Skaters Maximum Speed,Lower Body - Agility,Plyometric,1,40s,20s,Max speed skate
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 3,Diagonal Bounds,Lower Body - Agility,Plyometric,1,40s,20s,Directional bound
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 4,Jump Lunges Speed,Lower Body - Quads,Plyometric,1,40s,20s,Continuous speed
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 4,Step-Up Sprint,Lower Body - Quads,Plyometric,1,40s,20s,Sprint stepping
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 4,Lateral Shuffle Directional Change,Lower Body - Agility,Plyometric,1,40s,20s,Direction changes
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 4,Squat Hold Rapid Pulse,Lower Body - Quads,Plyometric,1,40s,20s,Pulsing hold
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 4,Single-Leg Squat Hold,Lower Body - Quads,Plyometric,1,40s,20s,Single-leg endurance
+Plyometrics V3: Quad & Agility,"Tuesday Weeks 3,7,11",Round 4,Calf Raises Maximum Speed,Lower Body - Calves,Plyometric,1,40s,20s,Max speed calf

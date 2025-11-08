@@ -10,6 +10,8 @@ import {
   getHiitSessions,
   getCardioSessions,
   getPlyoSessions,
+  getPlannedWorkouts,
+  deferPlannedWorkout,
   deleteStretchSession,
   deleteYogaSession,
   deleteHiitSession,
@@ -102,6 +104,7 @@ const ProgressScreen = () => {
   const [hiitSessions, setHiitSessions] = useState([]);
   const [cardioSessions, setCardioSessions] = useState([]);
   const [plyoSessions, setPlyoSessions] = useState([]);
+  const [plannedWorkouts, setPlannedWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [pinnedExercises, setPinnedExercisesState] = useState([]);
@@ -116,13 +119,14 @@ const ProgressScreen = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedHistory, loadedStretches, loadedYoga, loadedHiit, loadedCardio, loadedPlyo] = await Promise.all([
+      const [loadedHistory, loadedStretches, loadedYoga, loadedHiit, loadedCardio, loadedPlyo, loadedPlanned] = await Promise.all([
         getWorkoutHistory(),
         getStretchSessions(),
         getYogaSessions(),
         getHiitSessions(),
         getCardioSessions(),
-        getPlyoSessions()
+        getPlyoSessions(),
+        getPlannedWorkouts()
       ]);
       setHistory(loadedHistory);
       setStretchSessions(loadedStretches);
@@ -130,6 +134,7 @@ const ProgressScreen = () => {
       setHiitSessions(loadedHiit);
       setCardioSessions(loadedCardio);
       setPlyoSessions(loadedPlyo);
+      setPlannedWorkouts(loadedPlanned);
       
       // Load pinned exercises
       const pinned = getPinnedExercises();
@@ -377,6 +382,18 @@ const ProgressScreen = () => {
         sessionList.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 100);
+  };
+
+  // Handle defer planned workout
+  const handleDeferPlanned = async (plannedId) => {
+    try {
+      await deferPlannedWorkout(plannedId);
+      // Reload data to update calendar
+      const loadedPlanned = await getPlannedWorkouts();
+      setPlannedWorkouts(loadedPlanned);
+    } catch (error) {
+      console.error('Error deferring planned workout:', error);
+    }
   };
 
   // Filter sessions by selected date
@@ -710,7 +727,12 @@ const ProgressScreen = () => {
       </Box>
 
       {/* Calendar - positioned after stats, before history */}
-      <Calendar workoutSessions={workoutSessions} onDayClick={handleDayClick} />
+      <Calendar 
+        workoutSessions={workoutSessions} 
+        plannedWorkouts={plannedWorkouts}
+        onDayClick={handleDayClick} 
+        onDeferPlanned={handleDeferPlanned}
+      />
 
       {/* Progressive Overload Section */}
       {history.length > 0 && (

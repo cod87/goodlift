@@ -28,6 +28,8 @@ const KEYS = {
   YOGA_SESSIONS: 'goodlift_yoga_sessions',
   CARDIO_SESSIONS: 'goodlift_cardio_sessions',
   PLYO_SESSIONS: 'goodlift_plyo_sessions',
+  WORKOUT_PLANS: 'goodlift_workout_plans',
+  PLANNED_WORKOUTS: 'goodlift_planned_workouts',
   FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
   FAVORITE_EXERCISES: 'goodlift_favorite_exercises',
   PINNED_EXERCISES: 'goodlift_pinned_exercises',
@@ -1326,6 +1328,308 @@ export const updatePinnedExerciseMode = (exerciseName, trackingMode) => {
     setPinnedExercises(updated);
   } catch (error) {
     console.error('Error updating pinned exercise mode:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// WORKOUT PLAN MANAGEMENT
+// ============================================================================
+
+/**
+ * Get all workout plans
+ * @returns {Array} Array of workout plan objects
+ */
+export const getWorkoutPlans = () => {
+  try {
+    if (isGuestMode()) {
+      return getGuestData('workout_plans') || [];
+    }
+    
+    const plans = localStorage.getItem(KEYS.WORKOUT_PLANS);
+    return plans ? JSON.parse(plans) : [];
+  } catch (error) {
+    console.error('Error reading workout plans:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a new workout plan
+ * @param {Object} planData - Plan data including name, description, schedule
+ * @returns {Object} The saved plan with generated ID
+ */
+export const saveWorkoutPlan = async (planData) => {
+  try {
+    if (!planData || !planData.name) {
+      throw new Error('Plan name is required');
+    }
+    
+    const plans = getWorkoutPlans();
+    const newPlan = {
+      id: `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: planData.name,
+      description: planData.description || '',
+      schedule: planData.schedule || [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isActive: planData.isActive || false,
+    };
+    
+    plans.unshift(newPlan);
+    
+    if (isGuestMode()) {
+      setGuestData('workout_plans', plans);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(plans));
+      
+      // TODO: Add Firebase sync when ready
+      // if (currentUserId) {
+      //   await saveWorkoutPlansToFirebase(currentUserId, plans);
+      // }
+    }
+    
+    return newPlan;
+  } catch (error) {
+    console.error('Error saving workout plan:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update an existing workout plan
+ * @param {string} planId - ID of the plan to update
+ * @param {Object} updates - Updated plan data
+ */
+export const updateWorkoutPlan = async (planId, updates) => {
+  try {
+    const plans = getWorkoutPlans();
+    const planIndex = plans.findIndex(p => p.id === planId);
+    
+    if (planIndex === -1) {
+      throw new Error('Plan not found');
+    }
+    
+    plans[planIndex] = {
+      ...plans[planIndex],
+      ...updates,
+      id: planId, // Ensure ID doesn't change
+      updatedAt: new Date().toISOString(),
+    };
+    
+    if (isGuestMode()) {
+      setGuestData('workout_plans', plans);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(plans));
+      
+      // TODO: Add Firebase sync when ready
+      // if (currentUserId) {
+      //   await saveWorkoutPlansToFirebase(currentUserId, plans);
+      // }
+    }
+    
+    return plans[planIndex];
+  } catch (error) {
+    console.error('Error updating workout plan:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a workout plan
+ * @param {string} planId - ID of the plan to delete
+ */
+export const deleteWorkoutPlan = async (planId) => {
+  try {
+    const plans = getWorkoutPlans();
+    const filteredPlans = plans.filter(p => p.id !== planId);
+    
+    if (isGuestMode()) {
+      setGuestData('workout_plans', filteredPlans);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(filteredPlans));
+      
+      // TODO: Add Firebase sync when ready
+      // if (currentUserId) {
+      //   await saveWorkoutPlansToFirebase(currentUserId, filteredPlans);
+      // }
+    }
+    
+    // Also remove any planned workouts associated with this plan
+    const plannedWorkouts = getPlannedWorkouts();
+    const filteredPlanned = plannedWorkouts.filter(pw => pw.planId !== planId);
+    
+    if (isGuestMode()) {
+      setGuestData('planned_workouts', filteredPlanned);
+    } else {
+      localStorage.setItem(KEYS.PLANNED_WORKOUTS, JSON.stringify(filteredPlanned));
+    }
+  } catch (error) {
+    console.error('Error deleting workout plan:', error);
+    throw error;
+  }
+};
+
+/**
+ * Set a plan as active (only one plan can be active at a time)
+ * @param {string} planId - ID of the plan to activate
+ */
+export const setActivePlan = async (planId) => {
+  try {
+    const plans = getWorkoutPlans();
+    
+    // Deactivate all plans
+    plans.forEach(plan => {
+      plan.isActive = plan.id === planId;
+    });
+    
+    if (isGuestMode()) {
+      setGuestData('workout_plans', plans);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(plans));
+    }
+  } catch (error) {
+    console.error('Error setting active plan:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// PLANNED WORKOUT MANAGEMENT
+// ============================================================================
+
+/**
+ * Get all planned workouts
+ * @returns {Array} Array of planned workout objects
+ */
+export const getPlannedWorkouts = () => {
+  try {
+    if (isGuestMode()) {
+      return getGuestData('planned_workouts') || [];
+    }
+    
+    const planned = localStorage.getItem(KEYS.PLANNED_WORKOUTS);
+    return planned ? JSON.parse(planned) : [];
+  } catch (error) {
+    console.error('Error reading planned workouts:', error);
+    return [];
+  }
+};
+
+/**
+ * Schedule a planned workout for a specific date
+ * @param {Object} plannedWorkoutData - Planned workout data
+ */
+export const schedulePlannedWorkout = async (plannedWorkoutData) => {
+  try {
+    if (!plannedWorkoutData || !plannedWorkoutData.date) {
+      throw new Error('Date is required for planned workout');
+    }
+    
+    const plannedWorkouts = getPlannedWorkouts();
+    const newPlanned = {
+      id: `planned_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      date: plannedWorkoutData.date,
+      type: plannedWorkoutData.type || 'full',
+      planId: plannedWorkoutData.planId || null,
+      planName: plannedWorkoutData.planName || '',
+      workoutName: plannedWorkoutData.workoutName || '',
+      isCompleted: false,
+      createdAt: new Date().toISOString(),
+    };
+    
+    plannedWorkouts.push(newPlanned);
+    
+    if (isGuestMode()) {
+      setGuestData('planned_workouts', plannedWorkouts);
+    } else {
+      localStorage.setItem(KEYS.PLANNED_WORKOUTS, JSON.stringify(plannedWorkouts));
+    }
+    
+    return newPlanned;
+  } catch (error) {
+    console.error('Error scheduling planned workout:', error);
+    throw error;
+  }
+};
+
+/**
+ * Mark a planned workout as completed
+ * @param {string} plannedWorkoutId - ID of the planned workout
+ */
+export const markPlannedWorkoutComplete = async (plannedWorkoutId) => {
+  try {
+    const plannedWorkouts = getPlannedWorkouts();
+    const plannedIndex = plannedWorkouts.findIndex(p => p.id === plannedWorkoutId);
+    
+    if (plannedIndex === -1) {
+      throw new Error('Planned workout not found');
+    }
+    
+    plannedWorkouts[plannedIndex].isCompleted = true;
+    plannedWorkouts[plannedIndex].completedAt = new Date().toISOString();
+    
+    if (isGuestMode()) {
+      setGuestData('planned_workouts', plannedWorkouts);
+    } else {
+      localStorage.setItem(KEYS.PLANNED_WORKOUTS, JSON.stringify(plannedWorkouts));
+    }
+    
+    return plannedWorkouts[plannedIndex];
+  } catch (error) {
+    console.error('Error marking planned workout complete:', error);
+    throw error;
+  }
+};
+
+/**
+ * Defer a planned workout to the next day
+ * @param {string} plannedWorkoutId - ID of the planned workout
+ */
+export const deferPlannedWorkout = async (plannedWorkoutId) => {
+  try {
+    const plannedWorkouts = getPlannedWorkouts();
+    const plannedIndex = plannedWorkouts.findIndex(p => p.id === plannedWorkoutId);
+    
+    if (plannedIndex === -1) {
+      throw new Error('Planned workout not found');
+    }
+    
+    const currentDate = new Date(plannedWorkouts[plannedIndex].date);
+    const nextDay = new Date(currentDate);
+    nextDay.setDate(currentDate.getDate() + 1);
+    
+    plannedWorkouts[plannedIndex].date = nextDay.toISOString();
+    
+    if (isGuestMode()) {
+      setGuestData('planned_workouts', plannedWorkouts);
+    } else {
+      localStorage.setItem(KEYS.PLANNED_WORKOUTS, JSON.stringify(plannedWorkouts));
+    }
+    
+    return plannedWorkouts[plannedIndex];
+  } catch (error) {
+    console.error('Error deferring planned workout:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a planned workout
+ * @param {string} plannedWorkoutId - ID of the planned workout
+ */
+export const deletePlannedWorkout = async (plannedWorkoutId) => {
+  try {
+    const plannedWorkouts = getPlannedWorkouts();
+    const filteredPlanned = plannedWorkouts.filter(p => p.id !== plannedWorkoutId);
+    
+    if (isGuestMode()) {
+      setGuestData('planned_workouts', filteredPlanned);
+    } else {
+      localStorage.setItem(KEYS.PLANNED_WORKOUTS, JSON.stringify(filteredPlanned));
+    }
+  } catch (error) {
+    console.error('Error deleting planned workout:', error);
     throw error;
   }
 };

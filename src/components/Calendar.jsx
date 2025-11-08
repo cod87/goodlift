@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@mui/material';
+import { Box, IconButton, Tooltip } from '@mui/material';
+import { SkipNext } from '@mui/icons-material';
 import '../styles/Calendar.css';
 
-const Calendar = ({ workoutSessions = [], onDayClick }) => {
+const Calendar = ({ workoutSessions = [], plannedWorkouts = [], onDayClick, onDeferPlanned }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   // Create a map of dates to session info for quick lookup
@@ -13,7 +14,7 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
       const d = new Date(session.date);
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (!dateMap.has(dateStr)) {
-        dateMap.set(dateStr, { sessions: [], durations: {} });
+        dateMap.set(dateStr, { sessions: [], durations: {}, planned: [] });
       }
       const dayData = dateMap.get(dateStr);
       dayData.sessions.push(session);
@@ -23,13 +24,28 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
       }
       dayData.durations[session.type] += session.duration || 0;
     });
+    
+    // Add planned workouts
+    plannedWorkouts.forEach(planned => {
+      const d = new Date(planned.date);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (!dateMap.has(dateStr)) {
+        dateMap.set(dateStr, { sessions: [], durations: {}, planned: [] });
+      }
+      const dayData = dateMap.get(dateStr);
+      // Only show as planned if not completed
+      if (!planned.isCompleted) {
+        dayData.planned.push(planned);
+      }
+    });
+    
     return dateMap;
-  }, [workoutSessions]);
+  }, [workoutSessions, plannedWorkouts]);
 
   // Get session info for a date
   const getSessionInfo = (date) => {
     const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    return workoutDateMap.get(dateStr) || { sessions: [], durations: {} };
+    return workoutDateMap.get(dateStr) || { sessions: [], durations: {}, planned: [] };
   };
 
   // Get days for monthly view
@@ -196,8 +212,8 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
         
         {/* Calendar days */}
         {days.map((date, index) => {
-          const sessionInfo = date ? getSessionInfo(date) : { sessions: [], durations: {} };
-          const hasActivity = sessionInfo.sessions.length > 0;
+          const sessionInfo = date ? getSessionInfo(date) : { sessions: [], durations: {}, planned: [] };
+          const hasActivity = sessionInfo.sessions.length > 0 || sessionInfo.planned.length > 0;
           const displayInfo = hasActivity ? getDisplayInfo(sessionInfo) : { icon: null, bookmarks: [] };
           
           return (
@@ -238,9 +254,56 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
                           style={{ 
                             width: '40px', 
                             height: '40px',
-                            opacity: 0.8,
+                            opacity: 0.8, // Completed workouts at full opacity
                           }}
                         />
+                      </Box>
+                    )}
+                    
+                    {/* Show planned workout icon if no completed workout */}
+                    {!displayInfo.icon && sessionInfo.planned.length > 0 && (
+                      <Box sx={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '100%',
+                        height: '100%',
+                        position: 'relative'
+                      }}>
+                        <img 
+                          src={getIconPath(sessionInfo.planned[0].type)} 
+                          alt={sessionInfo.planned[0].type}
+                          style={{ 
+                            width: '40px', 
+                            height: '40px',
+                            opacity: 0.3, // Planned workouts at lower opacity
+                            filter: 'grayscale(50%)',
+                          }}
+                        />
+                        {/* Defer button for planned workouts */}
+                        {onDeferPlanned && (
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeferPlanned(sessionInfo.planned[0].id);
+                            }}
+                            sx={{
+                              position: 'absolute',
+                              bottom: -4,
+                              right: -4,
+                              bgcolor: 'background.paper',
+                              boxShadow: 1,
+                              width: 20,
+                              height: 20,
+                              '&:hover': {
+                                bgcolor: 'primary.light',
+                              }
+                            }}
+                          >
+                            <SkipNext sx={{ fontSize: 14 }} />
+                          </IconButton>
+                        )}
                       </Box>
                     )}
                     
@@ -321,7 +384,16 @@ Calendar.propTypes = {
       duration: PropTypes.number,
     })
   ),
+  plannedWorkouts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      date: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
+      isCompleted: PropTypes.bool,
+    })
+  ),
   onDayClick: PropTypes.func,
+  onDeferPlanned: PropTypes.func,
 };
 
 export default Calendar;

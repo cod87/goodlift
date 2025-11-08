@@ -16,6 +16,7 @@ import CardioScreen from './pages/CardioScreen';
 import PlyoScreen from './pages/PlyoScreen';
 import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
+import WorkoutPlanBuilderPage from './pages/WorkoutPlanBuilderPage';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
@@ -575,6 +576,8 @@ function App() {
           {currentScreen === 'cardio' && <CardioScreen onNavigate={handleNavigate} />}
 
           {currentScreen === 'plyo' && <PlyoScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'plans' && <WorkoutPlanBuilderPage onNavigate={handleNavigate} />}
 
           {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} />}
 

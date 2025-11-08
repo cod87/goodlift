@@ -211,6 +211,12 @@ const NavigationSidebar = ({
                 onClick={() => handleNavClick('progress')}
               />
               <NavLink
+                icon={<EditCalendarIcon />}
+                label="Plans"
+                isActive={currentScreen === 'plans'}
+                onClick={() => handleNavClick('plans')}
+              />
+              <NavLink
                 icon={<FaDumbbell />}
                 label="Workout"
                 isActive={currentScreen === 'selection' || currentScreen === 'preview'}

@@ -638,6 +638,7 @@ export const saveCardioSession = async (sessionData) => {
       cardioType: sessionData.cardioType,
       duration: sessionData.duration,
       date: sessionData.date || Date.now(),
+      notes: sessionData.notes || '',
     };
     
     sessions.unshift(newSession); // Add to beginning for chronological order

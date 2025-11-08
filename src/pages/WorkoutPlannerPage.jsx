@@ -14,6 +14,10 @@ import {
   TextField,
   IconButton,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { Add, Edit, Delete, PlayArrow } from '@mui/icons-material';
 import PropTypes from 'prop-types';
@@ -27,10 +31,15 @@ import {
 } from '../utils/storage';
 import { create90DayPlan, scheduleWorkoutsFromPlan } from '../utils/planHelpers';
 
+const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
 const WorkoutPlannerPage = ({ onNavigate }) => {
   const [plans, setPlans] = useState([]);
   const [activePlan, setActivePlanState] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openActivateDialog, setOpenActivateDialog] = useState(false);
+  const [planToActivate, setPlanToActivate] = useState(null);
+  const [selectedStartDay, setSelectedStartDay] = useState('Monday');
   const [editingPlan, setEditingPlan] = useState(null);
   const [planName, setPlanName] = useState('');
   const [planDescription, setPlanDescription] = useState('');
@@ -93,17 +102,34 @@ const WorkoutPlannerPage = ({ onNavigate }) => {
     }
   };
 
-  const handleActivatePlan = (plan) => {
+  const handleShowActivateDialog = (plan) => {
+    setPlanToActivate(plan);
+    // Set default start day based on plan or user preference
+    setSelectedStartDay(plan.startDayOfWeek || 'Monday');
+    setOpenActivateDialog(true);
+  };
+
+  const handleActivatePlan = () => {
+    if (!planToActivate) return;
+    
     const startDate = new Date();
-    const planWithStart = { ...plan, startDate: startDate.toISOString() };
+    // If the plan is the 90-day plan, recreate it with the selected start day
+    let planToSchedule = planToActivate;
+    if (planToActivate.isPremade && planToActivate.id === 'premade-90-day') {
+      planToSchedule = create90DayPlan(selectedStartDay);
+    }
+    
+    const planWithStart = { ...planToSchedule, startDate: startDate.toISOString(), startDayOfWeek: selectedStartDay };
     
     setActivePlan(planWithStart);
     
     // Generate scheduled workouts
-    const scheduled = scheduleWorkoutsFromPlan(plan, startDate);
+    const scheduled = scheduleWorkoutsFromPlan(planToSchedule, startDate);
     setScheduledWorkouts(scheduled);
     
     setActivePlanState(planWithStart);
+    setOpenActivateDialog(false);
+    setPlanToActivate(null);
     
     // Navigate to progress screen to see calendar
     if (onNavigate) {
@@ -168,7 +194,7 @@ const WorkoutPlannerPage = ({ onNavigate }) => {
                 <Button
                   size="small"
                   startIcon={<PlayArrow />}
-                  onClick={() => handleActivatePlan(plan)}
+                  onClick={() => handleShowActivateDialog(plan)}
                   disabled={activePlan?.id === plan.id}
                 >
                   {activePlan?.id === plan.id ? 'Active' : 'Activate'}
@@ -228,6 +254,56 @@ const WorkoutPlannerPage = ({ onNavigate }) => {
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
           <Button onClick={handleSavePlan} variant="contained" disabled={!planName}>
             Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Activate Plan Dialog with Start Day Selection */}
+      <Dialog open={openActivateDialog} onClose={() => setOpenActivateDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Activate Workout Plan
+        </DialogTitle>
+        <DialogContent>
+          {planToActivate && (
+            <>
+              <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
+                {planToActivate.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                {planToActivate.description}
+              </Typography>
+              {planToActivate.totalDays && (
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Duration: {planToActivate.totalDays} days
+                </Typography>
+              )}
+              
+              <FormControl fullWidth sx={{ mt: 3 }}>
+                <InputLabel>Start Day of Week</InputLabel>
+                <Select
+                  value={selectedStartDay}
+                  onChange={(e) => setSelectedStartDay(e.target.value)}
+                  label="Start Day of Week"
+                >
+                  {DAYS_OF_WEEK.map((day) => (
+                    <MenuItem key={day} value={day}>
+                      {day}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                The plan will start today ({new Date().toLocaleDateString()}) and schedule workouts according to the weekly pattern.
+                {planToActivate.isPremade && ' The 90-day program follows: Mon-Chest&Back, Tue-Plyo, Wed-Shoulders&Arms, Thu-Yoga, Fri-Legs, Sat-Recovery, Sun-Rest.'}
+              </Typography>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenActivateDialog(false)}>Cancel</Button>
+          <Button onClick={handleActivatePlan} variant="contained" color="primary">
+            Activate Plan
           </Button>
         </DialogActions>
       </Dialog>

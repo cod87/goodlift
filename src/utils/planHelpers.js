@@ -1,137 +1,178 @@
 /**
  * Utilities for creating and managing the 90-day workout program
+ * Based on the updated 90-day-calendar1.md structure
  */
 
 /**
- * Parse the 90-day calendar and create a structured plan
+ * Create the 90-day plan based on the new calendar structure
+ * Weekly pattern: Mon-Chest&Back, Tue-Plyo, Wed-Shoulders&Arms, Thu-Yoga, Fri-Legs, Sat-Active Recovery, Sun-Rest
+ * @param {string} startDayOfWeek - Day of week to start the plan (default: 'Monday')
  * @returns {Object} The premade 90-day plan
  */
-export const create90DayPlan = () => {
+export const create90DayPlan = (startDayOfWeek = 'Monday') => {
   const plan = {
     id: 'premade-90-day',
-    name: '90-Day Transformation Program',
-    description: 'Complete 90-day program with strength, power, plyometric, yoga, and core workouts',
+    name: '90-Day Comprehensive Workout Program',
+    description: 'P90X-inspired program with Chest & Back, Shoulders & Arms, Legs, Plyometrics (3 versions), Yoga, and Core work',
     isPremade: true,
     totalDays: 90,
+    startDayOfWeek,
     days: [],
   };
 
-  // Phase 1: Foundation (Days 1-30)
-  const phase1Pattern = [
-    { type: 'upper', name: 'Upper Body Strength', phase: 'Foundation' },
-    { type: 'lower', name: 'Lower Body Strength', phase: 'Foundation' },
-    { type: 'yoga', name: 'Yoga Session', duration: 30, phase: 'Foundation' },
-    { type: 'core', name: 'Core Strength', phase: 'Foundation' },
-    { type: 'full', name: 'Full Body Strength', phase: 'Foundation' },
-    { type: 'plyometric', name: 'Plyometric Training', phase: 'Foundation' },
-    { type: 'rest', name: 'Rest Day', phase: 'Foundation' },
+  // Phase 1: Weeks 1-4 (Days 1-28)
+  const phase1Weeks = [
+    // Week 1
+    [
+      { type: 'chest-back', name: 'Chest & Back + Core', phase: 'Foundation', week: 1, dayOfWeek: 'Monday', workoutId: 'chest-back-core' },
+      { type: 'plyometric', name: 'Plyometrics V1: Balanced', phase: 'Foundation', week: 1, dayOfWeek: 'Tuesday', workoutId: 'plyo-v1', version: 1 },
+      { type: 'shoulders-arms', name: 'Shoulders & Arms + Core', phase: 'Foundation', week: 1, dayOfWeek: 'Wednesday', workoutId: 'shoulders-arms-core' },
+      { type: 'yoga', name: 'Yoga', phase: 'Foundation', week: 1, dayOfWeek: 'Thursday', duration: 60, workoutId: 'yoga' },
+      { type: 'legs', name: 'Legs & Lower Body + Core', phase: 'Foundation', week: 1, dayOfWeek: 'Friday', workoutId: 'legs-core' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Foundation', week: 1, dayOfWeek: 'Saturday', workoutId: 'active-recovery' },
+      { type: 'rest', name: 'Rest or X-Stretch', phase: 'Foundation', week: 1, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+    // Week 2
+    [
+      { type: 'chest-back', name: 'Chest & Back + Core', phase: 'Foundation', week: 2, dayOfWeek: 'Monday', workoutId: 'chest-back-core' },
+      { type: 'plyometric', name: 'Plyometrics V2: Glute & Power', phase: 'Foundation', week: 2, dayOfWeek: 'Tuesday', workoutId: 'plyo-v2', version: 2 },
+      { type: 'shoulders-arms', name: 'Shoulders & Arms + Core', phase: 'Foundation', week: 2, dayOfWeek: 'Wednesday', workoutId: 'shoulders-arms-core' },
+      { type: 'yoga', name: 'Yoga', phase: 'Foundation', week: 2, dayOfWeek: 'Thursday', duration: 60, workoutId: 'yoga' },
+      { type: 'legs', name: 'Legs & Lower Body + Core', phase: 'Foundation', week: 2, dayOfWeek: 'Friday', workoutId: 'legs-core' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Foundation', week: 2, dayOfWeek: 'Saturday', workoutId: 'active-recovery' },
+      { type: 'rest', name: 'Rest or X-Stretch', phase: 'Foundation', week: 2, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+    // Week 3
+    [
+      { type: 'chest-back', name: 'Chest & Back + Core', phase: 'Foundation', week: 3, dayOfWeek: 'Monday', workoutId: 'chest-back-core' },
+      { type: 'plyometric', name: 'Plyometrics V3: Quad & Agility', phase: 'Foundation', week: 3, dayOfWeek: 'Tuesday', workoutId: 'plyo-v3', version: 3 },
+      { type: 'shoulders-arms', name: 'Shoulders & Arms + Core', phase: 'Foundation', week: 3, dayOfWeek: 'Wednesday', workoutId: 'shoulders-arms-core' },
+      { type: 'yoga', name: 'Yoga', phase: 'Foundation', week: 3, dayOfWeek: 'Thursday', duration: 60, workoutId: 'yoga' },
+      { type: 'legs', name: 'Legs & Lower Body + Core', phase: 'Foundation', week: 3, dayOfWeek: 'Friday', workoutId: 'legs-core' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Foundation', week: 3, dayOfWeek: 'Saturday', workoutId: 'active-recovery' },
+      { type: 'rest', name: 'Rest or X-Stretch', phase: 'Foundation', week: 3, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+    // Week 4 - Recovery Week
+    [
+      { type: 'yoga', name: 'Yoga (Recovery)', phase: 'Foundation', week: 4, dayOfWeek: 'Monday', duration: 90, intensity: 'light', workoutId: 'yoga' },
+      { type: 'plyometric', name: 'Plyometrics V1 (Light)', phase: 'Foundation', week: 4, dayOfWeek: 'Tuesday', workoutId: 'plyo-v1', version: 1, intensity: 'light' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Foundation', week: 4, dayOfWeek: 'Wednesday', workoutId: 'active-recovery' },
+      { type: 'stretch', name: 'X-Stretch', phase: 'Foundation', week: 4, dayOfWeek: 'Thursday', duration: 30, workoutId: 'stretch' },
+      { type: 'yoga', name: 'Yoga (Recovery)', phase: 'Foundation', week: 4, dayOfWeek: 'Friday', duration: 90, intensity: 'light', workoutId: 'yoga' },
+      { type: 'yoga', name: 'Yoga (Recovery)', phase: 'Foundation', week: 4, dayOfWeek: 'Saturday', duration: 90, intensity: 'light', workoutId: 'yoga' },
+      { type: 'rest', name: 'Rest', phase: 'Foundation', week: 4, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
   ];
 
-  // Add Phase 1 (days 1-21)
-  for (let week = 0; week < 3; week++) {
-    phase1Pattern.forEach(day => {
+  // Phase 2: Weeks 5-8 (Days 29-56)
+  const phase2Weeks = [
+    // Week 5
+    [
+      { type: 'chest-back', name: 'Chest & Back + Core', phase: 'Progressive Overload', week: 5, dayOfWeek: 'Monday', workoutId: 'chest-back-core' },
+      { type: 'plyometric', name: 'Plyometrics V2: Glute & Power', phase: 'Progressive Overload', week: 5, dayOfWeek: 'Tuesday', workoutId: 'plyo-v2', version: 2 },
+      { type: 'shoulders-arms', name: 'Shoulders & Arms + Core', phase: 'Progressive Overload', week: 5, dayOfWeek: 'Wednesday', workoutId: 'shoulders-arms-core' },
+      { type: 'yoga', name: 'Yoga', phase: 'Progressive Overload', week: 5, dayOfWeek: 'Thursday', duration: 60, workoutId: 'yoga' },
+      { type: 'legs', name: 'Legs & Lower Body + Core', phase: 'Progressive Overload', week: 5, dayOfWeek: 'Friday', workoutId: 'legs-core' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Progressive Overload', week: 5, dayOfWeek: 'Saturday', workoutId: 'active-recovery' },
+      { type: 'rest', name: 'Rest or X-Stretch', phase: 'Progressive Overload', week: 5, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+    // Week 6
+    [
+      { type: 'chest-back', name: 'Chest & Back + Core', phase: 'Progressive Overload', week: 6, dayOfWeek: 'Monday', workoutId: 'chest-back-core' },
+      { type: 'plyometric', name: 'Plyometrics V3: Quad & Agility', phase: 'Progressive Overload', week: 6, dayOfWeek: 'Tuesday', workoutId: 'plyo-v3', version: 3 },
+      { type: 'shoulders-arms', name: 'Shoulders & Arms + Core', phase: 'Progressive Overload', week: 6, dayOfWeek: 'Wednesday', workoutId: 'shoulders-arms-core' },
+      { type: 'yoga', name: 'Yoga', phase: 'Progressive Overload', week: 6, dayOfWeek: 'Thursday', duration: 60, workoutId: 'yoga' },
+      { type: 'legs', name: 'Legs & Lower Body + Core', phase: 'Progressive Overload', week: 6, dayOfWeek: 'Friday', workoutId: 'legs-core' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Progressive Overload', week: 6, dayOfWeek: 'Saturday', workoutId: 'active-recovery' },
+      { type: 'rest', name: 'Rest or X-Stretch', phase: 'Progressive Overload', week: 6, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+    // Week 7
+    [
+      { type: 'chest-back', name: 'Chest & Back + Core', phase: 'Progressive Overload', week: 7, dayOfWeek: 'Monday', workoutId: 'chest-back-core' },
+      { type: 'plyometric', name: 'Plyometrics V1: Balanced', phase: 'Progressive Overload', week: 7, dayOfWeek: 'Tuesday', workoutId: 'plyo-v1', version: 1 },
+      { type: 'shoulders-arms', name: 'Shoulders & Arms + Core', phase: 'Progressive Overload', week: 7, dayOfWeek: 'Wednesday', workoutId: 'shoulders-arms-core' },
+      { type: 'yoga', name: 'Yoga', phase: 'Progressive Overload', week: 7, dayOfWeek: 'Thursday', duration: 60, workoutId: 'yoga' },
+      { type: 'legs', name: 'Legs & Lower Body + Core', phase: 'Progressive Overload', week: 7, dayOfWeek: 'Friday', workoutId: 'legs-core' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Progressive Overload', week: 7, dayOfWeek: 'Saturday', workoutId: 'active-recovery' },
+      { type: 'rest', name: 'Rest or X-Stretch', phase: 'Progressive Overload', week: 7, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+    // Week 8 - Recovery Week
+    [
+      { type: 'yoga', name: 'Yoga (Recovery)', phase: 'Progressive Overload', week: 8, dayOfWeek: 'Monday', duration: 90, intensity: 'light', workoutId: 'yoga' },
+      { type: 'plyometric', name: 'Plyometrics V2 (Light)', phase: 'Progressive Overload', week: 8, dayOfWeek: 'Tuesday', workoutId: 'plyo-v2', version: 2, intensity: 'light' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Progressive Overload', week: 8, dayOfWeek: 'Wednesday', workoutId: 'active-recovery' },
+      { type: 'stretch', name: 'X-Stretch', phase: 'Progressive Overload', week: 8, dayOfWeek: 'Thursday', duration: 30, workoutId: 'stretch' },
+      { type: 'yoga', name: 'Yoga (Recovery)', phase: 'Progressive Overload', week: 8, dayOfWeek: 'Friday', duration: 90, intensity: 'light', workoutId: 'yoga' },
+      { type: 'yoga', name: 'Yoga (Recovery)', phase: 'Progressive Overload', week: 8, dayOfWeek: 'Saturday', duration: 90, intensity: 'light', workoutId: 'yoga' },
+      { type: 'rest', name: 'Rest', phase: 'Progressive Overload', week: 8, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+  ];
+
+  // Phase 3: Weeks 9-12 (Days 57-84 + final days)
+  const phase3Weeks = [
+    // Week 9
+    [
+      { type: 'chest-back', name: 'Chest & Back + Core', phase: 'Peak Performance', week: 9, dayOfWeek: 'Monday', workoutId: 'chest-back-core' },
+      { type: 'plyometric', name: 'Plyometrics V2: Glute & Power', phase: 'Peak Performance', week: 9, dayOfWeek: 'Tuesday', workoutId: 'plyo-v2', version: 2 },
+      { type: 'shoulders-arms', name: 'Shoulders & Arms + Core', phase: 'Peak Performance', week: 9, dayOfWeek: 'Wednesday', workoutId: 'shoulders-arms-core' },
+      { type: 'yoga', name: 'Yoga', phase: 'Peak Performance', week: 9, dayOfWeek: 'Thursday', duration: 60, workoutId: 'yoga' },
+      { type: 'legs', name: 'Legs & Lower Body + Core', phase: 'Peak Performance', week: 9, dayOfWeek: 'Friday', workoutId: 'legs-core' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Peak Performance', week: 9, dayOfWeek: 'Saturday', workoutId: 'active-recovery' },
+      { type: 'rest', name: 'Rest or X-Stretch', phase: 'Peak Performance', week: 9, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+    // Week 10
+    [
+      { type: 'chest-back', name: 'Chest & Back + Core', phase: 'Peak Performance', week: 10, dayOfWeek: 'Monday', workoutId: 'chest-back-core' },
+      { type: 'plyometric', name: 'Plyometrics V1: Balanced', phase: 'Peak Performance', week: 10, dayOfWeek: 'Tuesday', workoutId: 'plyo-v1', version: 1 },
+      { type: 'shoulders-arms', name: 'Shoulders & Arms + Core', phase: 'Peak Performance', week: 10, dayOfWeek: 'Wednesday', workoutId: 'shoulders-arms-core' },
+      { type: 'yoga', name: 'Yoga', phase: 'Peak Performance', week: 10, dayOfWeek: 'Thursday', duration: 60, workoutId: 'yoga' },
+      { type: 'legs', name: 'Legs & Lower Body + Core', phase: 'Peak Performance', week: 10, dayOfWeek: 'Friday', workoutId: 'legs-core' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Peak Performance', week: 10, dayOfWeek: 'Saturday', workoutId: 'active-recovery' },
+      { type: 'rest', name: 'Rest or X-Stretch', phase: 'Peak Performance', week: 10, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+    // Week 11
+    [
+      { type: 'chest-back', name: 'Chest & Back + Core', phase: 'Peak Performance', week: 11, dayOfWeek: 'Monday', workoutId: 'chest-back-core' },
+      { type: 'plyometric', name: 'Plyometrics V3: Quad & Agility', phase: 'Peak Performance', week: 11, dayOfWeek: 'Tuesday', workoutId: 'plyo-v3', version: 3 },
+      { type: 'shoulders-arms', name: 'Shoulders & Arms + Core', phase: 'Peak Performance', week: 11, dayOfWeek: 'Wednesday', workoutId: 'shoulders-arms-core' },
+      { type: 'yoga', name: 'Yoga', phase: 'Peak Performance', week: 11, dayOfWeek: 'Thursday', duration: 60, workoutId: 'yoga' },
+      { type: 'legs', name: 'Legs & Lower Body + Core', phase: 'Peak Performance', week: 11, dayOfWeek: 'Friday', workoutId: 'legs-core' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Peak Performance', week: 11, dayOfWeek: 'Saturday', workoutId: 'active-recovery' },
+      { type: 'rest', name: 'Rest or X-Stretch', phase: 'Peak Performance', week: 11, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+    // Week 12 - Final Week
+    [
+      { type: 'chest-back', name: 'Chest & Back + Core', phase: 'Peak Performance', week: 12, dayOfWeek: 'Monday', workoutId: 'chest-back-core' },
+      { type: 'plyometric', name: 'Plyometrics V3: Quad & Agility', phase: 'Peak Performance', week: 12, dayOfWeek: 'Tuesday', workoutId: 'plyo-v3', version: 3 },
+      { type: 'shoulders-arms', name: 'Shoulders & Arms + Core', phase: 'Peak Performance', week: 12, dayOfWeek: 'Wednesday', workoutId: 'shoulders-arms-core' },
+      { type: 'yoga', name: 'Yoga', phase: 'Peak Performance', week: 12, dayOfWeek: 'Thursday', duration: 60, workoutId: 'yoga' },
+      { type: 'legs', name: 'Legs & Lower Body + Core', phase: 'Peak Performance', week: 12, dayOfWeek: 'Friday', workoutId: 'legs-core' },
+      { type: 'active-recovery', name: 'Active Recovery', phase: 'Peak Performance', week: 12, dayOfWeek: 'Saturday', workoutId: 'active-recovery' },
+      { type: 'rest', name: 'Rest/Test Performance', phase: 'Peak Performance', week: 12, dayOfWeek: 'Sunday', workoutId: 'rest' },
+    ],
+  ];
+
+  // Combine all weeks
+  const allWeeks = [...phase1Weeks, ...phase2Weeks, ...phase3Weeks];
+  
+  // Flatten into days array
+  allWeeks.forEach(week => {
+    week.forEach(day => {
       plan.days.push({ ...day });
     });
-  }
+  });
 
-  // Week 4 - Recovery Week (days 22-28)
-  plan.days.push(
-    { type: 'upper', name: 'Upper Body Strength (Light)', intensity: 'light', phase: 'Foundation' },
-    { type: 'yoga', name: 'Yoga Session', duration: 45, phase: 'Foundation' },
-    { type: 'core', name: 'Core Strength', phase: 'Foundation' },
-    { type: 'yoga', name: 'Yoga Session', duration: 30, phase: 'Foundation' },
-    { type: 'lower', name: 'Lower Body Strength (Light)', intensity: 'light', phase: 'Foundation' },
-    { type: 'yoga', name: 'Yoga Session', duration: 60, phase: 'Foundation' },
-    { type: 'rest', name: 'Rest Day', phase: 'Foundation' }
-  );
-
-  // Days 29-30
-  plan.days.push(
-    { type: 'full', name: 'Full Body Strength', phase: 'Foundation' },
-    { type: 'yoga', name: 'Yoga Session', duration: 30, phase: 'Foundation' }
-  );
-
-  // Phase 2: Progressive Overload (Days 31-60)
-  const phase2Pattern = [
-    { type: 'upper', name: 'Upper Body Power', intensity: 'power', phase: 'Progressive Overload' },
-    { type: 'lower', name: 'Lower Body Power', intensity: 'power', phase: 'Progressive Overload' },
-    { type: 'yoga', name: 'Yoga Session', duration: 30, phase: 'Progressive Overload' },
-    { type: 'core', name: 'Core Strength', phase: 'Progressive Overload' },
-    { type: 'full', name: 'Full Body Power', intensity: 'power', phase: 'Progressive Overload' },
-    { type: 'plyometric', name: 'Plyometric Training', phase: 'Progressive Overload' },
-    { type: 'rest', name: 'Rest Day', phase: 'Progressive Overload' },
-  ];
-
-  // Add Phase 2 weeks 5-7 (days 31-51)
-  for (let week = 0; week < 3; week++) {
-    phase2Pattern.forEach((day, idx) => {
-      // Increase yoga duration in week 6 and 7
-      if (day.type === 'yoga' && week > 0) {
-        plan.days.push({ ...day, duration: 45 });
-      } else {
-        plan.days.push({ ...day });
-      }
+  // Pad to exactly 90 days (Days 85-90)
+  while (plan.days.length < 90) {
+    plan.days.push({
+      type: 'rest',
+      name: 'Rest/Recovery',
+      phase: 'Peak Performance',
+      week: 13,
+      dayOfWeek: 'Extra',
+      workoutId: 'rest'
     });
   }
-
-  // Week 8 - Recovery Week (days 52-58)
-  plan.days.push(
-    { type: 'upper', name: 'Upper Body Strength (Moderate)', intensity: 'moderate', phase: 'Progressive Overload' },
-    { type: 'yoga', name: 'Yoga Session', duration: 60, phase: 'Progressive Overload' },
-    { type: 'core', name: 'Core Strength', phase: 'Progressive Overload' },
-    { type: 'yoga', name: 'Yoga Session', duration: 45, phase: 'Progressive Overload' },
-    { type: 'lower', name: 'Lower Body Strength (Moderate)', intensity: 'moderate', phase: 'Progressive Overload' },
-    { type: 'yoga', name: 'Yoga Session', duration: 60, phase: 'Progressive Overload' },
-    { type: 'rest', name: 'Rest Day', phase: 'Progressive Overload' }
-  );
-
-  // Days 59-60
-  plan.days.push(
-    { type: 'full', name: 'Full Body Power', intensity: 'power', phase: 'Progressive Overload' },
-    { type: 'yoga', name: 'Yoga Session', duration: 45, phase: 'Progressive Overload' }
-  );
-
-  // Phase 3: Peak Performance (Days 61-90)
-  const phase3Pattern = [
-    { type: 'upper', name: 'Upper Body Power', intensity: 'power', phase: 'Peak Performance' },
-    { type: 'lower', name: 'Lower Body Power', intensity: 'power', phase: 'Peak Performance' },
-    { type: 'yoga', name: 'Yoga Session', duration: 30, phase: 'Peak Performance' },
-    { type: 'core', name: 'Core Strength', phase: 'Peak Performance' },
-    { type: 'full', name: 'Full Body Power', intensity: 'power', phase: 'Peak Performance' },
-    { type: 'plyometric', name: 'Plyometric Training', phase: 'Peak Performance' },
-    { type: 'rest', name: 'Rest Day', phase: 'Peak Performance' },
-  ];
-
-  // Add Phase 3 weeks 9-11 (days 61-81)
-  for (let week = 0; week < 3; week++) {
-    phase3Pattern.forEach((day, idx) => {
-      // Increase yoga duration in later weeks
-      if (day.type === 'yoga' && week === 1) {
-        plan.days.push({ ...day, duration: 45 });
-      } else if (day.type === 'yoga' && week === 2) {
-        plan.days.push({ ...day, duration: 60 });
-      } else {
-        plan.days.push({ ...day });
-      }
-    });
-  }
-
-  // Week 12 - Final Recovery Week (days 82-88)
-  plan.days.push(
-    { type: 'upper', name: 'Upper Body Strength (Light)', intensity: 'light', phase: 'Peak Performance' },
-    { type: 'yoga', name: 'Yoga Session', duration: 45, phase: 'Peak Performance' },
-    { type: 'core', name: 'Core Strength', phase: 'Peak Performance' },
-    { type: 'yoga', name: 'Yoga Session', duration: 60, phase: 'Peak Performance' },
-    { type: 'lower', name: 'Lower Body Strength (Light)', intensity: 'light', phase: 'Peak Performance' },
-    { type: 'yoga', name: 'Yoga Session', duration: 60, phase: 'Peak Performance' },
-    { type: 'rest', name: 'Rest Day', phase: 'Peak Performance' }
-  );
-
-  // Final days 89-90
-  plan.days.push(
-    { type: 'full', name: 'Full Body Power', intensity: 'power', phase: 'Peak Performance' },
-    { type: 'yoga', name: 'Yoga Session', duration: 60, phase: 'Peak Performance' }
-  );
 
   return plan;
 };
@@ -158,8 +199,12 @@ export const scheduleWorkoutsFromPlan = (plan, startDate) => {
       type: day.type,
       name: day.name,
       phase: day.phase,
+      week: day.week,
+      dayOfWeek: day.dayOfWeek,
       intensity: day.intensity,
       duration: day.duration,
+      workoutId: day.workoutId,
+      version: day.version,
       status: 'scheduled',
       deferred: false,
     });
@@ -169,87 +214,133 @@ export const scheduleWorkoutsFromPlan = (plan, startDate) => {
 };
 
 /**
- * Get workout template based on type and intensity
- * @param {string} type - Workout type (upper, lower, full, core, plyometric, yoga, rest)
- * @param {string} intensity - Intensity level (light, moderate, power)
+ * Get workout template based on type
+ * This returns the structure to link to actual workouts
+ * @param {string} workoutId - Workout identifier
+ * @param {number} version - Version number for plyometrics (1-3)
  * @returns {Object} Workout template
  */
-export const getWorkoutTemplate = (type, intensity = 'normal') => {
+export const getWorkoutTemplate = (workoutId, version = null) => {
   const templates = {
-    upper: {
-      name: intensity === 'power' ? 'Upper Body Power' : 'Upper Body Strength',
+    'chest-back-core': {
+      name: 'Chest & Back + Core',
+      description: '9 strength exercises (supersets) + 10 core exercises',
+      type: 'strength',
       exercises: [
-        'Barbell Bench Press',
-        'Pull-Ups',
-        'Overhead Press',
-        'Barbell Bent-Over Row',
-        'Dips',
-        intensity === 'power' ? 'Barbell Curls' : 'Bicep Curls',
+        'Barbell Bench Press', 'Seated Cable Row',
+        'Incline Dumbbell Bench Press', 'Lat Pulldown',
+        'Dumbbell Shoulder Press', 'Barbell Curls', 'Tricep Rope Pushdown',
+        'Dumbbell Flyes', 'Reverse Pec Deck Fly'
       ],
-      sets: intensity === 'power' ? 5 : 4,
-      reps: intensity === 'power' ? '5-8' : intensity === 'light' ? '10-15' : '8-12',
+      coreExercises: [
+        'In and Out (Crunches)', 'Seated Bicycle', 'Reverse Bicycle',
+        'Pulse Ups', 'V-Up Rollup', 'Leg Climbers',
+        'Fifer Scissors', 'Reverse Crunches', 'Heels to Heaven', 'Mason Twist'
+      ],
+      sets: '3-4',
+      duration: '60 min'
     },
-    lower: {
-      name: intensity === 'power' ? 'Lower Body Power' : 'Lower Body Strength',
+    'shoulders-arms-core': {
+      name: 'Shoulders & Arms + Core',
+      description: '9 strength exercises + 10 core exercises',
+      type: 'strength',
       exercises: [
-        'Back Squat',
-        intensity === 'power' ? 'Deadlift' : 'Romanian Deadlift',
-        'Leg Press',
-        'Bulgarian Split Squat',
-        'Leg Curl',
-        'Calf Raises',
+        'Dumbbell Shoulder Press', 'Barbell Curls',
+        'Dumbbell Lateral Raises', 'Dumbbell Hammer Curls',
+        'Reverse Pec Deck Fly', 'EZ Bar Skull Crushers', 'Cable Tricep Kickback',
+        'Dumbbell Shrugs', 'Plate Raises'
       ],
-      sets: intensity === 'power' ? 5 : 4,
-      reps: intensity === 'power' ? '5-8' : intensity === 'light' ? '10-15' : '8-12',
+      coreExercises: [
+        'In and Out (Crunches)', 'Seated Bicycle', 'Reverse Bicycle',
+        'Pulse Ups', 'V-Up Rollup', 'Leg Climbers',
+        'Fifer Scissors', 'Reverse Crunches', 'Heels to Heaven', 'Mason Twist'
+      ],
+      sets: '3-4',
+      duration: '60 min'
     },
-    full: {
-      name: intensity === 'power' ? 'Full Body Power' : 'Full Body Strength',
+    'legs-core': {
+      name: 'Legs & Lower Body + Core',
+      description: '9 strength exercises + 10 core exercises',
+      type: 'strength',
       exercises: [
-        'Deadlift',
-        'Barbell Bench Press',
-        'Back Squat',
-        'Pull-Ups',
-        'Overhead Press',
-        intensity === 'power' ? 'Power Cleans' : 'Barbell Bent-Over Row',
+        'Barbell Back Squat', 'Romanian Deadlift',
+        'Leg Press or Goblet Squat', 'Standing Calf Raises',
+        'Bulgarian Split Squats', 'Walking Lunges', 'Step-Ups',
+        'Leg Curls', 'Hip Thrusts / Weighted Glute Bridges'
       ],
-      sets: intensity === 'power' ? 5 : 4,
-      reps: intensity === 'power' ? '5-8' : intensity === 'light' ? '10-15' : '8-12',
+      coreExercises: [
+        'In and Out (Crunches)', 'Seated Bicycle', 'Reverse Bicycle',
+        'Pulse Ups', 'V-Up Rollup', 'Leg Climbers',
+        'Fifer Scissors', 'Reverse Crunches', 'Heels to Heaven', 'Mason Twist'
+      ],
+      sets: '3-4',
+      duration: '60 min'
     },
-    core: {
-      name: 'Core Strength',
-      exercises: [
-        'Planks',
-        'Russian Twists',
-        'Leg Raises',
-        'Dead Bug',
-        'Bird Dog',
-        'Mountain Climbers',
-      ],
-      sets: 3,
-      reps: '12-20 or 30-60 sec holds',
-    },
-    plyometric: {
-      name: 'Plyometric Training',
-      exercises: [
-        'Box Jumps',
-        'Burpees',
-        'Jump Squats',
-        'Tuck Jumps',
-        'Lateral Bounds',
-        'Broad Jumps',
-      ],
+    'plyo-v1': {
+      name: 'Plyometrics V1: Balanced',
+      description: '45-minute lower body plyometric HIIT workout with balanced approach',
+      type: 'plyometric',
       rounds: 4,
       workTime: 40,
       restTime: 20,
+      roundRest: 90,
+      exercises: [
+        'Jump Squats', 'Step-Ups with Knee Drive', 'Lateral Bounds',
+        'Step-Downs with Control', 'Skater Hops', 'Single-Leg Glute Bridges'
+      ],
+      duration: '45 min'
     },
-    yoga: {
+    'plyo-v2': {
+      name: 'Plyometrics V2: Glute & Power',
+      description: '45-minute plyometric workout with glute emphasis',
+      type: 'plyometric',
+      rounds: 4,
+      workTime: 40,
+      restTime: 20,
+      roundRest: 90,
+      exercises: [
+        'Explosive Glute Bridges', 'Single-Leg Hop Squats', 'Step-Up with Glute Squeeze',
+        'Donkey Kick Pulses', 'Jump Lunges Glute Focus', 'Lateral Bounds'
+      ],
+      duration: '45 min'
+    },
+    'plyo-v3': {
+      name: 'Plyometrics V3: Quad & Agility',
+      description: '45-minute plyometric workout with quad and agility emphasis',
+      type: 'plyometric',
+      rounds: 4,
+      workTime: 40,
+      restTime: 20,
+      roundRest: 90,
+      exercises: [
+        'Jump Squats Maximum', 'Rapid Step-Ups', 'Lateral Shuffle Sprint Steps',
+        'Tuck Jumps', 'Step-Up Lateral Extension', 'High Knees Maximum Speed'
+      ],
+      duration: '45 min'
+    },
+    'yoga': {
       name: 'Yoga Session',
-      // Duration will be specified in the schedule
+      description: 'User-defined yoga/mobility session',
+      type: 'yoga',
     },
-    rest: {
+    'active-recovery': {
+      name: 'Active Recovery',
+      description: 'Light movement, stretching, walking (30-45 min)',
+      type: 'recovery',
+      duration: '30-45 min'
+    },
+    'stretch': {
+      name: 'X-Stretch',
+      description: 'Full body stretching routine',
+      type: 'stretch',
+      duration: '30 min'
+    },
+    'rest': {
       name: 'Rest Day',
+      description: 'Complete rest or optional light stretching',
+      type: 'rest',
     },
   };
 
-  return templates[type] || templates.rest;
+  return templates[workoutId] || templates.rest;
 };

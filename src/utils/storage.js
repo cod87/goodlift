@@ -30,6 +30,9 @@ const KEYS = {
   FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
   FAVORITE_EXERCISES: 'goodlift_favorite_exercises',
   PINNED_EXERCISES: 'goodlift_pinned_exercises',
+  WORKOUT_PLANS: 'goodlift_workout_plans',
+  ACTIVE_PLAN: 'goodlift_active_plan',
+  SCHEDULED_WORKOUTS: 'goodlift_scheduled_workouts',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -1251,6 +1254,224 @@ export const updatePinnedExerciseMode = (exerciseName, trackingMode) => {
     setPinnedExercises(updated);
   } catch (error) {
     console.error('Error updating pinned exercise mode:', error);
+    throw error;
+  }
+};
+
+/**
+ * WORKOUT PLANS STORAGE
+ * Functions for managing workout plans, scheduling, and progress
+ */
+
+/**
+ * Get all workout plans
+ * @returns {Array} Array of workout plan objects
+ */
+export const getWorkoutPlans = () => {
+  try {
+    if (isGuestMode()) {
+      return getGuestData('workout_plans') || [];
+    }
+    const plans = localStorage.getItem(KEYS.WORKOUT_PLANS);
+    return plans ? JSON.parse(plans) : [];
+  } catch (error) {
+    console.error('Error reading workout plans:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a new workout plan or update existing
+ * @param {Object} plan - Plan object with id, name, description, days array
+ * @returns {Object} Saved plan
+ */
+export const saveWorkoutPlan = (plan) => {
+  try {
+    const plans = getWorkoutPlans();
+    const planId = plan.id || `plan_${Date.now()}`;
+    const planToSave = { ...plan, id: planId };
+    
+    const existingIndex = plans.findIndex(p => p.id === planId);
+    if (existingIndex >= 0) {
+      plans[existingIndex] = planToSave;
+    } else {
+      plans.push(planToSave);
+    }
+    
+    if (isGuestMode()) {
+      setGuestData('workout_plans', plans);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(plans));
+    }
+    
+    return planToSave;
+  } catch (error) {
+    console.error('Error saving workout plan:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a workout plan
+ * @param {string} planId - ID of plan to delete
+ */
+export const deleteWorkoutPlan = (planId) => {
+  try {
+    const plans = getWorkoutPlans();
+    const filtered = plans.filter(p => p.id !== planId);
+    
+    if (isGuestMode()) {
+      setGuestData('workout_plans', filtered);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(filtered));
+    }
+    
+    // If this was the active plan, clear it
+    const activePlan = getActivePlan();
+    if (activePlan?.id === planId) {
+      clearActivePlan();
+    }
+  } catch (error) {
+    console.error('Error deleting workout plan:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get the currently active plan
+ * @returns {Object|null} Active plan or null
+ */
+export const getActivePlan = () => {
+  try {
+    if (isGuestMode()) {
+      return getGuestData('active_plan') || null;
+    }
+    const plan = localStorage.getItem(KEYS.ACTIVE_PLAN);
+    return plan ? JSON.parse(plan) : null;
+  } catch (error) {
+    console.error('Error reading active plan:', error);
+    return null;
+  }
+};
+
+/**
+ * Set the active plan
+ * @param {Object} plan - Plan object with startDate
+ */
+export const setActivePlan = (plan) => {
+  try {
+    const planWithStart = {
+      ...plan,
+      startDate: plan.startDate || new Date().toISOString(),
+    };
+    
+    if (isGuestMode()) {
+      setGuestData('active_plan', planWithStart);
+    } else {
+      localStorage.setItem(KEYS.ACTIVE_PLAN, JSON.stringify(planWithStart));
+    }
+  } catch (error) {
+    console.error('Error setting active plan:', error);
+    throw error;
+  }
+};
+
+/**
+ * Clear the active plan
+ */
+export const clearActivePlan = () => {
+  try {
+    if (isGuestMode()) {
+      setGuestData('active_plan', null);
+    } else {
+      localStorage.removeItem(KEYS.ACTIVE_PLAN);
+    }
+  } catch (error) {
+    console.error('Error clearing active plan:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get scheduled workouts with their status
+ * @returns {Array} Array of scheduled workout objects
+ */
+export const getScheduledWorkouts = () => {
+  try {
+    if (isGuestMode()) {
+      return getGuestData('scheduled_workouts') || [];
+    }
+    const workouts = localStorage.getItem(KEYS.SCHEDULED_WORKOUTS);
+    return workouts ? JSON.parse(workouts) : [];
+  } catch (error) {
+    console.error('Error reading scheduled workouts:', error);
+    return [];
+  }
+};
+
+/**
+ * Update scheduled workouts
+ * @param {Array} workouts - Array of scheduled workout objects
+ */
+export const setScheduledWorkouts = (workouts) => {
+  try {
+    if (isGuestMode()) {
+      setGuestData('scheduled_workouts', workouts);
+    } else {
+      localStorage.setItem(KEYS.SCHEDULED_WORKOUTS, JSON.stringify(workouts));
+    }
+  } catch (error) {
+    console.error('Error saving scheduled workouts:', error);
+    throw error;
+  }
+};
+
+/**
+ * Mark a workout as completed
+ * @param {string} date - ISO date string
+ */
+export const markWorkoutComplete = (date) => {
+  try {
+    const workouts = getScheduledWorkouts();
+    const updated = workouts.map(w => 
+      w.date === date ? { ...w, status: 'completed' } : w
+    );
+    setScheduledWorkouts(updated);
+  } catch (error) {
+    console.error('Error marking workout complete:', error);
+    throw error;
+  }
+};
+
+/**
+ * Defer a workout to the next day
+ * @param {string} date - ISO date string of workout to defer
+ */
+export const deferWorkout = (date) => {
+  try {
+    const workouts = getScheduledWorkouts();
+    const workoutToDefer = workouts.find(w => w.date === date);
+    
+    if (!workoutToDefer) {
+      throw new Error('Workout not found');
+    }
+    
+    // Calculate next day
+    const currentDate = new Date(date);
+    const nextDate = new Date(currentDate);
+    nextDate.setDate(nextDate.getDate() + 1);
+    const nextDateStr = nextDate.toISOString().split('T')[0];
+    
+    // Update workout date
+    const updated = workouts.map(w => 
+      w.date === date 
+        ? { ...w, date: nextDateStr, deferred: true }
+        : w
+    );
+    
+    setScheduledWorkouts(updated);
+  } catch (error) {
+    console.error('Error deferring workout:', error);
     throw error;
   }
 };

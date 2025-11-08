@@ -112,6 +112,14 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=rT7DgCr-3pg"
   },
   {
+    "Exercise Name": "Box Jumps",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes; Calves",
+    "Exercise Type": "Compound",
+    "Equipment": "Plyo Box",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=NBY9-kTuHEk"
+  },
+  {
     "Exercise Name": "Box Squat",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Glutes, Hamstrings, Core",
@@ -120,12 +128,28 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=IiED5mP1UYY"
   },
   {
+    "Exercise Name": "Broad Jumps",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes; Hamstrings",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=DjKLDZSx2Hs"
+  },
+  {
     "Exercise Name": "Bulgarian Split Squat (Barbell)",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Core, Glutes, Hamstrings",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=2C-uNgKwPLE"
+  },
+  {
+    "Exercise Name": "Burpees",
+    "Primary Muscle": "Full Body",
+    "Secondary Muscles": "Core; Shoulders",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=JZQA08SlJnM"
   },
   {
     "Exercise Name": "Cable Lat Pulldown (Close Grip)",
@@ -208,6 +232,14 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=27YYEpCJnMU"
   },
   {
+    "Exercise Name": "Clapping Push-Ups",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "Shoulders; Triceps",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=qAMwSwDMGDg"
+  },
+  {
     "Exercise Name": "Close Grip Bench Press",
     "Primary Muscle": "Triceps",
     "Secondary Muscles": "Front Delts, Chest",
@@ -230,6 +262,14 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=IODxDxX7oi4"
+  },
+  {
+    "Exercise Name": "Depth Jumps",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes; Calves",
+    "Exercise Type": "Compound",
+    "Equipment": "Plyo Box",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=LTFvBr1Br-E"
   },
   {
     "Exercise Name": "Diamond Push-Up",
@@ -608,6 +648,14 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=o6QniJ9FaGA"
   },
   {
+    "Exercise Name": "Jump Squats",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes; Calves",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=A-cFYWvaHr0"
+  },
+  {
     "Exercise Name": "Kettlebell Goblet Squat",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Glutes, Core",
@@ -696,12 +744,28 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=ultWZbUMPL8"
   },
   {
+    "Exercise Name": "Lateral Bounds",
+    "Primary Muscle": "Glutes",
+    "Secondary Muscles": "Quads; Calves",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=zFxNhbPg8YI"
+  },
+  {
     "Exercise Name": "Leg Raises",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Obliques",
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=HQapklc5v38"
+  },
+  {
+    "Exercise Name": "Mountain Climbers",
+    "Primary Muscle": "Core",
+    "Secondary Muscles": "Shoulders; Hip Flexors",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=nmwgirgXLYM"
   },
   {
     "Exercise Name": "Pistol Squat",
@@ -792,6 +856,14 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=jyUv3O98Wok"
   },
   {
+    "Exercise Name": "Single Leg Hops",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes; Calves",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=FvZjmYiLLfc"
+  },
+  {
     "Exercise Name": "Split Squat (Barbell)",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Core, Glutes",
@@ -846,6 +918,14 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=op9kVnSso6Q"
+  },
+  {
+    "Exercise Name": "Tuck Jumps",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Core; Calves",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=gEGOUvvHP1Y"
   },
   {
     "Exercise Name": "Underhand Barbell Row",

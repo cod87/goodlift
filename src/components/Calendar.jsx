@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Box } from '@mui/material';
 import '../styles/Calendar.css';
 
-const Calendar = ({ workoutSessions = [], onDayClick }) => {
+const Calendar = ({ workoutSessions = [], scheduledWorkouts = [], onDayClick }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   // Create a map of dates to session info for quick lookup
@@ -13,7 +13,7 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
       const d = new Date(session.date);
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (!dateMap.has(dateStr)) {
-        dateMap.set(dateStr, { sessions: [], durations: {} });
+        dateMap.set(dateStr, { sessions: [], durations: {}, scheduled: null });
       }
       const dayData = dateMap.get(dateStr);
       dayData.sessions.push(session);
@@ -23,13 +23,24 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
       }
       dayData.durations[session.type] += session.duration || 0;
     });
+    
+    // Add scheduled workouts
+    scheduledWorkouts.forEach(scheduled => {
+      const dateStr = scheduled.date;
+      if (!dateMap.has(dateStr)) {
+        dateMap.set(dateStr, { sessions: [], durations: {}, scheduled: null });
+      }
+      const dayData = dateMap.get(dateStr);
+      dayData.scheduled = scheduled;
+    });
+    
     return dateMap;
-  }, [workoutSessions]);
+  }, [workoutSessions, scheduledWorkouts]);
 
   // Get session info for a date
   const getSessionInfo = (date) => {
     const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    return workoutDateMap.get(dateStr) || { sessions: [], durations: {} };
+    return workoutDateMap.get(dateStr) || { sessions: [], durations: {}, scheduled: null };
   };
 
   // Get days for monthly view
@@ -223,7 +234,29 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
                       {date.getDate()}
                     </span>
                     
-                    {/* Icon for main session - centered */}
+                    {/* Icon for scheduled workout (if exists and not completed) */}
+                    {sessionInfo.scheduled && sessionInfo.scheduled.status !== 'completed' && (
+                      <Box sx={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '100%',
+                        height: '100%',
+                      }}>
+                        <img 
+                          src={getIconPath(sessionInfo.scheduled.type)} 
+                          alt={sessionInfo.scheduled.type}
+                          style={{ 
+                            width: '40px', 
+                            height: '40px',
+                            opacity: 0.5,
+                            filter: 'grayscale(100%)',
+                          }}
+                        />
+                      </Box>
+                    )}
+                    
+                    {/* Icon for main session - centered (completed workouts) */}
                     {displayInfo.icon && (
                       <Box sx={{ 
                         display: 'flex',
@@ -319,6 +352,14 @@ Calendar.propTypes = {
       date: PropTypes.number.isRequired,
       type: PropTypes.string.isRequired,
       duration: PropTypes.number,
+    })
+  ),
+  scheduledWorkouts: PropTypes.arrayOf(
+    PropTypes.shape({
+      date: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
+      status: PropTypes.string,
+      name: PropTypes.string,
     })
   ),
   onDayClick: PropTypes.func,

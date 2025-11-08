@@ -19,7 +19,8 @@ import {
   getPinnedExercises,
   updatePinnedExerciseMode,
   removePinnedExercise,
-  addPinnedExercise
+  addPinnedExercise,
+  getScheduledWorkouts
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import { 
@@ -100,6 +101,7 @@ const ProgressScreen = () => {
   const [yogaSessions, setYogaSessions] = useState([]);
   const [hiitSessions, setHiitSessions] = useState([]);
   const [cardioSessions, setCardioSessions] = useState([]);
+  const [scheduledWorkouts, setScheduledWorkoutsState] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [pinnedExercises, setPinnedExercisesState] = useState([]);
@@ -114,18 +116,20 @@ const ProgressScreen = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedHistory, loadedStretches, loadedYoga, loadedHiit, loadedCardio] = await Promise.all([
+      const [loadedHistory, loadedStretches, loadedYoga, loadedHiit, loadedCardio, loadedScheduled] = await Promise.all([
         getWorkoutHistory(),
         getStretchSessions(),
         getYogaSessions(),
         getHiitSessions(),
-        getCardioSessions()
+        getCardioSessions(),
+        Promise.resolve(getScheduledWorkouts())
       ]);
       setHistory(loadedHistory);
       setStretchSessions(loadedStretches);
       setYogaSessions(loadedYoga);
       setHiitSessions(loadedHiit);
       setCardioSessions(loadedCardio);
+      setScheduledWorkoutsState(loadedScheduled);
       
       // Load pinned exercises
       const pinned = getPinnedExercises();
@@ -698,7 +702,11 @@ const ProgressScreen = () => {
       </Box>
 
       {/* Calendar - positioned after stats, before history */}
-      <Calendar workoutSessions={workoutSessions} onDayClick={handleDayClick} />
+      <Calendar 
+        workoutSessions={workoutSessions} 
+        scheduledWorkouts={scheduledWorkouts}
+        onDayClick={handleDayClick} 
+      />
 
       {/* Progressive Overload Section */}
       {history.length > 0 && (

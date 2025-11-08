@@ -6,6 +6,7 @@ import { MdSelfImprovement } from 'react-icons/md';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import GuestLogoutDialog from './GuestLogoutDialog';
@@ -215,6 +216,12 @@ const NavigationSidebar = ({
                 label="Workout"
                 isActive={currentScreen === 'selection' || currentScreen === 'preview'}
                 onClick={() => handleNavClick('selection')}
+              />
+              <NavLink
+                icon={<CalendarMonthIcon />}
+                label="Planner"
+                isActive={currentScreen === 'planner'}
+                onClick={() => handleNavClick('planner')}
               />
               <NavLink
                 icon={<DirectionsRunIcon />}

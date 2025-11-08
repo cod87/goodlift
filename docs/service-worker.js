@@ -1,4 +1,4 @@
-// GoodLife PWA Service Worker
+// GoodLift PWA Service Worker
 // Cache name - increment version to force update of cached files
 const CACHE_NAME = 'goodlift-pwa-v1';
 

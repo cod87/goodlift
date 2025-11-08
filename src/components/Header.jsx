@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { VolumeUp, VolumeOff } from '@mui/icons-material';
 import { MdScreenLockPortrait, MdScreenLockRotation } from 'react-icons/md';
-import PropTypes from 'prop-types';
 import audioService from '../utils/audioService';
 import wakeLockManager from '../utils/wakeLock';
 
@@ -10,7 +9,7 @@ import wakeLockManager from '../utils/wakeLock';
  * Header component - Sticky header with logo, sound toggle, and wake lock toggle
  * Appears at the top of all screens
  */
-const Header = ({ isDesktop }) => {
+const Header = () => {
   const [isMuted, setIsMuted] = useState(audioService.isMutedState());
   const [wakeLockActive, setWakeLockActive] = useState(wakeLockManager.isActive());
   const [wakeLockSupported] = useState(wakeLockManager.isWakeLockSupported());
@@ -44,12 +43,12 @@ const Header = ({ isDesktop }) => {
       sx={{
         position: 'fixed',
         top: 0,
-        left: isDesktop ? '280px' : 0,
+        left: 0,
         right: 0,
         height: '60px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         padding: '0 1rem',
         background: 'rgba(255, 255, 255, 0.75)',
         backdropFilter: 'blur(10px)',
@@ -59,8 +58,10 @@ const Header = ({ isDesktop }) => {
         transition: 'left 0.3s ease',
       }}
     >
-      {/* Left controls - empty for balance */}
+      {/* Left spacer - empty for balance */}
       <Box sx={{ 
+        position: 'absolute',
+        left: '1rem',
         display: 'flex', 
         alignItems: 'center',
         gap: 0.5,
@@ -84,6 +85,8 @@ const Header = ({ isDesktop }) => {
       
       {/* Right controls */}
       <Box sx={{ 
+        position: 'absolute',
+        right: '1rem',
         display: 'flex',
         alignItems: 'center',
         gap: 0.5 
@@ -94,6 +97,11 @@ const Header = ({ isDesktop }) => {
             onClick={handleToggleSound}
             sx={{
               color: isMuted ? 'grey.500' : 'primary.main',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               '&:hover': {
                 backgroundColor: 'rgba(19, 70, 134, 0.08)',
               },
@@ -111,6 +119,11 @@ const Header = ({ isDesktop }) => {
               onClick={handleToggleWakeLock}
               sx={{
                 color: wakeLockActive ? 'secondary.main' : 'grey.500',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 '&:hover': {
                   backgroundColor: 'rgba(237, 63, 39, 0.08)',
                 },
@@ -124,10 +137,6 @@ const Header = ({ isDesktop }) => {
       </Box>
     </Box>
   );
-};
-
-Header.propTypes = {
-  isDesktop: PropTypes.bool.isRequired,
 };
 
 export default Header;

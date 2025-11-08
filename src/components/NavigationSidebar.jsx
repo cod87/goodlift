@@ -224,12 +224,6 @@ const NavigationSidebar = ({
                 isActive={currentScreen === 'stretch' || currentScreen === 'yoga'}
                 onClick={() => handleNavClick('stretch')}
               />
-              <NavSubLink
-                icon={<MdSelfImprovement />}
-                label="Yoga"
-                isActive={currentScreen === 'yoga'}
-                onClick={() => handleNavClick('yoga')}
-              />
               <NavLink
                 icon={<EditCalendarIcon />}
                 label="Log Activity"

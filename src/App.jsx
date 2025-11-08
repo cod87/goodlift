@@ -12,8 +12,7 @@ import ProgressScreen from './components/ProgressScreen';
 import HiitTimerScreen from './components/HiitTimerScreen';
 import AuthScreen from './components/AuthScreen';
 import FavouritesScreen from './components/FavouritesScreen';
-import StretchScreen from './components/Stretch/StretchScreen';
-import YogaScreen from './pages/YogaScreen';
+import MobilityScreen from './components/Mobility/MobilityScreen';
 import CardioScreen from './pages/CardioScreen';
 import LogCardioScreen from './pages/LogCardioScreen';
 import LogActivityScreen from './pages/LogActivityScreen';
@@ -593,9 +592,9 @@ function App() {
 
           {currentScreen === 'log-activity-hiit' && <LogHiitScreen onNavigate={handleNavigate} />}
 
-          {currentScreen === 'stretch' && <StretchScreen />}
+          {currentScreen === 'stretch' && <MobilityScreen />}
 
-          {currentScreen === 'yoga' && <YogaScreen />}
+          {currentScreen === 'yoga' && <MobilityScreen />}
 
           {currentScreen === 'exercise-list' && <ExerciseListPage />}
         </div>

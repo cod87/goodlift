@@ -132,10 +132,41 @@ function App() {
   useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth > 768);
+      
+      // Fix iOS viewport resize issues on orientation change
+      // This ensures the viewport properly adjusts after rotation
+      if (window.visualViewport) {
+        const viewport = window.visualViewport;
+        document.documentElement.style.setProperty('--viewport-height', `${viewport.height}px`);
+      }
+    };
+    
+    const handleOrientationChange = () => {
+      // Force a reflow to fix iOS layout issues
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        handleResize();
+      }, 100);
     };
     
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleOrientationChange);
+    
+    // Support visualViewport API for better iOS handling
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+    }
+    
+    // Initial call
+    handleResize();
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+      }
+    };
   }, []);
 
   // Extract unique equipment types from exercises (memoized)

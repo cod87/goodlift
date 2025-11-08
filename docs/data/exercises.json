@@ -16,6 +16,18 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=C_VtOYc6j5c"
   },
   {
+    "Workout Type": "Legs & Lower Body",
+    "Schedule": "Friday",
+    "Grouping": "Superset 1",
+    "Exercise Name": "Barbell Back Squat",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Compound",
+    "Sets": "4",
+    "Reps/Duration": "8",
+    "Rest": "2-3 min",
+    "Focus": "Heavy strength"
+  },
+  {
     "Exercise Name": "Barbell Bench Press",
     "Primary Muscle": "Chest",
     "Secondary Muscles": "Front Delts, Triceps",
@@ -38,6 +50,30 @@
     "Exercise Type": "Isolation",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=ykJmrZ5v0Oo"
+  },
+  {
+    "Workout Type": "Chest & Back",
+    "Schedule": "Monday",
+    "Grouping": "Superset 3 (Triset)",
+    "Exercise Name": "Barbell Curls",
+    "Muscle Group": "Upper Body - Biceps",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "10",
+    "Rest": "30 sec",
+    "Focus": "Accessory"
+  },
+  {
+    "Workout Type": "Shoulders & Arms",
+    "Schedule": "Wednesday",
+    "Grouping": "Superset 1",
+    "Exercise Name": "Barbell Curls",
+    "Muscle Group": "Upper Body - Biceps",
+    "Type": "Compound",
+    "Sets": "4",
+    "Reps/Duration": "10",
+    "Rest": "Minimal",
+    "Focus": "Heavy strength"
   },
   {
     "Exercise Name": "Barbell Incline Bench Press",
@@ -128,6 +164,18 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=IiED5mP1UYY"
   },
   {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 3",
+    "Exercise Name": "Box Squat Jumps to Step",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Explosive squat"
+  },
+  {
     "Exercise Name": "Broad Jumps",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Glutes; Hamstrings",
@@ -142,6 +190,42 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=2C-uNgKwPLE"
+  },
+  {
+    "Workout Type": "Legs & Lower Body",
+    "Schedule": "Friday",
+    "Grouping": "Superset 3 (Triset)",
+    "Exercise Name": "Bulgarian Split Squats",
+    "Muscle Group": "Lower Body - Quads/Glutes",
+    "Type": "Compound",
+    "Sets": "3",
+    "Reps/Duration": "10",
+    "Rest": "60 sec (per leg)",
+    "Focus": "Unilateral strength"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 4",
+    "Exercise Name": "Bulgarian Split Squats",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Unilateral strength"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 2",
+    "Exercise Name": "Bulgarian Split Squats Explosive",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Explosive glute"
   },
   {
     "Exercise Name": "Burpees",
@@ -224,6 +308,54 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=6gKROT7AjQ0"
   },
   {
+    "Workout Type": "Shoulders & Arms",
+    "Schedule": "Wednesday",
+    "Grouping": "Superset 3 (Triset)",
+    "Exercise Name": "Cable Tricep Kickback",
+    "Muscle Group": "Upper Body - Triceps",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "15",
+    "Rest": "Minimal",
+    "Focus": "Tricep finisher"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 4",
+    "Exercise Name": "Calf Raise Holds Pulse",
+    "Muscle Group": "Lower Body - Calves",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Calf endurance"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 4",
+    "Exercise Name": "Calf Raises",
+    "Muscle Group": "Lower Body - Calves",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Calf power"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 4",
+    "Exercise Name": "Calf Raises Maximum Speed",
+    "Muscle Group": "Lower Body - Calves",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Max speed calf"
+  },
+  {
     "Exercise Name": "Chin-Up (Strict)",
     "Primary Muscle": "Biceps",
     "Secondary Muscles": "Lats, Delts, Core",
@@ -272,6 +404,18 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=LTFvBr1Br-E"
   },
   {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 3",
+    "Exercise Name": "Diagonal Bounds",
+    "Muscle Group": "Lower Body - Agility",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Directional bound"
+  },
+  {
     "Exercise Name": "Diamond Push-Up",
     "Primary Muscle": "Triceps",
     "Secondary Muscles": "Chest, Front Delts",
@@ -286,6 +430,54 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=27YYEpCJnMU"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 1",
+    "Exercise Name": "Donkey Kick Pulses",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute isolation"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 4",
+    "Exercise Name": "Double-Leg Explosive Glute Bridges",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Maximum glute power"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 3",
+    "Exercise Name": "Double-Leg Hops Forward Back",
+    "Muscle Group": "Lower Body - Agility",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Directional hops"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 4",
+    "Exercise Name": "Double-Leg Step-Ups",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Fast paced"
   },
   {
     "Exercise Name": "Dumbbell Arnold Press",
@@ -344,6 +536,18 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=uUGDRwge4F8"
   },
   {
+    "Workout Type": "Chest & Back",
+    "Schedule": "Monday",
+    "Grouping": "Accessory",
+    "Exercise Name": "Dumbbell Flyes",
+    "Muscle Group": "Upper Body - Chest",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "30 sec",
+    "Focus": "Chest finisher"
+  },
+  {
     "Exercise Name": "Dumbbell Front Raise",
     "Primary Muscle": "Delts",
     "Secondary Muscles": "Delts",
@@ -366,6 +570,18 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=MeIiIdhvXT4"
+  },
+  {
+    "Workout Type": "Shoulders & Arms",
+    "Schedule": "Wednesday",
+    "Grouping": "Superset 2",
+    "Exercise Name": "Dumbbell Hammer Curls",
+    "Muscle Group": "Upper Body - Biceps",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "Minimal",
+    "Focus": "Hypertrophy"
   },
   {
     "Exercise Name": "Dumbbell High Pull",
@@ -406,6 +622,18 @@
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=M8w9Y7oHYiU"
+  },
+  {
+    "Workout Type": "Shoulders & Arms",
+    "Schedule": "Wednesday",
+    "Grouping": "Superset 2",
+    "Exercise Name": "Dumbbell Lateral Raises",
+    "Muscle Group": "Upper Body - Shoulders",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "45 sec",
+    "Focus": "Hypertrophy"
   },
   {
     "Exercise Name": "Dumbbell Lunge",
@@ -504,6 +732,18 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=qEwKCR5JCog"
   },
   {
+    "Workout Type": "Shoulders & Arms",
+    "Schedule": "Wednesday",
+    "Grouping": "Accessory",
+    "Exercise Name": "Dumbbell Shrugs",
+    "Muscle Group": "Upper Body - Shoulders",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "30 sec",
+    "Focus": "Trap work"
+  },
+  {
     "Exercise Name": "Dumbbell Single-Arm Row",
     "Primary Muscle": "Lats",
     "Secondary Muscles": "Biceps, Core",
@@ -576,6 +816,30 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=eKxf7Vvs4f8"
   },
   {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 1",
+    "Exercise Name": "Explosive Glute Bridges",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute power"
+  },
+  {
+    "Workout Type": "Shoulders & Arms",
+    "Schedule": "Wednesday",
+    "Grouping": "Superset 3 (Triset)",
+    "Exercise Name": "EZ Bar Skull Crushers",
+    "Muscle Group": "Upper Body - Triceps",
+    "Type": "Compound",
+    "Sets": "3",
+    "Reps/Duration": "10",
+    "Rest": "30 sec",
+    "Focus": "Tricep work"
+  },
+  {
     "Exercise Name": "Farmer Carry (Dumbbell)",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Shoulders, Traps",
@@ -592,12 +856,108 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=4vzPnS6SOtA"
   },
   {
+    "Workout Type": "Core",
+    "Schedule": "Mon/Wed/Fri",
+    "Grouping": "Core Routine",
+    "Exercise Name": "Fifer Scissors",
+    "Muscle Group": "Core - Lower Abs",
+    "Type": "Bodyweight",
+    "Sets": "1",
+    "Reps/Duration": "25",
+    "Rest": "Continuous",
+    "Focus": "Core endurance"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 2",
+    "Exercise Name": "Fire Hydrant Pulses",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Hip abductor"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 3",
+    "Exercise Name": "Fire Hydrants",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Hip abductor"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 3",
+    "Exercise Name": "Frog Jumps",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Full body power"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 3",
+    "Exercise Name": "Frog Jumps Explosive",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Explosive power"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 2",
+    "Exercise Name": "Frog Jumps Glute",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute emphasis"
+  },
+  {
     "Exercise Name": "Front Squat",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Core, Upper Back",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=m4ytaCJZpl0"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 2",
+    "Exercise Name": "Glute Kickback Pulses",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute activation"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 3",
+    "Exercise Name": "Glute Kickback Pulses Single-Leg",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Unilateral glute pulse"
   },
   {
     "Exercise Name": "Goblet Squat",
@@ -640,6 +1000,30 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=HQapklc5v38"
   },
   {
+    "Workout Type": "Core",
+    "Schedule": "Mon/Wed/Fri",
+    "Grouping": "Core Routine",
+    "Exercise Name": "Heels to Heaven",
+    "Muscle Group": "Core - Lower Abs",
+    "Type": "Bodyweight",
+    "Sets": "1",
+    "Reps/Duration": "25",
+    "Rest": "Continuous",
+    "Focus": "Core strength"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 1",
+    "Exercise Name": "High Knees Maximum Speed",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Max speed knees"
+  },
+  {
     "Exercise Name": "High Pull",
     "Primary Muscle": "Traps",
     "Secondary Muscles": "Traps, Delts",
@@ -648,12 +1032,144 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=o6QniJ9FaGA"
   },
   {
+    "Workout Type": "Legs & Lower Body",
+    "Schedule": "Friday",
+    "Grouping": "Accessory",
+    "Exercise Name": "Hip Thrusts / Weighted Glute Bridges",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "30 sec",
+    "Focus": "Glute finisher"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 3",
+    "Exercise Name": "Ice Skaters",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Lateral stability"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 3",
+    "Exercise Name": "Ice Skaters Maximum Speed",
+    "Muscle Group": "Lower Body - Agility",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Max speed skate"
+  },
+  {
+    "Workout Type": "Core",
+    "Schedule": "Mon/Wed/Fri",
+    "Grouping": "Core Routine",
+    "Exercise Name": "In and Out (Crunches)",
+    "Muscle Group": "Core - Abs",
+    "Type": "Bodyweight",
+    "Sets": "1",
+    "Reps/Duration": "25",
+    "Rest": "Continuous",
+    "Focus": "Core strength"
+  },
+  {
+    "Workout Type": "Chest & Back",
+    "Schedule": "Monday",
+    "Grouping": "Superset 2",
+    "Exercise Name": "Incline Dumbbell Bench Press",
+    "Muscle Group": "Upper Body - Chest",
+    "Type": "Compound",
+    "Sets": "3",
+    "Reps/Duration": "10",
+    "Rest": "30-60 sec",
+    "Focus": "Hypertrophy"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 2",
+    "Exercise Name": "Jump Lunges",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Unilateral power"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 4",
+    "Exercise Name": "Jump Lunges Controlled",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Controlled landing"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 1",
+    "Exercise Name": "Jump Lunges Glute Focus",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute emphasis"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 4",
+    "Exercise Name": "Jump Lunges Speed",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Continuous speed"
+  },
+  {
     "Exercise Name": "Jump Squats",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Glutes; Calves",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=A-cFYWvaHr0"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 3",
+    "Exercise Name": "Jump Squats Deep",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Deep glute squat"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 1",
+    "Exercise Name": "Jump Squats Maximum",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Max height jump"
   },
   {
     "Exercise Name": "Kettlebell Goblet Squat",
@@ -744,6 +1260,18 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=ultWZbUMPL8"
   },
   {
+    "Workout Type": "Chest & Back",
+    "Schedule": "Monday",
+    "Grouping": "Superset 2",
+    "Exercise Name": "Lat Pulldown",
+    "Muscle Group": "Upper Body - Back",
+    "Type": "Compound",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "Minimal",
+    "Focus": "Hypertrophy"
+  },
+  {
     "Exercise Name": "Lateral Bounds",
     "Primary Muscle": "Glutes",
     "Secondary Muscles": "Quads; Calves",
@@ -752,12 +1280,168 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=zFxNhbPg8YI"
   },
   {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 2",
+    "Exercise Name": "Lateral Bounds Quick Feet",
+    "Muscle Group": "Lower Body - Agility",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Quick feet bounds"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 3",
+    "Exercise Name": "Lateral Lunges on Step",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Lateral stepping"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 4",
+    "Exercise Name": "Lateral Shuffle Directional Change",
+    "Muscle Group": "Lower Body - Agility",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Direction changes"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 1",
+    "Exercise Name": "Lateral Shuffle Sprint Steps",
+    "Muscle Group": "Lower Body - Agility",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Sprint agility"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 4",
+    "Exercise Name": "Lateral Shuffle to Lateral Lunge",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Directional change"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 4",
+    "Exercise Name": "Lateral Shuffle to Reverse Lunge",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Lateral glute lunge"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 2",
+    "Exercise Name": "Lateral Step-Overs",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Lateral control"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 2",
+    "Exercise Name": "Lateral Step-Overs Fast",
+    "Muscle Group": "Lower Body - Agility",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Fast paced"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 2",
+    "Exercise Name": "Lateral Step-Ups Knee Drive",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Lateral glute work"
+  },
+  {
+    "Workout Type": "Core",
+    "Schedule": "Mon/Wed/Fri",
+    "Grouping": "Core Routine",
+    "Exercise Name": "Leg Climbers",
+    "Muscle Group": "Core - Hip Flexors",
+    "Type": "Bodyweight",
+    "Sets": "1",
+    "Reps/Duration": "25",
+    "Rest": "Continuous",
+    "Focus": "Core endurance"
+  },
+  {
+    "Workout Type": "Legs & Lower Body",
+    "Schedule": "Friday",
+    "Grouping": "Accessory",
+    "Exercise Name": "Leg Curls",
+    "Muscle Group": "Lower Body - Hamstrings",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "30 sec",
+    "Focus": "Hamstring work"
+  },
+  {
+    "Workout Type": "Legs & Lower Body",
+    "Schedule": "Friday",
+    "Grouping": "Superset 2",
+    "Exercise Name": "Leg Press or Goblet Squat",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Compound",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "60 sec",
+    "Focus": "Hypertrophy"
+  },
+  {
     "Exercise Name": "Leg Raises",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Obliques",
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=HQapklc5v38"
+  },
+  {
+    "Workout Type": "Core",
+    "Schedule": "Mon/Wed/Fri",
+    "Grouping": "Core Routine",
+    "Exercise Name": "Mason Twist",
+    "Muscle Group": "Core - Obliques",
+    "Type": "Bodyweight",
+    "Sets": "1",
+    "Reps/Duration": "25",
+    "Rest": "Continuous (each side)",
+    "Focus": "Core strength"
   },
   {
     "Exercise Name": "Mountain Climbers",
@@ -774,6 +1458,18 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=ultWZbUMPL8"
+  },
+  {
+    "Workout Type": "Shoulders & Arms",
+    "Schedule": "Wednesday",
+    "Grouping": "Accessory",
+    "Exercise Name": "Plate Raises",
+    "Muscle Group": "Upper Body - Shoulders",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "30 sec",
+    "Focus": "Shoulder finisher"
   },
   {
     "Exercise Name": "Plyo Push-Up",
@@ -800,6 +1496,18 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=27YYEpCJnMU"
   },
   {
+    "Workout Type": "Core",
+    "Schedule": "Mon/Wed/Fri",
+    "Grouping": "Core Routine",
+    "Exercise Name": "Pulse Ups",
+    "Muscle Group": "Core - Lower Abs",
+    "Type": "Bodyweight",
+    "Sets": "1",
+    "Reps/Duration": "25",
+    "Rest": "Continuous",
+    "Focus": "Core strength"
+  },
+  {
     "Exercise Name": "Push Press",
     "Primary Muscle": "Delts",
     "Secondary Muscles": "Triceps, Chest, Core",
@@ -822,6 +1530,102 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=mut9P1fqo34"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 1",
+    "Exercise Name": "Rapid Step-Ups",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Fast cadence"
+  },
+  {
+    "Workout Type": "Core",
+    "Schedule": "Mon/Wed/Fri",
+    "Grouping": "Core Routine",
+    "Exercise Name": "Reverse Bicycle",
+    "Muscle Group": "Core - Obliques",
+    "Type": "Bodyweight",
+    "Sets": "1",
+    "Reps/Duration": "25",
+    "Rest": "Continuous",
+    "Focus": "Core strength"
+  },
+  {
+    "Workout Type": "Core",
+    "Schedule": "Mon/Wed/Fri",
+    "Grouping": "Core Routine",
+    "Exercise Name": "Reverse Crunches",
+    "Muscle Group": "Core - Lower Abs",
+    "Type": "Bodyweight",
+    "Sets": "1",
+    "Reps/Duration": "25",
+    "Rest": "Continuous",
+    "Focus": "Core strength"
+  },
+  {
+    "Workout Type": "Chest & Back",
+    "Schedule": "Monday",
+    "Grouping": "Accessory",
+    "Exercise Name": "Reverse Pec Deck Fly",
+    "Muscle Group": "Upper Body - Shoulders",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "30 sec",
+    "Focus": "Back finisher"
+  },
+  {
+    "Workout Type": "Shoulders & Arms",
+    "Schedule": "Wednesday",
+    "Grouping": "Superset 3 (Triset)",
+    "Exercise Name": "Reverse Pec Deck Fly",
+    "Muscle Group": "Upper Body - Shoulders",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "15",
+    "Rest": "30 sec",
+    "Focus": "Shoulder finisher"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 3",
+    "Exercise Name": "Reverse Step-Ups",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute focus"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 3",
+    "Exercise Name": "Reverse Step-Ups",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute engagement"
+  },
+  {
+    "Workout Type": "Legs & Lower Body",
+    "Schedule": "Friday",
+    "Grouping": "Superset 1",
+    "Exercise Name": "Romanian Deadlift",
+    "Muscle Group": "Lower Body - Hamstrings",
+    "Type": "Compound",
+    "Sets": "4",
+    "Reps/Duration": "10",
+    "Rest": "Minimal",
+    "Focus": "Heavy strength"
   },
   {
     "Exercise Name": "Romanian Deadlift (RDL)",
@@ -848,6 +1652,30 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=roCP6wCXPqo"
   },
   {
+    "Workout Type": "Core",
+    "Schedule": "Mon/Wed/Fri",
+    "Grouping": "Core Routine",
+    "Exercise Name": "Seated Bicycle",
+    "Muscle Group": "Core - Obliques",
+    "Type": "Bodyweight",
+    "Sets": "1",
+    "Reps/Duration": "25",
+    "Rest": "Continuous",
+    "Focus": "Core strength"
+  },
+  {
+    "Workout Type": "Chest & Back",
+    "Schedule": "Monday",
+    "Grouping": "Superset 1",
+    "Exercise Name": "Seated Cable Row",
+    "Muscle Group": "Upper Body - Back",
+    "Type": "Compound",
+    "Sets": "4",
+    "Reps/Duration": "10",
+    "Rest": "Minimal",
+    "Focus": "Heavy strength"
+  },
+  {
     "Exercise Name": "Single Leg Deadlift",
     "Primary Muscle": "Hamstrings",
     "Secondary Muscles": "Glutes, Hamstrings, Core",
@@ -864,12 +1692,360 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=FvZjmYiLLfc"
   },
   {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 2",
+    "Exercise Name": "Single-Leg Deadlift Hops",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Unilateral glute RDL"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 2",
+    "Exercise Name": "Single-Leg Glute Bridge Hops",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Unilateral glute power"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 1",
+    "Exercise Name": "Single-Leg Glute Bridges",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Unilateral glute"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 1",
+    "Exercise Name": "Single-Leg Hop Squats",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Single-leg power"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 2",
+    "Exercise Name": "Single-Leg Hops In Place",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Single-leg stability"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 2",
+    "Exercise Name": "Single-Leg Hops Rapid",
+    "Muscle Group": "Lower Body - Agility",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Rapid single-leg"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 4",
+    "Exercise Name": "Single-Leg RDL Hops",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Unilateral RDL hop"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 4",
+    "Exercise Name": "Single-Leg Squat Hold",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Single-leg endurance"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 1",
+    "Exercise Name": "Skater Hops",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Lateral agility"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 3",
+    "Exercise Name": "Skater Hops Glute Drive",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute-driven lateral"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 2",
+    "Exercise Name": "Skater Hops Wide Explosive",
+    "Muscle Group": "Lower Body - Agility",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Wide explosive jump"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 2",
+    "Exercise Name": "Split Jump Lunges",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Lower impact"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 2",
+    "Exercise Name": "Split Jump Lunges Rapid",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Rapid alternation"
+  },
+  {
     "Exercise Name": "Split Squat (Barbell)",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Core, Glutes",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=2C-uNgKwPLE"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 3",
+    "Exercise Name": "Split Squat Jumps",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Alternating glute jumps"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 4",
+    "Exercise Name": "Squat Hold Rapid Pulse",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Pulsing hold"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 4",
+    "Exercise Name": "Squat Pulses",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Quad endurance"
+  },
+  {
+    "Workout Type": "Legs & Lower Body",
+    "Schedule": "Friday",
+    "Grouping": "Superset 2",
+    "Exercise Name": "Standing Calf Raises",
+    "Muscle Group": "Lower Body - Calves",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "15",
+    "Rest": "Minimal",
+    "Focus": "Calf work"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 3",
+    "Exercise Name": "Step-Down Eccentric",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Slow glute control"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 1",
+    "Exercise Name": "Step-Downs with Control",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Eccentric control"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 2",
+    "Exercise Name": "Step-Up Knee Drive Maximum",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Max knee height"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 1",
+    "Exercise Name": "Step-Up Lateral Extension",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Lateral reach"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 4",
+    "Exercise Name": "Step-Up Sprint",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Sprint stepping"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 3",
+    "Exercise Name": "Step-Up to Single-Leg Balance",
+    "Muscle Group": "Lower Body - Balance",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Balance control"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 1",
+    "Exercise Name": "Step-Up with Glute Squeeze",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute focus"
+  },
+  {
+    "Workout Type": "Legs & Lower Body",
+    "Schedule": "Friday",
+    "Grouping": "Superset 3 (Triset)",
+    "Exercise Name": "Step-Ups",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Compound",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "Minimal (per leg)",
+    "Focus": "Glute finisher"
+  },
+  {
+    "Workout Type": "Plyometrics V3: Quad & Agility",
+    "Schedule": "Tuesday Weeks 3,7,11",
+    "Grouping": "Round 3",
+    "Exercise Name": "Step-Ups Cross-Body Knee",
+    "Muscle Group": "Lower Body - Quads",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Knee drive"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 2",
+    "Exercise Name": "Step-Ups Explosive Knee Drive",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Powerful hip drive"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 4",
+    "Exercise Name": "Step-Ups Single-Leg Balance",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute squeeze balance"
+  },
+  {
+    "Workout Type": "Plyometrics V1: Balanced",
+    "Schedule": "Tuesday Weeks 1,2,5,7,10",
+    "Grouping": "Round 1",
+    "Exercise Name": "Step-Ups with Knee Drive",
+    "Muscle Group": "Lower Body - Explosive",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute dominant"
   },
   {
     "Exercise Name": "Stiff Leg Deadlift",
@@ -920,6 +2096,18 @@
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=op9kVnSso6Q"
   },
   {
+    "Workout Type": "Chest & Back",
+    "Schedule": "Monday",
+    "Grouping": "Superset 3 (Triset)",
+    "Exercise Name": "Tricep Rope Pushdown",
+    "Muscle Group": "Upper Body - Triceps",
+    "Type": "Isolation",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "Minimal",
+    "Focus": "Accessory"
+  },
+  {
     "Exercise Name": "Tuck Jumps",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Core; Calves",
@@ -942,6 +2130,42 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "YouTube_Demonstration_Link": "https://www.youtube.com/watch?v=yaWj0cwS2DM"
+  },
+  {
+    "Workout Type": "Core",
+    "Schedule": "Mon/Wed/Fri",
+    "Grouping": "Core Routine",
+    "Exercise Name": "V-Up Rollup",
+    "Muscle Group": "Core - Full Body",
+    "Type": "Bodyweight",
+    "Sets": "1",
+    "Reps/Duration": "25",
+    "Rest": "Continuous",
+    "Focus": "Core strength"
+  },
+  {
+    "Workout Type": "Legs & Lower Body",
+    "Schedule": "Friday",
+    "Grouping": "Superset 3 (Triset)",
+    "Exercise Name": "Walking Lunges",
+    "Muscle Group": "Lower Body - Quads/Glutes",
+    "Type": "Compound",
+    "Sets": "3",
+    "Reps/Duration": "12",
+    "Rest": "Minimal (per leg)",
+    "Focus": "Unilateral strength"
+  },
+  {
+    "Workout Type": "Plyometrics V2: Glute & Power",
+    "Schedule": "Tuesday Weeks 2,6,9,12,4,8 deload",
+    "Grouping": "Round 4",
+    "Exercise Name": "Wall Sit Pulse Jumps",
+    "Muscle Group": "Lower Body - Glutes",
+    "Type": "Plyometric",
+    "Sets": "1",
+    "Reps/Duration": "40s",
+    "Rest": "20s",
+    "Focus": "Glute endurance"
   },
   {
     "Exercise Name": "Zottman Curl",

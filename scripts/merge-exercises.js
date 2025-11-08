@@ -8,10 +8,11 @@ const __dirname = path.dirname(__filename);
 
 // Paths
 const EXERCISES_JSON_PATH = path.join(__dirname, '../public/data/exercises.json');
-const NEW_EXERCISES_CSV_PATH = path.join(__dirname, '../public/data/possible-new-exercises.csv');
+const NEW_EXERCISES_CSV_PATH = path.join(__dirname, '../public/data/possible-new-exercises1.csv');
 
 /**
  * Parse CSV file and return exercises
+ * Transforms the new CSV format to match existing exercise format
  */
 function parseExercisesCSV(csvPath) {
   const csvContent = fs.readFileSync(csvPath, 'utf-8');
@@ -20,7 +21,21 @@ function parseExercisesCSV(csvPath) {
     skipEmptyLines: true,
   });
   
-  return result.data;
+  // Transform to match existing format
+  return result.data.map(row => {
+    // Extract primary muscle from "Muscle Group" field (e.g., "Upper Body - Chest" -> "Chest")
+    const muscleGroup = row['Muscle Group'] || '';
+    const primaryMuscle = muscleGroup.split(' - ').pop() || muscleGroup;
+    
+    return {
+      'Exercise Name': row['Exercise Name'],
+      'Primary Muscle': primaryMuscle,
+      'Secondary Muscles': '', // Not provided in new CSV
+      'Exercise Type': row['Type'] || 'Compound',
+      'Equipment': 'Various', // Not specified in new CSV
+      'YouTube_Demonstration_Link': '', // Not provided
+    };
+  });
 }
 
 /**

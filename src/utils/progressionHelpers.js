@@ -80,9 +80,10 @@ export const getUniqueExercises = (workoutHistory) => {
  * Format progression data for Chart.js
  * @param {Array} progressionData - Array from getExerciseProgression
  * @param {string} label - Label for the dataset
+ * @param {string} mode - 'weight' or 'reps' to determine Y-axis scaling
  * @returns {Object} Chart.js compatible data object
  */
-export const formatProgressionForChart = (progressionData, label) => {
+export const formatProgressionForChart = (progressionData, label, mode = 'weight') => {
   if (!progressionData || progressionData.length === 0) {
     return {
       labels: [],
@@ -99,15 +100,24 @@ export const formatProgressionForChart = (progressionData, label) => {
         pointRadius: 4,
         pointHoverRadius: 6,
       }],
+      minValue: 0,
     };
   }
 
-  const labels = progressionData.map(point => {
-    const date = point.date;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  });
+  // Limit to last 10 data points
+  const limitedData = progressionData.slice(-10);
 
-  const data = progressionData.map(point => point.value);
+  // Use session numbers for X-axis labels (Session 1, Session 2, etc.)
+  const labels = limitedData.map((_, index) => `Session ${index + 1}`);
+
+  const data = limitedData.map(point => point.value);
+
+  // Calculate minimum value for Y-axis scaling
+  let minValue = 0;
+  if (mode === 'weight' && data.length > 0) {
+    const minWeight = Math.min(...data);
+    minValue = Math.max(0, minWeight - 5); // 5lbs below minimum, but not below 0
+  }
 
   return {
     labels,
@@ -124,5 +134,6 @@ export const formatProgressionForChart = (progressionData, label) => {
       pointRadius: 4,
       pointHoverRadius: 6,
     }],
+    minValue,
   };
 };

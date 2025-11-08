@@ -691,7 +691,8 @@ const ProgressScreen = () => {
                     );
                     const chartData = formatProgressionForChart(
                       progression,
-                      pinned.trackingMode === 'weight' ? 'Weight (lbs)' : 'Reps'
+                      pinned.trackingMode === 'weight' ? 'Weight (lbs)' : 'Reps',
+                      pinned.trackingMode
                     );
 
                     const chartOptions = {
@@ -703,7 +704,8 @@ const ProgressScreen = () => {
                       },
                       scales: {
                         y: {
-                          beginAtZero: true,
+                          beginAtZero: pinned.trackingMode === 'reps',
+                          min: chartData.minValue,
                           ticks: {
                             callback: function(value) {
                               return pinned.trackingMode === 'weight' 
@@ -714,8 +716,8 @@ const ProgressScreen = () => {
                         },
                         x: {
                           ticks: {
-                            maxRotation: 45,
-                            minRotation: 45,
+                            maxRotation: 0,
+                            minRotation: 0,
                           }
                         }
                       },

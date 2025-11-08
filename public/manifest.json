@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#fdf4e3",
   "theme_color": "#134686",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "icons": [
     {
       "src": "/goodlift/icons/goodlift-icon-192.png",

@@ -272,24 +272,28 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        style={{ 
-          maxWidth: '700px', 
-          margin: '0 auto', 
-          padding: '2rem 1rem' 
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: '700px',
+          margin: '0 auto',
+          padding: { xs: '1rem 0.75rem', sm: '1.5rem 1rem', md: '2rem 1rem' },
+          boxSizing: 'border-box',
         }}
       >
-        <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+        <Box sx={{ mb: 3, textAlign: 'center' }}>
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'center', 
             mb: 2 
           }}>
             <Box sx={{ 
-              p: 2, 
+              p: { xs: 1.5, sm: 2 }, 
               borderRadius: '50%', 
               bgcolor: getActivityBgColor(),
               display: 'flex',
@@ -303,46 +307,67 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
             fontWeight: 700, 
             color: getActivityColor(),
             mb: 1,
-            fontSize: { xs: '1.75rem', sm: '2.5rem' }
+            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
           }}>
             {getActivityTitle()}
           </Typography>
           <Typography variant="body1" sx={{ 
             color: 'text.secondary',
-            mb: 3
+            mb: 2,
+            fontSize: { xs: '0.875rem', sm: '1rem' },
+            px: { xs: 1, sm: 0 }
           }}>
             Manually log your completed fitness activities
           </Typography>
 
           {/* Activity Type Selector */}
-          <ToggleButtonGroup
-            value={activityType}
-            exclusive
-            onChange={(e, newValue) => {
-              if (newValue !== null) {
-                setActivityType(newValue);
-              }
-            }}
-            aria-label="activity type"
-            sx={{ mb: 2 }}
-          >
-            <ToggleButton value={ACTIVITY_TYPES.WORKOUT} aria-label="workout">
-              <FitnessCenter sx={{ mr: 1 }} />
-              Workout
-            </ToggleButton>
-            <ToggleButton value={ACTIVITY_TYPES.CARDIO} aria-label="cardio">
-              <DirectionsRun sx={{ mr: 1 }} />
-              Cardio
-            </ToggleButton>
-            <ToggleButton value={ACTIVITY_TYPES.HIIT} aria-label="hiit">
-              <Timer sx={{ mr: 1 }} />
-              HIIT
-            </ToggleButton>
-            <ToggleButton value={ACTIVITY_TYPES.YOGA} aria-label="yoga">
-              <SelfImprovement sx={{ mr: 1 }} />
-              Yoga
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <Box sx={{ 
+            display: 'flex',
+            justifyContent: 'center',
+            width: '100%',
+            overflow: 'auto',
+            mb: 2,
+          }}>
+            <ToggleButtonGroup
+              value={activityType}
+              exclusive
+              onChange={(e, newValue) => {
+                if (newValue !== null) {
+                  setActivityType(newValue);
+                }
+              }}
+              aria-label="activity type"
+              sx={{ 
+                flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                justifyContent: 'center',
+                gap: { xs: 0.5, sm: 0 },
+                '& .MuiToggleButton-root': {
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  padding: { xs: '6px 8px', sm: '8px 16px' },
+                  minWidth: { xs: 'calc(50% - 4px)', sm: 'auto' },
+                  flex: { xs: '0 0 calc(50% - 4px)', sm: '0 1 auto' },
+                }
+              }}
+            >
+              <ToggleButton value={ACTIVITY_TYPES.WORKOUT} aria-label="workout">
+                <FitnessCenter sx={{ mr: { xs: 0.5, sm: 1 }, fontSize: { xs: '1rem', sm: '1.25rem' } }} />
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Workout</Box>
+                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>Work</Box>
+              </ToggleButton>
+              <ToggleButton value={ACTIVITY_TYPES.CARDIO} aria-label="cardio">
+                <DirectionsRun sx={{ mr: { xs: 0.5, sm: 1 }, fontSize: { xs: '1rem', sm: '1.25rem' } }} />
+                Cardio
+              </ToggleButton>
+              <ToggleButton value={ACTIVITY_TYPES.HIIT} aria-label="hiit">
+                <Timer sx={{ mr: { xs: 0.5, sm: 1 }, fontSize: { xs: '1rem', sm: '1.25rem' } }} />
+                HIIT
+              </ToggleButton>
+              <ToggleButton value={ACTIVITY_TYPES.YOGA} aria-label="yoga">
+                <SelfImprovement sx={{ mr: { xs: 0.5, sm: 1 }, fontSize: { xs: '1rem', sm: '1.25rem' } }} />
+                Yoga
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
         </Box>
 
         {notification.show && (
@@ -360,8 +385,15 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
           </motion.div>
         )}
 
-        <Card sx={{ borderRadius: 3 }}>
-          <CardContent sx={{ p: 3 }}>
+        <Card sx={{ 
+          borderRadius: 3,
+          width: '100%',
+          boxSizing: 'border-box',
+        }}>
+          <CardContent sx={{ 
+            p: { xs: 2, sm: 3 },
+            '&:last-child': { pb: { xs: 2, sm: 3 } }
+          }}>
             <Formik
               initialValues={initialValues}
               validate={validate}
@@ -383,8 +415,10 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                               fullWidth: true,
                               error: touched.date && Boolean(errors.date),
                               helperText: touched.date && errors.date,
+                              sx: { width: '100%' }
                             }
                           }}
+                          sx={{ width: '100%' }}
                         />
                       )}
                     </Field>
@@ -512,7 +546,8 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
             </Formik>
           </CardContent>
         </Card>
-      </motion.div>
+        </motion.div>
+      </Box>
     </LocalizationProvider>
   );
 };

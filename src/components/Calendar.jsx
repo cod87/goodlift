@@ -1,32 +1,35 @@
 import { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@mui/material';
-import { Star } from '@mui/icons-material';
 import '../styles/Calendar.css';
 
 const Calendar = ({ workoutSessions = [], onDayClick }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Create a map of dates to session types for quick lookup (format: YYYY-MM-DD -> [types])
+  // Create a map of dates to session info for quick lookup
   const workoutDateMap = useMemo(() => {
     const dateMap = new Map();
     workoutSessions.forEach(session => {
       const d = new Date(session.date);
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (!dateMap.has(dateStr)) {
-        dateMap.set(dateStr, []);
+        dateMap.set(dateStr, { sessions: [], durations: {} });
       }
-      if (!dateMap.get(dateStr).includes(session.type)) {
-        dateMap.get(dateStr).push(session.type);
+      const dayData = dateMap.get(dateStr);
+      dayData.sessions.push(session);
+      // Track duration for each type to determine which to show if multiple non-workout sessions
+      if (!dayData.durations[session.type]) {
+        dayData.durations[session.type] = 0;
       }
+      dayData.durations[session.type] += session.duration || 0;
     });
     return dateMap;
   }, [workoutSessions]);
 
-  // Get session types for a date
-  const getSessionTypes = (date) => {
+  // Get session info for a date
+  const getSessionInfo = (date) => {
     const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    return workoutDateMap.get(dateStr) || [];
+    return workoutDateMap.get(dateStr) || { sessions: [], durations: {} };
   };
 
   // Get days for monthly view
@@ -87,20 +90,80 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
            date.getFullYear() === today.getFullYear();
   };
 
-  // Get color for activity type
-  const getColorForType = (type) => {
+  // Determine which icon to display and which bookmarks to show
+  const getDisplayInfo = (sessionInfo) => {
+    const { sessions } = sessionInfo;
+    if (sessions.length === 0) return { icon: null, bookmarks: [] };
+
+    // Check if there's any workout session
+    const workoutSession = sessions.find(s => s.type === 'upper' || s.type === 'lower' || s.type === 'full');
+    
+    if (workoutSession) {
+      // Show workout icon, add bookmarks for other session types
+      const bookmarks = [];
+      if (sessions.some(s => s.type === 'cardio' || s.type === 'hiit')) {
+        bookmarks.push('cardio');
+      }
+      if (sessions.some(s => s.type === 'yoga' || s.type === 'stretch')) {
+        bookmarks.push('yoga');
+      }
+      return { 
+        icon: workoutSession.type, // 'upper', 'lower', or 'full'
+        bookmarks 
+      };
+    }
+
+    // No workout session - determine which to show based on duration
+    const hasCardio = sessions.some(s => s.type === 'cardio' || s.type === 'hiit');
+    const hasYoga = sessions.some(s => s.type === 'yoga' || s.type === 'stretch');
+    
+    if (hasCardio && hasYoga) {
+      // Show longer one, bookmark the other
+      const cardioDuration = (sessionInfo.durations.cardio || 0) + (sessionInfo.durations.hiit || 0);
+      const yogaDuration = (sessionInfo.durations.yoga || 0) + (sessionInfo.durations.stretch || 0);
+      
+      if (cardioDuration >= yogaDuration) {
+        return { icon: 'cardio', bookmarks: ['yoga'] };
+      } else {
+        return { icon: 'yoga', bookmarks: ['cardio'] };
+      }
+    } else if (hasCardio) {
+      return { icon: 'cardio', bookmarks: [] };
+    } else if (hasYoga) {
+      return { icon: 'yoga', bookmarks: [] };
+    }
+
+    return { icon: null, bookmarks: [] };
+  };
+
+  // Get icon path for session type
+  const getIconPath = (type) => {
+    const basePath = `${import.meta.env.BASE_URL}icons/`;
     switch (type) {
-      case 'workout':
-        return '#3f51b5'; // blue
+      case 'upper':
+        return `${basePath}upperbody-calendaricon.svg`;
+      case 'lower':
+        return `${basePath}lowerbody-calendaricon.svg`;
+      case 'full':
+        return `${basePath}fullbody-calendaricon.svg`;
       case 'cardio':
-        return '#4caf50'; // green
+        return `${basePath}cardio-calendaricon.svg`;
       case 'yoga':
-      case 'stretch':
-        return '#9c27b0'; // purple
-      case 'hiit':
-        return '#ed3f27'; // red/orange
+        return `${basePath}yoga-calendaricon.svg`;
       default:
-        return '#3f51b5';
+        return null;
+    }
+  };
+
+  // Get bookmark color
+  const getBookmarkColor = (type) => {
+    switch (type) {
+      case 'cardio':
+        return '#2196f3'; // light blue
+      case 'yoga':
+        return '#9c27b0'; // purple
+      default:
+        return '#ccc';
     }
   };
 
@@ -133,10 +196,9 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
         
         {/* Calendar days */}
         {days.map((date, index) => {
-          const sessionTypes = date ? getSessionTypes(date) : [];
-          const hasActivity = sessionTypes.length > 0;
-          const hasMultipleTypes = sessionTypes.length > 1;
-          const singleType = sessionTypes.length === 1 ? sessionTypes[0] : null;
+          const sessionInfo = date ? getSessionInfo(date) : { sessions: [], durations: {} };
+          const hasActivity = sessionInfo.sessions.length > 0;
+          const displayInfo = hasActivity ? getDisplayInfo(sessionInfo) : { icon: null, bookmarks: [] };
           
           return (
             <div
@@ -156,8 +218,8 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
                     alignItems: 'center', 
                     justifyContent: 'center' 
                   }}>
-                    {/* Marker for sessions */}
-                    {hasActivity && (
+                    {/* Icon for main session */}
+                    {displayInfo.icon && (
                       <Box sx={{ 
                         position: 'absolute',
                         top: '50%',
@@ -165,28 +227,44 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
                         transform: 'translate(-50%, -50%)',
                         zIndex: 0,
                       }}>
-                        {hasMultipleTypes ? (
-                          // Gold star for multiple session types
-                          <Star sx={{ 
-                            fontSize: { xs: '2rem', sm: '2.5rem' },
-                            color: '#FFD700',
-                            opacity: 0.8,
-                          }} />
-                        ) : (
-                          // Large X for single session type with color coding
-                          <Box sx={{ 
-                            fontSize: { xs: '2.5rem', sm: '3rem' },
-                            fontWeight: 900,
-                            lineHeight: 1,
-                            color: getColorForType(singleType),
-                            opacity: 0.6,
-                            fontFamily: 'Arial, sans-serif',
-                          }}>
-                            ✕
-                          </Box>
-                        )}
+                        <img 
+                          src={getIconPath(displayInfo.icon)} 
+                          alt={displayInfo.icon}
+                          style={{ 
+                            width: '28px', 
+                            height: '28px',
+                            opacity: 0.7,
+                          }}
+                        />
                       </Box>
                     )}
+                    
+                    {/* Bookmarks for additional session types */}
+                    {displayInfo.bookmarks.length > 0 && (
+                      <Box sx={{
+                        position: 'absolute',
+                        top: '2px',
+                        right: '2px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2px',
+                        zIndex: 1,
+                      }}>
+                        {displayInfo.bookmarks.map((bookmarkType, idx) => (
+                          <Box
+                            key={idx}
+                            sx={{
+                              width: '8px',
+                              height: '12px',
+                              backgroundColor: getBookmarkColor(bookmarkType),
+                              borderRadius: '0 0 2px 2px',
+                              clipPath: 'polygon(0 0, 100% 0, 100% 80%, 50% 60%, 0 80%)',
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    )}
+                    
                     <span className="day-number" style={{ zIndex: 1, position: 'relative' }}>
                       {date.getDate()}
                     </span>
@@ -200,20 +278,34 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
 
       <div className="calendar-legend">
         <div className="legend-item">
-          <Box sx={{ fontSize: '1rem', fontWeight: 900, color: '#3f51b5' }}>✕</Box>
-          <span>Workout</span>
+          <img src={`${import.meta.env.BASE_URL}icons/fullbody-calendaricon.svg`} alt="Full Body" style={{ width: '16px', height: '16px' }} />
+          <span>Full Body</span>
         </div>
         <div className="legend-item">
-          <Box sx={{ fontSize: '1rem', fontWeight: 900, color: '#4caf50' }}>✕</Box>
+          <img src={`${import.meta.env.BASE_URL}icons/upperbody-calendaricon.svg`} alt="Upper Body" style={{ width: '16px', height: '16px' }} />
+          <span>Upper Body</span>
+        </div>
+        <div className="legend-item">
+          <img src={`${import.meta.env.BASE_URL}icons/lowerbody-calendaricon.svg`} alt="Lower Body" style={{ width: '16px', height: '16px' }} />
+          <span>Lower Body</span>
+        </div>
+        <div className="legend-item">
+          <img src={`${import.meta.env.BASE_URL}icons/cardio-calendaricon.svg`} alt="Cardio" style={{ width: '16px', height: '16px' }} />
           <span>Cardio</span>
         </div>
         <div className="legend-item">
-          <Box sx={{ fontSize: '1rem', fontWeight: 900, color: '#9c27b0' }}>✕</Box>
-          <span>Yoga/Stretch</span>
+          <img src={`${import.meta.env.BASE_URL}icons/yoga-calendaricon.svg`} alt="Yoga" style={{ width: '16px', height: '16px' }} />
+          <span>Yoga</span>
         </div>
         <div className="legend-item">
-          <Star sx={{ fontSize: '1rem', color: '#FFD700' }} />
-          <span>Multiple Types</span>
+          <Box sx={{
+            width: '8px',
+            height: '12px',
+            backgroundColor: '#2196f3',
+            borderRadius: '0 0 2px 2px',
+            clipPath: 'polygon(0 0, 100% 0, 100% 80%, 50% 60%, 0 80%)',
+          }} />
+          <span>Additional Sessions</span>
         </div>
       </div>
     </div>
@@ -225,6 +317,7 @@ Calendar.propTypes = {
     PropTypes.shape({
       date: PropTypes.number.isRequired,
       type: PropTypes.string.isRequired,
+      duration: PropTypes.number,
     })
   ),
   onDayClick: PropTypes.func,

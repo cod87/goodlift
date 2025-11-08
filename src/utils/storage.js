@@ -3,6 +3,10 @@ import {
   saveUserStatsToFirebase,
   saveExerciseWeightsToFirebase,
   saveExerciseTargetRepsToFirebase,
+  saveHiitSessionsToFirebase,
+  saveCardioSessionsToFirebase,
+  saveStretchSessionsToFirebase,
+  saveYogaSessionsToFirebase,
   loadUserDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
@@ -464,6 +468,23 @@ export const loadUserDataFromCloud = async (userId) => {
         localStorage.setItem(KEYS.EXERCISE_TARGET_REPS, JSON.stringify(firebaseData.exerciseTargetReps));
       }
       
+      // Sync session data
+      if (firebaseData.hiitSessions) {
+        localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(firebaseData.hiitSessions));
+      }
+      
+      if (firebaseData.cardioSessions) {
+        localStorage.setItem(KEYS.CARDIO_SESSIONS, JSON.stringify(firebaseData.cardioSessions));
+      }
+      
+      if (firebaseData.stretchSessions) {
+        localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(firebaseData.stretchSessions));
+      }
+      
+      if (firebaseData.yogaSessions) {
+        localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(firebaseData.yogaSessions));
+      }
+      
       console.log('User data synced from Firebase to localStorage');
     } else {
       // No data in Firebase, sync current localStorage data to Firebase
@@ -473,16 +494,26 @@ export const loadUserDataFromCloud = async (userId) => {
       const weightsObj = localWeights ? JSON.parse(localWeights) : {};
       const localTargetReps = localStorage.getItem(KEYS.EXERCISE_TARGET_REPS);
       const targetRepsObj = localTargetReps ? JSON.parse(localTargetReps) : {};
+      const localHiit = getHiitSessions();
+      const localCardio = getCardioSessions();
+      const localStretch = getStretchSessions();
+      const localYoga = getYogaSessions();
       
       // If user has local data, sync it to Firebase
       if (localHistory.length > 0 || localStats?.totalWorkouts > 0 || 
-          Object.keys(weightsObj).length > 0 || Object.keys(targetRepsObj).length > 0) {
+          Object.keys(weightsObj).length > 0 || Object.keys(targetRepsObj).length > 0 ||
+          localHiit.length > 0 || localCardio.length > 0 || 
+          localStretch.length > 0 || localYoga.length > 0) {
         console.log('Syncing local data to Firebase for new user');
         await Promise.all([
           saveWorkoutHistoryToFirebase(userId, localHistory),
           saveUserStatsToFirebase(userId, localStats),
           saveExerciseWeightsToFirebase(userId, weightsObj),
-          saveExerciseTargetRepsToFirebase(userId, targetRepsObj)
+          saveExerciseTargetRepsToFirebase(userId, targetRepsObj),
+          saveHiitSessionsToFirebase(userId, localHiit),
+          saveCardioSessionsToFirebase(userId, localCardio),
+          saveStretchSessionsToFirebase(userId, localStretch),
+          saveYogaSessionsToFirebase(userId, localYoga)
         ]);
       }
     }
@@ -527,6 +558,11 @@ export const saveHiitSession = async (sessionData) => {
       setGuestData('hiit_sessions', sessions);
     } else {
       localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(sessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveHiitSessionsToFirebase(currentUserId, sessions);
+      }
     }
     
     // Stats will be recalculated automatically next time getUserStats() is called
@@ -578,6 +614,11 @@ export const saveCardioSession = async (sessionData) => {
       setGuestData('cardio_sessions', sessions);
     } else {
       localStorage.setItem(KEYS.CARDIO_SESSIONS, JSON.stringify(sessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveCardioSessionsToFirebase(currentUserId, sessions);
+      }
     }
     
     // Stats will be recalculated automatically next time getUserStats() is called
@@ -607,6 +648,11 @@ export const deleteCardioSession = async (sessionId) => {
       setGuestData('cardio_sessions', updatedSessions);
     } else {
       localStorage.setItem(KEYS.CARDIO_SESSIONS, JSON.stringify(updatedSessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveCardioSessionsToFirebase(currentUserId, updatedSessions);
+      }
     }
     
     // Stats will be recalculated automatically next time getUserStats() is called
@@ -752,6 +798,11 @@ export const saveStretchSession = async (sessionData) => {
       setGuestData('stretch_sessions', sessions);
     } else {
       localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(sessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveStretchSessionsToFirebase(currentUserId, sessions);
+      }
     }
     
     // Stats will be recalculated automatically next time getUserStats() is called
@@ -775,6 +826,11 @@ export const deleteStretchSession = async (sessionId) => {
       setGuestData('stretch_sessions', filteredSessions);
     } else {
       localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(filteredSessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveStretchSessionsToFirebase(currentUserId, filteredSessions);
+      }
     }
     
     // Stats will be recalculated automatically next time getUserStats() is called
@@ -819,6 +875,11 @@ export const saveYogaSession = async (sessionData) => {
       setGuestData('yoga_sessions', sessions);
     } else {
       localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(sessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveYogaSessionsToFirebase(currentUserId, sessions);
+      }
     }
     
     // Stats will be recalculated automatically next time getUserStats() is called
@@ -842,6 +903,11 @@ export const deleteYogaSession = async (sessionId) => {
       setGuestData('yoga_sessions', filteredSessions);
     } else {
       localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(filteredSessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveYogaSessionsToFirebase(currentUserId, filteredSessions);
+      }
     }
     
     // Stats will be recalculated automatically next time getUserStats() is called
@@ -865,6 +931,11 @@ export const deleteHiitSession = async (sessionId) => {
       setGuestData('hiit_sessions', filteredSessions);
     } else {
       localStorage.setItem(KEYS.HIIT_SESSIONS, JSON.stringify(filteredSessions));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveHiitSessionsToFirebase(currentUserId, filteredSessions);
+      }
     }
     
     // Stats will be recalculated automatically next time getUserStats() is called

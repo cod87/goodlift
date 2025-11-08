@@ -9,6 +9,7 @@ import {
   getYogaSessions,
   getHiitSessions,
   getCardioSessions,
+  getPlyoSessions,
   deleteStretchSession,
   deleteYogaSession,
   deleteHiitSession,
@@ -100,6 +101,7 @@ const ProgressScreen = () => {
   const [yogaSessions, setYogaSessions] = useState([]);
   const [hiitSessions, setHiitSessions] = useState([]);
   const [cardioSessions, setCardioSessions] = useState([]);
+  const [plyoSessions, setPlyoSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [pinnedExercises, setPinnedExercisesState] = useState([]);
@@ -109,23 +111,25 @@ const ProgressScreen = () => {
   const [exerciseSearchQuery, setExerciseSearchQuery] = useState('');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
-  const [editingSessionType, setEditingSessionType] = useState(null); // 'workout', 'cardio', 'hiit', 'yoga'
+  const [editingSessionType, setEditingSessionType] = useState(null); // 'workout', 'cardio', 'hiit', 'yoga', 'plyo'
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedHistory, loadedStretches, loadedYoga, loadedHiit, loadedCardio] = await Promise.all([
+      const [loadedHistory, loadedStretches, loadedYoga, loadedHiit, loadedCardio, loadedPlyo] = await Promise.all([
         getWorkoutHistory(),
         getStretchSessions(),
         getYogaSessions(),
         getHiitSessions(),
-        getCardioSessions()
+        getCardioSessions(),
+        getPlyoSessions()
       ]);
       setHistory(loadedHistory);
       setStretchSessions(loadedStretches);
       setYogaSessions(loadedYoga);
       setHiitSessions(loadedHiit);
       setCardioSessions(loadedCardio);
+      setPlyoSessions(loadedPlyo);
       
       // Load pinned exercises
       const pinned = getPinnedExercises();
@@ -346,6 +350,11 @@ const ProgressScreen = () => {
       type: 'cardio',
       duration: session.duration || 0
     })),
+    ...plyoSessions.map(session => ({ 
+      date: session.date, 
+      type: 'plyo',
+      duration: session.duration || 0
+    })),
     ...stretchSessions.map(session => ({ 
       date: session.date, 
       type: 'stretch',
@@ -386,7 +395,8 @@ const ProgressScreen = () => {
         hiit: hiitSessions,
         stretch: stretchSessions,
         yoga: yogaSessions,
-        cardio: cardioSessions
+        cardio: cardioSessions,
+        plyo: plyoSessions
       };
     }
 
@@ -395,7 +405,8 @@ const ProgressScreen = () => {
       hiit: hiitSessions.filter(s => isSameDay(s.date, selectedDate)),
       stretch: stretchSessions.filter(s => isSameDay(s.date, selectedDate)),
       yoga: yogaSessions.filter(s => isSameDay(s.date, selectedDate)),
-      cardio: cardioSessions.filter(s => isSameDay(s.date, selectedDate))
+      cardio: cardioSessions.filter(s => isSameDay(s.date, selectedDate)),
+      plyo: plyoSessions.filter(s => isSameDay(s.date, selectedDate))
     };
   };
 
@@ -405,7 +416,8 @@ const ProgressScreen = () => {
     filteredSessions.hiit.length > 0 ||
     filteredSessions.stretch.length > 0 ||
     filteredSessions.yoga.length > 0 ||
-    filteredSessions.cardio.length > 0
+    filteredSessions.cardio.length > 0 ||
+    filteredSessions.plyo.length > 0
   );
 
   return (

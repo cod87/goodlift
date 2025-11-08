@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { 
   getWorkoutHistory, 
-  deleteWorkout, 
+  deleteWorkout,
+  updateWorkout,
   getStretchSessions,
   getYogaSessions,
   getHiitSessions,
@@ -11,6 +13,9 @@ import {
   deleteYogaSession,
   deleteHiitSession,
   deleteCardioSession,
+  updateYogaSession,
+  updateHiitSession,
+  updateCardioSession,
   getPinnedExercises,
   updatePinnedExerciseMode,
   removePinnedExercise,
@@ -45,7 +50,11 @@ import {
   ListItemText,
   ToggleButtonGroup,
   ToggleButton,
-  TextField
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { 
   FitnessCenter, 
@@ -57,7 +66,8 @@ import {
   SelfImprovement, 
   DirectionsRun,
   Add,
-  Close
+  Close,
+  Edit
 } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {
@@ -97,6 +107,9 @@ const ProgressScreen = () => {
   const [availableExercises, setAvailableExercises] = useState([]);
   const [timeFilter, setTimeFilter] = useState('all'); // 'all', 'month', '2weeks'
   const [exerciseSearchQuery, setExerciseSearchQuery] = useState('');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingSession, setEditingSession] = useState(null);
+  const [editingSessionType, setEditingSessionType] = useState(null); // 'workout', 'cardio', 'hiit', 'yoga'
 
   const loadData = async () => {
     setLoading(true);
@@ -174,6 +187,67 @@ const ProgressScreen = () => {
     if (window.confirm('Are you sure you want to delete this cardio session? This action cannot be undone.')) {
       await deleteCardioSession(sessionId);
       await loadData();
+    }
+  };
+
+  const handleEditWorkout = (workout, index) => {
+    setEditingSession({ ...workout, index });
+    setEditingSessionType('workout');
+    setEditDialogOpen(true);
+  };
+
+  const handleEditCardio = (session) => {
+    setEditingSession(session);
+    setEditingSessionType('cardio');
+    setEditDialogOpen(true);
+  };
+
+  const handleEditHiit = (session) => {
+    setEditingSession(session);
+    setEditingSessionType('hiit');
+    setEditDialogOpen(true);
+  };
+
+  const handleEditYoga = (session) => {
+    setEditingSession(session);
+    setEditingSessionType('yoga');
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async (updatedData) => {
+    try {
+      if (editingSessionType === 'workout') {
+        await updateWorkout(editingSession.index, updatedData);
+      } else if (editingSessionType === 'cardio') {
+        await updateCardioSession(editingSession.id, updatedData);
+      } else if (editingSessionType === 'hiit') {
+        await updateHiitSession(editingSession.id, updatedData);
+      } else if (editingSessionType === 'yoga') {
+        await updateYogaSession(editingSession.id, updatedData);
+      }
+      
+      await loadData();
+      setEditDialogOpen(false);
+      setEditingSession(null);
+      setEditingSessionType(null);
+    } catch (error) {
+      console.error('Error saving edit:', error);
+      alert('Failed to save changes. Please try again.');
+    }
+  };
+
+  const getWorkoutTypeLabel = (type) => {
+    if (!type) return 'Workout';
+    
+    switch (type.toLowerCase()) {
+      case 'upper':
+        return 'Upper Body Workout';
+      case 'lower':
+        return 'Lower Body Workout';
+      case 'full':
+        return 'Full Body Workout';
+      default:
+        return type;
     }
   };
 
@@ -896,7 +970,7 @@ const ProgressScreen = () => {
                           <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.25 }}>
                             <FitnessCenter sx={{ fontSize: 16, color: 'primary.main' }} />
                             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
-                              {workout.type}
+                              {getWorkoutTypeLabel(workout.type)}
                             </Typography>
                             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
                               • {formatDate(workout.date)}
@@ -914,31 +988,77 @@ const ProgressScreen = () => {
                                 variant="outlined"
                               />
                             )}
+                            {workout.isManualLog && (
+                              <Chip 
+                                label="Manual" 
+                                size="small" 
+                                sx={{ 
+                                  height: 18,
+                                  fontSize: '0.65rem',
+                                  color: 'info.main',
+                                  borderColor: 'info.main'
+                                }}
+                                variant="outlined"
+                              />
+                            )}
                           </Stack>
-                          <Stack direction="row" spacing={1} alignItems="center">
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
                             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
                               {formatDuration(workout.duration)}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                              • {Object.keys(workout.exercises).length} exercises
-                            </Typography>
+                            {workout.isManualLog && workout.numExercises ? (
+                              <>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                  • {workout.numExercises} exercises
+                                </Typography>
+                                {workout.setsPerExercise && (
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                    • {workout.setsPerExercise} sets
+                                  </Typography>
+                                )}
+                              </>
+                            ) : (
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                • {Object.keys(workout.exercises).length} exercises
+                              </Typography>
+                            )}
+                            {workout.notes && (
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', fontStyle: 'italic' }}>
+                                • {workout.notes}
+                              </Typography>
+                            )}
                           </Stack>
                         </Box>
-                        <IconButton
-                          onClick={() => handleDeleteWorkout(idx)}
-                          size="small"
-                          sx={{
-                            ml: 1,
-                            color: 'text.secondary',
-                            '&:hover': {
-                              backgroundColor: 'error.light',
-                              color: 'error.main',
-                            }
-                          }}
-                          aria-label="Delete workout"
-                        >
-                          <Delete sx={{ fontSize: 18 }} />
-                        </IconButton>
+                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                          <IconButton
+                            onClick={() => handleEditWorkout(workout, idx)}
+                            size="small"
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': {
+                                backgroundColor: 'primary.light',
+                                color: 'primary.main',
+                              }
+                            }}
+                            aria-label="Edit workout"
+                          >
+                            <Edit sx={{ fontSize: 18 }} />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => handleDeleteWorkout(idx)}
+                            size="small"
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': {
+                                backgroundColor: 'error.light',
+                                color: 'error.main',
+                              }
+                            }}
+                            aria-label="Delete workout"
+                          >
+                            <Delete sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Box>
                       </Box>
                     </CardContent>
                   </Card>
@@ -975,25 +1095,47 @@ const ProgressScreen = () => {
                               • {formatDate(session.date)}
                             </Typography>
                           </Stack>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                            {formatDuration(session.duration)}
-                          </Typography>
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              {formatDuration(session.duration)}
+                            </Typography>
+                            {session.notes && (
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', fontStyle: 'italic' }}>
+                                • {session.notes}
+                              </Typography>
+                            )}
+                          </Stack>
                         </Box>
-                        <IconButton
-                          onClick={() => handleDeleteHiit(session.id)}
-                          size="small"
-                          sx={{
-                            ml: 1,
-                            color: 'text.secondary',
-                            '&:hover': {
-                              backgroundColor: 'error.light',
-                              color: 'error.main',
-                            }
-                          }}
-                          aria-label="Delete HIIT session"
-                        >
-                          <Delete sx={{ fontSize: 18 }} />
-                        </IconButton>
+                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                          <IconButton
+                            onClick={() => handleEditHiit(session)}
+                            size="small"
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': {
+                                backgroundColor: 'secondary.light',
+                                color: 'secondary.main',
+                              }
+                            }}
+                            aria-label="Edit HIIT session"
+                          >
+                            <Edit sx={{ fontSize: 18 }} />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => handleDeleteHiit(session.id)}
+                            size="small"
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': {
+                                backgroundColor: 'error.light',
+                                color: 'error.main',
+                              }
+                            }}
+                            aria-label="Delete HIIT session"
+                          >
+                            <Delete sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Box>
                       </Box>
                     </CardContent>
                   </Card>
@@ -1090,33 +1232,57 @@ const ProgressScreen = () => {
                               • {formatDate(session.date)}
                             </Typography>
                           </Stack>
-                          <Stack direction="row" spacing={1} alignItems="center">
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
                             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
                               {formatDuration(session.duration)}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                              • Flow: {session.flowLength}m
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                              • {session.poseCount} poses
-                            </Typography>
+                            {session.flowLength > 0 && (
+                              <>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                  • Flow: {session.flowLength}m
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                  • {session.poseCount} poses
+                                </Typography>
+                              </>
+                            )}
+                            {session.notes && (
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', fontStyle: 'italic' }}>
+                                • {session.notes}
+                              </Typography>
+                            )}
                           </Stack>
                         </Box>
-                        <IconButton
-                          onClick={() => handleDeleteYoga(session.id)}
-                          size="small"
-                          sx={{
-                            ml: 1,
-                            color: 'text.secondary',
-                            '&:hover': {
-                              backgroundColor: 'error.light',
-                              color: 'error.main',
-                            }
-                          }}
-                          aria-label="Delete yoga session"
-                        >
-                          <Delete sx={{ fontSize: 18 }} />
-                        </IconButton>
+                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                          <IconButton
+                            onClick={() => handleEditYoga(session)}
+                            size="small"
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': {
+                                backgroundColor: '#f3e5f5',
+                                color: '#9c27b0',
+                              }
+                            }}
+                            aria-label="Edit yoga session"
+                          >
+                            <Edit sx={{ fontSize: 18 }} />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => handleDeleteYoga(session.id)}
+                            size="small"
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': {
+                                backgroundColor: 'error.light',
+                                color: 'error.main',
+                              }
+                            }}
+                            aria-label="Delete yoga session"
+                          >
+                            <Delete sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Box>
                       </Box>
                     </CardContent>
                   </Card>
@@ -1153,25 +1319,47 @@ const ProgressScreen = () => {
                               • {formatDate(session.date)}
                             </Typography>
                           </Stack>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                            {formatDuration(session.duration)}
-                          </Typography>
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              {formatDuration(session.duration)}
+                            </Typography>
+                            {session.notes && (
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', fontStyle: 'italic' }}>
+                                • {session.notes}
+                              </Typography>
+                            )}
+                          </Stack>
                         </Box>
-                        <IconButton
-                          onClick={() => handleDeleteCardio(session.id)}
-                          size="small"
-                          sx={{
-                            ml: 1,
-                            color: 'text.secondary',
-                            '&:hover': {
-                              backgroundColor: 'error.light',
-                              color: 'error.main',
-                            }
-                          }}
-                          aria-label="Delete cardio session"
-                        >
-                          <Delete sx={{ fontSize: 18 }} />
-                        </IconButton>
+                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                          <IconButton
+                            onClick={() => handleEditCardio(session)}
+                            size="small"
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': {
+                                backgroundColor: '#e3f2fd',
+                                color: '#2196f3',
+                              }
+                            }}
+                            aria-label="Edit cardio session"
+                          >
+                            <Edit sx={{ fontSize: 18 }} />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => handleDeleteCardio(session.id)}
+                            size="small"
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': {
+                                backgroundColor: 'error.light',
+                                color: 'error.main',
+                              }
+                            }}
+                            aria-label="Delete cardio session"
+                          >
+                            <Delete sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Box>
                       </Box>
                     </CardContent>
                   </Card>
@@ -1187,8 +1375,150 @@ const ProgressScreen = () => {
           )}
         </Stack>
       </div>
+
+      {/* Edit Session Dialog */}
+      {editingSession && (
+        <EditSessionDialog
+          open={editDialogOpen}
+          onClose={() => {
+            setEditDialogOpen(false);
+            setEditingSession(null);
+            setEditingSessionType(null);
+          }}
+          onSave={handleSaveEdit}
+          session={editingSession}
+          sessionType={editingSessionType}
+        />
+      )}
     </motion.div>
   );
+};
+
+// Edit Session Dialog Component
+const EditSessionDialog = ({ open, onClose, onSave, session, sessionType }) => {
+  const [duration, setDuration] = useState(session.duration ? Math.round(session.duration / 60) : 0);
+  const [notes, setNotes] = useState(session.notes || '');
+  const [workoutType, setWorkoutType] = useState(session.type || 'full');
+  const [numExercises, setNumExercises] = useState(session.numExercises || '');
+  const [setsPerExercise, setSetsPerExercise] = useState(session.setsPerExercise || '');
+  const [cardioType, setCardioType] = useState(session.cardioType || '');
+
+  const handleSubmit = () => {
+    const updatedData = {
+      duration: duration * 60, // Convert back to seconds
+      notes: notes.trim(),
+    };
+
+    if (sessionType === 'workout') {
+      updatedData.type = workoutType;
+      if (numExercises) updatedData.numExercises = parseInt(numExercises);
+      if (setsPerExercise) updatedData.setsPerExercise = parseInt(setsPerExercise);
+    } else if (sessionType === 'cardio') {
+      updatedData.cardioType = cardioType.trim();
+    }
+
+    onSave(updatedData);
+  };
+
+  const getTitle = () => {
+    switch (sessionType) {
+      case 'workout':
+        return 'Edit Workout';
+      case 'cardio':
+        return 'Edit Cardio Session';
+      case 'hiit':
+        return 'Edit HIIT Session';
+      case 'yoga':
+        return 'Edit Yoga Session';
+      default:
+        return 'Edit Session';
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{getTitle()}</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          <TextField
+            fullWidth
+            type="number"
+            label="Duration (minutes)"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            inputProps={{ min: 0, step: 1 }}
+          />
+
+          {sessionType === 'workout' && (
+            <>
+              <FormControl fullWidth>
+                <InputLabel>Workout Type</InputLabel>
+                <Select
+                  value={workoutType}
+                  label="Workout Type"
+                  onChange={(e) => setWorkoutType(e.target.value)}
+                >
+                  <MenuItem value="upper">Upper Body</MenuItem>
+                  <MenuItem value="lower">Lower Body</MenuItem>
+                  <MenuItem value="full">Full Body</MenuItem>
+                </Select>
+              </FormControl>
+
+              <TextField
+                fullWidth
+                type="number"
+                label="Number of Exercises"
+                value={numExercises}
+                onChange={(e) => setNumExercises(e.target.value)}
+                inputProps={{ min: 1, step: 1 }}
+              />
+
+              <TextField
+                fullWidth
+                type="number"
+                label="Sets per Exercise"
+                value={setsPerExercise}
+                onChange={(e) => setSetsPerExercise(e.target.value)}
+                inputProps={{ min: 1, step: 1 }}
+              />
+            </>
+          )}
+
+          {sessionType === 'cardio' && (
+            <TextField
+              fullWidth
+              label="Cardio Type"
+              value={cardioType}
+              onChange={(e) => setCardioType(e.target.value)}
+            />
+          )}
+
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Notes (optional)"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleSubmit} variant="contained">
+          Save Changes
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+EditSessionDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  session: PropTypes.object.isRequired,
+  sessionType: PropTypes.string.isRequired,
 };
 
 export default ProgressScreen;

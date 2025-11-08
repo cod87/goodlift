@@ -156,9 +156,13 @@
   line-height: 1;
   z-index: 2;
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: 2px;
+  left: 2px;
   font-weight: 600;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 2px 4px;
+  border-radius: 3px;
+  backdrop-filter: blur(2px);
 }
 
 .workout-indicator {
@@ -246,6 +250,10 @@
   .day-number {
     font-size: 0.85rem;
     font-weight: 600;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 2px 4px;
+    border-radius: 3px;
+    backdrop-filter: blur(2px);
   }
 
   .calendar-day {
@@ -277,6 +285,10 @@
 
   .day-number {
     font-size: 0.75rem;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 2px 4px;
+    border-radius: 3px;
+    backdrop-filter: blur(2px);
   }
 
   .workout-indicator {

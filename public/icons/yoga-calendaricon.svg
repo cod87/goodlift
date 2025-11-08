@@ -1,0 +1,8 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Yoga person icon -->
+  <path d="M16 6C17.105 6 18 5.105 18 4C18 2.895 17.105 2 16 2C14.895 2 14 2.895 14 4C14 5.105 14.895 6 16 6Z" fill="#9c27b0"/>
+  <path d="M16 8C14 8 12 9 12 11V15H14V11C14 10 15 9 16 9C17 9 18 10 18 11V15H20V11C20 9 18 8 16 8Z" fill="#9c27b0"/>
+  <path d="M12 16V18L10 22V28H12V22L14 18H18L20 22V28H22V22L20 18V16H12Z" fill="#9c27b0"/>
+  <path d="M8 16L6 14L4 16L6 18L8 16Z" fill="#9c27b0"/>
+  <path d="M28 16L26 14L24 16L26 18L28 16Z" fill="#9c27b0"/>
+</svg>

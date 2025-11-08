@@ -257,11 +257,31 @@ const ProgressScreen = () => {
 
   // Extract workout dates for calendar - include all session types with their types
   const workoutSessions = [
-    ...history.map(workout => ({ date: workout.date, type: 'workout' })),
-    ...hiitSessions.map(session => ({ date: session.date, type: 'hiit' })),
-    ...cardioSessions.map(session => ({ date: session.date, type: 'cardio' })),
-    ...stretchSessions.map(session => ({ date: session.date, type: 'stretch' })),
-    ...yogaSessions.map(session => ({ date: session.date, type: 'yoga' }))
+    ...history.map(workout => ({ 
+      date: workout.date, 
+      type: workout.type || 'full', // Use workout.type (upper/lower/full) or default to full
+      duration: workout.duration || 0
+    })),
+    ...hiitSessions.map(session => ({ 
+      date: session.date, 
+      type: 'hiit',
+      duration: session.duration || 0
+    })),
+    ...cardioSessions.map(session => ({ 
+      date: session.date, 
+      type: 'cardio',
+      duration: session.duration || 0
+    })),
+    ...stretchSessions.map(session => ({ 
+      date: session.date, 
+      type: 'stretch',
+      duration: session.duration || 0
+    })),
+    ...yogaSessions.map(session => ({ 
+      date: session.date, 
+      type: 'yoga',
+      duration: session.duration || 0
+    }))
   ];
 
   // Handle day click in calendar

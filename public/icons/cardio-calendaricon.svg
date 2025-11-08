@@ -1,0 +1,6 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Running person icon for cardio -->
+  <path d="M20 6C20 7.105 19.105 8 18 8C16.895 8 16 7.105 16 6C16 4.895 16.895 4 18 4C19.105 4 20 4.895 20 6Z" fill="#2196f3"/>
+  <path d="M22 10L18 12L16 10V14L12 16V20H14V16L16 15V22L18 28H20L21 22L23 20L24 16H22V10Z" fill="#2196f3"/>
+  <path d="M14 10L10 12V16H12V12L14 11V10Z" fill="#2196f3"/>
+</svg>

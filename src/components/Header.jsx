@@ -49,7 +49,7 @@ const Header = ({ isDesktop }) => {
         height: '60px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         padding: '0 1rem',
         background: 'rgba(255, 255, 255, 0.75)',
         backdropFilter: 'blur(10px)',
@@ -59,22 +59,21 @@ const Header = ({ isDesktop }) => {
         transition: 'left 0.3s ease',
       }}
     >
-      {/* Left controls */}
+      {/* Left controls - empty for balance */}
       <Box sx={{ 
-        position: 'absolute', 
-        left: '1rem',
         display: 'flex', 
-        gap: 0.5 
+        alignItems: 'center',
+        gap: 0.5,
+        visibility: 'hidden'
       }}>
-        {/* Placeholder to balance layout - hidden */}
-        <Box sx={{ width: '40px', visibility: 'hidden' }} />
+        <Box sx={{ width: '40px' }} />
       </Box>
       
-      {/* Center logo - absolutely centered */}
+      {/* Center logo */}
       <Box sx={{
-        position: 'absolute',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}>
         <img
           src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
@@ -85,9 +84,8 @@ const Header = ({ isDesktop }) => {
       
       {/* Right controls */}
       <Box sx={{ 
-        position: 'absolute',
-        right: '1rem',
-        display: 'flex', 
+        display: 'flex',
+        alignItems: 'center',
         gap: 0.5 
       }}>
         {/* Sound Toggle */}

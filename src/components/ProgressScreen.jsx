@@ -44,7 +44,8 @@ import {
   ListItemButton,
   ListItemText,
   ToggleButtonGroup,
-  ToggleButton
+  ToggleButton,
+  TextField
 } from '@mui/material';
 import { 
   FitnessCenter, 
@@ -95,6 +96,7 @@ const ProgressScreen = () => {
   const [addExerciseDialogOpen, setAddExerciseDialogOpen] = useState(false);
   const [availableExercises, setAvailableExercises] = useState([]);
   const [timeFilter, setTimeFilter] = useState('all'); // 'all', 'month', '2weeks'
+  const [exerciseSearchQuery, setExerciseSearchQuery] = useState('');
 
   const loadData = async () => {
     setLoading(true);
@@ -216,14 +218,17 @@ const ProgressScreen = () => {
   const getFilteredStats = () => {
     const filteredWorkouts = filterByTimePeriod(history);
     const filteredCardio = filterByTimePeriod(cardioSessions);
+    const filteredHiit = filterByTimePeriod(hiitSessions);
     const filteredYoga = filterByTimePeriod(yogaSessions);
     
     const totalWorkouts = filteredWorkouts.length;
     const totalWorkoutTime = filteredWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
     const avgWorkout = totalWorkouts > 0 ? Math.round(totalWorkoutTime / totalWorkouts / 60) : 0;
     
-    const totalCardio = filteredCardio.length;
-    const totalCardioTime = filteredCardio.reduce((sum, s) => sum + (s.duration || 0), 0);
+    // Combine cardio and HIIT sessions
+    const allCardio = [...filteredCardio, ...filteredHiit];
+    const totalCardio = allCardio.length;
+    const totalCardioTime = allCardio.reduce((sum, s) => sum + (s.duration || 0), 0);
     const avgCardio = totalCardio > 0 ? Math.round(totalCardioTime / totalCardio / 60) : 0;
     
     const totalYoga = filteredYoga.length;
@@ -309,56 +314,6 @@ const ProgressScreen = () => {
     filteredSessions.cardio.length > 0
   );
 
-  // Prepare chart data
-  const chartData = {
-    labels: history.slice(-7).reverse().map(w => formatDate(w.date)),
-    datasets: [
-      {
-        label: 'Workout Duration (minutes)',
-        data: history.slice(-7).reverse().map(w => Math.round(w.duration / 60)),
-        fill: true,
-        backgroundColor: 'rgba(19, 70, 134, 0.2)',
-        borderColor: 'rgb(19, 70, 134)',
-        tension: 0.4,
-        pointBackgroundColor: 'rgb(19, 70, 134)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      title: {
-        display: true,
-        text: 'Last 7 Workouts',
-        font: {
-          size: 16,
-          weight: 600,
-          family: "'Montserrat', sans-serif",
-        },
-        color: 'rgb(19, 70, 134)',
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: function(value) {
-            return value + 'm';
-          },
-        },
-      },
-    },
-  };
-
   return (
     <motion.div
       className="screen progress-screen"
@@ -411,12 +366,12 @@ const ProgressScreen = () => {
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-4px)',
-                  boxShadow: '0 8px 24px rgba(19, 70, 134, 0.15)',
+                  boxShadow: '0 8px 24px rgba(237, 63, 39, 0.15)',
                 }
               }}>
                 <CardContent sx={{ p: 2 }}>
                   <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-                    <FitnessCenter sx={{ fontSize: 32, color: 'primary.main' }} />
+                    <FitnessCenter sx={{ fontSize: 32, color: 'secondary.main' }} />
                     <Typography variant="body2" sx={{ 
                       color: 'text.secondary',
                       textTransform: 'uppercase',
@@ -429,8 +384,9 @@ const ProgressScreen = () => {
                   </Stack>
                   <Typography variant="h3" sx={{ 
                     fontWeight: 700,
-                    color: 'primary.main',
-                    fontSize: { xs: '2rem', sm: '2.5rem' }
+                    color: 'secondary.main',
+                    fontSize: { xs: '2rem', sm: '2.5rem' },
+                    textAlign: 'center'
                   }}>
                     {filteredStats.totalWorkouts}
                   </Typography>
@@ -469,7 +425,8 @@ const ProgressScreen = () => {
                   <Typography variant="h3" sx={{ 
                     fontWeight: 700,
                     color: 'secondary.main',
-                    fontSize: { xs: '2rem', sm: '2.5rem' }
+                    fontSize: { xs: '2rem', sm: '2.5rem' },
+                    textAlign: 'center'
                   }}>
                     {filteredStats.avgWorkout}m
                   </Typography>
@@ -511,7 +468,8 @@ const ProgressScreen = () => {
                   <Typography variant="h3" sx={{ 
                     fontWeight: 700,
                     color: '#2196f3',
-                    fontSize: { xs: '2rem', sm: '2.5rem' }
+                    fontSize: { xs: '2rem', sm: '2.5rem' },
+                    textAlign: 'center'
                   }}>
                     {filteredStats.totalCardio}
                   </Typography>
@@ -550,7 +508,8 @@ const ProgressScreen = () => {
                   <Typography variant="h3" sx={{ 
                     fontWeight: 700,
                     color: '#2196f3',
-                    fontSize: { xs: '2rem', sm: '2.5rem' }
+                    fontSize: { xs: '2rem', sm: '2.5rem' },
+                    textAlign: 'center'
                   }}>
                     {filteredStats.avgCardio}m
                   </Typography>
@@ -592,7 +551,8 @@ const ProgressScreen = () => {
                   <Typography variant="h3" sx={{ 
                     fontWeight: 700,
                     color: '#9c27b0',
-                    fontSize: { xs: '2rem', sm: '2.5rem' }
+                    fontSize: { xs: '2rem', sm: '2.5rem' },
+                    textAlign: 'center'
                   }}>
                     {filteredStats.totalYoga}
                   </Typography>
@@ -631,7 +591,8 @@ const ProgressScreen = () => {
                   <Typography variant="h3" sx={{ 
                     fontWeight: 700,
                     color: '#9c27b0',
-                    fontSize: { xs: '2rem', sm: '2.5rem' }
+                    fontSize: { xs: '2rem', sm: '2.5rem' },
+                    textAlign: 'center'
                   }}>
                     {filteredStats.avgYoga}m
                   </Typography>
@@ -644,24 +605,6 @@ const ProgressScreen = () => {
 
       {/* Calendar - positioned after stats, before history */}
       <Calendar workoutSessions={workoutSessions} onDayClick={handleDayClick} />
-
-      {history.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card sx={{ 
-            mb: 3,
-            borderRadius: 3,
-            p: 2,
-          }}>
-            <Box sx={{ height: 250 }}>
-              <Line data={chartData} options={chartOptions} />
-            </Box>
-          </Card>
-        </motion.div>
-      )}
 
       {/* Progressive Overload Section */}
       {history.length > 0 && (
@@ -832,7 +775,10 @@ const ProgressScreen = () => {
       {/* Add Exercise Dialog */}
       <Dialog 
         open={addExerciseDialogOpen} 
-        onClose={() => setAddExerciseDialogOpen(false)}
+        onClose={() => {
+          setAddExerciseDialogOpen(false);
+          setExerciseSearchQuery('');
+        }}
         maxWidth="xs"
         fullWidth
       >
@@ -843,21 +789,39 @@ const ProgressScreen = () => {
               Loading exercises...
             </Typography>
           ) : (
-            <List sx={{ maxHeight: 400, overflow: 'auto' }}>
-              {availableExercises
-                .filter(ex => !pinnedExercises.some(p => p.exerciseName === ex))
-                .map((exerciseName) => (
-                  <ListItem key={exerciseName} disablePadding>
-                    <ListItemButton onClick={() => handleAddPinnedExercise(exerciseName)}>
-                      <ListItemText primary={exerciseName} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-            </List>
+            <>
+              <TextField
+                fullWidth
+                placeholder="Search exercises..."
+                value={exerciseSearchQuery}
+                onChange={(e) => setExerciseSearchQuery(e.target.value)}
+                variant="outlined"
+                size="small"
+                sx={{ mb: 2, mt: 1 }}
+              />
+              <List sx={{ maxHeight: 400, overflow: 'auto' }}>
+                {availableExercises
+                  .filter(ex => !pinnedExercises.some(p => p.exerciseName === ex))
+                  .filter(ex => ex.toLowerCase().includes(exerciseSearchQuery.toLowerCase()))
+                  .map((exerciseName) => (
+                    <ListItem key={exerciseName} disablePadding>
+                      <ListItemButton onClick={() => {
+                        handleAddPinnedExercise(exerciseName);
+                        setExerciseSearchQuery('');
+                      }}>
+                        <ListItemText primary={exerciseName} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+              </List>
+            </>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddExerciseDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => {
+            setAddExerciseDialogOpen(false);
+            setExerciseSearchQuery('');
+          }}>Cancel</Button>
         </DialogActions>
       </Dialog>
 

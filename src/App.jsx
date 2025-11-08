@@ -499,7 +499,7 @@ function App() {
           onToggle={handleToggleSidebar}
         />
         
-        <Header />
+        <Header onNavigate={handleNavigate} />
         
         <div id="app" style={{ 
           flex: 1,
@@ -575,9 +575,7 @@ function App() {
 
           {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} />}
 
-          {currentScreen === 'stretch' && <MobilityScreen />}
-
-          {currentScreen === 'yoga' && <MobilityScreen />}
+          {(currentScreen === 'stretch' || currentScreen === 'yoga' || currentScreen === 'mobility') && <MobilityScreen />}
 
           {currentScreen === 'exercise-list' && <ExerciseListPage />}
         </div>

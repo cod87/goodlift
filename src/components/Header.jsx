@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { VolumeUp, VolumeOff } from '@mui/icons-material';
 import { MdScreenLockPortrait, MdScreenLockRotation } from 'react-icons/md';
@@ -9,7 +10,7 @@ import wakeLockManager from '../utils/wakeLock';
  * Header component - Sticky header with logo, sound toggle, and wake lock toggle
  * Appears at the top of all screens
  */
-const Header = () => {
+const Header = ({ onNavigate }) => {
   const [isMuted, setIsMuted] = useState(audioService.isMutedState());
   const [wakeLockActive, setWakeLockActive] = useState(wakeLockManager.isActive());
   const [wakeLockSupported] = useState(wakeLockManager.isWakeLockSupported());
@@ -71,11 +72,31 @@ const Header = () => {
       </Box>
       
       {/* Center logo */}
-      <Box sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
+      <Box 
+        onClick={() => onNavigate && onNavigate('progress')}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: onNavigate ? 'pointer' : 'default',
+          transition: 'transform 0.2s ease',
+          '&:hover': onNavigate ? {
+            transform: 'scale(1.05)',
+          } : {},
+          '&:active': onNavigate ? {
+            transform: 'scale(0.98)',
+          } : {},
+        }}
+        aria-label={onNavigate ? "Go to Progress screen" : undefined}
+        role={onNavigate ? "button" : undefined}
+        tabIndex={onNavigate ? 0 : undefined}
+        onKeyDown={onNavigate ? (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onNavigate('progress');
+          }
+        } : undefined}
+      >
         <img
           src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
           alt="GoodLift"
@@ -137,6 +158,10 @@ const Header = () => {
       </Box>
     </Box>
   );
+};
+
+Header.propTypes = {
+  onNavigate: PropTypes.func,
 };
 
 export default Header;

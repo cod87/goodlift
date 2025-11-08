@@ -146,21 +146,29 @@ const NavigationSidebar = ({
               padding: '1.5rem 1.5rem 1rem',
               borderBottom: '2px solid rgba(19, 70, 134, 0.1)',
             }}>
-              <motion.div
+              <motion.button
                 whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleNavClick('progress')}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: '1rem',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  width: '100%',
                 }}
+                aria-label="Go to Progress screen"
               >
-             <img
-  src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
-  alt="GoodLift"
-  style={{ height: '48px', width: 'auto' }}
-/>
-              </motion.div>
+                <img
+                  src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
+                  alt="GoodLift"
+                  style={{ height: '48px', width: 'auto' }}
+                />
+              </motion.button>
               
               {/* Guest Mode Indicator */}
               {isGuest && (
@@ -192,7 +200,9 @@ const NavigationSidebar = ({
             {/* Navigation Links */}
             <nav style={{ 
               padding: '1rem 0',
-              borderBottom: '2px solid rgba(19, 70, 134, 0.1)',
+              flex: 1,
+              overflowY: 'auto',
+              overflowX: 'hidden',
             }}>
               <NavLink
                 icon={<FaHome />}
@@ -215,8 +225,8 @@ const NavigationSidebar = ({
               <NavLink
                 icon={<MdSelfImprovement />}
                 label="Mobility"
-                isActive={currentScreen === 'stretch' || currentScreen === 'yoga'}
-                onClick={() => handleNavClick('stretch')}
+                isActive={currentScreen === 'stretch' || currentScreen === 'yoga' || currentScreen === 'mobility'}
+                onClick={() => handleNavClick('mobility')}
               />
               <NavLink
                 icon={<EditCalendarIcon />}
@@ -238,7 +248,7 @@ const NavigationSidebar = ({
                 padding: '1rem 1.5rem',
                 paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
                 borderTop: '2px solid rgba(19, 70, 134, 0.1)',
-                marginTop: 'auto',
+                flexShrink: 0,
               }}>
                 <motion.button
                   onClick={handleLogout}

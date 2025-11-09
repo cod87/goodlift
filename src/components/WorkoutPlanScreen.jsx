@@ -22,7 +22,10 @@ import {
   Card,
   CardContent,
   CardActions,
-  LinearProgress
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -163,10 +166,10 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   };
 
   const handleViewCalendar = (plan) => {
-    // Set as active plan and navigate to calendar view
+    // Set as active plan and navigate to progress screen (calendar view)
     setActivePlan(plan.id);
     if (onNavigate) {
-      onNavigate('plan-calendar');
+      onNavigate('progress');
     }
   };
 
@@ -207,152 +210,174 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         }
       />
       
-      <Container maxWidth="lg" sx={{ py: 2 }}>
+      <Container maxWidth="lg" sx={{ py: 2, px: { xs: 2, sm: 3 } }}>
 
-      {/* Active Plan Section */}
+      {/* Active Plan Section - Compact */}
       {activePlan && (
         <Paper sx={{ 
-          p: { xs: 2, sm: 3 }, 
-          mb: 3, 
+          p: 2, 
+          mb: 2, 
           bgcolor: 'primary.light', 
           color: 'white',
-          overflow: 'hidden',
-          wordWrap: 'break-word'
+          borderRadius: 2
         }}>
-          <Typography variant="h6" gutterBottom>
-            Active Plan
-          </Typography>
-          <Typography variant="h5" gutterBottom sx={{ 
-            wordBreak: 'break-word',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}>
-            {activePlan.name}
-          </Typography>
-          <Box sx={{ 
-            display: 'flex', 
-            gap: 1, 
-            mb: 2, 
-            flexWrap: 'wrap'
-          }}>
-            <Chip label={getGoalLabel(activePlan.goal)} size="small" sx={{ bgcolor: 'white' }} />
-            <Chip label={`${activePlan.daysPerWeek} days/week`} size="small" sx={{ bgcolor: 'white' }} />
-            <Chip label={getExperienceLabel(activePlan.experienceLevel)} size="small" sx={{ bgcolor: 'white' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="subtitle2" sx={{ opacity: 0.9, textTransform: 'uppercase', fontSize: '0.75rem' }}>
+                Active Plan
+              </Typography>
+              <Typography variant="h6" sx={{ 
+                fontWeight: 600,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {activePlan.name}
+              </Typography>
+            </Box>
+            <CheckCircleIcon sx={{ ml: 1 }} />
           </Box>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" gutterBottom sx={{ wordBreak: 'break-word' }}>
-              Progress: {(() => {
+          
+          <Box sx={{ display: 'flex', gap: 0.5, mb: 1.5, flexWrap: 'wrap' }}>
+            <Chip label={getGoalLabel(activePlan.goal)} size="small" sx={{ bgcolor: 'white', height: 20, fontSize: '0.7rem' }} />
+            <Chip label={`${activePlan.daysPerWeek}x/week`} size="small" sx={{ bgcolor: 'white', height: 20, fontSize: '0.7rem' }} />
+            <Chip label={getExperienceLabel(activePlan.experienceLevel)} size="small" sx={{ bgcolor: 'white', height: 20, fontSize: '0.7rem' }} />
+          </Box>
+          
+          <Box sx={{ mb: 1 }}>
+            <Typography variant="caption" sx={{ opacity: 0.9 }}>
+              {(() => {
                 const stats = getPlanStatistics(activePlan);
-                return `${stats.completedSessions}/${stats.totalSessions} sessions (${Math.round(stats.completionRate)}%)`;
+                return `${stats.completedSessions}/${stats.totalSessions} sessions • ${Math.round(stats.completionRate)}% complete`;
               })()}
             </Typography>
             <LinearProgress 
               variant="determinate" 
               value={getPlanStatistics(activePlan).completionRate} 
-              sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.3)', '& .MuiLinearProgress-bar': { bgcolor: 'white' } }}
+              sx={{ 
+                mt: 0.5, 
+                height: 4,
+                borderRadius: 2,
+                bgcolor: 'rgba(255,255,255,0.3)', 
+                '& .MuiLinearProgress-bar': { bgcolor: 'white' } 
+              }}
             />
           </Box>
+          
           <Button
             variant="contained"
             color="secondary"
+            size="small"
             startIcon={<CalendarIcon />}
             onClick={() => handleViewCalendar(activePlan)}
             fullWidth
-            sx={{ maxWidth: { xs: '100%', sm: 'auto' } }}
           >
             View Calendar
           </Button>
         </Paper>
       )}
 
-      {/* Plans List */}
-      <Grid container spacing={2}>
-        {plans.map(plan => {
-          const stats = getPlanStatistics(plan);
-          const isActive = activePlan && activePlan.id === plan.id;
-          
-          return (
-            <Grid item xs={12} sm={6} md={4} key={plan.id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                    <Typography variant="h6" component="h2" sx={{ flexGrow: 1 }}>
-                      {plan.name}
-                    </Typography>
-                    {isActive && (
-                      <CheckCircleIcon color="primary" />
-                    )}
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
-                    <Chip label={getGoalLabel(plan.goal)} size="small" />
-                    <Chip label={`${plan.daysPerWeek} days/week`} size="small" />
-                    <Chip label={`${plan.duration} days`} size="small" />
-                  </Box>
-                  
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    {getExperienceLabel(plan.experienceLevel)}
-                  </Typography>
-                  
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      {stats.completedSessions}/{stats.totalSessions} completed ({Math.round(stats.completionRate)}%)
-                    </Typography>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={stats.completionRate} 
-                      sx={{ mt: 1 }}
-                    />
-                  </Box>
-                </CardContent>
-                
-                <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                  <Box>
-                    <Tooltip title="View Calendar">
-                      <IconButton size="small" onClick={() => handleViewCalendar(plan)}>
-                        <CalendarIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete Plan">
-                      <IconButton size="small" onClick={() => handleDeletePlan(plan.id)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                  {!isActive && (
-                    <Button
-                      size="small"
-                      startIcon={<StartIcon />}
-                      onClick={() => handleSetActive(plan.id)}
-                    >
-                      Set Active
-                    </Button>
-                  )}
-                </CardActions>
-              </Card>
-            </Grid>
-          );
-        })}
-      </Grid>
-
-      {plans.length === 0 && (
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            No workout plans yet
+      {/* Plans List - Compact */}
+      <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+        <Box sx={{ p: 2, bgcolor: 'background.default', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            All Plans ({plans.length})
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Create your first workout plan to get started
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={handleCreatePlan}
-          >
-            Create Your First Plan
-          </Button>
-        </Paper>
-      )}
+        </Box>
+        
+        {plans.length === 0 ? (
+          <Box sx={{ p: 4, textAlign: 'center' }}>
+            <Typography variant="body1" color="text.secondary" gutterBottom>
+              No workout plans yet
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Create your first workout plan to get started
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={handleCreatePlan}
+            >
+              Create Plan
+            </Button>
+          </Box>
+        ) : (
+          <List sx={{ p: 0 }}>
+            {plans.map((plan, index) => {
+              const stats = getPlanStatistics(plan);
+              const isActive = activePlan && activePlan.id === plan.id;
+              
+              return (
+                <ListItem
+                  key={plan.id}
+                  sx={{
+                    borderBottom: index < plans.length - 1 ? '1px solid' : 'none',
+                    borderColor: 'divider',
+                    py: 2,
+                    px: 2,
+                    bgcolor: isActive ? 'action.selected' : 'transparent',
+                    '&:hover': {
+                      bgcolor: isActive ? 'action.selected' : 'action.hover'
+                    }
+                  }}
+                  secondaryAction={
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      <Tooltip title="View Calendar">
+                        <IconButton size="small" onClick={() => handleViewCalendar(plan)}>
+                          <CalendarIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      {!isActive && (
+                        <Tooltip title="Set Active">
+                          <IconButton size="small" onClick={() => handleSetActive(plan.id)}>
+                            <StartIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      <Tooltip title="Delete">
+                        <IconButton size="small" onClick={() => handleDeletePlan(plan.id)}>
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  }
+                >
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                          {plan.name}
+                        </Typography>
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5, flexWrap: 'wrap' }}>
+                          <Chip label={getGoalLabel(plan.goal)} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                          <Chip label={`${plan.daysPerWeek}x/week`} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                          <Chip label={`${plan.duration} days`} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                          <Chip label={getExperienceLabel(plan.experienceLevel)} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 'fit-content' }}>
+                            {stats.completedSessions}/{stats.totalSessions} • {Math.round(stats.completionRate)}%
+                          </Typography>
+                          <LinearProgress 
+                            variant="determinate" 
+                            value={stats.completionRate} 
+                            sx={{ flex: 1, height: 4, borderRadius: 2, maxWidth: 150 }}
+                          />
+                        </Box>
+                      </Box>
+                    }
+                  />
+                </ListItem>
+              );
+            })}
+          </List>
+        )}
+      </Paper>
 
       {/* Create Plan Dialog */}
       <Dialog open={showCreateDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>

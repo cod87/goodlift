@@ -147,39 +147,40 @@ export const generateWorkoutPlan = async (preferences) => {
   // until a deload week, then we can optionally vary them for the next block
   const exerciseCache = {}; // Cache exercises by session type and week block
   
-  const populatedSessions = await Promise.all(
-    sessions.map(async (session, index) => {
-      const weekNumber = Math.floor(index / daysPerWeek) + 1;
-      const isDeloadWeek = deloadWeeks.includes(weekNumber);
-      
-      // Determine which training block we're in (changes after each deload)
-      const blockNumber = deloadWeeks.filter(w => w < weekNumber).length + 1;
-      
-      // Create a cache key based on session type and training block
-      // This ensures same exercises are used within a block
-      const cacheKey = `${session.type}_block${blockNumber}`;
-      
-      // For the first session of this type in this block, generate new exercises
-      // For subsequent sessions, reuse the cached exercises
-      if (!exerciseCache[cacheKey]) {
-        const populated = await populateSessionData(session, experienceLevel, weekNumber, equipmentAvailable, isDeloadWeek);
-        exerciseCache[cacheKey] = populated.exercises || populated.sessionData;
-        return populated;
-      } else {
-        // Reuse exercises from the first week of this block
-        return {
-          ...session,
-          exercises: session.type !== 'hiit' && session.type !== 'yoga' && session.type !== 'stretch' 
-            ? exerciseCache[cacheKey] 
-            : null,
-          sessionData: session.type === 'hiit' || session.type === 'yoga' || session.type === 'stretch'
-            ? exerciseCache[cacheKey]
-            : null,
-          isDeloadWeek
-        };
-      }
-    })
-  );
+  // Process sessions sequentially to ensure cache is populated correctly
+  const populatedSessions = [];
+  for (let index = 0; index < sessions.length; index++) {
+    const session = sessions[index];
+    const weekNumber = Math.floor(index / daysPerWeek) + 1;
+    const isDeloadWeek = deloadWeeks.includes(weekNumber);
+    
+    // Determine which training block we're in (changes after each deload)
+    const blockNumber = deloadWeeks.filter(w => w < weekNumber).length + 1;
+    
+    // Create a cache key based on session type and training block
+    // This ensures same exercises are used within a block
+    const cacheKey = `${session.type}_block${blockNumber}`;
+    
+    // For the first session of this type in this block, generate new exercises
+    // For subsequent sessions, reuse the cached exercises
+    if (!exerciseCache[cacheKey]) {
+      const populated = await populateSessionData(session, experienceLevel, weekNumber, equipmentAvailable, isDeloadWeek);
+      exerciseCache[cacheKey] = populated.exercises || populated.sessionData;
+      populatedSessions.push(populated);
+    } else {
+      // Reuse exercises from the first week of this block
+      populatedSessions.push({
+        ...session,
+        exercises: session.type !== 'hiit' && session.type !== 'yoga' && session.type !== 'stretch' 
+          ? exerciseCache[cacheKey] 
+          : null,
+        sessionData: session.type === 'hiit' || session.type === 'yoga' || session.type === 'stretch'
+          ? exerciseCache[cacheKey]
+          : null,
+        isDeloadWeek
+      });
+    }
+  }
 
   // Validate sessions were properly populated
   const validationErrors = [];

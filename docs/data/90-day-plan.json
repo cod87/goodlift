@@ -231,8 +231,8 @@
         "day": 32,
         "weekday": "Tuesday",
         "type": "plyo",
-        "workout": "Plyometrics V2: Glute & Power",
-        "plyoId": "plyo-v2-glute-power"
+        "workout": "Plyometrics V1",
+        "plyoId": "plyo-v1-balanced"
       },
       {
         "day": 33,
@@ -268,6 +268,185 @@
         "weekday": "Sunday",
         "type": "rest",
         "workout": "Rest or X-Stretch"
+      },
+      {
+        "day": 38,
+        "weekday": "Monday",
+        "type": "strength",
+        "workout": "Chest & Back",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 39,
+        "weekday": "Tuesday",
+        "type": "plyo",
+        "workout": "Plyometrics V1",
+        "plyoId": "plyo-v1-balanced"
+      },
+      {
+        "day": 40,
+        "weekday": "Wednesday",
+        "type": "strength",
+        "workout": "Shoulders & Arms",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 41,
+        "weekday": "Thursday",
+        "type": "yoga",
+        "workout": "Yoga",
+        "duration": 60
+      },
+      {
+        "day": 42,
+        "weekday": "Friday",
+        "type": "strength",
+        "workout": "Legs & Lower Body",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 43,
+        "weekday": "Saturday",
+        "type": "recovery",
+        "workout": "Active Recovery"
+      },
+      {
+        "day": 44,
+        "weekday": "Sunday",
+        "type": "rest",
+        "workout": "Rest or X-Stretch"
+      },
+      {
+        "day": 45,
+        "weekday": "Monday",
+        "type": "strength",
+        "workout": "Chest & Back",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 46,
+        "weekday": "Tuesday",
+        "type": "plyo",
+        "workout": "Plyometrics V2",
+        "plyoId": "plyo-v2-glute-power"
+      },
+      {
+        "day": 47,
+        "weekday": "Wednesday",
+        "type": "strength",
+        "workout": "Shoulders & Arms",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 48,
+        "weekday": "Thursday",
+        "type": "yoga",
+        "workout": "Yoga",
+        "duration": 60
+      },
+      {
+        "day": 49,
+        "weekday": "Friday",
+        "type": "strength",
+        "workout": "Legs & Lower Body",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 50,
+        "weekday": "Saturday",
+        "type": "recovery",
+        "workout": "Active Recovery"
+      },
+      {
+        "day": 51,
+        "weekday": "Sunday",
+        "type": "rest",
+        "workout": "Rest or X-Stretch"
+      },
+      {
+        "day": 52,
+        "weekday": "Monday",
+        "type": "strength",
+        "workout": "Chest & Back",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 53,
+        "weekday": "Tuesday",
+        "type": "plyo",
+        "workout": "Plyometrics V2",
+        "plyoId": "plyo-v2-glute-power"
+      },
+      {
+        "day": 54,
+        "weekday": "Wednesday",
+        "type": "strength",
+        "workout": "Shoulders & Arms",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 55,
+        "weekday": "Thursday",
+        "type": "yoga",
+        "workout": "Yoga",
+        "duration": 60
+      },
+      {
+        "day": 56,
+        "weekday": "Friday",
+        "type": "strength",
+        "workout": "Legs & Lower Body",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 57,
+        "weekday": "Saturday",
+        "type": "recovery",
+        "workout": "Active Recovery"
+      },
+      {
+        "day": 58,
+        "weekday": "Sunday",
+        "type": "rest",
+        "workout": "Rest or X-Stretch"
+      },
+      {
+        "day": 57,
+        "weekday": "Monday",
+        "type": "yoga",
+        "workout": "Yoga",
+        "duration": 90,
+        "intensity": "Light"
+      },
+      {
+        "day": 58,
+        "weekday": "Tuesday",
+        "type": "cardio",
+        "workout": "Light Cardio",
+        "duration": 30,
+        "intensity": "Light"
+      },
+      {
+        "day": 59,
+        "weekday": "Wednesday",
+        "type": "stretch",
+        "workout": "Full Body Stretch",
+        "duration": 45
+      },
+      {
+        "day": 60,
+        "weekday": "Thursday",
+        "type": "rest",
+        "workout": "Complete Rest"
       }
     ]
   },
@@ -326,6 +505,200 @@
         "weekday": "Sunday",
         "type": "rest",
         "workout": "Rest or X-Stretch"
+      },
+      {
+        "day": 68,
+        "weekday": "Monday",
+        "type": "strength",
+        "workout": "Chest & Back",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 69,
+        "weekday": "Tuesday",
+        "type": "plyo",
+        "workout": "Plyometrics V3: Quad & Agility",
+        "plyoId": "plyo-v2-glute-power"
+      },
+      {
+        "day": 70,
+        "weekday": "Wednesday",
+        "type": "strength",
+        "workout": "Shoulders & Arms",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 71,
+        "weekday": "Thursday",
+        "type": "yoga",
+        "workout": "Yoga",
+        "duration": 60
+      },
+      {
+        "day": 72,
+        "weekday": "Friday",
+        "type": "strength",
+        "workout": "Legs & Lower Body",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 73,
+        "weekday": "Saturday",
+        "type": "recovery",
+        "workout": "Active Recovery"
+      },
+      {
+        "day": 74,
+        "weekday": "Sunday",
+        "type": "rest",
+        "workout": "Rest or X-Stretch"
+      },
+      {
+        "day": 75,
+        "weekday": "Monday",
+        "type": "strength",
+        "workout": "Chest & Back",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 76,
+        "weekday": "Tuesday",
+        "type": "plyo",
+        "workout": "Plyometrics V2: Glute & Power",
+        "plyoId": "plyo-v1-balanced"
+      },
+      {
+        "day": 77,
+        "weekday": "Wednesday",
+        "type": "strength",
+        "workout": "Shoulders & Arms",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 78,
+        "weekday": "Thursday",
+        "type": "yoga",
+        "workout": "Yoga",
+        "duration": 60
+      },
+      {
+        "day": 79,
+        "weekday": "Friday",
+        "type": "strength",
+        "workout": "Legs & Lower Body",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 80,
+        "weekday": "Saturday",
+        "type": "recovery",
+        "workout": "Active Recovery"
+      },
+      {
+        "day": 81,
+        "weekday": "Sunday",
+        "type": "rest",
+        "workout": "Rest or X-Stretch"
+      },
+      {
+        "day": 82,
+        "weekday": "Monday",
+        "type": "strength",
+        "workout": "Chest & Back",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 83,
+        "weekday": "Tuesday",
+        "type": "plyo",
+        "workout": "Plyometrics V2: Glute & Power",
+        "plyoId": "plyo-v3-quad-agility"
+      },
+      {
+        "day": 84,
+        "weekday": "Wednesday",
+        "type": "strength",
+        "workout": "Shoulders & Arms",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 85,
+        "weekday": "Thursday",
+        "type": "yoga",
+        "workout": "Yoga",
+        "duration": 60
+      },
+      {
+        "day": 86,
+        "weekday": "Friday",
+        "type": "strength",
+        "workout": "Legs & Lower Body",
+        "strength": 9,
+        "core": 10
+      },
+      {
+        "day": 87,
+        "weekday": "Saturday",
+        "type": "recovery",
+        "workout": "Active Recovery"
+      },
+      {
+        "day": 88,
+        "weekday": "Sunday",
+        "type": "rest",
+        "workout": "Rest or X-Stretch"
+      },
+      {
+        "day": 85,
+        "weekday": "Monday",
+        "type": "yoga",
+        "workout": "Yoga",
+        "duration": 90,
+        "intensity": "Light"
+      },
+      {
+        "day": 86,
+        "weekday": "Tuesday",
+        "type": "plyo",
+        "workout": "Plyometrics V1: Balanced (Light)",
+        "plyoId": "plyo-v1-balanced",
+        "intensity": 0.7
+      },
+      {
+        "day": 87,
+        "weekday": "Wednesday",
+        "type": "recovery",
+        "workout": "Active Recovery",
+        "duration": 45
+      },
+      {
+        "day": 88,
+        "weekday": "Thursday",
+        "type": "stretch",
+        "workout": "X-Stretch",
+        "duration": 30
+      },
+      {
+        "day": 89,
+        "weekday": "Friday",
+        "type": "yoga",
+        "workout": "Yoga",
+        "duration": 90,
+        "intensity": "Light"
+      },
+      {
+        "day": 90,
+        "weekday": "Saturday",
+        "type": "rest",
+        "workout": "Complete Rest - Celebrate!"
       }
     ]
   }

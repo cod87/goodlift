@@ -3,7 +3,10 @@ import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItem, ListItemText, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { ExpandMore, Delete, Star, Edit } from '@mui/icons-material';
-import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName } from '../utils/storage';
+import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName, getWorkoutHistory } from '../utils/storage';
+import QuickStartCard from './Home/QuickStartCard';
+import WeeklyPlanPreview from './Home/WeeklyPlanPreview';
+import { useWeeklyPlan } from '../hooks/useWeeklyPlan';
 
 /**
  * SelectionScreen component for workout configuration
@@ -25,11 +28,29 @@ const SelectionScreen = memo(({
   const [editingWorkout, setEditingWorkout] = useState(null);
   const [editedName, setEditedName] = useState('');
   const [expandedFavorite, setExpandedFavorite] = useState(null);
+  const [lastWorkout, setLastWorkout] = useState(null);
+  
+  // Use weekly plan hook
+  const { todaysWorkout, nextWorkouts, weeklyPlan, resetToDefault } = useWeeklyPlan();
 
   useEffect(() => {
     // Scroll to top when component mounts
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setFavoriteWorkouts(getFavoriteWorkouts());
+    
+    // Load last workout for QuickStartCard
+    const loadLastWorkout = async () => {
+      const history = await getWorkoutHistory();
+      if (history && history.length > 0) {
+        const last = history[0];
+        setLastWorkout({
+          date: last.date,
+          duration: last.duration,
+          exercises: last.exercises ? Object.keys(last.exercises) : [],
+        });
+      }
+    };
+    loadLastWorkout();
   }, []);
 
   const handleStartClick = () => {
@@ -84,6 +105,43 @@ const SelectionScreen = memo(({
       ? 'all' 
       : [favoriteWorkout.equipment];
     onStartWorkout(favoriteWorkout.type, equipmentFilter, favoriteWorkout.exercises);
+  };
+  
+  const handleQuickStart = () => {
+    if (todaysWorkout && todaysWorkout.type !== 'rest') {
+      // Use today's workout type from weekly plan
+      onWorkoutTypeChange(todaysWorkout.type);
+      const equipmentFilter = selectedEquipment.has('all') 
+        ? 'all' 
+        : Array.from(selectedEquipment);
+      onStartWorkout(todaysWorkout.type, equipmentFilter);
+    }
+  };
+  
+  const handleQuickStartDay = (dayWorkout) => {
+    if (dayWorkout && dayWorkout.type !== 'rest') {
+      onWorkoutTypeChange(dayWorkout.type);
+      const equipmentFilter = selectedEquipment.has('all') 
+        ? 'all' 
+        : Array.from(selectedEquipment);
+      onStartWorkout(dayWorkout.type, equipmentFilter);
+    }
+  };
+  
+  const handleViewPlan = () => {
+    // Future: Navigate to full plan screen
+    console.log('View plan - to be implemented');
+  };
+  
+  const handleRandomize = () => {
+    // Generate a random workout type
+    const types = ['full', 'upper', 'lower'];
+    const randomType = types[Math.floor(Math.random() * types.length)];
+    onWorkoutTypeChange(randomType);
+    const equipmentFilter = selectedEquipment.has('all') 
+      ? 'all' 
+      : Array.from(selectedEquipment);
+    onStartWorkout(randomType, equipmentFilter);
   };
 
   const handleEquipmentToggle = (equipment) => {
@@ -156,6 +214,32 @@ const SelectionScreen = memo(({
           </Typography>
         </Box>
       ) : (
+        <Box sx={{ width: '100%', maxWidth: 800 }}>
+          {/* QuickStart Card - New consolidated component */}
+          <Box sx={{ mb: 3 }}>
+            <QuickStartCard
+              todaysWorkout={todaysWorkout}
+              nextWorkouts={nextWorkouts}
+              lastWorkout={lastWorkout}
+              onQuickStart={handleQuickStart}
+              onViewPlan={handleViewPlan}
+              onRandomize={handleRandomize}
+              loading={loading}
+            />
+          </Box>
+
+          {/* Weekly Plan Preview - New consolidated component */}
+          <Box sx={{ mb: 3 }}>
+            <WeeklyPlanPreview
+              weeklyPlan={weeklyPlan}
+              onQuickStartDay={handleQuickStartDay}
+              onEditPlan={handleViewPlan}
+              onRandomizeWeek={resetToDefault}
+              onResetPlan={resetToDefault}
+            />
+          </Box>
+
+          {/* Main Configuration Card */}
         <Card sx={{ 
           maxWidth: 800,
           width: '100%',
@@ -437,6 +521,7 @@ const SelectionScreen = memo(({
             </Stack>
           </CardContent>
         </Card>
+        </Box>
       )}
       
       {/* Edit Favorite Name Dialog */}

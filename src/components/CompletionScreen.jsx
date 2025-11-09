@@ -83,7 +83,11 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
             ease: 'easeInOut'
           }}
         >
-          <Celebration sx={{ fontSize: 80, mb: 2 }} />
+          <img 
+            src={`${import.meta.env.BASE_URL}dancing-icon.svg`} 
+            alt="Celebration" 
+            style={{ width: '120px', height: '120px', marginBottom: '1rem' }}
+          />
         </motion.div>
         <h1>Workout Complete!</h1>
         <p className="completion-time">

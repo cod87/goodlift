@@ -207,8 +207,19 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
 
   if (loading) {
     return (
-      <Box sx={{ textAlign: 'center', py: 8 }}>
-        <Typography>Loading workout...</Typography>
+      <Box sx={{ 
+        textAlign: 'center', 
+        py: 8, 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        minHeight: '400px'
+      }}>
+        <img 
+          src={`${import.meta.env.BASE_URL}dancing-icon.svg`} 
+          alt="Loading workout..." 
+          style={{ width: '150px', height: '150px' }}
+        />
       </Box>
     );
   }

@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { useQuery } from '@tanstack/react-query';
 import {
   Box,
@@ -31,8 +31,7 @@ import {
   EXERCISE_CATEGORIES
 } from '../utils/hiitSessionGenerator';
 
-const HiitSessionSelection = () => {
-  const navigate = useNavigate();
+const HiitSessionSelection = ({ onNavigate }) => {
   
   // State for session configuration
   const [modality, setModality] = useState('bodyweight');
@@ -65,7 +64,9 @@ const HiitSessionSelection = () => {
     });
     
     // Navigate to session execution screen with the generated session
-    navigate('/hiit-session', { state: { session } });
+    // Store session in localStorage for now
+    localStorage.setItem('currentHiitSession', JSON.stringify(session));
+    onNavigate('hiit-session');
   };
   
   if (isLoading) {
@@ -285,6 +286,10 @@ const HiitSessionSelection = () => {
       </Box>
     </motion.div>
   );
+};
+
+HiitSessionSelection.propTypes = {
+  onNavigate: PropTypes.func.isRequired,
 };
 
 export default HiitSessionSelection;

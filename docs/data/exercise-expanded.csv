@@ -1,0 +1,148 @@
+Exercise Name,Primary Muscle,Secondary Muscles,Exercise Type,Equipment,Difficulty,Movement Pattern,Rep Range,Superset Type,HIIT Compatible,Workout Type,Progression
+Back Squat,Quads,"Glutes, Hamstrings, Core",Compound,Barbell,Intermediate,Lower Leg,4-6,Agonist-Antagonist,No,"Full Body Strength, Lower Body Strength, Push/Pull/Legs",Progressive Overload
+Barbell Bench Press,Chest,"Front Delts, Triceps",Compound,Barbell,Beginner,Upper Push,4-8,Agonist-Antagonist,No,"Full Body Strength, Upper Body Strength, Push/Pull/Legs",Progressive Overload
+Barbell Bent-Over Row,Lats,"Biceps, Lower Back, Core",Compound,Barbell,Intermediate,Upper Pull,6-8,Agonist-Antagonist,No,"Full Body Strength, Upper Body Strength, Push/Pull/Legs",Progressive Overload
+Barbell Deadlift,Hamstrings,"Glutes, Lower Back, Quads",Compound,Barbell,Intermediate,Lower Leg,3-6,Agonist-Antagonist,No,"Full Body Strength, Lower Body Strength, Push/Pull/Legs",Progressive Overload
+Barbell Front Squat,Quads,"Core, Glutes, Upper Back",Compound,Barbell,Advanced,Lower Leg,5-8,Agonist-Antagonist,No,"Lower Body Strength, Push/Pull/Legs",Progressive Overload
+Barbell Overhead Press,Delts,"Triceps, Chest, Core",Compound,Barbell,Intermediate,Upper Push,4-6,Agonist-Antagonist,No,"Upper Body Strength, Push/Pull/Legs",Progressive Overload
+Barbell Squat (High Bar),Quads,"Glutes, Hamstrings, Core, Upper Back",Compound,Barbell,Intermediate,Lower Leg,5-8,Agonist-Antagonist,No,"Lower Body Strength, Full Body Strength",Progressive Overload
+Barbell Romanian Deadlift,Hamstrings,"Glutes, Lower Back",Compound,Barbell,Intermediate,Lower Back,6-8,Agonist-Antagonist,No,"Lower Body Strength, Push/Pull/Legs",Progressive Overload
+Barbell Incline Bench Press,Chest,"Front Delts, Triceps",Compound,Barbell,Intermediate,Upper Push,6-8,Agonist-Antagonist,No,"Upper Body Strength, Push/Pull/Legs",Progressive Overload
+Barbell Decline Bench Press,Chest,"Front Delts, Triceps",Compound,Barbell,Intermediate,Upper Push,6-8,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Barbell Sumo Deadlift,Hamstrings,"Glutes, Quads, Lower Back, Adductors",Compound,Barbell,Intermediate,Lower Leg,3-6,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Barbell Good Morning,Glutes,"Hamstrings, Lower Back, Core",Compound,Barbell,Intermediate,Lower Back,6-8,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Barbell Shrug,Traps,Upper Back,Compound,Barbell,Beginner,Upper Back,8-12,Same Muscle,No,Upper Body Strength,Progressive Overload
+Barbell Bicep Curl,Biceps,"Front Delts, Forearms",Isolation,Barbell,Beginner,Arm,8-12,Same Muscle,No,Upper Body Strength,Progressive Overload
+Barbell Close Grip Bench Press,Triceps,"Chest, Front Delts",Compound,Barbell,Intermediate,Upper Push,6-8,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Barbell Upright Row,Traps,"Delts, Biceps",Compound,Barbell,Beginner,Upper Pull,8-12,Same Muscle,No,Upper Body Strength,Progressive Overload
+Barbell High Pull,Traps,"Delts, Hamstrings",Compound,Barbell,Advanced,Upper Pull,3-5,Agonist-Antagonist,Yes,"Cardio, HIIT",Power Development
+Barbell Clean,Hamstrings,"Glutes, Delts, Core, Traps",Compound,Barbell,Advanced,Full Body,1-3,Agonist-Antagonist,No,Full Body Strength,Progressive Overload
+Barbell Snatch,Hamstrings,"Glutes, Delts, Core, Traps",Compound,Barbell,Advanced,Full Body,1-3,Agonist-Antagonist,No,Full Body Strength,Progressive Overload
+Barbell Thruster,Quads,"Glutes, Delts, Triceps, Core",Compound,Barbell,Advanced,Full Body,5-8,Agonist-Antagonist,Yes,"Full Body Strength, HIIT",Power Development
+Barbell Pendulum Squat,Quads,"Glutes, Hamstrings",Compound,Barbell,Beginner,Lower Leg,8-12,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Barbell Belt Squat,Quads,"Glutes, Hamstrings, Core",Compound,Barbell,Intermediate,Lower Leg,6-12,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Barbell Trap Bar Deadlift,Hamstrings,"Glutes, Quads, Lower Back",Compound,Barbell,Intermediate,Lower Leg,3-6,Agonist-Antagonist,No,"Lower Body Strength, Full Body Strength",Progressive Overload
+Barbell Paused Bench Press,Chest,"Front Delts, Triceps",Compound,Barbell,Intermediate,Upper Push,6-8,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Barbell Push Press,Delts,"Triceps, Chest, Core",Compound,Barbell,Intermediate,Upper Push,5-8,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Barbell Box Squat,Quads,"Glutes, Hamstrings, Core",Compound,Barbell,Intermediate,Lower Leg,5-8,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Barbell Hack Squat,Quads,"Glutes, Hamstrings",Compound,Barbell,Beginner,Lower Leg,8-12,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Dumbbell Bench Press,Chest,"Front Delts, Triceps",Compound,Dumbbell,Beginner,Upper Push,6-10,Agonist-Antagonist,No,"Upper Body Strength, Full Body Strength",Progressive Overload
+Dumbbell Incline Bench Press,Chest,"Front Delts, Triceps",Compound,Dumbbell,Intermediate,Upper Push,8-12,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Dumbbell Decline Bench Press,Chest,"Front Delts, Triceps",Compound,Dumbbell,Intermediate,Upper Push,8-12,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Dumbbell Fly,Chest,Front Delts,Isolation,Dumbbell,Intermediate,Upper Push,10-15,Same Muscle,No,Upper Body Strength,Progressive Overload
+Dumbbell Pullover,Chest,"Lats, Triceps",Isolation,Dumbbell,Intermediate,Upper Pull,10-12,Same Muscle,No,Upper Body Strength,Progressive Overload
+Dumbbell Bent-Over Row,Lats,"Biceps, Core",Compound,Dumbbell,Beginner,Upper Pull,8-12,Agonist-Antagonist,No,"Upper Body Strength, Full Body Strength",Progressive Overload
+Dumbbell Single-Arm Row,Lats,"Biceps, Core, Obliques",Compound,Dumbbell,Intermediate,Upper Pull,8-12,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Dumbbell Pendlay Row,Lats,"Biceps, Core",Compound,Dumbbell,Intermediate,Upper Pull,6-8,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Dumbbell Renegade Row,Core,"Lats, Triceps, Shoulders",Compound,Dumbbell,Advanced,Full Body,8-12,Same Muscle,Yes,"Full Body Strength, HIIT",Progressive Overload
+Dumbbell Bicep Curl,Biceps,"Front Delts, Forearms",Isolation,Dumbbell,Beginner,Arm,8-12,Same Muscle,No,Upper Body Strength,Progressive Overload
+Dumbbell Hammer Curl,Biceps,Forearms,Isolation,Dumbbell,Beginner,Arm,10-12,Same Muscle,No,Upper Body Strength,Progressive Overload
+Dumbbell Incline Curl,Biceps,Front Delts,Isolation,Dumbbell,Intermediate,Arm,8-12,Same Muscle,No,Upper Body Strength,Progressive Overload
+Dumbbell Shoulder Press,Delts,"Triceps, Chest, Core",Compound,Dumbbell,Beginner,Upper Push,8-12,Agonist-Antagonist,No,"Upper Body Strength, Full Body Strength",Progressive Overload
+Dumbbell Single-Arm Shoulder Press,Delts,"Triceps, Core, Obliques",Compound,Dumbbell,Intermediate,Upper Push,8-12,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Dumbbell Arnold Press,Delts,"Triceps, Chest",Compound,Dumbbell,Intermediate,Upper Push,8-12,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Dumbbell Lateral Raise,Delts,Traps,Isolation,Dumbbell,Beginner,Shoulder,12-15,Same Muscle,No,Upper Body Strength,Progressive Overload
+Dumbbell Front Raise,Delts,Chest,Isolation,Dumbbell,Beginner,Shoulder,12-15,Same Muscle,No,Upper Body Strength,Progressive Overload
+Dumbbell Reverse Fly,Rear Delts,Upper Back,Isolation,Dumbbell,Beginner,Upper Back,12-15,Same Muscle,No,Upper Body Strength,Progressive Overload
+Dumbbell Kickback,Triceps,Shoulders,Isolation,Dumbbell,Beginner,Arm,12-15,Same Muscle,No,Upper Body Strength,Progressive Overload
+Dumbbell Overhead Tricep Extension,Triceps,"Shoulders, Chest",Isolation,Dumbbell,Beginner,Arm,10-12,Same Muscle,No,Upper Body Strength,Progressive Overload
+Dumbbell Goblet Squat,Quads,"Glutes, Core",Compound,Dumbbell,Beginner,Lower Leg,12-15,Agonist-Antagonist,No,"Lower Body Strength, Full Body Strength",Progressive Overload
+Dumbbell Front Squat,Quads,"Glutes, Core, Upper Back",Compound,Dumbbell,Intermediate,Lower Leg,8-10,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Dumbbell Lunge,Quads,"Glutes, Hamstrings, Core",Compound,Dumbbell,Beginner,Lower Leg,10-12,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Dumbbell Walking Lunge,Quads,"Glutes, Hamstrings, Core",Compound,Dumbbell,Intermediate,Lower Leg,10-12,Agonist-Antagonist,Yes,"Lower Body Strength, HIIT",Progressive Overload
+Dumbbell Reverse Lunge,Quads,"Glutes, Hamstrings, Core",Compound,Dumbbell,Beginner,Lower Leg,10-12,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Dumbbell Bulgarian Split Squat,Quads,"Glutes, Hamstrings, Core",Compound,Dumbbell,Intermediate,Lower Leg,8-12,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Dumbbell Step-Up,Quads,"Glutes, Hamstrings",Compound,Dumbbell,Beginner,Lower Leg,10-12,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Dumbbell Romanian Deadlift,Hamstrings,"Glutes, Lower Back",Compound,Dumbbell,Beginner,Lower Back,8-12,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Dumbbell Deadlift,Hamstrings,"Glutes, Quads, Lower Back",Compound,Dumbbell,Beginner,Lower Leg,8-12,Agonist-Antagonist,No,"Lower Body Strength, Full Body Strength",Progressive Overload
+Dumbbell Single-Leg Deadlift,Hamstrings,"Glutes, Core, Balance",Compound,Dumbbell,Intermediate,Lower Leg,8-10,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Dumbbell Suitcase Deadlift,Core,"Obliques, Lower Back, Glutes",Compound,Dumbbell,Intermediate,Core,8-12,Same Muscle,No,Core,Progressive Overload
+Dumbbell Farmer Carry,Core,"Traps, Forearms",Compound,Dumbbell,Beginner,Core,40-60 sec,Same Muscle,No,Core,Progressive Overload
+Dumbbell Thruster,Quads,"Glutes, Delts, Triceps, Core",Compound,Dumbbell,Intermediate,Full Body,8-12,Agonist-Antagonist,Yes,"Full Body Strength, HIIT",Power Development
+Dumbbell Jump Squat,Quads,"Glutes, Core, Calves",Compound,Dumbbell,Advanced,Lower Leg,8-12,Agonist-Antagonist,Yes,"Lower Body Strength, HIIT",Power Development
+Kettlebell Swing,Hamstrings,"Glutes, Core, Upper Back",Compound,Kettlebell,Intermediate,Lower Back,12-20,Agonist-Antagonist,Yes,"Lower Body Strength, Cardio, HIIT",Power Development
+Kettlebell Turkish Get-Up,Core,"Shoulders, Chest, Triceps, Glutes",Compound,Kettlebell,Advanced,Full Body,3-5 per side,Same Muscle,No,Full Body Strength,Progressive Overload
+Kettlebell Clean,Hamstrings,"Glutes, Delts, Core",Compound,Kettlebell,Advanced,Full Body,5-10,Agonist-Antagonist,No,Full Body Strength,Progressive Overload
+Kettlebell Snatch,Hamstrings,"Glutes, Delts, Core",Compound,Kettlebell,Advanced,Full Body,5-10 per side,Agonist-Antagonist,No,Full Body Strength,Progressive Overload
+Kettlebell Goblet Squat,Quads,"Glutes, Core",Compound,Kettlebell,Beginner,Lower Leg,12-20,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Kettlebell Front Squat,Quads,"Glutes, Core, Upper Back",Compound,Kettlebell,Intermediate,Lower Leg,8-15,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Kettlebell Overhead Press,Delts,"Triceps, Chest, Core",Compound,Kettlebell,Intermediate,Upper Push,8-15,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Kettlebell Lunge,Quads,"Glutes, Hamstrings, Core",Compound,Kettlebell,Beginner,Lower Leg,10-15 per side,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Kettlebell Single-Arm Row,Lats,"Biceps, Core, Obliques",Compound,Kettlebell,Intermediate,Upper Pull,8-15 per side,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Kettlebell Thruster,Quads,"Glutes, Delts, Triceps, Core",Compound,Kettlebell,Intermediate,Full Body,10-15,Agonist-Antagonist,Yes,"Full Body Strength, HIIT",Power Development
+Landmine Press,Delts,"Triceps, Chest, Core",Compound,Landmine,Intermediate,Upper Push,8-15,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Landmine Squat,Quads,"Glutes, Core, Upper Back",Compound,Landmine,Beginner,Lower Leg,8-15,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Landmine Rotation,Core,"Obliques, Shoulders",Compound,Landmine,Intermediate,Core,12-20 per side,Same Muscle,Yes,"Core, HIIT",Progressive Overload
+Landmine Row,Lats,"Biceps, Core",Compound,Landmine,Intermediate,Upper Pull,8-15,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Landmine Deadlift,Hamstrings,"Glutes, Lower Back, Quads",Compound,Landmine,Intermediate,Lower Leg,6-12,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Slam Ball Slam,Core,"Delts, Hamstrings, Glutes",Compound,Slam Ball,Intermediate,Full Body,8-15,Same Muscle,Yes,"Full Body Strength, HIIT, Cardio",Power Development
+Slam Ball Rotational Slam,Core,"Obliques, Delts, Hamstrings",Compound,Slam Ball,Intermediate,Full Body,8-12 per side,Same Muscle,Yes,"Core, HIIT, Cardio",Power Development
+Slam Ball Chest Throw,Chest,"Triceps, Delts",Compound,Slam Ball,Intermediate,Upper Push,8-12,Agonist-Antagonist,Yes,"Upper Body Strength, HIIT",Power Development
+Slam Ball Squat,Quads,"Glutes, Core",Compound,Slam Ball,Beginner,Lower Leg,12-20,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Push-Up,Chest,"Triceps, Front Delts",Compound,Bodyweight,Beginner,Upper Push,10-20,Agonist-Antagonist,No,"Upper Body Strength, Full Body Strength",Progressive Overload
+Pull-Up,Lats,"Biceps, Core, Delts",Compound,Bodyweight,Intermediate,Upper Pull,5-12,Agonist-Antagonist,No,"Upper Body Strength, Full Body Strength",Progressive Overload
+Chin-Up,Biceps,"Lats, Core, Delts",Compound,Bodyweight,Intermediate,Upper Pull,5-12,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Dip,Triceps,"Chest, Front Delts",Compound,Bodyweight,Intermediate,Upper Push,8-15,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Plank,Core,"Shoulders, Chest, Triceps",Compound,Bodyweight,Beginner,Core,30-120 sec,Same Muscle,No,Core,Progressive Overload
+Side Plank,Obliques,"Core, Shoulders",Compound,Bodyweight,Intermediate,Core,20-60 sec per side,Same Muscle,No,Core,Progressive Overload
+Squat,Quads,"Glutes, Hamstrings, Core",Compound,Bodyweight,Beginner,Lower Leg,12-20,Agonist-Antagonist,No,"Lower Body Strength, Full Body Strength",Progressive Overload
+Lunge,Quads,"Glutes, Hamstrings, Core",Compound,Bodyweight,Beginner,Lower Leg,12-20 per leg,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Crunch,Core,Hip Flexors,Isolation,Bodyweight,Beginner,Core,15-30,Same Muscle,No,Core,Progressive Overload
+Glute Bridge,Glutes,"Hamstrings, Core",Compound,Bodyweight,Beginner,Lower Back,15-25,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Mountain Climber,Core,"Shoulders, Hip Flexors, Quads",Compound,Bodyweight,Intermediate,Full Body,30-60 sec,Same Muscle,Yes,"Cardio, HIIT",Power Development
+Burpee,Chest,"Triceps, Quads, Glutes, Core",Compound,Bodyweight,Advanced,Full Body,8-20,Agonist-Antagonist,Yes,"Full Body Strength, HIIT, Cardio",Power Development
+Jump Squat,Quads,"Glutes, Core, Calves",Compound,Bodyweight,Intermediate,Lower Leg,10-20,Agonist-Antagonist,Yes,"Lower Body Strength, HIIT",Power Development
+High Knees,Hip Flexors,"Quads, Core, Glutes",Compound,Bodyweight,Beginner,Cardio,30-60 sec,Same Muscle,Yes,"Cardio, HIIT",Power Development
+Jumping Jacks,Glutes,"Quads, Chest, Shoulders",Compound,Bodyweight,Beginner,Cardio,30-60 sec,Same Muscle,Yes,"Cardio, HIIT",Power Development
+Skater Hops,Glutes,"Adductors, Abductors, Core",Compound,Bodyweight,Intermediate,Cardio,30-60 sec,Same Muscle,Yes,"Cardio, HIIT",Power Development
+Bicycle Crunch,Core,"Obliques, Hip Flexors",Compound,Bodyweight,Intermediate,Core,20-40,Same Muscle,No,Core,Progressive Overload
+V-Up,Core,"Hip Flexors, Chest",Compound,Bodyweight,Advanced,Core,10-20,Same Muscle,No,Core,Progressive Overload
+Leg Raise,Core,Hip Flexors,Isolation,Bodyweight,Intermediate,Core,10-20,Same Muscle,No,Core,Progressive Overload
+Russian Twist,Core,"Obliques, Hip Flexors",Compound,Bodyweight,Beginner,Core,20-40,Same Muscle,No,Core,Progressive Overload
+Diamond Push-Up,Triceps,"Chest, Front Delts",Compound,Bodyweight,Intermediate,Upper Push,8-15,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Pike Push-Up,Delts,"Triceps, Core, Chest",Compound,Bodyweight,Intermediate,Upper Push,8-15,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Archer Push-Up,Chest,"Lats, Triceps",Compound,Bodyweight,Advanced,Upper Push,8-15 per side,Agonist-Antagonist,Yes,Upper Body Strength,Progressive Overload
+Decline Push-Up,Chest,"Front Delts, Triceps",Compound,Bodyweight,Intermediate,Upper Push,8-15,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Plyometric Push-Up,Chest,"Triceps, Front Delts",Compound,Bodyweight,Advanced,Upper Push,8-15,Agonist-Antagonist,Yes,"Upper Body Strength, HIIT",Power Development
+Bear Crawl,Shoulders,"Triceps, Core, Quads",Compound,Bodyweight,Intermediate,Full Body,30-60 sec,Same Muscle,Yes,"Full Body Strength, HIIT",Power Development
+Inchworm,Core,"Chest, Shoulders, Hamstrings",Compound,Bodyweight,Intermediate,Full Body,10-20,Same Muscle,Yes,"Full Body Strength, HIIT",Progressive Overload
+Plank Jack,Core,"Shoulders, Quads, Glutes",Compound,Bodyweight,Intermediate,Core,15-30,Same Muscle,Yes,"Core, HIIT",Progressive Overload
+Superman,Erector Spinae,"Glutes, Rear Delts",Compound,Bodyweight,Beginner,Lower Back,12-20,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Dead Bug,Core,Hip Flexors,Compound,Bodyweight,Beginner,Core,10-20,Same Muscle,No,Core,Progressive Overload
+Bird Dog,Core,"Glutes, Lower Back",Compound,Bodyweight,Beginner,Core,12-20 per side,Same Muscle,No,Core,Progressive Overload
+Wall Sit,Quads,"Glutes, Core",Compound,Bodyweight,Beginner,Lower Leg,30-120 sec,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Pistol Squat,Quads,"Glutes, Core, Hip Flexors",Compound,Bodyweight,Advanced,Lower Leg,5-12 per leg,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Single-Leg Glute Bridge,Glutes,"Hamstrings, Core",Compound,Bodyweight,Intermediate,Lower Back,12-20 per side,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Step-Up,Quads,"Glutes, Hamstrings",Compound,Bodyweight,Beginner,Lower Leg,12-20 per side,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Jump Lunge,Quads,"Glutes, Hamstrings, Core",Compound,Bodyweight,Advanced,Lower Leg,10-20 per leg,Agonist-Antagonist,Yes,"Lower Body Strength, HIIT",Power Development
+Box Jump,Quads,"Glutes, Calves",Compound,Bodyweight,Advanced,Lower Leg,5-12,Agonist-Antagonist,Yes,"Lower Body Strength, HIIT",Power Development
+Calf Raise,Calves,Core,Isolation,Bodyweight,Beginner,Lower Leg,15-30,Same Muscle,No,Lower Body Strength,Progressive Overload
+Bench Dip,Triceps,"Chest, Front Delts",Compound,Bodyweight,Beginner,Upper Push,10-20,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Reverse Lunge,Quads,"Glutes, Hamstrings, Core",Compound,Bodyweight,Beginner,Lower Leg,12-20 per side,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Lateral Lunge,Quads,"Adductors, Abductors, Glutes",Compound,Bodyweight,Intermediate,Lower Leg,12-20 per side,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+Sit-Up,Core,Hip Flexors,Isolation,Bodyweight,Beginner,Core,15-30,Same Muscle,No,Core,Progressive Overload
+Walking Lunge,Quads,"Glutes, Hamstrings, Core",Compound,Bodyweight,Beginner,Lower Leg,12-20,Agonist-Antagonist,Yes,"Lower Body Strength, HIIT",Progressive Overload
+Bulgarian Split Squat,Quads,"Glutes, Hamstrings, Core",Compound,Bodyweight,Intermediate,Lower Leg,10-15 per side,Agonist-Antagonist,No,Lower Body Strength,Progressive Overload
+L-Sit,Core,"Shoulders, Triceps, Hip Flexors",Compound,Bodyweight,Advanced,Core,15-60 sec,Same Muscle,No,Core,Progressive Overload
+Hollow Body Hold,Core,"Shoulders, Back",Compound,Bodyweight,Intermediate,Core,20-60 sec,Same Muscle,No,Core,Progressive Overload
+Flutter Kicks,Core,Hip Flexors,Isolation,Bodyweight,Beginner,Core,30-60 sec,Same Muscle,No,Core,Progressive Overload
+Scissor Kicks,Core,Hip Flexors,Isolation,Bodyweight,Intermediate,Core,20-40,Same Muscle,No,Core,Progressive Overload
+Hanging Knee Raise,Core,"Hip Flexors, Chest",Isolation,Bodyweight,Intermediate,Core,10-20,Same Muscle,No,Core,Progressive Overload
+Tuck Jump,Quads,"Glutes, Hip Flexors, Calves",Compound,Bodyweight,Advanced,Lower Leg,8-15,Agonist-Antagonist,Yes,"Lower Body Strength, HIIT",Power Development
+Burpee to Box Jump,Full Body,All,Compound,Bodyweight,Advanced,Full Body,5-10,Agonist-Antagonist,Yes,"Full Body Strength, HIIT, Cardio",Power Development
+Pogo Hop,Calves,"Quads, Core",Compound,Bodyweight,Beginner,Cardio,30-60 sec,Same Muscle,Yes,"Cardio, HIIT",Power Development
+Butt Kicks,Hamstrings,"Glutes, Core",Compound,Bodyweight,Beginner,Cardio,30-60 sec,Same Muscle,Yes,"Cardio, HIIT",Power Development
+Lateral Bound,Glutes,"Adductors, Abductors, Core",Compound,Bodyweight,Intermediate,Cardio,10-20 per side,Same Muscle,Yes,"Cardio, HIIT",Power Development
+Single-Leg Hop,Quads,"Glutes, Calves, Core",Compound,Bodyweight,Intermediate,Cardio,10-20 per leg,Same Muscle,Yes,"Cardio, HIIT",Power Development
+Handstand Hold,Shoulders,"Core, Chest, Triceps",Compound,Bodyweight,Advanced,Upper Push,20-90 sec,Same Muscle,No,Upper Body Strength,Progressive Overload
+Handstand Push-Up,Delts,"Triceps, Core, Chest",Compound,Bodyweight,Advanced,Upper Push,3-10,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Muscle-Up,Lats,"Triceps, Core, Chest",Compound,Bodyweight,Advanced,Upper Pull,3-8,Agonist-Antagonist,No,Upper Body Strength,Progressive Overload
+Front Lever,Core,"Chest, Shoulders, Lats",Compound,Bodyweight,Advanced,Core,10-60 sec,Same Muscle,No,Core,Progressive Overload
+Back Lever,Core,"Back, Shoulders",Compound,Bodyweight,Advanced,Core,10-60 sec,Same Muscle,No,Core,Progressive Overload
+Dragon Flag,Core,"Chest, Shoulders",Compound,Bodyweight,Advanced,Core,5-15,Same Muscle,No,Core,Progressive Overload
+Rope Climb,Lats,"Grip, Core, Hamstrings",Compound,Bodyweight,Advanced,Full Body,1-3 climbs,Agonist-Antagonist,Yes,"Full Body Strength, HIIT",Progressive Overload
+Crab Walk,Triceps,"Shoulders, Core, Glutes",Compound,Bodyweight,Beginner,Upper Push,30-60 sec,Agonist-Antagonist,Yes,"Upper Body Strength, HIIT",Progressive Overload
+Leopard Crawl,Shoulders,"Triceps, Core",Compound,Bodyweight,Advanced,Full Body,30-60 sec,Same Muscle,Yes,"Full Body Strength, HIIT",Progressive Overload
+Oblique Crunch,Obliques,Core,Isolation,Bodyweight,Beginner,Core,15-25 per side,Same Muscle,No,Core,Progressive Overload
+Rainbow Crunches,Core,Obliques,Compound,Bodyweight,Beginner,Core,10-20 per side,Same Muscle,No,Core,Progressive Overload
+Woodchopper,Core,"Obliques, Delts",Compound,Bodyweight,Intermediate,Core,15-20 per side,Same Muscle,No,Core,Progressive Overload

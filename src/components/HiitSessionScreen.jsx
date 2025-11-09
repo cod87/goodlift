@@ -29,6 +29,7 @@ import {
   Pause,
   Stop,
   SkipNext,
+  SkipPrevious,
   Timer as TimerIcon,
   CheckCircle,
   FitnessCenter
@@ -36,18 +37,46 @@ import {
 import { motion } from 'framer-motion';
 import { saveHiitSession } from '../utils/storage';
 import CompactHeader from './Common/CompactHeader';
+import { useSessionExecution } from '../hooks/useSessionExecution';
 
 const HiitSessionScreen = ({ onNavigate }) => {
   const [session, setSession] = useState(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'main', 'cooldown', 'complete'
-  const [currentRound, setCurrentRound] = useState(0);
-  const [currentExercise, setCurrentExercise] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const [isWorkInterval, setIsWorkInterval] = useState(true);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [sessionNotes, setSessionNotes] = useState('');
   const [perceivedExertion, setPerceivedExertion] = useState(5);
+
+  // Handle session completion
+  const handleComplete = useCallback(() => {
+    setShowCompleteDialog(true);
+  }, []);
+
+  // Initialize session execution with the hook
+  const sessionExecution = useSessionExecution({
+    exercises: session?.mainWorkout?.exercises || [],
+    rounds: session?.mainWorkout?.rounds || 1,
+    workTime: session?.protocol?.workSeconds || 30,
+    restTime: session?.protocol?.restSeconds || 15,
+    onComplete: handleComplete
+  });
+
+  const {
+    currentPhase,
+    currentRound,
+    timeRemaining,
+    totalElapsedTime,
+    currentExercise,
+    progress,
+    isRunning,
+    isPaused,
+    isComplete,
+    start,
+    pause,
+    resume,
+    stop,
+    skipToNext,
+    skipToPrevious,
+    formatTime
+  } = sessionExecution;
 
   // Load session from localStorage on mount
   useEffect(() => {
@@ -55,139 +84,68 @@ const HiitSessionScreen = ({ onNavigate }) => {
     if (storedSession) {
       const parsedSession = JSON.parse(storedSession);
       setSession(parsedSession);
-      
-      // Set initial time based on session structure
-      if (parsedSession.warmup) {
-        setTimeRemaining(parsedSession.warmup.duration);
-      }
     }
   }, []);
 
-  const handleNextPhase = useCallback(() => {
-    if (!session) return;
-
-    if (currentPhase === 'warmup') {
-      // Move to main workout
-      setCurrentPhase('main');
-      setCurrentRound(0);
-      setCurrentExercise(0);
-      setIsWorkInterval(true);
-      
-      if (session.mainWorkout?.exercises) {
-        setTimeRemaining(session.mainWorkout.exercises[0].workSeconds);
-      }
-    } else if (currentPhase === 'main') {
-      const exercises = session.mainWorkout?.exercises || [];
-      const rounds = session.mainWorkout?.rounds || 1;
-
-      if (isWorkInterval) {
-        // Switch to rest interval
-        setIsWorkInterval(false);
-        setTimeRemaining(exercises[currentExercise]?.restSeconds || 0);
-      } else {
-        // Move to next exercise
-        if (currentExercise < exercises.length - 1) {
-          setCurrentExercise(prev => prev + 1);
-          setIsWorkInterval(true);
-          setTimeRemaining(exercises[currentExercise + 1]?.workSeconds || 0);
-        } else {
-          // Move to next round or cooldown
-          if (currentRound < rounds - 1) {
-            setCurrentRound(prev => prev + 1);
-            setCurrentExercise(0);
-            setIsWorkInterval(true);
-            setTimeRemaining(exercises[0]?.workSeconds || 0);
-          } else {
-            // Move to cooldown
-            setCurrentPhase('cooldown');
-            setTimeRemaining(session.cooldown?.duration || 0);
-          }
-        }
-      }
-    } else if (currentPhase === 'cooldown') {
-      // Session complete
-      setCurrentPhase('complete');
-      setIsRunning(false);
+  // Show dialog when session is complete
+  useEffect(() => {
+    if (isComplete) {
       setShowCompleteDialog(true);
     }
-  }, [session, currentPhase, isWorkInterval, currentExercise, currentRound]);
-
-  // Timer logic
-  useEffect(() => {
-    let interval = null;
-
-    if (isRunning && timeRemaining > 0) {
-      interval = setInterval(() => {
-        setTimeRemaining(prev => prev - 1);
-      }, 1000);
-    } else if (timeRemaining === 0 && isRunning) {
-      // Move to next phase/exercise
-      handleNextPhase();
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isRunning, timeRemaining, handleNextPhase]);
+  }, [isComplete]);
 
   const handlePlayPause = () => {
-    setIsRunning(!isRunning);
+    if (isRunning) {
+      pause();
+    } else if (isPaused) {
+      resume();
+    } else {
+      start();
+    }
   };
 
   const handleStop = () => {
-    setIsRunning(false);
+    stop();
     setShowCompleteDialog(true);
-  };
-
-  const handleSkip = () => {
-    setTimeRemaining(0);
   };
 
   const handleSaveSession = async () => {
     if (!session) return;
 
+    // Get plan context from session storage if it exists
+    const planContextStr = sessionStorage.getItem('currentWorkoutPlanContext');
+    const planContext = planContextStr ? JSON.parse(planContextStr) : null;
+
     const completedSession = {
       type: session.type || 'hiit',
       date: Date.now(),
-      duration: session.totalDuration,
+      duration: totalElapsedTime || session.totalDuration,
       level: session.level,
       protocol: session.protocol?.name,
       modality: session.type,
       perceivedExertion,
       notes: sessionNotes,
       completed: true,
-      metadata: session.metadata
+      metadata: session.metadata,
+      planId: planContext?.planId || null,
+      planDay: planContext?.planDay ?? null
     };
 
     await saveHiitSession(completedSession);
+    
+    // Clear plan context from session storage
+    sessionStorage.removeItem('currentWorkoutPlanContext');
+    
     setShowCompleteDialog(false);
     if (onNavigate) {
       onNavigate('progress');
     }
   };
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const getProgress = () => {
-    if (!session) return 0;
-
-    const totalPhases = 3; // warmup, main, cooldown
-    let completedPhases = 0;
-
-    if (currentPhase === 'main') completedPhases = 1;
-    if (currentPhase === 'cooldown') completedPhases = 2;
-    if (currentPhase === 'complete') completedPhases = 3;
-
-    return (completedPhases / totalPhases) * 100;
-  };
-
   const getCurrentExerciseInfo = () => {
     if (!session) return null;
 
+    // The hook uses 'work', 'rest', 'warmup', 'cooldown', 'complete' phases
     if (currentPhase === 'warmup') {
       return {
         title: 'Warm-up',
@@ -196,15 +154,15 @@ const HiitSessionScreen = ({ onNavigate }) => {
       };
     }
 
-    if (currentPhase === 'main') {
-      const exercise = session.mainWorkout?.exercises?.[currentExercise];
+    if (currentPhase === 'work' || currentPhase === 'rest') {
+      const exercise = currentExercise;
       if (!exercise) return null;
 
       return {
-        title: exercise.name,
-        description: `Round ${currentRound + 1} of ${session.mainWorkout?.rounds}`,
-        muscles: `${exercise.primaryMuscle}${exercise.secondaryMuscles ? ` • ${exercise.secondaryMuscles}` : ''}`,
-        modification: exercise.modification,
+        title: exercise.name || exercise['Exercise Name'] || 'Exercise',
+        description: `Round ${currentRound + 1} of ${session.mainWorkout?.rounds || 1}`,
+        muscles: `${exercise.primaryMuscle || exercise['Primary Muscle'] || ''}${(exercise.secondaryMuscles || exercise['Secondary Muscles']) ? ` • ${exercise.secondaryMuscles || exercise['Secondary Muscles']}` : ''}`,
+        modification: exercise.modification || exercise['Modification'],
         icon: <FitnessCenter />
       };
     }
@@ -213,6 +171,14 @@ const HiitSessionScreen = ({ onNavigate }) => {
       return {
         title: 'Cool-down',
         description: session.cooldown?.exercises?.map(ex => ex.name).join(', ') || 'Stretch and recover',
+        icon: <CheckCircle />
+      };
+    }
+
+    if (currentPhase === 'complete') {
+      return {
+        title: 'Session Complete!',
+        description: 'Great work!',
         icon: <CheckCircle />
       };
     }
@@ -308,33 +274,39 @@ const HiitSessionScreen = ({ onNavigate }) => {
       {/* Progress Bar */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="subtitle2" gutterBottom>
+          <Typography variant="subtitle2" gutterBottom id="session-progress-label">
             Session Progress
           </Typography>
           <LinearProgress 
             variant="determinate" 
-            value={getProgress()} 
+            value={progress} 
             sx={{ height: 8, borderRadius: 4 }}
+            aria-labelledby="session-progress-label"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
           />
         </CardContent>
       </Card>
 
       {/* Current Exercise/Phase Card */}
-      <Card sx={{ mb: 3, bgcolor: isWorkInterval && currentPhase === 'main' ? 'rgba(237, 63, 39, 0.05)' : 'background.paper' }}>
+      <Card sx={{ mb: 3, bgcolor: currentPhase === 'work' ? 'rgba(237, 63, 39, 0.05)' : 'background.paper' }}>
         <CardContent>
           <Stack spacing={2}>
             {/* Phase Indicator */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {exerciseInfo?.icon}
-              <Typography variant="overline" sx={{ fontWeight: 600 }}>
-                {currentPhase === 'main' && (isWorkInterval ? 'WORK' : 'REST')}
+              <Typography variant="overline" sx={{ fontWeight: 600 }} aria-live="polite">
+                {currentPhase === 'work' && 'WORK'}
+                {currentPhase === 'rest' && 'REST'}
                 {currentPhase === 'warmup' && 'WARMUP'}
                 {currentPhase === 'cooldown' && 'COOLDOWN'}
+                {currentPhase === 'complete' && 'COMPLETE'}
               </Typography>
             </Box>
 
             {/* Exercise Name */}
-            <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
+            <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }} role="heading" aria-level={1}>
               {exerciseInfo?.title}
             </Typography>
 
@@ -362,8 +334,14 @@ const HiitSessionScreen = ({ onNavigate }) => {
               bgcolor: 'rgba(19, 70, 134, 0.05)',
               borderRadius: 2
             }}>
-              <TimerIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-              <Typography variant="h2" sx={{ fontWeight: 800, color: 'primary.main' }}>
+              <TimerIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} aria-hidden="true" />
+              <Typography 
+                variant="h2" 
+                sx={{ fontWeight: 800, color: 'primary.main' }}
+                aria-live="polite"
+                aria-atomic="true"
+                role="timer"
+              >
                 {formatTime(timeRemaining)}
               </Typography>
             </Box>
@@ -371,26 +349,45 @@ const HiitSessionScreen = ({ onNavigate }) => {
             {/* Controls */}
             <Stack direction="row" spacing={2} justifyContent="center">
               <IconButton 
+                onClick={skipToPrevious}
+                size="large"
+                aria-label="Previous exercise"
+                sx={{ 
+                  bgcolor: 'secondary.main',
+                  color: 'white',
+                  '&:hover': { bgcolor: 'secondary.dark' },
+                  minWidth: 64,
+                  minHeight: 64
+                }}
+              >
+                <SkipPrevious />
+              </IconButton>
+
+              <IconButton 
                 onClick={handlePlayPause}
                 size="large"
+                aria-label={isRunning ? 'Pause session' : isPaused ? 'Resume session' : 'Start session'}
                 sx={{ 
                   bgcolor: 'primary.main',
                   color: 'white',
                   '&:hover': { bgcolor: 'primary.dark' },
-                  width: 64,
-                  height: 64
+                  minWidth: 64,
+                  minHeight: 64
                 }}
               >
                 {isRunning ? <Pause /> : <PlayArrow />}
               </IconButton>
 
               <IconButton 
-                onClick={handleSkip}
+                onClick={skipToNext}
                 size="large"
+                aria-label="Skip to next exercise"
                 sx={{ 
                   bgcolor: 'warning.main',
                   color: 'white',
-                  '&:hover': { bgcolor: 'warning.dark' }
+                  '&:hover': { bgcolor: 'warning.dark' },
+                  minWidth: 64,
+                  minHeight: 64
                 }}
               >
                 <SkipNext />
@@ -399,10 +396,13 @@ const HiitSessionScreen = ({ onNavigate }) => {
               <IconButton 
                 onClick={handleStop}
                 size="large"
+                aria-label="Stop session"
                 sx={{ 
-                  bgcolor: 'secondary.main',
+                  bgcolor: 'error.main',
                   color: 'white',
-                  '&:hover': { bgcolor: 'secondary.dark' }
+                  '&:hover': { bgcolor: 'error.dark' },
+                  minWidth: 64,
+                  minHeight: 64
                 }}
               >
                 <Stop />

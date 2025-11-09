@@ -212,8 +212,15 @@ function App() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null) => {
+  const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null, planNavState = null) => {
     setLoading(true);
+    
+    // Store plan context if provided
+    if (planNavState) {
+      sessionStorage.setItem('currentWorkoutPlanContext', JSON.stringify(planNavState));
+    } else {
+      sessionStorage.removeItem('currentWorkoutPlanContext');
+    }
     
     // Simulate loading to show user we're generating
     setTimeout(() => {
@@ -388,6 +395,10 @@ function App() {
   const handleWorkoutComplete = useCallback(async (workoutData) => {
     const progressionNotifications = [];
     
+    // Get plan context from session storage if it exists
+    const planContextStr = sessionStorage.getItem('currentWorkoutPlanContext');
+    const planContext = planContextStr ? JSON.parse(planContextStr) : null;
+    
     // Process each exercise for weight tracking and progression
     for (const [exerciseName, data] of Object.entries(workoutData.exercises)) {
       const lastSet = data.sets[data.sets.length - 1];
@@ -432,9 +443,17 @@ function App() {
       });
     }
 
-    // Save workout and update stats
-    const finalWorkoutData = { ...workoutData, type: workoutType };
+    // Save workout with plan context if available
+    const finalWorkoutData = { 
+      ...workoutData, 
+      type: workoutType,
+      planId: planContext?.planId || null,
+      planDay: planContext?.planDay ?? null
+    };
     await saveWorkout(finalWorkoutData);
+    
+    // Clear plan context from session storage
+    sessionStorage.removeItem('currentWorkoutPlanContext');
     
     const stats = await getUserStats();
     stats.totalWorkouts += 1;

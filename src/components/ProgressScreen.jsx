@@ -731,7 +731,60 @@ const ProgressScreen = () => {
       </Box>
 
       {/* Calendar - positioned after stats, before history */}
-      <Calendar workoutSessions={workoutSessions} onDayClick={handleDayClick} />
+      <Box sx={{ mb: 3 }}>
+        <Calendar workoutSessions={workoutSessions} onDayClick={handleDayClick} />
+        
+        {/* Quick Actions for Selected Date */}
+        {selectedDate && (
+          <Card sx={{ mt: 2, borderRadius: 2 }}>
+            <CardContent>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    {selectedDate.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </Typography>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setSelectedDate(null)}
+                    aria-label="Clear selected date"
+                  >
+                    <Close />
+                  </IconButton>
+                </Box>
+                
+                {hasSessionsOnSelectedDay ? (
+                  <Typography variant="body2" color="text.secondary">
+                    {filteredSessions.workouts.length + 
+                     filteredSessions.hiit.length + 
+                     filteredSessions.stretch.length + 
+                     filteredSessions.yoga.length + 
+                     filteredSessions.cardio.length} session(s) recorded
+                  </Typography>
+                ) : (
+                  <Stack spacing={1}>
+                    <Typography variant="body2" color="text.secondary">
+                      No sessions recorded for this day.
+                    </Typography>
+                    <Button 
+                      variant="outlined" 
+                      size="small"
+                      startIcon={<Add />}
+                      aria-label="Log workout for selected date"
+                    >
+                      Log Workout
+                    </Button>
+                  </Stack>
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
+        )}
+      </Box>
 
       {/* Progressive Overload Section */}
       {history.length > 0 && (

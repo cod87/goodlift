@@ -7,7 +7,7 @@ import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName, 
 import QuickStartCard from './Home/QuickStartCard';
 import WeeklyPlanPreview from './Home/WeeklyPlanPreview';
 import CompactHeader from './Common/CompactHeader';
-import { useWeeklyPlan } from '../hooks/useWeeklyPlan';
+import { usePlanIntegration } from '../hooks/usePlanIntegration';
 
 /**
  * SelectionScreen component for workout configuration
@@ -31,8 +31,14 @@ const SelectionScreen = memo(({
   const [expandedFavorite, setExpandedFavorite] = useState(null);
   const [lastWorkout, setLastWorkout] = useState(null);
   
-  // Use weekly plan hook
-  const { todaysWorkout, nextWorkouts, weeklyPlan, resetToDefault } = useWeeklyPlan();
+  // Use plan integration hook instead of weekly plan hook
+  const { 
+    currentPlan,
+    getTodaysWorkout, 
+    getUpcomingWorkouts,
+    getPlanDay,
+    createWorkoutNavState
+  } = usePlanIntegration();
 
   useEffect(() => {
     // Scroll to top when component mounts
@@ -53,6 +59,17 @@ const SelectionScreen = memo(({
     };
     loadLastWorkout();
   }, []);
+
+  // Get today's workout and upcoming workouts from the plan
+  const todaysWorkout = getTodaysWorkout();
+  const nextWorkouts = getUpcomingWorkouts(2);
+  
+  // Convert plan days to weekly plan format for WeeklyPlanPreview
+  const weeklyPlan = currentPlan?.days?.map((day, index) => ({
+    day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][index],
+    type: day.subtype || day.type,
+    label: day.subtype ? day.subtype.charAt(0).toUpperCase() + day.subtype.slice(1) : day.type,
+  })) || [];
 
   const handleStartClick = () => {
     if (workoutType) {
@@ -111,22 +128,40 @@ const SelectionScreen = memo(({
   const handleQuickStart = () => {
     if (todaysWorkout && todaysWorkout.type !== 'rest') {
       // Use today's workout type from weekly plan
-      onWorkoutTypeChange(todaysWorkout.type);
+      const workoutType = todaysWorkout.subtype || todaysWorkout.type;
+      onWorkoutTypeChange(workoutType);
       const equipmentFilter = selectedEquipment.has('all') 
         ? 'all' 
         : Array.from(selectedEquipment);
-      onStartWorkout(todaysWorkout.type, equipmentFilter);
+      
+      // Create nav state with plan context
+      const today = new Date().getDay();
+      const navState = createWorkoutNavState(today);
+      
+      onStartWorkout(workoutType, equipmentFilter, null, navState);
     }
   };
   
   const handleQuickStartDay = (dayWorkout) => {
-    if (dayWorkout && dayWorkout.type !== 'rest') {
-      onWorkoutTypeChange(dayWorkout.type);
-      const equipmentFilter = selectedEquipment.has('all') 
-        ? 'all' 
-        : Array.from(selectedEquipment);
-      onStartWorkout(dayWorkout.type, equipmentFilter);
-    }
+    if (!dayWorkout || dayWorkout.type === 'rest') return;
+    
+    // Find the day index for this workout
+    const dayIndex = weeklyPlan.findIndex(d => d.day === dayWorkout.day);
+    if (dayIndex === -1) return;
+    
+    const planDay = getPlanDay(dayIndex);
+    if (!planDay) return;
+    
+    const workoutType = planDay.subtype || planDay.type;
+    onWorkoutTypeChange(workoutType);
+    const equipmentFilter = selectedEquipment.has('all') 
+      ? 'all' 
+      : Array.from(selectedEquipment);
+    
+    // Create nav state with plan context
+    const navState = createWorkoutNavState(dayIndex);
+    
+    onStartWorkout(workoutType, equipmentFilter, null, navState);
   };
   
   const handleViewPlan = () => {
@@ -135,7 +170,7 @@ const SelectionScreen = memo(({
   };
   
   const handleRandomize = () => {
-    // Generate a random workout type
+    // Generate a random workout type (not tied to plan)
     const types = ['full', 'upper', 'lower'];
     const randomType = types[Math.floor(Math.random() * types.length)];
     onWorkoutTypeChange(randomType);
@@ -143,6 +178,11 @@ const SelectionScreen = memo(({
       ? 'all' 
       : Array.from(selectedEquipment);
     onStartWorkout(randomType, equipmentFilter);
+  };
+  
+  const handleResetPlan = () => {
+    // Reset the plan to defaults
+    console.log('Reset plan - to be implemented');
   };
 
   const handleEquipmentToggle = (equipment) => {
@@ -238,8 +278,8 @@ const SelectionScreen = memo(({
               weeklyPlan={weeklyPlan}
               onQuickStartDay={handleQuickStartDay}
               onEditPlan={handleViewPlan}
-              onRandomizeWeek={resetToDefault}
-              onResetPlan={resetToDefault}
+              onRandomizeWeek={handleRandomize}
+              onResetPlan={handleResetPlan}
             />
           </Box>
 

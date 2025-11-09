@@ -32,6 +32,7 @@ import {
   Pause,
   Stop,
   SkipNext,
+  SkipPrevious,
   Timer as TimerIcon,
   CheckCircle,
   SelfImprovement,
@@ -40,17 +41,84 @@ import {
 import { motion } from 'framer-motion';
 import { saveYogaSession } from '../utils/storage';
 import CompactHeader from './Common/CompactHeader';
+import { useSessionExecution } from '../hooks/useSessionExecution';
 
 const YogaSessionScreen = ({ onNavigate }) => {
   const [session, setSession] = useState(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [currentPhase, setCurrentPhase] = useState('opening'); // 'opening', 'warmup', 'main', 'cooldown', 'complete'
-  const [currentSequence, setCurrentSequence] = useState(0);
-  const [currentPose, setCurrentPose] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(0);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [sessionNotes, setSessionNotes] = useState('');
   const [perceivedExertion, setPerceivedExertion] = useState(5);
+
+
+  // Flatten all poses from all sequences for the session execution hook
+  const getAllPoses = useCallback(() => {
+    if (!session) return [];
+    
+    const allPoses = [];
+    
+    // Add warmup poses
+    if (session.warmup?.poses) {
+      allPoses.push(...session.warmup.poses);
+    }
+    
+    // Add main practice poses from all sequences
+    if (session.mainPractice?.sequences) {
+      session.mainPractice.sequences.forEach(sequence => {
+        if (sequence.poses) {
+          allPoses.push(...sequence.poses);
+        }
+      });
+    }
+    
+    // Add cooldown poses
+    if (session.cooldown?.poses) {
+      allPoses.push(...session.cooldown.poses);
+    }
+    
+    return allPoses;
+  }, [session]);
+
+  // Handle session completion
+  const handleComplete = useCallback(() => {
+    setShowCompleteDialog(true);
+  }, []);
+
+  // Get average hold duration for poses
+  const getAverageHoldDuration = useCallback(() => {
+    const poses = getAllPoses();
+    if (poses.length === 0) return 30;
+    
+    const totalDuration = poses.reduce((sum, pose) => sum + (pose.holdDuration || 30), 0);
+    return Math.round(totalDuration / poses.length);
+  }, [getAllPoses]);
+
+  // Initialize session execution with the hook
+  const sessionExecution = useSessionExecution({
+    exercises: getAllPoses(),
+    rounds: 1, // Yoga sessions don't repeat
+    workTime: getAverageHoldDuration(), // Average hold time
+    restTime: 5, // Brief transition time between poses
+    onComplete: handleComplete
+  });
+
+  const {
+    currentPhase,
+    currentExerciseIndex,
+    timeRemaining,
+    totalElapsedTime,
+    currentExercise: currentPose,
+    progress,
+    isRunning,
+    isPaused,
+    isComplete,
+    start,
+    pause,
+    resume,
+    stop,
+    skipToNext,
+    skipToPrevious,
+    formatTime
+  } = sessionExecution;
 
   // Load session from localStorage on mount
   useEffect(() => {
@@ -58,201 +126,117 @@ const YogaSessionScreen = ({ onNavigate }) => {
     if (storedSession) {
       const parsedSession = JSON.parse(storedSession);
       setSession(parsedSession);
-      
-      // Set initial time based on session structure
-      if (parsedSession.opening) {
-        setTimeRemaining(parsedSession.opening.duration);
-      }
     }
   }, []);
 
-  const handleNextPhase = useCallback(() => {
-    if (!session) return;
-
-    if (currentPhase === 'opening') {
-      // Move to warmup
-      setCurrentPhase('warmup');
-      setCurrentPose(0);
-      if (session.warmup?.poses) {
-        setTimeRemaining(session.warmup.poses[0]?.holdDuration || 0);
-      }
-    } else if (currentPhase === 'warmup') {
-      const poses = session.warmup?.poses || [];
-      
-      if (currentPose < poses.length - 1) {
-        setCurrentPose(prev => prev + 1);
-        setTimeRemaining(poses[currentPose + 1]?.holdDuration || 0);
-      } else {
-        // Move to main practice
-        setCurrentPhase('main');
-        setCurrentSequence(0);
-        setCurrentPose(0);
-        if (session.mainPractice?.sequences) {
-          const firstPose = session.mainPractice.sequences[0]?.poses?.[0];
-          setTimeRemaining(firstPose?.holdDuration || 0);
-        }
-      }
-    } else if (currentPhase === 'main') {
-      const sequences = session.mainPractice?.sequences || [];
-      const currentSeq = sequences[currentSequence];
-      const poses = currentSeq?.poses || [];
-
-      if (currentPose < poses.length - 1) {
-        setCurrentPose(prev => prev + 1);
-        setTimeRemaining(poses[currentPose + 1]?.holdDuration || 0);
-      } else if (currentSequence < sequences.length - 1) {
-        // Move to next sequence
-        setCurrentSequence(prev => prev + 1);
-        setCurrentPose(0);
-        const nextSeq = sequences[currentSequence + 1];
-        setTimeRemaining(nextSeq?.poses?.[0]?.holdDuration || 0);
-      } else {
-        // Move to cooldown
-        setCurrentPhase('cooldown');
-        setCurrentPose(0);
-        if (session.cooldown?.poses) {
-          setTimeRemaining(session.cooldown.poses[0]?.holdDuration || 0);
-        }
-      }
-    } else if (currentPhase === 'cooldown') {
-      const poses = session.cooldown?.poses || [];
-      
-      if (currentPose < poses.length - 1) {
-        setCurrentPose(prev => prev + 1);
-        setTimeRemaining(poses[currentPose + 1]?.holdDuration || 0);
-      } else {
-        // Session complete
-        setCurrentPhase('complete');
-        setIsRunning(false);
-        setShowCompleteDialog(true);
-      }
-    }
-  }, [session, currentPhase, currentPose, currentSequence]);
-
-  // Timer logic
+  // Show dialog when session is complete
   useEffect(() => {
-    let interval = null;
-
-    if (isRunning && timeRemaining > 0) {
-      interval = setInterval(() => {
-        setTimeRemaining(prev => prev - 1);
-      }, 1000);
-    } else if (timeRemaining === 0 && isRunning) {
-      // Move to next phase/pose
-      handleNextPhase();
+    if (isComplete) {
+      setShowCompleteDialog(true);
     }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isRunning, timeRemaining, handleNextPhase]);
+  }, [isComplete]);
 
   const handlePlayPause = () => {
-    setIsRunning(!isRunning);
+    if (isRunning) {
+      pause();
+    } else if (isPaused) {
+      resume();
+    } else {
+      start();
+    }
   };
 
   const handleStop = () => {
-    setIsRunning(false);
+    stop();
     setShowCompleteDialog(true);
-  };
-
-  const handleSkip = () => {
-    setTimeRemaining(0);
   };
 
   const handleSaveSession = async () => {
     if (!session) return;
 
+    // Get plan context from session storage if it exists
+    const planContextStr = sessionStorage.getItem('currentWorkoutPlanContext');
+    const planContext = planContextStr ? JSON.parse(planContextStr) : null;
+
     const completedSession = {
       type: session.type || 'yoga',
       date: Date.now(),
-      duration: session.totalDuration,
+      duration: totalElapsedTime || session.totalDuration,
       mode: session.mode,
       level: session.level,
       perceivedExertion,
       notes: sessionNotes,
       completed: true,
-      metadata: session.metadata
+      metadata: session.metadata,
+      planId: planContext?.planId || null,
+      planDay: planContext?.planDay ?? null
     };
 
     await saveYogaSession(completedSession);
+    
+    // Clear plan context from session storage
+    sessionStorage.removeItem('currentWorkoutPlanContext');
+    
     setShowCompleteDialog(false);
     if (onNavigate) {
       onNavigate('progress');
     }
   };
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const getProgress = () => {
-    if (!session) return 0;
-
-    const totalPhases = 4; // opening, warmup, main, cooldown
-    let completedPhases = 0;
-
-    if (currentPhase === 'warmup') completedPhases = 1;
-    if (currentPhase === 'main') completedPhases = 2;
-    if (currentPhase === 'cooldown') completedPhases = 3;
-    if (currentPhase === 'complete') completedPhases = 4;
-
-    return (completedPhases / totalPhases) * 100;
-  };
-
   const getCurrentPoseInfo = () => {
-    if (!session) return null;
+    if (!session || !currentPose) return null;
 
-    if (currentPhase === 'opening') {
+    // The hook provides the current pose directly
+    const pose = currentPose;
+    
+    // Determine which phase we're in based on pose index
+    const warmupPoseCount = session.warmup?.poses?.length || 0;
+    const allMainPoses = session.mainPractice?.sequences?.reduce((acc, seq) => acc + (seq.poses?.length || 0), 0) || 0;
+    
+    let phaseLabel = 'PRACTICE';
+    if (currentExerciseIndex < warmupPoseCount) {
+      phaseLabel = 'WARMUP';
+    } else if (currentExerciseIndex >= warmupPoseCount + allMainPoses) {
+      phaseLabel = 'COOLDOWN';
+    }
+
+    if (currentPhase === 'work') {
       return {
-        title: session.opening?.name || 'Opening Meditation',
-        description: session.opening?.description || 'Set your intention',
-        breathingTechnique: session.breathingTechnique,
-        icon: <Spa />
+        title: pose.name || pose.Name || 'Pose',
+        description: pose.sanskritName || pose.Sanskrit || '',
+        muscles: `${pose.primaryMuscles || pose['Primary Muscles'] || ''}${(pose.secondaryMuscles || pose['Secondary Muscles']) ? ` • ${pose.secondaryMuscles || pose['Secondary Muscles']}` : ''}`,
+        benefits: pose.benefits || pose.Benefits,
+        instruction: pose.instruction || pose.Instruction,
+        icon: <SelfImprovement />,
+        phaseLabel
+      };
+    }
+
+    if (currentPhase === 'rest') {
+      return {
+        title: 'Transition',
+        description: 'Prepare for next pose',
+        icon: <Spa />,
+        phaseLabel: 'TRANSITION'
       };
     }
 
     if (currentPhase === 'warmup') {
-      const pose = session.warmup?.poses?.[currentPose];
-      if (!pose) return null;
-
       return {
-        title: pose.name,
-        description: pose.sanskritName || '',
-        muscles: `${pose.primaryMuscle}${pose.secondaryMuscles ? ` • ${pose.secondaryMuscles}` : ''}`,
-        benefits: pose.benefits,
-        instruction: pose.instruction,
-        icon: <SelfImprovement />
+        title: session.opening?.name || 'Opening Meditation',
+        description: session.opening?.description || 'Set your intention',
+        breathingTechnique: session.breathingTechnique,
+        icon: <Spa />,
+        phaseLabel: 'OPENING'
       };
     }
 
-    if (currentPhase === 'main') {
-      const sequence = session.mainPractice?.sequences?.[currentSequence];
-      const pose = sequence?.poses?.[currentPose];
-      if (!pose) return null;
-
+    if (currentPhase === 'complete') {
       return {
-        title: pose.name,
-        description: pose.sanskritName || '',
-        sequenceName: sequence.name,
-        muscles: `${pose.primaryMuscle}${pose.secondaryMuscles ? ` • ${pose.secondaryMuscles}` : ''}`,
-        benefits: pose.benefits,
-        instruction: pose.instruction,
-        icon: <SelfImprovement />
-      };
-    }
-
-    if (currentPhase === 'cooldown') {
-      const pose = session.cooldown?.poses?.[currentPose];
-      if (!pose) return null;
-
-      return {
-        title: pose.name,
-        description: pose.sanskritName || 'Final relaxation',
-        instruction: pose.instruction,
-        icon: <CheckCircle />
+        title: 'Namaste 🙏',
+        description: 'Session complete',
+        icon: <CheckCircle />,
+        phaseLabel: 'COMPLETE'
       };
     }
 
@@ -354,13 +338,17 @@ const YogaSessionScreen = ({ onNavigate }) => {
       {/* Progress Bar */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="subtitle2" gutterBottom>
+          <Typography variant="subtitle2" gutterBottom id="yoga-session-progress-label">
             Session Progress
           </Typography>
           <LinearProgress 
             variant="determinate" 
-            value={getProgress()} 
+            value={progress} 
             sx={{ height: 8, borderRadius: 4 }}
+            aria-labelledby="yoga-session-progress-label"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
           />
         </CardContent>
       </Card>
@@ -372,14 +360,13 @@ const YogaSessionScreen = ({ onNavigate }) => {
             {/* Phase Indicator */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {poseInfo?.icon}
-              <Typography variant="overline" sx={{ fontWeight: 600 }}>
-                {currentPhase.toUpperCase()}
-                {poseInfo?.sequenceName && ` - ${poseInfo.sequenceName}`}
+              <Typography variant="overline" sx={{ fontWeight: 600 }} aria-live="polite">
+                {poseInfo?.phaseLabel || currentPhase.toUpperCase()}
               </Typography>
             </Box>
 
             {/* Pose Name */}
-            <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
+            <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }} role="heading" aria-level={1}>
               {poseInfo?.title}
             </Typography>
 
@@ -405,7 +392,7 @@ const YogaSessionScreen = ({ onNavigate }) => {
             )}
 
             {/* Benefits */}
-            {poseInfo?.benefits && (
+            {poseInfo?.benefits && Array.isArray(poseInfo.benefits) && (
               <Box>
                 <Typography variant="subtitle2" gutterBottom>
                   Benefits:
@@ -439,8 +426,14 @@ const YogaSessionScreen = ({ onNavigate }) => {
               bgcolor: 'rgba(19, 70, 134, 0.05)',
               borderRadius: 2
             }}>
-              <TimerIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-              <Typography variant="h2" sx={{ fontWeight: 800, color: 'primary.main' }}>
+              <TimerIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} aria-hidden="true" />
+              <Typography 
+                variant="h2" 
+                sx={{ fontWeight: 800, color: 'primary.main' }}
+                aria-live="polite"
+                aria-atomic="true"
+                role="timer"
+              >
                 {formatTime(timeRemaining)}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -451,26 +444,45 @@ const YogaSessionScreen = ({ onNavigate }) => {
             {/* Controls */}
             <Stack direction="row" spacing={2} justifyContent="center">
               <IconButton 
+                onClick={skipToPrevious}
+                size="large"
+                aria-label="Previous pose"
+                sx={{ 
+                  bgcolor: 'secondary.main',
+                  color: 'white',
+                  '&:hover': { bgcolor: 'secondary.dark' },
+                  minWidth: 64,
+                  minHeight: 64
+                }}
+              >
+                <SkipPrevious />
+              </IconButton>
+
+              <IconButton 
                 onClick={handlePlayPause}
                 size="large"
+                aria-label={isRunning ? 'Pause session' : isPaused ? 'Resume session' : 'Start session'}
                 sx={{ 
                   bgcolor: 'primary.main',
                   color: 'white',
                   '&:hover': { bgcolor: 'primary.dark' },
-                  width: 64,
-                  height: 64
+                  minWidth: 64,
+                  minHeight: 64
                 }}
               >
                 {isRunning ? <Pause /> : <PlayArrow />}
               </IconButton>
 
               <IconButton 
-                onClick={handleSkip}
+                onClick={skipToNext}
                 size="large"
+                aria-label="Skip to next pose"
                 sx={{ 
                   bgcolor: 'warning.main',
                   color: 'white',
-                  '&:hover': { bgcolor: 'warning.dark' }
+                  '&:hover': { bgcolor: 'warning.dark' },
+                  minWidth: 64,
+                  minHeight: 64
                 }}
               >
                 <SkipNext />
@@ -479,10 +491,13 @@ const YogaSessionScreen = ({ onNavigate }) => {
               <IconButton 
                 onClick={handleStop}
                 size="large"
+                aria-label="Stop session"
                 sx={{ 
-                  bgcolor: 'secondary.main',
+                  bgcolor: 'error.main',
                   color: 'white',
-                  '&:hover': { bgcolor: 'secondary.dark' }
+                  '&:hover': { bgcolor: 'error.dark' },
+                  minWidth: 64,
+                  minHeight: 64
                 }}
               >
                 <Stop />

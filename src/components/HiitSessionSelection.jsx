@@ -72,7 +72,7 @@ const HiitSessionSelection = ({ onNavigate }) => {
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress />
+        <CircularProgress color="secondary" size={60} />
       </Box>
     );
   }

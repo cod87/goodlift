@@ -128,7 +128,7 @@ const GuestDataMigrationDialog = ({ open, onClose, userId }) => {
           onClick={handleMigrate}
           disabled={migrating}
           variant="contained"
-          startIcon={migrating ? <CircularProgress size={20} /> : <CloudUpload />}
+          startIcon={migrating ? <CircularProgress size={20} color="inherit" /> : <CloudUpload />}
           sx={{ fontWeight: 600 }}
         >
           {migrating ? 'Migrating...' : 'Save My Data'}

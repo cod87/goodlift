@@ -35,6 +35,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { saveHiitSession } from '../utils/storage';
+import CompactHeader from './Common/CompactHeader';
 
 const HiitSessionScreen = ({ onNavigate }) => {
   const [session, setSession] = useState(null);
@@ -283,24 +284,26 @@ const HiitSessionScreen = ({ onNavigate }) => {
   const exerciseInfo = getCurrentExerciseInfo();
 
   return (
-    <motion.div
-      className="screen"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{ padding: '1rem', maxWidth: '900px', margin: '0 auto' }}
-    >
-      {/* Header */}
-      <Box sx={{ mb: 3, textAlign: 'center' }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
-          {session.protocol?.name || 'HIIT Session'}
-        </Typography>
-        <Chip 
-          label={`${session.level || 'intermediate'} level`} 
-          color="primary" 
-          size="small"
-        />
-      </Box>
+    <Box sx={{ width: '100%', minHeight: '100vh' }}>
+      <CompactHeader 
+        title={session.protocol?.name || 'HIIT Session'} 
+        icon="🔥"
+        action={
+          <Chip 
+            label={`${session.level || 'intermediate'} level`} 
+            color="primary" 
+            size="small"
+          />
+        }
+      />
+      
+      <motion.div
+        className="screen"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        style={{ padding: '1rem', maxWidth: '900px', margin: '0 auto' }}
+      >
 
       {/* Progress Bar */}
       <Card sx={{ mb: 3 }}>
@@ -483,6 +486,7 @@ const HiitSessionScreen = ({ onNavigate }) => {
         </DialogActions>
       </Dialog>
     </motion.div>
+    </Box>
   );
 };
 

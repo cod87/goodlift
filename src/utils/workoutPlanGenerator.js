@@ -1,6 +1,14 @@
 /**
  * Workout Plan Generator
  * Generates customizable workout plans for up to 90 days based on user preferences
+ * 
+ * Based on evidence-based principles from WORKOUT-PLANNING-GUIDE.md:
+ * - Agonist-antagonist superset training for time efficiency
+ * - Progressive overload with 10% weekly increases
+ * - Volume: 10-20 sets per muscle group per week for hypertrophy
+ * - Frequency: 2x minimum per muscle group per week
+ * - Periodization with deload weeks every 3-4 weeks
+ * - Rep ranges: 6-12 for hypertrophy, 1-6 for strength
  */
 
 import { MUSCLE_GROUPS } from './constants';
@@ -53,6 +61,9 @@ export const generateWorkoutPlan = (preferences) => {
     experienceLevel
   });
 
+  // Calculate deload weeks (every 3-4 weeks per guide recommendations)
+  const deloadWeeks = calculateDeloadWeeks(duration);
+
   // Create plan object
   const plan = {
     id: generatePlanId(),
@@ -67,6 +78,12 @@ export const generateWorkoutPlan = (preferences) => {
     sessionTypes,
     equipmentAvailable,
     sessions,
+    deloadWeeks, // Track which weeks are deload weeks
+    periodization: {
+      type: duration >= 56 ? 'undulating' : 'linear', // Undulating for 8+ weeks
+      deloadFrequency: 4, // Every 4 weeks
+      volumeProgression: '10% weekly increase',
+    },
     created: Date.now(),
     modified: Date.now(),
     active: true
@@ -250,6 +267,12 @@ const generateSessionId = () => {
 
 /**
  * Get recommended plan template based on goal and experience
+ * Based on WORKOUT-PLANNING-GUIDE.md recommendations:
+ * - Beginners: 2-4 days/week, full body, lower volume
+ * - Intermediate: 3-5 days/week, upper/lower split, moderate volume
+ * - Advanced: 4-6 days/week, PPL or specialized splits, higher volume
+ * - Volume: 10-20 sets per muscle group per week for hypertrophy
+ * - Frequency: 2x per muscle group minimum
  * @param {string} goal - Fitness goal
  * @param {string} experienceLevel - Experience level
  * @returns {Object} Recommended plan preferences
@@ -260,71 +283,113 @@ export const getRecommendedPlanTemplate = (goal, experienceLevel) => {
       strength: {
         daysPerWeek: 3,
         sessionTypes: ['full'],
-        description: '3x/week full body strength training for beginners'
+        description: '3x/week full body - Each muscle 3x/week for strength adaptation',
+        volumePerMuscleGroup: 9, // 3 sets per session x 3 sessions
+        repRange: '6-12 reps',
       },
       hypertrophy: {
         daysPerWeek: 3,
         sessionTypes: ['full'],
-        description: '3x/week full body muscle building for beginners'
+        description: '3x/week full body - Building foundation with moderate volume',
+        volumePerMuscleGroup: 12, // 4 sets per session x 3 sessions
+        repRange: '8-12 reps',
       },
       fat_loss: {
         daysPerWeek: 4,
         sessionTypes: ['full', 'hiit'],
-        description: '3x/week strength + 1x/week HIIT for fat loss'
+        description: '3x/week strength + 1-2x/week HIIT for metabolic stress',
+        volumePerMuscleGroup: 10,
+        repRange: '10-15 reps',
       },
       general_fitness: {
         daysPerWeek: 3,
         sessionTypes: ['full', 'cardio', 'yoga'],
-        description: 'Balanced fitness plan with variety'
+        description: 'Balanced fitness with variety and recovery',
+        volumePerMuscleGroup: 9,
+        repRange: '8-12 reps',
       }
     },
     intermediate: {
       strength: {
         daysPerWeek: 4,
         sessionTypes: ['upper', 'lower'],
-        description: '4x/week upper/lower split for strength'
+        description: '4x/week upper/lower - Each muscle 2x/week, strength focus',
+        volumePerMuscleGroup: 12, // 6 sets per session x 2 sessions
+        repRange: '4-8 reps',
       },
       hypertrophy: {
-        daysPerWeek: 5,
+        daysPerWeek: 4,
         sessionTypes: ['upper', 'lower'],
-        description: '5x/week upper/lower for muscle growth'
+        description: '4-5x/week upper/lower - Optimal volume for muscle growth',
+        volumePerMuscleGroup: 16, // 8 sets per session x 2 sessions
+        repRange: '6-12 reps',
       },
       fat_loss: {
         daysPerWeek: 5,
         sessionTypes: ['upper', 'lower', 'hiit'],
-        description: '4x/week strength + HIIT for fat loss'
+        description: '4x/week strength + HIIT for fat loss with muscle preservation',
+        volumePerMuscleGroup: 14,
+        repRange: '8-15 reps',
       },
       general_fitness: {
         daysPerWeek: 4,
         sessionTypes: ['full', 'hiit', 'yoga'],
-        description: 'Well-rounded fitness plan'
+        description: 'Well-rounded fitness with strength, conditioning, and mobility',
+        volumePerMuscleGroup: 12,
+        repRange: '8-12 reps',
       }
     },
     advanced: {
       strength: {
         daysPerWeek: 5,
         sessionTypes: ['upper', 'lower'],
-        description: '5x/week upper/lower for advanced strength'
+        description: '5x/week upper/lower - High frequency for advanced strength',
+        volumePerMuscleGroup: 16, // Variable per session for periodization
+        repRange: '1-6 reps (strength), 6-12 reps (hypertrophy blocks)',
       },
       hypertrophy: {
         daysPerWeek: 6,
         sessionTypes: ['push', 'pull', 'legs'],
-        description: '6x/week PPL for maximum muscle growth'
+        description: '6x/week PPL - Maximum volume and specialization',
+        volumePerMuscleGroup: 20, // Near upper limit of productive volume
+        repRange: '6-12 reps',
       },
       fat_loss: {
         daysPerWeek: 6,
         sessionTypes: ['upper', 'lower', 'hiit'],
-        description: '5x/week strength + HIIT for advanced fat loss'
+        description: '5x/week strength + HIIT - Advanced fat loss protocol',
+        volumePerMuscleGroup: 16,
+        repRange: '8-15 reps',
       },
       general_fitness: {
         daysPerWeek: 5,
         sessionTypes: ['full', 'hiit', 'yoga'],
-        description: 'Advanced balanced training'
+        description: 'Advanced balanced training with recovery modalities',
+        volumePerMuscleGroup: 14,
+        repRange: '6-12 reps',
       }
     }
   };
 
   return templates[experienceLevel]?.[goal] || templates.intermediate.general_fitness;
+};
+
+/**
+ * Calculate deload weeks for periodization
+ * Per WORKOUT-PLANNING-GUIDE.md: deload every 3-4 weeks (25-50% volume reduction)
+ * @param {number} duration - Plan duration in days
+ * @returns {Array<number>} Array of week numbers that should be deload weeks
+ */
+const calculateDeloadWeeks = (duration) => {
+  const totalWeeks = Math.floor(duration / 7);
+  const deloadWeeks = [];
+  
+  // Schedule deload every 4 weeks
+  for (let week = 4; week <= totalWeeks; week += 4) {
+    deloadWeeks.push(week);
+  }
+  
+  return deloadWeeks;
 };
 
 /**

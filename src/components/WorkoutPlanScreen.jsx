@@ -32,6 +32,7 @@ import {
   CalendarMonth as CalendarIcon,
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
+import CompactHeader from './Common/CompactHeader';
 import {
   generateWorkoutPlan,
   getPlanStatistics
@@ -180,20 +181,24 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          Workout Plans
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleCreatePlan}
-        >
-          Create New Plan
-        </Button>
-      </Box>
+    <Box sx={{ width: '100%', minHeight: '100vh' }}>
+      <CompactHeader 
+        title="Workout Plans" 
+        icon="📅"
+        action={
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={handleCreatePlan}
+          >
+            Create Plan
+          </Button>
+        }
+      />
+      
+      <Container maxWidth="lg" sx={{ py: 2 }}>
 
       {/* Active Plan Section */}
       {activePlan && (
@@ -428,6 +433,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         </DialogActions>
       </Dialog>
     </Container>
+    </Box>
   );
 };
 

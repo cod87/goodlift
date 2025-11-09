@@ -28,6 +28,7 @@ import {
   FavoriteOutlined,
   FitnessCenter,
 } from '@mui/icons-material';
+import CompactHeader from '../components/Common/CompactHeader';
 import { useWorkoutGenerator } from '../hooks/useWorkoutGenerator';
 import {
   toggleFavoriteExercise,
@@ -179,32 +180,15 @@ const ExerciseListPage = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{ padding: '1rem', maxWidth: '1400px', margin: '0 auto' }}
-    >
-      {/* Header */}
-      <Box sx={{ mb: 3, textAlign: 'center' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, mb: 1 }}>
-          <FitnessCenter sx={{ fontSize: 40, color: 'primary.main' }} />
-          <Typography
-            variant="h3"
-            component="h1"
-            sx={{
-              fontWeight: 700,
-              color: 'primary.main',
-              fontSize: { xs: '1.75rem', sm: '2.5rem' },
-            }}
-          >
-            Exercise Database
-          </Typography>
-        </Box>
-        <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-          Configure weight & reps inline
-        </Typography>
-      </Box>
+    <Box sx={{ width: '100%', minHeight: '100vh' }}>
+      <CompactHeader title="Exercise Database" icon="💪" />
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        style={{ padding: '1rem', maxWidth: '1400px', margin: '0 auto' }}
+      >
 
       {/* Compact Filter Bar */}
       <Card
@@ -490,6 +474,7 @@ const ExerciseListPage = () => {
         </Box>
       )}
     </motion.div>
+    </Box>
   );
 };
 

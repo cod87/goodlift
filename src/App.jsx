@@ -541,6 +541,7 @@ function App() {
               onEquipmentChange={handleEquipmentChange}
               onStartWorkout={handleStartWorkout}
               onCustomize={handleCustomize}
+              onNavigate={handleNavigate}
               loading={loading}
             />
           )}

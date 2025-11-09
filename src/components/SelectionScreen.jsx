@@ -22,6 +22,7 @@ const SelectionScreen = memo(({
   onEquipmentChange,
   onStartWorkout,
   onCustomize,
+  onNavigate,
   loading,
 }) => {
   const [favoriteWorkouts, setFavoriteWorkouts] = useState([]);
@@ -165,24 +166,10 @@ const SelectionScreen = memo(({
   };
   
   const handleViewPlan = () => {
-    // Future: Navigate to full plan screen
-    console.log('View plan - to be implemented');
-  };
-  
-  const handleRandomize = () => {
-    // Generate a random workout type (not tied to plan)
-    const types = ['full', 'upper', 'lower'];
-    const randomType = types[Math.floor(Math.random() * types.length)];
-    onWorkoutTypeChange(randomType);
-    const equipmentFilter = selectedEquipment.has('all') 
-      ? 'all' 
-      : Array.from(selectedEquipment);
-    onStartWorkout(randomType, equipmentFilter);
-  };
-  
-  const handleResetPlan = () => {
-    // Reset the plan to defaults
-    console.log('Reset plan - to be implemented');
+    // Navigate to plan calendar screen
+    if (onNavigate) {
+      onNavigate('plan-calendar');
+    }
   };
 
   const handleEquipmentToggle = (equipment) => {
@@ -267,7 +254,6 @@ const SelectionScreen = memo(({
               lastWorkout={lastWorkout}
               onQuickStart={handleQuickStart}
               onViewPlan={handleViewPlan}
-              onRandomize={handleRandomize}
               loading={loading}
             />
           </Box>
@@ -278,8 +264,6 @@ const SelectionScreen = memo(({
               weeklyPlan={weeklyPlan}
               onQuickStartDay={handleQuickStartDay}
               onEditPlan={handleViewPlan}
-              onRandomizeWeek={handleRandomize}
-              onResetPlan={handleResetPlan}
             />
           </Box>
 
@@ -291,14 +275,6 @@ const SelectionScreen = memo(({
           boxShadow: '0 8px 32px rgba(19, 70, 134, 0.12)',
         }}>
           <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
-            <Box sx={{ textAlign: 'center', mb: 3 }}>
-              <img
-                src={`${import.meta.env.BASE_URL}goodlift-favicon.svg`}
-                alt="GoodLift"
-                style={{ height: '64px', width: 'auto' }}
-              />
-            </Box>
-
             {/* Workout Type and Equipment Dropdowns in Single Row */}
             <Box sx={{ mb: 3 }}>
               <Stack 
@@ -612,6 +588,7 @@ SelectionScreen.propTypes = {
   onEquipmentChange: PropTypes.func.isRequired,
   onStartWorkout: PropTypes.func.isRequired,
   onCustomize: PropTypes.func,
+  onNavigate: PropTypes.func,
   loading: PropTypes.bool.isRequired,
 };
 

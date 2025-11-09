@@ -105,8 +105,14 @@ export const BREATHING_TECHNIQUES = {
 export const generatePowerYogaSession = (options) => {
   const { poses = [], level = 'intermediate' } = options;
   
-  // Filter poses appropriate for Power Yoga
-  const powerPoses = poses.filter(p => p.Type === 'Power' || p.Category === 'Standing' || p.Category === 'Core');
+  // Filter poses appropriate for Power Yoga using actual CSV fields
+  const powerPoses = poses.filter(p => {
+    const isPowerYoga = p.Type && p.Type.includes('Power');
+    const isStandingOrCore = p.Category === 'Standing' || p.Category === 'Core';
+    const sessionType = p['Session Type'] || '';
+    const hasPowerSession = sessionType.includes('Power Yoga');
+    return isPowerYoga || isStandingOrCore || hasPowerSession;
+  });
   
   // Adjust hold times based on level
   const holdAdjustment = level === 'beginner' ? 0.8 : level === 'advanced' ? 1.2 : 1.0;
@@ -233,7 +239,13 @@ export const generatePowerYogaSession = (options) => {
 export const generateRestorativeYogaSession = (options) => {
   const { poses = [] } = options;
   
-  const restorativePoses = poses.filter(p => p.Type === 'Restorative' || p.Category === 'Restorative');
+  const restorativePoses = poses.filter(p => {
+    const isRestorative = p.Type && p.Type.includes('Restorative');
+    const hasRestorativeCategory = p.Category === 'Restorative';
+    const sessionType = p['Session Type'] || '';
+    const hasRestorativeSession = sessionType.includes('Restorative');
+    return isRestorative || hasRestorativeCategory || hasRestorativeSession;
+  });
   
   // Guide Section 8.3: Deep Relaxation and Recovery
   return {
@@ -338,7 +350,13 @@ export const generateRestorativeYogaSession = (options) => {
 export const generateYinYogaSession = (options) => {
   const { poses = [] } = options;
   
-  const yinPoses = poses.filter(p => p.Type === 'Yin' || p.Category === 'Hip Opener' || p.Category === 'Forward Fold');
+  const yinPoses = poses.filter(p => {
+    const isYin = p.Type && p.Type.includes('Yin');
+    const hasYinCategory = p.Category === 'Hip Opener' || p.Category === 'Forward Fold';
+    const sessionType = p['Session Type'] || '';
+    const hasYinSession = sessionType.includes('Yin');
+    return isYin || hasYinCategory || hasYinSession;
+  });
   
   // Guide Section 8.4: Long-Hold Deep Stretch
   return {
@@ -448,11 +466,13 @@ export const generateYinYogaSession = (options) => {
 export const generateFlexibilityYogaSession = (options) => {
   const { poses = [] } = options;
   
-  const flexPoses = poses.filter(p => 
-    p.Type === 'Flexibility' || 
-    p.Category === 'Hip Opener' || 
-    p.Category === 'Forward Fold'
-  );
+  const flexPoses = poses.filter(p => {
+    const isFlex = p.Type && p.Type.includes('Flexibility');
+    const hasFlexCategory = p.Category === 'Hip Opener' || p.Category === 'Forward Fold';
+    const sessionType = p['Session Type'] || '';
+    const hasFlexSession = sessionType.includes('Flexibility');
+    return isFlex || hasFlexCategory || hasFlexSession;
+  });
   
   // Guide Section 8.5: Hip and Hamstring Opening
   return {
@@ -583,7 +603,13 @@ export const generateFlexibilityYogaSession = (options) => {
 export const generateCoreYogaSession = (options) => {
   const { poses = [] } = options;
   
-  const corePoses = poses.filter(p => p.Type === 'Core' || p.Category === 'Core' || p.Type === 'Power');
+  const corePoses = poses.filter(p => {
+    const isCore = p.Category === 'Core';
+    const isPower = p.Type && p.Type.includes('Power');
+    const sessionType = p['Session Type'] || '';
+    const hasCoreSession = sessionType.includes('Core');
+    return isCore || (isPower && hasCoreSession);
+  });
   
   // Guide Section 8.6: Power Core Building
   return {

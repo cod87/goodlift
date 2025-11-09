@@ -119,16 +119,17 @@ export const generateBodyweightSession = (options) => {
   
   const selectedProtocol = HIIT_PROTOCOLS[protocol];
   
-  // Filter for HIIT bodyweight exercises
-  const hiitExercises = exercises.filter(ex => 
-    ex['Exercise Type'] === 'HIIT' && 
-    ex.Equipment === 'Bodyweight' &&
-    (!ex.Category || ex.Category !== 'Plyometric') // Exclude plyometric for pure bodyweight
-  );
+  // Filter for HIIT bodyweight exercises using actual CSV fields
+  const hiitExercises = exercises.filter(ex => {
+    const isHiitCompatible = ex['HIIT Compatible'] === 'Yes' || 
+                            (ex['Workout Type'] && ex['Workout Type'].includes('HIIT'));
+    const isBodyweight = ex.Equipment === 'Bodyweight';
+    return isHiitCompatible && isBodyweight;
+  });
   
-  // Apply impact level filter if needed
+  // Apply difficulty filter for lower impact (use Difficulty field instead of Impact Level)
   const filteredExercises = lowerImpact 
-    ? hiitExercises.filter(ex => ex['Impact Level'] === 'Low' || ex['Impact Level'] === 'Moderate')
+    ? hiitExercises.filter(ex => ex.Difficulty === 'Beginner' || ex.Difficulty === 'Intermediate')
     : hiitExercises;
   
   // Determine session parameters based on level (Guide Section 1.2)
@@ -180,8 +181,8 @@ export const generateBodyweightSession = (options) => {
         secondaryMuscles: ex['Secondary Muscles'],
         workSeconds: selectedProtocol.workSeconds,
         restSeconds: selectedProtocol.restSeconds,
-        impactLevel: ex['Impact Level'],
-        modification: lowerImpact ? ex.Modification : null
+        difficulty: ex.Difficulty,
+        equipment: ex.Equipment
       }))
     },
     cooldown: {
@@ -211,17 +212,20 @@ export const generatePlyometricSession = (options) => {
   
   const selectedProtocol = HIIT_PROTOCOLS[protocol];
   
-  // Filter for plyometric exercises
-  const plyoExercises = exercises.filter(ex => 
-    ex.Category === 'Plyometric' ||
-    (ex['Exercise Type'] === 'HIIT' && ex['Impact Level'] === 'High')
-  );
+  // Filter for plyometric/power exercises using actual CSV fields
+  const plyoExercises = exercises.filter(ex => {
+    const isHiitCompatible = ex['HIIT Compatible'] === 'Yes' || 
+                            (ex['Workout Type'] && ex['Workout Type'].includes('HIIT'));
+    const isPowerDevelopment = ex.Progression === 'Power Development';
+    // Jump exercises are typically plyometric
+    const isJumpExercise = ex['Exercise Name'] && ex['Exercise Name'].toLowerCase().includes('jump');
+    return (isHiitCompatible && isPowerDevelopment) || isJumpExercise;
+  });
   
-  // Apply impact and level filters
+  // Apply difficulty level filters
   const filteredExercises = plyoExercises.filter(ex => {
-    if (lowerImpact && ex['Impact Level'] === 'Very High') return false;
-    if (level === 'beginner' && ex['Progression Level'] === 'Advanced') return false;
-    if (level === 'intermediate' && ex['Progression Level'] === 'Advanced') return false;
+    if (lowerImpact && ex.Difficulty === 'Advanced') return false;
+    if (level === 'beginner' && ex.Difficulty === 'Advanced') return false;
     return true;
   });
   
@@ -243,9 +247,8 @@ export const generatePlyometricSession = (options) => {
         secondaryMuscles: ex['Secondary Muscles'],
         workSeconds: 40, // Fixed at 40 sec per Guide Section 3.2
         restSeconds: 20,
-        impactLevel: ex['Impact Level'],
-        modification: lowerImpact ? ex.Modification : null,
-        progressionLevel: ex['Progression Level']
+        difficulty: ex.Difficulty,
+        equipment: ex.Equipment
       }))
     });
   }
@@ -571,11 +574,15 @@ export const generateEllipticalSession = (options) => {
 export const generateStepSession = (options) => {
   const { exercises = [] } = options;
   
-  // Filter for step/lower body exercises
-  const stepExercises = exercises.filter(ex => 
-    ex.Equipment === 'Box/Platform' || 
-    (ex['Exercise Type'] === 'HIIT' && ex.Category === 'Lower Body')
-  );
+  // Filter for step/lower body exercises using actual CSV fields
+  const stepExercises = exercises.filter(ex => {
+    const hasBoxEquipment = ex.Equipment && ex.Equipment.toLowerCase().includes('box');
+    const isLowerBody = ex['Movement Pattern'] && 
+                       (ex['Movement Pattern'].includes('Lower') || 
+                        ex['Movement Pattern'] === 'Lower Leg');
+    const isHiitCompatible = ex['HIIT Compatible'] === 'Yes';
+    return hasBoxEquipment || (isLowerBody && isHiitCompatible);
+  });
   
   // Guide Section 7.1: Upper and Lower Integration
   return {

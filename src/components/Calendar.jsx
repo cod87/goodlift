@@ -172,26 +172,66 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
       onDayClick(date);
     }
   };
+  
+  const handleKeyDown = (event, date) => {
+    // Support keyboard navigation
+    if ((event.key === 'Enter' || event.key === ' ') && date && onDayClick) {
+      event.preventDefault();
+      onDayClick(date);
+    }
+  };
 
   const days = getMonthDays();
 
   return (
-    <div className="calendar-container">
+    <Box 
+      sx={{ 
+        width: '100%', 
+        bgcolor: 'background.paper', 
+        borderRadius: 2, 
+        p: 2,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+      }}
+      role="region"
+      aria-label="Workout calendar"
+    >
       <div className="calendar-header">
         <div className="calendar-controls">
-          <button onClick={goToPrevious} className="calendar-nav-btn">←</button>
-          <h3 className="calendar-period">{getPeriodLabel()}</h3>
-          <button onClick={goToNext} className="calendar-nav-btn">→</button>
+          <button 
+            onClick={goToPrevious} 
+            className="calendar-nav-btn"
+            aria-label="Previous month"
+          >
+            ←
+          </button>
+          <h3 className="calendar-period" id="calendar-month-label">{getPeriodLabel()}</h3>
+          <button 
+            onClick={goToNext} 
+            className="calendar-nav-btn"
+            aria-label="Next month"
+          >
+            →
+          </button>
         </div>
         <div className="calendar-actions">
-          <button onClick={goToToday} className="calendar-today-btn">Today</button>
+          <button 
+            onClick={goToToday} 
+            className="calendar-today-btn"
+            aria-label="Go to today"
+          >
+            Today
+          </button>
         </div>
       </div>
 
-      <div className="calendar-grid monthly">
+      <div 
+        className="calendar-grid monthly"
+        role="grid"
+        aria-labelledby="calendar-month-label"
+      >
         {/* Day labels */}
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="calendar-day-label">{day}</div>
+          <div key={day} className="calendar-day-label" role="columnheader">{day}</div>
         ))}
         
         {/* Calendar days */}
@@ -205,6 +245,10 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
               key={index}
               className={`calendar-day ${!date ? 'empty' : ''} ${isToday(date) ? 'today' : ''} ${hasActivity ? 'has-activity' : ''}`}
               onClick={() => handleDayClick(date)}
+              onKeyDown={(e) => handleKeyDown(e, date)}
+              role="gridcell"
+              tabIndex={date && hasActivity ? 0 : -1}
+              aria-label={date ? `${date.toLocaleDateString()}, ${hasActivity ? `${sessionInfo.sessions.length} workout${sessionInfo.sessions.length > 1 ? 's' : ''}` : 'no workouts'}` : ''}
               style={{ cursor: date && hasActivity ? 'pointer' : 'default' }}
             >
               {date && (
@@ -294,23 +338,23 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
 
       <div className="calendar-legend">
         <div className="legend-item">
-          <img src={`${import.meta.env.BASE_URL}icons/fullbody-calendaricon.svg`} alt="Full Body" style={{ width: '16px', height: '16px' }} />
+          <img src={`${import.meta.env.BASE_URL}icons/fullbody-calendaricon.svg`} alt="" aria-hidden="true" style={{ width: '16px', height: '16px' }} />
           <span>Full Body</span>
         </div>
         <div className="legend-item">
-          <img src={`${import.meta.env.BASE_URL}icons/upperbody-calendaricon.svg`} alt="Upper Body" style={{ width: '16px', height: '16px' }} />
+          <img src={`${import.meta.env.BASE_URL}icons/upperbody-calendaricon.svg`} alt="" aria-hidden="true" style={{ width: '16px', height: '16px' }} />
           <span>Upper Body</span>
         </div>
         <div className="legend-item">
-          <img src={`${import.meta.env.BASE_URL}icons/lowerbody-calendaricon.svg`} alt="Lower Body" style={{ width: '16px', height: '16px' }} />
+          <img src={`${import.meta.env.BASE_URL}icons/lowerbody-calendaricon.svg`} alt="" aria-hidden="true" style={{ width: '16px', height: '16px' }} />
           <span>Lower Body</span>
         </div>
         <div className="legend-item">
-          <img src={`${import.meta.env.BASE_URL}icons/cardio-calendaricon.svg`} alt="Cardio" style={{ width: '16px', height: '16px' }} />
+          <img src={`${import.meta.env.BASE_URL}icons/cardio-calendaricon.svg`} alt="" aria-hidden="true" style={{ width: '16px', height: '16px' }} />
           <span>Cardio</span>
         </div>
         <div className="legend-item">
-          <img src={`${import.meta.env.BASE_URL}icons/yoga-calendaricon.svg`} alt="Mobility" style={{ width: '16px', height: '16px' }} />
+          <img src={`${import.meta.env.BASE_URL}icons/yoga-calendaricon.svg`} alt="" aria-hidden="true" style={{ width: '16px', height: '16px' }} />
           <span>Mobility</span>
         </div>
         <div className="legend-item">
@@ -320,11 +364,13 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
             backgroundColor: '#2196f3',
             borderRadius: '0 0 2px 2px',
             clipPath: 'polygon(0 0, 100% 0, 100% 80%, 50% 60%, 0 80%)',
-          }} />
+          }} 
+          aria-hidden="true"
+          />
           <span>Additional Sessions</span>
         </div>
       </div>
-    </div>
+    </Box>
   );
 };
 

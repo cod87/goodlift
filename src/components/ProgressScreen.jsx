@@ -29,6 +29,9 @@ import {
   formatProgressionForChart 
 } from '../utils/progressionHelpers';
 import Calendar from './Calendar';
+import StatsRow from './Progress/StatsRow';
+import ChartTabs from './Progress/ChartTabs';
+import ActivitiesList from './Progress/ActivitiesList';
 import { 
   Box, 
   Card, 

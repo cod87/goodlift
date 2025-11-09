@@ -116,6 +116,8 @@ const ProgressScreen = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
   const [editingSessionType, setEditingSessionType] = useState(null); // 'workout', 'cardio', 'hiit', 'yoga'
+  const [plannedSession, setPlannedSession] = useState(null); // For displaying planned session details
+  const [plannedSessionDialogOpen, setPlannedSessionDialogOpen] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -391,13 +393,27 @@ const ProgressScreen = () => {
   // Handle day click in calendar
   const handleDayClick = (date) => {
     setSelectedDate(date);
-    // Scroll to the session list
-    setTimeout(() => {
-      const sessionList = document.querySelector('.workout-history-container');
-      if (sessionList) {
-        sessionList.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
+    
+    // Check if there are planned sessions for this date
+    const dateStr = date.toDateString();
+    const plannedSessionsOnDate = (activePlan?.sessions || []).filter(session => {
+      const sessionDate = new Date(session.date);
+      return sessionDate.toDateString() === dateStr && session.status === 'planned';
+    });
+    
+    if (plannedSessionsOnDate.length > 0) {
+      // Show planned session dialog
+      setPlannedSession(plannedSessionsOnDate[0]);
+      setPlannedSessionDialogOpen(true);
+    } else {
+      // Scroll to the session list for completed sessions
+      setTimeout(() => {
+        const sessionList = document.querySelector('.workout-history-container');
+        if (sessionList) {
+          sessionList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
   };
 
   // Filter sessions by selected date
@@ -437,6 +453,34 @@ const ProgressScreen = () => {
     filteredSessions.yoga.length > 0 ||
     filteredSessions.cardio.length > 0
   );
+
+  const getSessionTypeLabel = (type) => {
+    const labels = {
+      upper: 'Upper Body',
+      lower: 'Lower Body',
+      full: 'Full Body',
+      push: 'Push',
+      pull: 'Pull',
+      legs: 'Legs',
+      hiit: 'HIIT',
+      cardio: 'Cardio',
+      yoga: 'Yoga',
+      stretch: 'Stretch'
+    };
+    return labels[type] || type;
+  };
+
+  const handleStartPlannedSession = () => {
+    // Navigate to start the workout
+    // This would need onNavigate or onStartWorkout prop passed from App
+    setPlannedSessionDialogOpen(false);
+    // TODO: Implement navigation to workout start
+  };
+
+  const handleClosePlannedDialog = () => {
+    setPlannedSessionDialogOpen(false);
+    setPlannedSession(null);
+  };
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh' }}>
@@ -1476,6 +1520,87 @@ const ProgressScreen = () => {
           sessionType={editingSessionType}
         />
       )}
+
+      {/* Planned Session Dialog */}
+      <Dialog 
+        open={plannedSessionDialogOpen} 
+        onClose={handleClosePlannedDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6">
+            {selectedDate && selectedDate.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          {plannedSession && (
+            <Box>
+              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <Chip 
+                  label={getSessionTypeLabel(plannedSession.type)} 
+                  color="primary"
+                />
+                <Chip 
+                  label="Planned" 
+                  color="default"
+                  size="small"
+                />
+              </Box>
+              
+              <Typography variant="body1" gutterBottom>
+                Session Type: {getSessionTypeLabel(plannedSession.type)}
+              </Typography>
+              
+              {/* Show exercises list if available */}
+              {plannedSession.exercises && plannedSession.exercises.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                    Exercises ({plannedSession.exercises.length}):
+                  </Typography>
+                  <Box sx={{ 
+                    maxHeight: '200px', 
+                    overflowY: 'auto',
+                    bgcolor: 'background.default',
+                    borderRadius: 1,
+                    p: 1.5,
+                  }}>
+                    {plannedSession.exercises.map((exercise, index) => (
+                      <Typography 
+                        key={index} 
+                        variant="body2" 
+                        sx={{ 
+                          py: 0.5,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        {index + 1}. {exercise.name}
+                      </Typography>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePlannedDialog}>Close</Button>
+          {plannedSession && (
+            <Button 
+              variant="contained" 
+              color="primary"
+              onClick={handleStartPlannedSession}
+            >
+              Start Workout
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </motion.div>
     </Box>
   );

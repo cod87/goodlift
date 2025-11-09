@@ -11,7 +11,7 @@
  * - Rep ranges: 6-12 for hypertrophy, 1-6 for strength
  */
 
-import { MUSCLE_GROUPS } from './constants';
+import { MUSCLE_GROUPS } from './constants.js';
 
 /**
  * Generate a workout plan based on user preferences

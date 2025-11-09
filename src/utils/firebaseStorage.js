@@ -177,3 +177,33 @@ export const saveYogaSessionsToFirebase = async (userId, yogaSessions) => {
     console.error('Error saving yoga sessions to Firebase:', error);
   }
 };
+
+/**
+ * Save workout plans to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} workoutPlans - The workout plans array
+ */
+export const saveWorkoutPlansToFirebase = async (userId, workoutPlans) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { workoutPlans });
+  } catch (error) {
+    console.error('Error saving workout plans to Firebase:', error);
+  }
+};
+
+/**
+ * Save active plan ID to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {string|null} activePlanId - The active plan ID or null
+ */
+export const saveActivePlanToFirebase = async (userId, activePlanId) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { activePlanId });
+  } catch (error) {
+    console.error('Error saving active plan to Firebase:', error);
+  }
+};

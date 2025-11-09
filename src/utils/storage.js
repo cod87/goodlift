@@ -7,6 +7,8 @@ import {
   saveCardioSessionsToFirebase,
   saveStretchSessionsToFirebase,
   saveYogaSessionsToFirebase,
+  saveWorkoutPlansToFirebase,
+  saveActivePlanToFirebase,
   loadUserDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
@@ -520,6 +522,16 @@ export const loadUserDataFromCloud = async (userId) => {
         localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(firebaseData.yogaSessions));
       }
       
+      // Sync workout plans
+      if (firebaseData.workoutPlans) {
+        localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(firebaseData.workoutPlans));
+      }
+      
+      // Sync active plan ID
+      if (firebaseData.activePlanId) {
+        localStorage.setItem(KEYS.ACTIVE_PLAN, firebaseData.activePlanId);
+      }
+      
       console.log('User data synced from Firebase to localStorage');
     } else {
       // No data in Firebase, sync current localStorage data to Firebase
@@ -533,12 +545,16 @@ export const loadUserDataFromCloud = async (userId) => {
       const localCardio = getCardioSessions();
       const localStretch = getStretchSessions();
       const localYoga = getYogaSessions();
+      const localPlans = localStorage.getItem(KEYS.WORKOUT_PLANS);
+      const plansArray = localPlans ? JSON.parse(localPlans) : [];
+      const localActivePlanId = localStorage.getItem(KEYS.ACTIVE_PLAN);
       
       // If user has local data, sync it to Firebase
       if (localHistory.length > 0 || localStats?.totalWorkouts > 0 || 
           Object.keys(weightsObj).length > 0 || Object.keys(targetRepsObj).length > 0 ||
           localHiit.length > 0 || localCardio.length > 0 || 
-          localStretch.length > 0 || localYoga.length > 0) {
+          localStretch.length > 0 || localYoga.length > 0 ||
+          plansArray.length > 0 || localActivePlanId) {
         console.log('Syncing local data to Firebase for new user');
         await Promise.all([
           saveWorkoutHistoryToFirebase(userId, localHistory),
@@ -548,7 +564,9 @@ export const loadUserDataFromCloud = async (userId) => {
           saveHiitSessionsToFirebase(userId, localHiit),
           saveCardioSessionsToFirebase(userId, localCardio),
           saveStretchSessionsToFirebase(userId, localStretch),
-          saveYogaSessionsToFirebase(userId, localYoga)
+          saveYogaSessionsToFirebase(userId, localYoga),
+          saveWorkoutPlansToFirebase(userId, plansArray),
+          saveActivePlanToFirebase(userId, localActivePlanId)
         ]);
       }
     }
@@ -1267,11 +1285,27 @@ export const updatePinnedExerciseMode = (exerciseName, trackingMode) => {
  */
 export const getWorkoutPlans = async () => {
   try {
+    // Check if in guest mode first
     if (isGuestMode()) {
       const guestData = getGuestData('workout_plans');
       return guestData || [];
     }
 
+    // Try Firebase first if user is authenticated
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData?.workoutPlans) {
+          // Update localStorage cache for offline access
+          localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(firebaseData.workoutPlans));
+          return firebaseData.workoutPlans;
+        }
+      } catch (error) {
+        console.error('Firebase fetch failed, using localStorage:', error);
+      }
+    }
+
+    // Fallback to localStorage
     const plans = localStorage.getItem(KEYS.WORKOUT_PLANS);
     return plans ? JSON.parse(plans) : [];
   } catch (error) {
@@ -1296,13 +1330,17 @@ export const saveWorkoutPlan = async (plan) => {
       plans.push(plan);
     }
 
+    // Save based on mode
     if (isGuestMode()) {
       setGuestData('workout_plans', plans);
     } else {
       localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(plans));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveWorkoutPlansToFirebase(currentUserId, plans);
+      }
     }
-
-    // TODO: Add Firebase sync when available
   } catch (error) {
     console.error('Error saving workout plan:', error);
     throw error;
@@ -1319,10 +1357,16 @@ export const deleteWorkoutPlan = async (planId) => {
     const plans = await getWorkoutPlans();
     const filtered = plans.filter(p => p.id !== planId);
     
+    // Save based on mode
     if (isGuestMode()) {
       setGuestData('workout_plans', filtered);
     } else {
       localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(filtered));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveWorkoutPlansToFirebase(currentUserId, filtered);
+      }
     }
 
     // If this was the active plan, clear it
@@ -1347,6 +1391,22 @@ export const getActivePlan = async () => {
       return guestData || null;
     }
 
+    // Try Firebase first if user is authenticated
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData?.activePlanId) {
+          // Cache to localStorage
+          localStorage.setItem(KEYS.ACTIVE_PLAN, firebaseData.activePlanId);
+          const plans = await getWorkoutPlans();
+          return plans.find(p => p.id === firebaseData.activePlanId) || null;
+        }
+      } catch (error) {
+        console.error('Firebase fetch failed, using localStorage:', error);
+      }
+    }
+
+    // Fallback to localStorage
     const activePlanId = localStorage.getItem(KEYS.ACTIVE_PLAN);
     if (!activePlanId) return null;
 
@@ -1376,8 +1436,18 @@ export const setActivePlan = async (planId) => {
     } else {
       if (planId) {
         localStorage.setItem(KEYS.ACTIVE_PLAN, planId);
+        
+        // Sync to Firebase if user is logged in
+        if (currentUserId) {
+          await saveActivePlanToFirebase(currentUserId, planId);
+        }
       } else {
         localStorage.removeItem(KEYS.ACTIVE_PLAN);
+        
+        // Sync to Firebase if user is logged in
+        if (currentUserId) {
+          await saveActivePlanToFirebase(currentUserId, null);
+        }
       }
     }
   } catch (error) {

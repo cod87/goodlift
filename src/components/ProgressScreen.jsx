@@ -20,7 +20,8 @@ import {
   updatePinnedExerciseMode,
   removePinnedExercise,
   addPinnedExercise,
-  getActivePlan
+  getActivePlan,
+  saveWorkoutPlan
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import { 
@@ -28,6 +29,10 @@ import {
   getUniqueExercises,
   formatProgressionForChart 
 } from '../utils/progressionHelpers';
+import { moveSession } from '../utils/workoutPlanGenerator';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Calendar from './Calendar';
 import StatsRow from './Progress/StatsRow';
 import ChartTabs from './Progress/ChartTabs';
@@ -59,7 +64,8 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Menu
 } from '@mui/material';
 import { 
   FitnessCenter, 
@@ -72,7 +78,9 @@ import {
   DirectionsRun,
   Add,
   Close,
-  Edit
+  Edit,
+  MoreVert as MoreVertIcon,
+  EventRepeat as MoveIcon
 } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {
@@ -118,6 +126,9 @@ const ProgressScreen = () => {
   const [editingSessionType, setEditingSessionType] = useState(null); // 'workout', 'cardio', 'hiit', 'yoga'
   const [plannedSession, setPlannedSession] = useState(null); // For displaying planned session details
   const [plannedSessionDialogOpen, setPlannedSessionDialogOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+  const [newDate, setNewDate] = useState(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -480,6 +491,32 @@ const ProgressScreen = () => {
   const handleClosePlannedDialog = () => {
     setPlannedSessionDialogOpen(false);
     setPlannedSession(null);
+    setAnchorEl(null);
+  };
+
+  const handleMenuOpen = (event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMoveSession = () => {
+    setMoveDialogOpen(true);
+    setNewDate(selectedDate);
+  };
+
+  const handleConfirmMove = async () => {
+    if (!plannedSession || !activePlan || !newDate) return;
+    
+    const updatedPlan = moveSession(activePlan, plannedSession.id, newDate);
+    await saveWorkoutPlan(updatedPlan);
+    await loadData(); // Reload to get updated plan
+    
+    setMoveDialogOpen(false);
+    handleClosePlannedDialog();
   };
 
   return (
@@ -1529,14 +1566,19 @@ const ProgressScreen = () => {
         fullWidth
       >
         <DialogTitle>
-          <Typography variant="h6">
-            {selectedDate && selectedDate.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">
+              {selectedDate && selectedDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </Typography>
+            <IconButton onClick={handleMenuOpen}>
+              <MoreVertIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <DialogContent>
           {plannedSession && (
@@ -1601,6 +1643,44 @@ const ProgressScreen = () => {
           )}
         </DialogActions>
       </Dialog>
+
+      {/* Session Options Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleMoveSession}>
+          <MoveIcon sx={{ mr: 1 }} fontSize="small" />
+          Move to Different Date
+        </MenuItem>
+      </Menu>
+
+      {/* Move Session Dialog */}
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Dialog open={moveDialogOpen} onClose={() => setMoveDialogOpen(false)}>
+          <DialogTitle>Move Session</DialogTitle>
+          <DialogContent sx={{ pt: 2 }}>
+            <DatePicker
+              label="New Date"
+              value={newDate}
+              onChange={(date) => setNewDate(date)}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  margin: 'normal'
+                }
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setMoveDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleConfirmMove} variant="contained">
+              Move
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </LocalizationProvider>
     </motion.div>
     </Box>
   );

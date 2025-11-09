@@ -211,20 +211,36 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
 
       {/* Active Plan Section */}
       {activePlan && (
-        <Paper sx={{ p: 3, mb: 3, bgcolor: 'primary.light', color: 'white' }}>
+        <Paper sx={{ 
+          p: { xs: 2, sm: 3 }, 
+          mb: 3, 
+          bgcolor: 'primary.light', 
+          color: 'white',
+          overflow: 'hidden',
+          wordWrap: 'break-word'
+        }}>
           <Typography variant="h6" gutterBottom>
             Active Plan
           </Typography>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h5" gutterBottom sx={{ 
+            wordBreak: 'break-word',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
             {activePlan.name}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 1, 
+            mb: 2, 
+            flexWrap: 'wrap'
+          }}>
             <Chip label={getGoalLabel(activePlan.goal)} size="small" sx={{ bgcolor: 'white' }} />
             <Chip label={`${activePlan.daysPerWeek} days/week`} size="small" sx={{ bgcolor: 'white' }} />
             <Chip label={getExperienceLabel(activePlan.experienceLevel)} size="small" sx={{ bgcolor: 'white' }} />
           </Box>
           <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" gutterBottom>
+            <Typography variant="body2" gutterBottom sx={{ wordBreak: 'break-word' }}>
               Progress: {(() => {
                 const stats = getPlanStatistics(activePlan);
                 return `${stats.completedSessions}/${stats.totalSessions} sessions (${Math.round(stats.completionRate)}%)`;
@@ -241,6 +257,8 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
             color="secondary"
             startIcon={<CalendarIcon />}
             onClick={() => handleViewCalendar(activePlan)}
+            fullWidth
+            sx={{ maxWidth: { xs: '100%', sm: 'auto' } }}
           >
             View Calendar
           </Button>

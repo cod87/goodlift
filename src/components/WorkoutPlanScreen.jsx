@@ -123,6 +123,12 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
       });
 
       await saveWorkoutPlan(plan);
+      
+      // Auto-activate if plan name is "This Week"
+      if (plan.name === 'This Week') {
+        await setActivePlan(plan.id);
+      }
+      
       await loadPlans();
       handleCloseDialog();
     } catch (error) {

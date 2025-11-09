@@ -1004,9 +1004,9 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
         );
       }
       
-      // Generate workout with equipment filter
+      // Generate workout with equipment filter and experience level
       const equipmentFilter = equipmentAvailable.includes('all') ? 'all' : equipmentAvailable;
-      const workoutExercises = generateStandardWorkout(filteredExercises, session.type, equipmentFilter);
+      const workoutExercises = generateStandardWorkout(filteredExercises, session.type, equipmentFilter, experienceLevel);
       
       return {
         ...session,

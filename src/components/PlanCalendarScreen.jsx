@@ -129,9 +129,16 @@ const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
     
     // Navigate to appropriate workout screen based on session type
     if (isStandardWorkout) {
-      // Navigate to standard workout
+      // Navigate to workout preview with pre-generated exercises
       if (onStartWorkout) {
-        onStartWorkout(selectedSession.type, new Set(['all']));
+        // Pass pre-generated workout exercises and plan context for tracking
+        const planContext = {
+          planId: plan.id,
+          planName: plan.name,
+          sessionId: selectedSession.id,
+          sessionDate: selectedSession.date
+        };
+        onStartWorkout(selectedSession.type, new Set(['all']), selectedSession.exercises, planContext);
       }
     } else if (isHiit) {
       // Store session data and navigate to HIIT session screen

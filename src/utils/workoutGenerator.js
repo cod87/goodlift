@@ -2,9 +2,64 @@
  * Workout Generation Utilities
  * Standalone functions for generating workout sessions
  * Used by workout plan generator and can be called from non-React contexts
+ * 
+ * Based on WORKOUT-PLANNING-GUIDE.md principles:
+ * - Moderate Volume: 4-7 sets per muscle group per session for optimal hypertrophy
+ * - Agonist-antagonist superset pairing for time efficiency
+ * - Compound exercises (60-70% of volume) + isolation exercises (30-40%)
+ * - Flexible exercise counts based on session goals
  */
 
 import { EXERCISES_PER_WORKOUT } from './constants.js';
+
+/**
+ * Recommended sets per exercise based on exercise type
+ */
+const SETS_CONFIG = {
+  compound: 4, // Heavy compound movements: 4 sets
+  isolation: 3, // Isolation exercises: 3 sets
+  accessory: 3  // Accessory work: 3 sets
+};
+
+/**
+ * Calculate optimal exercise count based on session type and experience
+ * Per WORKOUT-PLANNING-GUIDE.md: 4-7 sets per muscle group per session
+ * With 3-4 sets per exercise, that's roughly 6-10 total exercises per session
+ * 
+ * @param {string} sessionType - Workout type (upper, lower, full, etc.)
+ * @param {string} experienceLevel - beginner, intermediate, advanced
+ * @returns {number} Number of exercises for the session
+ */
+const getOptimalExerciseCount = (sessionType, experienceLevel = 'intermediate') => {
+  const baseCount = {
+    beginner: {
+      full: 6,    // Full body: 6 exercises (lighter workload)
+      upper: 6,   // Upper body: 6 exercises
+      lower: 6,   // Lower body: 6 exercises
+      push: 7,    // Push day: 7 exercises
+      pull: 7,    // Pull day: 7 exercises
+      legs: 7     // Leg day: 7 exercises
+    },
+    intermediate: {
+      full: 8,    // Full body: 8 exercises
+      upper: 8,   // Upper body: 8 exercises
+      lower: 8,   // Lower body: 8 exercises
+      push: 8,    // Push day: 8 exercises
+      pull: 8,    // Pull day: 8 exercises
+      legs: 8     // Leg day: 8 exercises
+    },
+    advanced: {
+      full: 9,    // Full body: 9 exercises
+      upper: 10,  // Upper body: 10 exercises
+      lower: 10,  // Lower body: 10 exercises
+      push: 10,   // Push day: 10 exercises
+      pull: 10,   // Pull day: 10 exercises
+      legs: 10    // Leg day: 10 exercises
+    }
+  };
+
+  return baseCount[experienceLevel]?.[sessionType] || EXERCISES_PER_WORKOUT;
+};
 
 /**
  * Map of opposing muscle groups for optimal superset pairing
@@ -110,8 +165,18 @@ const pairExercises = (exercises) => {
 
 /**
  * Generate exercise list for PPL (Push/Pull/Legs) split
+ * Per WORKOUT-PLANNING-GUIDE.md:
+ * - Compound exercises: 60-70% of volume
+ * - Isolation exercises: 30-40% of volume
+ * - 4-7 sets per muscle group per session for moderate volume
+ * 
+ * @param {Array} allExercises - All available exercises
+ * @param {string} type - Workout type
+ * @param {string|Array} equipmentFilter - Equipment filter(s)
+ * @param {string} experienceLevel - User experience level
+ * @returns {Array} List of exercises for the workout
  */
-const generatePPLExercises = (allExercises, type, equipmentFilter = 'all') => {
+const generatePPLExercises = (allExercises, type, equipmentFilter = 'all', experienceLevel = 'intermediate') => {
   // Group exercises by primary muscle
   const exerciseDB = allExercises.reduce((acc, exercise) => {
     const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
@@ -123,10 +188,12 @@ const generatePPLExercises = (allExercises, type, equipmentFilter = 'all') => {
   }, {});
 
   let workout = [];
+  const targetCount = getOptimalExerciseCount(type, experienceLevel);
 
   switch (type) {
     case 'push':
       // Push day: Chest, Shoulders, Triceps
+      // Per guide: Emphasize compound movements (bench press, overhead press)
       workout.push(...getRandomExercises(exerciseDB, 'Chest', 3, workout, equipmentFilter));
       workout.push(...getRandomExercises(exerciseDB, 'Delts', 2, workout, equipmentFilter));
       workout.push(...getRandomExercises(exerciseDB, 'Triceps', 3, workout, equipmentFilter));
@@ -134,6 +201,7 @@ const generatePPLExercises = (allExercises, type, equipmentFilter = 'all') => {
 
     case 'pull':
       // Pull day: Back (Lats), Biceps, Rear Delts
+      // Per guide: Mix horizontal pulls (rows) and vertical pulls (pulldowns/pullups)
       workout.push(...getRandomExercises(exerciseDB, 'Lats', 4, workout, equipmentFilter));
       workout.push(...getRandomExercises(exerciseDB, 'Biceps', 3, workout, equipmentFilter));
       workout.push(...getRandomExercises(exerciseDB, 'Traps', 1, workout, equipmentFilter));
@@ -141,6 +209,7 @@ const generatePPLExercises = (allExercises, type, equipmentFilter = 'all') => {
 
     case 'legs':
       // Legs day: Quads, Hamstrings, Glutes, Calves
+      // Per guide: Compound multi-joint movements + isolation
       workout.push(...getRandomExercises(exerciseDB, 'Quads', 3, workout, equipmentFilter));
       workout.push(...getRandomExercises(exerciseDB, 'Hamstrings', 3, workout, equipmentFilter));
       workout.push(...getRandomExercises(exerciseDB, 'Glutes', 1, workout, equipmentFilter));
@@ -149,6 +218,7 @@ const generatePPLExercises = (allExercises, type, equipmentFilter = 'all') => {
 
     case 'upper':
       // Upper body: Chest, Back, Shoulders, Arms
+      // Balanced upper body split with push/pull balance
       workout.push(...getRandomExercises(exerciseDB, 'Chest', 3, workout, equipmentFilter));
       workout.push(...getRandomExercises(exerciseDB, 'Lats', 3, workout, equipmentFilter));
       workout.push(...getRandomExercises(exerciseDB, 'Biceps', 1, workout, equipmentFilter));
@@ -157,12 +227,14 @@ const generatePPLExercises = (allExercises, type, equipmentFilter = 'all') => {
 
     case 'lower': {
       // Lower body: Quads, Hamstrings, Core
-      const quadCount = Math.floor(Math.random() * 2) + 3; // 3-4 exercises
-      const hamCount = Math.floor(Math.random() * 2) + 2; // 2-3 exercises
-      const coreCount = EXERCISES_PER_WORKOUT - quadCount - hamCount;
-
+      // Flexible distribution based on optimal volume
+      const quadCount = Math.min(4, Math.floor(targetCount * 0.4)); // ~40% quads
+      const hamCount = Math.min(3, Math.floor(targetCount * 0.3));  // ~30% hamstrings
+      const coreCount = Math.max(1, targetCount - quadCount - hamCount - 1); // Rest to core, save 1 for glutes
+      
       workout.push(...getRandomExercises(exerciseDB, 'Quads', quadCount, workout, equipmentFilter));
       workout.push(...getRandomExercises(exerciseDB, 'Hamstrings', hamCount, workout, equipmentFilter));
+      workout.push(...getRandomExercises(exerciseDB, 'Glutes', 1, workout, equipmentFilter));
       if (coreCount > 0) {
         workout.push(...getRandomExercises(exerciseDB, 'Core', coreCount, workout, equipmentFilter));
       }
@@ -171,15 +243,19 @@ const generatePPLExercises = (allExercises, type, equipmentFilter = 'all') => {
 
     case 'full': {
       // Full body: Balanced selection across all major muscle groups
-      const hamFullCount = Math.floor(Math.random() * 2) + 1; // 1-2 exercises
-      const coreFullCount = EXERCISES_PER_WORKOUT - 2 - 2 - 2 - hamFullCount;
-
-      workout.push(...getRandomExercises(exerciseDB, 'Chest', 2, workout, equipmentFilter));
-      workout.push(...getRandomExercises(exerciseDB, 'Lats', 2, workout, equipmentFilter));
-      workout.push(...getRandomExercises(exerciseDB, 'Quads', 2, workout, equipmentFilter));
-      workout.push(...getRandomExercises(exerciseDB, 'Hamstrings', hamFullCount, workout, equipmentFilter));
-      if (coreFullCount > 0) {
-        workout.push(...getRandomExercises(exerciseDB, 'Core', coreFullCount, workout, equipmentFilter));
+      // Per guide: Full body 3x/week = 6-9 sets per muscle per session
+      // With 2 exercises per major muscle group × 3-4 sets = 6-8 sets
+      const targetPerMuscle = Math.floor(targetCount / 4); // Divide among 4 major groups
+      const remainder = targetCount - (targetPerMuscle * 4);
+      
+      workout.push(...getRandomExercises(exerciseDB, 'Chest', targetPerMuscle, workout, equipmentFilter));
+      workout.push(...getRandomExercises(exerciseDB, 'Lats', targetPerMuscle, workout, equipmentFilter));
+      workout.push(...getRandomExercises(exerciseDB, 'Quads', targetPerMuscle, workout, equipmentFilter));
+      workout.push(...getRandomExercises(exerciseDB, 'Hamstrings', targetPerMuscle, workout, equipmentFilter));
+      
+      // Distribute remainder to core or other muscles
+      if (remainder > 0) {
+        workout.push(...getRandomExercises(exerciseDB, 'Core', remainder, workout, equipmentFilter));
       }
       break;
     }
@@ -189,21 +265,24 @@ const generatePPLExercises = (allExercises, type, equipmentFilter = 'all') => {
       break;
   }
 
-  // Fill remaining slots if needed (safety measure)
-  while (workout.length < EXERCISES_PER_WORKOUT && workout.length > 0) {
+  // Adjust to target count (trim if over, fill if under)
+  if (workout.length > targetCount) {
+    workout = workout.slice(0, targetCount);
+  } else if (workout.length < targetCount) {
+    // Fill remaining slots with varied exercises
     const allMuscles = Object.keys(exerciseDB);
-    if (allMuscles.length === 0) break;
-
-    const randomMuscle = allMuscles[Math.floor(Math.random() * allMuscles.length)];
-    const filler = getRandomExercises(exerciseDB, randomMuscle, 1, workout, equipmentFilter);
-    if (filler.length > 0) {
-      workout.push(filler[0]);
-    } else {
-      break; // No more exercises available
+    while (workout.length < targetCount && allMuscles.length > 0) {
+      const randomMuscle = allMuscles[Math.floor(Math.random() * allMuscles.length)];
+      const filler = getRandomExercises(exerciseDB, randomMuscle, 1, workout, equipmentFilter);
+      if (filler.length > 0) {
+        workout.push(filler[0]);
+      } else {
+        break; // No more exercises available
+      }
     }
   }
 
-  return workout.slice(0, EXERCISES_PER_WORKOUT);
+  return workout;
 };
 
 /**
@@ -211,15 +290,16 @@ const generatePPLExercises = (allExercises, type, equipmentFilter = 'all') => {
  * @param {Array} allExercises - Complete exercise database
  * @param {string} type - Workout type: 'upper', 'lower', 'full', 'push', 'pull', 'legs'
  * @param {string|Array} equipmentFilter - Equipment filter(s) to apply
+ * @param {string} experienceLevel - User experience level: 'beginner', 'intermediate', 'advanced'
  * @returns {Array} Complete workout plan with exercises ordered for supersets
  */
-export const generateStandardWorkout = (allExercises, type, equipmentFilter = 'all') => {
+export const generateStandardWorkout = (allExercises, type, equipmentFilter = 'all', experienceLevel = 'intermediate') => {
   if (!allExercises || allExercises.length === 0) {
     console.error("Exercise database is empty. Cannot generate workout.");
     return [];
   }
 
-  const exerciseList = generatePPLExercises(allExercises, type, equipmentFilter);
+  const exerciseList = generatePPLExercises(allExercises, type, equipmentFilter, experienceLevel);
   const pairedList = pairExercises(exerciseList);
 
   return pairedList;

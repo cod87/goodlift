@@ -69,7 +69,7 @@ const theme = createTheme({
 });
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState('progress');
+  const [currentScreen, setCurrentScreen] = useState('selection');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState([]);
   const [workoutType, setWorkoutType] = useState('full');

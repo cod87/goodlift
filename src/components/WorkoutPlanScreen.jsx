@@ -48,6 +48,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   const [plans, setPlans] = useState([]);
   const [activePlan, setActivePlanState] = useState(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [planForm, setPlanForm] = useState({
     name: '',
     goal: 'general_fitness',
@@ -112,7 +113,8 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
 
   const handleGeneratePlan = async () => {
     try {
-      const plan = generateWorkoutPlan({
+      setIsGenerating(true);
+      const plan = await generateWorkoutPlan({
         ...planForm,
         planName: planForm.name || 'My Workout Plan',
         startDate: new Date(),
@@ -125,6 +127,8 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
     } catch (error) {
       console.error('Error generating plan:', error);
       alert('Failed to generate plan. Please try again.');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -412,14 +416,14 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCloseDialog} disabled={isGenerating}>Cancel</Button>
           <Button 
             onClick={handleGeneratePlan} 
             variant="contained" 
             color="primary"
-            disabled={!planForm.name || planForm.sessionTypes.length === 0}
+            disabled={!planForm.name || planForm.sessionTypes.length === 0 || isGenerating}
           >
-            Generate Plan
+            {isGenerating ? 'Generating...' : 'Generate Plan'}
           </Button>
         </DialogActions>
       </Dialog>

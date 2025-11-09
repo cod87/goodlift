@@ -9,9 +9,82 @@
  * - Frequency: 2x minimum per muscle group per week
  * - Periodization with deload weeks every 3-4 weeks
  * - Rep ranges: 6-12 for hypertrophy, 1-6 for strength
+ * 
+ * SESSION DATA MODEL:
+ * All sessions have these base fields:
+ * - id: string - Unique session identifier
+ * - date: number - Timestamp of the session date
+ * - type: string - Session type (upper, lower, full, push, pull, legs, hiit, yoga, cardio)
+ * - status: string - Session status (planned, in_progress, completed, skipped)
+ * - notes: string - User notes
+ * - completedAt: number|null - Timestamp when completed
+ * 
+ * Standard workout sessions (upper, lower, full, push, pull, legs):
+ * - exercises: Array<Object> - Array of exercise objects with sets, reps, etc.
+ * - sessionData: null
+ * 
+ * HIIT sessions:
+ * - exercises: null
+ * - sessionData: Object - Generated HIIT session with warmup, mainWorkout, cooldown
+ *   - protocol: Object - HIIT protocol configuration
+ *   - warmup: Object - Warmup exercises and duration
+ *   - mainWorkout: Object - Main workout with exercises array, rounds, work/rest intervals
+ *   - cooldown: Object - Cooldown exercises and duration
+ *   - totalDuration: number - Total session duration in seconds
+ * 
+ * Yoga sessions:
+ * - exercises: null
+ * - sessionData: Object - Generated yoga session with pose sequences
+ *   - opening: Object - Opening meditation/breathing
+ *   - warmup: Object - Warmup poses
+ *   - mainPractice: Object - Main practice sequences with poses array
+ *   - cooldown: Object - Cooldown/savasana
+ *   - totalDuration: number - Total session duration in seconds
  */
 
 import { MUSCLE_GROUPS } from './constants.js';
+
+/**
+ * Validate a session object has required fields based on its type
+ * @param {Object} session - Session object to validate
+ * @returns {Object} Validation result with isValid and errors array
+ */
+export const validateSession = (session) => {
+  const errors = [];
+  
+  if (!session.id) errors.push('Session missing id');
+  if (!session.date) errors.push('Session missing date');
+  if (!session.type) errors.push('Session missing type');
+  if (!session.status) errors.push('Session missing status');
+  
+  // Validate type-specific required data
+  const isStandardWorkout = ['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(session.type);
+  const isHiit = session.type === 'hiit';
+  const isYoga = session.type === 'yoga' || session.type === 'stretch';
+  
+  if (isStandardWorkout) {
+    if (!session.exercises || !Array.isArray(session.exercises) || session.exercises.length === 0) {
+      errors.push(`Standard workout session (${session.type}) missing exercises array`);
+    }
+  } else if (isHiit) {
+    if (!session.sessionData) {
+      errors.push('HIIT session missing sessionData');
+    } else if (!session.sessionData.mainWorkout || !session.sessionData.mainWorkout.exercises) {
+      errors.push('HIIT session missing mainWorkout exercises');
+    }
+  } else if (isYoga) {
+    if (!session.sessionData) {
+      errors.push('Yoga session missing sessionData');
+    } else if (!session.sessionData.mainPractice || !session.sessionData.mainPractice.sequences) {
+      errors.push('Yoga session missing mainPractice sequences');
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
 
 /**
  * Generate a workout plan based on user preferences
@@ -72,6 +145,20 @@ export const generateWorkoutPlan = async (preferences) => {
     })
   );
 
+  // Validate sessions were properly populated
+  const validationErrors = [];
+  populatedSessions.forEach((session, index) => {
+    const validation = validateSession(session);
+    if (!validation.isValid) {
+      validationErrors.push(`Session ${index + 1} (${session.type}): ${validation.errors.join(', ')}`);
+    }
+  });
+
+  if (validationErrors.length > 0) {
+    console.warn('Some sessions failed validation:', validationErrors);
+    // Log warnings but don't fail - allow users to regenerate specific sessions later
+  }
+
   // Create plan object
   const plan = {
     id: generatePlanId(),
@@ -94,7 +181,8 @@ export const generateWorkoutPlan = async (preferences) => {
     },
     created: Date.now(),
     modified: Date.now(),
-    active: true
+    active: true,
+    validationWarnings: validationErrors.length > 0 ? validationErrors : null
   };
 
   return plan;

@@ -97,17 +97,43 @@ const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
   const handleStartSession = async () => {
     if (!selectedSession || !plan) return;
     
+    // Validate session has required data before starting
+    const sessionType = selectedSession.type;
+    const isStandardWorkout = ['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(sessionType);
+    const isHiit = sessionType === 'hiit';
+    const isYoga = sessionType === 'yoga' || sessionType === 'stretch';
+    
+    // Check if session data is available for sessions that require it
+    if (isStandardWorkout && (!selectedSession.exercises || selectedSession.exercises.length === 0)) {
+      alert('This session does not have exercises populated. Please regenerate the plan or select a different session.');
+      return;
+    }
+    
+    if (isHiit && !selectedSession.sessionData) {
+      // Allow fallback to HIIT timer, but warn user
+      if (!window.confirm('This session does not have pre-generated data. Would you like to use the HIIT timer instead?')) {
+        return;
+      }
+    }
+    
+    if (isYoga && !selectedSession.sessionData) {
+      // Allow fallback to mobility screen, but warn user
+      if (!window.confirm('This session does not have pre-generated data. Would you like to use the mobility screen instead?')) {
+        return;
+      }
+    }
+    
     // Update session status to in_progress
     const updatedPlan = updateSessionStatus(plan, selectedSession.id, 'in_progress');
     await saveWorkoutPlan(updatedPlan);
     
     // Navigate to appropriate workout screen based on session type
-    if (['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(selectedSession.type)) {
+    if (isStandardWorkout) {
       // Navigate to standard workout
       if (onStartWorkout) {
         onStartWorkout(selectedSession.type, new Set(['all']));
       }
-    } else if (selectedSession.type === 'hiit') {
+    } else if (isHiit) {
       // Store session data and navigate to HIIT session screen
       if (selectedSession.sessionData) {
         localStorage.setItem('currentHiitSession', JSON.stringify(selectedSession.sessionData));
@@ -120,11 +146,11 @@ const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
           onNavigate('hiit');
         }
       }
-    } else if (selectedSession.type === 'cardio') {
+    } else if (sessionType === 'cardio') {
       if (onNavigate) {
         onNavigate('cardio');
       }
-    } else if (selectedSession.type === 'yoga' || selectedSession.type === 'stretch') {
+    } else if (isYoga) {
       // Store session data and navigate to Yoga session screen
       if (selectedSession.sessionData) {
         localStorage.setItem('currentYogaSession', JSON.stringify(selectedSession.sessionData));

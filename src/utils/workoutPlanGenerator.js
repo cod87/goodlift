@@ -26,7 +26,7 @@ import { MUSCLE_GROUPS } from './constants';
  * @param {Array<number>} preferences.preferredDays - Preferred training days (0-6, where 0 is Sunday)
  * @returns {Object} Generated workout plan
  */
-export const generateWorkoutPlan = (preferences) => {
+export const generateWorkoutPlan = async (preferences) => {
   const {
     goal = 'general_fitness',
     experienceLevel = 'intermediate',
@@ -63,6 +63,14 @@ export const generateWorkoutPlan = (preferences) => {
 
   // Calculate deload weeks (every 3-4 weeks per guide recommendations)
   const deloadWeeks = calculateDeloadWeeks(duration);
+  
+  // Populate session data for all sessions
+  const populatedSessions = await Promise.all(
+    sessions.map((session, index) => {
+      const weekNumber = Math.floor(index / daysPerWeek) + 1;
+      return populateSessionData(session, experienceLevel, weekNumber, equipmentAvailable);
+    })
+  );
 
   // Create plan object
   const plan = {
@@ -77,7 +85,7 @@ export const generateWorkoutPlan = (preferences) => {
     splitType,
     sessionTypes,
     equipmentAvailable,
-    sessions,
+    sessions: populatedSessions,
     deloadWeeks, // Track which weeks are deload weeks
     periodization: {
       type: duration >= 56 ? 'undulating' : 'linear', // Undulating for 8+ weeks
@@ -851,19 +859,67 @@ export const applyYogaProgression = (weekNumber, baseSession) => {
 };
 
 /**
- * Populate session data for planned HIIT and Yoga sessions
+ * Populate session data for all session types
  * Generates full session objects so users don't need to re-generate on start
  * 
  * @param {Object} session - Session object from plan
  * @param {string} experienceLevel - User's experience level
  * @param {number} weekNumber - Week number in the plan for progressive overload
+ * @param {Array<string>} equipmentAvailable - Equipment available for workouts
  * @returns {Object} Session with populated data
  */
-export const populateSessionData = async (session, experienceLevel, weekNumber) => {
+export const populateSessionData = async (session, experienceLevel, weekNumber, equipmentAvailable = ['all']) => {
   // For standard workouts (upper, lower, full, push, pull, legs), 
-  // exercises will be generated when the workout is started using existing logic
+  // generate exercises using the workout generator
   if (['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(session.type)) {
-    return session; // No pre-generation needed
+    try {
+      const { generateStandardWorkout } = await import('./workoutGenerator.js');
+      
+      // Load exercises from public data
+      const exercisesResponse = await fetch(`${import.meta.env.BASE_URL}data/exercises.json`);
+      const exercises = exercisesResponse.ok ? await exercisesResponse.json() : [];
+      
+      // Filter exercises based on workout type requirements
+      let filteredExercises = exercises;
+      
+      // Filter by workout type field from CSV
+      if (session.type === 'upper') {
+        filteredExercises = exercises.filter(ex => 
+          ex['Workout Type'] && 
+          (ex['Workout Type'].includes('Upper Body') || 
+           ex['Workout Type'].includes('Full Body') ||
+           ex['Workout Type'].includes('Push/Pull/Legs'))
+        );
+      } else if (session.type === 'lower') {
+        filteredExercises = exercises.filter(ex => 
+          ex['Workout Type'] && 
+          (ex['Workout Type'].includes('Lower Body') || 
+           ex['Workout Type'].includes('Full Body') ||
+           ex['Workout Type'].includes('Push/Pull/Legs'))
+        );
+      } else if (session.type === 'full') {
+        filteredExercises = exercises.filter(ex => 
+          ex['Workout Type'] && ex['Workout Type'].includes('Full Body')
+        );
+      } else if (['push', 'pull', 'legs'].includes(session.type)) {
+        filteredExercises = exercises.filter(ex => 
+          ex['Workout Type'] && ex['Workout Type'].includes('Push/Pull/Legs')
+        );
+      }
+      
+      // Generate workout with equipment filter
+      const equipmentFilter = equipmentAvailable.includes('all') ? 'all' : equipmentAvailable;
+      const workoutExercises = generateStandardWorkout(filteredExercises, session.type, equipmentFilter);
+      
+      return {
+        ...session,
+        exercises: workoutExercises,
+        sessionData: null
+      };
+    } catch (error) {
+      console.error('Error generating standard workout session:', error);
+      return session;
+    }
   }
 
   // Generate HIIT session data

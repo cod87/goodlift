@@ -57,6 +57,11 @@ export const validateSession = (session) => {
   if (!session.type) errors.push('Session missing type');
   if (!session.status) errors.push('Session missing status');
   
+  // Check for population errors
+  if (session.populationError) {
+    errors.push(session.populationError);
+  }
+  
   // Validate type-specific required data
   const isStandardWorkout = ['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(session.type);
   const isHiit = session.type === 'hiit';
@@ -950,11 +955,15 @@ export const applyYogaProgression = (weekNumber, baseSession) => {
  * Populate session data for all session types
  * Generates full session objects so users don't need to re-generate on start
  * 
+ * IMPORTANT: This function is async and must be awaited. It uses fetch and dynamic imports
+ * which may fail if exercises data is unavailable. On error, it returns the original session
+ * with a warning flag so validation can catch it.
+ * 
  * @param {Object} session - Session object from plan
  * @param {string} experienceLevel - User's experience level
  * @param {number} weekNumber - Week number in the plan for progressive overload
  * @param {Array<string>} equipmentAvailable - Equipment available for workouts
- * @returns {Object} Session with populated data
+ * @returns {Promise<Object>} Session with populated data, or original session with error flag on failure
  */
 export const populateSessionData = async (session, experienceLevel, weekNumber, equipmentAvailable = ['all']) => {
   // For standard workouts (upper, lower, full, push, pull, legs), 
@@ -1006,7 +1015,10 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
       };
     } catch (error) {
       console.error('Error generating standard workout session:', error);
-      return session;
+      return {
+        ...session,
+        populationError: `Failed to generate exercises: ${error.message}`
+      };
     }
   }
 
@@ -1045,7 +1057,10 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
       };
     } catch (error) {
       console.error('Error generating HIIT session:', error);
-      return session;
+      return {
+        ...session,
+        populationError: `Failed to generate HIIT session: ${error.message}`
+      };
     }
   }
 
@@ -1082,9 +1097,13 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
       };
     } catch (error) {
       console.error('Error generating Yoga session:', error);
-      return session;
+      return {
+        ...session,
+        populationError: `Failed to generate Yoga session: ${error.message}`
+      };
     }
   }
 
+  // Return session as-is for other types (cardio, etc.)
   return session;
 };

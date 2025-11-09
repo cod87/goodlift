@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaDumbbell, FaHome, FaSignOutAlt, FaTimes, FaBars, FaRunning } from 'react-icons/fa';
+import { FaDumbbell, FaSignOutAlt, FaTimes, FaBars, FaRunning } from 'react-icons/fa';
 import { MdSelfImprovement } from 'react-icons/md';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import GuestLogoutDialog from './GuestLogoutDialog';
@@ -151,7 +152,7 @@ const NavigationSidebar = ({
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => handleNavClick('progress')}
+                onClick={() => handleNavClick('selection')}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -163,7 +164,7 @@ const NavigationSidebar = ({
                   padding: 0,
                   width: '100%',
                 }}
-                aria-label="Go to Progress screen"
+                aria-label="Go to Workouts screen"
               >
                 <img
                   src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
@@ -207,16 +208,16 @@ const NavigationSidebar = ({
               overflowX: 'hidden',
             }}>
               <NavLink
-                icon={<FaHome />}
-                label="Home"
-                isActive={currentScreen === 'progress'}
-                onClick={() => handleNavClick('progress')}
-              />
-              <NavLink
                 icon={<FaDumbbell />}
-                label="Workout"
+                label="Workouts"
                 isActive={currentScreen === 'selection' || currentScreen === 'preview'}
                 onClick={() => handleNavClick('selection')}
+              />
+              <NavLink
+                icon={<TrendingUpIcon />}
+                label="Progress"
+                isActive={currentScreen === 'progress'}
+                onClick={() => handleNavClick('progress')}
               />
               <NavLink
                 icon={<CalendarMonthIcon />}

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Box, Card, CardContent, Typography, Button, Stack, Grid } from '@mui/material';
 import { Whatshot, FitnessCenter, DirectionsRun, SelfImprovement } from '@mui/icons-material';
 import PropTypes from 'prop-types';
+import CompactHeader from '../components/Common/CompactHeader';
 
 const CardioScreen = ({ onNavigate }) => {
   const handleHiitClick = () => {
@@ -29,33 +30,19 @@ const CardioScreen = ({ onNavigate }) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{ 
-        maxWidth: '900px', 
-        margin: '0 auto', 
-        padding: '2rem 1rem' 
-      }}
-    >
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h3" sx={{ 
-          fontWeight: 700, 
-          color: 'primary.main',
-          mb: 1
-        }}>
-          Cardio & Conditioning
-        </Typography>
-        <Typography variant="body1" sx={{ 
-          color: 'text.secondary',
-          maxWidth: '600px',
-          margin: '0 auto'
-        }}>
-          Science-backed HIIT, Yoga, and cardio activities
-        </Typography>
-      </Box>
-
+    <Box sx={{ width: '100%', minHeight: '100vh' }}>
+      <CompactHeader title="Cardio & Conditioning" icon="🏃" />
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        style={{ 
+          maxWidth: '900px', 
+          margin: '0 auto', 
+          padding: '1rem' 
+        }}
+      >
       <Grid container spacing={3}>
         {/* HIIT Session Builder Card */}
         <Grid item xs={12} md={6}>
@@ -295,6 +282,7 @@ const CardioScreen = ({ onNavigate }) => {
         </Grid>
       </Grid>
     </motion.div>
+    </Box>
   );
 };
 

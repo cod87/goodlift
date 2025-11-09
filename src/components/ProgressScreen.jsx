@@ -32,6 +32,7 @@ import Calendar from './Calendar';
 import StatsRow from './Progress/StatsRow';
 import ChartTabs from './Progress/ChartTabs';
 import ActivitiesList from './Progress/ActivitiesList';
+import CompactHeader from './Common/CompactHeader';
 import { 
   Box, 
   Card, 
@@ -438,13 +439,16 @@ const ProgressScreen = () => {
   );
 
   return (
-    <motion.div
-      className="screen progress-screen"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}
-    >
+    <Box sx={{ width: '100%', minHeight: '100vh' }}>
+      <CompactHeader title="Progress" icon="📊" />
+      
+      <motion.div
+        className="screen progress-screen"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}
+      >
       {/* Time Filter Controls */}
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
         <ToggleButtonGroup
@@ -1420,6 +1424,7 @@ const ProgressScreen = () => {
         />
       )}
     </motion.div>
+    </Box>
   );
 };
 

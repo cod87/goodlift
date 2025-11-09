@@ -6,6 +6,7 @@ import { ExpandMore, Delete, Star, Edit } from '@mui/icons-material';
 import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName, getWorkoutHistory } from '../utils/storage';
 import QuickStartCard from './Home/QuickStartCard';
 import WeeklyPlanPreview from './Home/WeeklyPlanPreview';
+import CompactHeader from './Common/CompactHeader';
 import { useWeeklyPlan } from '../hooks/useWeeklyPlan';
 
 /**
@@ -191,22 +192,25 @@ const SelectionScreen = memo(({
   };
 
   return (
-    <motion.div
-      className="screen selection-screen"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 'calc(100vh - 4rem)',
-        padding: '1rem',
-        paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))',
-        overflow: 'auto',
-      }}
-    >
+    <Box sx={{ width: '100%', minHeight: '100vh' }}>
+      <CompactHeader title="Workouts" icon="⚡" />
+      
+      <motion.div
+        className="screen selection-screen"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: 'calc(100vh - 4rem)',
+          padding: '1rem',
+          paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))',
+          overflow: 'auto',
+        }}
+      >
       {loading ? (
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="h5" sx={{ mb: 2 }}>
@@ -554,6 +558,7 @@ const SelectionScreen = memo(({
         </DialogActions>
       </Dialog>
     </motion.div>
+    </Box>
   );
 });
 

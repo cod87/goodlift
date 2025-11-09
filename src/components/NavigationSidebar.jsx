@@ -5,6 +5,8 @@ import { FaDumbbell, FaHome, FaSignOutAlt, FaTimes, FaBars, FaRunning } from 're
 import { MdSelfImprovement } from 'react-icons/md';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import { Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
@@ -217,6 +219,12 @@ const NavigationSidebar = ({
                 onClick={() => handleNavClick('selection')}
               />
               <NavLink
+                icon={<CalendarMonthIcon />}
+                label="Workout Plans"
+                isActive={currentScreen === 'plans' || currentScreen === 'plan-calendar'}
+                onClick={() => handleNavClick('plans')}
+              />
+              <NavLink
                 icon={<DirectionsRunIcon />}
                 label="Cardio"
                 isActive={currentScreen === 'cardio'}
@@ -229,7 +237,7 @@ const NavigationSidebar = ({
                 onClick={() => handleNavClick('mobility')}
               />
               <NavLink
-                icon={<EditCalendarIcon />}
+                icon={<AddCircleOutlineIcon />}
                 label="Log Activity"
                 isActive={currentScreen === 'log-activity'}
                 onClick={() => handleNavClick('log-activity')}

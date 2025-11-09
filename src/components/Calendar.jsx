@@ -238,7 +238,22 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
                           style={{ 
                             width: '40px', 
                             height: '40px',
-                            opacity: 0.8,
+                            opacity: (() => {
+                              // Check if any session on this date is completed
+                              const hasCompleted = sessionInfo.sessions.some(s => s.status === 'completed');
+                              const hasPlanned = sessionInfo.sessions.some(s => s.status === 'planned');
+                              // Show full opacity for completed, grey (0.5) for upcoming planned
+                              if (hasCompleted) return 0.8;
+                              if (hasPlanned) return 0.5;
+                              return 0.8; // Default for other statuses
+                            })(),
+                            filter: (() => {
+                              const hasCompleted = sessionInfo.sessions.some(s => s.status === 'completed');
+                              if (!hasCompleted && sessionInfo.sessions.some(s => s.status === 'planned')) {
+                                return 'grayscale(1)';
+                              }
+                              return 'none';
+                            })(),
                           }}
                         />
                       </Box>
@@ -319,9 +334,12 @@ Calendar.propTypes = {
       date: PropTypes.number.isRequired,
       type: PropTypes.string.isRequired,
       duration: PropTypes.number,
+      status: PropTypes.string,
     })
   ),
   onDayClick: PropTypes.func,
+  onDragOver: PropTypes.func,
+  onDrop: PropTypes.func,
 };
 
 export default Calendar;

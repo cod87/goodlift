@@ -15,6 +15,8 @@ import MobilityScreen from './components/Mobility/MobilityScreen';
 import CardioScreen from './pages/CardioScreen';
 import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
+import WorkoutPlanScreen from './components/WorkoutPlanScreen';
+import PlanCalendarScreen from './components/PlanCalendarScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
@@ -578,6 +580,15 @@ function App() {
           {(currentScreen === 'stretch' || currentScreen === 'yoga' || currentScreen === 'mobility') && <MobilityScreen />}
 
           {currentScreen === 'exercise-list' && <ExerciseListPage />}
+
+          {currentScreen === 'plans' && <WorkoutPlanScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'plan-calendar' && (
+            <PlanCalendarScreen 
+              onNavigate={handleNavigate}
+              onStartWorkout={handleStartWorkout}
+            />
+          )}
         </div>
         
         {/* Guest Data Migration Dialog */}

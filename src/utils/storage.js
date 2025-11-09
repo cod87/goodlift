@@ -30,6 +30,8 @@ const KEYS = {
   FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
   FAVORITE_EXERCISES: 'goodlift_favorite_exercises',
   PINNED_EXERCISES: 'goodlift_pinned_exercises',
+  WORKOUT_PLANS: 'goodlift_workout_plans',
+  ACTIVE_PLAN: 'goodlift_active_plan',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -1252,5 +1254,149 @@ export const updatePinnedExerciseMode = (exerciseName, trackingMode) => {
   } catch (error) {
     console.error('Error updating pinned exercise mode:', error);
     throw error;
+  }
+};
+
+/**
+ * Workout Plan Storage Functions
+ */
+
+/**
+ * Get all workout plans
+ * @returns {Promise<Array>} Array of workout plans
+ */
+export const getWorkoutPlans = async () => {
+  try {
+    if (isGuestMode()) {
+      const guestData = getGuestData('workout_plans');
+      return guestData || [];
+    }
+
+    const plans = localStorage.getItem(KEYS.WORKOUT_PLANS);
+    return plans ? JSON.parse(plans) : [];
+  } catch (error) {
+    console.error('Error reading workout plans:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a workout plan
+ * @param {Object} plan - Workout plan to save
+ * @returns {Promise<void>}
+ */
+export const saveWorkoutPlan = async (plan) => {
+  try {
+    const plans = await getWorkoutPlans();
+    const existingIndex = plans.findIndex(p => p.id === plan.id);
+    
+    if (existingIndex >= 0) {
+      plans[existingIndex] = plan;
+    } else {
+      plans.push(plan);
+    }
+
+    if (isGuestMode()) {
+      setGuestData('workout_plans', plans);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(plans));
+    }
+
+    // TODO: Add Firebase sync when available
+  } catch (error) {
+    console.error('Error saving workout plan:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a workout plan
+ * @param {string} planId - Plan ID to delete
+ * @returns {Promise<void>}
+ */
+export const deleteWorkoutPlan = async (planId) => {
+  try {
+    const plans = await getWorkoutPlans();
+    const filtered = plans.filter(p => p.id !== planId);
+    
+    if (isGuestMode()) {
+      setGuestData('workout_plans', filtered);
+    } else {
+      localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(filtered));
+    }
+
+    // If this was the active plan, clear it
+    const activePlan = await getActivePlan();
+    if (activePlan && activePlan.id === planId) {
+      await setActivePlan(null);
+    }
+  } catch (error) {
+    console.error('Error deleting workout plan:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get the active workout plan
+ * @returns {Promise<Object|null>} Active plan or null
+ */
+export const getActivePlan = async () => {
+  try {
+    if (isGuestMode()) {
+      const guestData = getGuestData('active_plan');
+      return guestData || null;
+    }
+
+    const activePlanId = localStorage.getItem(KEYS.ACTIVE_PLAN);
+    if (!activePlanId) return null;
+
+    const plans = await getWorkoutPlans();
+    return plans.find(p => p.id === activePlanId) || null;
+  } catch (error) {
+    console.error('Error reading active plan:', error);
+    return null;
+  }
+};
+
+/**
+ * Set the active workout plan
+ * @param {string|null} planId - Plan ID to set as active, or null to clear
+ * @returns {Promise<void>}
+ */
+export const setActivePlan = async (planId) => {
+  try {
+    if (isGuestMode()) {
+      if (planId) {
+        const plans = await getWorkoutPlans();
+        const plan = plans.find(p => p.id === planId);
+        setGuestData('active_plan', plan);
+      } else {
+        setGuestData('active_plan', null);
+      }
+    } else {
+      if (planId) {
+        localStorage.setItem(KEYS.ACTIVE_PLAN, planId);
+      } else {
+        localStorage.removeItem(KEYS.ACTIVE_PLAN);
+      }
+    }
+  } catch (error) {
+    console.error('Error setting active plan:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get a specific workout plan by ID
+ * @param {string} planId - Plan ID
+ * @returns {Promise<Object|null>} Plan or null if not found
+ */
+export const getWorkoutPlanById = async (planId) => {
+  try {
+    const plans = await getWorkoutPlans();
+    return plans.find(p => p.id === planId) || null;
+  } catch (error) {
+    console.error('Error getting workout plan:', error);
+    return null;
   }
 };

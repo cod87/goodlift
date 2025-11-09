@@ -10,6 +10,10 @@ import CustomWorkoutPreview from './components/CustomWorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import HiitTimerScreen from './components/HiitTimerScreen';
+import HiitSessionSelection from './components/HiitSessionSelection';
+import HiitSessionScreen from './components/HiitSessionScreen';
+import YogaSessionSelection from './components/YogaSessionSelection';
+import YogaSessionScreen from './components/YogaSessionScreen';
 import AuthScreen from './components/AuthScreen';
 import MobilityScreen from './components/Mobility/MobilityScreen';
 import CardioScreen from './pages/CardioScreen';
@@ -572,6 +576,14 @@ function App() {
           {currentScreen === 'progress' && <ProgressScreen />}
 
           {currentScreen === 'hiit' && <HiitTimerScreen />}
+
+          {currentScreen === 'hiit-selection' && <HiitSessionSelection onNavigate={handleNavigate} />}
+
+          {currentScreen === 'hiit-session' && <HiitSessionScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'yoga-selection' && <YogaSessionSelection onNavigate={handleNavigate} />}
+
+          {currentScreen === 'yoga-session' && <YogaSessionScreen onNavigate={handleNavigate} />}
 
           {currentScreen === 'cardio' && <CardioScreen onNavigate={handleNavigate} />}
 

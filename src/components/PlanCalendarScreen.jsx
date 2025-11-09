@@ -108,16 +108,34 @@ const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
         onStartWorkout(selectedSession.type, new Set(['all']));
       }
     } else if (selectedSession.type === 'hiit') {
-      if (onNavigate) {
-        onNavigate('hiit');
+      // Store session data and navigate to HIIT session screen
+      if (selectedSession.sessionData) {
+        localStorage.setItem('currentHiitSession', JSON.stringify(selectedSession.sessionData));
+        if (onNavigate) {
+          onNavigate('hiit-session');
+        }
+      } else {
+        // Fallback to HIIT timer if no session data
+        if (onNavigate) {
+          onNavigate('hiit');
+        }
       }
     } else if (selectedSession.type === 'cardio') {
       if (onNavigate) {
         onNavigate('cardio');
       }
     } else if (selectedSession.type === 'yoga' || selectedSession.type === 'stretch') {
-      if (onNavigate) {
-        onNavigate('yoga');
+      // Store session data and navigate to Yoga session screen
+      if (selectedSession.sessionData) {
+        localStorage.setItem('currentYogaSession', JSON.stringify(selectedSession.sessionData));
+        if (onNavigate) {
+          onNavigate('yoga-session');
+        }
+      } else {
+        // Fallback to mobility screen if no session data
+        if (onNavigate) {
+          onNavigate('mobility');
+        }
       }
     }
     

@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { useQuery } from '@tanstack/react-query';
 import {
   Box,
@@ -34,8 +34,7 @@ import {
   BREATHING_TECHNIQUES
 } from '../utils/yogaSessionGenerator';
 
-const YogaSessionSelection = () => {
-  const navigate = useNavigate();
+const YogaSessionSelection = ({ onNavigate }) => {
   
   // State for session configuration
   const [mode, setMode] = useState('power');
@@ -64,13 +63,15 @@ const YogaSessionSelection = () => {
     });
     
     // Navigate to session execution screen with the generated session
-    navigate('/yoga-session', { state: { session } });
+    // Store session in localStorage for now
+    localStorage.setItem('currentYogaSession', JSON.stringify(session));
+    onNavigate('yoga-session');
   };
   
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress />
+        <CircularProgress color="secondary" size={60} />
       </Box>
     );
   }
@@ -307,6 +308,10 @@ const YogaSessionSelection = () => {
       </Box>
     </motion.div>
   );
+};
+
+YogaSessionSelection.propTypes = {
+  onNavigate: PropTypes.func.isRequired,
 };
 
 export default YogaSessionSelection;

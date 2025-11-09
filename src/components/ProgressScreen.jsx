@@ -19,7 +19,8 @@ import {
   getPinnedExercises,
   updatePinnedExerciseMode,
   removePinnedExercise,
-  addPinnedExercise
+  addPinnedExercise,
+  getActivePlan
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import { 
@@ -100,6 +101,7 @@ const ProgressScreen = () => {
   const [yogaSessions, setYogaSessions] = useState([]);
   const [hiitSessions, setHiitSessions] = useState([]);
   const [cardioSessions, setCardioSessions] = useState([]);
+  const [activePlan, setActivePlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [pinnedExercises, setPinnedExercisesState] = useState([]);
@@ -114,18 +116,20 @@ const ProgressScreen = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedHistory, loadedStretches, loadedYoga, loadedHiit, loadedCardio] = await Promise.all([
+      const [loadedHistory, loadedStretches, loadedYoga, loadedHiit, loadedCardio, loadedActivePlan] = await Promise.all([
         getWorkoutHistory(),
         getStretchSessions(),
         getYogaSessions(),
         getHiitSessions(),
-        getCardioSessions()
+        getCardioSessions(),
+        getActivePlan()
       ]);
       setHistory(loadedHistory);
       setStretchSessions(loadedStretches);
       setYogaSessions(loadedYoga);
       setHiitSessions(loadedHiit);
       setCardioSessions(loadedCardio);
+      setActivePlan(loadedActivePlan);
       
       // Load pinned exercises
       const pinned = getPinnedExercises();
@@ -323,38 +327,60 @@ const ProgressScreen = () => {
 
   if (loading) {
     return (
-      <div className="screen progress-screen">
-        <p>Loading...</p>
+      <div className="screen progress-screen" style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '400px' 
+      }}>
+        <img 
+          src={`${import.meta.env.BASE_URL}dancing-icon.svg`} 
+          alt="Loading..." 
+          style={{ width: '150px', height: '150px' }}
+        />
       </div>
     );
   }
 
   // Extract workout dates for calendar - include all session types with their types
+  // Also include planned sessions from the active plan
   const workoutSessions = [
     ...history.map(workout => ({ 
       date: workout.date, 
       type: workout.type || 'full', // Use workout.type (upper/lower/full) or default to full
-      duration: workout.duration || 0
+      duration: workout.duration || 0,
+      status: 'completed'
     })),
     ...hiitSessions.map(session => ({ 
       date: session.date, 
       type: 'hiit',
-      duration: session.duration || 0
+      duration: session.duration || 0,
+      status: 'completed'
     })),
     ...cardioSessions.map(session => ({ 
       date: session.date, 
       type: 'cardio',
-      duration: session.duration || 0
+      duration: session.duration || 0,
+      status: 'completed'
     })),
     ...stretchSessions.map(session => ({ 
       date: session.date, 
       type: 'stretch',
-      duration: session.duration || 0
+      duration: session.duration || 0,
+      status: 'completed'
     })),
     ...yogaSessions.map(session => ({ 
       date: session.date, 
       type: 'yoga',
-      duration: session.duration || 0
+      duration: session.duration || 0,
+      status: 'completed'
+    })),
+    // Add planned sessions from active plan
+    ...(activePlan?.sessions || []).map(session => ({
+      date: session.date,
+      type: session.type,
+      duration: session.duration || 60,
+      status: session.status || 'planned'
     }))
   ];
 

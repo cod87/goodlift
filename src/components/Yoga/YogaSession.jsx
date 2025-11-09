@@ -220,8 +220,19 @@ const YogaSession = ({ config, onComplete, onExit }) => {
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography>Loading yoga session...</Typography>
+      <Box sx={{ 
+        p: 4, 
+        textAlign: 'center',
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        minHeight: '400px'
+      }}>
+        <img 
+          src={`${import.meta.env.BASE_URL}dancing-icon.svg`} 
+          alt="Loading yoga session..." 
+          style={{ width: '150px', height: '150px' }}
+        />
       </Box>
     );
   }

@@ -143,10 +143,41 @@ export const generateWorkoutPlan = async (preferences) => {
   const deloadWeeks = calculateDeloadWeeks(duration);
   
   // Populate session data for all sessions
+  // IMPORTANT: For progressive overload to work, we reuse the same exercises week-to-week
+  // until a deload week, then we can optionally vary them for the next block
+  const exerciseCache = {}; // Cache exercises by session type and week block
+  
   const populatedSessions = await Promise.all(
-    sessions.map((session, index) => {
+    sessions.map(async (session, index) => {
       const weekNumber = Math.floor(index / daysPerWeek) + 1;
-      return populateSessionData(session, experienceLevel, weekNumber, equipmentAvailable);
+      const isDeloadWeek = deloadWeeks.includes(weekNumber);
+      
+      // Determine which training block we're in (changes after each deload)
+      const blockNumber = deloadWeeks.filter(w => w < weekNumber).length + 1;
+      
+      // Create a cache key based on session type and training block
+      // This ensures same exercises are used within a block
+      const cacheKey = `${session.type}_block${blockNumber}`;
+      
+      // For the first session of this type in this block, generate new exercises
+      // For subsequent sessions, reuse the cached exercises
+      if (!exerciseCache[cacheKey]) {
+        const populated = await populateSessionData(session, experienceLevel, weekNumber, equipmentAvailable, isDeloadWeek);
+        exerciseCache[cacheKey] = populated.exercises || populated.sessionData;
+        return populated;
+      } else {
+        // Reuse exercises from the first week of this block
+        return {
+          ...session,
+          exercises: session.type !== 'hiit' && session.type !== 'yoga' && session.type !== 'stretch' 
+            ? exerciseCache[cacheKey] 
+            : null,
+          sessionData: session.type === 'hiit' || session.type === 'yoga' || session.type === 'stretch'
+            ? exerciseCache[cacheKey]
+            : null,
+          isDeloadWeek
+        };
+      }
     })
   );
 
@@ -965,7 +996,7 @@ export const applyYogaProgression = (weekNumber, baseSession) => {
  * @param {Array<string>} equipmentAvailable - Equipment available for workouts
  * @returns {Promise<Object>} Session with populated data, or original session with error flag on failure
  */
-export const populateSessionData = async (session, experienceLevel, weekNumber, equipmentAvailable = ['all']) => {
+export const populateSessionData = async (session, experienceLevel, weekNumber, equipmentAvailable = ['all'], isDeloadWeek = false) => {
   // For standard workouts (upper, lower, full, push, pull, legs), 
   // generate exercises using the workout generator
   if (['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(session.type)) {

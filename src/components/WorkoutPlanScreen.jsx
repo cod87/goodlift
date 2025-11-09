@@ -122,13 +122,16 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         equipmentAvailable: ['all']
       });
 
+      // Save the plan first
       await saveWorkoutPlan(plan);
       
       // Auto-activate if plan name is "This Week"
       if (plan.name === 'This Week') {
         await setActivePlan(plan.id);
+        console.log('Auto-activated "This Week" plan:', plan.id);
       }
       
+      // Reload plans to ensure UI is updated
       await loadPlans();
       handleCloseDialog();
     } catch (error) {

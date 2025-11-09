@@ -95,6 +95,44 @@ Successfully implemented comprehensive workout plan enhancements including auto-
 
 ---
 
+## Cloud Persistence & Cross-Device Sync
+
+**Date**: 2025-11-09
+
+### Firebase Integration for Workout Plans
+
+Workout plans now support cross-device persistence via Firebase Firestore for authenticated users:
+
+**Implementation Details**:
+- Plans are synced to Firebase when created, updated, or deleted for logged-in users
+- Active plan selection is also synced to Firebase
+- Guest mode users continue to use localStorage only
+- Logged-in users get Firebase-first, localStorage-fallback behavior
+
+**Storage Flow**:
+1. **Save Plan**: `saveWorkoutPlan()` → localStorage → Firebase (if authenticated)
+2. **Load Plans**: Firebase (if authenticated) → localStorage cache → return
+3. **Active Plan**: Synced separately as `activePlanId` in Firebase
+
+**Files Modified**:
+- `src/utils/firebaseStorage.js`: Added `saveWorkoutPlansToFirebase()` and `saveActivePlanToFirebase()`
+- `src/utils/storage.js`: Updated all plan functions to use Firebase sync
+- `src/components/WorkoutPlanScreen.jsx`: Enhanced "This Week" auto-activation
+
+**Benefits**:
+- ✅ Plans persist across devices for authenticated users
+- ✅ Active plan selection syncs across devices
+- ✅ Offline support via localStorage cache
+- ✅ Guest mode remains fully functional without auth
+- ✅ No breaking changes to existing code
+
+**Setup Required**:
+- Firebase project must be properly configured (already done in `firebase.js`)
+- User must be authenticated for cross-device sync
+- See `FIREBASE_SETUP.md` for Firebase configuration details
+
+---
+
 ## Security Summary
 
 **CodeQL Analysis**: 

@@ -4,13 +4,40 @@ This document outlines any remaining work, edge cases, and potential improvement
 
 ## Completed Features
 
-✅ **"This Week" Plan Auto-Activation**: Plans named "This Week" are automatically set as active upon creation and persist correctly.
+✅ **"This Week" Plan Auto-Activation**: Plans named "This Week" are automatically set as active upon creation and persist correctly across devices for logged-in users.
+
+✅ **Cross-Device Persistence**: Workout plans now sync to Firebase for authenticated users, ensuring plans are accessible across all devices.
 
 ✅ **Clickable Calendar Days**: Users can click on workout days in the calendar to view session details, change dates, or start workouts.
 
 ✅ **Start Workout from Calendar**: When starting a workout from the calendar, users navigate to WorkoutPreview with the full planned workout loaded and editable.
 
 ✅ **Flexible Exercise Supersets**: Workout generator now allows variable exercise counts (6-10 exercises) based on experience level, with intelligent superset grouping per WORKOUT-PLANNING-GUIDE.md.
+
+## Firebase Configuration Requirements
+
+### Cross-Device Sync Setup
+For workout plans to sync across devices, users must:
+1. **Be authenticated** - Sign in with Firebase Auth (email/password, Google, etc.)
+2. **Have Firebase configured** - Project must have valid Firebase config in `src/firebase.js`
+3. **Firestore rules** - Must allow authenticated users to read/write their own data
+
+### Current Implementation
+- **Authenticated users**: Plans sync to `users/{userId}/data/userData` in Firestore
+- **Guest users**: Plans stored in sessionStorage only (cleared on browser close)
+- **Offline support**: localStorage cache for offline access when authenticated
+
+### Data Structure
+Firebase document structure for workout plans:
+```javascript
+{
+  workoutPlans: Array<Plan>,
+  activePlanId: string | null,
+  // ... other user data
+}
+```
+
+See `FIREBASE_SETUP.md` for detailed Firebase configuration instructions.
 
 ## Known Limitations & Future Enhancements
 

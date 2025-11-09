@@ -154,6 +154,10 @@ const YogaSessionScreen = ({ onNavigate }) => {
   const handleSaveSession = async () => {
     if (!session) return;
 
+    // Get plan context from session storage if it exists
+    const planContextStr = sessionStorage.getItem('currentWorkoutPlanContext');
+    const planContext = planContextStr ? JSON.parse(planContextStr) : null;
+
     const completedSession = {
       type: session.type || 'yoga',
       date: Date.now(),
@@ -163,10 +167,16 @@ const YogaSessionScreen = ({ onNavigate }) => {
       perceivedExertion,
       notes: sessionNotes,
       completed: true,
-      metadata: session.metadata
+      metadata: session.metadata,
+      planId: planContext?.planId || null,
+      planDay: planContext?.planDay ?? null
     };
 
     await saveYogaSession(completedSession);
+    
+    // Clear plan context from session storage
+    sessionStorage.removeItem('currentWorkoutPlanContext');
+    
     setShowCompleteDialog(false);
     if (onNavigate) {
       onNavigate('progress');

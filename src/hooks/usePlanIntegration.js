@@ -54,8 +54,20 @@ export const usePlanIntegration = () => {
     if (!currentPlan) return null;
     
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+    today.setHours(0, 0, 0, 0);
     
+    // Handle plan with sessions (from workout plan generator)
+    if (currentPlan.sessions && Array.isArray(currentPlan.sessions)) {
+      const todaySession = currentPlan.sessions.find(s => {
+        const sessionDate = new Date(s.date);
+        sessionDate.setHours(0, 0, 0, 0);
+        return sessionDate.getTime() === today.getTime();
+      });
+      return todaySession || null;
+    }
+    
+    // Handle plan with days (from weekly plan)
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
     return currentPlan.days?.[dayOfWeek] || null;
   }, [currentPlan]);
 
@@ -73,11 +85,37 @@ export const usePlanIntegration = () => {
    * @param {number} count - Number of workouts to return
    */
   const getUpcomingWorkouts = useCallback((count = 3) => {
-    if (!currentPlan || !currentPlan.days) return [];
+    if (!currentPlan) return [];
     
     const today = new Date();
-    const dayOfWeek = today.getDay();
+    today.setHours(0, 0, 0, 0);
     const upcoming = [];
+    
+    // Handle plan with sessions (from workout plan generator)
+    if (currentPlan.sessions && Array.isArray(currentPlan.sessions)) {
+      const futureSessions = currentPlan.sessions
+        .filter(s => {
+          const sessionDate = new Date(s.date);
+          sessionDate.setHours(0, 0, 0, 0);
+          return sessionDate > today && s.type !== 'rest';
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, count);
+      
+      return futureSessions.map(s => {
+        const sessionDate = new Date(s.date);
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        return {
+          ...s,
+          day: days[sessionDate.getDay()],
+        };
+      });
+    }
+    
+    // Handle plan with days (from weekly plan)
+    if (!currentPlan.days) return [];
+    
+    const dayOfWeek = today.getDay();
     
     for (let i = 1; i <= 7 && upcoming.length < count; i++) {
       const dayIndex = (dayOfWeek + i) % 7;

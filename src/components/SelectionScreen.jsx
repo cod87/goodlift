@@ -65,12 +65,60 @@ const SelectionScreen = memo(({
   const todaysWorkout = getTodaysWorkout();
   const nextWorkouts = getUpcomingWorkouts(2);
   
-  // Convert plan days to weekly plan format for WeeklyPlanPreview
-  const weeklyPlan = currentPlan?.days?.map((day, index) => ({
-    day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][index],
-    type: day.subtype || day.type,
-    label: day.subtype ? day.subtype.charAt(0).toUpperCase() + day.subtype.slice(1) : day.type,
-  })) || [];
+  // Convert plan to weekly plan format for WeeklyPlanPreview
+  // Handle both plan structures: days (from createWeeklyPlan) and sessions (from generateWorkoutPlan)
+  const weeklyPlan = (() => {
+    if (!currentPlan) return [];
+    
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date();
+    const result = [];
+    
+    // If plan has sessions (from workout plan generator), show next 7 days from today
+    if (currentPlan.sessions && Array.isArray(currentPlan.sessions)) {
+      for (let i = 0; i < 7; i++) {
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + i);
+        targetDate.setHours(0, 0, 0, 0);
+        
+        // Find session for this date
+        const session = currentPlan.sessions.find(s => {
+          const sessionDate = new Date(s.date);
+          sessionDate.setHours(0, 0, 0, 0);
+          return sessionDate.getTime() === targetDate.getTime();
+        });
+        
+        if (session) {
+          result.push({
+            day: days[targetDate.getDay()],
+            type: session.type,
+            focus: session.focus,
+            estimatedDuration: session.estimatedDuration,
+            label: session.type.charAt(0).toUpperCase() + session.type.slice(1),
+          });
+        } else {
+          // No session for this day - it's a rest day
+          result.push({
+            day: days[targetDate.getDay()],
+            type: 'rest',
+            label: 'Rest',
+          });
+        }
+      }
+    }
+    // If plan has days (from weekly plan), use that structure
+    else if (currentPlan.days && Array.isArray(currentPlan.days)) {
+      return currentPlan.days.map((day, index) => ({
+        day: days[index],
+        type: day.subtype || day.type,
+        focus: day.focus,
+        estimatedDuration: day.estimatedDuration,
+        label: day.subtype ? day.subtype.charAt(0).toUpperCase() + day.subtype.slice(1) : day.type,
+      }));
+    }
+    
+    return result;
+  })();
 
   const handleStartClick = () => {
     if (workoutType) {

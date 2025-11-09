@@ -5,7 +5,7 @@
  * with pose sequences, hold timers, and breathing instructions
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -65,25 +65,7 @@ const YogaSessionScreen = ({ onNavigate }) => {
     }
   }, []);
 
-  // Timer logic
-  useEffect(() => {
-    let interval = null;
-
-    if (isRunning && timeRemaining > 0) {
-      interval = setInterval(() => {
-        setTimeRemaining(prev => prev - 1);
-      }, 1000);
-    } else if (timeRemaining === 0 && isRunning) {
-      // Move to next phase/pose
-      handleNextPhase();
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isRunning, timeRemaining]);
-
-  const handleNextPhase = () => {
+  const handleNextPhase = useCallback(() => {
     if (!session) return;
 
     if (currentPhase === 'opening') {
@@ -144,7 +126,25 @@ const YogaSessionScreen = ({ onNavigate }) => {
         setShowCompleteDialog(true);
       }
     }
-  };
+  }, [session, currentPhase, currentPose, currentSequence]);
+
+  // Timer logic
+  useEffect(() => {
+    let interval = null;
+
+    if (isRunning && timeRemaining > 0) {
+      interval = setInterval(() => {
+        setTimeRemaining(prev => prev - 1);
+      }, 1000);
+    } else if (timeRemaining === 0 && isRunning) {
+      // Move to next phase/pose
+      handleNextPhase();
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning, timeRemaining, handleNextPhase]);
 
   const handlePlayPause = () => {
     setIsRunning(!isRunning);
@@ -261,14 +261,60 @@ const YogaSessionScreen = ({ onNavigate }) => {
   if (!session) {
     return (
       <Box sx={{ 
-        display: 'flex', 
+        display: 'flex',
+        flexDirection: 'column',
         justifyContent: 'center', 
         alignItems: 'center', 
-        minHeight: '50vh' 
+        minHeight: '50vh',
+        gap: 2,
+        p: 3
       }}>
         <Typography variant="h6" color="text.secondary">
-          No session loaded. Please generate a session first.
+          No session loaded
         </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+          Please select a yoga session from the calendar or generate a new session.
+        </Typography>
+        {onNavigate && (
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={() => onNavigate('yoga-selection')}
+          >
+            Generate Yoga Session
+          </Button>
+        )}
+      </Box>
+    );
+  }
+
+  // Validate session has required data
+  if (!session.mainPractice || !session.mainPractice.sequences || session.mainPractice.sequences.length === 0) {
+    return (
+      <Box sx={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '50vh',
+        gap: 2,
+        p: 3
+      }}>
+        <Typography variant="h6" color="error">
+          Invalid session data
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+          This session does not have poses. Please regenerate the session or select a different one.
+        </Typography>
+        {onNavigate && (
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={() => onNavigate('yoga-selection')}
+          >
+            Generate New Session
+          </Button>
+        )}
       </Box>
     );
   }

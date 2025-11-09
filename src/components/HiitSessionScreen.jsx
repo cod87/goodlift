@@ -5,7 +5,7 @@
  * with interval timer, exercise instructions, and progress tracking
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -62,25 +62,7 @@ const HiitSessionScreen = ({ onNavigate }) => {
     }
   }, []);
 
-  // Timer logic
-  useEffect(() => {
-    let interval = null;
-
-    if (isRunning && timeRemaining > 0) {
-      interval = setInterval(() => {
-        setTimeRemaining(prev => prev - 1);
-      }, 1000);
-    } else if (timeRemaining === 0 && isRunning) {
-      // Move to next phase/exercise
-      handleNextPhase();
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isRunning, timeRemaining]);
-
-  const handleNextPhase = () => {
+  const handleNextPhase = useCallback(() => {
     if (!session) return;
 
     if (currentPhase === 'warmup') {
@@ -127,7 +109,25 @@ const HiitSessionScreen = ({ onNavigate }) => {
       setIsRunning(false);
       setShowCompleteDialog(true);
     }
-  };
+  }, [session, currentPhase, isWorkInterval, currentExercise, currentRound]);
+
+  // Timer logic
+  useEffect(() => {
+    let interval = null;
+
+    if (isRunning && timeRemaining > 0) {
+      interval = setInterval(() => {
+        setTimeRemaining(prev => prev - 1);
+      }, 1000);
+    } else if (timeRemaining === 0 && isRunning) {
+      // Move to next phase/exercise
+      handleNextPhase();
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning, timeRemaining, handleNextPhase]);
 
   const handlePlayPause = () => {
     setIsRunning(!isRunning);
@@ -222,14 +222,60 @@ const HiitSessionScreen = ({ onNavigate }) => {
   if (!session) {
     return (
       <Box sx={{ 
-        display: 'flex', 
+        display: 'flex',
+        flexDirection: 'column',
         justifyContent: 'center', 
         alignItems: 'center', 
-        minHeight: '50vh' 
+        minHeight: '50vh',
+        gap: 2,
+        p: 3
       }}>
         <Typography variant="h6" color="text.secondary">
-          No session loaded. Please generate a session first.
+          No session loaded
         </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+          Please select a HIIT session from the calendar or generate a new session.
+        </Typography>
+        {onNavigate && (
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={() => onNavigate('hiit-selection')}
+          >
+            Generate HIIT Session
+          </Button>
+        )}
+      </Box>
+    );
+  }
+
+  // Validate session has required data
+  if (!session.mainWorkout || !session.mainWorkout.exercises || session.mainWorkout.exercises.length === 0) {
+    return (
+      <Box sx={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '50vh',
+        gap: 2,
+        p: 3
+      }}>
+        <Typography variant="h6" color="error">
+          Invalid session data
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+          This session does not have exercises. Please regenerate the session or select a different one.
+        </Typography>
+        {onNavigate && (
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={() => onNavigate('hiit-selection')}
+          >
+            Generate New Session
+          </Button>
+        )}
       </Box>
     );
   }

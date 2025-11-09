@@ -573,3 +573,278 @@ export const getPlanStatistics = (plan) => {
     completionRate: totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0
   };
 };
+
+/**
+ * Enhanced session pattern generator with HIIT and Yoga integration
+ * Based on .github/HIIT-YOGA-GUIDE.md Section 9 (Sample Integration Schedules)
+ * 
+ * Key principles from the guide:
+ * - HIIT sessions not on consecutive days (48+ hours recovery)
+ * - Balance sympathetic (HIIT/strength) with parasympathetic (restorative yoga)
+ * - Target 60/40 ratio of high-intensity to recovery sessions
+ * - Deload weeks every 3-4 weeks
+ * 
+ * @param {string} splitType - Workout split type
+ * @param {Array<string>} sessionTypes - Allowed session types
+ * @param {string} experienceLevel - User experience level
+ * @param {number} daysPerWeek - Training days per week
+ * @returns {Array<string>} Enhanced pattern with HIIT and Yoga
+ */
+export const generateEnhancedSessionPattern = (splitType, sessionTypes, experienceLevel, daysPerWeek) => {
+  const includeStandardWorkouts = sessionTypes.some(t => 
+    ['full', 'upper', 'lower', 'push', 'pull', 'legs'].includes(t)
+  );
+  const includeHiit = sessionTypes.includes('hiit');
+  const includeYoga = sessionTypes.includes('yoga') || sessionTypes.includes('stretch');
+  
+  let pattern = [];
+  
+  // Build base pattern following HIIT-YOGA-GUIDE.md Section 9 templates
+  if (experienceLevel === 'beginner' && daysPerWeek >= 3) {
+    // Beginner 7-Day Schedule (Guide Section 9.1)
+    if (includeStandardWorkouts && includeHiit && includeYoga) {
+      pattern = [
+        'upper',           // Mon: Upper Body Strength
+        'hiit',            // Tue: Beginner HIIT + Power Yoga
+        'lower',           // Wed: Lower Body Strength + HIIT finisher
+        'yoga_flex',       // Thu: Flexibility Yoga - Active Recovery
+        'full',            // Fri: Full Body Strength + HIIT
+        'hiit',            // Sat: HIIT + Restorative Yoga
+        'yoga_restorative' // Sun: Rest/Yin Yoga - Deep relaxation
+      ];
+    } else if (includeStandardWorkouts) {
+      pattern = ['full', 'full', 'full'];
+    }
+  } else if (experienceLevel === 'intermediate' && daysPerWeek >= 4) {
+    // Intermediate 7-Day Schedule (Guide Section 9.2)
+    if (includeStandardWorkouts && includeHiit && includeYoga) {
+      pattern = [
+        'upper',           // Mon: Upper + Intermediate HIIT
+        'hiit',            // Tue: Cycling HIIT + Core Yoga
+        'lower',           // Wed: Lower + Step HIIT
+        'yoga_power',      // Thu: Power Yoga - Moderate
+        'upper',           // Fri: Upper + Plyometric HIIT
+        'hiit',            // Sat: Rowing HIIT + Yin Yoga
+        'yoga_flex'        // Sun: Flexibility Yoga or Active Recovery
+      ];
+    } else if (splitType === 'upper_lower') {
+      pattern = ['upper', 'lower', 'upper', 'lower'];
+    } else {
+      pattern = ['full', 'full', 'full', 'full'];
+    }
+  } else if (experienceLevel === 'advanced' && daysPerWeek >= 5) {
+    // Advanced 7-Day Schedule (Guide Section 9.3)
+    if (includeStandardWorkouts && includeHiit && includeYoga) {
+      pattern = [
+        'upper',           // Mon: Upper + Advanced Tabata
+        'hiit',            // Tue: REHIT Cycling + Power Yoga
+        'lower',           // Wed: Lower + Advanced Plyometric
+        'hiit',            // Thu: Rowing/Elliptical HIIT
+        'upper',           // Fri: Upper + Step HIIT Advanced
+        'yoga_power',      // Sat: Power Yoga + Restorative (evening)
+        'yoga_yin'         // Sun: Yin Yoga or Active Recovery
+      ];
+    } else if (splitType === 'ppl') {
+      pattern = ['push', 'pull', 'legs', 'push', 'pull', 'legs'];
+    } else if (splitType === 'upper_lower') {
+      pattern = ['upper', 'lower', 'upper', 'lower', 'upper'];
+    }
+  } else {
+    // Fallback to basic pattern
+    if (splitType === 'full_body') {
+      pattern = ['full', 'full', 'full'];
+    } else if (splitType === 'upper_lower') {
+      pattern = ['upper', 'lower', 'upper', 'lower'];
+    } else if (splitType === 'ppl') {
+      pattern = ['push', 'pull', 'legs', 'push', 'pull', 'legs'];
+    }
+  }
+  
+  // Trim pattern to match days per week
+  if (pattern.length > daysPerWeek) {
+    pattern = pattern.slice(0, daysPerWeek);
+  }
+  
+  // Ensure pattern is not empty
+  if (pattern.length === 0) {
+    pattern = ['full'];
+  }
+  
+  return pattern;
+};
+
+/**
+ * Validate HIIT session spacing
+ * Ensures HIIT sessions are not scheduled on consecutive days
+ * Per Guide Section 1.3: Allow 48+ hours between HIIT sessions
+ * 
+ * @param {Array<Object>} sessions - Array of session objects
+ * @returns {Object} Validation result with warnings
+ */
+export const validateHiitSpacing = (sessions) => {
+  const hiitSessions = sessions.filter(s => 
+    s.type === 'hiit' || s.type.startsWith('hiit')
+  );
+  
+  const warnings = [];
+  
+  for (let i = 1; i < hiitSessions.length; i++) {
+    const prevDate = new Date(hiitSessions[i - 1].date);
+    const currDate = new Date(hiitSessions[i].date);
+    const hoursDiff = (currDate - prevDate) / (1000 * 60 * 60);
+    
+    if (hoursDiff < 48) {
+      warnings.push({
+        session1: hiitSessions[i - 1].id,
+        session2: hiitSessions[i].id,
+        hoursBetween: hoursDiff,
+        recommendation: 'HIIT sessions should be spaced 48+ hours apart for adequate recovery (Guide Section 1.3)'
+      });
+    }
+  }
+  
+  return {
+    valid: warnings.length === 0,
+    warnings
+  };
+};
+
+/**
+ * Calculate sympathetic/parasympathetic balance
+ * Per Guide Section 10.1: Target 60% HIIT/power, 40% restorative/flexibility
+ * 
+ * @param {Array<Object>} sessions - Array of session objects
+ * @returns {Object} Balance analysis
+ */
+export const calculateSympatheticBalance = (sessions) => {
+  const sympatheticSessions = sessions.filter(s => 
+    s.type === 'hiit' || 
+    s.type === 'upper' || 
+    s.type === 'lower' || 
+    s.type === 'full' || 
+    s.type === 'push' || 
+    s.type === 'pull' || 
+    s.type === 'legs' ||
+    s.type === 'yoga_power' ||
+    s.type === 'yoga_core'
+  ).length;
+  
+  const parasympatheticSessions = sessions.filter(s => 
+    s.type === 'yoga_restorative' || 
+    s.type === 'yoga_yin' || 
+    s.type === 'yoga_flex' ||
+    s.type === 'yoga'
+  ).length;
+  
+  const total = sessions.length;
+  const sympatheticPercent = (sympatheticSessions / total) * 100;
+  const parasympatheticPercent = (parasympatheticSessions / total) * 100;
+  
+  // Guide recommends 60/40 ratio
+  const isBalanced = sympatheticPercent >= 50 && sympatheticPercent <= 70;
+  
+  return {
+    sympatheticSessions,
+    parasympatheticSessions,
+    sympatheticPercent,
+    parasympatheticPercent,
+    isBalanced,
+    recommendation: !isBalanced 
+      ? 'Consider adjusting to achieve 60/40 ratio of high-intensity to recovery sessions (Guide Section 10.1)'
+      : 'Good balance between sympathetic and parasympathetic activities'
+  };
+};
+
+/**
+ * Apply progressive overload to HIIT sessions
+ * Per Guide Section 10.2: Progressive overload for HIIT
+ * 
+ * Week 1-2: Learn movements, focus on form
+ * Week 3-4: Increase intensity
+ * Week 5-6: Increase duration
+ * Week 7-8: Decrease rest period
+ * Week 9-12: Deload
+ * 
+ * @param {number} weekNumber - Current week number (1-based)
+ * @param {Object} baseSession - Base HIIT session configuration
+ * @returns {Object} Adjusted session parameters
+ */
+export const applyHiitProgression = (weekNumber, baseSession) => {
+  const { intensity = 'moderate', duration = 25, restRatio = 1 } = baseSession;
+  
+  let adjustedIntensity = intensity;
+  let adjustedDuration = duration;
+  let adjustedRestRatio = restRatio;
+  
+  if (weekNumber <= 2) {
+    // Week 1-2: Learn movements, lower intensity
+    adjustedIntensity = 'learning';
+    adjustedDuration = duration * 0.8;
+  } else if (weekNumber <= 4) {
+    // Week 3-4: Increase intensity
+    adjustedIntensity = 'moderate';
+    adjustedDuration = duration;
+  } else if (weekNumber <= 6) {
+    // Week 5-6: Increase duration
+    adjustedIntensity = 'moderate';
+    adjustedDuration = duration * 1.1;
+  } else if (weekNumber <= 8) {
+    // Week 7-8: Decrease rest (increase work-to-rest ratio)
+    adjustedIntensity = 'high';
+    adjustedDuration = duration * 1.1;
+    adjustedRestRatio = restRatio * 0.8; // Less rest = higher intensity
+  } else {
+    // Week 9+: Deload or maintain
+    const deloadWeek = weekNumber % 4 === 0;
+    if (deloadWeek) {
+      adjustedIntensity = 'moderate';
+      adjustedDuration = duration * 0.7;
+      adjustedRestRatio = restRatio * 1.2; // More rest during deload
+    } else {
+      adjustedIntensity = 'high';
+      adjustedDuration = duration * 1.1;
+      adjustedRestRatio = restRatio * 0.8;
+    }
+  }
+  
+  return {
+    intensity: adjustedIntensity,
+    duration: Math.round(adjustedDuration),
+    restRatio: adjustedRestRatio,
+    weekNumber,
+    guideReference: 'Section 10.2'
+  };
+};
+
+/**
+ * Apply progressive overload to Yoga sessions
+ * Per Guide Section 10.2: Yoga progression
+ * 
+ * @param {number} weekNumber - Current week number (1-based)
+ * @param {Object} baseSession - Base yoga session configuration
+ * @returns {Object} Adjusted session parameters
+ */
+export const applyYogaProgression = (weekNumber, baseSession) => {
+  const { holdDuration = 30, complexity = 'basic' } = baseSession;
+  
+  // Increase hold duration by 5-10 seconds every 2 weeks
+  const weeksProgression = Math.floor(weekNumber / 2);
+  const holdIncrease = weeksProgression * 7; // 7 seconds per 2-week block
+  
+  let adjustedHoldDuration = holdDuration + holdIncrease;
+  let adjustedComplexity = complexity;
+  
+  // Progress complexity every 4 weeks
+  if (weekNumber >= 4 && complexity === 'basic') {
+    adjustedComplexity = 'intermediate';
+  } else if (weekNumber >= 8 && complexity === 'intermediate') {
+    adjustedComplexity = 'advanced';
+  }
+  
+  return {
+    holdDuration: adjustedHoldDuration,
+    complexity: adjustedComplexity,
+    weekNumber,
+    guideReference: 'Section 10.2'
+  };
+};

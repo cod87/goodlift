@@ -1,164 +1,464 @@
 [
   {
-    "Name": "Chair Pose",
-    "Type": "Flow Pose",
-    "Description": "A standing pose that strengthens the legs and builds heat in the body",
-    "Duration": 60
+    "Name": "Downward-Facing Dog",
+    "Sanskrit": "Adho Mukha Svanasana",
+    "Primary Muscles": "Shoulders, Lats, Hamstrings",
+    "Secondary Muscles": "Core, Chest, Hip Flexors",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Full-body stretch, inversion, core engagement",
+    "Level": "Beginner",
+    "Category": "Standing"
   },
   {
-    "Name": "Crescent Lunge",
-    "Type": "Flow Pose",
-    "Description": "A dynamic lunge that opens the hip flexors and strengthens the legs",
-    "Duration": 60
+    "Name": "Plank Pose",
+    "Sanskrit": "Phalakasana",
+    "Primary Muscles": "Core, Shoulders, Triceps",
+    "Secondary Muscles": "Chest, Quads, Back",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Core strength, shoulder stability",
+    "Level": "Beginner",
+    "Category": "Core"
   },
   {
-    "Name": "Warrior One",
-    "Type": "Flow Pose",
-    "Description": "A powerful standing pose that builds strength and stability",
-    "Duration": 60
+    "Name": "Side Plank",
+    "Sanskrit": "Vasisthasana",
+    "Primary Muscles": "Obliques, Shoulders, Hip Abductors",
+    "Secondary Muscles": "Core, Quads, Lats",
+    "Type": "Power",
+    "Hold Duration": 25,
+    "Benefits": "Lateral core strength, shoulder stabilization",
+    "Level": "Intermediate",
+    "Category": "Core"
   },
   {
-    "Name": "Warrior Two",
-    "Type": "Flow Pose",
-    "Description": "An expansive warrior pose that opens the hips and chest",
-    "Duration": 60
+    "Name": "Upward-Facing Dog",
+    "Sanskrit": "Urdhva Mukha Svanasana",
+    "Primary Muscles": "Chest, Shoulders, Triceps",
+    "Secondary Muscles": "Abs, Hip Flexors, Back",
+    "Type": "Power",
+    "Hold Duration": 22,
+    "Benefits": "Chest opening, core engagement, backbend",
+    "Level": "Intermediate",
+    "Category": "Backbend"
   },
   {
-    "Name": "Reverse Warrior",
-    "Type": "Flow Pose",
-    "Description": "A side-bending warrior variation that stretches the side body",
-    "Duration": 60
+    "Name": "Four-Limbed Staff Pose",
+    "Sanskrit": "Chaturanga Dandasana",
+    "Primary Muscles": "Triceps, Chest, Shoulders",
+    "Secondary Muscles": "Core, Back, Quads",
+    "Type": "Power",
+    "Hold Duration": 12,
+    "Benefits": "Upper body strength, core stabilization",
+    "Level": "Intermediate",
+    "Category": "Strength"
   },
   {
-    "Name": "Triangle Pose",
-    "Type": "Flow Pose",
-    "Description": "A standing pose that stretches the legs, hips, and spine",
-    "Duration": 60
+    "Name": "Warrior I",
+    "Sanskrit": "Virabhadrasana I",
+    "Primary Muscles": "Glutes, Quads, Hip Flexors",
+    "Secondary Muscles": "Core, Shoulders, Chest",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Lower body strength, hip flexibility, core",
+    "Level": "Beginner",
+    "Category": "Standing"
+  },
+  {
+    "Name": "Warrior II",
+    "Sanskrit": "Virabhadrasana II",
+    "Primary Muscles": "Glutes, Quads, Hip Abductors",
+    "Secondary Muscles": "Core, Shoulders, Back",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Leg strength, hip opening, balance",
+    "Level": "Beginner",
+    "Category": "Standing"
+  },
+  {
+    "Name": "Warrior III",
+    "Sanskrit": "Virabhadrasana III",
+    "Primary Muscles": "Glutes, Back, Hip Extensors",
+    "Secondary Muscles": "Quads, Hamstrings, Core, Shoulders",
+    "Type": "Power",
+    "Hold Duration": 25,
+    "Benefits": "Balance, glute activation, core stability",
+    "Level": "Intermediate",
+    "Category": "Balance"
+  },
+  {
+    "Name": "Extended Triangle",
+    "Sanskrit": "Utthita Trikonasana",
+    "Primary Muscles": "Hamstrings, Hip Adductors",
+    "Secondary Muscles": "Glutes, Obliques, Shoulders",
+    "Type": "Power",
+    "Hold Duration": 37,
+    "Benefits": "Hamstring/hip flexibility, spinal rotation",
+    "Level": "Beginner",
+    "Category": "Standing"
   },
   {
     "Name": "Extended Side Angle",
-    "Type": "Flow Pose",
-    "Description": "A deep side stretch that strengthens and lengthens the entire side body",
-    "Duration": 60
+    "Sanskrit": "Utthita Parsvakonasana",
+    "Primary Muscles": "Glutes, Quads, Hip Abductors",
+    "Secondary Muscles": "Obliques, Shoulders, Chest",
+    "Type": "Power",
+    "Hold Duration": 37,
+    "Benefits": "Hip opening, lateral core, shoulder mobility",
+    "Level": "Intermediate",
+    "Category": "Standing"
   },
   {
-    "Name": "Pyramid Pose",
-    "Type": "Flow Pose",
-    "Description": "A forward fold that deeply stretches the hamstrings and calves",
-    "Duration": 60
+    "Name": "Chair Pose",
+    "Sanskrit": "Utkatasana",
+    "Primary Muscles": "Glutes, Quads, Hip Flexors",
+    "Secondary Muscles": "Core, Shoulders, Chest",
+    "Type": "Power",
+    "Hold Duration": 32,
+    "Benefits": "Lower body strength, core engagement",
+    "Level": "Beginner",
+    "Category": "Standing"
   },
   {
-    "Name": "Standing Forward Fold with Shoulder Stretch",
-    "Type": "Flow Pose",
-    "Description": "A forward fold that releases tension in the back and shoulders",
-    "Duration": 60
+    "Name": "Standing Forward Fold",
+    "Sanskrit": "Uttanasana",
+    "Primary Muscles": "Hamstrings, Glutes, Erector Spinae",
+    "Secondary Muscles": "Hip Adductors, Calves, Shoulders",
+    "Type": "Flexibility",
+    "Hold Duration": 67,
+    "Benefits": "Hamstring/lower back flexibility, calming",
+    "Level": "Beginner",
+    "Category": "Forward Fold"
   },
   {
-    "Name": "Half Split",
-    "Type": "Flow Pose",
-    "Description": "A seated hamstring stretch that prepares for deeper stretches",
-    "Duration": 60
+    "Name": "Mountain Pose",
+    "Sanskrit": "Tadasana",
+    "Primary Muscles": "Quads, Glutes, Core",
+    "Secondary Muscles": "All stabilizer muscles",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Body awareness, posture, balance",
+    "Level": "Beginner",
+    "Category": "Standing"
   },
   {
-    "Name": "Lizard Pose",
-    "Type": "Flow Pose",
-    "Description": "A deep hip opener that stretches the hip flexors and groin",
-    "Duration": 60
+    "Name": "Tree Pose",
+    "Sanskrit": "Vrksasana",
+    "Primary Muscles": "Hip Abductors, Hip Stabilizers, Quads",
+    "Secondary Muscles": "Glutes, Core, Shoulders",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Balance, hip stability, focus",
+    "Level": "Beginner",
+    "Category": "Balance"
   },
   {
-    "Name": "Twisted Lunge",
-    "Type": "Flow Pose",
-    "Description": "A twisting lunge that opens the chest and strengthens the core",
-    "Duration": 60
+    "Name": "Eagle Pose",
+    "Sanskrit": "Garudasana",
+    "Primary Muscles": "Hip Abductors, Hip Adductors, Core",
+    "Secondary Muscles": "Quads, Glutes, Shoulders",
+    "Type": "Power",
+    "Hold Duration": 25,
+    "Benefits": "Hip opening, balance, focus, shoulder strength",
+    "Level": "Intermediate",
+    "Category": "Balance"
   },
   {
-    "Name": "Twisted Chair",
-    "Type": "Flow Pose",
-    "Description": "A challenging twist that builds strength and detoxifies the body",
-    "Duration": 60
-  },
-  {
-    "Name": "Locust Pose",
-    "Type": "Flow Pose",
-    "Description": "A backbend that strengthens the back muscles and opens the chest",
-    "Duration": 60
-  },
-  {
-    "Name": "Bound Angle Pose (Butterfly)",
-    "Type": "Cool Down Pose",
-    "Description": "A seated hip opener that releases tension in the hips and groin",
-    "Duration": 60
-  },
-  {
-    "Name": "Seated Wide-Leg Forward Fold",
-    "Type": "Cool Down Pose",
-    "Description": "A calming forward fold that stretches the inner thighs and hamstrings",
-    "Duration": 60
-  },
-  {
-    "Name": "Seated Twist",
-    "Type": "Cool Down Pose",
-    "Description": "A gentle spinal twist that aids digestion and releases back tension",
-    "Duration": 60
-  },
-  {
-    "Name": "Head-to-Knee Pose",
-    "Type": "Cool Down Pose",
-    "Description": "A seated forward fold that calms the mind and stretches the hamstrings",
-    "Duration": 60
-  },
-  {
-    "Name": "Reclined Twist",
-    "Type": "Cool Down Pose",
-    "Description": "A restorative twist that releases tension in the spine and hips",
-    "Duration": 60
-  },
-  {
-    "Name": "Happy Baby Pose",
-    "Type": "Cool Down Pose",
-    "Description": "A playful pose that opens the hips and releases lower back tension",
-    "Duration": 60
-  },
-  {
-    "Name": "Reclined Pigeon",
-    "Type": "Cool Down Pose",
-    "Description": "A supine hip opener that deeply stretches the glutes and hip rotators",
-    "Duration": 60
+    "Name": "Boat Pose",
+    "Sanskrit": "Navasana",
+    "Primary Muscles": "Rectus Abdominis, Hip Flexors, Quads",
+    "Secondary Muscles": "Core, Back, Shoulders",
+    "Type": "Core",
+    "Hold Duration": 22,
+    "Benefits": "Core strength, hip flexor strength, balance",
+    "Level": "Intermediate",
+    "Category": "Core"
   },
   {
     "Name": "Bridge Pose",
-    "Type": "Cool Down Pose",
-    "Description": "A gentle backbend that opens the chest and strengthens the back",
-    "Duration": 60
+    "Sanskrit": "Setu Bandha Sarvangasana",
+    "Primary Muscles": "Glutes, Hamstrings, Erector Spinae",
+    "Secondary Muscles": "Hip Flexors, Chest, Shoulders",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Glute activation, spinal extension, core",
+    "Level": "Beginner",
+    "Category": "Backbend"
   },
   {
-    "Name": "Reclined Bound Angle Pose",
-    "Type": "Cool Down Pose",
-    "Description": "A deeply relaxing hip opener that promotes rest and recovery",
-    "Duration": 60
+    "Name": "Locust Pose",
+    "Sanskrit": "Salabhasana",
+    "Primary Muscles": "Erector Spinae, Glutes, Posterior Deltoids",
+    "Secondary Muscles": "Hamstrings, Hip Extensors, Back",
+    "Type": "Power",
+    "Hold Duration": 22,
+    "Benefits": "Posterior chain strength, spinal extension",
+    "Level": "Intermediate",
+    "Category": "Backbend"
+  },
+  {
+    "Name": "Cobra Pose",
+    "Sanskrit": "Bhujangasana",
+    "Primary Muscles": "Chest, Shoulders, Erector Spinae",
+    "Secondary Muscles": "Core, Hip Flexors, Back",
+    "Type": "Power",
+    "Hold Duration": 22,
+    "Benefits": "Chest opening, core, spinal extension",
+    "Level": "Beginner",
+    "Category": "Backbend"
+  },
+  {
+    "Name": "Sphinx Pose",
+    "Sanskrit": "Salamba Bhujangasana",
+    "Primary Muscles": "Chest, Shoulders, Core",
+    "Secondary Muscles": "Erector Spinae, Hip Flexors",
+    "Type": "Restorative",
+    "Hold Duration": 45,
+    "Benefits": "Gentle spinal extension, chest opening",
+    "Level": "Beginner",
+    "Category": "Backbend"
+  },
+  {
+    "Name": "Child's Pose",
+    "Sanskrit": "Balasana",
+    "Primary Muscles": "Hamstrings, Glutes, Erector Spinae",
+    "Secondary Muscles": "Hip Flexors, Shoulders, Back",
+    "Type": "Restorative",
+    "Hold Duration": 120,
+    "Benefits": "Recovery, hip flexibility, calming",
+    "Level": "Beginner",
+    "Category": "Restorative"
+  },
+  {
+    "Name": "Pigeon Pose",
+    "Sanskrit": "Eka Pada Rajakapotasana",
+    "Primary Muscles": "Hip External Rotators, Glutes",
+    "Secondary Muscles": "Hip Flexors, Hamstrings, Lower Back",
+    "Type": "Yin",
+    "Hold Duration": 75,
+    "Benefits": "Deep hip opening, lower back release",
+    "Level": "Intermediate",
+    "Category": "Hip Opener"
   },
   {
     "Name": "Seated Forward Fold",
-    "Type": "Cool Down Pose",
-    "Description": "A calming forward fold that stretches the entire back body",
-    "Duration": 60
+    "Sanskrit": "Paschimottanasana",
+    "Primary Muscles": "Hamstrings, Erector Spinae, Glutes",
+    "Secondary Muscles": "Hip Adductors, Calves, Shoulders",
+    "Type": "Yin",
+    "Hold Duration": 75,
+    "Benefits": "Hamstring/lower back flexibility, calming",
+    "Level": "Beginner",
+    "Category": "Forward Fold"
   },
   {
-    "Name": "Cat Cow Pose",
-    "Type": "Cool Down Pose",
-    "Description": "A gentle spinal flow that releases tension and improves flexibility",
-    "Duration": 60
+    "Name": "Half Lord of Fishes",
+    "Sanskrit": "Ardha Matsyendrasana",
+    "Primary Muscles": "Obliques, Erector Spinae, Hip Flexors",
+    "Secondary Muscles": "Glutes, Shoulders, Core",
+    "Type": "Flexibility",
+    "Hold Duration": 45,
+    "Benefits": "Spinal rotation, hip flexibility, digestion aid",
+    "Level": "Intermediate",
+    "Category": "Twist"
   },
   {
-    "Name": "Neck rolls",
-    "Type": "Cool Down Pose",
-    "Description": "Gentle neck movements that release tension and improve mobility",
-    "Duration": 60
+    "Name": "Cat-Cow",
+    "Sanskrit": "Marjaryasana-Bitilasana",
+    "Primary Muscles": "Erector Spinae, Rectus Abdominis",
+    "Secondary Muscles": "Shoulders, Hip Flexors",
+    "Type": "Flexibility",
+    "Hold Duration": 5,
+    "Benefits": "Spinal mobility, warm-up, core engagement",
+    "Level": "Beginner",
+    "Category": "Dynamic"
   },
   {
-    "Name": "Thread the Needle",
-    "Type": "Cool Down Pose",
-    "Description": "A gentle twist that opens the shoulders and upper back",
-    "Duration": 60
+    "Name": "Lizard Pose",
+    "Sanskrit": "Utthan Pristhasana",
+    "Primary Muscles": "Hip Flexors, Hip Abductors",
+    "Secondary Muscles": "Hamstrings, Glutes, Inner Thighs",
+    "Type": "Yin",
+    "Hold Duration": 75,
+    "Benefits": "Hip and hamstring opening",
+    "Level": "Intermediate",
+    "Category": "Hip Opener"
+  },
+  {
+    "Name": "Pyramid Pose",
+    "Sanskrit": "Parsvottanasana",
+    "Primary Muscles": "Hamstrings, Hip Adductors",
+    "Secondary Muscles": "Glutes, Calves, Shoulders",
+    "Type": "Flexibility",
+    "Hold Duration": 67,
+    "Benefits": "Hamstring flexibility, spinal rotation",
+    "Level": "Intermediate",
+    "Category": "Forward Fold"
+  },
+  {
+    "Name": "Supine Butterfly",
+    "Sanskrit": "Supta Baddha Konasana",
+    "Primary Muscles": "Hip Abductors, Hip Adductors, Hip Flexors",
+    "Secondary Muscles": "Pelvic floor, Lower Abdomen, Chest",
+    "Type": "Restorative",
+    "Hold Duration": 240,
+    "Benefits": "Deep hip opening, pelvic release, chest opening",
+    "Level": "Beginner",
+    "Category": "Restorative"
+  },
+  {
+    "Name": "Wide-Legged Forward Fold",
+    "Sanskrit": "Prasarita Padottanasana",
+    "Primary Muscles": "Hamstrings, Hip Adductors, Erector Spinae",
+    "Secondary Muscles": "Glutes, Inner Thighs, Calves",
+    "Type": "Flexibility",
+    "Hold Duration": 75,
+    "Benefits": "Hamstring flexibility, hip adductor stretch",
+    "Level": "Beginner",
+    "Category": "Forward Fold"
+  },
+  {
+    "Name": "Legs-Up-the-Wall",
+    "Sanskrit": "Viparita Karani",
+    "Primary Muscles": "Hip Flexors, Hamstrings, Core",
+    "Secondary Muscles": "Calves, Glutes, Lower Back",
+    "Type": "Restorative",
+    "Hold Duration": 600,
+    "Benefits": "Circulation, stress relief, parasympathetic activation",
+    "Level": "Beginner",
+    "Category": "Inversion"
+  },
+  {
+    "Name": "Shoulder Stand",
+    "Sanskrit": "Salamba Sarvangasana",
+    "Primary Muscles": "Shoulders, Neck, Core",
+    "Secondary Muscles": "Triceps, Back, Hip Flexors",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Inversion benefits, shoulder strength, thyroid stimulation",
+    "Level": "Advanced",
+    "Category": "Inversion"
+  },
+  {
+    "Name": "Headstand",
+    "Sanskrit": "Sirsasana",
+    "Primary Muscles": "Core, Shoulders, Hip Flexors",
+    "Secondary Muscles": "Neck, Back, Arms",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Full-body inversion, mental clarity, strength",
+    "Level": "Advanced",
+    "Category": "Inversion"
+  },
+  {
+    "Name": "Forearm Plank",
+    "Sanskrit": "Pincha Mayurasana prep",
+    "Primary Muscles": "Shoulders, Core, Triceps",
+    "Secondary Muscles": "Chest, Back, Quads",
+    "Type": "Core",
+    "Hold Duration": 45,
+    "Benefits": "Shoulder stability, core strength",
+    "Level": "Intermediate",
+    "Category": "Core"
+  },
+  {
+    "Name": "Dolphin Pose",
+    "Sanskrit": "Pincha Mayurasana prep",
+    "Primary Muscles": "Shoulders, Core, Hip Flexors",
+    "Secondary Muscles": "Chest, Triceps, Back",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Shoulder strength, core stability, inversion prep",
+    "Level": "Intermediate",
+    "Category": "Inversion Prep"
+  },
+  {
+    "Name": "Cow Face Pose",
+    "Sanskrit": "Gomukhasana",
+    "Primary Muscles": "Shoulders, Chest",
+    "Secondary Muscles": "Hip Flexors, Lats, Back",
+    "Type": "Flexibility",
+    "Hold Duration": 45,
+    "Benefits": "Shoulder flexibility, chest opening",
+    "Level": "Intermediate",
+    "Category": "Shoulder Opener"
+  },
+  {
+    "Name": "Reclined Twist",
+    "Sanskrit": "Supta Matsyendrasana",
+    "Primary Muscles": "Obliques, Erector Spinae",
+    "Secondary Muscles": "Glutes, Hip Flexors, Shoulders",
+    "Type": "Restorative",
+    "Hold Duration": 90,
+    "Benefits": "Spinal rotation, digestive aid, relaxation",
+    "Level": "Beginner",
+    "Category": "Twist"
+  },
+  {
+    "Name": "Reverse Warrior",
+    "Sanskrit": "Viparita Virabhadrasana",
+    "Primary Muscles": "Glutes, Quads, Obliques",
+    "Secondary Muscles": "Shoulders, Hip Flexors, Core",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Side body stretch, leg strength, hip opening",
+    "Level": "Beginner",
+    "Category": "Standing"
+  },
+  {
+    "Name": "Crescent Lunge",
+    "Sanskrit": "Anjaneyasana",
+    "Primary Muscles": "Glutes, Quads, Hip Flexors",
+    "Secondary Muscles": "Core, Shoulders, Hamstrings",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Hip flexor opening, leg strength, balance",
+    "Level": "Beginner",
+    "Category": "Standing"
+  },
+  {
+    "Name": "Half Split",
+    "Sanskrit": "Ardha Hanumanasana",
+    "Primary Muscles": "Hamstrings, Hip Adductors",
+    "Secondary Muscles": "Glutes, Calves, Hip Flexors",
+    "Type": "Flexibility",
+    "Hold Duration": 60,
+    "Benefits": "Hamstring flexibility, hip opening",
+    "Level": "Intermediate",
+    "Category": "Forward Fold"
+  },
+  {
+    "Name": "Twisted Lunge",
+    "Sanskrit": "Parivrtta Anjaneyasana",
+    "Primary Muscles": "Obliques, Hip Flexors, Glutes",
+    "Secondary Muscles": "Quads, Shoulders, Core",
+    "Type": "Power",
+    "Hold Duration": 45,
+    "Benefits": "Spinal rotation, hip opening, balance",
+    "Level": "Intermediate",
+    "Category": "Twist"
+  },
+  {
+    "Name": "Happy Baby",
+    "Sanskrit": "Ananda Balasana",
+    "Primary Muscles": "Hip Flexors, Hip Adductors",
+    "Secondary Muscles": "Lower Back, Glutes, Hamstrings",
+    "Type": "Restorative",
+    "Hold Duration": 90,
+    "Benefits": "Hip opening, lower back release, relaxation",
+    "Level": "Beginner",
+    "Category": "Restorative"
+  },
+  {
+    "Name": "Reclined Pigeon",
+    "Sanskrit": "Supta Kapotasana",
+    "Primary Muscles": "Hip External Rotators, Glutes",
+    "Secondary Muscles": "Hip Flexors, Lower Back, Hamstrings",
+    "Type": "Restorative",
+    "Hold Duration": 90,
+    "Benefits": "Hip opening, glute stretch, relaxation",
+    "Level": "Beginner",
+    "Category": "Hip Opener"
   }
 ]

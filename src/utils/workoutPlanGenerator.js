@@ -1056,8 +1056,19 @@ export const getRecurringSessionsInBlock = (plan, sessionId) => {
  * @returns {Object} Updated plan
  */
 export const updateRecurringSessionExercises = (plan, sessionId, newExercises) => {
+  if (!plan || !sessionId || !newExercises) {
+    throw new Error('Plan, sessionId, and newExercises are required');
+  }
+
+  if (!Array.isArray(newExercises) || newExercises.length === 0) {
+    throw new Error('newExercises must be a non-empty array');
+  }
+
   const recurringSessions = getRecurringSessionsInBlock(plan, sessionId);
-  if (recurringSessions.length === 0) return plan;
+  if (recurringSessions.length === 0) {
+    console.warn('No recurring sessions found for this session');
+    return plan;
+  }
   
   const recurringSessionIds = new Set(recurringSessions.map(s => s.id));
   

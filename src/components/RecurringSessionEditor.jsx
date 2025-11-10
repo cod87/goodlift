@@ -121,9 +121,21 @@ const RecurringSessionEditor = ({
 
   const handleSave = () => {
     if (exercises.length === 0) {
-      alert('Please add at least one exercise');
+      alert('Please add at least one exercise before saving.');
       return;
     }
+
+    // Validate all exercises have valid sets and reps
+    const invalidExercises = exercises.filter(ex => 
+      !ex.sets || ex.sets < 1 || !ex.reps || ex.reps === '' || 
+      !ex.restTime || ex.restTime < 0
+    );
+
+    if (invalidExercises.length > 0) {
+      alert('Please ensure all exercises have valid sets, reps, and rest time.');
+      return;
+    }
+
     onSave(exercises);
   };
 

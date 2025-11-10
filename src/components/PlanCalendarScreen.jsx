@@ -253,12 +253,16 @@ const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
     if (!selectedSession || !plan) return;
     
     try {
+      const recurringCount = getRecurringSessionCount();
       const updatedPlan = updateRecurringSessionExercises(plan, selectedSession.id, newExercises);
       await saveWorkoutPlan(updatedPlan);
       await loadActivePlan();
       
       setEditRecurringOpen(false);
       handleCloseDialog();
+      
+      // Show success feedback
+      alert(`Successfully updated ${recurringCount} ${getSessionTypeLabel(selectedSession.type)} sessions in this training block!`);
     } catch (error) {
       console.error('Error saving recurring edits:', error);
       alert('Failed to save changes. Please try again.');

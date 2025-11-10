@@ -43,6 +43,7 @@
  */
 
 import { MUSCLE_GROUPS } from './constants.js';
+import { generateStandardWorkout } from './workoutGenerator.js';
 
 /**
  * Validate a session object has required fields based on its type
@@ -1035,7 +1036,7 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
   // generate exercises using the workout generator
   if (['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(session.type)) {
     try {
-      const { generateStandardWorkout } = await import('./workoutGenerator.js');
+      // Use static import - already imported at top of file
       
       // Load exercises from public data
       const exercisesResponse = await fetch(`${import.meta.env.BASE_URL}data/exercises.json`);
@@ -1082,6 +1083,7 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
       console.error('Error generating standard workout session:', error);
       return {
         ...session,
+        exercises: [], // Return empty array instead of undefined
         populationError: `Failed to generate exercises: ${error.message}`
       };
     }

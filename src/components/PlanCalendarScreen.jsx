@@ -21,12 +21,14 @@ import {
   Edit as EditIcon,
   DeleteOutline as DeleteIcon,
   EventRepeat as MoveIcon,
-  PlayArrow as StartIcon
+  PlayArrow as StartIcon,
+  EditCalendar as EditRecurringIcon
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Calendar from './Calendar';
+import RecurringSessionEditor from './RecurringSessionEditor';
 import {
   getActivePlan,
   saveWorkoutPlan
@@ -34,7 +36,9 @@ import {
 import {
   moveSession,
   updateSessionStatus,
-  removeSessionFromPlan
+  removeSessionFromPlan,
+  getRecurringSessionsInBlock,
+  updateRecurringSessionExercises
 } from '../utils/workoutPlanGenerator';
 
 const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
@@ -45,10 +49,25 @@ const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [newDate, setNewDate] = useState(null);
   const [draggedSession, setDraggedSession] = useState(null);
+  const [editRecurringOpen, setEditRecurringOpen] = useState(false);
+  const [allExercises, setAllExercises] = useState([]);
 
   useEffect(() => {
     loadActivePlan();
+    loadExercises();
   }, []);
+
+  const loadExercises = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.BASE_URL}data/exercises.json`);
+      if (response.ok) {
+        const exercises = await response.json();
+        setAllExercises(exercises);
+      }
+    } catch (error) {
+      console.error('Error loading exercises:', error);
+    }
+  };
 
   const loadActivePlan = async () => {
     const activePlan = await getActivePlan();
@@ -214,6 +233,46 @@ const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
       handleMenuClose();
       handleCloseDialog();
     }
+  };
+
+  const handleEditRecurring = () => {
+    if (!selectedSession || !plan) return;
+    
+    // Only allow editing recurring sessions for standard workouts
+    const isStandardWorkout = ['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(selectedSession.type);
+    if (!isStandardWorkout) {
+      alert('Recurring editing is only available for standard workout sessions (Upper/Lower/Full Body/PPL)');
+      return;
+    }
+    
+    setEditRecurringOpen(true);
+    handleMenuClose();
+  };
+
+  const handleSaveRecurringEdits = async (newExercises) => {
+    if (!selectedSession || !plan) return;
+    
+    try {
+      const recurringCount = getRecurringSessionCount();
+      const updatedPlan = updateRecurringSessionExercises(plan, selectedSession.id, newExercises);
+      await saveWorkoutPlan(updatedPlan);
+      await loadActivePlan();
+      
+      setEditRecurringOpen(false);
+      handleCloseDialog();
+      
+      // Show success feedback
+      alert(`Successfully updated ${recurringCount} ${getSessionTypeLabel(selectedSession.type)} sessions in this training block!`);
+    } catch (error) {
+      console.error('Error saving recurring edits:', error);
+      alert('Failed to save changes. Please try again.');
+    }
+  };
+
+  const getRecurringSessionCount = () => {
+    if (!selectedSession || !plan) return 0;
+    const recurringSessions = getRecurringSessionsInBlock(plan, selectedSession.id);
+    return recurringSessions.length;
   };
 
   const handleCloseDialog = () => {
@@ -410,6 +469,12 @@ const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
+          {selectedSession && ['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(selectedSession.type) && (
+            <MenuItem onClick={handleEditRecurring}>
+              <EditRecurringIcon sx={{ mr: 1 }} fontSize="small" />
+              Edit Recurring Sessions
+            </MenuItem>
+          )}
           <MenuItem onClick={handleMoveSession}>
             <MoveIcon sx={{ mr: 1 }} fontSize="small" />
             Move to Different Date
@@ -453,6 +518,16 @@ const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Recurring Session Editor */}
+        <RecurringSessionEditor
+          open={editRecurringOpen}
+          onClose={() => setEditRecurringOpen(false)}
+          session={selectedSession}
+          recurringCount={getRecurringSessionCount()}
+          allExercises={allExercises}
+          onSave={handleSaveRecurringEdits}
+        />
       </Container>
     </LocalizationProvider>
   );

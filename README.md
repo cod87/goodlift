@@ -5,6 +5,8 @@ A modern, optimized React-based workout randomization application that helps you
 ## Features
 
 - **Randomized Workout Generation**: Generate workouts for Upper Body, Lower Body, or Full Body training
+- **Workout Plan Management**: Create comprehensive workout plans with automatic periodization and deload weeks
+- **Recurring Session Editing**: Batch edit exercises for all recurring sessions within a training block
 - **Equipment Filtering**: Filter exercises based on available equipment (Barbells, Dumbbells, Cable Machine, Kettlebells, etc.)
 - **Superset Pairing**: Exercises are intelligently paired into supersets based on opposing muscle groups
 - **Real-time Workout Tracking**: Track sets, reps, and weight with a built-in timer
@@ -12,7 +14,7 @@ A modern, optimized React-based workout randomization application that helps you
 - **Weight Progression**: Automatically suggests weight increases when you hit progression targets
 - **YouTube Demonstrations**: Each exercise includes embedded video demonstrations
 - **Data Export**: Download your workout data as CSV files
-- **Firebase Integration**: Ready for cloud storage and syncing (configured but not actively used in workout flow)
+- **Firebase Integration**: Cloud storage and cross-device syncing for authenticated users
 
 ## Performance Optimizations
 

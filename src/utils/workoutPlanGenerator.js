@@ -1018,6 +1018,81 @@ export const applyYogaProgression = (weekNumber, baseSession) => {
 };
 
 /**
+ * Get all recurring sessions of the same type in the current training block
+ * @param {Object} plan - Workout plan
+ * @param {string} sessionId - ID of a session in the block
+ * @returns {Array<Object>} Array of session objects in the same training block with same type
+ */
+export const getRecurringSessionsInBlock = (plan, sessionId) => {
+  const targetSession = plan.sessions.find(s => s.id === sessionId);
+  if (!targetSession) return [];
+  
+  const sessionType = targetSession.type;
+  const daysPerWeek = plan.daysPerWeek;
+  const deloadWeeks = plan.deloadWeeks || [];
+  
+  // Find the session's index in the plan
+  const sessionIndex = plan.sessions.findIndex(s => s.id === sessionId);
+  const sessionWeek = Math.floor(sessionIndex / daysPerWeek) + 1;
+  
+  // Find the start and end weeks for this block
+  const prevDeloadWeek = deloadWeeks.filter(w => w < sessionWeek).pop() || 0;
+  const nextDeloadWeek = deloadWeeks.find(w => w > sessionWeek) || Math.ceil(plan.duration / 7) + 1;
+  
+  // Get all sessions of the same type in this block
+  return plan.sessions.filter((session, index) => {
+    const week = Math.floor(index / daysPerWeek) + 1;
+    return session.type === sessionType && 
+           week > prevDeloadWeek && 
+           week < nextDeloadWeek;
+  });
+};
+
+/**
+ * Update exercises for all recurring sessions of the same type in a training block
+ * @param {Object} plan - Workout plan
+ * @param {string} sessionId - ID of any session in the recurring group
+ * @param {Array<Object>} newExercises - New exercises to apply to all recurring sessions
+ * @returns {Object} Updated plan
+ */
+export const updateRecurringSessionExercises = (plan, sessionId, newExercises) => {
+  if (!plan || !sessionId || !newExercises) {
+    throw new Error('Plan, sessionId, and newExercises are required');
+  }
+
+  if (!Array.isArray(newExercises) || newExercises.length === 0) {
+    throw new Error('newExercises must be a non-empty array');
+  }
+
+  const recurringSessions = getRecurringSessionsInBlock(plan, sessionId);
+  if (recurringSessions.length === 0) {
+    console.warn('No recurring sessions found for this session');
+    return plan;
+  }
+  
+  const recurringSessionIds = new Set(recurringSessions.map(s => s.id));
+  
+  const updatedSessions = plan.sessions.map(session => {
+    if (recurringSessionIds.has(session.id)) {
+      // Update standard workout sessions with new exercises
+      if (['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(session.type)) {
+        return {
+          ...session,
+          exercises: newExercises
+        };
+      }
+    }
+    return session;
+  });
+  
+  return {
+    ...plan,
+    sessions: updatedSessions,
+    modified: Date.now()
+  };
+};
+
+/**
  * Populate session data for all session types
  * Generates full session objects so users don't need to re-generate on start
  * 
@@ -1031,7 +1106,7 @@ export const applyYogaProgression = (weekNumber, baseSession) => {
  * @param {Array<string>} equipmentAvailable - Equipment available for workouts
  * @returns {Promise<Object>} Session with populated data, or original session with error flag on failure
  */
-export const populateSessionData = async (session, experienceLevel, weekNumber, equipmentAvailable = ['all'], isDeloadWeek = false) => {
+export const populateSessionData = async (session, experienceLevel, weekNumber, equipmentAvailable = ['all']) => {
   // For standard workouts (upper, lower, full, push, pull, legs), 
   // generate exercises using the workout generator
   if (['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(session.type)) {

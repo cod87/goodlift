@@ -1638,7 +1638,7 @@ const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
                           color: 'text.secondary',
                         }}
                       >
-                        {index + 1}. {exercise.name}
+                        {index + 1}. {exercise['Exercise Name'] || exercise.name || 'Unknown Exercise'}
                       </Typography>
                     ))}
                   </Box>

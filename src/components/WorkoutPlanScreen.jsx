@@ -470,7 +470,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
                                   <Box sx={{ mt: 0.5 }}>
                                     {session.exercises.slice(0, 5).map((exercise, exIdx) => (
                                       <Typography key={exIdx} variant="caption" color="text.secondary" sx={{ display: 'block', ml: 1 }}>
-                                        • {exercise.name}
+                                        • {exercise['Exercise Name'] || exercise.name || 'Unknown Exercise'}
                                       </Typography>
                                     ))}
                                     {session.exercises.length > 5 && (

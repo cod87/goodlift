@@ -9,7 +9,6 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import { Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import GuestLogoutDialog from './GuestLogoutDialog';
@@ -153,7 +152,7 @@ const NavigationSidebar = ({
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => handleNavClick('dashboard')}
+                onClick={() => handleNavClick('selection')}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -165,7 +164,7 @@ const NavigationSidebar = ({
                   padding: 0,
                   width: '100%',
                 }}
-                aria-label="Go to Dashboard screen"
+                aria-label="Go to Workouts screen"
               >
                 <img
                   src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
@@ -208,12 +207,6 @@ const NavigationSidebar = ({
               overflowY: 'auto',
               overflowX: 'hidden',
             }}>
-              <NavLink
-                icon={<DashboardIcon />}
-                label="Dashboard"
-                isActive={currentScreen === 'dashboard'}
-                onClick={() => handleNavClick('dashboard')}
-              />
               <NavLink
                 icon={<FaDumbbell />}
                 label="Workouts"

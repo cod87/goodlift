@@ -20,7 +20,6 @@ import {
   MenuItem,
   TextField,
   Divider,
-  Autocomplete,
   Paper,
   Card,
   CardContent
@@ -30,6 +29,7 @@ import {
   Add as AddIcon,
   DragIndicator as DragIcon
 } from '@mui/icons-material';
+import ExerciseAutocomplete from './ExerciseAutocomplete';
 
 /**
  * RecurringSessionEditor - Dialog for editing exercises across recurring workout sessions
@@ -184,28 +184,6 @@ const RecurringSessionEditor = ({
     return groups;
   };
 
-  // Filter exercises based on search text (multi-term search)
-  const getFilteredOptions = (inputValue) => {
-    if (!inputValue) return availableExercises;
-    
-    const searchTerms = inputValue.toLowerCase().split(' ').filter(term => term.length > 0);
-    
-    return availableExercises.filter(ex => {
-      const searchableText = [
-        ex['Exercise Name'],
-        ex['Primary Muscle'],
-        ex['Secondary Muscles'],
-        ex['Equipment'],
-        ex['Movement Pattern'],
-        ex['Difficulty'],
-        ex['Workout Type']
-      ].join(' ').toLowerCase();
-      
-      // All search terms must match
-      return searchTerms.every(term => searchableText.includes(term));
-    });
-  };
-
   if (!session) return null;
 
   return (
@@ -300,10 +278,7 @@ const RecurringSessionEditor = ({
                           <DragIcon sx={{ color: 'text.disabled', cursor: 'grab' }} />
                           <Box sx={{ flex: 1 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 1, mb: 1 }}>
-                              <Autocomplete
-                                fullWidth
-                                size="small"
-                                options={availableExercises}
+                              <ExerciseAutocomplete
                                 value={exercise}
                                 onChange={(event, newValue) => {
                                   if (newValue) {
@@ -317,35 +292,9 @@ const RecurringSessionEditor = ({
                                     handleExerciseChange(index, 'Workout Type', newValue['Workout Type']);
                                   }
                                 }}
-                                getOptionLabel={(option) => option['Exercise Name'] || option.name || ''}
-                                filterOptions={(options, state) => {
-                                  return getFilteredOptions(state.inputValue);
-                                }}
-                                isOptionEqualToValue={(option, value) => 
-                                  (option['Exercise Name'] || option.name) === (value['Exercise Name'] || value.name)
-                                }
-                                renderInput={(params) => (
-                                  <TextField
-                                    {...params}
-                                    label="Exercise"
-                                    placeholder="Type to search and swap exercise..."
-                                  />
-                                )}
-                                renderOption={(props, option) => {
-                                  const { key, ...otherProps } = props;
-                                  return (
-                                    <li key={key} {...otherProps}>
-                                      <Box>
-                                        <Typography variant="body2">
-                                          {option['Exercise Name']}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                          {option['Primary Muscle']} • {option['Equipment']}
-                                        </Typography>
-                                      </Box>
-                                    </li>
-                                  );
-                                }}
+                                availableExercises={availableExercises}
+                                label="Exercise"
+                                placeholder="Type to search and swap exercise..."
                                 sx={{ flex: 1 }}
                               />
                               <IconButton 
@@ -409,41 +358,14 @@ const RecurringSessionEditor = ({
             Search by name, muscle group, equipment, or any combination (e.g., &quot;chest dumbbell&quot;)
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Autocomplete
-              fullWidth
-              size="small"
-              options={availableExercises}
+            <ExerciseAutocomplete
               value={selectedExercise}
               onChange={(event, newValue) => {
                 setSelectedExercise(newValue);
               }}
-              getOptionLabel={(option) => option['Exercise Name'] || option.name || ''}
-              filterOptions={(options, state) => {
-                return getFilteredOptions(state.inputValue);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Search exercises"
-                  placeholder="Type to search..."
-                />
-              )}
-              renderOption={(props, option) => {
-                const { key, ...otherProps } = props;
-                return (
-                  <li key={key} {...otherProps}>
-                    <Box>
-                      <Typography variant="body2">
-                        {option['Exercise Name']}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {option['Primary Muscle']} • {option['Equipment']}
-                      </Typography>
-                    </Box>
-                  </li>
-                );
-              }}
-              noOptionsText="No exercises found. Try different search terms."
+              availableExercises={availableExercises}
+              label="Search exercises"
+              placeholder="Type to search..."
             />
             <Button
               variant="contained"

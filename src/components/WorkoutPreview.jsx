@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, Snackbar, Alert, IconButton } from '@mui/material';
 import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
+import { EXERCISES_DATA_PATH } from '../utils/constants';
+import ExerciseAutocomplete from './ExerciseAutocomplete';
 
 /**
  * WorkoutPreview component displays a preview of the generated workout
@@ -17,6 +19,44 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [showNotification, setShowNotification] = useState(false);
   const [customizedSettings, setCustomizedSettings] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+  const [availableExercises, setAvailableExercises] = useState([]);
+
+  // Load all exercises data
+  useEffect(() => {
+    const loadExercises = async () => {
+      try {
+        const response = await fetch(EXERCISES_DATA_PATH);
+        const exercisesData = await response.json();
+        
+        // Filter exercises based on workout type
+        let filtered = exercisesData;
+        if (workoutType === 'upper') {
+          filtered = exercisesData.filter(ex => 
+            ex['Workout Type'] && 
+            (ex['Workout Type'].includes('Upper Body') || 
+             ex['Workout Type'].includes('Full Body') ||
+             ex['Workout Type'].includes('Push/Pull/Legs'))
+          );
+        } else if (workoutType === 'lower') {
+          filtered = exercisesData.filter(ex => 
+            ex['Workout Type'] && 
+            (ex['Workout Type'].includes('Lower Body') || 
+             ex['Workout Type'].includes('Full Body') ||
+             ex['Workout Type'].includes('Push/Pull/Legs'))
+          );
+        } else if (workoutType === 'full') {
+          filtered = exercisesData.filter(ex => 
+            ex['Workout Type'] && ex['Workout Type'].includes('Full Body')
+          );
+        }
+        setAvailableExercises(filtered);
+      } catch (error) {
+        console.error('Error loading exercises:', error);
+        setAvailableExercises([]);
+      }
+    };
+    loadExercises();
+  }, [workoutType]);
 
   // Load saved weights and target reps on mount
   useEffect(() => {
@@ -169,6 +209,14 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
     if (onRandomizeExercise) {
       onRandomizeExercise(exercise, globalIndex);
     }
+  }, [onRandomizeExercise]);
+
+  const handleSwapExercise = useCallback((globalIndex, newExercise) => {
+    if (!newExercise || !onRandomizeExercise) return;
+    
+    // Use the randomize callback to swap the exercise
+    // This will trigger the parent component to update the workout
+    onRandomizeExercise(newExercise, globalIndex);
   }, [onRandomizeExercise]);
 
   const handleStartWorkout = async () => {
@@ -362,10 +410,22 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             {exerciseIdx === 0 ? 'A' : 'B'}
                           </Typography>
                           <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                              <Typography variant="body1" sx={{ fontWeight: 600, flex: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
-                                {exerciseName}
-                              </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 0.5 }}>
+                              <Box sx={{ flex: 1 }}>
+                                <ExerciseAutocomplete
+                                  value={exercise}
+                                  onChange={(event, newValue) => {
+                                    if (newValue) {
+                                      const globalIndex = idx * 2 + exerciseIdx;
+                                      handleSwapExercise(globalIndex, newValue);
+                                    }
+                                  }}
+                                  availableExercises={availableExercises}
+                                  label="Exercise"
+                                  placeholder="Type to search and swap..."
+                                  disabled={availableExercises.length === 0}
+                                />
+                              </Box>
                               {onRandomizeExercise && (
                                 <IconButton
                                   size="small"
@@ -378,6 +438,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                                     color: 'primary.main',
                                     minWidth: '44px',
                                     minHeight: '44px',
+                                    mt: 0.5,
                                     '&:hover': {
                                       backgroundColor: 'rgba(19, 70, 134, 0.08)',
                                     },

@@ -352,6 +352,35 @@ const PlanCalendarScreen = ({ onNavigate, onStartWorkout }) => {
                   Session Type: {getSessionTypeLabel(selectedSession.type)}
                 </Typography>
                 
+                {/* Show exercises list if available */}
+                {selectedSession.exercises && selectedSession.exercises.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                      Exercises ({selectedSession.exercises.length}):
+                    </Typography>
+                    <Box sx={{ 
+                      maxHeight: '200px', 
+                      overflowY: 'auto',
+                      bgcolor: 'background.default',
+                      borderRadius: 1,
+                      p: 1.5,
+                    }}>
+                      {selectedSession.exercises.map((exercise, index) => (
+                        <Typography 
+                          key={index} 
+                          variant="body2" 
+                          sx={{ 
+                            py: 0.5,
+                            color: 'text.secondary',
+                          }}
+                        >
+                          {index + 1}. {exercise.name}
+                        </Typography>
+                      ))}
+                    </Box>
+                  </Box>
+                )}
+                
                 {selectedSession.notes && (
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                     Notes: {selectedSession.notes}

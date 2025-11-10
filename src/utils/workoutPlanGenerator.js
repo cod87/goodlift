@@ -43,6 +43,7 @@
  */
 
 import { MUSCLE_GROUPS } from './constants.js';
+import { generateStandardWorkout } from './workoutGenerator.js';
 
 /**
  * Validate a session object has required fields based on its type
@@ -105,6 +106,8 @@ export const validateSession = (session) => {
  * @returns {Object} Generated workout plan
  */
 export const generateWorkoutPlan = async (preferences) => {
+  console.log('generateWorkoutPlan called with preferences:', preferences);
+  
   const {
     goal = 'general_fitness',
     experienceLevel = 'intermediate',
@@ -117,6 +120,16 @@ export const generateWorkoutPlan = async (preferences) => {
     planName = 'My Workout Plan'
   } = preferences;
 
+  console.log('Parsed preferences:', {
+    planName,
+    duration,
+    goal,
+    experienceLevel,
+    daysPerWeek,
+    sessionTypes,
+    equipmentAvailable
+  });
+
   // Validate inputs
   if (daysPerWeek < 2 || daysPerWeek > 7) {
     throw new Error('Days per week must be between 2 and 7');
@@ -125,8 +138,11 @@ export const generateWorkoutPlan = async (preferences) => {
     throw new Error('Duration must be between 1 and 90 days');
   }
 
+  console.log('Input validation passed');
+
   // Determine split type based on days per week
   const splitType = determineSplitType(daysPerWeek, experienceLevel);
+  console.log('Split type determined:', splitType);
 
   // Generate session schedule
   const sessions = generateSessionSchedule({
@@ -139,16 +155,58 @@ export const generateWorkoutPlan = async (preferences) => {
     experienceLevel
   });
 
+  console.log(`Generated ${sessions.length} sessions in schedule`);
+
   // Calculate deload weeks (every 3-4 weeks per guide recommendations)
   const deloadWeeks = calculateDeloadWeeks(duration);
+  console.log('Deload weeks calculated:', deloadWeeks);
   
   // Populate session data for all sessions
-  const populatedSessions = await Promise.all(
-    sessions.map((session, index) => {
-      const weekNumber = Math.floor(index / daysPerWeek) + 1;
-      return populateSessionData(session, experienceLevel, weekNumber, equipmentAvailable);
-    })
-  );
+  // IMPORTANT: For progressive overload to work, we reuse the same exercises week-to-week
+  // until a deload week, then we can optionally vary them for the next block
+  const exerciseCache = {}; // Cache exercises by session type and week block
+  
+  console.log('Starting to populate session data...');
+  
+  // Process sessions sequentially to ensure cache is populated correctly
+  const populatedSessions = [];
+  for (let index = 0; index < sessions.length; index++) {
+    const session = sessions[index];
+    const weekNumber = Math.floor(index / daysPerWeek) + 1;
+    const isDeloadWeek = deloadWeeks.includes(weekNumber);
+    
+    // Determine which training block we're in (changes after each deload)
+    const blockNumber = deloadWeeks.filter(w => w < weekNumber).length + 1;
+    
+    // Create a cache key based on session type and training block
+    // This ensures same exercises are used within a block
+    const cacheKey = `${session.type}_block${blockNumber}`;
+    
+    // For the first session of this type in this block, generate new exercises
+    // For subsequent sessions, reuse the cached exercises
+    if (!exerciseCache[cacheKey]) {
+      console.log(`Generating exercises for session ${index + 1}: ${session.type} (block ${blockNumber})`);
+      const populated = await populateSessionData(session, experienceLevel, weekNumber, equipmentAvailable, isDeloadWeek);
+      exerciseCache[cacheKey] = populated.exercises || populated.sessionData;
+      console.log(`Session ${index + 1} populated with ${populated.exercises?.length || 0} exercises`);
+      populatedSessions.push(populated);
+    } else {
+      console.log(`Reusing exercises for session ${index + 1}: ${session.type} (block ${blockNumber})`);
+      // Reuse exercises from the first week of this block
+      populatedSessions.push({
+        ...session,
+        exercises: session.type !== 'hiit' && session.type !== 'yoga' && session.type !== 'stretch' 
+          ? exerciseCache[cacheKey] 
+          : null,
+        sessionData: session.type === 'hiit' || session.type === 'yoga' || session.type === 'stretch'
+          ? exerciseCache[cacheKey]
+          : null,
+        isDeloadWeek
+      });
+    }
+  }
+
+  console.log('All sessions populated, validating...');
 
   // Validate sessions were properly populated
   const validationErrors = [];
@@ -187,8 +245,16 @@ export const generateWorkoutPlan = async (preferences) => {
     created: Date.now(),
     modified: Date.now(),
     active: true,
-    validationWarnings: validationErrors.length > 0 ? validationErrors : null
+    validationWarnings: validationErrors.length > 0 ? validationErrors : []
   };
+
+  console.log('Plan created successfully:', {
+    id: plan.id,
+    name: plan.name,
+    totalSessions: plan.sessions.length,
+    sessionsWithExercises: plan.sessions.filter(s => s.exercises && s.exercises.length > 0).length,
+    validationWarnings: plan.validationWarnings
+  });
 
   return plan;
 };
@@ -965,12 +1031,12 @@ export const applyYogaProgression = (weekNumber, baseSession) => {
  * @param {Array<string>} equipmentAvailable - Equipment available for workouts
  * @returns {Promise<Object>} Session with populated data, or original session with error flag on failure
  */
-export const populateSessionData = async (session, experienceLevel, weekNumber, equipmentAvailable = ['all']) => {
+export const populateSessionData = async (session, experienceLevel, weekNumber, equipmentAvailable = ['all'], isDeloadWeek = false) => {
   // For standard workouts (upper, lower, full, push, pull, legs), 
   // generate exercises using the workout generator
   if (['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(session.type)) {
     try {
-      const { generateStandardWorkout } = await import('./workoutGenerator.js');
+      // Use static import - already imported at top of file
       
       // Load exercises from public data
       const exercisesResponse = await fetch(`${import.meta.env.BASE_URL}data/exercises.json`);
@@ -1017,6 +1083,7 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
       console.error('Error generating standard workout session:', error);
       return {
         ...session,
+        exercises: [], // Return empty array instead of undefined
         populationError: `Failed to generate exercises: ${error.message}`
       };
     }
@@ -1059,6 +1126,8 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
       console.error('Error generating HIIT session:', error);
       return {
         ...session,
+        exercises: null,
+        sessionData: null,
         populationError: `Failed to generate HIIT session: ${error.message}`
       };
     }
@@ -1099,11 +1168,17 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
       console.error('Error generating Yoga session:', error);
       return {
         ...session,
+        exercises: null,
+        sessionData: null,
         populationError: `Failed to generate Yoga session: ${error.message}`
       };
     }
   }
 
-  // Return session as-is for other types (cardio, etc.)
-  return session;
+  // Return session as-is for other types (cardio, etc.) with null fields for consistency
+  return {
+    ...session,
+    exercises: session.exercises || null,
+    sessionData: session.sessionData || null
+  };
 };

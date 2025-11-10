@@ -22,6 +22,7 @@ const SelectionScreen = memo(({
   onEquipmentChange,
   onStartWorkout,
   onCustomize,
+  onNavigate,
   loading,
 }) => {
   const [favoriteWorkouts, setFavoriteWorkouts] = useState([]);
@@ -64,12 +65,60 @@ const SelectionScreen = memo(({
   const todaysWorkout = getTodaysWorkout();
   const nextWorkouts = getUpcomingWorkouts(2);
   
-  // Convert plan days to weekly plan format for WeeklyPlanPreview
-  const weeklyPlan = currentPlan?.days?.map((day, index) => ({
-    day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][index],
-    type: day.subtype || day.type,
-    label: day.subtype ? day.subtype.charAt(0).toUpperCase() + day.subtype.slice(1) : day.type,
-  })) || [];
+  // Convert plan to weekly plan format for WeeklyPlanPreview
+  // Handle both plan structures: days (from createWeeklyPlan) and sessions (from generateWorkoutPlan)
+  const weeklyPlan = (() => {
+    if (!currentPlan) return [];
+    
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date();
+    const result = [];
+    
+    // If plan has sessions (from workout plan generator), show next 7 days from today
+    if (currentPlan.sessions && Array.isArray(currentPlan.sessions)) {
+      for (let i = 0; i < 7; i++) {
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + i);
+        targetDate.setHours(0, 0, 0, 0);
+        
+        // Find session for this date
+        const session = currentPlan.sessions.find(s => {
+          const sessionDate = new Date(s.date);
+          sessionDate.setHours(0, 0, 0, 0);
+          return sessionDate.getTime() === targetDate.getTime();
+        });
+        
+        if (session) {
+          result.push({
+            day: days[targetDate.getDay()],
+            type: session.type,
+            focus: session.focus,
+            estimatedDuration: session.estimatedDuration,
+            label: session.type.charAt(0).toUpperCase() + session.type.slice(1),
+          });
+        } else {
+          // No session for this day - it's a rest day
+          result.push({
+            day: days[targetDate.getDay()],
+            type: 'rest',
+            label: 'Rest',
+          });
+        }
+      }
+    }
+    // If plan has days (from weekly plan), use that structure
+    else if (currentPlan.days && Array.isArray(currentPlan.days)) {
+      return currentPlan.days.map((day, index) => ({
+        day: days[index],
+        type: day.subtype || day.type,
+        focus: day.focus,
+        estimatedDuration: day.estimatedDuration,
+        label: day.subtype ? day.subtype.charAt(0).toUpperCase() + day.subtype.slice(1) : day.type,
+      }));
+    }
+    
+    return result;
+  })();
 
   const handleStartClick = () => {
     if (workoutType) {
@@ -165,24 +214,10 @@ const SelectionScreen = memo(({
   };
   
   const handleViewPlan = () => {
-    // Future: Navigate to full plan screen
-    console.log('View plan - to be implemented');
-  };
-  
-  const handleRandomize = () => {
-    // Generate a random workout type (not tied to plan)
-    const types = ['full', 'upper', 'lower'];
-    const randomType = types[Math.floor(Math.random() * types.length)];
-    onWorkoutTypeChange(randomType);
-    const equipmentFilter = selectedEquipment.has('all') 
-      ? 'all' 
-      : Array.from(selectedEquipment);
-    onStartWorkout(randomType, equipmentFilter);
-  };
-  
-  const handleResetPlan = () => {
-    // Reset the plan to defaults
-    console.log('Reset plan - to be implemented');
+    // Navigate to plan calendar screen
+    if (onNavigate) {
+      onNavigate('plan-calendar');
+    }
   };
 
   const handleEquipmentToggle = (equipment) => {
@@ -267,7 +302,6 @@ const SelectionScreen = memo(({
               lastWorkout={lastWorkout}
               onQuickStart={handleQuickStart}
               onViewPlan={handleViewPlan}
-              onRandomize={handleRandomize}
               loading={loading}
             />
           </Box>
@@ -278,8 +312,6 @@ const SelectionScreen = memo(({
               weeklyPlan={weeklyPlan}
               onQuickStartDay={handleQuickStartDay}
               onEditPlan={handleViewPlan}
-              onRandomizeWeek={handleRandomize}
-              onResetPlan={handleResetPlan}
             />
           </Box>
 
@@ -291,14 +323,6 @@ const SelectionScreen = memo(({
           boxShadow: '0 8px 32px rgba(19, 70, 134, 0.12)',
         }}>
           <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
-            <Box sx={{ textAlign: 'center', mb: 3 }}>
-              <img
-                src={`${import.meta.env.BASE_URL}goodlift-favicon.svg`}
-                alt="GoodLift"
-                style={{ height: '64px', width: 'auto' }}
-              />
-            </Box>
-
             {/* Workout Type and Equipment Dropdowns in Single Row */}
             <Box sx={{ mb: 3 }}>
               <Stack 
@@ -612,6 +636,7 @@ SelectionScreen.propTypes = {
   onEquipmentChange: PropTypes.func.isRequired,
   onStartWorkout: PropTypes.func.isRequired,
   onCustomize: PropTypes.func,
+  onNavigate: PropTypes.func,
   loading: PropTypes.bool.isRequired,
 };
 

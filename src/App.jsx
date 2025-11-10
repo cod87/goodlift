@@ -541,6 +541,7 @@ function App() {
               onEquipmentChange={handleEquipmentChange}
               onStartWorkout={handleStartWorkout}
               onCustomize={handleCustomize}
+              onNavigate={handleNavigate}
               loading={loading}
             />
           )}
@@ -592,7 +593,7 @@ function App() {
             />
           )}
           
-          {currentScreen === 'progress' && <ProgressScreen />}
+          {currentScreen === 'progress' && <ProgressScreen onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />}
 
           {currentScreen === 'hiit' && <HiitTimerScreen />}
 

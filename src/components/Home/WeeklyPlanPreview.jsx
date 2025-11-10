@@ -16,8 +16,6 @@ import {
 } from '@mui/material';
 import { 
   Edit, 
-  Shuffle, 
-  Refresh,
   PlayArrow
 } from '@mui/icons-material';
 import { getWorkoutTypeDisplayName } from '../../utils/weeklyPlanDefaults';
@@ -30,8 +28,6 @@ const WeeklyPlanPreview = memo(({
   weeklyPlan = [],
   onQuickStartDay,
   onEditPlan,
-  onRandomizeWeek,
-  onResetPlan,
   currentDay = new Date().getDay()
 }) => {
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -181,32 +177,6 @@ const WeeklyPlanPreview = memo(({
             );
           })}
         </List>
-
-        {/* Action Buttons */}
-        <Stack 
-          direction="row" 
-          spacing={1} 
-          sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}
-        >
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<Shuffle />}
-            onClick={onRandomizeWeek}
-            sx={{ flex: 1 }}
-          >
-            Randomize
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<Refresh />}
-            onClick={onResetPlan}
-            sx={{ flex: 1 }}
-          >
-            Reset
-          </Button>
-        </Stack>
       </CardContent>
     </Card>
   );
@@ -225,8 +195,6 @@ WeeklyPlanPreview.propTypes = {
   })).isRequired,
   onQuickStartDay: PropTypes.func,
   onEditPlan: PropTypes.func.isRequired,
-  onRandomizeWeek: PropTypes.func.isRequired,
-  onResetPlan: PropTypes.func.isRequired,
   currentDay: PropTypes.number,
 };
 

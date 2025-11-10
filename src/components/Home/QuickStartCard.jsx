@@ -11,8 +11,7 @@ import {
 } from '@mui/material';
 import { 
   PlayArrow, 
-  CalendarToday, 
-  Shuffle 
+  CalendarToday
 } from '@mui/icons-material';
 import { formatDuration } from '../../utils/helpers';
 import { getWorkoutTypeDisplayName } from '../../utils/weeklyPlanDefaults';
@@ -137,14 +136,6 @@ const QuickStartCard = memo(({
           >
             View Plan
           </Button>
-          <Button
-            variant="outlined"
-            onClick={onRandomize}
-            disabled={loading}
-            sx={{ minWidth: 'auto', px: 2 }}
-          >
-            <Shuffle />
-          </Button>
         </Stack>
 
         {/* What's Next */}
@@ -210,7 +201,6 @@ QuickStartCard.propTypes = {
   }),
   onQuickStart: PropTypes.func.isRequired,
   onViewPlan: PropTypes.func.isRequired,
-  onRandomize: PropTypes.func.isRequired,
   loading: PropTypes.bool,
 };
 

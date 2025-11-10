@@ -20,7 +20,8 @@ import {
   updatePinnedExerciseMode,
   removePinnedExercise,
   addPinnedExercise,
-  getActivePlan
+  getActivePlan,
+  saveWorkoutPlan
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
 import { 
@@ -28,6 +29,10 @@ import {
   getUniqueExercises,
   formatProgressionForChart 
 } from '../utils/progressionHelpers';
+import { moveSession } from '../utils/workoutPlanGenerator';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Calendar from './Calendar';
 import StatsRow from './Progress/StatsRow';
 import ChartTabs from './Progress/ChartTabs';
@@ -59,7 +64,8 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Menu
 } from '@mui/material';
 import { 
   FitnessCenter, 
@@ -72,7 +78,9 @@ import {
   DirectionsRun,
   Add,
   Close,
-  Edit
+  Edit,
+  MoreVert as MoreVertIcon,
+  EventRepeat as MoveIcon
 } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {
@@ -99,7 +107,7 @@ ChartJS.register(
   Filler
 );
 
-const ProgressScreen = () => {
+const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
   const [history, setHistory] = useState([]);
   const [stretchSessions, setStretchSessions] = useState([]);
   const [yogaSessions, setYogaSessions] = useState([]);
@@ -116,6 +124,11 @@ const ProgressScreen = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
   const [editingSessionType, setEditingSessionType] = useState(null); // 'workout', 'cardio', 'hiit', 'yoga'
+  const [plannedSession, setPlannedSession] = useState(null); // For displaying planned session details
+  const [plannedSessionDialogOpen, setPlannedSessionDialogOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+  const [newDate, setNewDate] = useState(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -391,13 +404,27 @@ const ProgressScreen = () => {
   // Handle day click in calendar
   const handleDayClick = (date) => {
     setSelectedDate(date);
-    // Scroll to the session list
-    setTimeout(() => {
-      const sessionList = document.querySelector('.workout-history-container');
-      if (sessionList) {
-        sessionList.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
+    
+    // Check if there are planned sessions for this date
+    const dateStr = date.toDateString();
+    const plannedSessionsOnDate = (activePlan?.sessions || []).filter(session => {
+      const sessionDate = new Date(session.date);
+      return sessionDate.toDateString() === dateStr && session.status === 'planned';
+    });
+    
+    if (plannedSessionsOnDate.length > 0) {
+      // Show planned session dialog
+      setPlannedSession(plannedSessionsOnDate[0]);
+      setPlannedSessionDialogOpen(true);
+    } else {
+      // Scroll to the session list for completed sessions
+      setTimeout(() => {
+        const sessionList = document.querySelector('.workout-history-container');
+        if (sessionList) {
+          sessionList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
   };
 
   // Filter sessions by selected date
@@ -437,6 +464,77 @@ const ProgressScreen = () => {
     filteredSessions.yoga.length > 0 ||
     filteredSessions.cardio.length > 0
   );
+
+  const getSessionTypeLabel = (type) => {
+    const labels = {
+      upper: 'Upper Body',
+      lower: 'Lower Body',
+      full: 'Full Body',
+      push: 'Push',
+      pull: 'Pull',
+      legs: 'Legs',
+      hiit: 'HIIT',
+      cardio: 'Cardio',
+      yoga: 'Yoga',
+      stretch: 'Stretch'
+    };
+    return labels[type] || type;
+  };
+
+  const handleStartPlannedSession = () => {
+    if (!plannedSession || !onStartWorkout) {
+      setPlannedSessionDialogOpen(false);
+      return;
+    }
+
+    // Create plan context for navigation
+    const planContext = {
+      planId: activePlan?.id,
+      sessionId: plannedSession.id,
+      sessionDate: plannedSession.date
+    };
+
+    // Start workout with pre-generated exercises from the plan
+    onStartWorkout(
+      plannedSession.type,
+      new Set(['all']),
+      plannedSession.exercises,
+      planContext
+    );
+    
+    setPlannedSessionDialogOpen(false);
+  };
+
+  const handleClosePlannedDialog = () => {
+    setPlannedSessionDialogOpen(false);
+    setPlannedSession(null);
+    setAnchorEl(null);
+  };
+
+  const handleMenuOpen = (event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMoveSession = () => {
+    setMoveDialogOpen(true);
+    setNewDate(selectedDate);
+  };
+
+  const handleConfirmMove = async () => {
+    if (!plannedSession || !activePlan || !newDate) return;
+    
+    const updatedPlan = moveSession(activePlan, plannedSession.id, newDate);
+    await saveWorkoutPlan(updatedPlan);
+    await loadData(); // Reload to get updated plan
+    
+    setMoveDialogOpen(false);
+    handleClosePlannedDialog();
+  };
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh' }}>
@@ -1476,6 +1574,130 @@ const ProgressScreen = () => {
           sessionType={editingSessionType}
         />
       )}
+
+      {/* Planned Session Dialog */}
+      <Dialog 
+        open={plannedSessionDialogOpen} 
+        onClose={handleClosePlannedDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">
+              {selectedDate && selectedDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </Typography>
+            <IconButton onClick={handleMenuOpen}>
+              <MoreVertIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {plannedSession && (
+            <Box>
+              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <Chip 
+                  label={getSessionTypeLabel(plannedSession.type)} 
+                  color="primary"
+                />
+                <Chip 
+                  label="Planned" 
+                  color="default"
+                  size="small"
+                />
+              </Box>
+              
+              <Typography variant="body1" gutterBottom>
+                Session Type: {getSessionTypeLabel(plannedSession.type)}
+              </Typography>
+              
+              {/* Show exercises list if available */}
+              {plannedSession.exercises && plannedSession.exercises.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                    Exercises ({plannedSession.exercises.length}):
+                  </Typography>
+                  <Box sx={{ 
+                    maxHeight: '200px', 
+                    overflowY: 'auto',
+                    bgcolor: 'background.default',
+                    borderRadius: 1,
+                    p: 1.5,
+                  }}>
+                    {plannedSession.exercises.map((exercise, index) => (
+                      <Typography 
+                        key={index} 
+                        variant="body2" 
+                        sx={{ 
+                          py: 0.5,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        {index + 1}. {exercise['Exercise Name'] || exercise.name || 'Unknown Exercise'}
+                      </Typography>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePlannedDialog}>Close</Button>
+          {plannedSession && (
+            <Button 
+              variant="contained" 
+              color="primary"
+              onClick={handleStartPlannedSession}
+            >
+              Start Workout
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+
+      {/* Session Options Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleMoveSession}>
+          <MoveIcon sx={{ mr: 1 }} fontSize="small" />
+          Move to Different Date
+        </MenuItem>
+      </Menu>
+
+      {/* Move Session Dialog */}
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Dialog open={moveDialogOpen} onClose={() => setMoveDialogOpen(false)}>
+          <DialogTitle>Move Session</DialogTitle>
+          <DialogContent sx={{ pt: 2 }}>
+            <DatePicker
+              label="New Date"
+              value={newDate}
+              onChange={(date) => setNewDate(date)}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  margin: 'normal'
+                }
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setMoveDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleConfirmMove} variant="contained">
+              Move
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </LocalizationProvider>
     </motion.div>
     </Box>
   );
@@ -1606,6 +1828,11 @@ EditSessionDialog.propTypes = {
   onSave: PropTypes.func.isRequired,
   session: PropTypes.object.isRequired,
   sessionType: PropTypes.string.isRequired,
+};
+
+ProgressScreen.propTypes = {
+  onNavigate: PropTypes.func,
+  onStartWorkout: PropTypes.func,
 };
 
 export default ProgressScreen;

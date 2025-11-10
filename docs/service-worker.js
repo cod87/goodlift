@@ -1,6 +1,6 @@
 // GoodLift PWA Service Worker
 // Cache name - increment version to force update of cached files
-const CACHE_NAME = 'goodlift-pwa-v1';
+const CACHE_NAME = 'goodlift-pwa-v2';
 
 // Files to cache for offline functionality
 // Note: These are the core app shell files. Update this list when adding new critical assets.

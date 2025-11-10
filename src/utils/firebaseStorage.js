@@ -10,6 +10,34 @@ import { db } from '../firebase';
  * @param {string} userId - The authenticated user's UID
  * @param {object} data - The data to save (workoutHistory, userStats, exerciseWeights)
  */
+/**
+ * Remove undefined values from an object recursively
+ * Firebase Firestore doesn't accept undefined values
+ * @param {any} obj - Object to clean
+ * @returns {any} - Cleaned object
+ */
+const removeUndefined = (obj) => {
+  if (obj === null || obj === undefined) {
+    return null;
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => removeUndefined(item));
+  }
+  
+  if (typeof obj === 'object') {
+    const cleaned = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = removeUndefined(value);
+      }
+    }
+    return cleaned;
+  }
+  
+  return obj;
+};
+
 export const saveUserDataToFirebase = async (userId, data) => {
   if (!userId) {
     console.error('Cannot save data: No user ID provided');
@@ -18,10 +46,25 @@ export const saveUserDataToFirebase = async (userId, data) => {
 
   try {
     const userDocRef = doc(db, 'users', userId, 'data', 'userData');
-    await setDoc(userDocRef, {
+    
+    // Remove all undefined values before saving
+    const cleanedData = removeUndefined({
       ...data,
       lastUpdated: new Date().toISOString()
-    }, { merge: true });
+    });
+    
+    // Log what we're actually saving
+    if (cleanedData.workoutPlans) {
+      console.log('Saving workout plans to Firebase:', {
+        count: cleanedData.workoutPlans.length,
+        firstPlanId: cleanedData.workoutPlans[0]?.id,
+        firstPlanName: cleanedData.workoutPlans[0]?.name,
+        firstPlanSessions: cleanedData.workoutPlans[0]?.sessions?.length,
+        firstSessionExercises: cleanedData.workoutPlans[0]?.sessions?.[0]?.exercises?.length
+      });
+    }
+    
+    await setDoc(userDocRef, cleanedData, { merge: true });
     console.log('Data saved to Firebase successfully');
   } catch (error) {
     console.error('Error saving data to Firebase:', error);
@@ -47,6 +90,20 @@ export const loadUserDataFromFirebase = async (userId) => {
     if (docSnap.exists()) {
       const data = docSnap.data();
       console.log('Data loaded from Firebase successfully');
+      
+      // Log workout plans details
+      if (data.workoutPlans) {
+        console.log('Firebase loaded workoutPlans:', {
+          count: data.workoutPlans.length,
+          firstPlanId: data.workoutPlans[0]?.id,
+          firstPlanSessions: data.workoutPlans[0]?.sessions?.length,
+          firstSessionExercises: data.workoutPlans[0]?.sessions?.[0]?.exercises?.length,
+          rawFirstSession: data.workoutPlans[0]?.sessions?.[0]
+        });
+      } else {
+        console.log('No workoutPlans in Firebase data');
+      }
+      
       return data;
     } else {
       console.log('No data found in Firebase for this user');
@@ -175,5 +232,35 @@ export const saveYogaSessionsToFirebase = async (userId, yogaSessions) => {
     await saveUserDataToFirebase(userId, { yogaSessions });
   } catch (error) {
     console.error('Error saving yoga sessions to Firebase:', error);
+  }
+};
+
+/**
+ * Save workout plans to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} workoutPlans - The workout plans array
+ */
+export const saveWorkoutPlansToFirebase = async (userId, workoutPlans) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { workoutPlans });
+  } catch (error) {
+    console.error('Error saving workout plans to Firebase:', error);
+  }
+};
+
+/**
+ * Save active plan ID to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {string|null} activePlanId - The active plan ID or null
+ */
+export const saveActivePlanToFirebase = async (userId, activePlanId) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { activePlanId });
+  } catch (error) {
+    console.error('Error saving active plan to Firebase:', error);
   }
 };

@@ -29,6 +29,7 @@ const QuickStartCard = memo(({
   lastWorkout,
   onQuickStart,
   onViewPlan,
+  onRandomize,
   loading = false
 }) => {
   const hasLastWorkout = lastWorkout && lastWorkout.date;

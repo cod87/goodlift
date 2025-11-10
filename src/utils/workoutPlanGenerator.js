@@ -245,7 +245,7 @@ export const generateWorkoutPlan = async (preferences) => {
     created: Date.now(),
     modified: Date.now(),
     active: true,
-    validationWarnings: validationErrors.length > 0 ? validationErrors : null
+    validationWarnings: validationErrors.length > 0 ? validationErrors : []
   };
 
   console.log('Plan created successfully:', {
@@ -1126,6 +1126,8 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
       console.error('Error generating HIIT session:', error);
       return {
         ...session,
+        exercises: null,
+        sessionData: null,
         populationError: `Failed to generate HIIT session: ${error.message}`
       };
     }
@@ -1166,11 +1168,17 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
       console.error('Error generating Yoga session:', error);
       return {
         ...session,
+        exercises: null,
+        sessionData: null,
         populationError: `Failed to generate Yoga session: ${error.message}`
       };
     }
   }
 
-  // Return session as-is for other types (cardio, etc.)
-  return session;
+  // Return session as-is for other types (cardio, etc.) with null fields for consistency
+  return {
+    ...session,
+    exercises: session.exercises || null,
+    sessionData: session.sessionData || null
+  };
 };

@@ -19,7 +19,11 @@ import {
   Select,
   MenuItem,
   TextField,
-  Divider
+  Divider,
+  Autocomplete,
+  Paper,
+  Card,
+  CardContent
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -41,11 +45,11 @@ const RecurringSessionEditor = ({
 }) => {
   const [exercises, setExercises] = useState([]);
   const [availableExercises, setAvailableExercises] = useState([]);
-  const [selectedExercise, setSelectedExercise] = useState('');
+  const [selectedExercise, setSelectedExercise] = useState(null);
 
   useEffect(() => {
     if (session && session.exercises) {
-      // Clone exercises for editing
+      // Clone exercises for editing, preserving superset groups
       setExercises(session.exercises.map(ex => ({ ...ex })));
     }
   }, [session]);
@@ -87,23 +91,18 @@ const RecurringSessionEditor = ({
   const handleAddExercise = () => {
     if (!selectedExercise) return;
 
-    const exerciseToAdd = availableExercises.find(
-      ex => (ex['Exercise Name'] || ex.name) === selectedExercise
-    );
-
-    if (exerciseToAdd) {
-      setExercises([
-        ...exercises,
-        {
-          ...exerciseToAdd,
-          name: exerciseToAdd['Exercise Name'] || exerciseToAdd.name,
-          sets: 3,
-          reps: '10',
-          restTime: 90
-        }
-      ]);
-      setSelectedExercise('');
-    }
+    setExercises([
+      ...exercises,
+      {
+        ...selectedExercise,
+        name: selectedExercise['Exercise Name'] || selectedExercise.name,
+        sets: 3,
+        reps: '10',
+        restTime: 90,
+        supersetGroup: null // New exercises don't have a superset group by default
+      }
+    ]);
+    setSelectedExercise(null);
   };
 
   const handleRemoveExercise = (index) => {
@@ -151,6 +150,62 @@ const RecurringSessionEditor = ({
     return labels[type] || type;
   };
 
+  // Group exercises by superset
+  const groupedExercises = () => {
+    const groups = [];
+    const grouped = new Map();
+    
+    exercises.forEach((exercise, index) => {
+      const groupId = exercise.supersetGroup;
+      if (groupId) {
+        if (!grouped.has(groupId)) {
+          grouped.set(groupId, []);
+        }
+        grouped.get(groupId).push({ exercise, index });
+      } else {
+        // Exercises without superset group go in their own group
+        groups.push({
+          id: `single-${index}`,
+          isSuperset: false,
+          exercises: [{ exercise, index }]
+        });
+      }
+    });
+    
+    // Add superset groups
+    grouped.forEach((exs, groupId) => {
+      groups.push({
+        id: `superset-${groupId}`,
+        isSuperset: true,
+        exercises: exs
+      });
+    });
+    
+    return groups;
+  };
+
+  // Filter exercises based on search text (multi-term search)
+  const getFilteredOptions = (inputValue) => {
+    if (!inputValue) return availableExercises;
+    
+    const searchTerms = inputValue.toLowerCase().split(' ').filter(term => term.length > 0);
+    
+    return availableExercises.filter(ex => {
+      const searchableText = [
+        ex['Exercise Name'],
+        ex['Primary Muscle'],
+        ex['Secondary Muscles'],
+        ex['Equipment'],
+        ex['Movement Pattern'],
+        ex['Difficulty'],
+        ex['Workout Type']
+      ].join(' ').toLowerCase();
+      
+      // All search terms must match
+      return searchTerms.every(term => searchableText.includes(term));
+    });
+  };
+
   if (!session) return null;
 
   return (
@@ -180,66 +235,102 @@ const RecurringSessionEditor = ({
               No exercises yet. Add exercises below.
             </Typography>
           ) : (
-            <List sx={{ 
-              bgcolor: 'background.default', 
-              borderRadius: 1,
-              maxHeight: 300,
+            <Box sx={{ 
+              maxHeight: 400,
               overflowY: 'auto'
             }}>
-              {exercises.map((exercise, index) => (
-                <ListItem
-                  key={index}
-                  secondaryAction={
-                    <IconButton 
-                      edge="end" 
-                      onClick={() => handleRemoveExercise(index)}
-                      size="small"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  }
+              {groupedExercises().map((group) => (
+                <Card 
+                  key={group.id} 
+                  variant="outlined" 
                   sx={{ 
-                    borderBottom: index < exercises.length - 1 ? '1px solid' : 'none',
-                    borderColor: 'divider',
-                    py: 1.5
+                    mb: 2,
+                    bgcolor: group.isSuperset ? 'action.hover' : 'background.paper',
+                    borderColor: group.isSuperset ? 'primary.main' : 'divider',
+                    borderWidth: group.isSuperset ? 2 : 1
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 2 }}>
-                    <DragIcon sx={{ color: 'text.disabled', cursor: 'grab' }} />
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {exercise.name || exercise['Exercise Name']}
+                  {group.isSuperset && (
+                    <Box sx={{ 
+                      bgcolor: 'primary.main', 
+                      color: 'primary.contrastText', 
+                      px: 2, 
+                      py: 0.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                        SUPERSET
                       </Typography>
-                      <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
-                        <TextField
-                          size="small"
-                          label="Sets"
-                          type="number"
-                          value={exercise.sets || 3}
-                          onChange={(e) => handleExerciseChange(index, 'sets', parseInt(e.target.value))}
-                          sx={{ width: 80 }}
-                        />
-                        <TextField
-                          size="small"
-                          label="Reps"
-                          value={exercise.reps || '10'}
-                          onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
-                          sx={{ width: 100 }}
-                        />
-                        <TextField
-                          size="small"
-                          label="Rest (s)"
-                          type="number"
-                          value={exercise.restTime || 90}
-                          onChange={(e) => handleExerciseChange(index, 'restTime', parseInt(e.target.value))}
-                          sx={{ width: 100 }}
-                        />
-                      </Box>
                     </Box>
-                  </Box>
-                </ListItem>
+                  )}
+                  <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                    {group.exercises.map(({ exercise, index }, groupIndex) => (
+                      <Box
+                        key={index}
+                        sx={{ 
+                          borderBottom: groupIndex < group.exercises.length - 1 ? '1px solid' : 'none',
+                          borderColor: 'divider',
+                          py: 1.5,
+                          px: 1
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 2 }}>
+                          <DragIcon sx={{ color: 'text.disabled', cursor: 'grab' }} />
+                          <Box sx={{ flex: 1 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                {exercise.name || exercise['Exercise Name']}
+                              </Typography>
+                              <IconButton 
+                                edge="end" 
+                                onClick={() => handleRemoveExercise(index)}
+                                size="small"
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                            {exercise['Primary Muscle'] && (
+                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                {exercise['Primary Muscle']} • {exercise['Equipment']}
+                              </Typography>
+                            )}
+                            <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
+                              <TextField
+                                size="small"
+                                label="Sets"
+                                type="number"
+                                value={exercise.sets || 3}
+                                onChange={(e) => handleExerciseChange(index, 'sets', parseInt(e.target.value))}
+                                sx={{ width: 80 }}
+                                inputProps={{ min: 1 }}
+                              />
+                              <TextField
+                                size="small"
+                                label="Reps"
+                                value={exercise.reps || '10'}
+                                onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
+                                sx={{ width: 100 }}
+                              />
+                              <TextField
+                                size="small"
+                                label="Rest (s)"
+                                type="number"
+                                value={exercise.restTime || 90}
+                                onChange={(e) => handleExerciseChange(index, 'restTime', parseInt(e.target.value))}
+                                sx={{ width: 100 }}
+                                inputProps={{ min: 0 }}
+                              />
+                            </Box>
+                          </Box>
+                        </Box>
+                      </Box>
+                    ))}
+                  </CardContent>
+                </Card>
               ))}
-            </List>
+            </Box>
           )}
         </Box>
 
@@ -249,29 +340,52 @@ const RecurringSessionEditor = ({
           <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
             Add Exercise
           </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+            Search by name, muscle group, equipment, or any combination (e.g., &quot;chest dumbbell&quot;)
+          </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Select Exercise</InputLabel>
-              <Select
-                value={selectedExercise}
-                label="Select Exercise"
-                onChange={(e) => setSelectedExercise(e.target.value)}
-              >
-                {availableExercises.map((ex, index) => (
-                  <MenuItem 
-                    key={index} 
-                    value={ex['Exercise Name'] || ex.name}
-                  >
-                    {ex['Exercise Name'] || ex.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              fullWidth
+              size="small"
+              options={availableExercises}
+              value={selectedExercise}
+              onChange={(event, newValue) => {
+                setSelectedExercise(newValue);
+              }}
+              getOptionLabel={(option) => option['Exercise Name'] || option.name || ''}
+              filterOptions={(options, state) => {
+                return getFilteredOptions(state.inputValue);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search exercises"
+                  placeholder="Type to search..."
+                />
+              )}
+              renderOption={(props, option) => {
+                const { key, ...otherProps } = props;
+                return (
+                  <li key={key} {...otherProps}>
+                    <Box>
+                      <Typography variant="body2">
+                        {option['Exercise Name']}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {option['Primary Muscle']} • {option['Equipment']}
+                      </Typography>
+                    </Box>
+                  </li>
+                );
+              }}
+              noOptionsText="No exercises found. Try different search terms."
+            />
             <Button
               variant="contained"
               startIcon={<AddIcon />}
               onClick={handleAddExercise}
               disabled={!selectedExercise}
+              sx={{ minWidth: 100 }}
             >
               Add
             </Button>

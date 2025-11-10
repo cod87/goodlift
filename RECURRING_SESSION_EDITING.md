@@ -36,11 +36,19 @@ Users can now edit workout exercises once and have those changes automatically a
 
 #### RecurringSessionEditor.jsx
 A dialog component that provides:
-- List of current exercises with drag-and-drop ordering
+- Visual grouping of exercises by superset pairs (exercises paired during plan generation)
+- Multi-term autocomplete search for exercises (search by name, muscle group, equipment, or any combination)
 - Ability to add new exercises from filtered list (based on session type)
-- Inline editing of sets, reps, and rest time
+- Only allows selection from valid exercises matching the session's workout type
+- Inline editing of sets, reps, and rest time within superset groups
 - Visual feedback showing how many sessions will be affected
 - Validation before saving
+
+**Enhanced Features:**
+- **Autocomplete Search**: Users can search exercises by typing multiple keywords (e.g., "chest dumbbell" to find all chest exercises using dumbbells)
+- **Superset Visualization**: Exercises paired as supersets are displayed in colored cards with a "SUPERSET" header
+- **Smart Filtering**: Search matches against exercise name, primary muscle, secondary muscles, equipment, movement pattern, difficulty, and workout type
+- **Multi-term Search**: All search terms must match for an exercise to appear in results
 
 #### ProgressScreen.jsx Updates
 - Added "Edit Recurring Sessions" option to planned session menu
@@ -139,20 +147,28 @@ HIIT and Yoga sessions use `sessionData` instead of `exercises` array and have d
 ### Why Inline Exercise Editing?
 Allowing users to edit sets, reps, and rest time directly in the list provides immediate feedback and reduces the number of clicks needed to customize a workout.
 
+### Why Autocomplete Instead of Dropdown?
+A traditional dropdown becomes cumbersome with 100+ exercises. Autocomplete with multi-term search allows users to quickly find exercises by typing relevant keywords (e.g., "chest barbell" or "leg compound"), making exercise selection much faster and more intuitive.
+
+### Why Visual Superset Grouping?
+Exercises are paired into supersets during plan generation for optimal workout efficiency (agonist-antagonist pairings). Visualizing these pairs helps users understand the intended workout structure and maintain proper superset pairings when editing.
+
 ## Future Enhancements
 
 ### Potential Improvements
-1. **Drag-and-drop reordering**: Allow users to reorder exercises
+1. **Drag-and-drop reordering**: Allow users to reorder exercises and create new superset pairs
 2. **HIIT/Yoga support**: Extend recurring editing to other session types
 3. **Cross-block editing**: Option to apply changes across multiple training blocks
 4. **Templates**: Save recurring session configurations as templates
 5. **Preview**: Show before/after comparison of all affected sessions
 6. **Undo/Redo**: Allow users to revert batch changes
+7. **Custom superset creation**: Allow users to manually create/break superset pairs
 
 ### Performance Considerations
 - Current implementation handles plans up to 90 days efficiently
 - For larger plans, consider lazy loading of exercises
 - Session updates are batched in a single operation
+- Autocomplete filtering is performed client-side for instant results
 
 ## Security Summary
 No new security concerns introduced:

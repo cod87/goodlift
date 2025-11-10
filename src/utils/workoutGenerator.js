@@ -120,10 +120,12 @@ const getRandomExercises = (exerciseDB, muscle, count, currentWorkout = [], equi
 
 /**
  * Pair exercises into supersets based on opposing muscle groups
+ * Adds supersetGroup property to enable visual grouping in UI
  */
 const pairExercises = (exercises) => {
   const pairings = [];
   const remaining = [...exercises];
+  let supersetGroupId = 1;
 
   while (remaining.length >= 2) {
     const exercise1 = remaining.shift();
@@ -152,12 +154,16 @@ const pairExercises = (exercises) => {
     }
 
     const exercise2 = remaining.splice(bestPairIndex, 1)[0];
-    pairings.push(exercise1, exercise2);
+    
+    // Add superset group identifier to both exercises
+    pairings.push({ ...exercise1, supersetGroup: supersetGroupId });
+    pairings.push({ ...exercise2, supersetGroup: supersetGroupId });
+    supersetGroupId++;
   }
   
-  // Add any remaining unpaired exercise
+  // Add any remaining unpaired exercise (no superset group)
   if (remaining.length > 0) {
-    pairings.push(...remaining);
+    pairings.push(...remaining.map(ex => ({ ...ex, supersetGroup: null })));
   }
   
   return pairings;

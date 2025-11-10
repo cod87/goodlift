@@ -53,6 +53,17 @@ export const saveUserDataToFirebase = async (userId, data) => {
       lastUpdated: new Date().toISOString()
     });
     
+    // Log what we're actually saving
+    if (cleanedData.workoutPlans) {
+      console.log('Saving workout plans to Firebase:', {
+        count: cleanedData.workoutPlans.length,
+        firstPlanId: cleanedData.workoutPlans[0]?.id,
+        firstPlanName: cleanedData.workoutPlans[0]?.name,
+        firstPlanSessions: cleanedData.workoutPlans[0]?.sessions?.length,
+        firstSessionExercises: cleanedData.workoutPlans[0]?.sessions?.[0]?.exercises?.length
+      });
+    }
+    
     await setDoc(userDocRef, cleanedData, { merge: true });
     console.log('Data saved to Firebase successfully');
   } catch (error) {

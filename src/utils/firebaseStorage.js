@@ -90,6 +90,20 @@ export const loadUserDataFromFirebase = async (userId) => {
     if (docSnap.exists()) {
       const data = docSnap.data();
       console.log('Data loaded from Firebase successfully');
+      
+      // Log workout plans details
+      if (data.workoutPlans) {
+        console.log('Firebase loaded workoutPlans:', {
+          count: data.workoutPlans.length,
+          firstPlanId: data.workoutPlans[0]?.id,
+          firstPlanSessions: data.workoutPlans[0]?.sessions?.length,
+          firstSessionExercises: data.workoutPlans[0]?.sessions?.[0]?.exercises?.length,
+          rawFirstSession: data.workoutPlans[0]?.sessions?.[0]
+        });
+      } else {
+        console.log('No workoutPlans in Firebase data');
+      }
+      
       return data;
     } else {
       console.log('No data found in Firebase for this user');

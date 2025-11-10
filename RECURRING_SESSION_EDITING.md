@@ -42,16 +42,17 @@ A dialog component that provides:
 - Visual feedback showing how many sessions will be affected
 - Validation before saving
 
-#### PlanCalendarScreen.jsx Updates
-- Added "Edit Recurring Sessions" option to session menu
+#### ProgressScreen.jsx Updates
+- Added "Edit Recurring Sessions" option to planned session menu
 - Only available for standard workout types (Upper/Lower/Full/Push/Pull/Legs)
 - Shows success message with count of updated sessions
 - Graceful error handling
+- Accessible from the Progress screen's calendar for all planned sessions
 
 ## User Flow
 
-1. User opens the workout plan calendar
-2. User clicks on a session (e.g., "Upper Body" on Monday)
+1. User opens the Progress screen (which contains the workout plan calendar)
+2. User clicks on a planned session date in the calendar
 3. User clicks the menu button (⋮) in the session detail dialog
 4. User selects "Edit Recurring Sessions"
 5. A dialog opens showing:
@@ -96,8 +97,9 @@ All tests passing:
 
 ### Manual Testing Checklist
 - [ ] Create a workout plan with multiple weeks
-- [ ] Open calendar and select a session
-- [ ] Access "Edit Recurring Sessions" option
+- [ ] Open Progress screen and view the calendar
+- [ ] Click on a planned session in the calendar
+- [ ] Access "Edit Recurring Sessions" option from the menu
 - [ ] Add, remove, and modify exercises
 - [ ] Verify changes apply to all recurring sessions
 - [ ] Verify deload week sessions are not affected
@@ -116,11 +118,15 @@ All tests passing:
    - Added `updateRecurringSessionExercises()`
    - Enhanced documentation
 
-2. `src/components/PlanCalendarScreen.jsx`
+2. `src/components/ProgressScreen.jsx` (replaces PlanCalendarScreen.jsx)
    - Added recurring editor integration
-   - Added menu option for recurring edits
+   - Added menu option for recurring edits in planned session dialog
    - Added success/error feedback
    - Added exercise loading from JSON
+   - Integrated RecurringSessionEditor component
+
+### Removed Files
+1. `src/components/PlanCalendarScreen.jsx` - Functionality migrated to ProgressScreen
 
 ## Design Decisions
 

@@ -222,7 +222,7 @@ const NavigationSidebar = ({
               <NavLink
                 icon={<CalendarMonthIcon />}
                 label="Workout Plans"
-                isActive={currentScreen === 'plans' || currentScreen === 'plan-calendar'}
+                isActive={currentScreen === 'plans'}
                 onClick={() => handleNavClick('plans')}
               />
               <NavLink

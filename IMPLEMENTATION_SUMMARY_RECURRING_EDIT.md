@@ -62,15 +62,21 @@
    - `updateRecurringSessionExercises()` - Batch updates exercises
    - Enhanced validation and error handling
 
-2. **src/components/PlanCalendarScreen.jsx** (+79 lines)
+2. **src/components/ProgressScreen.jsx** (+79 lines) - Replaces PlanCalendarScreen.jsx
    - Integrated RecurringSessionEditor
-   - Added menu option for recurring edits
+   - Added menu option for recurring edits in planned session dialog
    - Added exercise loading
    - Enhanced feedback
+   - Now serves as the single location for all calendar-based batch editing
 
 3. **README.md**
    - Updated feature list
    - Added recurring session editing highlight
+
+### Files Removed
+1. **src/components/PlanCalendarScreen.jsx** - Functionality migrated to ProgressScreen
+   - Calendar functionality now consolidated in ProgressScreen
+   - Reduces code duplication and improves maintainability
 
 ### Total Impact
 - **Lines Added**: ~1,047
@@ -110,26 +116,24 @@
 
 ## User Experience
 
-### Before This Feature
+### Before This Migration
 Users had to:
-1. Click on each recurring session individually
-2. Manually edit exercises for each occurrence
-3. Repeat this for every week until the next deload
-4. Risk inconsistency across sessions
+1. Navigate from Workouts > This Week > Edit icon to access calendar
+2. Calendar was in a separate screen (PlanCalendarScreen)
+3. Batch editing only available from that specific location
 
-### After This Feature
+### After This Migration
 Users can now:
-1. Click on any recurring session
-2. Select "Edit Recurring Sessions"
-3. Make changes once
-4. All recurring sessions updated automatically
-5. Clear feedback on number of sessions affected
+1. Access the calendar directly from the Progress screen
+2. All batch editing and recurring session management in one unified location
+3. Edit recurring sessions, move sessions, skip/delete sessions all from Progress calendar
+4. Simplified navigation - no separate calendar screen needed
 
-### Time Savings
+### Time Savings & UX Improvements
 For a 4-week training block with 3 Upper Body sessions:
-- **Before**: 3 separate edits
-- **After**: 1 batch edit
-- **Time saved**: ~66% reduction in editing time
+- **Before**: Navigate to separate calendar, 3 separate edits
+- **After**: Access from Progress screen, 1 batch edit
+- **Benefit**: Unified location for all workout tracking and planning
 
 ---
 

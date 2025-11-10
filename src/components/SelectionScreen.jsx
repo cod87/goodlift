@@ -214,9 +214,9 @@ const SelectionScreen = memo(({
   };
   
   const handleViewPlan = () => {
-    // Navigate to plan calendar screen
+    // Navigate to progress screen (which now has the plan calendar with editing)
     if (onNavigate) {
-      onNavigate('plan-calendar');
+      onNavigate('progress');
     }
   };
 

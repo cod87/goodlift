@@ -29,11 +29,12 @@ import {
   getUniqueExercises,
   formatProgressionForChart 
 } from '../utils/progressionHelpers';
-import { moveSession } from '../utils/workoutPlanGenerator';
+import { moveSession, getRecurringSessionsInBlock, updateRecurringSessionExercises } from '../utils/workoutPlanGenerator';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Calendar from './Calendar';
+import RecurringSessionEditor from './RecurringSessionEditor';
 import StatsRow from './Progress/StatsRow';
 import ChartTabs from './Progress/ChartTabs';
 import ActivitiesList from './Progress/ActivitiesList';
@@ -80,7 +81,10 @@ import {
   Close,
   Edit,
   MoreVert as MoreVertIcon,
-  EventRepeat as MoveIcon
+  EventRepeat as MoveIcon,
+  EditCalendar as EditRecurringIcon,
+  PlayArrow as StartIcon,
+  DeleteOutline as DeleteIcon
 } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import {
@@ -129,6 +133,8 @@ const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [newDate, setNewDate] = useState(null);
+  const [editRecurringOpen, setEditRecurringOpen] = useState(false);
+  const [allExercises, setAllExercises] = useState([]);
 
   const loadData = async () => {
     setLoading(true);
@@ -156,13 +162,17 @@ const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
       try {
         const response = await fetch(EXERCISES_DATA_PATH);
         const exercisesData = await response.json();
-        const allExercises = exercisesData.map(ex => ex['Exercise Name']).sort();
-        setAvailableExercises(allExercises);
+        // Store full exercise objects for RecurringSessionEditor
+        setAllExercises(exercisesData);
+        // Store just exercise names for pinned exercises selection
+        const exerciseNames = exercisesData.map(ex => ex['Exercise Name']).sort();
+        setAvailableExercises(exerciseNames);
       } catch (error) {
         console.error('Error loading exercises:', error);
         // Fallback to unique exercises from history
         const unique = getUniqueExercises(loadedHistory);
         setAvailableExercises(unique);
+        setAllExercises([]);
       }
     } catch (error) {
       console.error('Error loading progress data:', error);
@@ -534,6 +544,72 @@ const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
     
     setMoveDialogOpen(false);
     handleClosePlannedDialog();
+  };
+
+  const handleEditRecurring = () => {
+    if (!plannedSession || !activePlan) return;
+    
+    // Only allow editing recurring sessions for standard workouts
+    const isStandardWorkout = ['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(plannedSession.type);
+    if (!isStandardWorkout) {
+      alert('Recurring editing is only available for standard workout sessions (Upper/Lower/Full Body/PPL)');
+      return;
+    }
+    
+    setEditRecurringOpen(true);
+    handleMenuClose();
+  };
+
+  const handleSaveRecurringEdits = async (newExercises) => {
+    if (!plannedSession || !activePlan) return;
+    
+    try {
+      const recurringCount = getRecurringSessionCount();
+      const updatedPlan = updateRecurringSessionExercises(activePlan, plannedSession.id, newExercises);
+      await saveWorkoutPlan(updatedPlan);
+      await loadData();
+      
+      setEditRecurringOpen(false);
+      handleClosePlannedDialog();
+      
+      // Show success feedback
+      alert(`Successfully updated ${recurringCount} ${getSessionTypeLabel(plannedSession.type)} sessions in this training block!`);
+    } catch (error) {
+      console.error('Error saving recurring edits:', error);
+      alert('Failed to save changes. Please try again.');
+    }
+  };
+
+  const getRecurringSessionCount = () => {
+    if (!plannedSession || !activePlan) return 0;
+    const recurringSessions = getRecurringSessionsInBlock(activePlan, plannedSession.id);
+    return recurringSessions.length;
+  };
+
+  const handleSkipSession = async () => {
+    if (!plannedSession || !activePlan) return;
+    
+    const { updateSessionStatus } = await import('../utils/workoutPlanGenerator');
+    const updatedPlan = updateSessionStatus(activePlan, plannedSession.id, 'skipped');
+    await saveWorkoutPlan(updatedPlan);
+    await loadData();
+    
+    handleMenuClose();
+    handleClosePlannedDialog();
+  };
+
+  const handleDeleteSession = async () => {
+    if (!plannedSession || !activePlan) return;
+    
+    if (window.confirm('Are you sure you want to delete this session?')) {
+      const { removeSessionFromPlan } = await import('../utils/workoutPlanGenerator');
+      const updatedPlan = removeSessionFromPlan(activePlan, plannedSession.id);
+      await saveWorkoutPlan(updatedPlan);
+      await loadData();
+      
+      handleMenuClose();
+      handleClosePlannedDialog();
+    }
   };
 
   return (
@@ -1667,9 +1743,23 @@ const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
+        {plannedSession && ['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(plannedSession.type) && (
+          <MenuItem onClick={handleEditRecurring}>
+            <EditRecurringIcon sx={{ mr: 1 }} fontSize="small" />
+            Edit Recurring Sessions
+          </MenuItem>
+        )}
         <MenuItem onClick={handleMoveSession}>
           <MoveIcon sx={{ mr: 1 }} fontSize="small" />
           Move to Different Date
+        </MenuItem>
+        <MenuItem onClick={handleSkipSession}>
+          <Edit sx={{ mr: 1 }} fontSize="small" />
+          Mark as Skipped
+        </MenuItem>
+        <MenuItem onClick={handleDeleteSession}>
+          <DeleteIcon sx={{ mr: 1 }} fontSize="small" />
+          Delete Session
         </MenuItem>
       </Menu>
 
@@ -1698,6 +1788,16 @@ const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
           </DialogActions>
         </Dialog>
       </LocalizationProvider>
+
+      {/* Recurring Session Editor */}
+      <RecurringSessionEditor
+        open={editRecurringOpen}
+        onClose={() => setEditRecurringOpen(false)}
+        session={plannedSession}
+        recurringCount={getRecurringSessionCount()}
+        allExercises={allExercises}
+        onSave={handleSaveRecurringEdits}
+      />
     </motion.div>
     </Box>
   );

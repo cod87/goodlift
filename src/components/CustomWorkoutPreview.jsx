@@ -30,6 +30,8 @@ import {
   setExerciseTargetReps, 
   saveFavoriteWorkout 
 } from '../utils/storage';
+import { EXERCISES_DATA_PATH } from '../utils/constants';
+import ExerciseAutocomplete from './ExerciseAutocomplete';
 
 /** Weight rounding increment in pounds */
 const WEIGHT_INCREMENT = 2.5;
@@ -51,6 +53,46 @@ const CustomWorkoutPreview = memo(({
   const [savedToFavorites, setSavedToFavorites] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+  const [allExercises, setAllExercises] = useState([]);
+  const [availableExercises, setAvailableExercises] = useState([]);
+
+  // Load all exercises data
+  useEffect(() => {
+    const loadExercises = async () => {
+      try {
+        const response = await fetch(EXERCISES_DATA_PATH);
+        const exercisesData = await response.json();
+        setAllExercises(exercisesData);
+        
+        // Filter exercises based on workout type
+        let filtered = exercisesData;
+        if (workoutType === 'upper') {
+          filtered = exercisesData.filter(ex => 
+            ex['Workout Type'] && 
+            (ex['Workout Type'].includes('Upper Body') || 
+             ex['Workout Type'].includes('Full Body') ||
+             ex['Workout Type'].includes('Push/Pull/Legs'))
+          );
+        } else if (workoutType === 'lower') {
+          filtered = exercisesData.filter(ex => 
+            ex['Workout Type'] && 
+            (ex['Workout Type'].includes('Lower Body') || 
+             ex['Workout Type'].includes('Full Body') ||
+             ex['Workout Type'].includes('Push/Pull/Legs'))
+          );
+        } else if (workoutType === 'full') {
+          filtered = exercisesData.filter(ex => 
+            ex['Workout Type'] && ex['Workout Type'].includes('Full Body')
+          );
+        }
+        setAvailableExercises(filtered);
+      } catch (error) {
+        console.error('Error loading exercises:', error);
+        setAvailableExercises([]);
+      }
+    };
+    loadExercises();
+  }, [workoutType]);
 
   // Load saved weights and target reps on mount
   useEffect(() => {
@@ -126,6 +168,32 @@ const CustomWorkoutPreview = memo(({
           targetReps: numValue,
         }
       }));
+    }
+  };
+
+  const handleSwapExercise = (index, newExercise) => {
+    if (!newExercise) return;
+    
+    const updatedWorkout = [...workout];
+    updatedWorkout[index] = {
+      ...newExercise,
+      name: newExercise['Exercise Name'] || newExercise.name
+    };
+    setWorkout(updatedWorkout);
+    
+    // Transfer settings if they exist, otherwise initialize
+    const oldExerciseName = workout[index]['Exercise Name'];
+    const newExerciseName = newExercise['Exercise Name'];
+    
+    if (oldExerciseName !== newExerciseName) {
+      setExerciseSettings(prev => {
+        const oldSettings = prev[oldExerciseName] || { weight: '', targetReps: '' };
+        const { [oldExerciseName]: removed, ...rest } = prev;
+        return {
+          ...rest,
+          [newExerciseName]: oldSettings
+        };
+      });
     }
   };
 
@@ -300,9 +368,20 @@ const CustomWorkoutPreview = memo(({
                           {idx + 1}
                         </Typography>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
-                            {exerciseName}
-                          </Typography>
+                          <Box sx={{ mb: 1 }}>
+                            <ExerciseAutocomplete
+                              value={exercise}
+                              onChange={(event, newValue) => {
+                                if (newValue) {
+                                  handleSwapExercise(idx, newValue);
+                                }
+                              }}
+                              availableExercises={availableExercises}
+                              label="Exercise"
+                              placeholder="Type to search and swap..."
+                              disabled={availableExercises.length === 0}
+                            />
+                          </Box>
                           <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
                             <Chip 
                               label={exercise['Primary Muscle']} 

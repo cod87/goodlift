@@ -35,6 +35,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Calendar from './Calendar';
 import RecurringSessionEditor from './RecurringSessionEditor';
+import ExerciseAutocomplete from './ExerciseAutocomplete';
 import StatsRow from './Progress/StatsRow';
 import ChartTabs from './Progress/ChartTabs';
 import ActivitiesList from './Progress/ActivitiesList';
@@ -1811,6 +1812,72 @@ const EditSessionDialog = ({ open, onClose, onSave, session, sessionType }) => {
   const [numExercises, setNumExercises] = useState(session.numExercises || '');
   const [setsPerExercise, setSetsPerExercise] = useState(session.setsPerExercise || '');
   const [cardioType, setCardioType] = useState(session.cardioType || '');
+  const [allExercises, setAllExercises] = useState([]);
+  const [availableExercises, setAvailableExercises] = useState([]);
+  const [exercises, setExercises] = useState([]);
+  const [showExerciseEditor, setShowExerciseEditor] = useState(false);
+
+  // Load exercises data and initialize exercise list
+  useEffect(() => {
+    const loadExercises = async () => {
+      try {
+        const response = await fetch('/data/exercises.json');
+        const exercisesData = await response.json();
+        setAllExercises(exercisesData);
+        
+        // Filter based on workout type
+        let filtered = exercisesData;
+        if (workoutType === 'upper') {
+          filtered = exercisesData.filter(ex => 
+            ex['Workout Type'] && 
+            (ex['Workout Type'].includes('Upper Body') || 
+             ex['Workout Type'].includes('Full Body') ||
+             ex['Workout Type'].includes('Push/Pull/Legs'))
+          );
+        } else if (workoutType === 'lower') {
+          filtered = exercisesData.filter(ex => 
+            ex['Workout Type'] && 
+            (ex['Workout Type'].includes('Lower Body') || 
+             ex['Workout Type'].includes('Full Body') ||
+             ex['Workout Type'].includes('Push/Pull/Legs'))
+          );
+        } else if (workoutType === 'full') {
+          filtered = exercisesData.filter(ex => 
+            ex['Workout Type'] && ex['Workout Type'].includes('Full Body')
+          );
+        }
+        setAvailableExercises(filtered);
+      } catch (error) {
+        console.error('Error loading exercises:', error);
+        setAvailableExercises([]);
+      }
+    };
+
+    // Initialize exercises from session if available
+    if (session.exercises && Object.keys(session.exercises).length > 0 && !session.isManualLog) {
+      const exerciseList = Object.entries(session.exercises).map(([name, data]) => ({
+        'Exercise Name': name,
+        name: name,
+        ...data
+      }));
+      setExercises(exerciseList);
+      setShowExerciseEditor(true);
+    }
+    
+    loadExercises();
+  }, [session, workoutType]);
+
+  const handleExerciseChange = (index, newExercise) => {
+    if (!newExercise) return;
+    const updatedExercises = [...exercises];
+    updatedExercises[index] = {
+      ...updatedExercises[index],
+      ...newExercise,
+      name: newExercise['Exercise Name'] || newExercise.name,
+      'Exercise Name': newExercise['Exercise Name']
+    };
+    setExercises(updatedExercises);
+  };
 
   const handleSubmit = () => {
     const updatedData = {
@@ -1822,6 +1889,22 @@ const EditSessionDialog = ({ open, onClose, onSave, session, sessionType }) => {
       updatedData.type = workoutType;
       if (numExercises) updatedData.numExercises = parseInt(numExercises);
       if (setsPerExercise) updatedData.setsPerExercise = parseInt(setsPerExercise);
+      
+      // If exercises were edited, update the exercises object
+      if (showExerciseEditor && exercises.length > 0) {
+        const exercisesObj = {};
+        exercises.forEach(ex => {
+          const exerciseName = ex['Exercise Name'] || ex.name;
+          exercisesObj[exerciseName] = {
+            sets: ex.sets || [],
+            'Primary Muscle': ex['Primary Muscle'],
+            'Secondary Muscles': ex['Secondary Muscles'],
+            Equipment: ex['Equipment'],
+            'Movement Pattern': ex['Movement Pattern']
+          };
+        });
+        updatedData.exercises = exercisesObj;
+      }
     } else if (sessionType === 'cardio') {
       updatedData.cardioType = cardioType.trim();
     }
@@ -1845,7 +1928,7 @@ const EditSessionDialog = ({ open, onClose, onSave, session, sessionType }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>{getTitle()}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
@@ -1873,23 +1956,58 @@ const EditSessionDialog = ({ open, onClose, onSave, session, sessionType }) => {
                 </Select>
               </FormControl>
 
-              <TextField
-                fullWidth
-                type="number"
-                label="Number of Exercises"
-                value={numExercises}
-                onChange={(e) => setNumExercises(e.target.value)}
-                inputProps={{ min: 1, step: 1 }}
-              />
+              {!showExerciseEditor ? (
+                <>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Number of Exercises"
+                    value={numExercises}
+                    onChange={(e) => setNumExercises(e.target.value)}
+                    inputProps={{ min: 1, step: 1 }}
+                  />
 
-              <TextField
-                fullWidth
-                type="number"
-                label="Sets per Exercise"
-                value={setsPerExercise}
-                onChange={(e) => setSetsPerExercise(e.target.value)}
-                inputProps={{ min: 1, step: 1 }}
-              />
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Sets per Exercise"
+                    value={setsPerExercise}
+                    onChange={(e) => setSetsPerExercise(e.target.value)}
+                    inputProps={{ min: 1, step: 1 }}
+                  />
+                </>
+              ) : (
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                    Exercises ({exercises.length})
+                  </Typography>
+                  <Box sx={{ 
+                    maxHeight: 300,
+                    overflowY: 'auto',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 1,
+                    p: 1
+                  }}>
+                    {exercises.map((exercise, index) => (
+                      <Box key={index} sx={{ mb: 1 }}>
+                        <ExerciseAutocomplete
+                          value={exercise}
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              handleExerciseChange(index, newValue);
+                            }
+                          }}
+                          availableExercises={availableExercises}
+                          label={`Exercise ${index + 1}`}
+                          placeholder="Type to search and swap..."
+                          disabled={availableExercises.length === 0}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
             </>
           )}
 

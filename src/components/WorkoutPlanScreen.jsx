@@ -72,10 +72,14 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   }, []);
 
   const loadPlans = async () => {
+    console.log('loadPlans called');
     const loadedPlans = await getWorkoutPlans();
+    console.log('Loaded plans:', loadedPlans.length, 'plans');
+    console.log('Plan details:', loadedPlans.map(p => ({ id: p.id, name: p.name, sessions: p.sessions?.length })));
     setPlans(loadedPlans);
     
     const active = await getActivePlan();
+    console.log('Active plan:', active ? { id: active.id, name: active.name } : 'none');
     setActivePlanState(active);
   };
 

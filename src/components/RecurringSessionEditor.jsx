@@ -247,7 +247,21 @@ const RecurringSessionEditor = ({
                     mb: 2,
                     bgcolor: group.isSuperset ? 'action.hover' : 'background.paper',
                     borderColor: group.isSuperset ? 'primary.main' : 'divider',
-                    borderWidth: group.isSuperset ? 2 : 1
+                    borderWidth: group.isSuperset ? 2 : 1,
+                    position: 'relative',
+                    // Add bracket-like visual indicators for supersets
+                    ...(group.isSuperset && {
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: 4,
+                        bgcolor: 'primary.main',
+                        borderRadius: '4px 0 0 4px'
+                      }
+                    })
                   }}
                 >
                   {group.isSuperset && (
@@ -255,14 +269,20 @@ const RecurringSessionEditor = ({
                       bgcolor: 'primary.main', 
                       color: 'primary.contrastText', 
                       px: 2, 
-                      py: 0.5,
+                      py: 0.75,
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'space-between',
                       gap: 1
                     }}>
-                      <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                        SUPERSET
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.5px' }}>
+                          ⦗ SUPERSET ⦘
+                        </Typography>
+                        <Typography variant="caption" sx={{ opacity: 0.9, fontSize: '0.7rem' }}>
+                          ({group.exercises.length} exercises)
+                        </Typography>
+                      </Box>
                     </Box>
                   )}
                   <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
@@ -279,10 +299,55 @@ const RecurringSessionEditor = ({
                         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 2 }}>
                           <DragIcon sx={{ color: 'text.disabled', cursor: 'grab' }} />
                           <Box sx={{ flex: 1 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                {exercise.name || exercise['Exercise Name']}
-                              </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 1, mb: 1 }}>
+                              <Autocomplete
+                                fullWidth
+                                size="small"
+                                options={availableExercises}
+                                value={exercise}
+                                onChange={(event, newValue) => {
+                                  if (newValue) {
+                                    handleExerciseChange(index, 'name', newValue['Exercise Name'] || newValue.name);
+                                    handleExerciseChange(index, 'Exercise Name', newValue['Exercise Name']);
+                                    handleExerciseChange(index, 'Primary Muscle', newValue['Primary Muscle']);
+                                    handleExerciseChange(index, 'Secondary Muscles', newValue['Secondary Muscles']);
+                                    handleExerciseChange(index, 'Equipment', newValue['Equipment']);
+                                    handleExerciseChange(index, 'Movement Pattern', newValue['Movement Pattern']);
+                                    handleExerciseChange(index, 'Difficulty', newValue['Difficulty']);
+                                    handleExerciseChange(index, 'Workout Type', newValue['Workout Type']);
+                                  }
+                                }}
+                                getOptionLabel={(option) => option['Exercise Name'] || option.name || ''}
+                                filterOptions={(options, state) => {
+                                  return getFilteredOptions(state.inputValue);
+                                }}
+                                isOptionEqualToValue={(option, value) => 
+                                  (option['Exercise Name'] || option.name) === (value['Exercise Name'] || value.name)
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Exercise"
+                                    placeholder="Type to search and swap exercise..."
+                                  />
+                                )}
+                                renderOption={(props, option) => {
+                                  const { key, ...otherProps } = props;
+                                  return (
+                                    <li key={key} {...otherProps}>
+                                      <Box>
+                                        <Typography variant="body2">
+                                          {option['Exercise Name']}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                          {option['Primary Muscle']} • {option['Equipment']}
+                                        </Typography>
+                                      </Box>
+                                    </li>
+                                  );
+                                }}
+                                sx={{ flex: 1 }}
+                              />
                               <IconButton 
                                 edge="end" 
                                 onClick={() => handleRemoveExercise(index)}

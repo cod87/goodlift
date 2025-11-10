@@ -63,7 +63,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
     experienceLevel: 'intermediate',
     daysPerWeek: 3,
     duration: 30,
-    sessionTypes: ['full']
+    sessionTypes: ['full', 'upper', 'lower', 'hiit', 'cardio', 'yoga'] // Default to all session types
   });
 
   // Load plans on mount
@@ -91,7 +91,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
       experienceLevel: 'intermediate',
       daysPerWeek: 3,
       duration: 30,
-      sessionTypes: ['full']
+      sessionTypes: ['full', 'upper', 'lower', 'hiit', 'cardio', 'yoga'] // Default to all session types
     });
   };
 
@@ -122,6 +122,8 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   const handleGeneratePlan = async () => {
     try {
       setIsGenerating(true);
+      console.log('Starting plan generation with form:', planForm);
+      
       const plan = await generateWorkoutPlan({
         ...planForm,
         planName: planForm.name || 'My Workout Plan',
@@ -129,8 +131,17 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         equipmentAvailable: ['all']
       });
 
+      console.log('Plan generated successfully:', {
+        id: plan.id,
+        name: plan.name,
+        sessionCount: plan.sessions.length,
+        firstSessionHasExercises: plan.sessions[0]?.exercises?.length > 0,
+        sampleSession: plan.sessions[0]
+      });
+
       // Save the plan first
       await saveWorkoutPlan(plan);
+      console.log('Plan saved to storage');
       
       // Auto-activate if plan name is "This Week"
       if (plan.name === 'This Week') {
@@ -140,10 +151,12 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
       
       // Reload plans to ensure UI is updated
       await loadPlans();
+      console.log('Plans reloaded');
       handleCloseDialog();
     } catch (error) {
       console.error('Error generating plan:', error);
-      alert('Failed to generate plan. Please try again.');
+      console.error('Error stack:', error.stack);
+      alert(`Failed to generate plan: ${error.message}`);
     } finally {
       setIsGenerating(false);
     }

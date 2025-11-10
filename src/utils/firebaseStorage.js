@@ -10,6 +10,34 @@ import { db } from '../firebase';
  * @param {string} userId - The authenticated user's UID
  * @param {object} data - The data to save (workoutHistory, userStats, exerciseWeights)
  */
+/**
+ * Remove undefined values from an object recursively
+ * Firebase Firestore doesn't accept undefined values
+ * @param {any} obj - Object to clean
+ * @returns {any} - Cleaned object
+ */
+const removeUndefined = (obj) => {
+  if (obj === null || obj === undefined) {
+    return null;
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => removeUndefined(item));
+  }
+  
+  if (typeof obj === 'object') {
+    const cleaned = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = removeUndefined(value);
+      }
+    }
+    return cleaned;
+  }
+  
+  return obj;
+};
+
 export const saveUserDataToFirebase = async (userId, data) => {
   if (!userId) {
     console.error('Cannot save data: No user ID provided');
@@ -18,10 +46,14 @@ export const saveUserDataToFirebase = async (userId, data) => {
 
   try {
     const userDocRef = doc(db, 'users', userId, 'data', 'userData');
-    await setDoc(userDocRef, {
+    
+    // Remove all undefined values before saving
+    const cleanedData = removeUndefined({
       ...data,
       lastUpdated: new Date().toISOString()
-    }, { merge: true });
+    });
+    
+    await setDoc(userDocRef, cleanedData, { merge: true });
     console.log('Data saved to Firebase successfully');
   } catch (error) {
     console.error('Error saving data to Firebase:', error);

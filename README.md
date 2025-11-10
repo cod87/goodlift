@@ -1,17 +1,19 @@
-# GoodLift - React Workout Randomizer
+# GoodLift - Workout Planning & Tracking App
 
-A modern, optimized React-based workout randomization application that helps you create randomized strength training workouts with exercise tracking and progress monitoring.
+A modern, comprehensive React-based workout planning and tracking application that helps you structure your training, track progress, and achieve your fitness goals with intelligent periodization and data-driven insights.
 
 ## Features
 
-- **Randomized Workout Generation**: Generate workouts for Upper Body, Lower Body, or Full Body training
-- **Workout Plan Management**: Create comprehensive workout plans with automatic periodization and deload weeks
+- **Intelligent Dashboard**: Centralized hub displaying workout stats, upcoming plans, progress charts, and quick-start actions
+- **Structured Workout Planning**: Create comprehensive workout plans with automatic periodization and deload weeks
+- **Workout Plan Management**: Design multi-week training programs with progressive overload built-in
 - **Recurring Session Editing**: Batch edit exercises for all recurring sessions within a training block
+- **Real-time Workout Tracking**: Track sets, reps, and weight with a built-in timer
+- **Progress Analytics**: View detailed workout history, progression charts, and performance statistics
+- **Weight Progression**: Automatically suggests weight increases when you hit progression targets
+- **Random Workout Generation**: Optional randomized workout generation for Upper Body, Lower Body, or Full Body training
 - **Equipment Filtering**: Filter exercises based on available equipment (Barbells, Dumbbells, Cable Machine, Kettlebells, etc.)
 - **Superset Pairing**: Exercises are intelligently paired into supersets based on opposing muscle groups
-- **Real-time Workout Tracking**: Track sets, reps, and weight with a built-in timer
-- **Progress History**: View your workout history and statistics
-- **Weight Progression**: Automatically suggests weight increases when you hit progression targets
 - **YouTube Demonstrations**: Each exercise includes embedded video demonstrations
 - **Data Export**: Download your workout data as CSV files
 - **Firebase Integration**: Cloud storage and cross-device syncing for authenticated users
@@ -45,20 +47,38 @@ src/
 │   ├── WorkoutPreview.jsx
 │   ├── CompletionScreen.jsx
 │   ├── ProgressScreen.jsx
+│   ├── WorkoutPlanScreen.jsx
 │   ├── HiitTimerScreen.jsx
-│   └── AuthScreen.jsx
-├── hooks/              # Custom React hooks with comprehensive documentation
-│   └── useWorkoutGenerator.js
-├── utils/              # Utility functions with JSDoc documentation
-│   ├── constants.js    # Centralized configuration
-│   ├── helpers.js      # Helper utilities
-│   ├── storage.js      # Data persistence layer
-│   └── firebaseStorage.js
-├── contexts/           # React contexts
+│   ├── AuthScreen.jsx
+│   ├── Home/
+│   │   ├── QuickStartCard.jsx
+│   │   └── WeeklyPlanPreview.jsx
+│   ├── Progress/
+│   │   ├── StatsRow.jsx
+│   │   ├── ChartTabs.jsx
+│   │   └── ActivitiesList.jsx
+│   └── Common/
+│       └── CompactHeader.jsx
+├── pages/               # Page-level components
+│   ├── Dashboard.jsx    # Main dashboard (landing page)
+│   ├── CardioScreen.jsx
+│   ├── ExerciseListPage.jsx
+│   └── UnifiedLogActivityScreen.jsx
+├── hooks/               # Custom React hooks with comprehensive documentation
+│   ├── useWorkoutGenerator.js
+│   ├── usePlanIntegration.js
+│   └── useWeeklyPlan.js
+├── utils/               # Utility functions with JSDoc documentation
+│   ├── constants.js     # Centralized configuration
+│   ├── helpers.js       # Helper utilities
+│   ├── storage.js       # Data persistence layer
+│   ├── firebaseStorage.js
+│   └── weeklyPlanDefaults.js
+├── contexts/            # React contexts
 │   └── AuthContext.jsx
-├── App.jsx            # Main application component
-├── App.css            # Application styles
-└── main.jsx           # Entry point
+├── App.jsx             # Main application component
+├── App.css             # Application styles
+└── main.jsx            # Entry point
 
 public/
 └── data/
@@ -131,12 +151,37 @@ This repository is configured for deployment to GitHub Pages from the `docs/` di
 
 ## Usage
 
-1. **Select Workout Type**: Choose between Full Body, Upper Body, or Lower Body
-2. **Filter Equipment**: Select available equipment or choose "All"
-3. **Start Workout**: Click "Start Workout" to generate a randomized workout
-4. **Track Progress**: Enter weight and reps for each set
-5. **Complete Workout**: Review your workout summary and export data if needed
-6. **View Progress**: Check your workout history and statistics in the Progress tab
+### Getting Started
+
+1. **Dashboard**: Upon login, you'll see the main dashboard with:
+   - Your workout statistics (workouts this week, total volume, streak, average duration)
+   - Today's planned workout with quick-start button
+   - Full week preview with upcoming workouts
+   - Quick action buttons for all major features
+
+2. **Plan Your Training**:
+   - Navigate to "Workout Plans" to create structured multi-week programs
+   - Choose training splits (Push/Pull/Legs, Upper/Lower, Full Body)
+   - Set your training frequency and preferences
+   - Plans automatically include periodization and deload weeks
+
+3. **Start a Workout**:
+   - Quick-start from Dashboard for today's planned workout
+   - Or navigate to "Workouts" to customize your session
+   - Select workout type (Upper Body, Lower Body, Full Body)
+   - Filter by available equipment
+   - Generate or customize exercises
+
+4. **Track Your Progress**:
+   - Enter weight and reps for each set during your workout
+   - View progressive overload suggestions
+   - Complete workout and review summary
+
+5. **Monitor Your Growth**:
+   - Navigate to "Progress" to view workout history
+   - See detailed charts for each exercise
+   - Track volume, frequency, and personal records
+   - Export data as CSV for external analysis
 
 ## Exercise Database
 

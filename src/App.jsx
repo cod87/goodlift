@@ -593,7 +593,7 @@ function App() {
             />
           )}
           
-          {currentScreen === 'progress' && <ProgressScreen />}
+          {currentScreen === 'progress' && <ProgressScreen onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />}
 
           {currentScreen === 'hiit' && <HiitTimerScreen />}
 

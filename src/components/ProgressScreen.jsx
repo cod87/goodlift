@@ -107,7 +107,7 @@ ChartJS.register(
   Filler
 );
 
-const ProgressScreen = () => {
+const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
   const [history, setHistory] = useState([]);
   const [stretchSessions, setStretchSessions] = useState([]);
   const [yogaSessions, setYogaSessions] = useState([]);
@@ -482,10 +482,27 @@ const ProgressScreen = () => {
   };
 
   const handleStartPlannedSession = () => {
-    // Navigate to start the workout
-    // This would need onNavigate or onStartWorkout prop passed from App
+    if (!plannedSession || !onStartWorkout) {
+      setPlannedSessionDialogOpen(false);
+      return;
+    }
+
+    // Create plan context for navigation
+    const planContext = {
+      planId: activePlan?.id,
+      sessionId: plannedSession.id,
+      sessionDate: plannedSession.date
+    };
+
+    // Start workout with pre-generated exercises from the plan
+    onStartWorkout(
+      plannedSession.type,
+      new Set(['all']),
+      plannedSession.exercises,
+      planContext
+    );
+    
     setPlannedSessionDialogOpen(false);
-    // TODO: Implement navigation to workout start
   };
 
   const handleClosePlannedDialog = () => {
@@ -1811,6 +1828,11 @@ EditSessionDialog.propTypes = {
   onSave: PropTypes.func.isRequired,
   session: PropTypes.object.isRequired,
   sessionType: PropTypes.string.isRequired,
+};
+
+ProgressScreen.propTypes = {
+  onNavigate: PropTypes.func,
+  onStartWorkout: PropTypes.func,
 };
 
 export default ProgressScreen;

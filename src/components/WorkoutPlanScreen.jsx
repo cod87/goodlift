@@ -25,7 +25,8 @@ import {
   LinearProgress,
   List,
   ListItem,
-  ListItemText
+  ListItemText,
+  Collapse
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -33,7 +34,9 @@ import {
   Delete as DeleteIcon,
   PlayArrow as StartIcon,
   CalendarMonth as CalendarIcon,
-  CheckCircle as CheckCircleIcon
+  CheckCircle as CheckCircleIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon
 } from '@mui/icons-material';
 import CompactHeader from './Common/CompactHeader';
 import {
@@ -53,6 +56,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   const [activePlan, setActivePlanState] = useState(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [expandedPlan, setExpandedPlan] = useState(null); // Track which plan is expanded
   const [planForm, setPlanForm] = useState({
     name: '',
     goal: 'general_fitness',
@@ -171,6 +175,10 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
     if (onNavigate) {
       onNavigate('progress');
     }
+  };
+
+  const handleToggleExpand = (planId) => {
+    setExpandedPlan(expandedPlan === planId ? null : planId);
   };
 
   const getGoalLabel = (goal) => {
@@ -307,72 +315,166 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
             {plans.map((plan, index) => {
               const stats = getPlanStatistics(plan);
               const isActive = activePlan && activePlan.id === plan.id;
+              const isExpanded = expandedPlan === plan.id;
               
               return (
-                <ListItem
-                  key={plan.id}
-                  sx={{
-                    borderBottom: index < plans.length - 1 ? '1px solid' : 'none',
-                    borderColor: 'divider',
-                    py: 2,
-                    px: 2,
-                    bgcolor: isActive ? 'action.selected' : 'transparent',
-                    '&:hover': {
-                      bgcolor: isActive ? 'action.selected' : 'action.hover'
-                    }
-                  }}
-                  secondaryAction={
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <Tooltip title="View Calendar">
-                        <IconButton size="small" onClick={() => handleViewCalendar(plan)}>
-                          <CalendarIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      {!isActive && (
-                        <Tooltip title="Set Active">
-                          <IconButton size="small" onClick={() => handleSetActive(plan.id)}>
-                            <StartIcon fontSize="small" />
+                <Box key={plan.id}>
+                  <ListItem
+                    sx={{
+                      borderBottom: !isExpanded && index < plans.length - 1 ? '1px solid' : 'none',
+                      borderColor: 'divider',
+                      py: 2,
+                      px: 2,
+                      bgcolor: isActive ? 'action.selected' : 'transparent',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        bgcolor: isActive ? 'action.selected' : 'action.hover'
+                      }
+                    }}
+                    onClick={() => handleToggleExpand(plan.id)}
+                    secondaryAction={
+                      <Box sx={{ display: 'flex', gap: 0.5, ml: 1 }}>
+                        <Tooltip title="View Calendar">
+                          <IconButton 
+                            size="medium" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewCalendar(plan);
+                            }}
+                          >
+                            <CalendarIcon />
                           </IconButton>
                         </Tooltip>
-                      )}
-                      <Tooltip title="Delete">
-                        <IconButton size="small" onClick={() => handleDeletePlan(plan.id)}>
-                          <DeleteIcon fontSize="small" />
+                        {!isActive && (
+                          <Tooltip title="Set Active">
+                            <IconButton 
+                              size="medium" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSetActive(plan.id);
+                              }}
+                            >
+                              <StartIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        <Tooltip title="Delete">
+                          <IconButton 
+                            size="medium" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeletePlan(plan.id);
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <IconButton size="small" onClick={(e) => e.stopPropagation()}>
+                          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                         </IconButton>
-                      </Tooltip>
-                    </Box>
-                  }
-                >
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                          {plan.name}
-                        </Typography>
                       </Box>
                     }
-                    secondary={
-                      <Box>
-                        <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5, flexWrap: 'wrap' }}>
-                          <Chip label={getGoalLabel(plan.goal)} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
-                          <Chip label={`${plan.daysPerWeek}x/week`} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
-                          <Chip label={`${plan.duration} days`} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
-                          <Chip label={getExperienceLabel(plan.experienceLevel)} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 'fit-content' }}>
-                            {stats.completedSessions}/{stats.totalSessions} • {Math.round(stats.completionRate)}%
+                  >
+                    <ListItemText
+                      sx={{ pr: { xs: 14, sm: 12 } }} // Add padding to prevent overlap with icons
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                            {plan.name}
                           </Typography>
-                          <LinearProgress 
-                            variant="determinate" 
-                            value={stats.completionRate} 
-                            sx={{ flex: 1, height: 4, borderRadius: 2, maxWidth: 150 }}
-                          />
                         </Box>
-                      </Box>
-                    }
-                  />
-                </ListItem>
+                      }
+                      secondary={
+                        <Box>
+                          <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5, flexWrap: 'wrap', maxWidth: '100%' }}>
+                            <Chip label={getGoalLabel(plan.goal)} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                            <Chip label={`${plan.daysPerWeek}x/week`} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                            <Chip label={`${plan.duration} days`} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                            <Chip label={getExperienceLabel(plan.experienceLevel)} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 'fit-content' }}>
+                              {stats.completedSessions}/{stats.totalSessions} • {Math.round(stats.completionRate)}%
+                            </Typography>
+                            <LinearProgress 
+                              variant="determinate" 
+                              value={stats.completionRate} 
+                              sx={{ flex: 1, height: 4, borderRadius: 2, maxWidth: 150 }}
+                            />
+                          </Box>
+                        </Box>
+                      }
+                    />
+                  </ListItem>
+                  
+                  {/* Expandable section showing all sessions */}
+                  <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                    <Box sx={{ 
+                      px: 2, 
+                      pb: 2, 
+                      pt: 1,
+                      bgcolor: 'background.default',
+                      borderBottom: index < plans.length - 1 ? '1px solid' : 'none',
+                      borderColor: 'divider'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                        Workout Schedule
+                      </Typography>
+                      {plan.sessions && plan.sessions.length > 0 ? (
+                        <Box sx={{ maxHeight: 400, overflowY: 'auto' }}>
+                          {plan.sessions.map((session, idx) => (
+                            <Box 
+                              key={session.id || idx} 
+                              sx={{ 
+                                mb: 1.5, 
+                                p: 1.5, 
+                                bgcolor: 'background.paper',
+                                borderRadius: 1,
+                                border: '1px solid',
+                                borderColor: 'divider'
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                  {new Date(session.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                </Typography>
+                                <Chip 
+                                  label={session.type.toUpperCase()} 
+                                  size="small" 
+                                  color={session.type === 'rest' ? 'default' : 'primary'}
+                                  sx={{ height: 20, fontSize: '0.7rem' }}
+                                />
+                              </Box>
+                              {session.exercises && session.exercises.length > 0 && (
+                                <Box sx={{ mt: 1 }}>
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                                    Exercises ({session.exercises.length}):
+                                  </Typography>
+                                  <Box sx={{ mt: 0.5 }}>
+                                    {session.exercises.slice(0, 5).map((exercise, exIdx) => (
+                                      <Typography key={exIdx} variant="caption" color="text.secondary" sx={{ display: 'block', ml: 1 }}>
+                                        • {exercise.name}
+                                      </Typography>
+                                    ))}
+                                    {session.exercises.length > 5 && (
+                                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', ml: 1, fontStyle: 'italic' }}>
+                                        ... and {session.exercises.length - 5} more
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                </Box>
+                              )}
+                            </Box>
+                          ))}
+                        </Box>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          No sessions available
+                        </Typography>
+                      )}
+                    </Box>
+                  </Collapse>
+                </Box>
               );
             })}
           </List>

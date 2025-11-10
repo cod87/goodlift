@@ -53,7 +53,6 @@ const CustomWorkoutPreview = memo(({
   const [savedToFavorites, setSavedToFavorites] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
-  const [allExercises, setAllExercises] = useState([]);
   const [availableExercises, setAvailableExercises] = useState([]);
 
   // Load all exercises data
@@ -62,7 +61,6 @@ const CustomWorkoutPreview = memo(({
       try {
         const response = await fetch(EXERCISES_DATA_PATH);
         const exercisesData = await response.json();
-        setAllExercises(exercisesData);
         
         // Filter exercises based on workout type
         let filtered = exercisesData;
@@ -188,7 +186,7 @@ const CustomWorkoutPreview = memo(({
     if (oldExerciseName !== newExerciseName) {
       setExerciseSettings(prev => {
         const oldSettings = prev[oldExerciseName] || { weight: '', targetReps: '' };
-        const { [oldExerciseName]: removed, ...rest } = prev;
+        const { [oldExerciseName]: _removed, ...rest } = prev;
         return {
           ...rest,
           [newExerciseName]: oldSettings

@@ -1812,7 +1812,6 @@ const EditSessionDialog = ({ open, onClose, onSave, session, sessionType }) => {
   const [numExercises, setNumExercises] = useState(session.numExercises || '');
   const [setsPerExercise, setSetsPerExercise] = useState(session.setsPerExercise || '');
   const [cardioType, setCardioType] = useState(session.cardioType || '');
-  const [allExercises, setAllExercises] = useState([]);
   const [availableExercises, setAvailableExercises] = useState([]);
   const [exercises, setExercises] = useState([]);
   const [showExerciseEditor, setShowExerciseEditor] = useState(false);
@@ -1823,7 +1822,6 @@ const EditSessionDialog = ({ open, onClose, onSave, session, sessionType }) => {
       try {
         const response = await fetch('/data/exercises.json');
         const exercisesData = await response.json();
-        setAllExercises(exercisesData);
         
         // Filter based on workout type
         let filtered = exercisesData;

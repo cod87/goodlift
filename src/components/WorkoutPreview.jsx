@@ -19,7 +19,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [showNotification, setShowNotification] = useState(false);
   const [customizedSettings, setCustomizedSettings] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
-  const [allExercises, setAllExercises] = useState([]);
   const [availableExercises, setAvailableExercises] = useState([]);
 
   // Load all exercises data
@@ -28,7 +27,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
       try {
         const response = await fetch(EXERCISES_DATA_PATH);
         const exercisesData = await response.json();
-        setAllExercises(exercisesData);
         
         // Filter exercises based on workout type
         let filtered = exercisesData;

@@ -10,10 +10,18 @@ import {
   FormControlLabel,
   Divider,
   Stack,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Chip,
 } from '@mui/material';
-import { Brightness4, Brightness7, VolumeUp } from '@mui/icons-material';
+import { Brightness4, Brightness7, VolumeUp, Delete, CheckCircle, Add } from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
 import audioService from '../utils/audioService';
+import { getWorkoutPlans, getActivePlan, setActivePlan, deleteWorkoutPlan } from '../utils/storage';
+import PlanCreationModal from '../components/PlanCreationModal';
 
 const SettingsScreen = () => {
   const { mode, toggleTheme } = useTheme();
@@ -26,6 +34,21 @@ const SettingsScreen = () => {
     }
   });
   const [isMuted, setIsMuted] = useState(audioService.isMutedState());
+  const [plans, setPlans] = useState([]);
+  const [activePlan, setActivePlanState] = useState(null);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+
+  // Load plans on mount
+  useEffect(() => {
+    loadPlans();
+  }, []);
+
+  const loadPlans = async () => {
+    const loadedPlans = await getWorkoutPlans();
+    setPlans(loadedPlans);
+    const active = await getActivePlan();
+    setActivePlanState(active);
+  };
 
   // Save volume to localStorage
   useEffect(() => {
@@ -63,6 +86,57 @@ const SettingsScreen = () => {
     if (volume > 0 && !isMuted) {
       audioService.playBeep(800, 200, volume);
     }
+  };
+
+  const handleActivatePlan = async (planId) => {
+    try {
+      await setActivePlan(planId);
+      await loadPlans();
+    } catch (error) {
+      console.error('Error activating plan:', error);
+    }
+  };
+
+  const handleDeletePlan = async (planId) => {
+    if (window.confirm('Are you sure you want to delete this plan?')) {
+      try {
+        await deleteWorkoutPlan(planId);
+        await loadPlans();
+      } catch (error) {
+        console.error('Error deleting plan:', error);
+      }
+    }
+  };
+
+  const handleOpenPlanModal = () => {
+    setShowPlanModal(true);
+  };
+
+  const handleClosePlanModal = () => {
+    setShowPlanModal(false);
+  };
+
+  const handlePlanCreated = async () => {
+    await loadPlans();
+  };
+
+  const getGoalLabel = (goal) => {
+    const labels = {
+      strength: 'Strength',
+      hypertrophy: 'Muscle',
+      fat_loss: 'Fat-Loss',
+      general_fitness: 'General'
+    };
+    return labels[goal] || goal;
+  };
+
+  const getExperienceLabel = (level) => {
+    const labels = {
+      beginner: 'Beginner',
+      intermediate: 'Intermediate',
+      advanced: 'Advanced'
+    };
+    return labels[level] || level;
   };
 
   return (
@@ -203,12 +277,128 @@ const SettingsScreen = () => {
           </CardContent>
         </Card>
 
+        {/* Workout Plans Section */}
+        <Card
+          sx={{
+            maxWidth: 600,
+            borderRadius: 2,
+            boxShadow: 3,
+            mt: 3,
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Stack spacing={3}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                  }}
+                >
+                  Workout Plans
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<Add />}
+                  onClick={handleOpenPlanModal}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Create Plan
+                </Button>
+              </Box>
+
+              <Divider />
+
+              {plans.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                  No workout plans yet. Create one to get started!
+                </Typography>
+              ) : (
+                <List sx={{ py: 0 }}>
+                  {plans.map((plan) => (
+                    <ListItem
+                      key={plan.id}
+                      sx={{
+                        border: '1px solid',
+                        borderColor: activePlan?.id === plan.id ? 'primary.main' : 'divider',
+                        borderRadius: 2,
+                        mb: 2,
+                        bgcolor: activePlan?.id === plan.id ? 'action.selected' : 'background.paper',
+                        '&:last-child': { mb: 0 }
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                            <Typography variant="body1" fontWeight={600}>
+                              {plan.name}
+                            </Typography>
+                            {activePlan?.id === plan.id && (
+                              <CheckCircle color="primary" fontSize="small" />
+                            )}
+                          </Box>
+                        }
+                        secondary={
+                          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                            <Chip
+                              label={getGoalLabel(plan.goal)}
+                              size="small"
+                              sx={{ fontSize: '0.7rem', height: 20 }}
+                            />
+                            <Chip
+                              label={`${plan.daysPerWeek}x/week`}
+                              size="small"
+                              sx={{ fontSize: '0.7rem', height: 20 }}
+                            />
+                            <Chip
+                              label={getExperienceLabel(plan.experienceLevel)}
+                              size="small"
+                              sx={{ fontSize: '0.7rem', height: 20 }}
+                            />
+                          </Stack>
+                        }
+                      />
+                      <Stack direction="row" spacing={1}>
+                        {activePlan?.id !== plan.id && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => handleActivatePlan(plan.id)}
+                            sx={{ textTransform: 'none' }}
+                          >
+                            Activate
+                          </Button>
+                        )}
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeletePlan(plan.id)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Stack>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </Stack>
+          </CardContent>
+        </Card>
+
         <Box sx={{ mt: 3 }}>
           <Typography variant="body2" color="text.secondary">
             Your preferences are saved automatically and will persist between sessions.
           </Typography>
         </Box>
       </motion.div>
+
+      {/* Plan Creation Modal */}
+      <PlanCreationModal
+        open={showPlanModal}
+        onClose={handleClosePlanModal}
+        onPlanCreated={handlePlanCreated}
+      />
     </Box>
   );
 };

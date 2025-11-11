@@ -209,7 +209,7 @@ const NavigationSidebar = ({
             }}>
               <NavLink
                 icon={<FaDumbbell />}
-                label="Workouts & Plans"
+                label="Training Hub"
                 isActive={currentScreen === 'selection' || currentScreen === 'preview'}
                 onClick={() => handleNavClick('selection')}
               />
@@ -224,12 +224,6 @@ const NavigationSidebar = ({
                 label="Cardio"
                 isActive={currentScreen === 'cardio'}
                 onClick={() => handleNavClick('cardio')}
-              />
-              <NavLink
-                icon={<MdSelfImprovement />}
-                label="Mobility"
-                isActive={currentScreen === 'stretch' || currentScreen === 'yoga' || currentScreen === 'mobility'}
-                onClick={() => handleNavClick('mobility')}
               />
               <NavLink
                 icon={<AddCircleOutlineIcon />}

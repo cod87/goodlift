@@ -50,6 +50,9 @@ import audioService from '../utils/audioService';
 import { saveWorkout } from '../utils/storage';
 import { formatDuration } from '../utils/helpers';
 import wakeLockManager from '../utils/wakeLock';
+import { generateHIITSession } from '../utils/hiitSessionGenerator';
+import { generateYogaSession } from '../utils/yogaSessionGenerator';
+import yogaPosesData from '../../public/data/yoga-poses.json';
 
 // Timer types
 const TIMER_TYPES = {
@@ -58,15 +61,8 @@ const TIMER_TYPES = {
   YOGA: 'yoga',
 };
 
-// Yoga poses pool for random selection
-const YOGA_POSES = [
-  'Mountain Pose', 'Downward Dog', 'Warrior I', 'Warrior II', 'Triangle Pose',
-  'Tree Pose', 'Child\'s Pose', 'Cat-Cow Stretch', 'Cobra Pose', 'Plank Pose',
-  'Bridge Pose', 'Seated Forward Bend', 'Pigeon Pose', 'Corpse Pose (Savasana)',
-  'Chair Pose', 'Eagle Pose', 'Half Moon Pose', 'Camel Pose', 'Boat Pose',
-  'Butterfly Pose', 'Garland Pose', 'Extended Side Angle', 'Revolved Triangle',
-  'Upward Facing Dog', 'Low Lunge', 'High Lunge', 'Standing Forward Bend',
-];
+// Extract yoga pose names from imported data
+const YOGA_POSES = yogaPosesData.map(pose => pose.Name);
 
 // Storage key for timer settings
 const TIMER_SETTINGS_KEY = 'goodlift_timer_settings';
@@ -376,15 +372,39 @@ const UnifiedTimerScreen = () => {
     elapsedBeforePauseRef.current = 0;
     
     if (timerType === TIMER_TYPES.HIIT) {
+      // Generate HIIT session structure (for logging purposes)
+      const hiitSession = generateHIITSession({
+        modality: 'bodyweight',
+        level: 'intermediate',
+        protocol: 'BALANCED',
+        exercises: [],
+        workDuration: hiitWorkTime,
+        restDuration: hiitRestTime,
+        rounds: hiitRounds
+      });
+      console.log('HIIT session generated:', hiitSession);
+      
       setTimeLeft(hiitWorkTime);
       setCurrentRound(0);
       setIsWorkPhase(true);
       audioService.playHighBeep();
     } else if (timerType === TIMER_TYPES.CARDIO) {
+      // Cardio uses simple duration timer (no generator needed)
       const durationSeconds = cardioDuration * 60;
       setTimeLeft(durationSeconds);
       audioService.playHighBeep();
     } else if (timerType === TIMER_TYPES.YOGA) {
+      // Generate Yoga session structure (for logging purposes)
+      const yogaSession = generateYogaSession({
+        mode: 'power',
+        level: 'intermediate',
+        poses: yogaPosesData,
+        flowDuration: yogaFlowDuration,
+        poseInterval: yogaPoseInterval,
+        cooldownDuration: yogaCooldown
+      });
+      console.log('Yoga session generated:', yogaSession);
+      
       const durationSeconds = yogaFlowDuration * 60;
       setTimeLeft(durationSeconds);
       const firstPose = getRandomPose();

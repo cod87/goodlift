@@ -53,19 +53,7 @@ export const saveUserDataToFirebase = async (userId, data) => {
       lastUpdated: new Date().toISOString()
     });
     
-    // Log what we're actually saving
-    if (cleanedData.workoutPlans) {
-      console.log('Saving workout plans to Firebase:', {
-        count: cleanedData.workoutPlans.length,
-        firstPlanId: cleanedData.workoutPlans[0]?.id,
-        firstPlanName: cleanedData.workoutPlans[0]?.name,
-        firstPlanSessions: cleanedData.workoutPlans[0]?.sessions?.length,
-        firstSessionExercises: cleanedData.workoutPlans[0]?.sessions?.[0]?.exercises?.length
-      });
-    }
-    
     await setDoc(userDocRef, cleanedData, { merge: true });
-    console.log('Data saved to Firebase successfully');
   } catch (error) {
     console.error('Error saving data to Firebase:', error);
     throw error;
@@ -88,25 +76,8 @@ export const loadUserDataFromFirebase = async (userId) => {
     const docSnap = await getDoc(userDocRef);
     
     if (docSnap.exists()) {
-      const data = docSnap.data();
-      console.log('Data loaded from Firebase successfully');
-      
-      // Log workout plans details
-      if (data.workoutPlans) {
-        console.log('Firebase loaded workoutPlans:', {
-          count: data.workoutPlans.length,
-          firstPlanId: data.workoutPlans[0]?.id,
-          firstPlanSessions: data.workoutPlans[0]?.sessions?.length,
-          firstSessionExercises: data.workoutPlans[0]?.sessions?.[0]?.exercises?.length,
-          rawFirstSession: data.workoutPlans[0]?.sessions?.[0]
-        });
-      } else {
-        console.log('No workoutPlans in Firebase data');
-      }
-      
-      return data;
+      return docSnap.data();
     } else {
-      console.log('No data found in Firebase for this user');
       return null;
     }
   } catch (error) {

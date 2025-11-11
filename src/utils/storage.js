@@ -531,8 +531,6 @@ export const loadUserDataFromCloud = async (userId) => {
       if (firebaseData.activePlanId) {
         localStorage.setItem(KEYS.ACTIVE_PLAN, firebaseData.activePlanId);
       }
-      
-      console.log('User data synced from Firebase to localStorage');
     } else {
       // No data in Firebase, sync current localStorage data to Firebase
       const localHistory = await getWorkoutHistory();
@@ -555,7 +553,6 @@ export const loadUserDataFromCloud = async (userId) => {
           localHiit.length > 0 || localCardio.length > 0 || 
           localStretch.length > 0 || localYoga.length > 0 ||
           plansArray.length > 0 || localActivePlanId) {
-        console.log('Syncing local data to Firebase for new user');
         await Promise.all([
           saveWorkoutHistoryToFirebase(userId, localHistory),
           saveUserStatsToFirebase(userId, localStats),
@@ -1285,12 +1282,9 @@ export const updatePinnedExerciseMode = (exerciseName, trackingMode) => {
  */
 export const getWorkoutPlans = async () => {
   try {
-    console.log('getWorkoutPlans called, guest mode:', isGuestMode(), 'userId:', currentUserId);
-    
     // Check if in guest mode first
     if (isGuestMode()) {
       const guestData = getGuestData('workout_plans');
-      console.log('Guest mode - plans:', guestData?.length || 0);
       return guestData || [];
     }
 
@@ -1298,18 +1292,7 @@ export const getWorkoutPlans = async () => {
     if (currentUserId) {
       try {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
-        console.log('Firebase data loaded, has workoutPlans:', !!firebaseData?.workoutPlans, 'count:', firebaseData?.workoutPlans?.length || 0);
         if (firebaseData?.workoutPlans) {
-          // Log first plan's first session to check if exercises exist
-          if (firebaseData.workoutPlans.length > 0 && firebaseData.workoutPlans[0].sessions && firebaseData.workoutPlans[0].sessions.length > 0) {
-            const firstSession = firebaseData.workoutPlans[0].sessions[0];
-            console.log('First plan, first session:', {
-              type: firstSession.type,
-              hasExercises: !!firstSession.exercises,
-              exerciseCount: firstSession.exercises?.length || 0,
-              exercisesSample: firstSession.exercises?.slice(0, 2)
-            });
-          }
           // Update localStorage cache for offline access
           localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(firebaseData.workoutPlans));
           return firebaseData.workoutPlans;
@@ -1321,17 +1304,7 @@ export const getWorkoutPlans = async () => {
 
     // Fallback to localStorage
     const plans = localStorage.getItem(KEYS.WORKOUT_PLANS);
-    const parsedPlans = plans ? JSON.parse(plans) : [];
-    console.log('localStorage fallback - plans:', parsedPlans.length);
-    if (parsedPlans.length > 0 && parsedPlans[0].sessions && parsedPlans[0].sessions.length > 0) {
-      const firstSession = parsedPlans[0].sessions[0];
-      console.log('localStorage - First plan, first session:', {
-        type: firstSession.type,
-        hasExercises: !!firstSession.exercises,
-        exerciseCount: firstSession.exercises?.length || 0
-      });
-    }
-    return parsedPlans;
+    return plans ? JSON.parse(plans) : [];
   } catch (error) {
     console.error('Error reading workout plans:', error);
     return [];
@@ -1345,39 +1318,20 @@ export const getWorkoutPlans = async () => {
  */
 export const saveWorkoutPlan = async (plan) => {
   try {
-    console.log('saveWorkoutPlan called for plan:', plan.id, plan.name);
-    console.log('Plan has sessions:', plan.sessions?.length || 0);
-    if (plan.sessions && plan.sessions.length > 0) {
-      const firstSession = plan.sessions[0];
-      console.log('First session before save:', {
-        type: firstSession.type,
-        hasExercises: !!firstSession.exercises,
-        exerciseCount: firstSession.exercises?.length || 0,
-        exercisesSample: firstSession.exercises?.slice(0, 2)
-      });
-    }
-    
     const plans = await getWorkoutPlans();
-    console.log('Current plans before save:', plans.length);
     const existingIndex = plans.findIndex(p => p.id === plan.id);
     
     if (existingIndex >= 0) {
-      console.log('Updating existing plan at index:', existingIndex);
       plans[existingIndex] = plan;
     } else {
-      console.log('Adding new plan');
       plans.push(plan);
     }
-    console.log('Total plans after update:', plans.length);
 
     // Save based on mode
     if (isGuestMode()) {
-      console.log('Saving to guest storage');
       setGuestData('workout_plans', plans);
     } else {
-      console.log('Saving to localStorage');
       localStorage.setItem(KEYS.WORKOUT_PLANS, JSON.stringify(plans));
-      console.log('localStorage updated, plans count:', plans.length);
       
       // Sync to Firebase if user is logged in
       if (currentUserId) {

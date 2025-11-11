@@ -106,8 +106,6 @@ export const validateSession = (session) => {
  * @returns {Object} Generated workout plan
  */
 export const generateWorkoutPlan = async (preferences) => {
-  console.log('generateWorkoutPlan called with preferences:', preferences);
-  
   const {
     goal = 'general_fitness',
     experienceLevel = 'intermediate',
@@ -120,16 +118,6 @@ export const generateWorkoutPlan = async (preferences) => {
     planName = 'My Workout Plan'
   } = preferences;
 
-  console.log('Parsed preferences:', {
-    planName,
-    duration,
-    goal,
-    experienceLevel,
-    daysPerWeek,
-    sessionTypes,
-    equipmentAvailable
-  });
-
   // Validate inputs
   if (daysPerWeek < 2 || daysPerWeek > 7) {
     throw new Error('Days per week must be between 2 and 7');
@@ -138,11 +126,8 @@ export const generateWorkoutPlan = async (preferences) => {
     throw new Error('Duration must be between 1 and 90 days');
   }
 
-  console.log('Input validation passed');
-
   // Determine split type based on days per week
   const splitType = determineSplitType(daysPerWeek, experienceLevel);
-  console.log('Split type determined:', splitType);
 
   // Generate session schedule
   const sessions = generateSessionSchedule({
@@ -155,18 +140,13 @@ export const generateWorkoutPlan = async (preferences) => {
     experienceLevel
   });
 
-  console.log(`Generated ${sessions.length} sessions in schedule`);
-
   // Calculate deload weeks (every 3-4 weeks per guide recommendations)
   const deloadWeeks = calculateDeloadWeeks(duration);
-  console.log('Deload weeks calculated:', deloadWeeks);
   
   // Populate session data for all sessions
   // IMPORTANT: For progressive overload to work, we reuse the same exercises week-to-week
   // until a deload week, then we can optionally vary them for the next block
   const exerciseCache = {}; // Cache exercises by session type and week block
-  
-  console.log('Starting to populate session data...');
   
   // Process sessions sequentially to ensure cache is populated correctly
   const populatedSessions = [];
@@ -185,13 +165,10 @@ export const generateWorkoutPlan = async (preferences) => {
     // For the first session of this type in this block, generate new exercises
     // For subsequent sessions, reuse the cached exercises
     if (!exerciseCache[cacheKey]) {
-      console.log(`Generating exercises for session ${index + 1}: ${session.type} (block ${blockNumber})`);
       const populated = await populateSessionData(session, experienceLevel, weekNumber, equipmentAvailable, isDeloadWeek);
       exerciseCache[cacheKey] = populated.exercises || populated.sessionData;
-      console.log(`Session ${index + 1} populated with ${populated.exercises?.length || 0} exercises`);
       populatedSessions.push(populated);
     } else {
-      console.log(`Reusing exercises for session ${index + 1}: ${session.type} (block ${blockNumber})`);
       // Reuse exercises from the first week of this block
       populatedSessions.push({
         ...session,
@@ -205,8 +182,6 @@ export const generateWorkoutPlan = async (preferences) => {
       });
     }
   }
-
-  console.log('All sessions populated, validating...');
 
   // Validate sessions were properly populated
   const validationErrors = [];
@@ -247,14 +222,6 @@ export const generateWorkoutPlan = async (preferences) => {
     active: true,
     validationWarnings: validationErrors.length > 0 ? validationErrors : []
   };
-
-  console.log('Plan created successfully:', {
-    id: plan.id,
-    name: plan.name,
-    totalSessions: plan.sessions.length,
-    sessionsWithExercises: plan.sessions.filter(s => s.exercises && s.exercises.length > 0).length,
-    validationWarnings: plan.validationWarnings
-  });
 
   return plan;
 };

@@ -112,7 +112,7 @@ ChartJS.register(
   Filler
 );
 
-const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
+const ProgressScreen = ({ onStartWorkout }) => {
   const [history, setHistory] = useState([]);
   const [stretchSessions, setStretchSessions] = useState([]);
   const [yogaSessions, setYogaSessions] = useState([]);

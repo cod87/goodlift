@@ -105,7 +105,7 @@ const UnifiedTimerScreen = () => {
   const [poseHistory, setPoseHistory] = useState([]);
 
   // Cardio specific state
-  const [nextIntervalAt, setNextIntervalAt] = useState(0);
+  // Interval tracking is handled dynamically in timer logic
 
   // Completion dialog
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
@@ -383,7 +383,6 @@ const UnifiedTimerScreen = () => {
     } else if (timerType === TIMER_TYPES.CARDIO) {
       const durationSeconds = cardioDuration * 60;
       setTimeLeft(durationSeconds);
-      setNextIntervalAt(cardioIntervalMinutes * 60);
       audioService.playHighBeep();
     } else if (timerType === TIMER_TYPES.YOGA) {
       const durationSeconds = yogaFlowDuration * 60;

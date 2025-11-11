@@ -30,6 +30,7 @@ import {
   TrendingUp as ProgressIcon,
   Delete as DeleteIcon,
   SelfImprovement as YogaIcon,
+  DirectionsRun as CardioIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import CompactHeader from './Common/CompactHeader';
@@ -223,7 +224,7 @@ const UnifiedWorkoutHub = ({
     }}>
       <CompactHeader 
         title="Training Hub"
-        subtitle="Workouts, plans, mobility & yoga in one place"
+        subtitle="Workouts, plans, cardio, mobility & yoga in one place"
       />
 
       <Stack spacing={2}>
@@ -542,6 +543,59 @@ const UnifiedWorkoutHub = ({
                 Stretching
               </Button>
             </Stack>
+          </CardContent>
+        </Card>
+
+        {/* Cardio Section - Extra Compact */}
+        <Card sx={{ bgcolor: 'background.paper' }}>
+          <CardContent sx={{ py: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CardioIcon /> Cardio
+            </Typography>
+            <Grid container spacing={1}>
+              <Grid item xs={6}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => onNavigate('hiit-selection')}
+                  fullWidth
+                  sx={{ 
+                    py: 1,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  HIIT
+                </Button>
+              </Grid>
+              <Grid item xs={6}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => onNavigate('hiit')}
+                  fullWidth
+                  sx={{ 
+                    py: 1,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  Timer
+                </Button>
+              </Grid>
+              <Grid item xs={6}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => onNavigate('log-cardio')}
+                  fullWidth
+                  sx={{ 
+                    py: 1,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  Log Cardio
+                </Button>
+              </Grid>
+            </Grid>
           </CardContent>
         </Card>
       </Stack>

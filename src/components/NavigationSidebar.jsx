@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaDumbbell, FaSignOutAlt, FaTimes, FaBars, FaRunning } from 'react-icons/fa';
-import { MdSelfImprovement } from 'react-icons/md';
-import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
-import EditCalendarIcon from '@mui/icons-material/EditCalendar';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import { FaDumbbell, FaSignOutAlt, FaTimes, FaBars } from 'react-icons/fa';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -218,12 +214,6 @@ const NavigationSidebar = ({
                 label="Progress"
                 isActive={currentScreen === 'progress'}
                 onClick={() => handleNavClick('progress')}
-              />
-              <NavLink
-                icon={<DirectionsRunIcon />}
-                label="Cardio"
-                isActive={currentScreen === 'cardio'}
-                onClick={() => handleNavClick('cardio')}
               />
               <NavLink
                 icon={<AddCircleOutlineIcon />}

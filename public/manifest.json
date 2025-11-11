@@ -4,8 +4,8 @@
   "description": "Randomized strength training and workout tracker",
   "start_url": "/goodlift/",
   "display": "standalone",
-  "background_color": "#fdf4e3",
-  "theme_color": "#134686",
+  "background_color": "#1e2939",
+  "theme_color": "#2a3647",
   "orientation": "any",
   "icons": [
     {

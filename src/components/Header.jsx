@@ -60,19 +60,7 @@ const Header = ({ onNavigate }) => {
         borderBottom: '1px solid rgba(29, 181, 132, 0.2)',
       }}
     >
-      {/* Left spacer - empty for balance */}
-      <Box sx={{ 
-        position: 'absolute',
-        left: '1rem',
-        display: 'flex', 
-        alignItems: 'center',
-        gap: 0.5,
-        visibility: 'hidden'
-      }}>
-        <Box sx={{ width: '40px' }} />
-      </Box>
-      
-      {/* Center logo */}
+      {/* Center favicon icon */}
       <Box 
         onClick={() => onNavigate && onNavigate('progress')}
         sx={{
@@ -99,9 +87,9 @@ const Header = ({ onNavigate }) => {
         } : undefined}
       >
         <img
-          src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
+          src={`${import.meta.env.BASE_URL}goodlift-favicon.svg`}
           alt="GoodLift"
-          style={{ height: '40px', width: 'auto', display: 'block' }}
+          style={{ height: '40px', width: '40px', display: 'block' }}
         />
       </Box>
       

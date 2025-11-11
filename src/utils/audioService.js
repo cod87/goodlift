@@ -7,6 +7,7 @@ class AudioService {
   constructor() {
     this.audioContext = null;
     this.isMuted = this.loadMutePreference();
+    this.volume = this.loadVolumePreference();
     this.sounds = {};
     this.initAudioContext();
   }
@@ -34,6 +35,19 @@ class AudioService {
       return stored === 'true';
     } catch {
       return false;
+    }
+  }
+
+  /**
+   * Load volume preference from localStorage
+   * @returns {number} Volume level (0 to 1)
+   */
+  loadVolumePreference() {
+    try {
+      const stored = localStorage.getItem('audioVolume');
+      return stored ? parseFloat(stored) : 0.3;
+    } catch {
+      return 0.3;
     }
   }
 
@@ -79,10 +93,13 @@ class AudioService {
    * Generate a beep sound using Web Audio API
    * @param {number} frequency - Frequency in Hz
    * @param {number} duration - Duration in milliseconds
-   * @param {number} volume - Volume (0 to 1)
+   * @param {number} volume - Volume (0 to 1) - if not provided, uses stored volume
    */
-  playBeep(frequency = 800, duration = 200, volume = 0.3) {
+  playBeep(frequency = 800, duration = 200, volume = null) {
     if (this.isMuted) return;
+    
+    // Use stored volume if not provided
+    const actualVolume = volume !== null ? volume : this.loadVolumePreference();
     if (!this.audioContext) {
       this.initAudioContext();
       if (!this.audioContext) return;
@@ -103,7 +120,7 @@ class AudioService {
       oscillator.frequency.value = frequency;
       oscillator.type = 'sine';
 
-      gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+      gainNode.gain.setValueAtTime(actualVolume, this.audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(
         0.01,
         this.audioContext.currentTime + duration / 1000
@@ -120,14 +137,14 @@ class AudioService {
    * Play a high-pitched beep (for work period start)
    */
   playHighBeep() {
-    this.playBeep(1000, 300, 0.4);
+    this.playBeep(1000, 300);
   }
 
   /**
    * Play a low-pitched beep (for rest period start)
    */
   playLowBeep() {
-    this.playBeep(400, 300, 0.4);
+    this.playBeep(400, 300);
   }
 
   /**
@@ -147,11 +164,11 @@ class AudioService {
       }
 
       // First tone
-      this.playBeep(800, 200, 0.3);
+      this.playBeep(800, 200);
       
       // Second tone (slightly delayed)
       setTimeout(() => {
-        this.playBeep(1000, 400, 0.25);
+        this.playBeep(1000, 400);
       }, 150);
     } catch (e) {
       console.warn('Could not play chime', e);
@@ -164,9 +181,9 @@ class AudioService {
   playCountdownBeep() {
     if (this.isMuted) return;
     
-    this.playBeep(600, 150, 0.3);
-    setTimeout(() => this.playBeep(600, 150, 0.3), 200);
-    setTimeout(() => this.playBeep(600, 150, 0.3), 400);
+    this.playBeep(600, 150);
+    setTimeout(() => this.playBeep(600, 150), 200);
+    setTimeout(() => this.playBeep(600, 150), 400);
   }
 
   /**
@@ -188,7 +205,7 @@ class AudioService {
       const notes = [523, 659, 784, 1047]; // C, E, G, C (major chord)
       notes.forEach((freq, index) => {
         setTimeout(() => {
-          this.playBeep(freq, 300, 0.25);
+          this.playBeep(freq, 300);
         }, index * 150);
       });
     } catch (e) {
@@ -201,7 +218,7 @@ class AudioService {
    */
   playTransitionBeep() {
     if (this.isMuted) return;
-    this.playBeep(700, 200, 0.3);
+    this.playBeep(700, 200);
   }
 }
 

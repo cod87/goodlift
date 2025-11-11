@@ -19,109 +19,23 @@ import MobilityScreen from './components/Mobility/MobilityScreen';
 import CardioScreen from './pages/CardioScreen';
 import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
+import SettingsScreen from './pages/SettingsScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
 import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps, loadUserDataFromCloud } from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Snackbar, Alert, Button } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 
 /**
- * Custom theme configuration with dark mode
- * Color palette:
- * - Dark Background: #1e2939
- * - Teal/Green Accent: #1db584
- * - Orange Button: #ff8c00
- * - Secondary Text: #a0a8b3
- * - White Text: #ffffff
- * - Protein: #9c5a6e
- * - Carbs: #9d9e7e
- * - Fat: #6b8a9d
+ * Main app component wrapped with theme
  */
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#1db584', // Teal/Green Accent
-      light: '#2dd099',
-      dark: '#18a071',
-    },
-    secondary: {
-      main: '#ff8c00', // Orange Button
-      light: '#ffa333',
-      dark: '#cc7000',
-    },
-    background: {
-      default: '#1e2939', // Dark Background
-      paper: '#2a3647', // Slightly lighter for cards
-    },
-    text: {
-      primary: '#ffffff', // White Text
-      secondary: '#a0a8b3', // Secondary Text
-    },
-    // Custom colors for macros
-    success: {
-      main: '#1db584',
-    },
-    warning: {
-      main: '#ff8c00',
-    },
-    error: {
-      main: '#ef5350',
-    },
-    info: {
-      main: '#6b8a9d', // Fat color
-    },
-  },
-  typography: {
-    fontFamily: "'Poppins', sans-serif",
-    h1: { fontFamily: "'Montserrat', sans-serif", fontWeight: 800, color: '#ffffff' },
-    h2: { fontFamily: "'Montserrat', sans-serif", fontWeight: 800, color: '#ffffff' },
-    h3: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: '#ffffff' },
-    h4: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: '#ffffff' },
-    h5: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: '#ffffff' },
-    h6: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: '#ffffff' },
-  },
-  components: {
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#2a3647',
-          backgroundImage: 'none',
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        containedPrimary: {
-          backgroundColor: '#1db584',
-          '&:hover': {
-            backgroundColor: '#18a071',
-          },
-        },
-        containedSecondary: {
-          backgroundColor: '#ff8c00',
-          '&:hover': {
-            backgroundColor: '#cc7000',
-          },
-        },
-      },
-    },
-  },
-});
-
-function App() {
+function AppContent() {
   const [currentScreen, setCurrentScreen] = useState('selection');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState([]);
@@ -557,17 +471,19 @@ function App() {
   };
 
   // Show auth screen if user is not logged in
+  const { theme } = useCustomTheme();
+  
   if (!currentUser) {
     return (
-      <ThemeProvider theme={theme}>
+      <MuiThemeProvider theme={theme}>
         <CssBaseline />
         <AuthScreen />
-      </ThemeProvider>
+      </MuiThemeProvider>
     );
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <MuiThemeProvider theme={theme}>
       <CssBaseline />
       <div style={{ display: 'flex', minHeight: '100vh' }}>
         <NavigationSidebar
@@ -665,6 +581,8 @@ function App() {
           {(currentScreen === 'stretch' || currentScreen === 'yoga' || currentScreen === 'mobility') && <MobilityScreen />}
 
           {currentScreen === 'exercise-list' && <ExerciseListPage />}
+
+          {currentScreen === 'settings' && <SettingsScreen />}
         </div>
         
         {/* Guest Data Migration Dialog */}
@@ -727,7 +645,15 @@ function App() {
           </Alert>
         </Snackbar>
       </div>
-    </ThemeProvider>
+    </MuiThemeProvider>
+  );
+}
+
+function App() {
+  return (
+    <CustomThemeProvider>
+      <AppContent />
+    </CustomThemeProvider>
   );
 }
 

@@ -5,6 +5,7 @@ import { FaDumbbell, FaSignOutAlt, FaTimes, FaBars } from 'react-icons/fa';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import GuestLogoutDialog from './GuestLogoutDialog';
@@ -226,6 +227,12 @@ const NavigationSidebar = ({
                 label="Exercise List"
                 isActive={currentScreen === 'exercise-list'}
                 onClick={() => handleNavClick('exercise-list')}
+              />
+              <NavLink
+                icon={<SettingsIcon />}
+                label="Settings"
+                isActive={currentScreen === 'settings'}
+                onClick={() => handleNavClick('settings')}
               />
             </nav>
 

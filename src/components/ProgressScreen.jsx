@@ -39,7 +39,6 @@ import {
   Close,
   Edit,
   Delete,
-  ArrowForward,
   ExpandMore,
   ExpandLess,
 } from '@mui/icons-material';

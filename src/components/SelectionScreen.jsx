@@ -2,12 +2,13 @@ import { memo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItem, ListItemText, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { ExpandMore, Delete, Star, Edit } from '@mui/icons-material';
+import { ExpandMore, Delete, Star, Edit, Add } from '@mui/icons-material';
 import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName, getWorkoutHistory } from '../utils/storage';
 import QuickStartCard from './Home/QuickStartCard';
 import WeeklyPlanPreview from './Home/WeeklyPlanPreview';
 import CompactHeader from './Common/CompactHeader';
 import { usePlanIntegration } from '../hooks/usePlanIntegration';
+import PlanCreationModal from './PlanCreationModal';
 
 /**
  * SelectionScreen component for workout configuration
@@ -31,6 +32,7 @@ const SelectionScreen = memo(({
   const [editedName, setEditedName] = useState('');
   const [expandedFavorite, setExpandedFavorite] = useState(null);
   const [lastWorkout, setLastWorkout] = useState(null);
+  const [showPlanModal, setShowPlanModal] = useState(false);
   
   // Use plan integration hook instead of weekly plan hook
   const { 
@@ -163,6 +165,19 @@ const SelectionScreen = memo(({
     setEditDialogOpen(false);
     setEditingWorkout(null);
     setEditedName('');
+  };
+
+  const handleOpenPlanModal = () => {
+    setShowPlanModal(true);
+  };
+
+  const handleClosePlanModal = () => {
+    setShowPlanModal(false);
+  };
+
+  const handlePlanCreated = () => {
+    // Refresh the page to show the new plan
+    window.location.reload();
   };
 
   const handleLoadFavorite = (favoriteWorkout) => {
@@ -313,6 +328,25 @@ const SelectionScreen = memo(({
               onQuickStartDay={handleQuickStartDay}
               onEditPlan={handleViewPlan}
             />
+          </Box>
+
+          {/* Create New Plan Button */}
+          <Box sx={{ mb: 3 }}>
+            <Button
+              variant="outlined"
+              startIcon={<Add />}
+              onClick={handleOpenPlanModal}
+              fullWidth
+              sx={{
+                py: 1.5,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontSize: '1rem',
+                fontWeight: 600,
+              }}
+            >
+              Create New Plan
+            </Button>
           </Box>
 
           {/* Main Configuration Card */}
@@ -621,6 +655,13 @@ const SelectionScreen = memo(({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Plan Creation Modal */}
+      <PlanCreationModal
+        open={showPlanModal}
+        onClose={handleClosePlanModal}
+        onPlanCreated={handlePlanCreated}
+      />
     </motion.div>
     </Box>
   );

@@ -6,13 +6,10 @@ import {
   Card,
   CardContent,
   Typography,
-  Grid,
   Stack,
   Button,
   IconButton,
   Chip,
-  ToggleButtonGroup,
-  ToggleButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,33 +23,25 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Switch,
-  FormControlLabel,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
 } from '@mui/material';
 import {
-  FitnessCenter,
-  Timer,
   TrendingUp,
-  Whatshot,
-  DirectionsRun,
-  SelfImprovement,
+  TrendingDown,
+  Remove,
   Add,
   Close,
   Edit,
   Delete,
+  ExpandMore,
+  ExpandLess,
 } from '@mui/icons-material';
-import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-} from 'chart.js';
 import CompactHeader from './Common/CompactHeader';
 import Calendar from './Calendar';
 import {
@@ -71,7 +60,6 @@ import {
   updateHiitSession,
   updateCardioSession,
   getPinnedExercises,
-  updatePinnedExerciseMode,
   removePinnedExercise,
   addPinnedExercise,
   getActivePlan,
@@ -80,24 +68,12 @@ import { formatDate, formatDuration } from '../utils/helpers';
 import {
   getExerciseProgression,
   getUniqueExercises,
-  formatProgressionForChart
 } from '../utils/progressionHelpers';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
-
 /**
  * ProgressDashboard - Complete progress tracking dashboard
- * Redesigned to match the modern style of Workouts and Plans pages
+ * Redesigned to match the modern style of Training Hub
  */
 const ProgressDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -110,12 +86,13 @@ const ProgressDashboard = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [pinnedExercises, setPinnedExercisesState] = useState([]);
   const [availableExercises, setAvailableExercises] = useState([]);
-  const [timeFilter, setTimeFilter] = useState('all');
+  const [statsFilter, setStatsFilter] = useState('all'); // Changed from timeFilter
   const [addExerciseDialogOpen, setAddExerciseDialogOpen] = useState(false);
   const [exerciseSearchQuery, setExerciseSearchQuery] = useState('');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
   const [editingSessionType, setEditingSessionType] = useState(null);
+  const [calendarExpanded, setCalendarExpanded] = useState(false); // For weekly/monthly toggle
 
   const loadData = async () => {
     setLoading(true);
@@ -240,14 +217,7 @@ const ProgressDashboard = () => {
     }
   };
 
-  const handleToggleTrackingMode = (exerciseName, currentMode) => {
-    const newMode = currentMode === 'weight' ? 'reps' : 'weight';
-    updatePinnedExerciseMode(exerciseName, newMode);
-    const updated = pinnedExercises.map(p =>
-      p.exerciseName === exerciseName ? { ...p, trackingMode: newMode } : p
-    );
-    setPinnedExercisesState(updated);
-  };
+
 
   const handleRemovePinnedExercise = (exerciseName) => {
     removePinnedExercise(exerciseName);
@@ -263,14 +233,14 @@ const ProgressDashboard = () => {
   };
 
   const filterByTimePeriod = (sessions) => {
-    if (timeFilter === 'all') return sessions;
+    if (statsFilter === 'all') return sessions;
 
     const now = new Date();
     let cutoffDate;
 
-    if (timeFilter === 'month') {
+    if (statsFilter === 'month') {
       cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    } else if (timeFilter === '2weeks') {
+    } else if (statsFilter === '2weeks') {
       cutoffDate = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
     }
 
@@ -411,428 +381,322 @@ const ProgressDashboard = () => {
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh' }}>
-      <CompactHeader title="Progress Dashboard" subtitle="Track your fitness journey" />
+      <CompactHeader title="Progress" subtitle="Track your fitness journey" />
 
       <Box sx={{ maxWidth: '1400px', margin: '0 auto', p: { xs: 2, md: 3 } }}>
-        <Stack spacing={3}>
-          {/* Time Filter */}
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <ToggleButtonGroup
-              value={timeFilter}
-              exclusive
-              onChange={(e, newFilter) => {
-                if (newFilter !== null) {
-                  setTimeFilter(newFilter);
-                }
-              }}
-              size="small"
-              sx={{
-                '& .MuiToggleButton-root': {
-                  px: 3,
-                  py: 1,
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                }
-              }}
-            >
-              <ToggleButton value="all">All Time</ToggleButton>
-              <ToggleButton value="month">Past Month</ToggleButton>
-              <ToggleButton value="2weeks">Past 2 Weeks</ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
+        <Stack spacing={2}>
+          {/* Stats Table */}
+          <Card sx={{ bgcolor: 'background.paper' }}>
+            <CardContent>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                <Typography variant="h6">Statistics</Typography>
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel>Period</InputLabel>
+                  <Select
+                    value={statsFilter}
+                    label="Period"
+                    onChange={(e) => setStatsFilter(e.target.value)}
+                  >
+                    <MenuItem value="all">All Time</MenuItem>
+                    <MenuItem value="month">Past Month</MenuItem>
+                    <MenuItem value="2weeks">Past 2 Weeks</MenuItem>
+                  </Select>
+                </FormControl>
+              </Stack>
 
-          {/* Stats Overview */}
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              style={{ flex: '1 1 calc(25% - 12px)', minWidth: '150px' }}
-            >
-              <Card sx={{
-                borderRadius: 3,
-                background: 'linear-gradient(135deg, #134686 0%, #1db584 100%)',
-                transition: 'transform 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                }
-              }}>
-                <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                  <FitnessCenter sx={{ fontSize: 40, color: 'white', mb: 1 }} />
-                  <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
-                    {filteredStats.totalWorkouts}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
-                    Workouts
-                  </Typography>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              style={{ flex: '1 1 calc(25% - 12px)', minWidth: '150px' }}
-            >
-              <Card sx={{
-                borderRadius: 3,
-                background: 'linear-gradient(135deg, #ff8c00 0%, #ffb347 100%)',
-                transition: 'transform 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                }
-              }}>
-                <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                  <Timer sx={{ fontSize: 40, color: 'white', mb: 1 }} />
-                  <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
-                    {filteredStats.avgWorkout}m
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
-                    Avg Duration
-                  </Typography>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              style={{ flex: '1 1 calc(25% - 12px)', minWidth: '150px' }}
-            >
-              <Card sx={{
-                borderRadius: 3,
-                background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)',
-                transition: 'transform 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                }
-              }}>
-                <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                  <DirectionsRun sx={{ fontSize: 40, color: 'white', mb: 1 }} />
-                  <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
-                    {filteredStats.totalCardio}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
-                    Cardio Sessions
-                  </Typography>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              style={{ flex: '1 1 calc(25% - 12px)', minWidth: '150px' }}
-            >
-              <Card sx={{
-                borderRadius: 3,
-                background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
-                transition: 'transform 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                }
-              }}>
-                <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                  <SelfImprovement sx={{ fontSize: 40, color: 'white', mb: 1 }} />
-                  <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
-                    {filteredStats.totalYoga}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
-                    Mobility
-                  </Typography>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Box>
+              <TableContainer component={Paper} variant="outlined">
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>Sessions</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>Avg Duration</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Workouts</TableCell>
+                      <TableCell align="right">{filteredStats.totalWorkouts}</TableCell>
+                      <TableCell align="right">{filteredStats.avgWorkout}m</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Cardio & HIIT</TableCell>
+                      <TableCell align="right">{filteredStats.totalCardio}</TableCell>
+                      <TableCell align="right">{filteredStats.avgCardio}m</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Mobility & Yoga</TableCell>
+                      <TableCell align="right">{filteredStats.totalYoga}</TableCell>
+                      <TableCell align="right">{filteredStats.avgYoga}m</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
 
           {/* Calendar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Card sx={{ borderRadius: 3 }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
-                  Activity Calendar
-                </Typography>
-                <Calendar workoutSessions={workoutSessions} onDayClick={handleDayClick} />
-                {selectedDate && (
-                  <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {selectedDate.toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </Typography>
-                      <IconButton size="small" onClick={() => setSelectedDate(null)}>
-                        <Close fontSize="small" />
-                      </IconButton>
-                    </Stack>
-                    {hasSessionsOnSelectedDay && (
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                        {filteredSessions.workouts.length +
-                          filteredSessions.hiit.length +
-                          filteredSessions.stretch.length +
-                          filteredSessions.yoga.length +
-                          filteredSessions.cardio.length} session(s) recorded
-                      </Typography>
-                    )}
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
+          <Card sx={{ bgcolor: 'background.paper' }}>
+            <CardContent>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                <Typography variant="h6">Calendar</Typography>
+                <Button
+                  size="small"
+                  endIcon={calendarExpanded ? <ExpandLess /> : <ExpandMore />}
+                  onClick={() => setCalendarExpanded(!calendarExpanded)}
+                >
+                  {calendarExpanded ? 'Monthly' : 'Weekly'}
+                </Button>
+              </Stack>
+              <Calendar 
+                workoutSessions={workoutSessions} 
+                onDayClick={handleDayClick}
+                viewMode={calendarExpanded ? 'monthly' : 'weekly'}
+              />
+              {selectedDate && (
+                <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {selectedDate.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </Typography>
+                    <IconButton size="small" onClick={() => setSelectedDate(null)}>
+                      <Close fontSize="small" />
+                    </IconButton>
+                  </Stack>
+                  {hasSessionsOnSelectedDay && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                      {filteredSessions.workouts.length +
+                        filteredSessions.hiit.length +
+                        filteredSessions.stretch.length +
+                        filteredSessions.yoga.length +
+                        filteredSessions.cardio.length} session(s) recorded
+                    </Typography>
+                  )}
+                </Box>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Progressive Overload Tracking */}
           {history.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <Card sx={{ borderRadius: 3 }}>
-                <CardContent>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <TrendingUp /> Progressive Overload
-                    </Typography>
-                    {pinnedExercises.length < 10 && (
-                      <Button
-                        size="small"
-                        startIcon={<Add />}
-                        onClick={() => setAddExerciseDialogOpen(true)}
-                        sx={{ color: 'secondary.main' }}
-                      >
-                        Track Exercise
-                      </Button>
-                    )}
-                  </Stack>
-
-                  {pinnedExercises.length === 0 ? (
-                    <Box sx={{ textAlign: 'center', py: 4 }}>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        Track your favorite exercises to see your progress over time
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        startIcon={<Add />}
-                        onClick={() => setAddExerciseDialogOpen(true)}
-                      >
-                        Add Exercise
-                      </Button>
-                    </Box>
-                  ) : (
-                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                      {pinnedExercises.map((pinned) => {
-                        const progression = getExerciseProgression(
-                          history,
-                          pinned.exerciseName,
-                          pinned.trackingMode
-                        );
-                        const chartData = formatProgressionForChart(
-                          progression,
-                          pinned.trackingMode === 'weight' ? 'Weight (lbs)' : 'Reps',
-                          pinned.trackingMode
-                        );
-
-                        const chartOptions = {
-                          responsive: true,
-                          maintainAspectRatio: false,
-                          plugins: {
-                            legend: { display: false },
-                            title: { display: false },
-                          },
-                          scales: {
-                            y: {
-                              beginAtZero: pinned.trackingMode === 'reps',
-                              min: chartData.minValue,
-                              ticks: {
-                                callback: (value) => {
-                                  return pinned.trackingMode === 'weight'
-                                    ? `${value} lbs`
-                                    : value;
-                                },
-                              },
-                            },
-                            x: {
-                              offset: true,
-                              ticks: {
-                                maxRotation: 0,
-                                minRotation: 0,
-                              }
-                            }
-                          },
-                        };
-
-                        return (
-                          <Box 
-                            key={pinned.exerciseName}
-                            sx={{
-                              flex: '1 1 calc(33.333% - 11px)',
-                              minWidth: '280px',
-                              p: 2,
-                              borderRadius: 2,
-                              border: '1px solid',
-                              borderColor: 'divider',
-                              bgcolor: 'background.default',
-                            }}
-                          >
-                            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
-                              <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }}>
-                                {pinned.exerciseName}
-                              </Typography>
-                              <IconButton
-                                onClick={() => handleRemovePinnedExercise(pinned.exerciseName)}
-                                size="small"
-                                sx={{ color: 'text.secondary' }}
-                              >
-                                <Close sx={{ fontSize: 16 }} />
-                              </IconButton>
-                            </Stack>
-
-                            <FormControlLabel
-                              control={
-                                <Switch
-                                  checked={pinned.trackingMode === 'reps'}
-                                  onChange={() => handleToggleTrackingMode(pinned.exerciseName, pinned.trackingMode)}
-                                  size="small"
-                                />
-                              }
-                              label={
-                                <Typography variant="caption">
-                                  {pinned.trackingMode === 'weight' ? 'Weight' : 'Reps'}
-                                </Typography>
-                              }
-                              sx={{ mb: 1 }}
-                            />
-
-                            <Box sx={{ height: 200 }}>
-                              {progression.length > 0 ? (
-                                <Line data={chartData} options={chartOptions} />
-                              ) : (
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                  sx={{ display: 'block', textAlign: 'center', py: 4 }}
-                                >
-                                  No data available
-                                </Typography>
-                              )}
-                            </Box>
-                          </Box>
-                        );
-                      })}
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* Recent Activities */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className="activities-section"
-          >
-            <Card sx={{ borderRadius: 3 }}>
+            <Card sx={{ bgcolor: 'background.paper' }}>
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    {selectedDate
-                      ? `Activities on ${selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
-                      : 'Recent Activities'}
+                  <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <TrendingUp /> Progressive Overload
                   </Typography>
-                  {selectedDate && (
-                    <Button size="small" onClick={() => setSelectedDate(null)}>
-                      Show All
+                  {pinnedExercises.length < 10 && (
+                    <Button
+                      size="small"
+                      startIcon={<Add />}
+                      onClick={() => setAddExerciseDialogOpen(true)}
+                      sx={{ color: 'secondary.main' }}
+                    >
+                      Track Exercise
                     </Button>
                   )}
                 </Stack>
 
-                <Stack spacing={1}>
-                  {selectedDate && !hasSessionsOnSelectedDay ? (
-                    <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-                      No activities logged for this day.
+                {pinnedExercises.length === 0 ? (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Track your favorite exercises to see your progress over time
                     </Typography>
-                  ) : (
-                    <>
-                      {/* Workout Sessions */}
-                      {filteredSessions.workouts.map((workout, idx) => (
-                        <ActivityCard
-                          key={`workout-${idx}`}
-                          type="workout"
-                          session={workout}
-                          index={idx}
-                          onEdit={() => handleEditWorkout(workout, idx)}
-                          onDelete={() => handleDeleteWorkout(idx)}
-                        />
-                      ))}
+                    <Button
+                      variant="contained"
+                      startIcon={<Add />}
+                      onClick={() => setAddExerciseDialogOpen(true)}
+                    >
+                      Add Exercise
+                    </Button>
+                  </Box>
+                ) : (
+                  <Stack spacing={2}>
+                    {pinnedExercises.map((pinned) => {
+                      const progression = getExerciseProgression(
+                        history,
+                        pinned.exerciseName,
+                        'weight'
+                      );
 
-                      {/* HIIT Sessions */}
-                      {filteredSessions.hiit.map((session) => (
-                        <ActivityCard
-                          key={session.id}
-                          type="hiit"
-                          session={session}
-                          onEdit={() => handleEditHiit(session)}
-                          onDelete={() => handleDeleteHiit(session.id)}
-                        />
-                      ))}
+                      const startingWeight = progression.length > 0 ? progression[0].value : 0;
+                      const currentWeight = progression.length > 0 ? progression[progression.length - 1].value : 0;
+                      const progressionDirection = currentWeight > startingWeight ? 'up' : 
+                                                   currentWeight < startingWeight ? 'down' : 'same';
 
-                      {/* Cardio Sessions */}
-                      {filteredSessions.cardio.map((session) => (
-                        <ActivityCard
-                          key={session.id}
-                          type="cardio"
-                          session={session}
-                          onEdit={() => handleEditCardio(session)}
-                          onDelete={() => handleDeleteCardio(session.id)}
-                        />
-                      ))}
+                      return (
+                        <Box 
+                          key={pinned.exerciseName}
+                          sx={{
+                            p: 2,
+                            borderRadius: 2,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            bgcolor: 'background.default',
+                          }}
+                        >
+                          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
+                            <Typography variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
+                              {pinned.exerciseName}
+                            </Typography>
+                            <IconButton
+                              onClick={() => handleRemovePinnedExercise(pinned.exerciseName)}
+                              size="small"
+                              sx={{ color: 'text.secondary' }}
+                            >
+                              <Close sx={{ fontSize: 18 }} />
+                            </IconButton>
+                          </Stack>
 
-                      {/* Yoga Sessions */}
-                      {filteredSessions.yoga.map((session) => (
-                        <ActivityCard
-                          key={session.id}
-                          type="yoga"
-                          session={session}
-                          onEdit={() => handleEditYoga(session)}
-                          onDelete={() => handleDeleteYoga(session.id)}
-                        />
-                      ))}
+                          {progression.length > 0 ? (
+                            <Stack 
+                              direction="row" 
+                              alignItems="center" 
+                              spacing={2}
+                              sx={{ justifyContent: 'center', py: 1 }}
+                            >
+                              <Box sx={{ textAlign: 'center' }}>
+                                <Typography variant="caption" color="text.secondary">
+                                  Starting
+                                </Typography>
+                                <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                                  {startingWeight} lbs
+                                </Typography>
+                              </Box>
+                              
+                              <Box sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
+                                {progressionDirection === 'up' && (
+                                  <TrendingUp sx={{ fontSize: 40, color: 'success.main' }} />
+                                )}
+                                {progressionDirection === 'down' && (
+                                  <TrendingDown sx={{ fontSize: 40, color: 'error.main' }} />
+                                )}
+                                {progressionDirection === 'same' && (
+                                  <Remove sx={{ fontSize: 40, color: 'text.secondary' }} />
+                                )}
+                              </Box>
 
-                      {/* Stretch Sessions */}
-                      {filteredSessions.stretch.map((session) => (
-                        <ActivityCard
-                          key={session.id}
-                          type="stretch"
-                          session={session}
-                          onDelete={() => handleDeleteStretch(session.id)}
-                        />
-                      ))}
-
-                      {!selectedDate && history.length === 0 && hiitSessions.length === 0 &&
-                        stretchSessions.length === 0 && yogaSessions.length === 0 && cardioSessions.length === 0 && (
-                          <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-                            No activity history yet. Complete your first activity to see it here!
-                          </Typography>
-                        )}
-                    </>
-                  )}
-                </Stack>
+                              <Box sx={{ textAlign: 'center' }}>
+                                <Typography variant="caption" color="text.secondary">
+                                  Current
+                                </Typography>
+                                <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                                  {currentWeight} lbs
+                                </Typography>
+                              </Box>
+                            </Stack>
+                          ) : (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ display: 'block', textAlign: 'center', py: 2 }}
+                            >
+                              No data available
+                            </Typography>
+                          )}
+                        </Box>
+                      );
+                    })}
+                  </Stack>
+                )}
               </CardContent>
             </Card>
-          </motion.div>
+          )}
+
+          {/* Recent Activities */}
+          <Card sx={{ bgcolor: 'background.paper' }} className="activities-section">
+            <CardContent>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                <Typography variant="h6">
+                  {selectedDate
+                    ? `Activities on ${selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+                    : 'Recent Activities'}
+                </Typography>
+                {selectedDate && (
+                  <Button size="small" onClick={() => setSelectedDate(null)}>
+                    Show All
+                  </Button>
+                )}
+              </Stack>
+
+              <Stack spacing={1}>
+                {selectedDate && !hasSessionsOnSelectedDay ? (
+                  <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                    No activities logged for this day.
+                  </Typography>
+                ) : (
+                  <>
+                    {/* Workout Sessions */}
+                    {filteredSessions.workouts.map((workout, idx) => (
+                      <ActivityCard
+                        key={`workout-${idx}`}
+                        type="workout"
+                        session={workout}
+                        index={idx}
+                        onEdit={() => handleEditWorkout(workout, idx)}
+                        onDelete={() => handleDeleteWorkout(idx)}
+                      />
+                    ))}
+
+                    {/* HIIT Sessions */}
+                    {filteredSessions.hiit.map((session) => (
+                      <ActivityCard
+                        key={session.id}
+                        type="hiit"
+                        session={session}
+                        onEdit={() => handleEditHiit(session)}
+                        onDelete={() => handleDeleteHiit(session.id)}
+                      />
+                    ))}
+
+                    {/* Cardio Sessions */}
+                    {filteredSessions.cardio.map((session) => (
+                      <ActivityCard
+                        key={session.id}
+                        type="cardio"
+                        session={session}
+                        onEdit={() => handleEditCardio(session)}
+                        onDelete={() => handleDeleteCardio(session.id)}
+                      />
+                    ))}
+
+                    {/* Yoga Sessions */}
+                    {filteredSessions.yoga.map((session) => (
+                      <ActivityCard
+                        key={session.id}
+                        type="yoga"
+                        session={session}
+                        onEdit={() => handleEditYoga(session)}
+                        onDelete={() => handleDeleteYoga(session.id)}
+                      />
+                    ))}
+
+                    {/* Stretch Sessions */}
+                    {filteredSessions.stretch.map((session) => (
+                      <ActivityCard
+                        key={session.id}
+                        type="stretch"
+                        session={session}
+                        onDelete={() => handleDeleteStretch(session.id)}
+                      />
+                    ))}
+
+                    {!selectedDate && history.length === 0 && hiitSessions.length === 0 &&
+                      stretchSessions.length === 0 && yogaSessions.length === 0 && cardioSessions.length === 0 && (
+                        <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                          No activity history yet. Complete your first activity to see it here!
+                        </Typography>
+                      )}
+                  </>
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
         </Stack>
 
         {/* Add Exercise Dialog */}
@@ -898,13 +762,18 @@ const ProgressDashboard = () => {
 
 // Activity Card Component
 const ActivityCard = ({ type, session, onEdit, onDelete }) => {
+  const FitnessCenter = () => <span>🏋️</span>;
+  const Whatshot = () => <span>🔥</span>;
+  const DirectionsRun = () => <span>🏃</span>;
+  const SelfImprovement = () => <span>🧘</span>;
+
   const getIcon = () => {
     switch (type) {
-      case 'hiit': return <Whatshot sx={{ fontSize: 18, color: 'secondary.main' }} />;
-      case 'cardio': return <DirectionsRun sx={{ fontSize: 18, color: '#2196f3' }} />;
-      case 'yoga': return <SelfImprovement sx={{ fontSize: 18, color: '#9c27b0' }} />;
-      case 'stretch': return <DirectionsRun sx={{ fontSize: 18, color: 'success.main' }} />;
-      default: return <FitnessCenter sx={{ fontSize: 18, color: 'primary.main' }} />;
+      case 'hiit': return <Whatshot />;
+      case 'cardio': return <DirectionsRun />;
+      case 'yoga': return <SelfImprovement />;
+      case 'stretch': return <DirectionsRun />;
+      default: return <FitnessCenter />;
     }
   };
 

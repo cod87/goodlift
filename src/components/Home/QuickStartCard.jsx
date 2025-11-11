@@ -15,6 +15,7 @@ import {
 } from '@mui/icons-material';
 import { formatDuration } from '../../utils/helpers';
 import { getWorkoutTypeDisplayName } from '../../utils/weeklyPlanDefaults';
+import { TIME_CONSTANTS } from '../../utils/constants';
 
 /**
  * QuickStartCard - Multi-function card combining:
@@ -29,7 +30,6 @@ const QuickStartCard = memo(({
   lastWorkout,
   onQuickStart,
   onViewPlan,
-  onRandomize,
   loading = false
 }) => {
   const hasLastWorkout = lastWorkout && lastWorkout.date;
@@ -40,7 +40,7 @@ const QuickStartCard = memo(({
     const lastDate = new Date(lastWorkout.date);
     const today = new Date();
     const diffTime = Math.abs(today - lastDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(diffTime / TIME_CONSTANTS.MILLISECONDS_PER_DAY);
     return diffDays;
   };
 

@@ -74,3 +74,12 @@ export const EQUIPMENT_TYPES = {
   KETTLEBELLS: 'kettlebells',
   BODYWEIGHT: 'bodyweight',
 };
+
+/** Time conversion constants */
+export const TIME_CONSTANTS = {
+  SECONDS_PER_MINUTE: 60,
+  SECONDS_PER_HOUR: 3600,
+  SECONDS_PER_DAY: 86400,
+  MILLISECONDS_PER_SECOND: 1000,
+  MILLISECONDS_PER_DAY: 86400000, // 1000 * 60 * 60 * 24
+};

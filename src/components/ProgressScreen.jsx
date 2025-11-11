@@ -112,7 +112,7 @@ ChartJS.register(
   Filler
 );
 
-const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
+const ProgressScreen = ({ onStartWorkout }) => {
   const [history, setHistory] = useState([]);
   const [stretchSessions, setStretchSessions] = useState([]);
   const [yogaSessions, setYogaSessions] = useState([]);
@@ -1041,7 +1041,7 @@ const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
                           beginAtZero: pinned.trackingMode === 'reps',
                           min: chartData.minValue,
                           ticks: {
-                            callback: function(value) {
+                            callback: (value) => {
                               return pinned.trackingMode === 'weight' 
                                 ? `${value} lbs` 
                                 : value;

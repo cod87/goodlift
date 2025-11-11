@@ -402,11 +402,9 @@ const ProgressDashboard = () => {
         alignItems: 'center',
         minHeight: '100vh'
       }}>
-        <img
-          src={`${import.meta.env.BASE_URL}dancing-icon.svg`}
-          alt="Loading..."
-          style={{ width: '150px', height: '150px' }}
-        />
+        <Typography variant="h5" color="text.secondary">
+          Loading...
+        </Typography>
       </Box>
     );
   }
@@ -445,115 +443,111 @@ const ProgressDashboard = () => {
           </Box>
 
           {/* Stats Overview */}
-          <Grid container spacing={2}>
-            <Grid item xs={6} md={3}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <Card sx={{
-                  borderRadius: 3,
-                  background: 'linear-gradient(135deg, #134686 0%, #1db584 100%)',
-                  transition: 'transform 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  }
-                }}>
-                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                    <FitnessCenter sx={{ fontSize: 40, color: 'white', mb: 1 }} />
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
-                      {filteredStats.totalWorkouts}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
-                      Workouts
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Grid>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              style={{ flex: '1 1 calc(25% - 12px)', minWidth: '150px' }}
+            >
+              <Card sx={{
+                borderRadius: 3,
+                background: 'linear-gradient(135deg, #134686 0%, #1db584 100%)',
+                transition: 'transform 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                }
+              }}>
+                <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                  <FitnessCenter sx={{ fontSize: 40, color: 'white', mb: 1 }} />
+                  <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
+                    {filteredStats.totalWorkouts}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
+                    Workouts
+                  </Typography>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Grid item xs={6} md={3}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <Card sx={{
-                  borderRadius: 3,
-                  background: 'linear-gradient(135deg, #ff8c00 0%, #ffb347 100%)',
-                  transition: 'transform 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  }
-                }}>
-                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                    <Timer sx={{ fontSize: 40, color: 'white', mb: 1 }} />
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
-                      {filteredStats.avgWorkout}m
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
-                      Avg Duration
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Grid>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              style={{ flex: '1 1 calc(25% - 12px)', minWidth: '150px' }}
+            >
+              <Card sx={{
+                borderRadius: 3,
+                background: 'linear-gradient(135deg, #ff8c00 0%, #ffb347 100%)',
+                transition: 'transform 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                }
+              }}>
+                <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                  <Timer sx={{ fontSize: 40, color: 'white', mb: 1 }} />
+                  <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
+                    {filteredStats.avgWorkout}m
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
+                    Avg Duration
+                  </Typography>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Grid item xs={6} md={3}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Card sx={{
-                  borderRadius: 3,
-                  background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)',
-                  transition: 'transform 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  }
-                }}>
-                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                    <DirectionsRun sx={{ fontSize: 40, color: 'white', mb: 1 }} />
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
-                      {filteredStats.totalCardio}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
-                      Cardio Sessions
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Grid>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              style={{ flex: '1 1 calc(25% - 12px)', minWidth: '150px' }}
+            >
+              <Card sx={{
+                borderRadius: 3,
+                background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)',
+                transition: 'transform 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                }
+              }}>
+                <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                  <DirectionsRun sx={{ fontSize: 40, color: 'white', mb: 1 }} />
+                  <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
+                    {filteredStats.totalCardio}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
+                    Cardio Sessions
+                  </Typography>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Grid item xs={6} md={3}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <Card sx={{
-                  borderRadius: 3,
-                  background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
-                  transition: 'transform 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  }
-                }}>
-                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                    <SelfImprovement sx={{ fontSize: 40, color: 'white', mb: 1 }} />
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
-                      {filteredStats.totalYoga}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
-                      Mobility
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Grid>
-          </Grid>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              style={{ flex: '1 1 calc(25% - 12px)', minWidth: '150px' }}
+            >
+              <Card sx={{
+                borderRadius: 3,
+                background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
+                transition: 'transform 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                }
+              }}>
+                <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                  <SelfImprovement sx={{ fontSize: 40, color: 'white', mb: 1 }} />
+                  <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
+                    {filteredStats.totalYoga}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', fontWeight: 600 }}>
+                    Mobility
+                  </Typography>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Box>
 
           {/* Calendar */}
           <motion.div
@@ -636,7 +630,7 @@ const ProgressDashboard = () => {
                       </Button>
                     </Box>
                   ) : (
-                    <Grid container spacing={2}>
+                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                       {pinnedExercises.map((pinned) => {
                         const progression = getExerciseProgression(
                           history,
@@ -679,61 +673,64 @@ const ProgressDashboard = () => {
                         };
 
                         return (
-                          <Grid item xs={12} sm={6} md={4} key={pinned.exerciseName}>
-                            <Box sx={{
+                          <Box 
+                            key={pinned.exerciseName}
+                            sx={{
+                              flex: '1 1 calc(33.333% - 11px)',
+                              minWidth: '280px',
                               p: 2,
                               borderRadius: 2,
                               border: '1px solid',
                               borderColor: 'divider',
                               bgcolor: 'background.default',
-                            }}>
-                              <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }}>
-                                  {pinned.exerciseName}
-                                </Typography>
-                                <IconButton
-                                  onClick={() => handleRemovePinnedExercise(pinned.exerciseName)}
+                            }}
+                          >
+                            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }}>
+                                {pinned.exerciseName}
+                              </Typography>
+                              <IconButton
+                                onClick={() => handleRemovePinnedExercise(pinned.exerciseName)}
+                                size="small"
+                                sx={{ color: 'text.secondary' }}
+                              >
+                                <Close sx={{ fontSize: 16 }} />
+                              </IconButton>
+                            </Stack>
+
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={pinned.trackingMode === 'reps'}
+                                  onChange={() => handleToggleTrackingMode(pinned.exerciseName, pinned.trackingMode)}
                                   size="small"
-                                  sx={{ color: 'text.secondary' }}
+                                />
+                              }
+                              label={
+                                <Typography variant="caption">
+                                  {pinned.trackingMode === 'weight' ? 'Weight' : 'Reps'}
+                                </Typography>
+                              }
+                              sx={{ mb: 1 }}
+                            />
+
+                            <Box sx={{ height: 200 }}>
+                              {progression.length > 0 ? (
+                                <Line data={chartData} options={chartOptions} />
+                              ) : (
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ display: 'block', textAlign: 'center', py: 4 }}
                                 >
-                                  <Close sx={{ fontSize: 16 }} />
-                                </IconButton>
-                              </Stack>
-
-                              <FormControlLabel
-                                control={
-                                  <Switch
-                                    checked={pinned.trackingMode === 'reps'}
-                                    onChange={() => handleToggleTrackingMode(pinned.exerciseName, pinned.trackingMode)}
-                                    size="small"
-                                  />
-                                }
-                                label={
-                                  <Typography variant="caption">
-                                    {pinned.trackingMode === 'weight' ? 'Weight' : 'Reps'}
-                                  </Typography>
-                                }
-                                sx={{ mb: 1 }}
-                              />
-
-                              <Box sx={{ height: 200 }}>
-                                {progression.length > 0 ? (
-                                  <Line data={chartData} options={chartOptions} />
-                                ) : (
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                    sx={{ display: 'block', textAlign: 'center', py: 4 }}
-                                  >
-                                    No data available
-                                  </Typography>
-                                )}
-                              </Box>
+                                  No data available
+                                </Typography>
+                              )}
                             </Box>
-                          </Grid>
+                          </Box>
                         );
                       })}
-                    </Grid>
+                    </Box>
                   )}
                 </CardContent>
               </Card>

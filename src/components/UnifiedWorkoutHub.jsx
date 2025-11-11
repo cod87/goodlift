@@ -29,6 +29,8 @@ import {
   FitnessCenter as WorkoutIcon,
   TrendingUp as ProgressIcon,
   Delete as DeleteIcon,
+  SelfImprovement as YogaIcon,
+  DirectionsRun as CardioIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import CompactHeader from './Common/CompactHeader';
@@ -47,8 +49,8 @@ import {
 } from '../utils/storage';
 
 /**
- * UnifiedWorkoutHub - Single streamlined section for workouts and plans
- * Combines workout generation, plan management, and progress overview
+ * UnifiedWorkoutHub - Single streamlined section for workouts, plans, mobility and yoga
+ * Combines workout generation, plan management, mobility/yoga sessions, and progress overview
  */
 const UnifiedWorkoutHub = ({ 
   workoutType,
@@ -75,7 +77,6 @@ const UnifiedWorkoutHub = ({
 
   const {
     getTodaysWorkout,
-    getUpcomingWorkouts,
     createWorkoutNavState,
   } = usePlanIntegration();
 
@@ -98,7 +99,38 @@ const UnifiedWorkoutHub = ({
   };
 
   const todaysWorkout = getTodaysWorkout();
-  const upcomingWorkouts = getUpcomingWorkouts(3);
+  
+  // Get next 3 days including rest days
+  const getNext3Days = () => {
+    if (!activePlan || !activePlan.sessions || !Array.isArray(activePlan.sessions)) {
+      return [];
+    }
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const next3Days = [];
+    
+    for (let i = 1; i <= 3; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() + i);
+      date.setHours(0, 0, 0, 0);
+      
+      const session = activePlan.sessions.find(s => {
+        const sessionDate = new Date(s.date);
+        sessionDate.setHours(0, 0, 0, 0);
+        return sessionDate.getTime() === date.getTime();
+      });
+      
+      next3Days.push({
+        date: date,
+        session: session || { type: 'rest' }
+      });
+    }
+    
+    return next3Days;
+  };
+
+  const next3Days = getNext3Days();
 
   const handleQuickStart = () => {
     if (todaysWorkout && todaysWorkout.type !== 'rest') {
@@ -191,8 +223,8 @@ const UnifiedWorkoutHub = ({
       minHeight: '100vh',
     }}>
       <CompactHeader 
-        title="Workouts & Plans"
-        subtitle="Your fitness journey in one place"
+        title="Training Hub"
+        subtitle="Workouts, plans, cardio, mobility & yoga in one place"
       />
 
       <Stack spacing={2}>
@@ -317,33 +349,49 @@ const UnifiedWorkoutHub = ({
           </CardContent>
         </Card>
 
-        {/* Upcoming Workouts Section */}
-        {upcomingWorkouts.length > 0 && (
+        {/* Next 3 Days Section */}
+        {next3Days.length > 0 && (
           <Card sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CalendarIcon /> Upcoming Workouts
+                <CalendarIcon /> Next 3 Days
               </Typography>
               <Grid container spacing={2}>
-                {upcomingWorkouts.map((workout, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
-                    <Card sx={{ bgcolor: 'background.default', border: '1px solid', borderColor: 'primary.main' }}>
-                      <CardContent>
-                        <Typography variant="subtitle2" color="text.secondary">
-                          {new Date(workout.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                        </Typography>
-                        <Typography variant="h6" sx={{ color: 'primary.main', my: 1 }}>
-                          {workout.type.charAt(0).toUpperCase() + workout.type.slice(1)}
-                        </Typography>
-                        {workout.focus && (
-                          <Typography variant="body2" color="text.secondary">
-                            {workout.focus}
+                {next3Days.map((day, index) => {
+                  const isRest = day.session.type === 'rest';
+                  return (
+                    <Grid item xs={12} sm={4} key={index}>
+                      <Card sx={{ 
+                        bgcolor: 'background.default', 
+                        border: '1px solid', 
+                        borderColor: isRest ? 'divider' : 'primary.main',
+                        opacity: isRest ? 0.7 : 1
+                      }}>
+                        <CardContent sx={{ py: 2 }}>
+                          <Typography variant="subtitle2" color="text.secondary">
+                            {day.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                           </Typography>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
+                          {isRest ? (
+                            <Typography variant="h6" sx={{ color: 'text.secondary', my: 1 }}>
+                              Rest Day
+                            </Typography>
+                          ) : (
+                            <>
+                              <Typography variant="h6" sx={{ color: 'primary.main', my: 1 }}>
+                                {day.session.type.charAt(0).toUpperCase() + day.session.type.slice(1)}
+                              </Typography>
+                              {day.session.focus && (
+                                <Typography variant="body2" color="text.secondary">
+                                  {day.session.focus}
+                                </Typography>
+                              )}
+                            </>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  );
+                })}
               </Grid>
             </CardContent>
           </Card>
@@ -462,6 +510,94 @@ const UnifiedWorkoutHub = ({
             </CardContent>
           </Card>
         )}
+
+        {/* Mobility & Yoga Section - Extra Compact */}
+        <Card sx={{ bgcolor: 'background.paper' }}>
+          <CardContent sx={{ py: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <YogaIcon /> Mobility & Yoga
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => onNavigate('yoga-selection')}
+                sx={{ 
+                  flex: 1,
+                  py: 1,
+                  fontSize: '0.85rem',
+                }}
+              >
+                Yoga
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => onNavigate('mobility')}
+                sx={{ 
+                  flex: 1,
+                  py: 1,
+                  fontSize: '0.85rem',
+                }}
+              >
+                Stretching
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+
+        {/* Cardio Section - Extra Compact */}
+        <Card sx={{ bgcolor: 'background.paper' }}>
+          <CardContent sx={{ py: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CardioIcon /> Cardio
+            </Typography>
+            <Grid container spacing={1}>
+              <Grid item xs={6}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => onNavigate('hiit-selection')}
+                  fullWidth
+                  sx={{ 
+                    py: 1,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  HIIT
+                </Button>
+              </Grid>
+              <Grid item xs={6}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => onNavigate('hiit')}
+                  fullWidth
+                  sx={{ 
+                    py: 1,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  Timer
+                </Button>
+              </Grid>
+              <Grid item xs={6}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => onNavigate('log-cardio')}
+                  fullWidth
+                  sx={{ 
+                    py: 1,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  Log Cardio
+                </Button>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
       </Stack>
 
       {/* Create Plan Dialog */}

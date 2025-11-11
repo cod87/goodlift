@@ -1,4 +1,4 @@
-import{j as Ls}from"./mui-DA0zRBdt.js";import{r as et}from"./vendor-CsU6LQgQ.js";/*!
+import{j as Ls}from"./mui-C39dPSdK.js";import{r as et}from"./vendor-CsU6LQgQ.js";/*!
  * @kurkle/color v0.3.4
  * https://github.com/kurkle/color#readme
  * (c) 2024 Jukka Kurkela

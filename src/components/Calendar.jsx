@@ -1,10 +1,15 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@mui/material';
 import '../styles/Calendar.css';
 
-const Calendar = ({ workoutSessions = [], onDayClick }) => {
+const Calendar = ({ workoutSessions = [], onDayClick, viewMode = 'weekly' }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+
+  // Reset to current week/month when viewMode changes
+  useEffect(() => {
+    setCurrentDate(new Date());
+  }, [viewMode]);
 
   // Create a map of dates to session info for quick lookup
   const workoutDateMap = useMemo(() => {
@@ -32,6 +37,28 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
     return workoutDateMap.get(dateStr) || { sessions: [], durations: {} };
   };
 
+  // Get days for weekly view
+  const getWeekDays = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const date = currentDate.getDate();
+    
+    // Get the current day of week (0 = Sunday, 6 = Saturday)
+    const currentDay = new Date(year, month, date).getDay();
+    
+    // Calculate the start of the week (Sunday)
+    const startOfWeek = new Date(year, month, date - currentDay);
+    
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      days.push(day);
+    }
+    
+    return days;
+  };
+
   // Get days for monthly view
   const getMonthDays = () => {
     const year = currentDate.getFullYear();
@@ -57,17 +84,25 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
     return days;
   };
 
-  // Navigate to previous month
+  // Navigate to previous period (week or month)
   const goToPrevious = () => {
     const newDate = new Date(currentDate);
-    newDate.setMonth(currentDate.getMonth() - 1);
+    if (viewMode === 'weekly') {
+      newDate.setDate(currentDate.getDate() - 7);
+    } else {
+      newDate.setMonth(currentDate.getMonth() - 1);
+    }
     setCurrentDate(newDate);
   };
 
-  // Navigate to next month
+  // Navigate to next period (week or month)
   const goToNext = () => {
     const newDate = new Date(currentDate);
-    newDate.setMonth(currentDate.getMonth() + 1);
+    if (viewMode === 'weekly') {
+      newDate.setDate(currentDate.getDate() + 7);
+    } else {
+      newDate.setMonth(currentDate.getMonth() + 1);
+    }
     setCurrentDate(newDate);
   };
 
@@ -78,6 +113,19 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
 
   // Get current period label
   const getPeriodLabel = () => {
+    if (viewMode === 'weekly') {
+      const weekDays = getWeekDays();
+      const startDate = weekDays[0];
+      const endDate = weekDays[6];
+      
+      // If same month
+      if (startDate.getMonth() === endDate.getMonth()) {
+        return `${startDate.toLocaleDateString('en-US', { month: 'long' })} ${startDate.getDate()}-${endDate.getDate()}, ${startDate.getFullYear()}`;
+      } else {
+        // Different months
+        return `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${endDate.getFullYear()}`;
+      }
+    }
     return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
@@ -181,7 +229,7 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
     }
   };
 
-  const days = getMonthDays();
+  const days = viewMode === 'weekly' ? getWeekDays() : getMonthDays();
 
   return (
     <Box 
@@ -200,7 +248,7 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
           <button 
             onClick={goToPrevious} 
             className="calendar-nav-btn"
-            aria-label="Previous month"
+            aria-label={viewMode === 'weekly' ? 'Previous week' : 'Previous month'}
           >
             ←
           </button>
@@ -208,7 +256,7 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
           <button 
             onClick={goToNext} 
             className="calendar-nav-btn"
-            aria-label="Next month"
+            aria-label={viewMode === 'weekly' ? 'Next week' : 'Next month'}
           >
             →
           </button>
@@ -225,14 +273,22 @@ const Calendar = ({ workoutSessions = [], onDayClick }) => {
       </div>
 
       <div 
-        className="calendar-grid monthly"
+        className={`calendar-grid ${viewMode === 'weekly' ? 'weekly' : 'monthly'}`}
         role="grid"
         aria-labelledby="calendar-month-label"
       >
         {/* Day labels */}
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="calendar-day-label" role="columnheader">{day}</div>
-        ))}
+        {viewMode === 'weekly' ? (
+          // Weekly view - show full day names
+          ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+            <div key={day} className="calendar-day-label" role="columnheader">{day}</div>
+          ))
+        ) : (
+          // Monthly view - show abbreviated day names
+          ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            <div key={day} className="calendar-day-label" role="columnheader">{day}</div>
+          ))
+        )}
         
         {/* Calendar days */}
         {days.map((date, index) => {
@@ -384,8 +440,7 @@ Calendar.propTypes = {
     })
   ),
   onDayClick: PropTypes.func,
-  onDragOver: PropTypes.func,
-  onDrop: PropTypes.func,
+  viewMode: PropTypes.oneOf(['weekly', 'monthly']),
 };
 
 export default Calendar;

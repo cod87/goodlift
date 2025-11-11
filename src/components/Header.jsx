@@ -60,16 +60,19 @@ const Header = ({ onNavigate }) => {
         borderBottom: '1px solid rgba(29, 181, 132, 0.2)',
       }}
     >
-      {/* Left spacer - empty for balance */}
+      {/* Left side - favicon icon */}
       <Box sx={{ 
         position: 'absolute',
         left: '1rem',
         display: 'flex', 
         alignItems: 'center',
-        gap: 0.5,
-        visibility: 'hidden'
+        gap: 1,
       }}>
-        <Box sx={{ width: '40px' }} />
+        <img
+          src={`${import.meta.env.BASE_URL}goodlift-favicon.svg`}
+          alt="GoodLift Icon"
+          style={{ height: '32px', width: '32px', display: 'block' }}
+        />
       </Box>
       
       {/* Center logo */}

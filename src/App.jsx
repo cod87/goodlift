@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import './App.css';
 import Header from './components/Header';
 import NavigationSidebar from './components/NavigationSidebar';
-import SelectionScreen from './components/SelectionScreen';
+import UnifiedWorkoutHub from './components/UnifiedWorkoutHub';
 import WorkoutScreen from './components/WorkoutScreen';
 import WorkoutPreview from './components/WorkoutPreview';
 import CustomizeExerciseScreen from './components/CustomizeExerciseScreen';
@@ -19,7 +19,6 @@ import MobilityScreen from './components/Mobility/MobilityScreen';
 import CardioScreen from './pages/CardioScreen';
 import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
-import WorkoutPlanScreen from './components/WorkoutPlanScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
@@ -587,7 +586,7 @@ function App() {
           transition: 'margin-left 0.3s ease',
         }}>
           {currentScreen === 'selection' && (
-            <SelectionScreen
+            <UnifiedWorkoutHub
               workoutType={workoutType}
               selectedEquipment={selectedEquipment}
               equipmentOptions={equipmentOptions}
@@ -666,8 +665,6 @@ function App() {
           {(currentScreen === 'stretch' || currentScreen === 'yoga' || currentScreen === 'mobility') && <MobilityScreen />}
 
           {currentScreen === 'exercise-list' && <ExerciseListPage />}
-
-          {currentScreen === 'plans' && <WorkoutPlanScreen onNavigate={handleNavigate} />}
         </div>
         
         {/* Guest Data Migration Dialog */}

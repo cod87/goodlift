@@ -3,6 +3,7 @@
  * 
  * Allows users to configure and generate HIIT sessions based on
  * science-backed protocols from .github/HIIT-YOGA-GUIDE.md
+ * Also supports building custom HIIT sessions exercise-by-exercise
  */
 
 import { useState } from 'react';
@@ -21,15 +22,17 @@ import {
   Grid,
   Chip,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Divider
 } from '@mui/material';
 import { motion } from 'framer-motion';
-import { FitnessCenter, DirectionsRun, SelfImprovement } from '@mui/icons-material';
+import { FitnessCenter, DirectionsRun, SelfImprovement, Build as BuildIcon } from '@mui/icons-material';
 import {
   generateHIITSession,
   HIIT_PROTOCOLS,
   EXERCISE_CATEGORIES
 } from '../utils/hiitSessionGenerator';
+import HiitSessionBuilderDialog from './HiitSessionBuilderDialog';
 
 const HiitSessionSelection = ({ onNavigate }) => {
   
@@ -39,6 +42,7 @@ const HiitSessionSelection = ({ onNavigate }) => {
   const [protocol, setProtocol] = useState('BALANCED');
   const [lowerImpact, setLowerImpact] = useState(false);
   const [goal, setGoal] = useState('cardiovascular');
+  const [showBuilder, setShowBuilder] = useState(false);
   
   // Load exercises data
   const { data: exercises = [], isLoading } = useQuery({
@@ -66,6 +70,13 @@ const HiitSessionSelection = ({ onNavigate }) => {
     // Navigate to session execution screen with the generated session
     // Store session in localStorage for now
     localStorage.setItem('currentHiitSession', JSON.stringify(session));
+    onNavigate('hiit-session');
+  };
+
+  const handleSaveCustomSession = (session) => {
+    // Store custom session and navigate to session screen
+    localStorage.setItem('currentHiitSession', JSON.stringify(session));
+    setShowBuilder(false);
     onNavigate('hiit-session');
   };
   
@@ -264,8 +275,8 @@ const HiitSessionSelection = ({ onNavigate }) => {
           )}
         </Grid>
         
-        {/* Generate Button */}
-        <Box sx={{ mt: 4, textAlign: 'center' }}>
+        {/* Generate and Build Buttons */}
+        <Box sx={{ mt: 4, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
           <Button
             variant="contained"
             size="large"
@@ -274,6 +285,23 @@ const HiitSessionSelection = ({ onNavigate }) => {
           >
             Generate HIIT Session
           </Button>
+
+          <Divider sx={{ width: '100%', maxWidth: 400 }}>
+            <Typography variant="caption" color="text.secondary">OR</Typography>
+          </Divider>
+
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<BuildIcon />}
+            onClick={() => setShowBuilder(true)}
+            sx={{ minWidth: 250, py: 1.5, fontSize: '1.1rem' }}
+          >
+            Build Custom Session
+          </Button>
+          <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 400, textAlign: 'center' }}>
+            Build your own HIIT session exercise-by-exercise with custom work/rest intervals
+          </Typography>
         </Box>
         
         {/* Guide Reference */}
@@ -284,6 +312,14 @@ const HiitSessionSelection = ({ onNavigate }) => {
           </Typography>
         </Alert>
       </Box>
+
+      {/* HIIT Session Builder Dialog */}
+      <HiitSessionBuilderDialog
+        open={showBuilder}
+        onClose={() => setShowBuilder(false)}
+        onSave={handleSaveCustomSession}
+        allExercises={exercises}
+      />
     </motion.div>
   );
 };

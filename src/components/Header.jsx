@@ -51,12 +51,13 @@ const Header = ({ onNavigate }) => {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '0 1rem',
-        background: 'rgba(255, 255, 255, 0.75)',
+        background: '#2a3647',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
-        boxShadow: '0 2px 8px rgba(19, 70, 134, 0.08)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
         zIndex: 100,
         transition: 'left 0.3s ease',
+        borderBottom: '1px solid rgba(29, 181, 132, 0.2)',
       }}
     >
       {/* Left spacer - empty for balance */}
@@ -124,7 +125,7 @@ const Header = ({ onNavigate }) => {
               alignItems: 'center',
               justifyContent: 'center',
               '&:hover': {
-                backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                backgroundColor: 'rgba(29, 181, 132, 0.15)',
               },
             }}
             aria-label={isMuted ? 'Unmute sounds' : 'Mute sounds'}
@@ -146,7 +147,7 @@ const Header = ({ onNavigate }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 '&:hover': {
-                  backgroundColor: 'rgba(237, 63, 39, 0.08)',
+                  backgroundColor: 'rgba(255, 140, 0, 0.15)',
                 },
               }}
               aria-label={wakeLockActive ? 'Release wake lock' : 'Keep screen awake'}

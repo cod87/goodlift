@@ -88,7 +88,7 @@ const NavigationSidebar = ({
             left: 'max(1rem, env(safe-area-inset-left))',
             zIndex: 1001,
             background: 'transparent',
-            color: 'rgb(19, 70, 134)',
+            color: '#1db584',
             border: 'none',
             borderRadius: '0',
             padding: '8px',
@@ -135,9 +135,9 @@ const NavigationSidebar = ({
               left: 0,
               width: '280px',
               height: '100vh',
-              background: 'rgba(255, 255, 255, 0.95)',
+              background: '#2a3647',
               backdropFilter: 'blur(10px)',
-              boxShadow: '4px 0 20px rgba(19, 70, 134, 0.15)',
+              boxShadow: '4px 0 20px rgba(0, 0, 0, 0.5)',
               zIndex: 1000,
               overflow: 'hidden',
               display: 'flex',
@@ -147,7 +147,7 @@ const NavigationSidebar = ({
             {/* Logo Section */}
             <div style={{
               padding: '1.5rem 1.5rem 1rem',
-              borderBottom: '2px solid rgba(19, 70, 134, 0.1)',
+              borderBottom: '2px solid rgba(29, 181, 132, 0.2)',
             }}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -209,7 +209,7 @@ const NavigationSidebar = ({
             }}>
               <NavLink
                 icon={<FaDumbbell />}
-                label="Workouts"
+                label="Workouts & Plans"
                 isActive={currentScreen === 'selection' || currentScreen === 'preview'}
                 onClick={() => handleNavClick('selection')}
               />
@@ -218,12 +218,6 @@ const NavigationSidebar = ({
                 label="Progress"
                 isActive={currentScreen === 'progress'}
                 onClick={() => handleNavClick('progress')}
-              />
-              <NavLink
-                icon={<CalendarMonthIcon />}
-                label="Workout Plans"
-                isActive={currentScreen === 'plans'}
-                onClick={() => handleNavClick('plans')}
               />
               <NavLink
                 icon={<DirectionsRunIcon />}
@@ -256,7 +250,7 @@ const NavigationSidebar = ({
               <div style={{
                 padding: '1rem 1.5rem',
                 paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
-                borderTop: '2px solid rgba(19, 70, 134, 0.1)',
+                borderTop: '2px solid rgba(29, 181, 132, 0.2)',
                 flexShrink: 0,
               }}>
                 <motion.button
@@ -272,7 +266,7 @@ const NavigationSidebar = ({
                     padding: '10px 20px',
                     fontSize: '0.95rem',
                     fontWeight: 600,
-                    background: 'rgb(237, 63, 39)',
+                    background: '#ff8c00',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
@@ -301,7 +295,7 @@ const NavigationSidebar = ({
 const NavLink = ({ icon, label, isActive, onClick }) => (
   <motion.button
     onClick={onClick}
-    whileHover={{ x: 5, backgroundColor: 'rgba(19, 70, 134, 0.05)' }}
+    whileHover={{ x: 5, backgroundColor: 'rgba(29, 181, 132, 0.1)' }}
     whileTap={{ scale: 0.98 }}
     style={{
       display: 'flex',
@@ -311,10 +305,10 @@ const NavLink = ({ icon, label, isActive, onClick }) => (
       padding: '12px 1.5rem',
       fontSize: '1rem',
       fontWeight: 600,
-      background: isActive ? 'rgba(19, 70, 134, 0.1)' : 'transparent',
-      color: isActive ? 'rgb(19, 70, 134)' : 'rgb(237, 63, 39)',
+      background: isActive ? 'rgba(29, 181, 132, 0.2)' : 'transparent',
+      color: isActive ? '#1db584' : '#a0a8b3',
       border: 'none',
-      borderLeft: isActive ? '4px solid rgb(19, 70, 134)' : '4px solid transparent',
+      borderLeft: isActive ? '4px solid #1db584' : '4px solid transparent',
       textAlign: 'left',
       cursor: 'pointer',
       transition: 'all 0.2s ease',

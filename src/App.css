@@ -5,17 +5,23 @@
     --font-body: 'Poppins', sans-serif;
     --font-header: 'Montserrat', sans-serif;
 
-    --color-bg: rgb(253, 244, 227); /* Cream */
-    --color-surface: #FFFFFF;
-    --color-primary: rgb(19, 70, 134); /* Blue */
-    --color-secondary: rgb(237, 63, 39); /* Red/Orange */
-    --color-accent: rgb(254, 178, 26); /* Yellow */
-    --color-text: rgb(19, 70, 134); /* Blue */
-    --color-text-light: rgb(237, 63, 39); /* Red/Orange */
-    --color-border: rgb(19, 70, 134);
-    --shadow: 0 4px 12px rgba(19, 70, 134, 0.1);
-    --shadow-hover: 0 8px 24px rgba(19, 70, 134, 0.15);
-    --shadow-large: 0 10px 40px rgba(19, 70, 134, 0.2);
+    /* Dark Theme Colors */
+    --color-bg: #1e2939; /* Dark Background */
+    --color-surface: #2a3647; /* Slightly lighter for cards */
+    --color-primary: #1db584; /* Teal/Green Accent */
+    --color-secondary: #ff8c00; /* Orange Button */
+    --color-accent: #1db584; /* Teal accent */
+    --color-text: #ffffff; /* White Text */
+    --color-text-light: #a0a8b3; /* Secondary Text */
+    --color-border: #3d4a5c;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-large: 0 10px 40px rgba(0, 0, 0, 0.5);
+    
+    /* Macro Colors */
+    --protein-color: #9c5a6e;
+    --carbs-color: #9d9e7e;
+    --fat-color: #6b8a9d;
     
     /* Safe area inset variables for mobile devices */
     --safe-area-inset-top: env(safe-area-inset-top, 0px);
@@ -40,7 +46,7 @@ html {
 
 body {
     font-family: var(--font-body);
-    background: rgb(253, 244, 227);
+    background: #1e2939;
     background-attachment: fixed;
     color: var(--color-text);
     line-height: 1.6;

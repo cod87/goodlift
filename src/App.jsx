@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import './App.css';
 import Header from './components/Header';
 import NavigationSidebar from './components/NavigationSidebar';
-import HomeScreen from './components/HomeScreen';
+import SelectionScreen from './components/SelectionScreen';
 import UnifiedWorkoutHub from './components/UnifiedWorkoutHub';
 import WorkoutPlanScreen from './components/WorkoutPlanScreen';
 import WorkoutScreen from './components/WorkoutScreen';
@@ -505,9 +505,16 @@ function AppContent() {
           transition: 'margin-left 0.3s ease',
         }}>
           {currentScreen === 'home' && (
-            <HomeScreen
-              onNavigate={handleNavigate}
+            <SelectionScreen
+              workoutType={workoutType}
+              selectedEquipment={selectedEquipment}
+              equipmentOptions={equipmentOptions}
+              onWorkoutTypeChange={handleWorkoutTypeChange}
+              onEquipmentChange={handleEquipmentChange}
               onStartWorkout={handleStartWorkout}
+              onCustomize={handleCustomize}
+              onNavigate={handleNavigate}
+              loading={loading}
             />
           )}
 

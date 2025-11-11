@@ -7,6 +7,7 @@ import { Typography, Box } from '@mui/material';
  */
 const CompactHeader = ({ 
   title, 
+  subtitle,
   icon, 
   action 
 }) => (
@@ -17,13 +18,21 @@ const CompactHeader = ({
     py: 1, // compact padding (reduced from 2-3)
     px: 2,
     borderBottom: '1px solid', 
-    borderColor: 'divider'
+    borderColor: 'divider',
+    mb: 2,
   }}>
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      {icon && <span style={{ fontSize: '1.2rem' }}>{icon}</span>}
-      <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 700 }}>
-        {title}
-      </Typography>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {icon && <span style={{ fontSize: '1.2rem' }}>{icon}</span>}
+        <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 700 }}>
+          {title}
+        </Typography>
+      </Box>
+      {subtitle && (
+        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+          {subtitle}
+        </Typography>
+      )}
     </Box>
     {action && action}
   </Box>
@@ -31,6 +40,7 @@ const CompactHeader = ({
 
 CompactHeader.propTypes = {
   title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string,
   icon: PropTypes.node,
   action: PropTypes.node,
 };

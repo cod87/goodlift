@@ -27,3 +27,5 @@ dist-ssr
 # (Vite builds to docs/ for main/docs deployment)
 *_backup.json
 *_updated.json
+*.backup.*
+*.old.*

@@ -25,7 +25,7 @@ const AuthScreen = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, rgb(253, 244, 227) 0%, rgb(254, 230, 200) 100%)',
+        background: (theme) => theme.palette.background.default,
         p: 2,
       }}
     >

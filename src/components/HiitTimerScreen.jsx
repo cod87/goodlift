@@ -235,7 +235,7 @@ const HiitTimerScreen = () => {
             </CardContent>
           </Card>
 
-          <Card sx={{ borderRadius: 3, bgcolor: 'rgb(253, 244, 227)' }}>
+          <Card sx={{ borderRadius: 3, bgcolor: 'background.paper' }}>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                 About HIIT Training

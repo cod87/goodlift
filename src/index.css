@@ -17,14 +17,13 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background-color: var(--dark-bg);
-  color: var(--white-text);
+  /* Background color is handled by MUI theme via CssBaseline */
   /* Safe area support for mobile devices with notches and bottom bars */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
 #root {
   min-height: 100vh;
-  background-color: var(--dark-bg);
+  /* Background color is handled by MUI theme via CssBaseline */
 }
 

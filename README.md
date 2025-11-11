@@ -1,68 +1,110 @@
-# GoodLift - React Workout Randomizer
+# GoodLift - Workout Planning & Tracking Platform
 
-A modern, optimized React-based workout randomization application that helps you create randomized strength training workouts with exercise tracking and progress monitoring.
+A modern, comprehensive React-based workout planning and tracking application that helps you plan, execute, and monitor your fitness journey with intelligent workout generation, progress tracking, and data-driven insights.
 
-## Features
+## Overview
 
-- **Randomized Workout Generation**: Generate workouts for Upper Body, Lower Body, or Full Body training
-- **Workout Plan Management**: Create comprehensive workout plans with automatic periodization and deload weeks
+GoodLift is your complete fitness companion, designed to help you:
+- **Plan Your Workouts**: Create structured workout plans with automatic periodization and progressive overload tracking
+- **Track Your Progress**: Monitor your performance with detailed stats, charts, and workout history
+- **Stay Consistent**: Quick-start workouts from your personalized dashboard
+- **Train Smart**: Access randomized workouts when you want variety, or stick to your plan
+- **Holistic Fitness**: Include cardio, yoga, and mobility work alongside strength training
+
+## Key Features
+
+### 🏠 Dashboard (Landing Page)
+Your central hub for all fitness activities:
+- **Quick Start**: Launch today's planned workout with one tap
+- **Stats Overview**: See your total workouts, average duration, cardio sessions, and yoga sessions at a glance
+- **Quick Actions**: Fast access to random workouts, cardio, yoga, and workout plans
+- **Body Weight Tracking**: Log and monitor your weight over time
+- **Upcoming Workouts**: Preview your next scheduled sessions
+
+### 📅 Workout Planning
+- **Structured Plans**: Create comprehensive workout plans with automatic periodization and deload weeks
 - **Recurring Session Editing**: Batch edit exercises for all recurring sessions within a training block
+- **Smart Scheduling**: Plan your training weeks with intelligent workout distribution
+- **Progressive Overload**: Automatic tracking of strength gains and weight progression
+
+### 💪 Strength Training
+- **Random Workout Generation**: Generate workouts for Upper Body, Lower Body, or Full Body training (now a feature, not the main focus)
 - **Equipment Filtering**: Filter exercises based on available equipment (Barbells, Dumbbells, Cable Machine, Kettlebells, etc.)
 - **Superset Pairing**: Exercises are intelligently paired into supersets based on opposing muscle groups
-- **Real-time Workout Tracking**: Track sets, reps, and weight with a built-in timer
-- **Progress History**: View your workout history and statistics
+- **Real-time Tracking**: Track sets, reps, and weight with a built-in timer
 - **Weight Progression**: Automatically suggests weight increases when you hit progression targets
-- **YouTube Demonstrations**: Each exercise includes embedded video demonstrations
+- **100+ Exercises**: Comprehensive database with YouTube video demonstrations
+
+### 📊 Progress & Analytics
+- **Workout History**: View complete workout history with filtering options
+- **Performance Charts**: Visualize your progress over time with interactive charts
+- **Exercise Tracking**: Pin favorite exercises and track your personal records
+- **Calendar View**: See all your completed and planned workouts in a calendar format
 - **Data Export**: Download your workout data as CSV files
+
+### 🏃 Cardio & Recovery
+- **Cardio Sessions**: Log and track various cardio activities
+- **HIIT Workouts**: Built-in HIIT timer with customizable intervals
+- **Yoga Sessions**: Multiple yoga flows including flexibility, power, and restorative styles
+- **Mobility Work**: Dedicated mobility and stretching routines
+
+### ☁️ Data Sync & Storage
 - **Firebase Integration**: Cloud storage and cross-device syncing for authenticated users
-
-## Performance Optimizations
-
-This application has been optimized for performance with:
-- **Code Splitting**: Intelligent bundle splitting reduces initial load time
-- **React.memo**: Optimized component re-rendering for smooth UX
-- **Efficient Algorithms**: Fisher-Yates shuffle for better exercise randomization
-- **Parallel Operations**: Promise.all for faster data synchronization
-- **Modular Architecture**: Clean separation of concerns for better maintainability
+- **Guest Mode**: Try the app without signing up (data stored locally)
+- **Offline Support**: Full functionality even without internet connection
+- **Data Migration**: Seamlessly migrate guest data when you create an account
 
 ## Technologies Used
 
-- **React 19** - Modern UI framework
+- **React 19** - Modern UI framework with hooks and context
 - **Vite** - Fast build tool and dev server with optimized bundling
-- **Material-UI (MUI)** - Component library for consistent design
-- **Firebase** - Backend infrastructure (pre-configured)
+- **Material-UI (MUI)** - Component library for consistent, modern design
+- **Firebase** - Backend infrastructure for authentication and data sync
 - **Chart.js** - Data visualization for progress tracking
-- **LocalStorage** - Client-side workout and progress data storage
+- **Framer Motion** - Smooth animations and transitions
+- **LocalStorage** - Client-side data persistence with cloud sync
 
 ## Project Structure
 
 ```
 src/
-├── components/          # React components (memoized for performance)
+├── components/          # React components
+│   ├── DashboardScreen.jsx       # Main landing page (NEW)
 │   ├── NavigationSidebar.jsx
-│   ├── SelectionScreen.jsx
+│   ├── SelectionScreen.jsx       # Random workout generator
 │   ├── WorkoutScreen.jsx
 │   ├── WorkoutPreview.jsx
 │   ├── CompletionScreen.jsx
-│   ├── ProgressScreen.jsx
+│   ├── ProgressScreen.jsx        # Full progress view
+│   ├── WorkoutPlanScreen.jsx
 │   ├── HiitTimerScreen.jsx
-│   └── AuthScreen.jsx
-├── hooks/              # Custom React hooks with comprehensive documentation
-│   └── useWorkoutGenerator.js
-├── utils/              # Utility functions with JSDoc documentation
-│   ├── constants.js    # Centralized configuration
-│   ├── helpers.js      # Helper utilities
-│   ├── storage.js      # Data persistence layer
-│   └── firebaseStorage.js
+│   ├── AuthScreen.jsx
+│   └── Home/                     # Dashboard components
+│       ├── QuickStartCard.jsx
+│       └── WeeklyPlanPreview.jsx
+├── pages/               # Page components
+│   ├── CardioScreen.jsx
+│   ├── ExerciseListPage.jsx
+│   └── UnifiedLogActivityScreen.jsx
+├── hooks/              # Custom React hooks
+│   ├── useWorkoutGenerator.js
+│   ├── usePlanIntegration.js
+│   └── useFavoriteExercises.js
+├── utils/              # Utility functions
+│   ├── constants.js
+│   ├── helpers.js
+│   ├── storage.js
+│   ├── firebaseStorage.js
+│   └── workoutPlanGenerator.js
 ├── contexts/           # React contexts
 │   └── AuthContext.jsx
 ├── App.jsx            # Main application component
-├── App.css            # Application styles
 └── main.jsx           # Entry point
 
 public/
 └── data/
-    └── exercises.json  # Exercise database (100+ exercises)
+    ├── exercises.json  # Exercise database (100+ exercises)
+    └── yoga-poses.json # Yoga pose database
 ```
 
 ## Getting Started
@@ -127,29 +169,63 @@ This repository is configured for deployment to GitHub Pages from the `docs/` di
    - The site will be available at: `https://cod87.github.io/goodlift/`
    - It may take a few minutes for changes to appear after pushing
 
-**Note:** The GitHub Actions workflow (`.github/workflows/deploy.yml`) is kept as an alternative deployment method but is not used with the main/docs approach.
+## Usage Guide
 
-## Usage
+### Getting Started
+1. **Sign Up or Use Guest Mode**: Create an account for cloud sync, or try guest mode to explore
+2. **Explore the Dashboard**: Your main hub shows workout stats, quick actions, and upcoming sessions
+3. **Log Your Weight**: Track body weight changes over time from the dashboard widget
 
-1. **Select Workout Type**: Choose between Full Body, Upper Body, or Lower Body
-2. **Filter Equipment**: Select available equipment or choose "All"
-3. **Start Workout**: Click "Start Workout" to generate a randomized workout
-4. **Track Progress**: Enter weight and reps for each set
-5. **Complete Workout**: Review your workout summary and export data if needed
-6. **View Progress**: Check your workout history and statistics in the Progress tab
+### Planning Your Workouts
+1. **Create a Plan**: Go to "Workout Plans" to create structured training programs
+2. **Set Goals**: Choose your experience level, workout frequency, and training style
+3. **Review Sessions**: See your upcoming workouts in the calendar view
+4. **Quick Start**: Launch today's workout directly from the dashboard
 
-## Exercise Database
+### During Your Workout
+1. **Preview**: Review exercises, adjust weights, and customize your workout
+2. **Execute**: Follow the exercise-by-exercise flow with built-in timers
+3. **Track**: Log sets, reps, and weight for each exercise
+4. **Complete**: Review your performance and save to your history
 
-The app includes 100+ strength training exercises categorized by:
-- Primary muscle groups
-- Equipment requirements
-- Exercise type (Compound vs Isolation)
-- YouTube demonstration links
+### Monitoring Progress
+1. **Dashboard Stats**: See overall statistics at a glance
+2. **Full Progress View**: Access detailed history, charts, and analytics
+3. **Pin Exercises**: Track specific exercises and monitor progressive overload
+4. **Export Data**: Download your workout history as CSV
+
+### Random Workouts (Secondary Feature)
+1. **Quick Generation**: Navigate to "Random Workout" in the sidebar
+2. **Customize**: Select workout type (Upper/Lower/Full Body) and equipment
+3. **Generate**: Create a randomized workout when you want variety
+4. **Save Favorites**: Save workouts you enjoy for future use
+
+## App Philosophy
+
+GoodLift has evolved from a random workout generator to a comprehensive workout planning and tracking platform. The app now emphasizes:
+
+1. **Structured Training**: Create and follow workout plans with proper periodization
+2. **Progressive Overload**: Track your strength gains over time
+3. **Holistic Fitness**: Balance strength training with cardio, yoga, and mobility
+4. **Data-Driven Decisions**: Use your workout history to inform future training
+5. **Flexibility**: Access random workouts when you need variety, but stay consistent with your plan
+
+Random workout generation remains available as a valuable feature for adding variety or when you don't have a structured plan, but the focus is on helping you build sustainable, progressive training habits.
 
 ## Data Storage
 
 - **LocalStorage**: All workout data, progress, and personal records are stored locally in your browser
-- **Firebase**: Pre-configured for future cloud sync features
+- **Firebase**: Cloud sync for authenticated users enables cross-device access
+- **Guest Mode**: Try the app without commitment; migrate data later when you sign up
+
+## Performance Optimizations
+
+This application has been optimized for performance with:
+- **Code Splitting**: Intelligent bundle splitting reduces initial load time
+- **React.memo**: Optimized component re-rendering for smooth UX
+- **Efficient Algorithms**: Fisher-Yates shuffle for better exercise randomization
+- **Parallel Operations**: Promise.all for faster data synchronization
+- **Modular Architecture**: Clean separation of concerns for better maintainability
 
 ## Scripts
 
@@ -160,7 +236,7 @@ The app includes 100+ strength training exercises categorized by:
 
 ## Original Project
 
-This React application is a modern conversion of the original vanilla JavaScript version available at [cod87/Good-Lift](https://github.com/cod87/Good-Lift).
+This React application is a modern evolution of the original vanilla JavaScript version available at [cod87/Good-Lift](https://github.com/cod87/Good-Lift).
 
 ## License
 

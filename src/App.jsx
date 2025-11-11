@@ -32,38 +32,93 @@ import { Snackbar, Alert, Button } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 
 /**
- * Custom theme configuration matching app brand colors
+ * Custom theme configuration with dark mode
+ * Color palette:
+ * - Dark Background: #1e2939
+ * - Teal/Green Accent: #1db584
+ * - Orange Button: #ff8c00
+ * - Secondary Text: #a0a8b3
+ * - White Text: #ffffff
+ * - Protein: #9c5a6e
+ * - Carbs: #9d9e7e
+ * - Fat: #6b8a9d
  */
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: 'rgb(19, 70, 134)', // Blue
-      dark: 'rgb(15, 56, 107)',
+      main: '#1db584', // Teal/Green Accent
+      light: '#2dd099',
+      dark: '#18a071',
     },
     secondary: {
-      main: 'rgb(237, 63, 39)', // Red/Orange
-      dark: 'rgb(189, 50, 31)',
-    },
-    warning: {
-      main: 'rgb(254, 178, 26)', // Yellow
+      main: '#ff8c00', // Orange Button
+      light: '#ffa333',
+      dark: '#cc7000',
     },
     background: {
-      default: 'rgb(253, 244, 227)', // Cream
-      paper: '#FFFFFF',
+      default: '#1e2939', // Dark Background
+      paper: '#2a3647', // Slightly lighter for cards
     },
     text: {
-      primary: 'rgb(19, 70, 134)',
-      secondary: 'rgb(237, 63, 39)',
+      primary: '#ffffff', // White Text
+      secondary: '#a0a8b3', // Secondary Text
+    },
+    // Custom colors for macros
+    success: {
+      main: '#1db584',
+    },
+    warning: {
+      main: '#ff8c00',
+    },
+    error: {
+      main: '#ef5350',
+    },
+    info: {
+      main: '#6b8a9d', // Fat color
     },
   },
   typography: {
     fontFamily: "'Poppins', sans-serif",
-    h1: { fontFamily: "'Montserrat', sans-serif", fontWeight: 800 },
-    h2: { fontFamily: "'Montserrat', sans-serif", fontWeight: 800 },
-    h3: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700 },
-    h4: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700 },
-    h5: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700 },
-    h6: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700 },
+    h1: { fontFamily: "'Montserrat', sans-serif", fontWeight: 800, color: '#ffffff' },
+    h2: { fontFamily: "'Montserrat', sans-serif", fontWeight: 800, color: '#ffffff' },
+    h3: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: '#ffffff' },
+    h4: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: '#ffffff' },
+    h5: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: '#ffffff' },
+    h6: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700, color: '#ffffff' },
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#2a3647',
+          backgroundImage: 'none',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        containedPrimary: {
+          backgroundColor: '#1db584',
+          '&:hover': {
+            backgroundColor: '#18a071',
+          },
+        },
+        containedSecondary: {
+          backgroundColor: '#ff8c00',
+          '&:hover': {
+            backgroundColor: '#cc7000',
+          },
+        },
+      },
+    },
   },
 });
 

@@ -53,9 +53,7 @@ import {
 const UnifiedWorkoutHub = ({ 
   workoutType,
   selectedEquipment,
-  equipmentOptions,
   onWorkoutTypeChange,
-  onEquipmentChange,
   onStartWorkout,
   onCustomize,
   onNavigate,
@@ -76,7 +74,6 @@ const UnifiedWorkoutHub = ({
   });
 
   const {
-    currentPlan,
     getTodaysWorkout,
     getUpcomingWorkouts,
     createWorkoutNavState,
@@ -565,9 +562,7 @@ const UnifiedWorkoutHub = ({
 UnifiedWorkoutHub.propTypes = {
   workoutType: PropTypes.string,
   selectedEquipment: PropTypes.instanceOf(Set).isRequired,
-  equipmentOptions: PropTypes.array.isRequired,
   onWorkoutTypeChange: PropTypes.func.isRequired,
-  onEquipmentChange: PropTypes.func.isRequired,
   onStartWorkout: PropTypes.func.isRequired,
   onCustomize: PropTypes.func,
   onNavigate: PropTypes.func.isRequired,

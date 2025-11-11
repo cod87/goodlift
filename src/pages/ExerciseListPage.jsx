@@ -181,21 +181,23 @@ const ExerciseListPage = () => {
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh' }}>
-      <CompactHeader title="Exercise Database" icon="💪" />
+      <Box sx={{ px: { xs: 2, md: 0 } }}>
+        <CompactHeader title="Exercise Database" icon="💪" />
+      </Box>
       
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        style={{ padding: '1rem', maxWidth: '1400px', margin: '0 auto' }}
+        style={{ padding: '0', maxWidth: '1400px', margin: '0 auto' }}
       >
 
       {/* Compact Filter Bar */}
       <Card
         sx={{
-          mb: 2,
+          mb: { xs: 0, md: 2 },
           p: { xs: 1, sm: 2 },
-          borderRadius: 2,
+          borderRadius: { xs: 0, md: 2 },
           boxShadow: '0 2px 8px rgba(19, 70, 134, 0.08)',
         }}
       >

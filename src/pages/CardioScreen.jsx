@@ -31,7 +31,9 @@ const CardioScreen = ({ onNavigate }) => {
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh' }}>
-      <CompactHeader title="Cardio & Conditioning" icon="🏃" />
+      <Box sx={{ px: { xs: 2, md: 0 } }}>
+        <CompactHeader title="Cardio & Conditioning" icon="🏃" />
+      </Box>
       
       <motion.div
         initial={{ opacity: 0 }}
@@ -40,10 +42,10 @@ const CardioScreen = ({ onNavigate }) => {
         style={{ 
           maxWidth: '900px', 
           margin: '0 auto', 
-          padding: '1rem' 
+          padding: '0' 
         }}
       >
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 0, md: 3 }}>
         {/* HIIT Session Builder Card */}
         <Grid item xs={12} md={6}>
           <motion.div
@@ -52,7 +54,7 @@ const CardioScreen = ({ onNavigate }) => {
             transition={{ delay: 0.1 }}
           >
             <Card sx={{ 
-              borderRadius: 3,
+              borderRadius: { xs: 0, md: 3 },
               height: '100%',
               transition: 'all 0.3s ease',
               cursor: 'pointer',
@@ -113,7 +115,7 @@ const CardioScreen = ({ onNavigate }) => {
             transition={{ delay: 0.15 }}
           >
             <Card sx={{ 
-              borderRadius: 3,
+              borderRadius: { xs: 0, md: 3 },
               height: '100%',
               transition: 'all 0.3s ease',
               cursor: 'pointer',
@@ -174,7 +176,7 @@ const CardioScreen = ({ onNavigate }) => {
             transition={{ delay: 0.2 }}
           >
             <Card sx={{ 
-              borderRadius: 3,
+              borderRadius: { xs: 0, md: 3 },
               transition: 'all 0.3s ease',
               cursor: 'pointer',
               '&:hover': {
@@ -232,7 +234,7 @@ const CardioScreen = ({ onNavigate }) => {
             transition={{ delay: 0.25 }}
           >
             <Card sx={{ 
-              borderRadius: 3,
+              borderRadius: { xs: 0, md: 3 },
               transition: 'all 0.3s ease',
               cursor: 'pointer',
               '&:hover': {

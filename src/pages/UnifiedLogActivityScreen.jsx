@@ -277,7 +277,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
           width: '100%',
           maxWidth: '700px',
           margin: '0 auto',
-          padding: { xs: '1rem 0.75rem', sm: '1.5rem 1rem', md: '2rem 1rem' },
+          padding: { xs: '1rem 0', sm: '1.5rem 1rem', md: '2rem 1rem' },
           boxSizing: 'border-box',
         }}
       >
@@ -386,7 +386,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
         )}
 
         <Card sx={{ 
-          borderRadius: 3,
+          borderRadius: { xs: 0, md: 3 },
           width: '100%',
           boxSizing: 'border-box',
         }}>

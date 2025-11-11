@@ -187,18 +187,25 @@ const UnifiedWorkoutHub = ({
     <Box sx={{ 
       maxWidth: '1400px', 
       margin: '0 auto', 
-      p: { xs: 2, md: 3 },
+      p: { xs: 0, md: 3 },
       minHeight: '100vh',
     }}>
-      <CompactHeader 
-        title="Workouts & Plans"
-        subtitle="Your fitness journey in one place"
-      />
+      <Box sx={{ px: { xs: 2, md: 0 } }}>
+        <CompactHeader 
+          title="Workouts & Plans"
+          subtitle="Your fitness journey in one place"
+        />
+      </Box>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 0, md: 3 }}>
         {/* Active Plan Section */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
+          <Card sx={{ 
+            height: '100%', 
+            bgcolor: 'background.paper',
+            borderRadius: { xs: 0, md: 2 },
+            mb: { xs: 0, md: 0 }
+          }}>
             <CardContent>
               <Stack spacing={2}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -270,7 +277,12 @@ const UnifiedWorkoutHub = ({
 
         {/* Quick Start Workout Section */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
+          <Card sx={{ 
+            height: '100%', 
+            bgcolor: 'background.paper',
+            borderRadius: { xs: 0, md: 2 },
+            mb: { xs: 0, md: 0 }
+          }}>
             <CardContent>
               <Stack spacing={2}>
                 <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -324,12 +336,15 @@ const UnifiedWorkoutHub = ({
         {/* Upcoming Workouts Section */}
         {upcomingWorkouts.length > 0 && (
           <Grid item xs={12}>
-            <Card sx={{ bgcolor: 'background.paper' }}>
+            <Card sx={{ 
+              bgcolor: 'background.paper',
+              borderRadius: { xs: 0, md: 2 }
+            }}>
               <CardContent>
                 <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <CalendarIcon /> Upcoming Workouts
                 </Typography>
-                <Grid container spacing={2}>
+                <Grid container spacing={{ xs: 1, sm: 2 }}>
                   {upcomingWorkouts.map((workout, index) => (
                     <Grid item xs={12} sm={6} md={4} key={index}>
                       <Card sx={{ bgcolor: 'background.default', border: '1px solid', borderColor: 'primary.main' }}>

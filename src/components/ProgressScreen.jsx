@@ -615,17 +615,19 @@ const ProgressScreen = ({ onStartWorkout }) => {
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh' }}>
-      <CompactHeader title="Progress" icon="📊" />
+      <Box sx={{ px: { xs: 2, md: 0 } }}>
+        <CompactHeader title="Progress" icon="📊" />
+      </Box>
       
       <motion.div
         className="screen progress-screen"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}
+        style={{ maxWidth: '900px', margin: '0 auto', padding: '0' }}
       >
       {/* Time Filter Controls */}
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center', px: { xs: 2, md: 0 } }}>
         <ToggleButtonGroup
           value={timeFilter}
           exclusive
@@ -652,10 +654,10 @@ const ProgressScreen = ({ onStartWorkout }) => {
       </Box>
 
       {/* Stats Overview - Redesigned for mobile */}
-      <Box sx={{ mb: 3 }}>
-        <Stack spacing={2}>
+      <Box sx={{ mb: 3, px: { xs: 0, md: 0 } }}>
+        <Stack spacing={{ xs: 0, md: 2 }}>
           {/* Row 1: Total Workouts & Avg Workout */}
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={{ xs: 0, md: 2 }}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -664,7 +666,7 @@ const ProgressScreen = ({ onStartWorkout }) => {
             >
               <Card sx={{ 
                 height: '100%',
-                borderRadius: 3,
+                borderRadius: { xs: 0, md: 3 },
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-4px)',
@@ -704,7 +706,7 @@ const ProgressScreen = ({ onStartWorkout }) => {
             >
               <Card sx={{ 
                 height: '100%',
-                borderRadius: 3,
+                borderRadius: { xs: 0, md: 3 },
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-4px)',
@@ -738,7 +740,7 @@ const ProgressScreen = ({ onStartWorkout }) => {
           </Stack>
 
           {/* Row 2: Total Cardio & Avg Cardio */}
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={{ xs: 0, md: 2 }}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -747,7 +749,7 @@ const ProgressScreen = ({ onStartWorkout }) => {
             >
               <Card sx={{ 
                 height: '100%',
-                borderRadius: 3,
+                borderRadius: { xs: 0, md: 3 },
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-4px)',
@@ -787,7 +789,7 @@ const ProgressScreen = ({ onStartWorkout }) => {
             >
               <Card sx={{ 
                 height: '100%',
-                borderRadius: 3,
+                borderRadius: { xs: 0, md: 3 },
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-4px)',
@@ -821,7 +823,7 @@ const ProgressScreen = ({ onStartWorkout }) => {
           </Stack>
 
           {/* Row 3: Yoga Sessions & Avg Yoga */}
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={{ xs: 0, md: 2 }}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -870,7 +872,7 @@ const ProgressScreen = ({ onStartWorkout }) => {
             >
               <Card sx={{ 
                 height: '100%',
-                borderRadius: 3,
+                borderRadius: { xs: 0, md: 3 },
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-4px)',
@@ -906,7 +908,7 @@ const ProgressScreen = ({ onStartWorkout }) => {
       </Box>
 
       {/* Calendar - positioned after stats, before history */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: { xs: 0, md: 3 }, px: { xs: 0, md: 0 } }}>
         <Calendar workoutSessions={workoutSessions} onDayClick={handleDayClick} />
         
         {/* Quick Actions for Selected Date */}
@@ -963,16 +965,17 @@ const ProgressScreen = ({ onStartWorkout }) => {
 
       {/* Progressive Overload Section */}
       {history.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card sx={{ 
-            mb: 3,
-            borderRadius: 3,
-            overflow: 'hidden',
-          }}>
+        <Box sx={{ px: { xs: 0, md: 0 } }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Card sx={{ 
+              mb: { xs: 0, md: 3 },
+              borderRadius: { xs: 0, md: 3 },
+              overflow: 'hidden',
+            }}>
             <Box sx={{ 
               background: 'rgb(19, 70, 134)',
               p: 1.5,
@@ -1125,6 +1128,7 @@ const ProgressScreen = ({ onStartWorkout }) => {
             </CardContent>
           </Card>
         </motion.div>
+        </Box>
       )}
 
       {/* Add Exercise Dialog */}
@@ -1180,27 +1184,29 @@ const ProgressScreen = ({ onStartWorkout }) => {
         </DialogActions>
       </Dialog>
 
-      <div className="workout-history-container">
-        <Typography variant="h5" component="h2" sx={{ 
-          fontWeight: 700,
-          mb: 1.5,
-          color: 'text.primary'
-        }}>
-          {selectedDate 
-            ? `Activities on ${selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
-            : 'All Activities'}
-        </Typography>
-        {selectedDate && (
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => setSelectedDate(null)}
-            sx={{ mb: 1.5 }}
-          >
-            Show All Activities
-          </Button>
-        )}
-        <Stack spacing={0.75}>
+      <div className="workout-history-container" style={{ paddingLeft: '0', paddingRight: '0' }}>
+        <Box sx={{ px: { xs: 2, md: 0 } }}>
+          <Typography variant="h5" component="h2" sx={{ 
+            fontWeight: 700,
+            mb: 1.5,
+            color: 'text.primary'
+          }}>
+            {selectedDate 
+              ? `Activities on ${selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+              : 'All Activities'}
+          </Typography>
+          {selectedDate && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setSelectedDate(null)}
+              sx={{ mb: 1.5 }}
+            >
+              Show All Activities
+            </Button>
+          )}
+        </Box>
+        <Stack spacing={{ xs: 0, md: 0.75 }}>
           {selectedDate && !hasSessionsOnSelectedDay ? (
             <Typography sx={{ textAlign: 'center', py: 3, color: 'text.secondary', fontSize: '0.875rem' }}>
               No activities logged for this day.

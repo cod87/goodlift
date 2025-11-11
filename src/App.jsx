@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import './App.css';
 import Header from './components/Header';
 import NavigationSidebar from './components/NavigationSidebar';
-import DashboardScreen from './components/DashboardScreen';
 import SelectionScreen from './components/SelectionScreen';
 import WorkoutScreen from './components/WorkoutScreen';
 import WorkoutPreview from './components/WorkoutPreview';
@@ -69,7 +68,7 @@ const theme = createTheme({
 });
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState('dashboard');
+  const [currentScreen, setCurrentScreen] = useState('selection');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState([]);
   const [workoutType, setWorkoutType] = useState('full');
@@ -532,13 +531,6 @@ function App() {
           marginTop: '60px',
           transition: 'margin-left 0.3s ease',
         }}>
-          {currentScreen === 'dashboard' && (
-            <DashboardScreen
-              onNavigate={handleNavigate}
-              onStartWorkout={handleStartWorkout}
-            />
-          )}
-
           {currentScreen === 'selection' && (
             <SelectionScreen
               workoutType={workoutType}

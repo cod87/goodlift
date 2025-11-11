@@ -152,7 +152,7 @@ const NavigationSidebar = ({
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => handleNavClick('selection')}
+                onClick={() => handleNavClick('dashboard')}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -164,7 +164,7 @@ const NavigationSidebar = ({
                   padding: 0,
                   width: '100%',
                 }}
-                aria-label="Go to Workouts screen"
+                aria-label="Go to Dashboard"
               >
                 <img
                   src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
@@ -208,22 +208,22 @@ const NavigationSidebar = ({
               overflowX: 'hidden',
             }}>
               <NavLink
-                icon={<FaDumbbell />}
-                label="Workouts"
-                isActive={currentScreen === 'selection' || currentScreen === 'preview'}
-                onClick={() => handleNavClick('selection')}
-              />
-              <NavLink
                 icon={<TrendingUpIcon />}
-                label="Progress"
-                isActive={currentScreen === 'progress'}
-                onClick={() => handleNavClick('progress')}
+                label="Dashboard"
+                isActive={currentScreen === 'dashboard'}
+                onClick={() => handleNavClick('dashboard')}
               />
               <NavLink
                 icon={<CalendarMonthIcon />}
                 label="Workout Plans"
                 isActive={currentScreen === 'plans'}
                 onClick={() => handleNavClick('plans')}
+              />
+              <NavLink
+                icon={<FaDumbbell />}
+                label="Random Workout"
+                isActive={currentScreen === 'selection' || currentScreen === 'preview'}
+                onClick={() => handleNavClick('selection')}
               />
               <NavLink
                 icon={<DirectionsRunIcon />}

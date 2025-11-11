@@ -16,6 +16,7 @@ import HiitSessionSelection from './components/HiitSessionSelection';
 import HiitSessionScreen from './components/HiitSessionScreen';
 import YogaSessionSelection from './components/YogaSessionSelection';
 import YogaSessionScreen from './components/YogaSessionScreen';
+import UnifiedTimerScreen from './components/UnifiedTimerScreen';
 import AuthScreen from './components/AuthScreen';
 import MobilityScreen from './components/Mobility/MobilityScreen';
 import CardioScreen from './pages/CardioScreen';
@@ -574,6 +575,8 @@ function AppContent() {
           {currentScreen === 'progress' && <ProgressScreen onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />}
 
           {currentScreen === 'workout-plan' && <WorkoutPlanScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'timer' && <UnifiedTimerScreen />}
 
           {currentScreen === 'hiit' && <HiitTimerScreen />}
 

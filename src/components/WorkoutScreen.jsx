@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
-import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder } from '@mui/icons-material';
+import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button } from '@mui/material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration } from '@mui/icons-material';
+import { selectStretchesForMuscleGroups } from '../utils/selectStretchesForMuscleGroups';
+import StretchPhase from './StretchPhase';
 
 /**
  * WorkoutScreen component manages the active workout session
@@ -23,6 +25,16 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [initialTargets, setInitialTargets] = useState({});
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
+  
+  // Stretching phase state
+  const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
+  const [currentStretchIndex, setCurrentStretchIndex] = useState(0);
+  const [warmupStretches, setWarmupStretches] = useState([]);
+  const [cooldownStretches, setCooldownStretches] = useState([]);
+  const [warmupCompleted, setWarmupCompleted] = useState(false);
+  const [warmupSkipped, setWarmupSkipped] = useState(false);
+  const [cooldownCompleted, setCooldownCompleted] = useState(false);
+  const [cooldownSkipped, setCooldownSkipped] = useState(false);
 
   // Generate workout sequence (supersets) - memoized to prevent recalculation
   const workoutSequence = useMemo(() => {
@@ -44,6 +56,68 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     }
     
     return sequence;
+  }, [workoutPlan]);
+
+  // Load stretching library and select stretches based on workout muscles
+  useEffect(() => {
+    const loadStretchingLibrary = async () => {
+      try {
+        const response = await fetch('/data/stretching-library.json');
+        const data = await response.json();
+        
+        // Extract muscle groups from workout plan
+        const muscleGroups = [];
+        workoutPlan.forEach(exercise => {
+          if (exercise['Primary Muscle']) {
+            muscleGroups.push(exercise['Primary Muscle']);
+          }
+          if (exercise['Secondary Muscles']) {
+            const secondaryMuscles = exercise['Secondary Muscles']
+              .split(',')
+              .map(m => m.trim())
+              .filter(m => m.length > 0);
+            muscleGroups.push(...secondaryMuscles);
+          }
+        });
+        
+        // Remove duplicates
+        const uniqueMuscles = [...new Set(muscleGroups)];
+        
+        // Check user preferences for skipping
+        const prefs = localStorage.getItem('goodlift_stretching_prefs');
+        const preferences = prefs ? JSON.parse(prefs) : {};
+        
+        if (preferences.alwaysSkipWarmup) {
+          setWarmupSkipped(true);
+          setCurrentPhase('exercise');
+        } else {
+          // Select 5-6 dynamic stretches for warmup
+          const selectedWarmup = selectStretchesForMuscleGroups(
+            uniqueMuscles,
+            'dynamic',
+            Math.floor(Math.random() * 2) + 5, // 5 or 6 stretches
+            data.dynamic
+          );
+          setWarmupStretches(selectedWarmup);
+        }
+        
+        // Select 4-5 static stretches for cooldown
+        const selectedCooldown = selectStretchesForMuscleGroups(
+          uniqueMuscles,
+          'static',
+          Math.floor(Math.random() * 2) + 4, // 4 or 5 stretches
+          data.static
+        );
+        setCooldownStretches(selectedCooldown);
+      } catch (error) {
+        console.error('Error loading stretching library:', error);
+        // If stretches fail to load, skip to exercise phase
+        setWarmupSkipped(true);
+        setCurrentPhase('exercise');
+      }
+    };
+    
+    loadStretchingLibrary();
   }, [workoutPlan]);
 
   // Start timer on mount and load initial target values
@@ -160,6 +234,81 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     }
   };
 
+  // Stretch phase handlers
+  const handleNextStretch = () => {
+    if (currentPhase === 'warmup') {
+      if (currentStretchIndex + 1 >= warmupStretches.length) {
+        // Warmup complete, move to exercises
+        setWarmupCompleted(true);
+        setCurrentPhase('exercise');
+        setCurrentStretchIndex(0);
+      } else {
+        setCurrentStretchIndex(prev => prev + 1);
+      }
+    } else if (currentPhase === 'cooldown') {
+      if (currentStretchIndex + 1 >= cooldownStretches.length) {
+        // Cooldown complete
+        setCooldownCompleted(true);
+        setCurrentPhase('complete');
+      } else {
+        setCurrentStretchIndex(prev => prev + 1);
+      }
+    }
+  };
+
+  const handleSkipWarmup = () => {
+    setWarmupSkipped(true);
+    setCurrentPhase('exercise');
+    // Save preference to localStorage
+    const prefs = localStorage.getItem('goodlift_stretching_prefs');
+    const preferences = prefs ? JSON.parse(prefs) : {};
+    localStorage.setItem('goodlift_stretching_prefs', JSON.stringify({
+      ...preferences,
+      lastSkippedWarmup: new Date().toISOString(),
+    }));
+  };
+
+  const handleSkipCooldown = () => {
+    setCooldownSkipped(true);
+    setCurrentPhase('complete');
+    // Save preference to localStorage
+    const prefs = localStorage.getItem('goodlift_stretching_prefs');
+    const preferences = prefs ? JSON.parse(prefs) : {};
+    localStorage.setItem('goodlift_stretching_prefs', JSON.stringify({
+      ...preferences,
+      lastSkippedCooldown: new Date().toISOString(),
+    }));
+  };
+
+  const handleWorkoutComplete = () => {
+    const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    
+    const finalData = {
+      date: new Date().toISOString(),
+      type: workoutPlan[0]?.['Primary Muscle'] || 'unknown',
+      duration: totalTime,
+      exercises: {},
+      warmupCompleted,
+      warmupSkipped,
+      cooldownCompleted,
+      cooldownSkipped,
+      totalDuration: totalTime,
+    };
+    
+    workoutData.forEach(step => {
+      const { exerciseName: exName, setNumber, weight: w, reps: r } = step;
+      if (!finalData.exercises[exName]) {
+        finalData.exercises[exName] = { sets: [] };
+      }
+      finalData.exercises[exName].sets.push({ set: setNumber, weight: w, reps: r });
+    });
+    
+    onComplete(finalData);
+  };
+
   const handleNext = async (e) => {
     e.preventDefault();
     const form = e.target.closest('form') || document.querySelector('form');
@@ -189,30 +338,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     setWorkoutData(updatedWorkoutData);
     
     if (currentStepIndex + 1 >= workoutSequence.length) {
-      // Workout complete - apply conditional persist rules
+      // Exercises complete - move to cooldown
       await applyConditionalPersistRules(updatedWorkoutData);
-      
-      const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      
-      const finalData = {
-        date: new Date().toISOString(),
-        type: workoutPlan[0]?.['Primary Muscle'] || 'unknown',
-        duration: totalTime,
-        exercises: {},
-      };
-      
-      updatedWorkoutData.forEach(step => {
-        const { exerciseName: exName, setNumber, weight: w, reps: r } = step;
-        if (!finalData.exercises[exName]) {
-          finalData.exercises[exName] = { sets: [] };
-        }
-        finalData.exercises[exName].sets.push({ set: setNumber, weight: w, reps: r });
-      });
-      
-      onComplete(finalData);
+      setCurrentPhase('cooldown');
+      setCurrentStretchIndex(0);
     } else {
       setCurrentStepIndex(prev => prev + 1);
     }
@@ -283,10 +412,102 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     }
   };
 
-  if (!currentStep) {
+  if (!currentStep && currentPhase === 'exercise') {
     return null;
   }
 
+  // Render warmup phase
+  if (currentPhase === 'warmup') {
+    if (warmupStretches.length === 0) {
+      return <div>Loading warmup...</div>;
+    }
+    
+    return (
+      <div className="screen" style={{ paddingBottom: '100px', padding: '0.5rem', maxWidth: '100vw', boxSizing: 'border-box' }}>
+        <Box sx={{ mb: 1.5, px: { xs: 0.5, sm: 0 } }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center', mb: 1 }}>
+            Warm-Up Phase
+          </Typography>
+        </Box>
+        <StretchPhase
+          stretch={warmupStretches[currentStretchIndex]}
+          onNext={handleNextStretch}
+          onSkipAll={handleSkipWarmup}
+          currentIndex={currentStretchIndex}
+          totalCount={warmupStretches.length}
+          phaseType="warmup"
+        />
+      </div>
+    );
+  }
+
+  // Render cooldown phase
+  if (currentPhase === 'cooldown') {
+    if (cooldownStretches.length === 0) {
+      setCurrentPhase('complete');
+      return null;
+    }
+    
+    return (
+      <div className="screen" style={{ paddingBottom: '100px', padding: '0.5rem', maxWidth: '100vw', boxSizing: 'border-box' }}>
+        <Box sx={{ mb: 1.5, px: { xs: 0.5, sm: 0 } }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center', mb: 1 }}>
+            Cool-Down Phase
+          </Typography>
+        </Box>
+        <StretchPhase
+          stretch={cooldownStretches[currentStretchIndex]}
+          onNext={handleNextStretch}
+          onSkipAll={handleSkipCooldown}
+          currentIndex={currentStretchIndex}
+          totalCount={cooldownStretches.length}
+          phaseType="cooldown"
+        />
+      </div>
+    );
+  }
+
+  // Render completion screen
+  if (currentPhase === 'complete') {
+    return (
+      <div className="screen" style={{ 
+        paddingBottom: '100px', 
+        padding: '2rem', 
+        maxWidth: '100vw', 
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '60vh'
+      }}>
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          style={{ textAlign: 'center' }}
+        >
+          <Celebration sx={{ fontSize: 80, color: 'primary.main', mb: 2 }} />
+          <Typography variant="h4" sx={{ fontWeight: 600, mb: 2 }}>
+            Workout Complete! 🎉
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Great job! You've completed your workout{!warmupSkipped && !cooldownSkipped ? ' including warmup and cooldown phases' : !warmupSkipped ? ' including warmup phase' : !cooldownSkipped ? ' including cooldown phase' : ''}.
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={handleWorkoutComplete}
+            sx={{ mt: 2 }}
+          >
+            Finish Workout
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Render exercise phase (existing workout screen)
   return (
     <div className="screen"
       style={{

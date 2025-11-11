@@ -46,8 +46,7 @@ html {
 
 body {
     font-family: var(--font-body);
-    background: #1e2939;
-    background-attachment: fixed;
+    /* Background color is handled by MUI theme via CssBaseline */
     color: var(--color-text);
     line-height: 1.6;
     overflow-x: hidden;

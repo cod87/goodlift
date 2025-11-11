@@ -1041,7 +1041,7 @@ const ProgressScreen = ({ onStartWorkout }) => {
                           beginAtZero: pinned.trackingMode === 'reps',
                           min: chartData.minValue,
                           ticks: {
-                            callback: function(value) {
+                            callback: (value) => {
                               return pinned.trackingMode === 'weight' 
                                 ? `${value} lbs` 
                                 : value;

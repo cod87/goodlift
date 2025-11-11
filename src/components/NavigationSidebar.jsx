@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaDumbbell, FaSignOutAlt, FaTimes, FaBars } from 'react-icons/fa';
+import { FaDumbbell, FaSignOutAlt, FaTimes, FaBars, FaHome } from 'react-icons/fa';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -149,7 +149,7 @@ const NavigationSidebar = ({
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => handleNavClick('selection')}
+                onClick={() => handleNavClick('home')}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -161,7 +161,7 @@ const NavigationSidebar = ({
                   padding: 0,
                   width: '100%',
                 }}
-                aria-label="Go to Workouts screen"
+                aria-label="Go to Home screen"
               >
                 <img
                   src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
@@ -204,6 +204,12 @@ const NavigationSidebar = ({
               overflowY: 'auto',
               overflowX: 'hidden',
             }}>
+              <NavLink
+                icon={<FaHome />}
+                label="Home"
+                isActive={currentScreen === 'home'}
+                onClick={() => handleNavClick('home')}
+              />
               <NavLink
                 icon={<FaDumbbell />}
                 label="Training Hub"

@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import './App.css';
 import Header from './components/Header';
 import NavigationSidebar from './components/NavigationSidebar';
+import HomeScreen from './components/HomeScreen';
 import UnifiedWorkoutHub from './components/UnifiedWorkoutHub';
+import WorkoutPlanScreen from './components/WorkoutPlanScreen';
 import WorkoutScreen from './components/WorkoutScreen';
 import WorkoutPreview from './components/WorkoutPreview';
 import CustomizeExerciseScreen from './components/CustomizeExerciseScreen';
@@ -36,7 +38,7 @@ import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from 
  * Main app component wrapped with theme
  */
 function AppContent() {
-  const [currentScreen, setCurrentScreen] = useState('selection');
+  const [currentScreen, setCurrentScreen] = useState('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState([]);
   const [workoutType, setWorkoutType] = useState('full');
@@ -501,6 +503,13 @@ function AppContent() {
           marginTop: '60px',
           transition: 'margin-left 0.3s ease',
         }}>
+          {currentScreen === 'home' && (
+            <HomeScreen
+              onNavigate={handleNavigate}
+              onStartWorkout={handleStartWorkout}
+            />
+          )}
+
           {currentScreen === 'selection' && (
             <UnifiedWorkoutHub
               workoutType={workoutType}
@@ -563,6 +572,8 @@ function AppContent() {
           )}
           
           {currentScreen === 'progress' && <ProgressScreen onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />}
+
+          {currentScreen === 'workout-plan' && <WorkoutPlanScreen onNavigate={handleNavigate} />}
 
           {currentScreen === 'hiit' && <HiitTimerScreen />}
 

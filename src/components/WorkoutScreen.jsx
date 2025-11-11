@@ -492,7 +492,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
             Workout Complete! 🎉
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Great job! You've completed your workout including {!warmupSkipped && 'warmup and'} {!cooldownSkipped && 'cooldown'} phases.
+            Great job! You've completed your workout{!warmupSkipped && !cooldownSkipped ? ' including warmup and cooldown phases' : !warmupSkipped ? ' including warmup phase' : !cooldownSkipped ? ' including cooldown phase' : ''}.
           </Typography>
           <Button
             variant="contained"

@@ -112,7 +112,7 @@ ChartJS.register(
   Filler
 );
 
-const ProgressScreen = ({ onStartWorkout }) => {
+const ProgressScreen = ({ onNavigate, onStartWorkout }) => {
   const [history, setHistory] = useState([]);
   const [stretchSessions, setStretchSessions] = useState([]);
   const [yogaSessions, setYogaSessions] = useState([]);
@@ -2047,6 +2047,7 @@ EditSessionDialog.propTypes = {
 };
 
 ProgressScreen.propTypes = {
+  onNavigate: PropTypes.func,
   onStartWorkout: PropTypes.func,
 };
 

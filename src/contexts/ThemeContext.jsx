@@ -87,7 +87,7 @@ export const ThemeProvider = ({ children }) => {
             dark: '#cc3520',
           },
           background: {
-            default: 'rgb(253, 244, 227)', // Tan/beige from auth screen
+            default: 'rgb(255, 245, 233)', // Lighter tinted beige (60% tint of paper color)
             paper: 'rgb(254, 230, 200)', // Slightly warmer for cards
           },
           text: {

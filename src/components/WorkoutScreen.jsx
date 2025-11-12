@@ -442,7 +442,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const adjustWeight = (delta) => {
     const current = parseFloat(currentWeight) || 0;
     const newWeight = Math.max(0, current + delta);
-    setCurrentWeight(newWeight.toString());
+    // Round to 1 decimal place to handle 2.5lb increments cleanly
+    setCurrentWeight(newWeight.toFixed(1));
   };
 
   const adjustReps = (delta) => {
@@ -721,7 +722,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                   <label htmlFor="weight-select">Weight (lbs)</label>
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                     <IconButton 
-                      onClick={() => adjustWeight(-5)}
+                      onClick={() => adjustWeight(-2.5)}
                       size="large"
                       sx={{ 
                         bgcolor: 'action.hover',
@@ -774,7 +775,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                       }}
                     />
                     <IconButton 
-                      onClick={() => adjustWeight(5)}
+                      onClick={() => adjustWeight(2.5)}
                       size="large"
                       sx={{ 
                         bgcolor: 'action.hover',

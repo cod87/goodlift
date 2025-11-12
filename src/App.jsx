@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import './App.css';
 import Header from './components/Header';
 import NavigationSidebar from './components/NavigationSidebar';
+import BottomNav from './components/Navigation/BottomNav';
 import HomeScreen from './components/HomeScreen';
 import TodayView from './components/TodayView/TodayView';
 import SelectionScreen from './components/SelectionScreen';
@@ -31,6 +32,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Snackbar, Alert, Button } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 import { runDataMigration } from './migrations/simplifyDataStructure';
+import { BREAKPOINTS } from './theme/responsive';
 
 /**
  * Main app component wrapped with theme
@@ -124,7 +126,7 @@ function AppContent() {
   // Track screen size for responsive layout
   useEffect(() => {
     const handleResize = () => {
-      setIsDesktop(window.innerWidth > 768);
+      setIsDesktop(window.innerWidth >= BREAKPOINTS.tablet);
       
       // Fix iOS viewport resize issues on orientation change
       // This ensures the viewport properly adjusts after rotation
@@ -633,6 +635,14 @@ function AppContent() {
 
           {currentScreen === 'settings' && <SettingsScreen />}
         </div>
+        
+        {/* Bottom Navigation - Mobile Only */}
+        {!isDesktop && (
+          <BottomNav
+            currentScreen={currentScreen}
+            onNavigate={handleNavigate}
+          />
+        )}
         
         {/* Guest Data Migration Dialog */}
         <GuestDataMigrationDialog

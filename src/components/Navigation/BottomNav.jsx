@@ -1,0 +1,164 @@
+import { memo } from 'react';
+import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
+import { 
+  FaDumbbell, 
+  FaChartLine,
+  FaCog,
+} from 'react-icons/fa';
+import { CalendarToday } from '@mui/icons-material';
+import { touchTargets, zIndex, safeAreaPadding } from '../../theme/responsive';
+
+/**
+ * BottomNav - Fixed bottom navigation for mobile devices
+ * 
+ * Features:
+ * - Fixed position at bottom of screen
+ * - 4 navigation icons: Workout, Plan, Progress, Settings
+ * - 56px height for comfortable touch targets
+ * - Safe area padding for devices with home indicators
+ * - Active state indication
+ * - Smooth transitions
+ * 
+ * Only visible on mobile devices (<768px)
+ */
+const BottomNav = memo(({ currentScreen, onNavigate }) => {
+  const navItems = [
+    {
+      id: 'selection',
+      label: 'Workout',
+      icon: FaDumbbell,
+      screens: ['selection', 'preview', 'workout', 'customize', 'custom-preview'],
+    },
+    {
+      id: 'home',
+      label: 'Plan',
+      icon: CalendarToday,
+      screens: ['home', 'workout-plan'],
+    },
+    {
+      id: 'progress',
+      label: 'Progress',
+      icon: FaChartLine,
+      screens: ['progress'],
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: FaCog,
+      screens: ['settings'],
+    },
+  ];
+
+  const handleNavClick = (screenId) => {
+    onNavigate(screenId);
+  };
+
+  const isActive = (item) => {
+    return item.screens.includes(currentScreen);
+  };
+
+  return (
+    <motion.nav
+      initial={{ y: 100 }}
+      animate={{ y: 0 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: touchTargets.navigation,
+        backgroundColor: '#2a3647',
+        borderTop: '1px solid rgba(29, 181, 132, 0.2)',
+        boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.3)',
+        zIndex: zIndex.navigation,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        paddingBottom: safeAreaPadding.bottom,
+        paddingLeft: safeAreaPadding.left,
+        paddingRight: safeAreaPadding.right,
+      }}
+    >
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const active = isActive(item);
+        
+        return (
+          <motion.button
+            key={item.id}
+            onClick={() => handleNavClick(item.id)}
+            whileTap={{ scale: 0.9 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flex: 1,
+              height: '100%',
+              minWidth: touchTargets.minimum,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: active ? '#1db584' : '#a0a8b3',
+              transition: 'color 0.2s ease',
+              padding: '8px 4px',
+            }}
+            aria-label={item.label}
+            aria-current={active ? 'page' : undefined}
+          >
+            {/* Icon */}
+            <div style={{
+              fontSize: '1.5rem',
+              marginBottom: '2px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Icon />
+            </div>
+            
+            {/* Label */}
+            <span style={{
+              fontSize: '0.625rem',
+              fontWeight: active ? 600 : 400,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              lineHeight: 1,
+            }}>
+              {item.label}
+            </span>
+            
+            {/* Active indicator */}
+            {active && (
+              <motion.div
+                layoutId="bottomNavIndicator"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '24px',
+                  height: '2px',
+                  backgroundColor: '#1db584',
+                  borderRadius: '0 0 2px 2px',
+                }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              />
+            )}
+          </motion.button>
+        );
+      })}
+    </motion.nav>
+  );
+});
+
+BottomNav.displayName = 'BottomNav';
+
+BottomNav.propTypes = {
+  currentScreen: PropTypes.string.isRequired,
+  onNavigate: PropTypes.func.isRequired,
+};
+
+export default BottomNav;

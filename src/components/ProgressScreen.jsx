@@ -251,10 +251,17 @@ const ProgressDashboard = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh' }}>
+    <Box sx={{ width: '100%', minHeight: '100vh', overflowX: 'hidden' }}>
       <CompactHeader title="Progress" subtitle="Track your fitness journey" />
 
-      <Box sx={{ maxWidth: '1400px', margin: '0 auto', p: { xs: 2, md: 3 }, pb: { xs: '80px', md: 3 } }}>
+      <Box sx={{ 
+        maxWidth: '1400px', 
+        margin: '0 auto', 
+        p: { xs: 1, sm: 2, md: 3 }, 
+        pb: { xs: '80px', md: 3 },
+        width: '100%',
+        boxSizing: 'border-box',
+      }}>
         {/* Tab Navigation */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
           <Tabs

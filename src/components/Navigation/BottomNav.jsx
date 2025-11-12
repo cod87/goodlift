@@ -2,10 +2,13 @@ import { memo } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { 
-  FaDumbbell, 
-  FaCog,
-} from 'react-icons/fa';
-import { TrendingUp } from '@mui/icons-material';
+  FitnessCenter,
+  FitnessCenterOutlined,
+  TrendingUp,
+  TrendingUpOutlined,
+  Settings,
+  SettingsOutlined,
+} from '@mui/icons-material';
 import { touchTargets, zIndex, safeAreaPadding } from '../../theme/responsive';
 
 /**
@@ -26,7 +29,8 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
     {
       id: 'home',
       label: 'Work',
-      icon: FaDumbbell,
+      iconActive: FitnessCenter,
+      iconInactive: FitnessCenterOutlined,
       screens: [
         'home', 
         'workout-plan', 
@@ -44,13 +48,15 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
     {
       id: 'progress',
       label: 'Progress',
-      icon: TrendingUp,
+      iconActive: TrendingUp,
+      iconInactive: TrendingUpOutlined,
       screens: ['progress'],
     },
     {
       id: 'settings',
       label: 'Settings',
-      icon: FaCog,
+      iconActive: Settings,
+      iconInactive: SettingsOutlined,
       screens: ['settings', 'log-activity', 'exercise-list', 'profile', 'stretch', 'mobility'],
     },
   ];
@@ -87,8 +93,8 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       }}
     >
       {navItems.map((item) => {
-        const Icon = item.icon;
         const active = isActive(item);
+        const Icon = active ? item.iconActive : item.iconInactive;
         
         return (
           <motion.button
@@ -121,7 +127,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-              <Icon />
+              <Icon sx={{ fontSize: '1.5rem' }} />
             </div>
             
             {/* Label */}

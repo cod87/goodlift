@@ -1023,49 +1023,8 @@ button:active {
     cursor: not-allowed;
 }
 
-/* Main content adjustment when sidebar is visible */
-#app {
-    transition: margin-left 0.3s ease-in-out;
-}
-
-#app.sidebar-open {
-    margin-left: 320px;
-}
-
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
-    .filter-sidebar {
-        width: 280px;
-    }
-    
-    .sidebar-content {
-        padding: 1.25rem 1rem;
-    }
-    
-    .sidebar-content h2 {
-        font-size: 1.25rem;
-        margin-bottom: 1rem;
-    }
-    
-    .sidebar-section {
-        margin-bottom: 1.25rem;
-    }
-    
-    .sidebar-section h3 {
-        font-size: 0.95rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .sidebar-start-btn {
-        padding: 10px 20px;
-        font-size: 0.95rem;
-        margin-top: 1rem;
-    }
-    
-    #app.sidebar-open {
-        margin-left: 0;
-    }
-    
     .screen {
         padding: 0.5rem;
     }

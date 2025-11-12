@@ -73,8 +73,8 @@ export const validateWeeklyPlan = (weekPlan) => {
 
   // Check each day has required fields
   weekPlan.forEach((day, index) => {
-    if (!day.dayOfWeek) {
-      errors.push(`Day ${index + 1} missing dayOfWeek`);
+    if (typeof day.dayOfWeek !== 'number' || day.dayOfWeek < 0 || day.dayOfWeek > 6) {
+      errors.push(`Day ${index + 1} missing or invalid dayOfWeek`);
     }
     if (!day.type || !Object.values(DAY_TYPES).includes(day.type)) {
       errors.push(`Day ${index + 1} has invalid type: ${day.type}`);

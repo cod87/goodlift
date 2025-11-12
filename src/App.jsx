@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import './App.css';
 import Header from './components/Header';
 import NavigationSidebar from './components/NavigationSidebar';
+import HomeScreen from './components/HomeScreen';
 import TodayView from './components/TodayView/TodayView';
 import SelectionScreen from './components/SelectionScreen';
 import UnifiedWorkoutHub from './components/UnifiedWorkoutHub';
@@ -21,7 +22,7 @@ import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
 import { usePlanIntegration } from './hooks/usePlanIntegration';
-import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps, loadUserDataFromCloud, getWorkoutHistory } from './utils/storage';
+import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps, loadUserDataFromCloud } from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
@@ -48,14 +49,13 @@ function AppContent() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
   const [showGuestSnackbar, setShowGuestSnackbar] = useState(false);
   const [showMigrationDialog, setShowMigrationDialog] = useState(false);
-  const [lastWorkout, setLastWorkout] = useState(null);
   const { currentUser, isGuest, hasGuestData } = useAuth();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
   const favoriteExercises = useFavoriteExercises();
   const { 
-    getTodaysWorkout, 
-    getUpcomingWorkouts,
+    currentPlan,
+    getTodaysWorkout,
     createWorkoutNavState
   } = usePlanIntegration();
 
@@ -79,22 +79,6 @@ function AppContent() {
     
     initializeMigration();
   }, []); // Run once on mount
-
-  // Load last workout for TodayView
-  useEffect(() => {
-    const loadLastWorkout = async () => {
-      const history = await getWorkoutHistory();
-      if (history && history.length > 0) {
-        const last = history[0];
-        setLastWorkout({
-          date: last.date,
-          duration: last.duration,
-          exercises: last.exercises ? Object.keys(last.exercises) : [],
-        });
-      }
-    };
-    loadLastWorkout();
-  }, []);
 
   // Check if guest snackbar should be shown
   useEffect(() => {
@@ -562,12 +546,10 @@ function AppContent() {
           transition: 'margin-left 0.3s ease',
         }}>
           {currentScreen === 'home' && (
-            <TodayView
+            <HomeScreen
+              currentPlan={currentPlan}
               todaysWorkout={getTodaysWorkout()}
-              nextWorkouts={getUpcomingWorkouts(2)}
-              lastWorkout={lastWorkout}
               onQuickStart={handleTodayViewQuickStart}
-              onNavigate={handleNavigate}
               loading={loading}
             />
           )}

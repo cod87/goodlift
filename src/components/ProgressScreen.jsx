@@ -48,7 +48,6 @@ import { EXERCISES_DATA_PATH } from '../utils/constants';
 import {
   calculateStreak,
   calculateAdherence,
-  getPersonalRecords,
   calculateTotalVolume,
 } from '../utils/trackingMetrics';
 import { StreakDisplay, AdherenceDisplay, VolumeTrendDisplay } from './Progress/TrackingCards';

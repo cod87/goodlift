@@ -364,3 +364,68 @@ export const getStreakMilestones = (currentStreak) => {
 
   return milestones.filter(m => currentStreak >= m.days);
 };
+
+/**
+ * Generate weekly summary data
+ * @param {Array} workoutHistory - Array of workout objects
+ * @param {Object} activePlan - Optional active plan
+ * @returns {Object} Weekly summary data
+ */
+export const generateWeeklySummary = (workoutHistory = [], activePlan = null) => {
+  const now = new Date();
+  const oneWeekAgo = new Date(now);
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  // Filter to last week
+  const weekWorkouts = workoutHistory.filter(w => {
+    const workoutDate = new Date(w.date);
+    return workoutDate >= oneWeekAgo && workoutDate <= now;
+  });
+
+  const workoutsCompleted = weekWorkouts.length;
+  const totalTime = weekWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
+  
+  // Calculate total volume
+  const totalVolume = weekWorkouts.reduce((sum, workout) => {
+    return sum + calculateVolumeLoad(workout);
+  }, 0);
+
+  // Count PRs achieved this week
+  const previousPRs = getPersonalRecords(workoutHistory.filter(w => {
+    const workoutDate = new Date(w.date);
+    return workoutDate < oneWeekAgo;
+  }));
+
+  let prsAchieved = 0;
+  weekWorkouts.forEach(workout => {
+    const newPRs = detectNewPRs(workout, previousPRs);
+    prsAchieved += newPRs.length;
+  });
+
+  // Find top exercises
+  const exerciseCounts = {};
+  weekWorkouts.forEach(workout => {
+    if (workout.exercises) {
+      Object.keys(workout.exercises).forEach(exerciseName => {
+        exerciseCounts[exerciseName] = (exerciseCounts[exerciseName] || 0) + 1;
+      });
+    }
+  });
+
+  const topExercises = Object.entries(exerciseCounts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  // Calculate adherence
+  const adherence = calculateAdherence(workoutHistory, activePlan, 7);
+
+  return {
+    workoutsCompleted,
+    totalVolume,
+    totalTime,
+    prsAchieved,
+    topExercises,
+    adherence,
+  };
+};

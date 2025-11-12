@@ -1,0 +1,453 @@
+import { useState, useEffect } from 'react';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  TextField,
+  Button,
+  Stack,
+  LinearProgress,
+  Chip,
+  IconButton,
+  Alert,
+  Grid,
+} from '@mui/material';
+import { Edit, Save, Cancel, PhotoCamera } from '@mui/icons-material';
+import { motion } from 'framer-motion';
+import { useUserProfile } from '../contexts/UserProfileContext';
+import { usePreferences } from '../contexts/PreferencesContext';
+import AvatarSelector from '../components/AvatarSelector';
+import WeightTracker from '../components/WeightTracker';
+import { 
+  validateDisplayName, 
+  validateTextField, 
+  sanitizeText,
+  formatLongDate 
+} from '../utils/profileUtils';
+import { isPresetAvatar, getPresetAvatarColor, getInitialsAvatarStyle } from '../utils/avatarUtils';
+
+const UserProfileScreen = () => {
+  const { 
+    profile, 
+    stats, 
+    loading: profileLoading,
+    saveProfile,
+    updateProfile,
+    addWeightEntry,
+    getInitials,
+    getProfileCompletion,
+  } = useUserProfile();
+
+  const { getDisplayUnit } = usePreferences();
+
+  const [editing, setEditing] = useState(false);
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [editedProfile, setEditedProfile] = useState(profile);
+  const [errors, setErrors] = useState({});
+  const [saveError, setSaveError] = useState(null);
+
+  useEffect(() => {
+    setEditedProfile(profile);
+  }, [profile]);
+
+  const handleEdit = () => {
+    setEditing(true);
+    setErrors({});
+    setSaveError(null);
+  };
+
+  const handleCancel = () => {
+    setEditing(false);
+    setEditedProfile(profile);
+    setErrors({});
+    setSaveError(null);
+  };
+
+  const handleSave = async () => {
+    const newErrors = {};
+
+    // Validate display name
+    const nameValidation = validateDisplayName(editedProfile.displayName);
+    if (!nameValidation.valid) {
+      newErrors.displayName = nameValidation.error;
+    }
+
+    // Validate bio
+    const bioValidation = validateTextField(editedProfile.bio, 500);
+    if (!bioValidation.valid) {
+      newErrors.bio = bioValidation.error;
+    }
+
+    // Validate goals
+    const goalsValidation = validateTextField(editedProfile.goals, 500);
+    if (!goalsValidation.valid) {
+      newErrors.goals = goalsValidation.error;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    try {
+      // Sanitize text fields
+      const sanitizedProfile = {
+        ...editedProfile,
+        displayName: sanitizeText(editedProfile.displayName),
+        bio: sanitizeText(editedProfile.bio),
+        goals: sanitizeText(editedProfile.goals),
+      };
+
+      await saveProfile(sanitizedProfile);
+      setEditing(false);
+      setSaveError(null);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      setSaveError('Failed to save profile. Please try again.');
+    }
+  };
+
+  const handleFieldChange = (field, value) => {
+    setEditedProfile({ ...editedProfile, [field]: value });
+    // Clear error for this field
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: null });
+    }
+  };
+
+  const handleAvatarSelect = async (avatarValue) => {
+    try {
+      await updateProfile('avatar', avatarValue);
+      setEditedProfile({ ...editedProfile, avatar: avatarValue });
+    } catch (error) {
+      console.error('Error updating avatar:', error);
+      setSaveError('Failed to update avatar. Please try again.');
+    }
+  };
+
+  const handleAddWeight = async (weight, unit) => {
+    try {
+      await addWeightEntry(weight, unit);
+    } catch (error) {
+      console.error('Error adding weight:', error);
+    }
+  };
+
+  const renderAvatar = () => {
+    const initials = getInitials();
+    const size = 100;
+
+    if (profile.avatar) {
+      if (isPresetAvatar(profile.avatar)) {
+        const color = getPresetAvatarColor(profile.avatar);
+        return (
+          <Avatar
+            sx={{
+              width: size,
+              height: size,
+              ...getInitialsAvatarStyle(initials, color),
+              fontSize: '2.5rem',
+            }}
+          >
+            {initials}
+          </Avatar>
+        );
+      } else {
+        return (
+          <Avatar
+            src={profile.avatar}
+            sx={{ width: size, height: size }}
+          />
+        );
+      }
+    }
+
+    return (
+      <Avatar
+        sx={{
+          width: size,
+          height: size,
+          ...getInitialsAvatarStyle(initials),
+          fontSize: '2.5rem',
+        }}
+      >
+        {initials}
+      </Avatar>
+    );
+  };
+
+  const profileCompletion = getProfileCompletion();
+
+  if (profileLoading) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography>Loading profile...</Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        padding: { xs: 2, sm: 3, md: 4 },
+        paddingBottom: { xs: '80px', sm: 3, md: 4 },
+        background: (theme) => theme.palette.background.default,
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            mb: 3,
+            fontWeight: 700,
+            color: 'text.primary',
+          }}
+        >
+          Profile
+        </Typography>
+
+        {/* Profile Header Card */}
+        <Card sx={{ mb: 3, borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3, mb: 3 }}>
+              {/* Avatar */}
+              <Box sx={{ position: 'relative', alignSelf: { xs: 'center', sm: 'flex-start' } }}>
+                {renderAvatar()}
+                <IconButton
+                  onClick={() => setShowAvatarSelector(true)}
+                  size="small"
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    '&:hover': { bgcolor: 'primary.dark' },
+                  }}
+                >
+                  <PhotoCamera fontSize="small" />
+                </IconButton>
+              </Box>
+
+              {/* Profile Info */}
+              <Box sx={{ flex: 1 }}>
+                {editing ? (
+                  <TextField
+                    fullWidth
+                    label="Display Name"
+                    value={editedProfile.displayName}
+                    onChange={(e) => handleFieldChange('displayName', e.target.value)}
+                    error={!!errors.displayName}
+                    helperText={errors.displayName}
+                    sx={{ mb: 2 }}
+                  />
+                ) : (
+                  <Typography variant="h5" fontWeight={700} gutterBottom>
+                    {profile.displayName || 'Unknown User'}
+                  </Typography>
+                )}
+
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {profile.email}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Member since {formatLongDate(profile.memberSince)}
+                </Typography>
+
+                {/* Profile Completion */}
+                <Box sx={{ mt: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2" fontWeight={600}>
+                      Profile Completion
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {profileCompletion}%
+                    </Typography>
+                  </Box>
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={profileCompletion}
+                    sx={{ height: 8, borderRadius: 4 }}
+                  />
+                </Box>
+              </Box>
+
+              {/* Edit/Save Buttons */}
+              <Box>
+                {editing ? (
+                  <Stack direction="row" spacing={1}>
+                    <IconButton color="primary" onClick={handleSave}>
+                      <Save />
+                    </IconButton>
+                    <IconButton onClick={handleCancel}>
+                      <Cancel />
+                    </IconButton>
+                  </Stack>
+                ) : (
+                  <IconButton color="primary" onClick={handleEdit}>
+                    <Edit />
+                  </IconButton>
+                )}
+              </Box>
+            </Box>
+
+            {saveError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {saveError}
+              </Alert>
+            )}
+
+            {/* Bio */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                Bio
+              </Typography>
+              {editing ? (
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  value={editedProfile.bio}
+                  onChange={(e) => handleFieldChange('bio', e.target.value)}
+                  error={!!errors.bio}
+                  helperText={errors.bio || `${editedProfile.bio.length}/500`}
+                  placeholder="Tell us about yourself..."
+                />
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  {profile.bio || 'No bio yet'}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Goals */}
+            <Box>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                Fitness Goals
+              </Typography>
+              {editing ? (
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  value={editedProfile.goals}
+                  onChange={(e) => handleFieldChange('goals', e.target.value)}
+                  error={!!errors.goals}
+                  helperText={errors.goals || `${editedProfile.goals.length}/500`}
+                  placeholder="What are your fitness goals?"
+                />
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  {profile.goals || 'No goals set yet'}
+                </Typography>
+              )}
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* Stats Cards */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={6} sm={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Total Workouts
+                </Typography>
+                <Typography variant="h4" fontWeight={700}>
+                  {stats.totalWorkouts}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={6} sm={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Current Streak
+                </Typography>
+                <Typography variant="h4" fontWeight={700} color="warning.main">
+                  {stats.currentStreak}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  days
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={6} sm={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Longest Streak
+                </Typography>
+                <Typography variant="h4" fontWeight={700}>
+                  {stats.longestStreak}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  days
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={6} sm={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Total PRs
+                </Typography>
+                <Typography variant="h4" fontWeight={700} color="success.main">
+                  {stats.totalPRs}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={8}>
+            <Card>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Favorite Exercise
+                </Typography>
+                <Chip 
+                  label={stats.favoriteExercise || 'No data yet'}
+                  color="primary"
+                  sx={{ mt: 1 }}
+                />
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Weight Tracker */}
+        <WeightTracker
+          weightHistory={profile.weightHistory || []}
+          currentWeight={profile.currentWeight}
+          currentUnit={profile.weightUnit || getDisplayUnit()}
+          onAddWeight={handleAddWeight}
+        />
+      </motion.div>
+
+      {/* Avatar Selector Dialog */}
+      <AvatarSelector
+        open={showAvatarSelector}
+        onClose={() => setShowAvatarSelector(false)}
+        onSelect={handleAvatarSelect}
+        currentAvatar={profile.avatar}
+        initials={getInitials()}
+      />
+    </Box>
+  );
+};
+
+export default UserProfileScreen;

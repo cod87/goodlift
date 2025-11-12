@@ -3,11 +3,8 @@ import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup, Button, Accordion, AccordionSummary, AccordionDetails, IconButton, Stack, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItem, ListItemText, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { ExpandMore, Delete, Star, Edit, Add } from '@mui/icons-material';
-import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName, getWorkoutHistory } from '../utils/storage';
-import QuickStartCard from './Home/QuickStartCard';
-import WeeklyPlanPreview from './Home/WeeklyPlanPreview';
+import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName } from '../utils/storage';
 import CompactHeader from './Common/CompactHeader';
-import { usePlanIntegration } from '../hooks/usePlanIntegration';
 import PlanCreationModal from './PlanCreationModal';
 
 /**
@@ -23,7 +20,6 @@ const SelectionScreen = memo(({
   onEquipmentChange,
   onStartWorkout,
   onCustomize,
-  onNavigate,
   loading,
 }) => {
   const [favoriteWorkouts, setFavoriteWorkouts] = useState([]);
@@ -31,96 +27,13 @@ const SelectionScreen = memo(({
   const [editingWorkout, setEditingWorkout] = useState(null);
   const [editedName, setEditedName] = useState('');
   const [expandedFavorite, setExpandedFavorite] = useState(null);
-  const [lastWorkout, setLastWorkout] = useState(null);
   const [showPlanModal, setShowPlanModal] = useState(false);
-  
-  // Use plan integration hook instead of weekly plan hook
-  const { 
-    currentPlan,
-    getTodaysWorkout, 
-    getUpcomingWorkouts,
-    getPlanDay,
-    createWorkoutNavState
-  } = usePlanIntegration();
 
   useEffect(() => {
     // Scroll to top when component mounts
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setFavoriteWorkouts(getFavoriteWorkouts());
-    
-    // Load last workout for QuickStartCard
-    const loadLastWorkout = async () => {
-      const history = await getWorkoutHistory();
-      if (history && history.length > 0) {
-        const last = history[0];
-        setLastWorkout({
-          date: last.date,
-          duration: last.duration,
-          exercises: last.exercises ? Object.keys(last.exercises) : [],
-        });
-      }
-    };
-    loadLastWorkout();
   }, []);
-
-  // Get today's workout and upcoming workouts from the plan
-  const todaysWorkout = getTodaysWorkout();
-  const nextWorkouts = getUpcomingWorkouts(2);
-  
-  // Convert plan to weekly plan format for WeeklyPlanPreview
-  // Handle both plan structures: days (from createWeeklyPlan) and sessions (from generateWorkoutPlan)
-  const weeklyPlan = (() => {
-    if (!currentPlan) return [];
-    
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const today = new Date();
-    const result = [];
-    
-    // If plan has sessions (from workout plan generator), show next 7 days from today
-    if (currentPlan.sessions && Array.isArray(currentPlan.sessions)) {
-      for (let i = 0; i < 7; i++) {
-        const targetDate = new Date(today);
-        targetDate.setDate(today.getDate() + i);
-        targetDate.setHours(0, 0, 0, 0);
-        
-        // Find session for this date
-        const session = currentPlan.sessions.find(s => {
-          const sessionDate = new Date(s.date);
-          sessionDate.setHours(0, 0, 0, 0);
-          return sessionDate.getTime() === targetDate.getTime();
-        });
-        
-        if (session) {
-          result.push({
-            day: days[targetDate.getDay()],
-            type: session.type,
-            focus: session.focus,
-            estimatedDuration: session.estimatedDuration,
-            label: session.type.charAt(0).toUpperCase() + session.type.slice(1),
-          });
-        } else {
-          // No session for this day - it's a rest day
-          result.push({
-            day: days[targetDate.getDay()],
-            type: 'rest',
-            label: 'Rest',
-          });
-        }
-      }
-    }
-    // If plan has days (from weekly plan), use that structure
-    else if (currentPlan.days && Array.isArray(currentPlan.days)) {
-      return currentPlan.days.map((day, index) => ({
-        day: days[index],
-        type: day.subtype || day.type,
-        focus: day.focus,
-        estimatedDuration: day.estimatedDuration,
-        label: day.subtype ? day.subtype.charAt(0).toUpperCase() + day.subtype.slice(1) : day.type,
-      }));
-    }
-    
-    return result;
-  })();
 
   const handleStartClick = () => {
     if (workoutType) {
@@ -187,52 +100,6 @@ const SelectionScreen = memo(({
       ? 'all' 
       : [favoriteWorkout.equipment];
     onStartWorkout(favoriteWorkout.type, equipmentFilter, favoriteWorkout.exercises);
-  };
-  
-  const handleQuickStart = () => {
-    if (todaysWorkout && todaysWorkout.type !== 'rest') {
-      // Use today's workout type from weekly plan
-      const workoutType = todaysWorkout.subtype || todaysWorkout.type;
-      onWorkoutTypeChange(workoutType);
-      const equipmentFilter = selectedEquipment.has('all') 
-        ? 'all' 
-        : Array.from(selectedEquipment);
-      
-      // Create nav state with plan context
-      const today = new Date().getDay();
-      const navState = createWorkoutNavState(today);
-      
-      onStartWorkout(workoutType, equipmentFilter, null, navState);
-    }
-  };
-  
-  const handleQuickStartDay = (dayWorkout) => {
-    if (!dayWorkout || dayWorkout.type === 'rest') return;
-    
-    // Find the day index for this workout
-    const dayIndex = weeklyPlan.findIndex(d => d.day === dayWorkout.day);
-    if (dayIndex === -1) return;
-    
-    const planDay = getPlanDay(dayIndex);
-    if (!planDay) return;
-    
-    const workoutType = planDay.subtype || planDay.type;
-    onWorkoutTypeChange(workoutType);
-    const equipmentFilter = selectedEquipment.has('all') 
-      ? 'all' 
-      : Array.from(selectedEquipment);
-    
-    // Create nav state with plan context
-    const navState = createWorkoutNavState(dayIndex);
-    
-    onStartWorkout(workoutType, equipmentFilter, null, navState);
-  };
-  
-  const handleViewPlan = () => {
-    // Navigate to progress screen (which now has the plan calendar with editing)
-    if (onNavigate) {
-      onNavigate('progress');
-    }
   };
 
   const handleEquipmentToggle = (equipment) => {
@@ -309,27 +176,6 @@ const SelectionScreen = memo(({
         </Box>
       ) : (
         <Box sx={{ width: '100%', maxWidth: 800 }}>
-          {/* QuickStart Card - New consolidated component */}
-          <Box sx={{ mb: 3 }}>
-            <QuickStartCard
-              todaysWorkout={todaysWorkout}
-              nextWorkouts={nextWorkouts}
-              lastWorkout={lastWorkout}
-              onQuickStart={handleQuickStart}
-              onViewPlan={handleViewPlan}
-              loading={loading}
-            />
-          </Box>
-
-          {/* Weekly Plan Preview - New consolidated component */}
-          <Box sx={{ mb: 3 }}>
-            <WeeklyPlanPreview
-              weeklyPlan={weeklyPlan}
-              onQuickStartDay={handleQuickStartDay}
-              onEditPlan={handleViewPlan}
-            />
-          </Box>
-
           {/* Create New Plan Button */}
           <Box sx={{ mb: 3 }}>
             <Button

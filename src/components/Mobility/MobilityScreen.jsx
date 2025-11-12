@@ -4,22 +4,18 @@ import { Box, Card, CardContent, Typography, Button } from '@mui/material';
 import { CheckCircle } from '@mui/icons-material';
 import MobilitySelection from './MobilitySelection';
 import StretchSession from '../Stretch/StretchSession';
-import YogaSession from '../Yoga/YogaSession';
 import { selectFullBodyStretches, selectCustomStretches } from '../../utils/stretchSelector';
-import { saveStretchSession, saveYogaSession } from '../../utils/storage';
-import { useYogaTTS } from '../../hooks/useYogaTTS';
+import { saveStretchSession } from '../../utils/storage';
 
 /**
  * Main Mobility Screen Component
- * Manages the flow between selection, stretch/yoga sessions, and completion
+ * Manages the flow between selection, stretch sessions, and completion
  */
 const MobilityScreen = () => {
-  const [screen, setScreen] = useState('selection'); // 'selection', 'stretch-session', 'yoga-session', 'complete'
+  const [screen, setScreen] = useState('selection'); // 'selection', 'stretch-session', 'complete'
   const [selectedStretches, setSelectedStretches] = useState([]);
   const [stretchSessionType, setStretchSessionType] = useState('');
-  const [yogaSessionConfig, setYogaSessionConfig] = useState(null);
-  const [completedSessionType, setCompletedSessionType] = useState(null); // 'stretch' or 'yoga'
-  const { ttsEnabled } = useYogaTTS();
+  const [completedSessionType, setCompletedSessionType] = useState(null); // 'stretch'
 
   const handleStartStretchSession = (type, muscles) => {
     let stretches;
@@ -31,15 +27,6 @@ const MobilityScreen = () => {
     setSelectedStretches(stretches);
     setStretchSessionType(type);
     setScreen('stretch-session');
-  };
-
-  const handleStartYogaSession = (config) => {
-    const sessionData = {
-      ...config,
-      ttsEnabled,
-    };
-    setYogaSessionConfig(sessionData);
-    setScreen('yoga-session');
   };
 
   const handleStretchSessionComplete = async () => {
@@ -61,27 +48,14 @@ const MobilityScreen = () => {
     setScreen('complete');
   };
 
-  const handleYogaSessionComplete = async (sessionData) => {
-    // Save the yoga session
-    try {
-      await saveYogaSession(sessionData);
-    } catch (error) {
-      console.error('Failed to save yoga session:', error);
-    }
-    setCompletedSessionType('yoga');
-    setScreen('complete');
-  };
-
   const handleExit = () => {
     setScreen('selection');
     setSelectedStretches([]);
-    setYogaSessionConfig(null);
   };
 
   const handleFinish = () => {
     setScreen('selection');
     setSelectedStretches([]);
-    setYogaSessionConfig(null);
     setCompletedSessionType(null);
   };
 
@@ -90,7 +64,6 @@ const MobilityScreen = () => {
       {screen === 'selection' && (
         <MobilitySelection
           onStartStretchSession={handleStartStretchSession}
-          onStartYogaSession={handleStartYogaSession}
         />
       )}
 
@@ -98,14 +71,6 @@ const MobilityScreen = () => {
         <StretchSession
           stretches={selectedStretches}
           onComplete={handleStretchSessionComplete}
-          onExit={handleExit}
-        />
-      )}
-
-      {screen === 'yoga-session' && yogaSessionConfig && (
-        <YogaSession
-          config={yogaSessionConfig}
-          onComplete={handleYogaSessionComplete}
           onExit={handleExit}
         />
       )}
@@ -182,22 +147,6 @@ const MobilityScreen = () => {
                     </Typography>
                     <Typography variant="body1" sx={{ marginBottom: 4 }}>
                       ~{selectedStretches.length} minutes of stretching
-                    </Typography>
-                  </>
-                )}
-
-                {completedSessionType === 'yoga' && yogaSessionConfig && (
-                  <>
-                    <Typography variant="body1" sx={{ marginBottom: 1 }}>
-                      {yogaSessionConfig.flowLength} minute flow
-                    </Typography>
-                    {yogaSessionConfig.coolDownLength > 0 && (
-                      <Typography variant="body1" sx={{ marginBottom: 1 }}>
-                        {yogaSessionConfig.coolDownLength} minute cool down
-                      </Typography>
-                    )}
-                    <Typography variant="body1" sx={{ marginBottom: 4 }}>
-                      Total: {yogaSessionConfig.flowLength + yogaSessionConfig.coolDownLength} minutes
                     </Typography>
                   </>
                 )}

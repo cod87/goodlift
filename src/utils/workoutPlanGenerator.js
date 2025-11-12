@@ -14,7 +14,7 @@
  * All sessions have these base fields:
  * - id: string - Unique session identifier
  * - date: number - Timestamp of the session date
- * - type: string - Session type (upper, lower, full, push, pull, legs, hiit, yoga, cardio)
+ * - type: string - Session type (upper, lower, full, push, pull, legs, hiit, stretch, cardio)
  * - status: string - Session status (planned, in_progress, completed, skipped)
  * - notes: string - User notes
  * - completedAt: number|null - Timestamp when completed
@@ -32,13 +32,12 @@
  *   - cooldown: Object - Cooldown exercises and duration
  *   - totalDuration: number - Total session duration in seconds
  * 
- * Yoga sessions:
+ * Stretch sessions:
  * - exercises: null
- * - sessionData: Object - Generated yoga session with pose sequences
- *   - opening: Object - Opening meditation/breathing
- *   - warmup: Object - Warmup poses
- *   - mainPractice: Object - Main practice sequences with poses array
- *   - cooldown: Object - Cooldown/savasana
+ * - sessionData: Object - Generated stretch session with stretch sequences
+ *   - warmup: Object - Dynamic warmup
+ *   - mainStretches: Object - Main stretching sequences
+ *   - cooldown: Object - Static cooldown stretches
  *   - totalDuration: number - Total session duration in seconds
  */
 
@@ -160,10 +159,10 @@ export const generateWorkoutPlan = async (preferences) => {
       // Reuse exercises from the first week of this block
       populatedSessions.push({
         ...session,
-        exercises: session.type !== 'hiit' && session.type !== 'yoga' && session.type !== 'stretch' 
+        exercises: session.type !== 'hiit' && session.type !== 'stretch' 
           ? exerciseCache[cacheKey] 
           : null,
-        sessionData: session.type === 'hiit' || session.type === 'yoga' || session.type === 'stretch'
+        sessionData: session.type === 'hiit' || session.type === 'stretch'
           ? exerciseCache[cacheKey]
           : null,
         isDeloadWeek
@@ -326,7 +325,7 @@ const generateSessionPattern = (splitType, sessionTypes, experienceLevel) => {
   );
   const includeHiit = sessionTypes.includes('hiit');
   const includeCardio = sessionTypes.includes('cardio');
-  const includeYoga = sessionTypes.includes('yoga') || sessionTypes.includes('stretch');
+  const includeStretch = sessionTypes.includes('stretch');
 
   let pattern = [];
 
@@ -353,15 +352,15 @@ const generateSessionPattern = (splitType, sessionTypes, experienceLevel) => {
       }
     }
 
-    // Add yoga/mobility for recovery
-    if (includeYoga && pattern.length >= 3) {
-      pattern.push('yoga');
+    // Add stretch/mobility for recovery
+    if (includeStretch && pattern.length >= 3) {
+      pattern.push('stretch');
     }
   } else {
     // If no standard workouts, create pattern from other types
     if (includeHiit) pattern.push('hiit');
     if (includeCardio) pattern.push('cardio');
-    if (includeYoga) pattern.push('yoga');
+    if (includeStretch) pattern.push('stretch');
   }
 
   // If pattern is still empty, default to full body
@@ -426,7 +425,7 @@ export const getRecommendedPlanTemplate = (goal, experienceLevel) => {
       },
       general_fitness: {
         daysPerWeek: 3,
-        sessionTypes: ['full', 'cardio', 'yoga'],
+        sessionTypes: ['full', 'cardio', 'stretch'],
         description: 'Balanced fitness with variety and recovery',
         volumePerMuscleGroup: 9,
         repRange: '8-12 reps',
@@ -456,7 +455,7 @@ export const getRecommendedPlanTemplate = (goal, experienceLevel) => {
       },
       general_fitness: {
         daysPerWeek: 4,
-        sessionTypes: ['full', 'hiit', 'yoga'],
+        sessionTypes: ['full', 'hiit', 'stretch'],
         description: 'Well-rounded fitness with strength, conditioning, and mobility',
         volumePerMuscleGroup: 12,
         repRange: '8-12 reps',
@@ -486,7 +485,7 @@ export const getRecommendedPlanTemplate = (goal, experienceLevel) => {
       },
       general_fitness: {
         daysPerWeek: 5,
-        sessionTypes: ['full', 'hiit', 'yoga'],
+        sessionTypes: ['full', 'hiit', 'stretch'],
         description: 'Advanced balanced training with recovery modalities',
         volumePerMuscleGroup: 14,
         repRange: '6-12 reps',
@@ -698,12 +697,12 @@ export const getPlanStatistics = (plan) => {
 };
 
 /**
- * Enhanced session pattern generator with HIIT and Yoga integration
- * Based on .github/HIIT-YOGA-GUIDE.md Section 9 (Sample Integration Schedules)
+ * Enhanced session pattern generator with HIIT and Stretch integration
+ * Based on .github/HIIT-STRETCH-GUIDE.md Section 9 (Sample Integration Schedules)
  * 
  * Key principles from the guide:
  * - HIIT sessions not on consecutive days (48+ hours recovery)
- * - Balance sympathetic (HIIT/strength) with parasympathetic (restorative yoga)
+ * - Balance high-intensity (HIIT/strength) with recovery (stretching)
  * - Target 60/40 ratio of high-intensity to recovery sessions
  * - Deload weeks every 3-4 weeks
  * 
@@ -711,44 +710,44 @@ export const getPlanStatistics = (plan) => {
  * @param {Array<string>} sessionTypes - Allowed session types
  * @param {string} experienceLevel - User experience level
  * @param {number} daysPerWeek - Training days per week
- * @returns {Array<string>} Enhanced pattern with HIIT and Yoga
+ * @returns {Array<string>} Enhanced pattern with HIIT and Stretch
  */
 export const generateEnhancedSessionPattern = (splitType, sessionTypes, experienceLevel, daysPerWeek) => {
   const includeStandardWorkouts = sessionTypes.some(t => 
     ['full', 'upper', 'lower', 'push', 'pull', 'legs'].includes(t)
   );
   const includeHiit = sessionTypes.includes('hiit');
-  const includeYoga = sessionTypes.includes('yoga') || sessionTypes.includes('stretch');
+  const includeStretch = sessionTypes.includes('stretch');
   
   let pattern = [];
   
-  // Build base pattern following HIIT-YOGA-GUIDE.md Section 9 templates
+  // Build base pattern following HIIT-STRETCH-GUIDE.md Section 9 templates
   if (experienceLevel === 'beginner' && daysPerWeek >= 3) {
     // Beginner 7-Day Schedule (Guide Section 9.1)
-    if (includeStandardWorkouts && includeHiit && includeYoga) {
+    if (includeStandardWorkouts && includeHiit && includeStretch) {
       pattern = [
         'upper',           // Mon: Upper Body Strength
-        'hiit',            // Tue: Beginner HIIT + Power Yoga
+        'hiit',            // Tue: Beginner HIIT + Dynamic stretching
         'lower',           // Wed: Lower Body Strength + HIIT finisher
-        'yoga_flex',       // Thu: Flexibility Yoga - Active Recovery
+        'stretch',         // Thu: Flexibility stretch - Active Recovery
         'full',            // Fri: Full Body Strength + HIIT
-        'hiit',            // Sat: HIIT + Restorative Yoga
-        'yoga_restorative' // Sun: Rest/Yin Yoga - Deep relaxation
+        'hiit',            // Sat: HIIT + Static stretching
+        'stretch'          // Sun: Rest/Static stretch - Deep relaxation
       ];
     } else if (includeStandardWorkouts) {
       pattern = ['full', 'full', 'full'];
     }
   } else if (experienceLevel === 'intermediate' && daysPerWeek >= 4) {
     // Intermediate 7-Day Schedule (Guide Section 9.2)
-    if (includeStandardWorkouts && includeHiit && includeYoga) {
+    if (includeStandardWorkouts && includeHiit && includeStretch) {
       pattern = [
         'upper',           // Mon: Upper + Intermediate HIIT
-        'hiit',            // Tue: Cycling HIIT + Core Yoga
+        'hiit',            // Tue: Cycling HIIT + Core stretching
         'lower',           // Wed: Lower + Step HIIT
-        'yoga_power',      // Thu: Power Yoga - Moderate
+        'stretch',         // Thu: Dynamic stretch - Moderate
         'upper',           // Fri: Upper + Plyometric HIIT
-        'hiit',            // Sat: Rowing HIIT + Yin Yoga
-        'yoga_flex'        // Sun: Flexibility Yoga or Active Recovery
+        'hiit',            // Sat: Rowing HIIT + Static stretch
+        'stretch'          // Sun: Flexibility stretch or Active Recovery
       ];
     } else if (splitType === 'upper_lower') {
       pattern = ['upper', 'lower', 'upper', 'lower'];
@@ -757,15 +756,15 @@ export const generateEnhancedSessionPattern = (splitType, sessionTypes, experien
     }
   } else if (experienceLevel === 'advanced' && daysPerWeek >= 5) {
     // Advanced 7-Day Schedule (Guide Section 9.3)
-    if (includeStandardWorkouts && includeHiit && includeYoga) {
+    if (includeStandardWorkouts && includeHiit && includeStretch) {
       pattern = [
         'upper',           // Mon: Upper + Advanced Tabata
-        'hiit',            // Tue: REHIT Cycling + Power Yoga
+        'hiit',            // Tue: REHIT Cycling + Dynamic stretch
         'lower',           // Wed: Lower + Advanced Plyometric
         'hiit',            // Thu: Rowing/Elliptical HIIT
         'upper',           // Fri: Upper + Step HIIT Advanced
-        'yoga_power',      // Sat: Power Yoga + Restorative (evening)
-        'yoga_yin'         // Sun: Yin Yoga or Active Recovery
+        'stretch',         // Sat: Dynamic stretch + Static (evening)
+        'stretch'          // Sun: Static stretch or Active Recovery
       ];
     } else if (splitType === 'ppl') {
       pattern = ['push', 'pull', 'legs', 'push', 'pull', 'legs'];
@@ -847,34 +846,29 @@ export const calculateSympatheticBalance = (sessions) => {
     s.type === 'full' || 
     s.type === 'push' || 
     s.type === 'pull' || 
-    s.type === 'legs' ||
-    s.type === 'yoga_power' ||
-    s.type === 'yoga_core'
+    s.type === 'legs'
   ).length;
   
-  const parasympatheticSessions = sessions.filter(s => 
-    s.type === 'yoga_restorative' || 
-    s.type === 'yoga_yin' || 
-    s.type === 'yoga_flex' ||
-    s.type === 'yoga'
+  const recoverySessions = sessions.filter(s => 
+    s.type === 'stretch'
   ).length;
   
   const total = sessions.length;
   const sympatheticPercent = (sympatheticSessions / total) * 100;
-  const parasympatheticPercent = (parasympatheticSessions / total) * 100;
+  const recoveryPercent = (recoverySessions / total) * 100;
   
   // Guide recommends 60/40 ratio
   const isBalanced = sympatheticPercent >= 50 && sympatheticPercent <= 70;
   
   return {
     sympatheticSessions,
-    parasympatheticSessions,
+    recoverySessions,
     sympatheticPercent,
-    parasympatheticPercent,
+    recoveryPercent,
     isBalanced,
     recommendation: !isBalanced 
-      ? 'Consider adjusting to achieve 60/40 ratio of high-intensity to recovery sessions (Guide Section 10.1)'
-      : 'Good balance between sympathetic and parasympathetic activities'
+      ? 'Consider adjusting to achieve 60/40 ratio of high-intensity to recovery sessions'
+      : 'Good balance between high-intensity and recovery activities'
   };
 };
 
@@ -934,39 +928,6 @@ export const applyHiitProgression = (weekNumber, baseSession) => {
     intensity: adjustedIntensity,
     duration: Math.round(adjustedDuration),
     restRatio: adjustedRestRatio,
-    weekNumber,
-    guideReference: 'Section 10.2'
-  };
-};
-
-/**
- * Apply progressive overload to Yoga sessions
- * Per Guide Section 10.2: Yoga progression
- * 
- * @param {number} weekNumber - Current week number (1-based)
- * @param {Object} baseSession - Base yoga session configuration
- * @returns {Object} Adjusted session parameters
- */
-export const applyYogaProgression = (weekNumber, baseSession) => {
-  const { holdDuration = 30, complexity = 'basic' } = baseSession;
-  
-  // Increase hold duration by 5-10 seconds every 2 weeks
-  const weeksProgression = Math.floor(weekNumber / 2);
-  const holdIncrease = weeksProgression * 7; // 7 seconds per 2-week block
-  
-  let adjustedHoldDuration = holdDuration + holdIncrease;
-  let adjustedComplexity = complexity;
-  
-  // Progress complexity every 4 weeks
-  if (weekNumber >= 4 && complexity === 'basic') {
-    adjustedComplexity = 'intermediate';
-  } else if (weekNumber >= 8 && complexity === 'intermediate') {
-    adjustedComplexity = 'advanced';
-  }
-  
-  return {
-    holdDuration: adjustedHoldDuration,
-    complexity: adjustedComplexity,
     weekNumber,
     guideReference: 'Section 10.2'
   };

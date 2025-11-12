@@ -9,8 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "convert:exercises": "node scripts/convert-exercise-expanded.js",
-    "convert:yoga": "node scripts/convert-yoga-expanded.js",
-    "convert:all": "npm run convert:exercises && npm run convert:yoga"
+    "convert:all": "npm run convert:exercises"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

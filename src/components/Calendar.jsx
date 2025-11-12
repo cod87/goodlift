@@ -152,8 +152,8 @@ const Calendar = ({ workoutSessions = [], onDayClick, viewMode = 'weekly' }) => 
       if (sessions.some(s => s.type === 'cardio' || s.type === 'hiit')) {
         bookmarks.push('cardio');
       }
-      if (sessions.some(s => s.type === 'yoga' || s.type === 'stretch')) {
-        bookmarks.push('yoga');
+      if (sessions.some(s => s.type === 'stretch')) {
+        bookmarks.push('stretch');
       }
       return { 
         icon: workoutSession.type, // 'upper', 'lower', or 'full'
@@ -163,22 +163,22 @@ const Calendar = ({ workoutSessions = [], onDayClick, viewMode = 'weekly' }) => 
 
     // No workout session - determine which to show based on duration
     const hasCardio = sessions.some(s => s.type === 'cardio' || s.type === 'hiit');
-    const hasYoga = sessions.some(s => s.type === 'yoga' || s.type === 'stretch');
+    const hasStretch = sessions.some(s => s.type === 'stretch');
     
-    if (hasCardio && hasYoga) {
+    if (hasCardio && hasStretch) {
       // Show longer one, bookmark the other
       const cardioDuration = (sessionInfo.durations.cardio || 0) + (sessionInfo.durations.hiit || 0);
-      const yogaDuration = (sessionInfo.durations.yoga || 0) + (sessionInfo.durations.stretch || 0);
+      const stretchDuration = (sessionInfo.durations.stretch || 0);
       
-      if (cardioDuration >= yogaDuration) {
-        return { icon: 'cardio', bookmarks: ['yoga'] };
+      if (cardioDuration >= stretchDuration) {
+        return { icon: 'cardio', bookmarks: ['stretch'] };
       } else {
-        return { icon: 'yoga', bookmarks: ['cardio'] };
+        return { icon: 'stretch', bookmarks: ['cardio'] };
       }
     } else if (hasCardio) {
       return { icon: 'cardio', bookmarks: [] };
-    } else if (hasYoga) {
-      return { icon: 'yoga', bookmarks: [] };
+    } else if (hasStretch) {
+      return { icon: 'stretch', bookmarks: [] };
     }
 
     return { icon: null, bookmarks: [] };
@@ -196,8 +196,8 @@ const Calendar = ({ workoutSessions = [], onDayClick, viewMode = 'weekly' }) => 
         return `${basePath}fullbody-calendaricon.svg`;
       case 'cardio':
         return `${basePath}cardio-calendaricon.svg`;
-      case 'yoga':
-        return `${basePath}yoga-calendaricon.svg`;
+      case 'stretch':
+        return `${basePath}stretch-calendaricon.svg`;
       default:
         return null;
     }
@@ -208,8 +208,8 @@ const Calendar = ({ workoutSessions = [], onDayClick, viewMode = 'weekly' }) => 
     switch (type) {
       case 'cardio':
         return '#2196f3'; // light blue
-      case 'yoga':
-        return '#9c27b0'; // purple
+      case 'stretch':
+        return '#4caf50'; // green
       default:
         return '#ccc';
     }
@@ -410,7 +410,7 @@ const Calendar = ({ workoutSessions = [], onDayClick, viewMode = 'weekly' }) => 
           <span>Cardio</span>
         </div>
         <div className="legend-item">
-          <img src={`${import.meta.env.BASE_URL}icons/yoga-calendaricon.svg`} alt="" aria-hidden="true" style={{ width: '16px', height: '16px' }} />
+          <img src={`${import.meta.env.BASE_URL}icons/stretch-calendaricon.svg`} alt="" aria-hidden="true" style={{ width: '16px', height: '16px' }} />
           <span>Mobility</span>
         </div>
         <div className="legend-item">

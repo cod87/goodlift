@@ -91,11 +91,11 @@ const TodayView = memo(({
       action: () => onNavigate('hiit'),
     },
     {
-      title: 'Yoga',
+      title: 'Stretching',
       icon: <SelfImprovement fontSize="large" />,
-      description: 'Stretching & yoga',
+      description: 'Mobility & stretching',
       color: 'secondary',
-      action: () => onNavigate('yoga'),
+      action: () => onNavigate('stretch'),
     },
     {
       title: 'Cardio',

@@ -47,7 +47,6 @@ const ActivitiesList = memo(({
     const icons = {
       strength: <FitnessCenter fontSize="small" />,
       cardio: <DirectionsRun fontSize="small" />,
-      yoga: <SelfImprovement fontSize="small" />,
       hiit: <DirectionsRun fontSize="small" />,
       stretch: <SelfImprovement fontSize="small" />,
     };
@@ -58,7 +57,6 @@ const ActivitiesList = memo(({
     const colors = {
       strength: 'primary',
       cardio: 'info',
-      yoga: 'secondary',
       hiit: 'error',
       stretch: 'warning',
     };

@@ -137,7 +137,7 @@ const MobilityScreen = () => {
                 >
                   {completedSessionType === 'stretch' 
                     ? "Great job! You've completed your stretch session."
-                    : "Namaste! You've completed your yoga session."}
+                    : "Great job! You've completed your mobility session."}
                 </Typography>
 
                 {completedSessionType === 'stretch' && (

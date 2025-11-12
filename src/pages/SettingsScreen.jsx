@@ -223,9 +223,12 @@ const SettingsScreen = ({ onNavigate }) => {
     <Box
       sx={{
         minHeight: '100vh',
-        padding: { xs: 2, sm: 3, md: 4 },
+        padding: { xs: 1, sm: 2, md: 3, lg: 4 },
         paddingBottom: { xs: '80px', sm: 3, md: 4 },
         background: (theme) => theme.palette.background.default,
+        overflowX: 'hidden',
+        width: '100%',
+        boxSizing: 'border-box',
       }}
     >
       <motion.div
@@ -256,8 +259,8 @@ const SettingsScreen = ({ onNavigate }) => {
 
         {/* Profile Tab */}
         {tabValue === 0 && (
-          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3 }}>
-            <CardContent sx={{ p: 3 }}>
+          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3, width: '100%', boxSizing: 'border-box' }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Typography variant="h6" fontWeight={600} gutterBottom>
                 Profile Settings
               </Typography>
@@ -280,8 +283,8 @@ const SettingsScreen = ({ onNavigate }) => {
         {/* Workout Tab */}
         {tabValue === 1 && (
           <>
-            <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3, mb: 3 }}>
-              <CardContent sx={{ p: 3 }}>
+            <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3, mb: 3, width: '100%', boxSizing: 'border-box' }}>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Typography
                   variant="h6"
                   sx={{
@@ -384,9 +387,11 @@ const SettingsScreen = ({ onNavigate }) => {
                 maxWidth: 600,
                 borderRadius: 2,
                 boxShadow: 3,
+                width: '100%',
+                boxSizing: 'border-box',
               }}
             >
-              <CardContent sx={{ p: 3 }}>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Stack spacing={3}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography
@@ -490,8 +495,8 @@ const SettingsScreen = ({ onNavigate }) => {
 
         {/* App Tab */}
         {tabValue === 2 && (
-          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3 }}>
-            <CardContent sx={{ p: 3 }}>
+          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3, width: '100%', boxSizing: 'border-box' }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Stack spacing={3}>
                 {/* Theme Setting */}
                 <Box>
@@ -624,8 +629,8 @@ const SettingsScreen = ({ onNavigate }) => {
 
         {/* Data Tab */}
         {tabValue === 3 && (
-          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3 }}>
-            <CardContent sx={{ p: 3 }}>
+          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3, width: '100%', boxSizing: 'border-box' }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Stack spacing={3}>
                 <Box>
                   <Typography variant="h6" fontWeight={600} gutterBottom>

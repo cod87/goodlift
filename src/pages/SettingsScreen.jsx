@@ -16,8 +16,12 @@ import {
   ListItemText,
   IconButton,
   Chip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
-import { Brightness4, Brightness7, VolumeUp, Delete, CheckCircle, Add } from '@mui/icons-material';
+import { Brightness4, Brightness7, VolumeUp, Delete, CheckCircle, Add, SelfImprovement } from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
 import audioService from '../utils/audioService';
 import { getWorkoutPlans, getActivePlan, setActivePlan, deleteWorkoutPlan } from '../utils/storage';
@@ -37,6 +41,26 @@ const SettingsScreen = () => {
   const [plans, setPlans] = useState([]);
   const [activePlan, setActivePlanState] = useState(null);
   const [showPlanModal, setShowPlanModal] = useState(false);
+
+  // Stretch reminder preferences
+  const [stretchPrefs, setStretchPrefs] = useState(() => {
+    try {
+      const stored = localStorage.getItem('goodlift_stretch_prefs');
+      return stored ? JSON.parse(stored) : {
+        showWarmup: true,
+        showCooldown: true,
+        defaultWarmupDuration: 5,
+        defaultCooldownDuration: 5,
+      };
+    } catch {
+      return {
+        showWarmup: true,
+        showCooldown: true,
+        defaultWarmupDuration: 5,
+        defaultCooldownDuration: 5,
+      };
+    }
+  });
 
   // Load plans on mount
   useEffect(() => {
@@ -58,6 +82,15 @@ const SettingsScreen = () => {
       console.warn('Could not save volume preference', e);
     }
   }, [volume]);
+
+  // Save stretch preferences to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('goodlift_stretch_prefs', JSON.stringify(stretchPrefs));
+    } catch (e) {
+      console.warn('Could not save stretch preferences', e);
+    }
+  }, [stretchPrefs]);
 
   const handleVolumeChange = (event, newValue) => {
     setVolume(newValue);
@@ -118,6 +151,13 @@ const SettingsScreen = () => {
 
   const handlePlanCreated = async () => {
     await loadPlans();
+  };
+
+  const handleStretchPreferenceChange = (key, value) => {
+    setStretchPrefs(prev => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
   const getGoalLabel = (goal) => {
@@ -272,6 +312,105 @@ const SettingsScreen = () => {
                     Adjust the volume of sound effects throughout the app. Set to 0 to mute all sounds.
                   </Typography>
                 </Box>
+              </Box>
+
+              <Divider />
+
+              {/* Stretch Reminders Setting */}
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 2,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <SelfImprovement />
+                  Stretch Reminders
+                </Typography>
+                
+                {/* Warmup Toggle */}
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={stretchPrefs.showWarmup}
+                      onChange={(e) => handleStretchPreferenceChange('showWarmup', e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body1" fontWeight={500}>
+                        Show Warmup Reminders
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Display warmup reminder before starting exercises
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ mb: 2 }}
+                />
+
+                {/* Warmup Duration */}
+                {stretchPrefs.showWarmup && (
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel id="warmup-duration-label">Default Warmup Duration</InputLabel>
+                    <Select
+                      labelId="warmup-duration-label"
+                      id="warmup-duration-select"
+                      value={stretchPrefs.defaultWarmupDuration}
+                      label="Default Warmup Duration"
+                      onChange={(e) => handleStretchPreferenceChange('defaultWarmupDuration', e.target.value)}
+                    >
+                      <MenuItem value={5}>5 minutes</MenuItem>
+                      <MenuItem value={7}>7 minutes</MenuItem>
+                      <MenuItem value={10}>10 minutes</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
+
+                {/* Cooldown Toggle */}
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={stretchPrefs.showCooldown}
+                      onChange={(e) => handleStretchPreferenceChange('showCooldown', e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body1" fontWeight={500}>
+                        Show Cooldown Reminders
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Display cooldown reminder after finishing exercises
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ mb: 2 }}
+                />
+
+                {/* Cooldown Duration */}
+                {stretchPrefs.showCooldown && (
+                  <FormControl fullWidth>
+                    <InputLabel id="cooldown-duration-label">Default Cooldown Duration</InputLabel>
+                    <Select
+                      labelId="cooldown-duration-label"
+                      id="cooldown-duration-select"
+                      value={stretchPrefs.defaultCooldownDuration}
+                      label="Default Cooldown Duration"
+                      onChange={(e) => handleStretchPreferenceChange('defaultCooldownDuration', e.target.value)}
+                    >
+                      <MenuItem value={5}>5 minutes</MenuItem>
+                      <MenuItem value={7}>7 minutes</MenuItem>
+                      <MenuItem value={10}>10 minutes</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
               </Box>
             </Stack>
           </CardContent>

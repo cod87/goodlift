@@ -6,8 +6,7 @@ import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExercis
 import { SETS_PER_EXERCISE } from '../utils/constants';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip } from '@mui/material';
 import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp } from '@mui/icons-material';
-import { selectStretchesForMuscleGroups } from '../utils/selectStretchesForMuscleGroups';
-import StretchPhase from './StretchPhase';
+import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
 
 /**
@@ -35,13 +34,11 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   
   // Stretching phase state
   const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
-  const [currentStretchIndex, setCurrentStretchIndex] = useState(0);
-  const [warmupStretches, setWarmupStretches] = useState([]);
-  const [cooldownStretches, setCooldownStretches] = useState([]);
   const [warmupCompleted, setWarmupCompleted] = useState(false);
   const [warmupSkipped, setWarmupSkipped] = useState(false);
   const [cooldownCompleted, setCooldownCompleted] = useState(false);
   const [cooldownSkipped, setCooldownSkipped] = useState(false);
+  const [workoutType, setWorkoutType] = useState('full');
 
   // Generate workout sequence (supersets) - memoized to prevent recalculation
   const workoutSequence = useMemo(() => {
@@ -65,66 +62,26 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     return sequence;
   }, [workoutPlan]);
 
-  // Load stretching library and select stretches based on workout muscles
+  // Detect workout type and check user preferences for stretch reminders
   useEffect(() => {
-    const loadStretchingLibrary = async () => {
-      try {
-        const response = await fetch('/data/stretching-library.json');
-        const data = await response.json();
-        
-        // Extract muscle groups from workout plan
-        const muscleGroups = [];
-        workoutPlan.forEach(exercise => {
-          if (exercise['Primary Muscle']) {
-            muscleGroups.push(exercise['Primary Muscle']);
-          }
-          if (exercise['Secondary Muscles']) {
-            const secondaryMuscles = exercise['Secondary Muscles']
-              .split(',')
-              .map(m => m.trim())
-              .filter(m => m.length > 0);
-            muscleGroups.push(...secondaryMuscles);
-          }
-        });
-        
-        // Remove duplicates
-        const uniqueMuscles = [...new Set(muscleGroups)];
-        
-        // Check user preferences for skipping
-        const prefs = localStorage.getItem('goodlift_stretching_prefs');
-        const preferences = prefs ? JSON.parse(prefs) : {};
-        
-        if (preferences.alwaysSkipWarmup) {
-          setWarmupSkipped(true);
-          setCurrentPhase('exercise');
-        } else {
-          // Select 5-6 dynamic stretches for warmup
-          const selectedWarmup = selectStretchesForMuscleGroups(
-            uniqueMuscles,
-            'dynamic',
-            Math.floor(Math.random() * 2) + 5, // 5 or 6 stretches
-            data.dynamic
-          );
-          setWarmupStretches(selectedWarmup);
-        }
-        
-        // Select 4-5 static stretches for cooldown
-        const selectedCooldown = selectStretchesForMuscleGroups(
-          uniqueMuscles,
-          'static',
-          Math.floor(Math.random() * 2) + 4, // 4 or 5 stretches
-          data.static
-        );
-        setCooldownStretches(selectedCooldown);
-      } catch (error) {
-        console.error('Error loading stretching library:', error);
-        // If stretches fail to load, skip to exercise phase
-        setWarmupSkipped(true);
-        setCurrentPhase('exercise');
-      }
+    // Detect workout type from exercises
+    const type = detectWorkoutType(workoutPlan[0]);
+    setWorkoutType(type);
+    
+    // Check user preferences for skipping
+    const prefs = localStorage.getItem('goodlift_stretch_prefs');
+    const preferences = prefs ? JSON.parse(prefs) : { 
+      showWarmup: true, 
+      showCooldown: true,
+      defaultWarmupDuration: 5,
+      defaultCooldownDuration: 5
     };
     
-    loadStretchingLibrary();
+    // Skip warmup if preference is disabled
+    if (!preferences.showWarmup) {
+      setWarmupSkipped(true);
+      setCurrentPhase('exercise');
+    }
   }, [workoutPlan]);
 
   // Start timer on mount and load initial target values
@@ -250,49 +207,24 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   };
 
   // Stretch phase handlers
-  const handleNextStretch = () => {
-    if (currentPhase === 'warmup') {
-      if (currentStretchIndex + 1 >= warmupStretches.length) {
-        // Warmup complete, move to exercises
-        setWarmupCompleted(true);
-        setCurrentPhase('exercise');
-        setCurrentStretchIndex(0);
-      } else {
-        setCurrentStretchIndex(prev => prev + 1);
-      }
-    } else if (currentPhase === 'cooldown') {
-      if (currentStretchIndex + 1 >= cooldownStretches.length) {
-        // Cooldown complete
-        setCooldownCompleted(true);
-        setCurrentPhase('complete');
-      } else {
-        setCurrentStretchIndex(prev => prev + 1);
-      }
-    }
+  const handleWarmupComplete = () => {
+    setWarmupCompleted(true);
+    setCurrentPhase('exercise');
   };
 
-  const handleSkipWarmup = () => {
+  const handleWarmupSkip = () => {
     setWarmupSkipped(true);
     setCurrentPhase('exercise');
-    // Save preference to localStorage
-    const prefs = localStorage.getItem('goodlift_stretching_prefs');
-    const preferences = prefs ? JSON.parse(prefs) : {};
-    localStorage.setItem('goodlift_stretching_prefs', JSON.stringify({
-      ...preferences,
-      lastSkippedWarmup: new Date().toISOString(),
-    }));
   };
 
-  const handleSkipCooldown = () => {
+  const handleCooldownComplete = () => {
+    setCooldownCompleted(true);
+    setCurrentPhase('complete');
+  };
+
+  const handleCooldownSkip = () => {
     setCooldownSkipped(true);
     setCurrentPhase('complete');
-    // Save preference to localStorage
-    const prefs = localStorage.getItem('goodlift_stretching_prefs');
-    const preferences = prefs ? JSON.parse(prefs) : {};
-    localStorage.setItem('goodlift_stretching_prefs', JSON.stringify({
-      ...preferences,
-      lastSkippedCooldown: new Date().toISOString(),
-    }));
   };
 
   const handleWorkoutComplete = () => {
@@ -364,10 +296,18 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     }
     
     if (currentStepIndex + 1 >= workoutSequence.length) {
-      // Exercises complete - move to cooldown
+      // Exercises complete - check if cooldown is enabled, otherwise complete
       await applyConditionalPersistRules(updatedWorkoutData);
-      setCurrentPhase('cooldown');
-      setCurrentStretchIndex(0);
+      
+      const prefs = localStorage.getItem('goodlift_stretch_prefs');
+      const preferences = prefs ? JSON.parse(prefs) : { showCooldown: true };
+      
+      if (preferences.showCooldown) {
+        setCurrentPhase('cooldown');
+      } else {
+        setCooldownSkipped(true);
+        setCurrentPhase('complete');
+      }
     } else {
       setCurrentStepIndex(prev => prev + 1);
     }
@@ -490,9 +430,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
 
   // Render warmup phase
   if (currentPhase === 'warmup') {
-    if (warmupStretches.length === 0) {
-      return <div>Loading warmup...</div>;
-    }
+    // Get user preferences for default duration
+    const prefs = localStorage.getItem('goodlift_stretch_prefs');
+    const preferences = prefs ? JSON.parse(prefs) : { defaultWarmupDuration: 5 };
     
     return (
       <div className="screen" style={{ paddingBottom: '100px', padding: '0.5rem', maxWidth: '100vw', boxSizing: 'border-box' }}>
@@ -501,13 +441,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
             Warm-Up Phase
           </Typography>
         </Box>
-        <StretchPhase
-          stretch={warmupStretches[currentStretchIndex]}
-          onNext={handleNextStretch}
-          onSkipAll={handleSkipWarmup}
-          currentIndex={currentStretchIndex}
-          totalCount={warmupStretches.length}
-          phaseType="warmup"
+        <StretchReminder
+          type="warmup"
+          workoutType={workoutType}
+          defaultDuration={preferences.defaultWarmupDuration || 5}
+          onComplete={handleWarmupComplete}
+          onSkip={handleWarmupSkip}
         />
       </div>
     );
@@ -515,10 +454,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
 
   // Render cooldown phase
   if (currentPhase === 'cooldown') {
-    if (cooldownStretches.length === 0) {
-      setCurrentPhase('complete');
-      return null;
-    }
+    // Get user preferences for default duration
+    const prefs = localStorage.getItem('goodlift_stretch_prefs');
+    const preferences = prefs ? JSON.parse(prefs) : { defaultCooldownDuration: 5 };
     
     return (
       <div className="screen" style={{ paddingBottom: '100px', padding: '0.5rem', maxWidth: '100vw', boxSizing: 'border-box' }}>
@@ -527,13 +465,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
             Cool-Down Phase
           </Typography>
         </Box>
-        <StretchPhase
-          stretch={cooldownStretches[currentStretchIndex]}
-          onNext={handleNextStretch}
-          onSkipAll={handleSkipCooldown}
-          currentIndex={currentStretchIndex}
-          totalCount={cooldownStretches.length}
-          phaseType="cooldown"
+        <StretchReminder
+          type="cooldown"
+          workoutType={workoutType}
+          defaultDuration={preferences.defaultCooldownDuration || 5}
+          onComplete={handleCooldownComplete}
+          onSkip={handleCooldownSkip}
         />
       </div>
     );

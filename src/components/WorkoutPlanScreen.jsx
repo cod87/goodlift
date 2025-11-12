@@ -6,22 +6,9 @@ import {
   Container,
   Typography,
   Paper,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Chip,
   IconButton,
   Tooltip,
-  Card,
-  CardContent,
-  CardActions,
   LinearProgress,
   List,
   ListItem,
@@ -43,8 +30,8 @@ import {
 } from '@mui/icons-material';
 import CompactHeader from './Common/CompactHeader';
 import WorkoutPlanBuilderDialog from './WorkoutPlanBuilderDialog';
+import PlanCreationModal from './PlanCreationModal';
 import {
-  generateWorkoutPlan,
   getPlanStatistics
 } from '../utils/workoutPlanGenerator';
 import {
@@ -58,19 +45,10 @@ import {
 const WorkoutPlanScreen = ({ onNavigate }) => {
   const [plans, setPlans] = useState([]);
   const [activePlan, setActivePlanState] = useState(null);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showPlanCreationModal, setShowPlanCreationModal] = useState(false);
   const [showBuilderDialog, setShowBuilderDialog] = useState(false);
   const [createMenuAnchor, setCreateMenuAnchor] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [expandedPlan, setExpandedPlan] = useState(null); // Track which plan is expanded
-  const [planForm, setPlanForm] = useState({
-    name: '',
-    goal: 'general_fitness',
-    experienceLevel: 'intermediate',
-    daysPerWeek: 3,
-    duration: 30,
-    sessionTypes: ['full', 'upper', 'lower', 'hiit', 'cardio', 'yoga'] // Default to all session types
-  });
 
   // Load plans on mount
   useEffect(() => {
@@ -91,7 +69,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
 
   const handleCreatePlan = () => {
     setCreateMenuAnchor(null);
-    setShowCreateDialog(true);
+    setShowPlanCreationModal(true);
   };
 
   const handleBuildPlan = () => {
@@ -105,85 +83,6 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
 
   const handleCloseCreateMenu = () => {
     setCreateMenuAnchor(null);
-  };
-
-  const handleCloseDialog = () => {
-    setShowCreateDialog(false);
-    setPlanForm({
-      name: '',
-      goal: 'general_fitness',
-      experienceLevel: 'intermediate',
-      daysPerWeek: 3,
-      duration: 30,
-      sessionTypes: ['full', 'upper', 'lower', 'hiit', 'cardio', 'yoga'] // Default to all session types
-    });
-  };
-
-  const handleFormChange = (field, value) => {
-    setPlanForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSessionTypeToggle = (type) => {
-    setPlanForm(prev => {
-      const currentTypes = prev.sessionTypes;
-      if (currentTypes.includes(type)) {
-        return {
-          ...prev,
-          sessionTypes: currentTypes.filter(t => t !== type)
-        };
-      } else {
-        return {
-          ...prev,
-          sessionTypes: [...currentTypes, type]
-        };
-      }
-    });
-  };
-
-  const handleGeneratePlan = async () => {
-    try {
-      setIsGenerating(true);
-      console.log('Starting plan generation with form:', planForm);
-      
-      const plan = await generateWorkoutPlan({
-        ...planForm,
-        planName: planForm.name || 'My Workout Plan',
-        startDate: new Date(),
-        equipmentAvailable: ['all']
-      });
-
-      console.log('Plan generated successfully:', {
-        id: plan.id,
-        name: plan.name,
-        sessionCount: plan.sessions.length,
-        firstSessionHasExercises: plan.sessions[0]?.exercises?.length > 0,
-        sampleSession: plan.sessions[0]
-      });
-
-      // Save the plan first
-      await saveWorkoutPlan(plan);
-      console.log('Plan saved to storage');
-      
-      // Auto-activate if plan name is "This Week"
-      if (plan.name === 'This Week') {
-        await setActivePlan(plan.id);
-        console.log('Auto-activated "This Week" plan:', plan.id);
-      }
-      
-      // Reload plans to ensure UI is updated
-      await loadPlans();
-      console.log('Plans reloaded');
-      handleCloseDialog();
-    } catch (error) {
-      console.error('Error generating plan:', error);
-      console.error('Error stack:', error.stack);
-      alert(`Failed to generate plan: ${error.message}`);
-    } finally {
-      setIsGenerating(false);
-    }
   };
 
   const handleSaveBuiltPlan = async (plan) => {
@@ -545,111 +444,15 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         )}
       </Paper>
 
-      {/* Create Plan Dialog */}
-      <Dialog open={showCreateDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Create Workout Plan</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="Plan Name"
-              value={planForm.name}
-              onChange={(e) => handleFormChange('name', e.target.value)}
-              placeholder="e.g., Summer Strength Plan"
-            />
-
-            <FormControl fullWidth>
-              <InputLabel>Goal</InputLabel>
-              <Select
-                value={planForm.goal}
-                label="Goal"
-                onChange={(e) => handleFormChange('goal', e.target.value)}
-              >
-                <MenuItem value="strength">Strength</MenuItem>
-                <MenuItem value="hypertrophy">Muscle Gain</MenuItem>
-                <MenuItem value="fat_loss">Fat Loss</MenuItem>
-                <MenuItem value="general_fitness">General Fitness</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>Experience Level</InputLabel>
-              <Select
-                value={planForm.experienceLevel}
-                label="Experience Level"
-                onChange={(e) => handleFormChange('experienceLevel', e.target.value)}
-              >
-                <MenuItem value="beginner">Beginner</MenuItem>
-                <MenuItem value="intermediate">Intermediate</MenuItem>
-                <MenuItem value="advanced">Advanced</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>Days per Week</InputLabel>
-              <Select
-                value={planForm.daysPerWeek}
-                label="Days per Week"
-                onChange={(e) => handleFormChange('daysPerWeek', e.target.value)}
-              >
-                {[2, 3, 4, 5, 6, 7].map(days => (
-                  <MenuItem key={days} value={days}>{days} days</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>Duration (days)</InputLabel>
-              <Select
-                value={planForm.duration}
-                label="Duration (days)"
-                onChange={(e) => handleFormChange('duration', e.target.value)}
-              >
-                <MenuItem value={7}>1 week</MenuItem>
-                <MenuItem value={14}>2 weeks</MenuItem>
-                <MenuItem value={30}>30 days</MenuItem>
-                <MenuItem value={60}>60 days</MenuItem>
-                <MenuItem value={90}>90 days</MenuItem>
-              </Select>
-            </FormControl>
-
-            <Box>
-              <Typography variant="subtitle2" gutterBottom>
-                Session Types
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {[
-                  { value: 'full', label: 'Full Body' },
-                  { value: 'upper', label: 'Upper Body' },
-                  { value: 'lower', label: 'Lower Body' },
-                  { value: 'hiit', label: 'HIIT' },
-                  { value: 'cardio', label: 'Cardio' },
-                  { value: 'yoga', label: 'Yoga/Mobility' }
-                ].map(type => (
-                  <Chip
-                    key={type.value}
-                    label={type.label}
-                    onClick={() => handleSessionTypeToggle(type.value)}
-                    color={planForm.sessionTypes.includes(type.value) ? 'primary' : 'default'}
-                    variant={planForm.sessionTypes.includes(type.value) ? 'filled' : 'outlined'}
-                  />
-                ))}
-              </Box>
-            </Box>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} disabled={isGenerating}>Cancel</Button>
-          <Button 
-            onClick={handleGeneratePlan} 
-            variant="contained" 
-            color="primary"
-            disabled={!planForm.name || planForm.sessionTypes.length === 0 || isGenerating}
-          >
-            {isGenerating ? 'Generating...' : 'Generate Plan'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Plan Creation Modal */}
+      <PlanCreationModal
+        open={showPlanCreationModal}
+        onClose={() => setShowPlanCreationModal(false)}
+        onPlanCreated={() => {
+          loadPlans();
+          setShowPlanCreationModal(false);
+        }}
+      />
 
       {/* Workout Plan Builder Dialog */}
       <WorkoutPlanBuilderDialog

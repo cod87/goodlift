@@ -184,6 +184,7 @@ const SettingsScreen = () => {
       sx={{
         minHeight: '100vh',
         padding: { xs: 2, sm: 3, md: 4 },
+        paddingBottom: { xs: '80px', sm: 3, md: 4 },
         background: (theme) => theme.palette.background.default,
       }}
     >

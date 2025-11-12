@@ -244,7 +244,7 @@ const ProgressDashboard = () => {
     <Box sx={{ width: '100%', minHeight: '100vh' }}>
       <CompactHeader title="Progress" subtitle="Track your fitness journey" />
 
-      <Box sx={{ maxWidth: '1400px', margin: '0 auto', p: { xs: 2, md: 3 } }}>
+      <Box sx={{ maxWidth: '1400px', margin: '0 auto', p: { xs: 2, md: 3 }, pb: { xs: '80px', md: 3 } }}>
         <Stack spacing={3}>
           {/* Top Row: Streak, Adherence, Volume */}
           <Box

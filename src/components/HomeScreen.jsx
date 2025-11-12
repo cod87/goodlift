@@ -18,6 +18,7 @@ import {
 import { getWorkoutTypeDisplayName } from '../utils/weeklyPlanDefaults';
 import { getWorkoutHistory } from '../utils/storage';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
+import { containerPadding, touchTargets } from '../theme/responsive';
 
 /**
  * HomeScreen - Quick-start interface component
@@ -134,10 +135,15 @@ const HomeScreen = memo(({
   return (
     <Box 
       sx={{ 
-        padding: { xs: '1rem', sm: '2rem', md: '3rem' },
+        padding: { 
+          xs: containerPadding.mobile, 
+          sm: containerPadding.tablet, 
+          md: containerPadding.desktop 
+        },
         maxWidth: '1200px',
         margin: '0 auto',
         minHeight: 'calc(100vh - 60px)',
+        paddingBottom: { xs: '80px', md: '2rem' }, // Extra padding for mobile bottom nav
       }}
     >
       {/* Greeting Section */}
@@ -218,7 +224,7 @@ const HomeScreen = memo(({
                 </Typography>
               )}
 
-              {/* CTA Button - Prominent, min 60px height, full-width on mobile */}
+              {/* CTA Button - Prominent, min 56px height, full-width on mobile */}
               <Button
                 variant="contained"
                 size="large"
@@ -227,7 +233,7 @@ const HomeScreen = memo(({
                 onClick={onQuickStart}
                 disabled={loading}
                 sx={{ 
-                  minHeight: '60px',
+                  minHeight: touchTargets.navigation,
                   fontSize: { xs: '1.1rem', sm: '1.25rem' },
                   fontWeight: 700,
                   backgroundColor: 'primary.main',
@@ -254,19 +260,19 @@ const HomeScreen = memo(({
         </CardContent>
       </Card>
 
-      {/* Stats Cards - Mobile First: Stack Vertically */}
-      <Stack 
-        spacing={2} 
+      {/* Stats Cards - Two-column grid on mobile for small widgets */}
+      <Box 
         sx={{ 
           mb: 3,
-          flexDirection: { xs: 'column', md: 'row' },
+          display: 'grid',
+          gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(2, 1fr)' },
+          gap: { xs: 2, sm: 2, md: 3 },
         }}
       >
         {/* Streak Card */}
         <Card 
           elevation={2}
           sx={{ 
-            flex: 1,
             borderRadius: 3,
           }}
         >
@@ -309,7 +315,6 @@ const HomeScreen = memo(({
         <Card 
           elevation={2}
           sx={{ 
-            flex: 1,
             borderRadius: 3,
           }}
         >
@@ -358,7 +363,7 @@ const HomeScreen = memo(({
             </Typography>
           </CardContent>
         </Card>
-      </Stack>
+      </Box>
 
       {/* Weekly Overview */}
       {currentPlan && currentPlan.days && (

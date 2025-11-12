@@ -167,6 +167,7 @@ const UnifiedWorkoutHub = ({
       maxWidth: '1400px', 
       margin: '0 auto', 
       p: { xs: 2, md: 3 },
+      pb: { xs: '80px', md: 3 },
       minHeight: '100vh',
     }}>
       <CompactHeader 

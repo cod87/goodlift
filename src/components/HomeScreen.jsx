@@ -26,10 +26,11 @@ import { containerPadding, touchTargets } from '../theme/responsive';
  * HomeScreen - Quick-start interface component (Work Tab)
  * Features:
  * - Prominent "Start Today's Workout" button
+ * - Secondary action buttons: Create Plan, Quick Timer, View Plans
  * - Current plan name display
  * - Today's scheduled sessions
- * - Streak counter with fire emoji
- * - Adherence percentage
+ * - Recent workout history (3-5 sessions)
+ * - Weekly schedule overview
  */
 const HomeScreen = memo(({ 
   currentPlan,

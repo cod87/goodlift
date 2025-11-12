@@ -29,6 +29,7 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Snackbar, Alert, Button } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
+import { runDataMigration } from './migrations/simplifyDataStructure';
 
 /**
  * Main app component wrapped with theme
@@ -57,6 +58,27 @@ function AppContent() {
     getUpcomingWorkouts,
     createWorkoutNavState
   } = usePlanIntegration();
+
+  // Run data migration on app initialization
+  useEffect(() => {
+    const initializeMigration = async () => {
+      try {
+        console.log('Running data structure migration...');
+        const migrationResult = runDataMigration();
+        if (migrationResult.status === 'success') {
+          console.log('Migration completed:', migrationResult);
+        } else if (migrationResult.status === 'skipped') {
+          console.log('Migration skipped:', migrationResult.reason);
+        } else {
+          console.error('Migration failed:', migrationResult);
+        }
+      } catch (error) {
+        console.error('Error running migration:', error);
+      }
+    };
+    
+    initializeMigration();
+  }, []); // Run once on mount
 
   // Load last workout for TodayView
   useEffect(() => {

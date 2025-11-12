@@ -131,7 +131,7 @@ const QuickPlanSetup = ({ open, onClose, onPlanCreated }) => {
         duration,
         startDate: new Date(),
         equipmentAvailable: ['all'],
-        sessionTypes: ['full', 'upper', 'lower', 'hiit', 'cardio', 'yoga']
+        sessionTypes: ['full', 'upper', 'lower', 'hiit', 'cardio', 'stretch']
       };
 
       // Generate plan using workoutPlanGenerator

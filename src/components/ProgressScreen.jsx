@@ -613,7 +613,6 @@ const ActivityCard = ({ type, session, onEdit, onDelete }) => {
     switch (type) {
       case 'hiit': return <Whatshot />;
       case 'cardio': return <DirectionsRun />;
-      case 'yoga': return <SelfImprovement />;
       case 'stretch': return <DirectionsRun />;
       default: return <FitnessCenter />;
     }
@@ -623,7 +622,6 @@ const ActivityCard = ({ type, session, onEdit, onDelete }) => {
     switch (type) {
       case 'hiit': return 'HIIT Session';
       case 'cardio': return session.cardioType || 'Cardio';
-      case 'yoga': return 'Yoga Session';
       case 'stretch': return 'Stretch Session';
       default: return session.type ? `${session.type.charAt(0).toUpperCase() + session.type.slice(1)} Body` : 'Workout';
     }
@@ -633,7 +631,6 @@ const ActivityCard = ({ type, session, onEdit, onDelete }) => {
     switch (type) {
       case 'hiit': return 'secondary.main';
       case 'cardio': return '#2196f3';
-      case 'yoga': return '#9c27b0';
       case 'stretch': return 'success.main';
       default: return 'primary.main';
     }
@@ -746,7 +743,6 @@ const EditSessionDialog = ({ open, onClose, onSave, session, sessionType }) => {
       case 'workout': return 'Edit Workout';
       case 'cardio': return 'Edit Cardio Session';
       case 'hiit': return 'Edit HIIT Session';
-      case 'yoga': return 'Edit Yoga Session';
       default: return 'Edit Session';
     }
   };

@@ -6,7 +6,6 @@ import {
   saveHiitSessionsToFirebase,
   saveCardioSessionsToFirebase,
   saveStretchSessionsToFirebase,
-  saveYogaSessionsToFirebase,
   saveWorkoutPlansToFirebase,
   saveActivePlanToFirebase,
   loadUserDataFromFirebase
@@ -533,7 +532,6 @@ export const loadUserDataFromCloud = async (userId) => {
       const localHiit = getHiitSessions();
       const localCardio = getCardioSessions();
       const localStretch = getStretchSessions();
-      const localYoga = getYogaSessions();
       const localPlans = localStorage.getItem(KEYS.WORKOUT_PLANS);
       const plansArray = localPlans ? JSON.parse(localPlans) : [];
       const localActivePlanId = localStorage.getItem(KEYS.ACTIVE_PLAN);
@@ -542,7 +540,7 @@ export const loadUserDataFromCloud = async (userId) => {
       if (localHistory.length > 0 || localStats?.totalWorkouts > 0 || 
           Object.keys(weightsObj).length > 0 || Object.keys(targetRepsObj).length > 0 ||
           localHiit.length > 0 || localCardio.length > 0 || 
-          localStretch.length > 0 || localYoga.length > 0 ||
+          localStretch.length > 0 ||
           plansArray.length > 0 || localActivePlanId) {
         await Promise.all([
           saveWorkoutHistoryToFirebase(userId, localHistory),
@@ -552,7 +550,6 @@ export const loadUserDataFromCloud = async (userId) => {
           saveHiitSessionsToFirebase(userId, localHiit),
           saveCardioSessionsToFirebase(userId, localCardio),
           saveStretchSessionsToFirebase(userId, localStretch),
-          saveYogaSessionsToFirebase(userId, localYoga),
           saveWorkoutPlansToFirebase(userId, plansArray),
           saveActivePlanToFirebase(userId, localActivePlanId)
         ]);

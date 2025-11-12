@@ -1,6 +1,6 @@
 /**
  * Stretching and Mobility Exercises Database
- * Combined from stretching/mobility exercises and yoga poses
+ * Combined from stretching and mobility exercises
  */
 
 export const stretchesData = [

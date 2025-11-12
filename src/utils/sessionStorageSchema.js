@@ -268,7 +268,6 @@ export default {
   createPlanDay,
   createWorkoutSession,
   createHiitSession,
-  createYogaSession,
   createCardioSession,
   linkSessionToPlan,
   hasValidPlanContext,

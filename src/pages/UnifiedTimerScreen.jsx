@@ -47,7 +47,6 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import audioService from '../utils/audioService';
-import { stretchesData } from '../data/stretches';
 import { saveWorkout, saveUserStats, getUserStats } from '../utils/storage';
 
 const TIMER_MODES = {
@@ -114,6 +113,13 @@ const UnifiedTimerScreen = ({ onNavigate }) => {
         clearInterval(timerRef.current);
       }
     };
+  }, []);
+
+  const handleTimerComplete = useCallback(() => {
+    setIsRunning(false);
+    clearInterval(timerRef.current);
+    audioService.playCompletionFanfare();
+    setShowCompletionDialog(true);
   }, []);
 
   // Main timer logic
@@ -184,14 +190,7 @@ const UnifiedTimerScreen = ({ onNavigate }) => {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, isPaused, mode, isWorkPeriod, currentRound, rounds, currentPoseIndex, selectedPoses, workInterval, restInterval]);
-
-  const handleTimerComplete = useCallback(() => {
-    setIsRunning(false);
-    clearInterval(timerRef.current);
-    audioService.playCompletionFanfare();
-    setShowCompletionDialog(true);
-  }, []);
+  }, [isRunning, isPaused, mode, isWorkPeriod, currentRound, rounds, currentPoseIndex, selectedPoses, workInterval, restInterval, handleTimerComplete]);
 
   const handleStart = () => {
     if (isConfiguring) {

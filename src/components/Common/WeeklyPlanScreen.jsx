@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { 
   Box, 
@@ -9,23 +9,33 @@ import {
   Select,
   MenuItem,
   Button,
-  Stack
+  Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
-import WeeklyPlanPreview from '../Home/WeeklyPlanPreview';
+import WeeklyCalendarView from '../WeeklyCalendarView';
 import { useWeeklyPlan } from '../../hooks/useWeeklyPlan';
 
 /**
  * WeeklyPlanScreen - Full weekly plan management screen
  * Allows users to view, edit, and customize their weekly training plan
+ * Now uses the new WeeklyCalendarView with 7-day structure
  */
 const WeeklyPlanScreen = memo(({ onBack, onQuickStartDay }) => {
   const {
     planningStyle,
     weeklyPlan,
     updatePlanningStyle,
+    updatePlan,
+    updateDay,
     resetToDefault,
   } = useWeeklyPlan();
+
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [dayEditDialogOpen, setDayEditDialogOpen] = useState(false);
 
   const handleStyleChange = (event) => {
     updatePlanningStyle(event.target.value);
@@ -36,8 +46,23 @@ const WeeklyPlanScreen = memo(({ onBack, onQuickStartDay }) => {
     resetToDefault();
   };
 
+  const handleDayClick = (day, index) => {
+    setSelectedDay({ ...day, index });
+    setDayEditDialogOpen(true);
+  };
+
+  const handlePlanChange = (newPlan) => {
+    // Update the entire weekly plan with reordered days
+    updatePlan(newPlan);
+  };
+
+  const handleCloseDayEdit = () => {
+    setDayEditDialogOpen(false);
+    setSelectedDay(null);
+  };
+
   return (
-    <Container maxWidth="md" sx={{ py: 3 }}>
+    <Container maxWidth="lg" sx={{ py: 3 }}>
       {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Button
@@ -51,7 +76,7 @@ const WeeklyPlanScreen = memo(({ onBack, onQuickStartDay }) => {
           Weekly Training Plan
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Configure your weekly workout schedule based on science-backed training splits
+          Configure your weekly workout schedule with a mandatory 7-day structure
         </Typography>
       </Box>
 
@@ -79,16 +104,12 @@ const WeeklyPlanScreen = memo(({ onBack, onQuickStartDay }) => {
         </Typography>
       </Box>
 
-      {/* Weekly Plan Preview */}
-      <WeeklyPlanPreview
+      {/* Weekly Calendar View */}
+      <WeeklyCalendarView
         weeklyPlan={weeklyPlan}
-        onQuickStartDay={onQuickStartDay}
-        onEditPlan={() => {
-          // Future: Open detailed editor
-          console.log('Edit plan functionality coming soon');
-        }}
-        onRandomizeWeek={handleRandomizeWeek}
-        onResetPlan={resetToDefault}
+        onPlanChange={handlePlanChange}
+        onDayClick={handleDayClick}
+        readOnly={false}
       />
 
       {/* Info Section */}
@@ -97,10 +118,10 @@ const WeeklyPlanScreen = memo(({ onBack, onQuickStartDay }) => {
           About Your Training Plan
         </Typography>
         <Typography variant="caption" color="text.secondary" component="div">
-          • Each workout includes strength training and optional cardio<br />
-          • Recovery days (Yoga/Rest) are essential for muscle growth<br />
-          • HIIT sessions are lower-impact to reduce joint stress<br />
-          • Adjust your plan based on recovery and energy levels<br />
+          • Each workout is scheduled based on recovery needs<br />
+          • No more than 2 consecutive intense training days<br />
+          • Active recovery days include mobility and flexibility work<br />
+          • Rest days are essential for muscle growth and adaptation<br />
         </Typography>
       </Box>
 
@@ -114,6 +135,29 @@ const WeeklyPlanScreen = memo(({ onBack, onQuickStartDay }) => {
           Reset to Default Plan
         </Button>
       </Stack>
+
+      {/* Day Edit Dialog */}
+      <Dialog open={dayEditDialogOpen} onClose={handleCloseDayEdit} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Edit {selectedDay?.dayName}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Day editing functionality will be available in a future update.
+          </Typography>
+          {selectedDay && (
+            <Box>
+              <Typography variant="subtitle2">Current Configuration:</Typography>
+              <Typography variant="body2">Type: {selectedDay.type}</Typography>
+              <Typography variant="body2">Duration: {selectedDay.duration} min</Typography>
+              <Typography variant="body2">{selectedDay.description}</Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDayEdit}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 });

@@ -220,3 +220,39 @@ export const saveActivePlanToFirebase = async (userId, activePlanId) => {
     console.error('Error saving active plan to Firebase:', error);
   }
 };
+
+/**
+ * Save weekly plan to Firebase
+ * Enforces 7-day structure with day types enum
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} weeklyPlan - Array of 7 day objects with mandatory structure
+ */
+export const saveWeeklyPlanToFirebase = async (userId, weeklyPlan) => {
+  if (!userId) return;
+  
+  // Validate 7-day structure
+  if (!Array.isArray(weeklyPlan) || weeklyPlan.length !== 7) {
+    console.error('Invalid weekly plan: must be an array of exactly 7 days');
+    return;
+  }
+  
+  // Validate each day has required fields
+  const validDayTypes = ['strength', 'hypertrophy', 'cardio', 'active_recovery', 'rest'];
+  for (let i = 0; i < weeklyPlan.length; i++) {
+    const day = weeklyPlan[i];
+    if (typeof day.dayOfWeek !== 'number' || day.dayOfWeek < 0 || day.dayOfWeek > 6) {
+      console.error(`Invalid dayOfWeek at index ${i}: must be 0-6`);
+      return;
+    }
+    if (!validDayTypes.includes(day.type)) {
+      console.error(`Invalid day type at index ${i}: must be one of ${validDayTypes.join(', ')}`);
+      return;
+    }
+  }
+  
+  try {
+    await saveUserDataToFirebase(userId, { weeklyPlan });
+  } catch (error) {
+    console.error('Error saving weekly plan to Firebase:', error);
+  }
+};

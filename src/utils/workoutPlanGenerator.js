@@ -1088,3 +1088,141 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
     sessionData: session.sessionData || null
   };
 };
+
+/**
+ * Generate a workout plan using the new 7-day weekly structure
+ * This is the updated version that enforces mandatory 7-day planning
+ * 
+ * @param {Object} preferences - User preferences for plan generation
+ * @param {string} preferences.goal - Fitness goal: "strength" | "hypertrophy" | "fat_loss" | "general_fitness"
+ * @param {string} preferences.experienceLevel - Experience level: "beginner" | "intermediate" | "advanced"
+ * @param {number} preferences.intenseDaysPerWeek - Number of intense training days per week (2-5)
+ * @param {number} preferences.cardioDaysPerWeek - Number of cardio days per week (0-3)
+ * @param {number} preferences.duration - Plan duration in weeks (1-12)
+ * @param {Date} preferences.startDate - Plan start date
+ * @param {Array<string>} preferences.equipmentAvailable - Available equipment
+ * @param {Array<number>} preferences.preferredIntenseDays - Preferred days for intense workouts (0-6)
+ * @param {string} preferences.planName - Name for the plan
+ * @returns {Promise<Object>} Generated workout plan with 7-day weekly structure
+ */
+export const generateWeeklyWorkoutPlan = async (preferences) => {
+  const {
+    goal = 'general_fitness',
+    experienceLevel = 'intermediate',
+    intenseDaysPerWeek = 3,
+    cardioDaysPerWeek = 1,
+    duration = 4, // duration in weeks
+    startDate = new Date(),
+    equipmentAvailable = ['all'],
+    preferredIntenseDays = null,
+    planName = 'My Weekly Plan'
+  } = preferences;
+
+  // Import the scheduler - use static import at top of file to avoid bundler warning
+  const { scheduleWeeklyPlan, DAY_TYPES } = await import('./planScheduler.js');
+
+  // Validate inputs
+  if (intenseDaysPerWeek < 2 || intenseDaysPerWeek > 5) {
+    throw new Error('Intense days per week must be between 2 and 5');
+  }
+  if (cardioDaysPerWeek < 0 || cardioDaysPerWeek > 3) {
+    throw new Error('Cardio days per week must be between 0 and 3');
+  }
+  if (duration < 1 || duration > 12) {
+    throw new Error('Duration must be between 1 and 12 weeks');
+  }
+
+  // Determine focus type based on goal
+  const focusType = goal === 'hypertrophy' ? 'hypertrophy' : 'strength';
+
+  // Generate the base 7-day weekly structure
+  const weeklyTemplate = scheduleWeeklyPlan({
+    intenseDaysPerWeek,
+    cardioDaysPerWeek,
+    focusType,
+    preferredIntenseDays
+  });
+
+  // Generate sessions for each week based on the template
+  const allSessions = [];
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+
+  for (let week = 0; week < duration; week++) {
+    const weekStartDate = new Date(start.getTime() + week * 7 * 24 * 60 * 60 * 1000);
+    
+    // For each day in the week, create a session
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+      const templateDay = weeklyTemplate[dayIndex];
+      const sessionDate = new Date(weekStartDate.getTime() + dayIndex * 24 * 60 * 60 * 1000);
+      
+      // Create session based on day type
+      const session = {
+        id: generateSessionId(),
+        date: sessionDate.getTime(),
+        type: mapDayTypeToWorkoutType(templateDay.type),
+        dayType: templateDay.type, // Store the standardized day type
+        status: 'planned',
+        exercises: null,
+        sessionData: null,
+        completedAt: null,
+        notes: '',
+        description: templateDay.description,
+        estimatedDuration: templateDay.duration
+      };
+
+      // Only populate exercises for non-rest days
+      if (templateDay.type !== 'rest') {
+        // Populate session with exercises if it's a workout day
+        const populated = await populateSessionData(
+          session,
+          experienceLevel,
+          week + 1,
+          equipmentAvailable,
+          false // not a deload week for now
+        );
+        allSessions.push(populated);
+      } else {
+        allSessions.push(session);
+      }
+    }
+  }
+
+  // Create the plan object with 7-day weekly structure
+  const plan = {
+    id: generatePlanId(),
+    name: planName,
+    startDate: start.getTime(),
+    endDate: new Date(start.getTime() + duration * 7 * 24 * 60 * 60 * 1000).getTime(),
+    duration: duration * 7, // Convert weeks to days for compatibility
+    durationInWeeks: duration,
+    goal,
+    experienceLevel,
+    intenseDaysPerWeek,
+    cardioDaysPerWeek,
+    weeklyTemplate, // Store the 7-day template
+    sessions: allSessions,
+    planningStructure: '7-day-weekly', // Flag to indicate new structure
+    created: Date.now(),
+    modified: Date.now(),
+    active: true
+  };
+
+  return plan;
+};
+
+/**
+ * Map standardized day type to workout session type
+ * @param {string} dayType - Day type from planScheduler
+ * @returns {string} Workout session type
+ */
+const mapDayTypeToWorkoutType = (dayType) => {
+  const typeMap = {
+    'strength': 'full', // Default to full body for strength
+    'hypertrophy': 'full', // Default to full body for hypertrophy
+    'cardio': 'cardio',
+    'active_recovery': 'stretch',
+    'rest': 'rest'
+  };
+  return typeMap[dayType] || 'full';
+};

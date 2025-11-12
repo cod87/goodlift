@@ -238,8 +238,7 @@ export const getUserStats = async () => {
       totalTime: 0, 
       totalHiitTime: 0,
       totalCardioTime: 0,
-      totalStretchTime: 0,
-      totalYogaTime: 0
+      totalStretchTime: 0
     };
   }
 };

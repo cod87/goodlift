@@ -21,7 +21,7 @@ import { Brightness4, Brightness7, VolumeUp, Delete, CheckCircle, Add } from '@m
 import { useTheme } from '../contexts/ThemeContext';
 import audioService from '../utils/audioService';
 import { getWorkoutPlans, getActivePlan, setActivePlan, deleteWorkoutPlan } from '../utils/storage';
-import PlanCreationModal from '../components/PlanCreationModal';
+import QuickPlanSetup from '../components/PlanBuilder/QuickPlanSetup';
 
 const SettingsScreen = () => {
   const { mode, toggleTheme } = useTheme();
@@ -393,8 +393,8 @@ const SettingsScreen = () => {
         </Box>
       </motion.div>
 
-      {/* Plan Creation Modal */}
-      <PlanCreationModal
+      {/* Quick Plan Setup */}
+      <QuickPlanSetup
         open={showPlanModal}
         onClose={handleClosePlanModal}
         onPlanCreated={handlePlanCreated}

@@ -30,7 +30,7 @@ import {
 } from '@mui/icons-material';
 import CompactHeader from './Common/CompactHeader';
 import WorkoutPlanBuilderDialog from './WorkoutPlanBuilderDialog';
-import PlanCreationModal from './PlanCreationModal';
+import QuickPlanSetup from './PlanBuilder/QuickPlanSetup';
 import {
   getPlanStatistics
 } from '../utils/workoutPlanGenerator';
@@ -444,8 +444,8 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         )}
       </Paper>
 
-      {/* Plan Creation Modal */}
-      <PlanCreationModal
+      {/* Quick Plan Setup */}
+      <QuickPlanSetup
         open={showPlanCreationModal}
         onClose={() => setShowPlanCreationModal(false)}
         onPlanCreated={() => {

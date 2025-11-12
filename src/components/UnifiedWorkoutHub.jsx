@@ -25,7 +25,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import CompactHeader from './Common/CompactHeader';
-import PlanCreationModal from './PlanCreationModal';
+import QuickPlanSetup from './PlanBuilder/QuickPlanSetup';
 import { usePlanIntegration } from '../hooks/usePlanIntegration';
 import {
   getPlanStatistics,
@@ -547,8 +547,8 @@ const UnifiedWorkoutHub = ({
         </Card>
       </Stack>
 
-      {/* Plan Creation Modal */}
-      <PlanCreationModal
+      {/* Quick Plan Setup */}
+      <QuickPlanSetup
         open={showPlanCreationModal}
         onClose={() => setShowPlanCreationModal(false)}
         onPlanCreated={() => {

@@ -49,16 +49,7 @@ import {
   deleteWorkout,
   updateWorkout,
   getStretchSessions,
-  getYogaSessions,
-  getHiitSessions,
-  getCardioSessions,
   deleteStretchSession,
-  deleteYogaSession,
-  deleteHiitSession,
-  deleteCardioSession,
-  updateYogaSession,
-  updateHiitSession,
-  updateCardioSession,
   getActivePlan,
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
@@ -73,9 +64,6 @@ const ProgressDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
   const [stretchSessions, setStretchSessions] = useState([]);
-  const [yogaSessions, setYogaSessions] = useState([]);
-  const [hiitSessions, setHiitSessions] = useState([]);
-  const [cardioSessions, setCardioSessions] = useState([]);
   const [activePlan, setActivePlan] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [pinnedExercises, setPinnedExercisesState] = useState([]);
@@ -91,19 +79,13 @@ const ProgressDashboard = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedHistory, loadedStretches, loadedYoga, loadedHiit, loadedCardio, loadedActivePlan] = await Promise.all([
+      const [loadedHistory, loadedStretches, loadedActivePlan] = await Promise.all([
         getWorkoutHistory(),
         getStretchSessions(),
-        getYogaSessions(),
-        getHiitSessions(),
-        getCardioSessions(),
         getActivePlan()
       ]);
       setHistory(loadedHistory);
       setStretchSessions(loadedStretches);
-      setYogaSessions(loadedYoga);
-      setHiitSessions(loadedHiit);
-      setCardioSessions(loadedCardio);
       setActivePlan(loadedActivePlan);
 
       const pinned = progressiveOverloadService.getPinnedExercises();
@@ -144,48 +126,9 @@ const ProgressDashboard = () => {
     }
   };
 
-  const handleDeleteYoga = async (sessionId) => {
-    if (window.confirm('Are you sure you want to delete this yoga session? This action cannot be undone.')) {
-      await deleteYogaSession(sessionId);
-      await loadData();
-    }
-  };
-
-  const handleDeleteHiit = async (sessionId) => {
-    if (window.confirm('Are you sure you want to delete this HIIT session? This action cannot be undone.')) {
-      await deleteHiitSession(sessionId);
-      await loadData();
-    }
-  };
-
-  const handleDeleteCardio = async (sessionId) => {
-    if (window.confirm('Are you sure you want to delete this cardio session? This action cannot be undone.')) {
-      await deleteCardioSession(sessionId);
-      await loadData();
-    }
-  };
-
   const handleEditWorkout = (workout, index) => {
     setEditingSession({ ...workout, index });
     setEditingSessionType('workout');
-    setEditDialogOpen(true);
-  };
-
-  const handleEditCardio = (session) => {
-    setEditingSession(session);
-    setEditingSessionType('cardio');
-    setEditDialogOpen(true);
-  };
-
-  const handleEditHiit = (session) => {
-    setEditingSession(session);
-    setEditingSessionType('hiit');
-    setEditDialogOpen(true);
-  };
-
-  const handleEditYoga = (session) => {
-    setEditingSession(session);
-    setEditingSessionType('yoga');
     setEditDialogOpen(true);
   };
 
@@ -193,12 +136,6 @@ const ProgressDashboard = () => {
     try {
       if (editingSessionType === 'workout') {
         await updateWorkout(editingSession.index, updatedData);
-      } else if (editingSessionType === 'cardio') {
-        await updateCardioSession(editingSession.id, updatedData);
-      } else if (editingSessionType === 'hiit') {
-        await updateHiitSession(editingSession.id, updatedData);
-      } else if (editingSessionType === 'yoga') {
-        await updateYogaSession(editingSession.id, updatedData);
       }
 
       await loadData();
@@ -243,30 +180,14 @@ const ProgressDashboard = () => {
 
   const getFilteredStats = () => {
     const filteredWorkouts = filterByTimePeriod(history);
-    const filteredCardio = filterByTimePeriod(cardioSessions);
-    const filteredHiit = filterByTimePeriod(hiitSessions);
-    const filteredYoga = filterByTimePeriod(yogaSessions);
 
     const totalWorkouts = filteredWorkouts.length;
     const totalWorkoutTime = filteredWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
     const avgWorkout = totalWorkouts > 0 ? Math.round(totalWorkoutTime / totalWorkouts / 60) : 0;
 
-    const allCardio = [...filteredCardio, ...filteredHiit];
-    const totalCardio = allCardio.length;
-    const totalCardioTime = allCardio.reduce((sum, s) => sum + (s.duration || 0), 0);
-    const avgCardio = totalCardio > 0 ? Math.round(totalCardioTime / totalCardio / 60) : 0;
-
-    const totalYoga = filteredYoga.length;
-    const totalYogaTime = filteredYoga.reduce((sum, s) => sum + (s.duration || 0), 0);
-    const avgYoga = totalYoga > 0 ? Math.round(totalYogaTime / totalYoga / 60) : 0;
-
     return {
       totalWorkouts,
       avgWorkout,
-      totalCardio,
-      avgCardio,
-      totalYoga,
-      avgYoga
     };
   };
 
@@ -279,27 +200,9 @@ const ProgressDashboard = () => {
       duration: workout.duration || 0,
       status: 'completed'
     })),
-    ...hiitSessions.map(session => ({
-      date: session.date,
-      type: 'hiit',
-      duration: session.duration || 0,
-      status: 'completed'
-    })),
-    ...cardioSessions.map(session => ({
-      date: session.date,
-      type: 'cardio',
-      duration: session.duration || 0,
-      status: 'completed'
-    })),
     ...stretchSessions.map(session => ({
       date: session.date,
       type: 'stretch',
-      duration: session.duration || 0,
-      status: 'completed'
-    })),
-    ...yogaSessions.map(session => ({
-      date: session.date,
-      type: 'yoga',
       duration: session.duration || 0,
       status: 'completed'
     })),
@@ -333,29 +236,20 @@ const ProgressDashboard = () => {
     if (!selectedDate) {
       return {
         workouts: history,
-        hiit: hiitSessions,
         stretch: stretchSessions,
-        yoga: yogaSessions,
-        cardio: cardioSessions
       };
     }
 
     return {
       workouts: history.filter(w => isSameDay(w.date, selectedDate)),
-      hiit: hiitSessions.filter(s => isSameDay(s.date, selectedDate)),
       stretch: stretchSessions.filter(s => isSameDay(s.date, selectedDate)),
-      yoga: yogaSessions.filter(s => isSameDay(s.date, selectedDate)),
-      cardio: cardioSessions.filter(s => isSameDay(s.date, selectedDate))
     };
   };
 
   const filteredSessions = getFilteredSessions();
   const hasSessionsOnSelectedDay = selectedDate && (
     filteredSessions.workouts.length > 0 ||
-    filteredSessions.hiit.length > 0 ||
-    filteredSessions.stretch.length > 0 ||
-    filteredSessions.yoga.length > 0 ||
-    filteredSessions.cardio.length > 0
+    filteredSessions.stretch.length > 0
   );
 
   if (loading) {
@@ -413,16 +307,6 @@ const ProgressDashboard = () => {
                       <TableCell align="right">{filteredStats.totalWorkouts}</TableCell>
                       <TableCell align="right">{filteredStats.avgWorkout}m</TableCell>
                     </TableRow>
-                    <TableRow>
-                      <TableCell>Cardio & HIIT</TableCell>
-                      <TableCell align="right">{filteredStats.totalCardio}</TableCell>
-                      <TableCell align="right">{filteredStats.avgCardio}m</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Mobility & Yoga</TableCell>
-                      <TableCell align="right">{filteredStats.totalYoga}</TableCell>
-                      <TableCell align="right">{filteredStats.avgYoga}m</TableCell>
-                    </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -465,10 +349,7 @@ const ProgressDashboard = () => {
                   {hasSessionsOnSelectedDay && (
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
                       {filteredSessions.workouts.length +
-                        filteredSessions.hiit.length +
-                        filteredSessions.stretch.length +
-                        filteredSessions.yoga.length +
-                        filteredSessions.cardio.length} session(s) recorded
+                        filteredSessions.stretch.length} session(s) recorded
                     </Typography>
                   )}
                 </Box>
@@ -637,39 +518,6 @@ const ProgressDashboard = () => {
                       />
                     ))}
 
-                    {/* HIIT Sessions */}
-                    {filteredSessions.hiit.map((session) => (
-                      <ActivityCard
-                        key={session.id}
-                        type="hiit"
-                        session={session}
-                        onEdit={() => handleEditHiit(session)}
-                        onDelete={() => handleDeleteHiit(session.id)}
-                      />
-                    ))}
-
-                    {/* Cardio Sessions */}
-                    {filteredSessions.cardio.map((session) => (
-                      <ActivityCard
-                        key={session.id}
-                        type="cardio"
-                        session={session}
-                        onEdit={() => handleEditCardio(session)}
-                        onDelete={() => handleDeleteCardio(session.id)}
-                      />
-                    ))}
-
-                    {/* Yoga Sessions */}
-                    {filteredSessions.yoga.map((session) => (
-                      <ActivityCard
-                        key={session.id}
-                        type="yoga"
-                        session={session}
-                        onEdit={() => handleEditYoga(session)}
-                        onDelete={() => handleDeleteYoga(session.id)}
-                      />
-                    ))}
-
                     {/* Stretch Sessions */}
                     {filteredSessions.stretch.map((session) => (
                       <ActivityCard
@@ -680,8 +528,8 @@ const ProgressDashboard = () => {
                       />
                     ))}
 
-                    {!selectedDate && history.length === 0 && hiitSessions.length === 0 &&
-                      stretchSessions.length === 0 && yogaSessions.length === 0 && cardioSessions.length === 0 && (
+                    {!selectedDate && history.length === 0 &&
+                      stretchSessions.length === 0 && (
                         <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
                           No activity history yet. Complete your first activity to see it here!
                         </Typography>

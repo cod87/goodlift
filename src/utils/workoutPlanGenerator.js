@@ -65,25 +65,13 @@ export const validateSession = (session) => {
   
   // Validate type-specific required data
   const isStandardWorkout = ['upper', 'lower', 'full', 'push', 'pull', 'legs'].includes(session.type);
-  const isHiit = session.type === 'hiit';
-  const isYoga = session.type === 'yoga' || session.type === 'stretch';
   
   if (isStandardWorkout) {
     if (!session.exercises || !Array.isArray(session.exercises) || session.exercises.length === 0) {
       errors.push(`Standard workout session (${session.type}) missing exercises array`);
     }
-  } else if (isHiit) {
-    if (!session.sessionData) {
-      errors.push('HIIT session missing sessionData');
-    } else if (!session.sessionData.mainWorkout || !session.sessionData.mainWorkout.exercises) {
-      errors.push('HIIT session missing mainWorkout exercises');
-    }
-  } else if (isYoga) {
-    if (!session.sessionData) {
-      errors.push('Yoga session missing sessionData');
-    } else if (!session.sessionData.mainPractice || !session.sessionData.mainPractice.sequences) {
-      errors.push('Yoga session missing mainPractice sequences');
-    }
+  } else {
+    errors.push(`Unsupported session type: ${session.type}. Only standard workout types are supported.`);
   }
   
   return {
@@ -1131,93 +1119,8 @@ export const populateSessionData = async (session, experienceLevel, weekNumber, 
     }
   }
 
-  // Generate HIIT session data
-  if (session.type === 'hiit') {
-    try {
-      // Dynamically import to avoid circular dependencies
-      const { generateHIITSession, HIIT_PROTOCOLS } = await import('./hiitSessionGenerator.js');
-      
-      // Load exercises from public data
-      const exercisesResponse = await fetch(`${import.meta.env.BASE_URL}data/exercises.json`);
-      const exercises = exercisesResponse.ok ? await exercisesResponse.json() : [];
-      
-      // Determine protocol based on experience level and week
-      let protocol = 'BALANCED';
-      if (experienceLevel === 'beginner') {
-        protocol = 'MAX_POWER';
-      } else if (experienceLevel === 'advanced' && weekNumber >= 4) {
-        protocol = 'METABOLIC';
-      }
-      
-      // Generate session
-      const sessionData = generateHIITSession({
-        modality: 'bodyweight', // Default, can be customized
-        level: experienceLevel,
-        protocol,
-        exercises,
-        lowerImpact: experienceLevel === 'beginner',
-        goal: 'cardiovascular'
-      });
-      
-      return {
-        ...session,
-        sessionData,
-        exercises: null // HIIT uses sessionData instead
-      };
-    } catch (error) {
-      console.error('Error generating HIIT session:', error);
-      return {
-        ...session,
-        exercises: null,
-        sessionData: null,
-        populationError: `Failed to generate HIIT session: ${error.message}`
-      };
-    }
-  }
-
-  // Generate Yoga session data
-  if (session.type === 'yoga' || session.type === 'stretch') {
-    try {
-      // Dynamically import to avoid circular dependencies
-      const { generateYogaSession } = await import('./yogaSessionGenerator.js');
-      
-      // Load poses from public data
-      const posesResponse = await fetch(`${import.meta.env.BASE_URL}data/yoga-poses.json`);
-      const poses = posesResponse.ok ? await posesResponse.json() : [];
-      
-      // Determine mode based on week number (alternate recovery and strength)
-      let mode = 'power';
-      if (weekNumber % 2 === 0) {
-        mode = 'restorative'; // Recovery weeks
-      } else if (weekNumber >= 8) {
-        mode = weekNumber % 3 === 0 ? 'yin' : 'flexibility';
-      }
-      
-      // Generate session
-      const sessionData = generateYogaSession({
-        mode,
-        level: experienceLevel,
-        poses,
-        goal: mode === 'restorative' || mode === 'yin' ? 'recovery' : 'balance'
-      });
-      
-      return {
-        ...session,
-        sessionData,
-        exercises: null // Yoga uses sessionData instead
-      };
-    } catch (error) {
-      console.error('Error generating Yoga session:', error);
-      return {
-        ...session,
-        exercises: null,
-        sessionData: null,
-        populationError: `Failed to generate Yoga session: ${error.message}`
-      };
-    }
-  }
-
-  // Return session as-is for other types (cardio, etc.) with null fields for consistency
+  // HIIT and Yoga sessions are no longer supported
+  // Return session as-is for standard workout types with null fields for consistency
   return {
     ...session,
     exercises: session.exercises || null,

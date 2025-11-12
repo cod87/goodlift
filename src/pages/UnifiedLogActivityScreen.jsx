@@ -8,8 +8,6 @@ import {
   TextField, 
   Button, 
   Alert,
-  ToggleButtonGroup,
-  ToggleButton,
   FormControl,
   InputLabel,
   Select,
@@ -18,10 +16,7 @@ import {
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import { 
-  FitnessCenter, 
-  SelfImprovement, 
-  Timer, 
-  DirectionsRun 
+  FitnessCenter
 } from '@mui/icons-material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -29,13 +24,9 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import PropTypes from 'prop-types';
 import { 
   saveWorkout, 
-  saveCardioSession, 
-  saveYogaSession, 
-  saveHiitSession,
   saveUserStats,
   getUserStats
 } from '../utils/storage';
-import { generateSessionId } from '../utils/helpers';
 
 // Constants
 const SECONDS_PER_MINUTE = 60;
@@ -43,9 +34,6 @@ const NAVIGATION_DELAY_MS = 1500;
 
 const ACTIVITY_TYPES = {
   WORKOUT: 'workout',
-  CARDIO: 'cardio',
-  HIIT: 'hiit',
-  YOGA: 'yoga',
 };
 
 const WORKOUT_TYPES = {
@@ -56,7 +44,6 @@ const WORKOUT_TYPES = {
 
 const UnifiedLogActivityScreen = ({ onNavigate }) => {
   const [notification, setNotification] = useState({ show: false, message: '', severity: 'success' });
-  const [activityType, setActivityType] = useState(ACTIVITY_TYPES.WORKOUT);
 
   const initialValues = {
     date: new Date(),
@@ -66,8 +53,6 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
     workoutType: WORKOUT_TYPES.FULL,
     numExercises: '',
     setsPerExercise: '',
-    // Cardio-specific fields
-    cardioType: '',
   };
 
   const validate = (values) => {
@@ -84,24 +69,16 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
     }
 
     // Validate activity-specific fields
-    if (activityType === ACTIVITY_TYPES.WORKOUT) {
-      if (!values.numExercises) {
-        errors.numExercises = 'Number of exercises is required';
-      } else if (isNaN(values.numExercises) || parseInt(values.numExercises) <= 0) {
-        errors.numExercises = 'Must be a positive number';
-      }
-
-      if (!values.setsPerExercise) {
-        errors.setsPerExercise = 'Sets per exercise is required';
-      } else if (isNaN(values.setsPerExercise) || parseInt(values.setsPerExercise) <= 0) {
-        errors.setsPerExercise = 'Must be a positive number';
-      }
+    if (!values.numExercises) {
+      errors.numExercises = 'Number of exercises is required';
+    } else if (isNaN(values.numExercises) || parseInt(values.numExercises) <= 0) {
+      errors.numExercises = 'Must be a positive number';
     }
 
-    if (activityType === ACTIVITY_TYPES.CARDIO) {
-      if (!values.cardioType || values.cardioType.trim() === '') {
-        errors.cardioType = 'Cardio type is required';
-      }
+    if (!values.setsPerExercise) {
+      errors.setsPerExercise = 'Sets per exercise is required';
+    } else if (isNaN(values.setsPerExercise) || parseInt(values.setsPerExercise) <= 0) {
+      errors.setsPerExercise = 'Must be a positive number';
     }
     
     return errors;
@@ -112,83 +89,31 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
       const timestamp = values.date.getTime();
       const duration = parseFloat(values.duration) * SECONDS_PER_MINUTE;
 
-      if (activityType === ACTIVITY_TYPES.WORKOUT) {
-        // Save workout with manual log details
-        const workoutData = {
-          date: timestamp,
-          duration: duration,
-          type: values.workoutType,
-          exercises: {},
-          notes: values.notes.trim(),
-          numExercises: parseInt(values.numExercises),
-          setsPerExercise: parseInt(values.setsPerExercise),
-          isManualLog: true,
-        };
+      // Save workout with manual log details
+      const workoutData = {
+        date: timestamp,
+        duration: duration,
+        type: values.workoutType,
+        exercises: {},
+        notes: values.notes.trim(),
+        numExercises: parseInt(values.numExercises),
+        setsPerExercise: parseInt(values.setsPerExercise),
+        isManualLog: true,
+      };
 
-        await saveWorkout(workoutData);
-        
-        // Update stats
-        const stats = await getUserStats();
-        stats.totalWorkouts += 1;
-        stats.totalTime += workoutData.duration;
-        await saveUserStats(stats);
+      await saveWorkout(workoutData);
+      
+      // Update stats
+      const stats = await getUserStats();
+      stats.totalWorkouts += 1;
+      stats.totalTime += workoutData.duration;
+      await saveUserStats(stats);
 
-        setNotification({
-          show: true,
-          message: 'Workout logged successfully!',
-          severity: 'success'
-        });
-      } else if (activityType === ACTIVITY_TYPES.CARDIO) {
-        const sessionData = {
-          cardioType: values.cardioType.trim(),
-          duration: duration,
-          date: timestamp,
-          notes: values.notes.trim(),
-        };
-
-        await saveCardioSession(sessionData);
-        
-        setNotification({
-          show: true,
-          message: 'Cardio session logged successfully!',
-          severity: 'success'
-        });
-      } else if (activityType === ACTIVITY_TYPES.HIIT) {
-        const sessionData = {
-          id: generateSessionId(),
-          date: timestamp,
-          duration: duration,
-          type: 'Manual Log',
-          notes: values.notes.trim(),
-        };
-
-        await saveHiitSession(sessionData);
-        
-        setNotification({
-          show: true,
-          message: 'HIIT session logged successfully!',
-          severity: 'success'
-        });
-      } else if (activityType === ACTIVITY_TYPES.YOGA) {
-        const sessionData = {
-          id: generateSessionId(),
-          date: timestamp,
-          duration: duration,
-          flowLength: 0,
-          coolDownLength: 0,
-          poseCount: 0,
-          type: 'Manual Log',
-          notes: values.notes.trim(),
-        };
-
-        await saveYogaSession(sessionData);
-        
-        setNotification({
-          show: true,
-          message: 'Yoga session logged successfully!',
-          severity: 'success'
-        });
-      }
+      setNotification({
+        show: true,
+        message: 'Workout logged successfully!',
+        severity: 'success'
+      });
       
       resetForm();
       
@@ -211,63 +136,19 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
   };
 
   const getActivityIcon = () => {
-    switch (activityType) {
-      case ACTIVITY_TYPES.WORKOUT:
-        return <FitnessCenter sx={{ fontSize: 48, color: 'primary.main' }} />;
-      case ACTIVITY_TYPES.CARDIO:
-        return <DirectionsRun sx={{ fontSize: 48, color: '#2196f3' }} />;
-      case ACTIVITY_TYPES.HIIT:
-        return <Timer sx={{ fontSize: 48, color: 'secondary.main' }} />;
-      case ACTIVITY_TYPES.YOGA:
-        return <SelfImprovement sx={{ fontSize: 48, color: '#9c27b0' }} />;
-      default:
-        return <FitnessCenter sx={{ fontSize: 48, color: 'primary.main' }} />;
-    }
+    return <FitnessCenter sx={{ fontSize: 48, color: 'primary.main' }} />;
   };
 
   const getActivityColor = () => {
-    switch (activityType) {
-      case ACTIVITY_TYPES.WORKOUT:
-        return 'primary.main';
-      case ACTIVITY_TYPES.CARDIO:
-        return '#2196f3';
-      case ACTIVITY_TYPES.HIIT:
-        return 'secondary.main';
-      case ACTIVITY_TYPES.YOGA:
-        return '#9c27b0';
-      default:
-        return 'primary.main';
-    }
+    return 'primary.main';
   };
 
   const getActivityBgColor = () => {
-    switch (activityType) {
-      case ACTIVITY_TYPES.WORKOUT:
-        return 'rgba(19, 70, 134, 0.1)';
-      case ACTIVITY_TYPES.CARDIO:
-        return 'rgba(33, 150, 243, 0.1)';
-      case ACTIVITY_TYPES.HIIT:
-        return 'rgba(237, 63, 39, 0.1)';
-      case ACTIVITY_TYPES.YOGA:
-        return 'rgba(156, 39, 176, 0.1)';
-      default:
-        return 'rgba(19, 70, 134, 0.1)';
-    }
+    return 'rgba(19, 70, 134, 0.1)';
   };
 
   const getActivityTitle = () => {
-    switch (activityType) {
-      case ACTIVITY_TYPES.WORKOUT:
-        return 'Log Workout';
-      case ACTIVITY_TYPES.CARDIO:
-        return 'Log Cardio';
-      case ACTIVITY_TYPES.HIIT:
-        return 'Log HIIT';
-      case ACTIVITY_TYPES.YOGA:
-        return 'Log Yoga';
-      default:
-        return 'Log Activity';
-    }
+    return 'Log Workout';
   };
 
   return (
@@ -317,57 +198,8 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
             fontSize: { xs: '0.875rem', sm: '1rem' },
             px: { xs: 1, sm: 0 }
           }}>
-            Manually log your completed fitness activities
+            Manually log your completed workouts
           </Typography>
-
-          {/* Activity Type Selector */}
-          <Box sx={{ 
-            display: 'flex',
-            justifyContent: 'center',
-            width: '100%',
-            overflow: 'auto',
-            mb: 2,
-          }}>
-            <ToggleButtonGroup
-              value={activityType}
-              exclusive
-              onChange={(e, newValue) => {
-                if (newValue !== null) {
-                  setActivityType(newValue);
-                }
-              }}
-              aria-label="activity type"
-              sx={{ 
-                flexWrap: { xs: 'wrap', sm: 'nowrap' },
-                justifyContent: 'center',
-                gap: { xs: 0.5, sm: 0 },
-                '& .MuiToggleButton-root': {
-                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  padding: { xs: '6px 8px', sm: '8px 16px' },
-                  minWidth: { xs: 'calc(50% - 4px)', sm: 'auto' },
-                  flex: { xs: '0 0 calc(50% - 4px)', sm: '0 1 auto' },
-                }
-              }}
-            >
-              <ToggleButton value={ACTIVITY_TYPES.WORKOUT} aria-label="workout">
-                <FitnessCenter sx={{ mr: { xs: 0.5, sm: 1 }, fontSize: { xs: '1rem', sm: '1.25rem' } }} />
-                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Workout</Box>
-                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>Work</Box>
-              </ToggleButton>
-              <ToggleButton value={ACTIVITY_TYPES.CARDIO} aria-label="cardio">
-                <DirectionsRun sx={{ mr: { xs: 0.5, sm: 1 }, fontSize: { xs: '1rem', sm: '1.25rem' } }} />
-                Cardio
-              </ToggleButton>
-              <ToggleButton value={ACTIVITY_TYPES.HIIT} aria-label="hiit">
-                <Timer sx={{ mr: { xs: 0.5, sm: 1 }, fontSize: { xs: '1rem', sm: '1.25rem' } }} />
-                HIIT
-              </ToggleButton>
-              <ToggleButton value={ACTIVITY_TYPES.YOGA} aria-label="yoga">
-                <SelfImprovement sx={{ mr: { xs: 0.5, sm: 1 }, fontSize: { xs: '1rem', sm: '1.25rem' } }} />
-                Yoga
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
         </Box>
 
         {notification.show && (
@@ -441,73 +273,52 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                     </Field>
 
                     {/* Workout-specific fields */}
-                    {activityType === ACTIVITY_TYPES.WORKOUT && (
-                      <>
-                        <FormControl fullWidth>
-                          <InputLabel>Workout Type</InputLabel>
-                          <Select
-                            value={values.workoutType}
-                            label="Workout Type"
-                            onChange={(e) => setFieldValue('workoutType', e.target.value)}
-                          >
-                            <MenuItem value={WORKOUT_TYPES.UPPER}>Upper Body</MenuItem>
-                            <MenuItem value={WORKOUT_TYPES.LOWER}>Lower Body</MenuItem>
-                            <MenuItem value={WORKOUT_TYPES.FULL}>Full Body</MenuItem>
-                          </Select>
-                        </FormControl>
+                    <FormControl fullWidth>
+                      <InputLabel>Workout Type</InputLabel>
+                      <Select
+                        value={values.workoutType}
+                        label="Workout Type"
+                        onChange={(e) => setFieldValue('workoutType', e.target.value)}
+                      >
+                        <MenuItem value={WORKOUT_TYPES.UPPER}>Upper Body</MenuItem>
+                        <MenuItem value={WORKOUT_TYPES.LOWER}>Lower Body</MenuItem>
+                        <MenuItem value={WORKOUT_TYPES.FULL}>Full Body</MenuItem>
+                      </Select>
+                    </FormControl>
 
-                        <Field name="numExercises">
-                          {({ field }) => (
-                            <TextField
-                              {...field}
-                              fullWidth
-                              type="number"
-                              label="Number of Exercises"
-                              placeholder="e.g., 6"
-                              error={touched.numExercises && Boolean(errors.numExercises)}
-                              helperText={touched.numExercises && errors.numExercises}
-                              variant="outlined"
-                              inputProps={{ min: 1, step: 1 }}
-                            />
-                          )}
-                        </Field>
+                    <Field name="numExercises">
+                      {({ field }) => (
+                        <TextField
+                          {...field}
+                          fullWidth
+                          type="number"
+                          label="Number of Exercises"
+                          placeholder="e.g., 6"
+                          error={touched.numExercises && Boolean(errors.numExercises)}
+                          helperText={touched.numExercises && errors.numExercises}
+                          variant="outlined"
+                          inputProps={{ min: 1, step: 1 }}
+                        />
+                      )}
+                    </Field>
 
-                        <Field name="setsPerExercise">
-                          {({ field }) => (
-                            <TextField
-                              {...field}
-                              fullWidth
-                              type="number"
-                              label="Sets per Exercise"
-                              placeholder="e.g., 3"
-                              error={touched.setsPerExercise && Boolean(errors.setsPerExercise)}
-                              helperText={touched.setsPerExercise && errors.setsPerExercise}
-                              variant="outlined"
-                              inputProps={{ min: 1, step: 1 }}
-                            />
-                          )}
-                        </Field>
-                      </>
-                    )}
+                    <Field name="setsPerExercise">
+                      {({ field }) => (
+                        <TextField
+                          {...field}
+                          fullWidth
+                          type="number"
+                          label="Sets per Exercise"
+                          placeholder="e.g., 3"
+                          error={touched.setsPerExercise && Boolean(errors.setsPerExercise)}
+                          helperText={touched.setsPerExercise && errors.setsPerExercise}
+                          variant="outlined"
+                          inputProps={{ min: 1, step: 1 }}
+                        />
+                      )}
+                    </Field>
 
-                    {/* Cardio-specific field */}
-                    {activityType === ACTIVITY_TYPES.CARDIO && (
-                      <Field name="cardioType">
-                        {({ field }) => (
-                          <TextField
-                            {...field}
-                            fullWidth
-                            label="Cardio Type"
-                            placeholder="e.g., Running, Cycling, Swimming"
-                            error={touched.cardioType && Boolean(errors.cardioType)}
-                            helperText={touched.cardioType && errors.cardioType}
-                            variant="outlined"
-                          />
-                        )}
-                      </Field>
-                    )}
-
-                    {/* Notes Field - for all activity types */}
+                    {/* Notes Field */}
                     <Field name="notes">
                       {({ field }) => (
                         <TextField

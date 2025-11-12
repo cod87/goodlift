@@ -11,14 +11,9 @@ import WorkoutPreview from './components/WorkoutPreview';
 import CustomizeExerciseScreen from './components/CustomizeExerciseScreen';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
-import UnifiedTimerScreen from './components/UnifiedTimerScreen';
-import HiitSessionSelection from './components/HiitSessionSelection';
-import HiitSessionScreen from './components/HiitSessionScreen';
-import YogaSessionSelection from './components/YogaSessionSelection';
-import YogaSessionScreen from './components/YogaSessionScreen';
 import AuthScreen from './components/AuthScreen';
 import MobilityScreen from './components/Mobility/MobilityScreen';
-import CardioScreen from './pages/CardioScreen';
+import CardioTimer from './components/Cardio/CardioTimer.jsx';
 import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
 import SettingsScreen from './pages/SettingsScreen';
@@ -622,19 +617,7 @@ function AppContent() {
 
           {currentScreen === 'workout-plan' && <WorkoutPlanScreen onNavigate={handleNavigate} />}
 
-          {currentScreen === 'timer' && <UnifiedTimerScreen />}
-
-          {currentScreen === 'hiit' && <HiitTimerScreen />}
-
-          {currentScreen === 'hiit-selection' && <HiitSessionSelection onNavigate={handleNavigate} />}
-
-          {currentScreen === 'hiit-session' && <HiitSessionScreen onNavigate={handleNavigate} />}
-
-          {currentScreen === 'yoga-selection' && <YogaSessionSelection onNavigate={handleNavigate} />}
-
-          {currentScreen === 'yoga-session' && <YogaSessionScreen onNavigate={handleNavigate} />}
-
-          {currentScreen === 'cardio' && <CardioScreen onNavigate={handleNavigate} />}
+          {currentScreen === 'cardio' && <CardioTimer onNavigate={handleNavigate} />}
 
           {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} />}
 

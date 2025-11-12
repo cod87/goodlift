@@ -29,6 +29,7 @@ const WeeklyPlanScreen = memo(({ onBack, onQuickStartDay }) => {
     planningStyle,
     weeklyPlan,
     updatePlanningStyle,
+    updatePlan,
     updateDay,
     resetToDefault,
   } = useWeeklyPlan();
@@ -51,9 +52,8 @@ const WeeklyPlanScreen = memo(({ onBack, onQuickStartDay }) => {
   };
 
   const handlePlanChange = (newPlan) => {
-    // Update the entire weekly plan
-    // This would need to be implemented in useWeeklyPlan
-    console.log('Plan reordered:', newPlan);
+    // Update the entire weekly plan with reordered days
+    updatePlan(newPlan);
   };
 
   const handleCloseDayEdit = () => {

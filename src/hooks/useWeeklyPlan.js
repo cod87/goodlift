@@ -107,6 +107,17 @@ export const useWeeklyPlan = () => {
   };
 
   /**
+   * Update entire weekly plan (e.g., after drag-and-drop reorder)
+   * @param {Array} newPlan - New weekly plan array
+   */
+  const updatePlan = (newPlan) => {
+    setWeeklyPlan(newPlan);
+    setTodaysWorkout(getTodaysWorkout(newPlan));
+    setNextWorkouts(getNextWorkouts(newPlan, 2));
+    savePlan(planningStyle, newPlan);
+  };
+
+  /**
    * Reset plan to default for current style
    */
   const resetToDefault = () => {
@@ -119,11 +130,15 @@ export const useWeeklyPlan = () => {
 
   /**
    * Get workout for specific day
-   * @param {string} day - Day abbreviation (Mon, Tue, etc.)
+   * @param {string|number} day - Day abbreviation (Mon, Tue, etc.) or day index (0-6)
    * @returns {Object|null} Workout for the day
    */
   const getWorkoutForDay = (day) => {
-    return weeklyPlan.find(d => d.day === day) || null;
+    if (typeof day === 'number') {
+      return weeklyPlan.find(d => d.dayOfWeek === day) || null;
+    }
+    // Legacy support for day abbreviations
+    return weeklyPlan.find(d => d.day === day || d.dayName?.substring(0, 3) === day) || null;
   };
 
   return {
@@ -133,6 +148,7 @@ export const useWeeklyPlan = () => {
     nextWorkouts,
     updatePlanningStyle,
     updateDay,
+    updatePlan,
     resetToDefault,
     getWorkoutForDay
   };

@@ -59,16 +59,10 @@ import {
   updateYogaSession,
   updateHiitSession,
   updateCardioSession,
-  getPinnedExercises,
-  removePinnedExercise,
-  addPinnedExercise,
   getActivePlan,
 } from '../utils/storage';
 import { formatDate, formatDuration } from '../utils/helpers';
-import {
-  getExerciseProgression,
-  getUniqueExercises,
-} from '../utils/progressionHelpers';
+import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 
 /**
@@ -112,7 +106,7 @@ const ProgressDashboard = () => {
       setCardioSessions(loadedCardio);
       setActivePlan(loadedActivePlan);
 
-      const pinned = getPinnedExercises();
+      const pinned = progressiveOverloadService.getPinnedExercises();
       setPinnedExercisesState(pinned);
 
       try {
@@ -122,7 +116,7 @@ const ProgressDashboard = () => {
         setAvailableExercises(exerciseNames);
       } catch (error) {
         console.error('Error loading exercises:', error);
-        const unique = getUniqueExercises(loadedHistory);
+        const unique = progressiveOverloadService.getUniqueExercises(loadedHistory);
         setAvailableExercises(unique);
       }
     } catch (error) {
@@ -220,12 +214,12 @@ const ProgressDashboard = () => {
 
 
   const handleRemovePinnedExercise = (exerciseName) => {
-    removePinnedExercise(exerciseName);
+    progressiveOverloadService.removePinnedExercise(exerciseName);
     setPinnedExercisesState(pinnedExercises.filter(p => p.exerciseName !== exerciseName));
   };
 
   const handleAddPinnedExercise = (exerciseName) => {
-    if (addPinnedExercise(exerciseName, 'weight')) {
+    if (progressiveOverloadService.addPinnedExercise(exerciseName, 'weight')) {
       setPinnedExercisesState([...pinnedExercises, { exerciseName, trackingMode: 'weight' }]);
       setAddExerciseDialogOpen(false);
       setExerciseSearchQuery('');
@@ -518,7 +512,7 @@ const ProgressDashboard = () => {
                 ) : (
                   <Stack spacing={2}>
                     {pinnedExercises.map((pinned) => {
-                      const progression = getExerciseProgression(
+                      const progression = progressiveOverloadService.getExerciseProgression(
                         history,
                         pinned.exerciseName,
                         'weight'

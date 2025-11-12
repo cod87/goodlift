@@ -7,6 +7,7 @@ import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import SettingsIcon from '@mui/icons-material/Settings';
 import TimerIcon from '@mui/icons-material/Timer';
+import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import { Chip, Tooltip } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import GuestLogoutDialog from './GuestLogoutDialog';
@@ -218,10 +219,10 @@ const NavigationSidebar = ({
                 onClick={() => handleNavClick('selection')}
               />
               <NavLink
-                icon={<TimerIcon />}
-                label="Timer Hub"
-                isActive={currentScreen === 'timer'}
-                onClick={() => handleNavClick('timer')}
+                icon={<DirectionsRunIcon />}
+                label="Cardio"
+                isActive={currentScreen === 'cardio'}
+                onClick={() => handleNavClick('cardio')}
               />
               <NavLink
                 icon={<TrendingUpIcon />}

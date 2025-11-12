@@ -10,15 +10,6 @@ import {
   IconButton,
   Stack,
   LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Grid,
 } from '@mui/material';
 import {
@@ -34,14 +25,13 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import CompactHeader from './Common/CompactHeader';
+import PlanCreationModal from './PlanCreationModal';
 import { usePlanIntegration } from '../hooks/usePlanIntegration';
 import {
-  generateWorkoutPlan,
   getPlanStatistics,
 } from '../utils/workoutPlanGenerator';
 import {
   getWorkoutPlans,
-  saveWorkoutPlan,
   deleteWorkoutPlan,
   getActivePlan,
   setActivePlan,
@@ -63,17 +53,8 @@ const UnifiedWorkoutHub = ({
 }) => {
   const [plans, setPlans] = useState([]);
   const [activePlan, setActivePlanState] = useState(null);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [showPlanCreationModal, setShowPlanCreationModal] = useState(false);
   const [recentWorkouts, setRecentWorkouts] = useState([]);
-  const [planForm, setPlanForm] = useState({
-    name: '',
-    goal: 'general_fitness',
-    experienceLevel: 'intermediate',
-    daysPerWeek: 3,
-    duration: 30,
-    sessionTypes: ['full', 'upper', 'lower', 'hiit', 'cardio', 'yoga']
-  });
 
   const {
     getTodaysWorkout,
@@ -152,40 +133,6 @@ const UnifiedWorkoutHub = ({
     }
   };
 
-  const handleGeneratePlan = async () => {
-    try {
-      setIsGenerating(true);
-      const plan = await generateWorkoutPlan({
-        ...planForm,
-        planName: planForm.name || 'My Workout Plan',
-        startDate: new Date(),
-        equipmentAvailable: ['all']
-      });
-
-      await saveWorkoutPlan(plan);
-      
-      if (plan.name === 'This Week') {
-        await setActivePlan(plan.id);
-      }
-      
-      await loadPlans();
-      setShowCreateDialog(false);
-      setPlanForm({
-        name: '',
-        goal: 'general_fitness',
-        experienceLevel: 'intermediate',
-        daysPerWeek: 3,
-        duration: 30,
-        sessionTypes: ['full', 'upper', 'lower', 'hiit', 'cardio', 'yoga']
-      });
-    } catch (error) {
-      console.error('Error generating plan:', error);
-      alert(`Failed to generate plan: ${error.message}`);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   const handleSetActive = async (planId) => {
     try {
       await setActivePlan(planId);
@@ -239,7 +186,7 @@ const UnifiedWorkoutHub = ({
                 <Button
                   size="small"
                   startIcon={<AddIcon />}
-                  onClick={() => setShowCreateDialog(true)}
+                  onClick={() => setShowPlanCreationModal(true)}
                   sx={{ color: 'secondary.main' }}
                 >
                   New Plan
@@ -288,7 +235,7 @@ const UnifiedWorkoutHub = ({
                     variant="contained"
                     color="secondary"
                     startIcon={<AddIcon />}
-                    onClick={() => setShowCreateDialog(true)}
+                    onClick={() => setShowPlanCreationModal(true)}
                   >
                     Create Plan
                   </Button>
@@ -600,87 +547,15 @@ const UnifiedWorkoutHub = ({
         </Card>
       </Stack>
 
-      {/* Create Plan Dialog */}
-      <Dialog open={showCreateDialog} onClose={() => setShowCreateDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Workout Plan</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              label="Plan Name"
-              fullWidth
-              value={planForm.name}
-              onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
-              placeholder="e.g., Summer Cut, Strength Building"
-            />
-            
-            <FormControl fullWidth>
-              <InputLabel>Goal</InputLabel>
-              <Select
-                value={planForm.goal}
-                onChange={(e) => setPlanForm({ ...planForm, goal: e.target.value })}
-                label="Goal"
-              >
-                <MenuItem value="general_fitness">General Fitness</MenuItem>
-                <MenuItem value="muscle_building">Muscle Building</MenuItem>
-                <MenuItem value="strength">Strength</MenuItem>
-                <MenuItem value="fat_loss">Fat Loss</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>Experience Level</InputLabel>
-              <Select
-                value={planForm.experienceLevel}
-                onChange={(e) => setPlanForm({ ...planForm, experienceLevel: e.target.value })}
-                label="Experience Level"
-              >
-                <MenuItem value="beginner">Beginner</MenuItem>
-                <MenuItem value="intermediate">Intermediate</MenuItem>
-                <MenuItem value="advanced">Advanced</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>Days Per Week</InputLabel>
-              <Select
-                value={planForm.daysPerWeek}
-                onChange={(e) => setPlanForm({ ...planForm, daysPerWeek: e.target.value })}
-                label="Days Per Week"
-              >
-                {[3, 4, 5, 6, 7].map(days => (
-                  <MenuItem key={days} value={days}>{days} days</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>Plan Duration (days)</InputLabel>
-              <Select
-                value={planForm.duration}
-                onChange={(e) => setPlanForm({ ...planForm, duration: e.target.value })}
-                label="Plan Duration (days)"
-              >
-                <MenuItem value={7}>1 week</MenuItem>
-                <MenuItem value={14}>2 weeks</MenuItem>
-                <MenuItem value={30}>1 month</MenuItem>
-                <MenuItem value={60}>2 months</MenuItem>
-                <MenuItem value={90}>3 months</MenuItem>
-              </Select>
-            </FormControl>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowCreateDialog(false)}>Cancel</Button>
-          <Button 
-            onClick={handleGeneratePlan} 
-            variant="contained" 
-            color="primary"
-            disabled={isGenerating || !planForm.name}
-          >
-            {isGenerating ? 'Generating...' : 'Create Plan'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Plan Creation Modal */}
+      <PlanCreationModal
+        open={showPlanCreationModal}
+        onClose={() => setShowPlanCreationModal(false)}
+        onPlanCreated={() => {
+          loadPlans();
+          setShowPlanCreationModal(false);
+        }}
+      />
     </Box>
   );
 };

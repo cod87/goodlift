@@ -413,7 +413,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       if (nextIndex >= workoutSequence.length) {
         // No more exercises
         setCurrentPhase('cooldown');
-        setCurrentStretchIndex(0);
       } else {
         setCurrentStepIndex(nextIndex);
       }

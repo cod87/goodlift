@@ -11,7 +11,6 @@ import CustomizeExerciseScreen from './components/CustomizeExerciseScreen';
 import CustomWorkoutPreview from './components/CustomWorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
-import HiitTimerScreen from './components/HiitTimerScreen';
 import HiitSessionSelection from './components/HiitSessionSelection';
 import HiitSessionScreen from './components/HiitSessionScreen';
 import YogaSessionSelection from './components/YogaSessionSelection';
@@ -584,8 +583,6 @@ function AppContent() {
           {currentScreen === 'workout-plan' && <WorkoutPlanScreen onNavigate={handleNavigate} />}
 
           {currentScreen === 'timer' && <UnifiedTimerScreen />}
-
-          {currentScreen === 'hiit' && <HiitTimerScreen />}
 
           {currentScreen === 'hiit-selection' && <HiitSessionSelection onNavigate={handleNavigate} />}
 

@@ -61,9 +61,6 @@ const TIMER_TYPES = {
   YOGA: 'yoga',
 };
 
-// Extract yoga pose names from imported data
-const YOGA_POSES = yogaPosesData.map(pose => pose.Name);
-
 // Storage key for timer settings
 const TIMER_SETTINGS_KEY = 'goodlift_timer_settings';
 
@@ -208,11 +205,12 @@ const UnifiedTimerScreen = () => {
 
   // Get random yoga pose
   const getRandomPose = useCallback(() => {
-    const availablePoses = YOGA_POSES.filter(pose => !poseHistory.includes(pose));
+    const poseNames = yogaPosesData.map(pose => pose.Name);
+    const availablePoses = poseNames.filter(pose => !poseHistory.includes(pose));
     if (availablePoses.length === 0) {
       // Reset history if we've used all poses
       setPoseHistory([]);
-      return YOGA_POSES[Math.floor(Math.random() * YOGA_POSES.length)];
+      return poseNames[Math.floor(Math.random() * poseNames.length)];
     }
     return availablePoses[Math.floor(Math.random() * availablePoses.length)];
   }, [poseHistory]);

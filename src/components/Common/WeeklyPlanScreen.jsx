@@ -24,13 +24,12 @@ import { useWeeklyPlan } from '../../hooks/useWeeklyPlan';
  * Allows users to view, edit, and customize their weekly training plan
  * Now uses the new WeeklyCalendarView with 7-day structure
  */
-const WeeklyPlanScreen = memo(({ onBack, onQuickStartDay }) => {
+const WeeklyPlanScreen = memo(({ onBack }) => {
   const {
     planningStyle,
     weeklyPlan,
     updatePlanningStyle,
     updatePlan,
-    updateDay,
     resetToDefault,
   } = useWeeklyPlan();
 
@@ -39,11 +38,6 @@ const WeeklyPlanScreen = memo(({ onBack, onQuickStartDay }) => {
 
   const handleStyleChange = (event) => {
     updatePlanningStyle(event.target.value);
-  };
-
-  const handleRandomizeWeek = () => {
-    // For now, just reset to default. Could add randomization logic later
-    resetToDefault();
   };
 
   const handleDayClick = (day, index) => {
@@ -166,7 +160,6 @@ WeeklyPlanScreen.displayName = 'WeeklyPlanScreen';
 
 WeeklyPlanScreen.propTypes = {
   onBack: PropTypes.func.isRequired,
-  onQuickStartDay: PropTypes.func,
 };
 
 export default WeeklyPlanScreen;

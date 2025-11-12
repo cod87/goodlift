@@ -122,7 +122,7 @@ export const FourWeekProgressionChart = memo(({ workoutHistory = [] }) => {
   const options = {
     responsive: true,
     maintainAspectRatio: true,
-    aspectRatio: 2,
+    aspectRatio: window.innerWidth < 600 ? 1.2 : 2,
     interaction: {
       mode: 'index',
       intersect: false,
@@ -220,9 +220,12 @@ export const FourWeekProgressionChart = memo(({ workoutHistory = [] }) => {
       sx={{
         borderRadius: 3,
         boxShadow: '0 4px 16px rgba(19, 70, 134, 0.08)',
+        width: '100%',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
       }}
     >
-      <CardContent sx={{ p: 2.5 }}>
+      <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
         <Typography
           variant="overline"
           sx={{
@@ -236,7 +239,7 @@ export const FourWeekProgressionChart = memo(({ workoutHistory = [] }) => {
           4-WEEK PROGRESSION
         </Typography>
 
-        <Box sx={{ minHeight: '250px' }}>
+        <Box sx={{ minHeight: { xs: '200px', sm: '250px' }, width: '100%', position: 'relative' }}>
           <Line data={chartData} options={options} />
         </Box>
 
@@ -248,8 +251,8 @@ export const FourWeekProgressionChart = memo(({ workoutHistory = [] }) => {
             borderTop: '1px solid',
             borderColor: 'divider',
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 2,
+            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)' },
+            gap: { xs: 1, sm: 2 },
           }}
         >
           <Box sx={{ textAlign: 'center' }}>

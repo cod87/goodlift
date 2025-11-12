@@ -4,7 +4,9 @@ import { motion } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { Box, Card, CardContent, Typography, Button, Stack, Chip, IconButton, Snackbar, Alert } from '@mui/material';
 import { Download, Check, Celebration, Star, StarBorder } from '@mui/icons-material';
-import { saveFavoriteWorkout } from '../utils/storage';
+import { saveFavoriteWorkout, getWorkoutHistory } from '../utils/storage';
+import { getPersonalRecords, detectNewPRs } from '../utils/trackingMetrics';
+import { PRNotification } from './CelebrationNotifications';
 
 /**
  * CompletionScreen component displays workout summary after completion
@@ -14,6 +16,28 @@ import { saveFavoriteWorkout } from '../utils/storage';
 const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [prNotifications, setPrNotifications] = useState([]);
+  const [currentPRIndex, setCurrentPRIndex] = useState(0);
+
+  // Check for PRs when component mounts
+  useEffect(() => {
+    const checkForPRs = async () => {
+      try {
+        const history = await getWorkoutHistory();
+        // Get PRs from history excluding current workout
+        const previousPRs = getPersonalRecords(history.slice(1));
+        // Detect new PRs in current workout
+        const newPRs = detectNewPRs(workoutData, previousPRs);
+        if (newPRs.length > 0) {
+          setPrNotifications(newPRs);
+        }
+      } catch (error) {
+        console.error('Error checking for PRs:', error);
+      }
+    };
+
+    checkForPRs();
+  }, [workoutData]);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -243,6 +267,15 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
           Workout saved to favorites!
         </Alert>
       </Snackbar>
+
+      {/* PR Notifications */}
+      {prNotifications.length > 0 && currentPRIndex < prNotifications.length && (
+        <PRNotification
+          open={true}
+          onClose={() => setCurrentPRIndex(prev => prev + 1)}
+          prData={prNotifications[currentPRIndex]}
+        />
+      )}
     </motion.div>
   );
 });

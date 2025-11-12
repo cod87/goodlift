@@ -1281,3 +1281,45 @@ export const getWorkoutPlanById = async (planId) => {
     return null;
   }
 };
+
+/**
+ * Check if weekly summary should be shown
+ * Shows on Sundays if not shown in the last 7 days
+ * @returns {boolean} True if weekly summary should be shown
+ */
+export const shouldShowWeeklySummary = () => {
+  try {
+    const WEEKLY_SUMMARY_KEY = 'goodlift_last_weekly_summary';
+    const lastShown = localStorage.getItem(WEEKLY_SUMMARY_KEY);
+    const now = new Date();
+    
+    // Only show on Sundays
+    if (now.getDay() !== 0) {
+      return false;
+    }
+    
+    if (!lastShown) {
+      return true;
+    }
+    
+    const lastShownDate = new Date(lastShown);
+    const daysSince = Math.floor((now - lastShownDate) / (1000 * 60 * 60 * 24));
+    
+    return daysSince >= 7;
+  } catch (error) {
+    console.error('Error checking weekly summary:', error);
+    return false;
+  }
+};
+
+/**
+ * Mark weekly summary as shown
+ */
+export const markWeeklySummaryShown = () => {
+  try {
+    const WEEKLY_SUMMARY_KEY = 'goodlift_last_weekly_summary';
+    localStorage.setItem(WEEKLY_SUMMARY_KEY, new Date().toISOString());
+  } catch (error) {
+    console.error('Error marking weekly summary:', error);
+  }
+};

@@ -220,9 +220,9 @@ const NavigationSidebar = ({
               />
               <NavLink
                 icon={<DirectionsRunIcon />}
-                label="Cardio"
-                isActive={currentScreen === 'cardio'}
-                onClick={() => handleNavClick('cardio')}
+                label="Timer"
+                isActive={currentScreen === 'timer' || currentScreen === 'cardio' || currentScreen === 'hiit'}
+                onClick={() => handleNavClick('timer')}
               />
               <NavLink
                 icon={<TrendingUpIcon />}

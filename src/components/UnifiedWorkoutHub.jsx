@@ -481,39 +481,25 @@ const UnifiedWorkoutHub = ({
           </CardContent>
         </Card>
 
-        {/* Cardio Section - Extra Compact */}
+        {/* Cardio & Timer Section - Extra Compact */}
         <Card sx={{ bgcolor: 'background.paper' }}>
           <CardContent sx={{ py: 2 }}>
             <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CardioIcon /> Cardio
+              <CardioIcon /> Cardio & Timers
             </Typography>
             <Grid container spacing={1}>
               <Grid item xs={6}>
                 <Button
                   variant="outlined"
                   size="small"
-                  onClick={() => onNavigate('hiit-selection')}
+                  onClick={() => onNavigate('timer')}
                   fullWidth
                   sx={{ 
                     py: 1,
                     fontSize: '0.85rem',
                   }}
                 >
-                  HIIT
-                </Button>
-              </Grid>
-              <Grid item xs={6}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => onNavigate('hiit')}
-                  fullWidth
-                  sx={{ 
-                    py: 1,
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  Timer
+                  Unified Timer
                 </Button>
               </Grid>
               <Grid item xs={6}>

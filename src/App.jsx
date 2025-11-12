@@ -14,7 +14,7 @@ import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import AuthScreen from './components/AuthScreen';
 import MobilityScreen from './components/Mobility/MobilityScreen';
-import CardioTimer from './components/Cardio/CardioTimer.jsx';
+import UnifiedTimerScreen from './pages/UnifiedTimerScreen';
 import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
 import SettingsScreen from './pages/SettingsScreen';
@@ -621,7 +621,9 @@ function AppContent() {
 
           {currentScreen === 'workout-plan' && <WorkoutPlanScreen onNavigate={handleNavigate} />}
 
-          {currentScreen === 'cardio' && <CardioTimer onNavigate={handleNavigate} />}
+          {(currentScreen === 'cardio' || currentScreen === 'hiit' || currentScreen === 'timer') && (
+            <UnifiedTimerScreen onNavigate={handleNavigate} />
+          )}
 
           {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} />}
 

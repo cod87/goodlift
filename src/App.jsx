@@ -608,6 +608,7 @@ function AppContent() {
               currentPlan={currentPlan}
               todaysWorkout={getTodaysWorkout()}
               onQuickStart={handleTodayViewQuickStart}
+              onNavigate={handleNavigate}
               loading={loading}
             />
           )}

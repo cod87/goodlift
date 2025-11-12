@@ -26,6 +26,7 @@ import {
   Delete as DeleteIcon,
   SelfImprovement as YogaIcon,
   DirectionsRun as CardioIcon,
+  ArrowBack as BackIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import CompactHeader from './Common/CompactHeader';
@@ -174,6 +175,17 @@ const UnifiedWorkoutHub = ({
       pb: { xs: '80px', md: 3 },
       minHeight: '100vh',
     }}>
+      {/* Back Button */}
+      <Box sx={{ mb: 2 }}>
+        <Button
+          startIcon={<BackIcon />}
+          onClick={() => onNavigate('home')}
+          sx={{ color: 'text.secondary' }}
+        >
+          Back to Work Home
+        </Button>
+      </Box>
+      
       <CompactHeader 
         title="Training Hub"
         subtitle="Workouts, plans, cardio, and mobility in one place"

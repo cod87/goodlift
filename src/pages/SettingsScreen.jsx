@@ -12,11 +12,6 @@ import {
   Divider,
   Stack,
   Button,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  Chip,
   Select,
   MenuItem,
   FormControl,
@@ -29,9 +24,6 @@ import {
   Brightness4, 
   Brightness7, 
   VolumeUp, 
-  Delete, 
-  CheckCircle, 
-  Add, 
   SelfImprovement,
   Person,
   FitnessCenter,
@@ -43,8 +35,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { usePreferences } from '../contexts/PreferencesContext';
 import { useAuth } from '../contexts/AuthContext';
 import audioService from '../utils/audioService';
-import { getWorkoutPlans, getActivePlan, setActivePlan, deleteWorkoutPlan } from '../utils/storage';
-import QuickPlanSetup from '../components/PlanBuilder/QuickPlanSetup';
 import { downloadProfileData } from '../utils/profileUtils';
 import { useUserProfile } from '../contexts/UserProfileContext';
 
@@ -64,9 +54,6 @@ const SettingsScreen = ({ onNavigate }) => {
     }
   });
   const [isMuted, setIsMuted] = useState(audioService.isMutedState());
-  const [plans, setPlans] = useState([]);
-  const [activePlan, setActivePlanState] = useState(null);
-  const [showPlanModal, setShowPlanModal] = useState(false);
 
   // Stretch reminder preferences
   const [stretchPrefs, setStretchPrefs] = useState(() => {
@@ -87,18 +74,6 @@ const SettingsScreen = ({ onNavigate }) => {
       };
     }
   });
-
-  // Load plans on mount
-  useEffect(() => {
-    loadPlans();
-  }, []);
-
-  const loadPlans = async () => {
-    const loadedPlans = await getWorkoutPlans();
-    setPlans(loadedPlans);
-    const active = await getActivePlan();
-    setActivePlanState(active);
-  };
 
   // Save volume to localStorage
   useEffect(() => {
@@ -147,38 +122,6 @@ const SettingsScreen = ({ onNavigate }) => {
     }
   };
 
-  const handleActivatePlan = async (planId) => {
-    try {
-      await setActivePlan(planId);
-      await loadPlans();
-    } catch (error) {
-      console.error('Error activating plan:', error);
-    }
-  };
-
-  const handleDeletePlan = async (planId) => {
-    if (window.confirm('Are you sure you want to delete this plan?')) {
-      try {
-        await deleteWorkoutPlan(planId);
-        await loadPlans();
-      } catch (error) {
-        console.error('Error deleting plan:', error);
-      }
-    }
-  };
-
-  const handleOpenPlanModal = () => {
-    setShowPlanModal(true);
-  };
-
-  const handleClosePlanModal = () => {
-    setShowPlanModal(false);
-  };
-
-  const handlePlanCreated = async () => {
-    await loadPlans();
-  };
-
   const handleStretchPreferenceChange = (key, value) => {
     setStretchPrefs(prev => ({
       ...prev,
@@ -198,25 +141,6 @@ const SettingsScreen = ({ onNavigate }) => {
     if (onNavigate) {
       onNavigate('profile');
     }
-  };
-
-  const getGoalLabel = (goal) => {
-    const labels = {
-      strength: 'Strength',
-      hypertrophy: 'Muscle',
-      fat_loss: 'Fat-Loss',
-      general_fitness: 'General'
-    };
-    return labels[goal] || goal;
-  };
-
-  const getExperienceLabel = (level) => {
-    const labels = {
-      beginner: 'Beginner',
-      intermediate: 'Intermediate',
-      advanced: 'Advanced'
-    };
-    return labels[level] || level;
   };
 
   return (
@@ -378,116 +302,6 @@ const SettingsScreen = ({ onNavigate }) => {
                     </Select>
                   </FormControl>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Workout Plans Section */}
-            <Card
-              sx={{
-                maxWidth: 600,
-                borderRadius: 2,
-                boxShadow: 3,
-                width: '100%',
-                boxSizing: 'border-box',
-              }}
-            >
-              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                <Stack spacing={3}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 600,
-                      }}
-                    >
-                      Workout Plans
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      startIcon={<Add />}
-                      onClick={handleOpenPlanModal}
-                      sx={{ textTransform: 'none' }}
-                    >
-                      Create Plan
-                    </Button>
-                  </Box>
-
-                  <Divider />
-
-                  {plans.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-                      No workout plans yet. Create one to get started!
-                    </Typography>
-                  ) : (
-                    <List sx={{ py: 0 }}>
-                      {plans.map((plan) => (
-                        <ListItem
-                          key={plan.id}
-                          sx={{
-                            border: '1px solid',
-                            borderColor: activePlan?.id === plan.id ? 'primary.main' : 'divider',
-                            borderRadius: 2,
-                            mb: 2,
-                            bgcolor: activePlan?.id === plan.id ? 'action.selected' : 'background.paper',
-                            '&:last-child': { mb: 0 }
-                          }}
-                        >
-                          <ListItemText
-                            primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                <Typography variant="body1" fontWeight={600}>
-                                  {plan.name}
-                                </Typography>
-                                {activePlan?.id === plan.id && (
-                                  <CheckCircle color="primary" fontSize="small" />
-                                )}
-                              </Box>
-                            }
-                            secondary={
-                              <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                                <Chip
-                                  label={getGoalLabel(plan.goal)}
-                                  size="small"
-                                  sx={{ fontSize: '0.7rem', height: 20 }}
-                                />
-                                <Chip
-                                  label={`${plan.daysPerWeek}x/week`}
-                                  size="small"
-                                  sx={{ fontSize: '0.7rem', height: 20 }}
-                                />
-                                <Chip
-                                  label={getExperienceLabel(plan.experienceLevel)}
-                                  size="small"
-                                  sx={{ fontSize: '0.7rem', height: 20 }}
-                                />
-                              </Stack>
-                            }
-                          />
-                          <Stack direction="row" spacing={1}>
-                            {activePlan?.id !== plan.id && (
-                              <Button
-                                size="small"
-                                variant="outlined"
-                                onClick={() => handleActivatePlan(plan.id)}
-                                sx={{ textTransform: 'none' }}
-                              >
-                                Activate
-                              </Button>
-                            )}
-                            <IconButton
-                              size="small"
-                              onClick={() => handleDeletePlan(plan.id)}
-                              sx={{ color: 'error.main' }}
-                            >
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </Stack>
-                        </ListItem>
-                      ))}
-                    </List>
-                  )}
-                </Stack>
               </CardContent>
             </Card>
           </>
@@ -677,13 +491,6 @@ const SettingsScreen = ({ onNavigate }) => {
           </Typography>
         </Box>
       </motion.div>
-
-      {/* Quick Plan Setup */}
-      <QuickPlanSetup
-        open={showPlanModal}
-        onClose={handleClosePlanModal}
-        onPlanCreated={handlePlanCreated}
-      />
     </Box>
   );
 };

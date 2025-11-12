@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, getYoutubeEmbedUrl, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
-import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration } from '@mui/icons-material';
+import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip } from '@mui/material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp } from '@mui/icons-material';
 import { selectStretchesForMuscleGroups } from '../utils/selectStretchesForMuscleGroups';
 import StretchPhase from './StretchPhase';
+import { calculateProgressiveOverload } from '../utils/progressiveOverload';
 
 /**
  * WorkoutScreen component manages the active workout session
@@ -23,6 +24,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   // Store initial target values for each exercise at workout start
   const [initialTargets, setInitialTargets] = useState({});
+  // Progressive overload suggestion state
+  const [progressiveOverloadSuggestion, setProgressiveOverloadSuggestion] = useState(null);
+  const [showSuggestion, setShowSuggestion] = useState(false);
+  // Current set weight and reps (controlled inputs)
+  const [currentWeight, setCurrentWeight] = useState('');
+  const [currentReps, setCurrentReps] = useState('');
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
   
@@ -168,6 +175,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       // This ensures we don't show stale values from a previous exercise
       setPrevWeight(initialTarget?.weight ?? null);
       setTargetReps(initialTarget?.reps ?? null);
+      
+      // Set controlled input values
+      setCurrentWeight(initialTarget?.weight ?? '');
+      setCurrentReps(initialTarget?.reps ?? '');
+      
+      // Reset suggestion when changing exercises
+      setProgressiveOverloadSuggestion(null);
+      setShowSuggestion(false);
     }
     
     // Scroll to top when exercise changes
@@ -337,6 +352,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     const updatedWorkoutData = [...workoutData, newData];
     setWorkoutData(updatedWorkoutData);
     
+    // Calculate and show progressive overload suggestion
+    if (targetReps && reps > 0) {
+      const suggestion = calculateProgressiveOverload(weight, reps, targetReps);
+      if (suggestion) {
+        setProgressiveOverloadSuggestion(suggestion);
+        setShowSuggestion(true);
+        // Auto-hide suggestion after 5 seconds
+        setTimeout(() => setShowSuggestion(false), 5000);
+      }
+    }
+    
     if (currentStepIndex + 1 >= workoutSequence.length) {
       // Exercises complete - move to cooldown
       await applyConditionalPersistRules(updatedWorkoutData);
@@ -410,6 +436,52 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
       console.error('Error saving to favorites:', error);
       alert('Failed to save workout to favorites');
     }
+  };
+
+  // Helper functions for +/- buttons
+  const adjustWeight = (delta) => {
+    const current = parseFloat(currentWeight) || 0;
+    const newWeight = Math.max(0, current + delta);
+    // Round to 1 decimal place to handle 2.5lb increments cleanly
+    setCurrentWeight(newWeight.toFixed(1));
+  };
+
+  const adjustReps = (delta) => {
+    const current = parseInt(currentReps, 10) || 0;
+    const newReps = Math.max(0, current + delta);
+    setCurrentReps(newReps.toString());
+  };
+
+  const applySuggestion = () => {
+    if (progressiveOverloadSuggestion?.suggestedWeight) {
+      setCurrentWeight(progressiveOverloadSuggestion.suggestedWeight.toString());
+      setShowSuggestion(false);
+    }
+  };
+
+  const skipExercise = () => {
+    if (window.confirm('Skip all remaining sets of this exercise?')) {
+      // Find next exercise in sequence
+      let nextIndex = currentStepIndex + 1;
+      const currentExerciseName = currentStep.exercise['Exercise Name'];
+      
+      while (nextIndex < workoutSequence.length && 
+             workoutSequence[nextIndex].exercise['Exercise Name'] === currentExerciseName) {
+        nextIndex++;
+      }
+      
+      if (nextIndex >= workoutSequence.length) {
+        // No more exercises
+        setCurrentPhase('cooldown');
+        setCurrentStretchIndex(0);
+      } else {
+        setCurrentStepIndex(nextIndex);
+      }
+    }
+  };
+
+  const swapExercise = () => {
+    alert('Exercise swap feature coming soon! For now, you can skip this exercise and manually add a different one later.');
   };
 
   if (!currentStep && currentPhase === 'exercise') {
@@ -587,7 +659,22 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                   allowFullScreen
                 ></iframe>
               </div>
-              <p className="set-info">Set {currentStep.setNumber} of {SETS_PER_EXERCISE}</p>
+              
+              {/* Set X of Y indicator with enhanced styling */}
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                gap: 1,
+                my: 2 
+              }}>
+                <Chip 
+                  label={`Set ${currentStep.setNumber} of ${SETS_PER_EXERCISE}`}
+                  color="primary"
+                  sx={{ fontWeight: 600, fontSize: '1rem', minHeight: '44px', px: 2 }}
+                />
+              </Box>
+              
               {(prevWeight !== null || targetReps !== null) && (
                 <motion.p
                   className="prev-weight"
@@ -598,99 +685,202 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                   Target: {prevWeight ?? '–'} lbs • {targetReps ?? '–'} reps
                 </motion.p>
               )}
+              
+              {/* Progressive Overload Suggestion */}
+              <AnimatePresence>
+                {showSuggestion && progressiveOverloadSuggestion && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <Alert 
+                      severity={progressiveOverloadSuggestion.type === 'excellent' ? 'success' : 'info'}
+                      icon={<TrendingUp />}
+                      action={
+                        progressiveOverloadSuggestion.suggestedWeight !== parseFloat(currentWeight) && (
+                          <Button 
+                            color="inherit" 
+                            size="small" 
+                            onClick={applySuggestion}
+                            sx={{ minHeight: '44px' }}
+                          >
+                            Apply
+                          </Button>
+                        )
+                      }
+                      sx={{ mb: 2, minHeight: '44px' }}
+                    >
+                      {progressiveOverloadSuggestion.message}
+                    </Alert>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
               <div className="input-row">
                 <div className="input-group">
                   <label htmlFor="weight-select">Weight (lbs)</label>
-                  <input
-                    id="weight-select"
-                    type="tel"
-                    inputMode="decimal"
-                    pattern="[0-9]*([.,][0-9]+)?"
-                    step="2.5"
-                    min="0"
-                    max="500"
-                    className="exercise-input"
-                    defaultValue={prevWeight ?? ''}
-                    placeholder="–"
-                    aria-label="Weight in pounds"
-                    onFocus={(e) => {
-                      e.target.select();
-                      // Only scroll if input would be obscured by keyboard
-                      // Keyboard takes up ~40% of viewport, scroll only if input is in lower 45%
-                      const rect = e.target.getBoundingClientRect();
-                      const inputBottom = rect.bottom;
-                      const viewportHeight = window.innerHeight;
-                      const threshold = viewportHeight * 0.55; // 55% from top = lower 45%
-                      
-                      // Only snap if input bottom is in the lower 45% (below 55% threshold)
-                      if (inputBottom > threshold) {
-                        setTimeout(() => {
-                          e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          // Additional scroll to create more space above the input
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <IconButton 
+                      onClick={() => adjustWeight(-2.5)}
+                      size="large"
+                      sx={{ 
+                        bgcolor: 'action.hover',
+                        minWidth: '44px',
+                        minHeight: '44px',
+                        '&:hover': { bgcolor: 'action.selected' }
+                      }}
+                    >
+                      <Remove />
+                    </IconButton>
+                    <input
+                      id="weight-select"
+                      type="tel"
+                      inputMode="decimal"
+                      pattern="[0-9]*([.,][0-9]+)?"
+                      step="2.5"
+                      min="0"
+                      max="500"
+                      className="exercise-input"
+                      value={currentWeight}
+                      onChange={(e) => setCurrentWeight(e.target.value)}
+                      placeholder="–"
+                      aria-label="Weight in pounds"
+                      onFocus={(e) => {
+                        e.target.select();
+                        const rect = e.target.getBoundingClientRect();
+                        const inputBottom = rect.bottom;
+                        const viewportHeight = window.innerHeight;
+                        const threshold = viewportHeight * 0.55;
+                        
+                        if (inputBottom > threshold) {
                           setTimeout(() => {
-                            window.scrollBy({ top: -80, behavior: 'smooth' });
-                          }, 100);
-                        }, 300);
-                      }
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '2px solid var(--color-border)',
-                      fontSize: '1rem',
-                      fontFamily: 'var(--font-body)',
-                      backgroundColor: 'var(--color-surface)',
-                      color: 'var(--color-text)',
-                    }}
-                  />
+                            e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            setTimeout(() => {
+                              window.scrollBy({ top: -80, behavior: 'smooth' });
+                            }, 100);
+                          }, 300);
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        minHeight: '44px',
+                        borderRadius: '8px',
+                        border: '2px solid var(--color-border)',
+                        fontSize: '1.1rem',
+                        fontFamily: 'var(--font-body)',
+                        backgroundColor: 'var(--color-surface)',
+                        color: 'var(--color-text)',
+                      }}
+                    />
+                    <IconButton 
+                      onClick={() => adjustWeight(2.5)}
+                      size="large"
+                      sx={{ 
+                        bgcolor: 'action.hover',
+                        minWidth: '44px',
+                        minHeight: '44px',
+                        '&:hover': { bgcolor: 'action.selected' }
+                      }}
+                    >
+                      <Add />
+                    </IconButton>
+                  </Box>
                 </div>
                 <div className="input-group">
                   <label htmlFor="reps-select">Reps</label>
-                  <input
-                    id="reps-select"
-                    type="number"
-                    inputMode="numeric"
-                    step="1"
-                    min="1"
-                    max="20"
-                    className="exercise-input"
-                    defaultValue={targetReps ?? ''}
-                    placeholder="–"
-                    aria-label="Repetitions"
-                    onFocus={(e) => {
-                      e.target.select();
-                      // Only scroll if input would be obscured by keyboard
-                      // Keyboard takes up ~40% of viewport, scroll only if input is in lower 45%
-                      const rect = e.target.getBoundingClientRect();
-                      const inputBottom = rect.bottom;
-                      const viewportHeight = window.innerHeight;
-                      const threshold = viewportHeight * 0.55; // 55% from top = lower 45%
-                      
-                      // Only snap if input bottom is in the lower 45% (below 55% threshold)
-                      if (inputBottom > threshold) {
-                        setTimeout(() => {
-                          e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          // Additional scroll to create more space above the input
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <IconButton 
+                      onClick={() => adjustReps(-1)}
+                      size="large"
+                      sx={{ 
+                        bgcolor: 'action.hover',
+                        minWidth: '44px',
+                        minHeight: '44px',
+                        '&:hover': { bgcolor: 'action.selected' }
+                      }}
+                    >
+                      <Remove />
+                    </IconButton>
+                    <input
+                      id="reps-select"
+                      type="number"
+                      inputMode="numeric"
+                      step="1"
+                      min="1"
+                      max="20"
+                      className="exercise-input"
+                      value={currentReps}
+                      onChange={(e) => setCurrentReps(e.target.value)}
+                      placeholder="–"
+                      aria-label="Repetitions"
+                      onFocus={(e) => {
+                        e.target.select();
+                        const rect = e.target.getBoundingClientRect();
+                        const inputBottom = rect.bottom;
+                        const viewportHeight = window.innerHeight;
+                        const threshold = viewportHeight * 0.55;
+                        
+                        if (inputBottom > threshold) {
                           setTimeout(() => {
-                            window.scrollBy({ top: -80, behavior: 'smooth' });
-                          }, 100);
-                        }, 300);
-                      }
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '2px solid var(--color-border)',
-                      fontSize: '1rem',
-                      fontFamily: 'var(--font-body)',
-                      backgroundColor: 'var(--color-surface)',
-                      color: 'var(--color-text)',
-                    }}
-                  />
+                            e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            setTimeout(() => {
+                              window.scrollBy({ top: -80, behavior: 'smooth' });
+                            }, 100);
+                          }, 300);
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        minHeight: '44px',
+                        borderRadius: '8px',
+                        border: '2px solid var(--color-border)',
+                        fontSize: '1.1rem',
+                        fontFamily: 'var(--font-body)',
+                        backgroundColor: 'var(--color-surface)',
+                        color: 'var(--color-text)',
+                      }}
+                    />
+                    <IconButton 
+                      onClick={() => adjustReps(1)}
+                      size="large"
+                      sx={{ 
+                        bgcolor: 'action.hover',
+                        minWidth: '44px',
+                        minHeight: '44px',
+                        '&:hover': { bgcolor: 'action.selected' }
+                      }}
+                    >
+                      <Add />
+                    </IconButton>
+                  </Box>
                 </div>
               </div>
+              
+              {/* Quick Actions */}
+              <Box sx={{ display: 'flex', gap: 1, mt: 2, mb: 2 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<SkipNext />}
+                  onClick={skipExercise}
+                  sx={{ flex: 1, minHeight: '44px' }}
+                >
+                  Skip Exercise
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<SwapHoriz />}
+                  onClick={swapExercise}
+                  sx={{ flex: 1, minHeight: '44px' }}
+                >
+                  Swap Exercise
+                </Button>
+              </Box>
+              
               <div className="workout-nav-buttons">
                 {currentStepIndex > 0 && (
                   <motion.button
@@ -699,6 +889,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                     onClick={handleBack}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    style={{ minHeight: '44px' }}
                   >
                     <ArrowBack sx={{ fontSize: 18, mr: 0.5 }} /> Back
                   </motion.button>
@@ -708,6 +899,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                   className="next-btn"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  style={{ minHeight: '44px' }}
                 >
                   Next <ArrowForward sx={{ fontSize: 18, ml: 0.5 }} />
                 </motion.button>
@@ -727,6 +919,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
             background: 'rgb(237, 63, 39)',
             marginBottom: '12px',
             color: 'white',
+            minHeight: '44px',
           }}
         >
           <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> End Workout
@@ -740,6 +933,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
             style={{
               background: 'rgb(254, 178, 26)',
               color: 'rgb(19, 70, 134)',
+              minHeight: '44px',
             }}
           >
             End and Save

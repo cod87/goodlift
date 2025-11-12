@@ -39,8 +39,8 @@ import {
 } from '../utils/storage';
 
 /**
- * UnifiedWorkoutHub - Single streamlined section for workouts, plans, mobility and yoga
- * Combines workout generation, plan management, mobility/yoga sessions, and progress overview
+ * UnifiedWorkoutHub - Single streamlined section for workouts, plans, and mobility
+ * Combines workout generation, plan management, mobility/stretch sessions, and progress overview
  */
 const UnifiedWorkoutHub = ({ 
   workoutType,
@@ -171,7 +171,7 @@ const UnifiedWorkoutHub = ({
     }}>
       <CompactHeader 
         title="Training Hub"
-        subtitle="Workouts, plans, cardio, mobility & yoga in one place"
+        subtitle="Workouts, plans, cardio, and mobility in one place"
       />
 
       <Stack spacing={2}>
@@ -458,25 +458,13 @@ const UnifiedWorkoutHub = ({
           </Card>
         )}
 
-        {/* Mobility & Yoga Section - Extra Compact */}
+        {/* Mobility Section - Extra Compact */}
         <Card sx={{ bgcolor: 'background.paper' }}>
           <CardContent sx={{ py: 2 }}>
             <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <YogaIcon /> Mobility & Yoga
+              <YogaIcon /> Mobility
             </Typography>
             <Stack direction="row" spacing={1}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => onNavigate('yoga-selection')}
-                sx={{ 
-                  flex: 1,
-                  py: 1,
-                  fontSize: '0.85rem',
-                }}
-              >
-                Yoga
-              </Button>
               <Button
                 variant="outlined"
                 size="small"

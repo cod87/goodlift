@@ -27,11 +27,11 @@ export const DEFAULT_PPL_PLAN = [
   },
   { 
     day: 'Wed', 
-    type: 'yoga', 
+    type: 'stretch', 
     style: 'flexibility', 
     estimatedDuration: 30, 
     includes: ['recovery'],
-    description: 'Yoga - Flexibility & Recovery'
+    description: 'Stretch - Flexibility & Recovery'
   },
   { 
     day: 'Thu', 
@@ -88,11 +88,11 @@ export const DEFAULT_UPPER_LOWER_PLAN = [
   },
   { 
     day: 'Wed', 
-    type: 'yoga', 
+    type: 'stretch', 
     style: 'restorative', 
     estimatedDuration: 30, 
     includes: ['recovery'],
-    description: 'Yoga - Active Recovery'
+    description: 'Stretch - Active Recovery'
   },
   { 
     day: 'Thu', 
@@ -155,7 +155,7 @@ export const getWorkoutTypeDisplayName = (type) => {
     upper: 'Upper Body',
     lower: 'Lower Body',
     full: 'Full Body',
-    yoga: 'Yoga',
+    stretch: 'Stretch',
     hiit: 'HIIT',
     rest: 'Rest',
     cardio: 'Cardio'

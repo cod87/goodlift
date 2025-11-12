@@ -621,7 +621,7 @@ function AppContent() {
 
           {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} />}
 
-          {(currentScreen === 'stretch' || currentScreen === 'yoga' || currentScreen === 'mobility') && <MobilityScreen />}
+          {(currentScreen === 'stretch' || currentScreen === 'mobility') && <MobilityScreen />}
 
           {currentScreen === 'exercise-list' && <ExerciseListPage />}
 

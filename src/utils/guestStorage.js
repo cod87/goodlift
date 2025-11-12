@@ -15,14 +15,11 @@ const GUEST_KEYS = {
   EXERCISE_TARGET_REPS: 'goodlift_guest_exercise_target_reps',
   HIIT_SESSIONS: 'goodlift_guest_hiit_sessions',
   STRETCH_SESSIONS: 'goodlift_guest_stretch_sessions',
-  YOGA_SESSIONS: 'goodlift_guest_yoga_sessions',
   CARDIO_SESSIONS: 'goodlift_guest_cardio_sessions',
   FAVORITE_WORKOUTS: 'goodlift_guest_favorite_workouts',
   FAVORITE_EXERCISES: 'goodlift_guest_favorite_exercises',
   PINNED_EXERCISES: 'goodlift_guest_pinned_exercises',
   SNACKBAR_DISMISSED: 'goodlift_guest_snackbar_dismissed',
-  YOGA_CONFIG: 'goodlift_guest_yoga_config',
-  YOGA_TTS_ENABLED: 'goodlift_guest_yoga_tts_enabled',
 };
 
 /**

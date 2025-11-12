@@ -7,7 +7,7 @@
 
 /**
  * Generate a unique session ID
- * @param {string} type - Session type (strength, hiit, yoga, cardio, etc.)
+ * @param {string} type - Session type (strength, hiit, stretch, cardio, etc.)
  * @param {string} date - ISO date string
  * @returns {string} Unique session ID
  */
@@ -84,7 +84,7 @@ export const createPlanDay = ({
   return {
     dayIndex,
     date,
-    type, // 'strength' | 'hiit' | 'yoga' | 'rest' | 'cardio'
+    type, // 'strength' | 'hiit' | 'stretch' | 'rest' | 'cardio'
     subtype, // 'push' | 'pull' | 'legs' | 'upper' | 'lower' | 'full'
     focus, // 'strength' | 'hypertrophy' | 'power'
     includes, // array of modalities included
@@ -102,7 +102,7 @@ const assignDayType = (planStyle, dayIndex) => {
     { type: 'strength', subtype: 'push' },   // Mon
     { type: 'strength', subtype: 'pull' },   // Tue
     { type: 'strength', subtype: 'legs' },   // Wed
-    { type: 'yoga', subtype: 'flexibility' }, // Thu
+    { type: 'stretch', subtype: 'flexibility' }, // Thu
     { type: 'strength', subtype: 'push' },   // Fri
     { type: 'hiit', subtype: 'full' },       // Sat
     { type: 'rest', subtype: 'rest' }        // Sun
@@ -120,7 +120,7 @@ const assignDayType = (planStyle, dayIndex) => {
   
   const fullBodySchedule = [
     { type: 'strength', subtype: 'full' },   // Mon
-    { type: 'yoga', subtype: 'flexibility' }, // Tue
+    { type: 'stretch', subtype: 'flexibility' }, // Tue
     { type: 'strength', subtype: 'full' },   // Wed
     { type: 'hiit', subtype: 'full' },       // Thu
     { type: 'strength', subtype: 'full' },   // Fri
@@ -191,38 +191,6 @@ export const createHiitSession = ({
     date,
     notes,
     perceivedExertion,
-    createdAt: new Date().toISOString()
-  };
-};
-
-/**
- * Yoga Session Schema
- */
-export const createYogaSession = ({
-  planId = null,
-  planDay = null,
-  name = 'Yoga Session',
-  style = 'flexibility',
-  level = 'intermediate',
-  poses = [],
-  totalDuration = 0,
-  date = new Date().toISOString(),
-  notes = '',
-  rating = 3
-}) => {
-  return {
-    sessionId: generateSessionId('yoga', date),
-    planId,
-    planDay,
-    type: 'yoga',
-    name,
-    style, // 'power' | 'flexibility' | 'restorative' | 'yin'
-    level, // 'beginner' | 'intermediate' | 'advanced'
-    poses, // [{ name, duration, breathingPattern, image, notes }]
-    totalDuration,
-    date,
-    notes,
-    rating,
     createdAt: new Date().toISOString()
   };
 };

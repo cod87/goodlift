@@ -27,7 +27,6 @@ const KEYS = {
   EXERCISE_TARGET_REPS: 'goodlift_exercise_target_reps',
   HIIT_SESSIONS: 'goodlift_hiit_sessions',
   STRETCH_SESSIONS: 'goodlift_stretch_sessions',
-  YOGA_SESSIONS: 'goodlift_yoga_sessions',
   CARDIO_SESSIONS: 'goodlift_cardio_sessions',
   FAVORITE_WORKOUTS: 'goodlift_favorite_workouts',
   FAVORITE_EXERCISES: 'goodlift_favorite_exercises',
@@ -214,16 +213,12 @@ export const getUserStats = async () => {
     const stretchSessions = getStretchSessions();
     const totalStretchTime = stretchSessions.reduce((sum, session) => sum + (session.duration || 0), 0);
     
-    const yogaSessions = getYogaSessions();
-    const totalYogaTime = yogaSessions.reduce((sum, session) => sum + (session.duration || 0), 0);
-    
     const calculatedStats = { 
       totalWorkouts, 
       totalTime, 
       totalHiitTime,
       totalCardioTime,
-      totalStretchTime,
-      totalYogaTime
+      totalStretchTime
     };
     
     // Save the calculated stats back to storage for persistence
@@ -516,10 +511,6 @@ export const loadUserDataFromCloud = async (userId) => {
       
       if (firebaseData.stretchSessions) {
         localStorage.setItem(KEYS.STRETCH_SESSIONS, JSON.stringify(firebaseData.stretchSessions));
-      }
-      
-      if (firebaseData.yogaSessions) {
-        localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(firebaseData.yogaSessions));
       }
       
       // Sync workout plans
@@ -921,117 +912,6 @@ export const deleteStretchSession = async (sessionId) => {
     // Stats will be recalculated automatically next time getUserStats() is called
   } catch (error) {
     console.error('Error deleting stretch session:', error);
-    throw error;
-  }
-};
-
-/**
- * Get yoga sessions from localStorage
- * @returns {Array} Array of yoga session objects
- */
-export const getYogaSessions = () => {
-  try {
-    if (isGuestMode()) {
-      return getGuestData('yoga_sessions') || [];
-    }
-    const sessions = localStorage.getItem(KEYS.YOGA_SESSIONS);
-    return sessions ? JSON.parse(sessions) : [];
-  } catch (error) {
-    console.error('Error reading yoga sessions:', error);
-    return [];
-  }
-};
-
-/**
- * Save a completed yoga session
- * @param {Object} sessionData - Yoga session data including flow name and duration
- */
-export const saveYogaSession = async (sessionData) => {
-  try {
-    if (!sessionData) {
-      throw new Error('Session data is required');
-    }
-    
-    const sessions = getYogaSessions();
-    sessions.unshift(sessionData); // Add to beginning for chronological order
-    
-    // Save based on mode
-    if (isGuestMode()) {
-      setGuestData('yoga_sessions', sessions);
-    } else {
-      localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(sessions));
-      
-      // Sync to Firebase if user is logged in
-      if (currentUserId) {
-        await saveYogaSessionsToFirebase(currentUserId, sessions);
-      }
-    }
-    
-    // Stats will be recalculated automatically next time getUserStats() is called
-  } catch (error) {
-    console.error('Error saving yoga session:', error);
-    throw error;
-  }
-};
-
-/**
- * Update a yoga session
- * @param {string} sessionId - ID of the session to update
- * @param {Object} updatedData - Updated session data
- */
-export const updateYogaSession = async (sessionId, updatedData) => {
-  try {
-    const sessions = getYogaSessions();
-    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
-    
-    if (sessionIndex === -1) {
-      throw new Error('Session not found');
-    }
-    
-    // Update the session
-    sessions[sessionIndex] = { ...sessions[sessionIndex], ...updatedData };
-    
-    // Save based on mode
-    if (isGuestMode()) {
-      setGuestData('yoga_sessions', sessions);
-    } else {
-      localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(sessions));
-      
-      // Sync to Firebase if user is logged in
-      if (currentUserId) {
-        await saveYogaSessionsToFirebase(currentUserId, sessions);
-      }
-    }
-  } catch (error) {
-    console.error('Error updating yoga session:', error);
-    throw error;
-  }
-};
-
-/**
- * Delete a yoga session
- * @param {string} sessionId - ID of the session to delete
- */
-export const deleteYogaSession = async (sessionId) => {
-  try {
-    const sessions = getYogaSessions();
-    const filteredSessions = sessions.filter(s => s.id !== sessionId);
-    
-    // Save based on mode
-    if (isGuestMode()) {
-      setGuestData('yoga_sessions', filteredSessions);
-    } else {
-      localStorage.setItem(KEYS.YOGA_SESSIONS, JSON.stringify(filteredSessions));
-      
-      // Sync to Firebase if user is logged in
-      if (currentUserId) {
-        await saveYogaSessionsToFirebase(currentUserId, filteredSessions);
-      }
-    }
-    
-    // Stats will be recalculated automatically next time getUserStats() is called
-  } catch (error) {
-    console.error('Error deleting yoga session:', error);
     throw error;
   }
 };

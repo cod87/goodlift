@@ -19,10 +19,9 @@ import { getWorkoutTypeDisplayName } from '../utils/weeklyPlanDefaults';
 import { getWorkoutHistory } from '../utils/storage';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { containerPadding, touchTargets } from '../theme/responsive';
-import ProfileWidget from './ProfileWidget';
 
 /**
- * HomeScreen - Quick-start interface component
+ * HomeScreen - Quick-start interface component (Work Tab)
  * Features:
  * - Prominent "Start Today's Workout" button
  * - Current plan name display
@@ -34,7 +33,6 @@ const HomeScreen = memo(({
   currentPlan,
   todaysWorkout,
   onQuickStart,
-  onNavigate,
   loading = false
 }) => {
   const [greeting, setGreeting] = useState('');
@@ -172,11 +170,6 @@ const HomeScreen = memo(({
           {currentDate}
         </Typography>
       </Box>
-
-      {/* Profile Widget */}
-      {onNavigate && (
-        <ProfileWidget onNavigateToProfile={() => onNavigate('profile')} />
-      )}
 
       {/* Main Workout Card */}
       <Card 

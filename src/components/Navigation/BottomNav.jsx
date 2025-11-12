@@ -3,50 +3,55 @@ import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { 
   FaDumbbell, 
-  FaChartLine,
   FaCog,
 } from 'react-icons/fa';
-import { CalendarToday } from '@mui/icons-material';
+import { TrendingUp } from '@mui/icons-material';
 import { touchTargets, zIndex, safeAreaPadding } from '../../theme/responsive';
 
 /**
- * BottomNav - Fixed bottom navigation for mobile devices
+ * BottomNav - Fixed bottom navigation for all devices
  * 
  * Features:
  * - Fixed position at bottom of screen
- * - 4 navigation icons: Workout, Plan, Progress, Settings
- * - 56px height for comfortable touch targets
+ * - 3 navigation icons: Work, Progress, Settings
+ * - 56-64px height for comfortable touch targets
  * - Safe area padding for devices with home indicators
- * - Active state indication
+ * - Active state indication with primary color
  * - Smooth transitions
  * 
- * Only visible on mobile devices (<768px)
+ * Visible on all screen sizes
  */
 const BottomNav = memo(({ currentScreen, onNavigate }) => {
   const navItems = [
     {
-      id: 'selection',
-      label: 'Workout',
-      icon: FaDumbbell,
-      screens: ['selection', 'preview', 'workout', 'customize', 'custom-preview'],
-    },
-    {
       id: 'home',
-      label: 'Plan',
-      icon: CalendarToday,
-      screens: ['home', 'workout-plan'],
+      label: 'Work',
+      icon: FaDumbbell,
+      screens: [
+        'home', 
+        'workout-plan', 
+        'selection', 
+        'preview', 
+        'workout', 
+        'customize', 
+        'custom-preview',
+        'completion',
+        'timer',
+        'cardio',
+        'hiit'
+      ],
     },
     {
       id: 'progress',
       label: 'Progress',
-      icon: FaChartLine,
+      icon: TrendingUp,
       screens: ['progress'],
     },
     {
       id: 'settings',
       label: 'Settings',
       icon: FaCog,
-      screens: ['settings'],
+      screens: ['settings', 'log-activity', 'exercise-list', 'profile', 'stretch', 'mobility'],
     },
   ];
 

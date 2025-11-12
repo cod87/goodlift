@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import './App.css';
 import Header from './components/Header';
-import NavigationSidebar from './components/NavigationSidebar';
 import BottomNav from './components/Navigation/BottomNav';
 import HomeScreen from './components/HomeScreen';
 import TodayView from './components/TodayView/TodayView';
@@ -46,7 +45,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Snackbar, Alert, Button } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 import { runDataMigration } from './migrations/simplifyDataStructure';
-import { BREAKPOINTS } from './theme/responsive';
 import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achievements';
 
 /**
@@ -54,7 +52,6 @@ import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achieve
  */
 function AppContent() {
   const [currentScreen, setCurrentScreen] = useState('home');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState([]);
   const [workoutType, setWorkoutType] = useState('full');
   const [selectedEquipment, setSelectedEquipment] = useState(new Set(['all']));
@@ -63,7 +60,6 @@ function AppContent() {
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
   const [showGuestSnackbar, setShowGuestSnackbar] = useState(false);
   const [showMigrationDialog, setShowMigrationDialog] = useState(false);
   const [newAchievement, setNewAchievement] = useState(null);
@@ -140,11 +136,9 @@ function AppContent() {
     setShowGuestSnackbar(false);
   };
 
-  // Track screen size for responsive layout
+  // Track viewport for iOS handling
   useEffect(() => {
     const handleResize = () => {
-      setIsDesktop(window.innerWidth >= BREAKPOINTS.tablet);
-      
       // Fix iOS viewport resize issues on orientation change
       // This ensures the viewport properly adjusts after rotation
       if (window.visualViewport) {
@@ -201,9 +195,6 @@ function AppContent() {
 
   const handleNavigate = (screen) => {
     setCurrentScreen(screen);
-    if (screen === 'selection') {
-      setSidebarOpen(true);
-    }
   };
 
   const handleWorkoutTypeChange = (type) => {
@@ -218,10 +209,6 @@ function AppContent() {
       newSelected.add(value);
       setSelectedEquipment(newSelected);
     }
-  };
-
-  const handleToggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
   };
 
   const handleTodayViewQuickStart = () => {
@@ -587,21 +574,13 @@ function AppContent() {
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
-      <div style={{ display: 'flex', minHeight: '100vh' }}>
-        <NavigationSidebar
-          currentScreen={currentScreen}
-          onNavigate={handleNavigate}
-          isOpen={sidebarOpen}
-          onToggle={handleToggleSidebar}
-        />
-        
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header onNavigate={handleNavigate} />
         
         <div id="app" style={{ 
           flex: 1,
-          marginLeft: isDesktop ? '280px' : '0',
           marginTop: '60px',
-          transition: 'margin-left 0.3s ease',
+          paddingBottom: '80px', // Space for bottom nav
         }}>
           {currentScreen === 'home' && (
             <HomeScreen
@@ -695,13 +674,11 @@ function AppContent() {
           {currentScreen === 'profile' && <UserProfileScreen />}
         </div>
         
-        {/* Bottom Navigation - Mobile Only */}
-        {!isDesktop && (
-          <BottomNav
-            currentScreen={currentScreen}
-            onNavigate={handleNavigate}
-          />
-        )}
+        {/* Bottom Navigation - Always visible */}
+        <BottomNav
+          currentScreen={currentScreen}
+          onNavigate={handleNavigate}
+        />
         
         {/* Guest Data Migration Dialog */}
         <GuestDataMigrationDialog

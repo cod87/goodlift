@@ -28,13 +28,14 @@ import { formatDate, formatDuration } from '../../utils/helpers';
 /**
  * ActivitiesList - Compact expandable activity history
  * Shows workout summary with expandable details
+ * Enhanced to show last 10 workouts by default with form quality notes
  */
 const ActivitiesList = memo(({ 
   activities = [],
   onDelete,
   onEdit,
   maxVisible = 10,
-  showLoadMore = false,
+  showLoadMore = true,
 }) => {
   const [expandedId, setExpandedId] = useState(null);
   const [visibleCount, setVisibleCount] = useState(maxVisible);
@@ -200,13 +201,30 @@ const ActivitiesList = memo(({
                         </Typography>
                         <List dense sx={{ mt: 0.5 }}>
                           {Object.entries(activity.exercises).map(([exerciseName, exerciseData], idx) => (
-                            <ListItem key={idx} sx={{ py: 0.5, px: 1 }}>
+                            <ListItem key={idx} sx={{ py: 0.5, px: 1, flexDirection: 'column', alignItems: 'flex-start' }}>
                               <Typography variant="caption" sx={{ color: 'text.primary' }}>
                                 {exerciseName}: {exerciseData.sets?.length || 0} sets
                               </Typography>
+                              {exerciseData.formNotes && (
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic', mt: 0.5 }}>
+                                  Form: {exerciseData.formNotes}
+                                </Typography>
+                              )}
                             </ListItem>
                           ))}
                         </List>
+                      </Box>
+                    )}
+
+                    {/* Overall Workout Notes */}
+                    {activity.notes && (
+                      <Box sx={{ mb: 2, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', display: 'block', mb: 0.5 }}>
+                          Notes:
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.primary' }}>
+                          {activity.notes}
+                        </Typography>
                       </Box>
                     )}
 

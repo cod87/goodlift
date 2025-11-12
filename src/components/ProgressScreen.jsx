@@ -9,7 +9,6 @@ import {
   Stack,
   Button,
   IconButton,
-  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -23,13 +22,6 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -49,12 +41,19 @@ import {
   deleteWorkout,
   updateWorkout,
   getStretchSessions,
-  deleteStretchSession,
   getActivePlan,
 } from '../utils/storage';
-import { formatDate, formatDuration } from '../utils/helpers';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
+import {
+  calculateStreak,
+  calculateAdherence,
+  getPersonalRecords,
+  calculateTotalVolume,
+} from '../utils/trackingMetrics';
+import { StreakDisplay, AdherenceDisplay, VolumeTrendDisplay } from './Progress/TrackingCards';
+import { FourWeekProgressionChart } from './Progress/FourWeekProgressionChart';
+import ActivitiesList from './Progress/ActivitiesList';
 
 /**
  * ProgressDashboard - Complete progress tracking dashboard
@@ -68,13 +67,17 @@ const ProgressDashboard = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [pinnedExercises, setPinnedExercisesState] = useState([]);
   const [availableExercises, setAvailableExercises] = useState([]);
-  const [statsFilter, setStatsFilter] = useState('all'); // Changed from timeFilter
   const [addExerciseDialogOpen, setAddExerciseDialogOpen] = useState(false);
   const [exerciseSearchQuery, setExerciseSearchQuery] = useState('');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
   const [editingSessionType, setEditingSessionType] = useState(null);
-  const [calendarExpanded, setCalendarExpanded] = useState(false); // For weekly/monthly toggle
+  const [calendarExpanded, setCalendarExpanded] = useState(false);
+  
+  // New tracking metrics state
+  const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0 });
+  const [adherence, setAdherence] = useState(0);
+  const [totalVolume, setTotalVolume] = useState(0);
 
   const loadData = async () => {
     setLoading(true);
@@ -87,6 +90,16 @@ const ProgressDashboard = () => {
       setHistory(loadedHistory);
       setStretchSessions(loadedStretches);
       setActivePlan(loadedActivePlan);
+
+      // Calculate tracking metrics
+      const streak = calculateStreak(loadedHistory, loadedActivePlan);
+      setStreakData(streak);
+
+      const adherencePercent = calculateAdherence(loadedHistory, loadedActivePlan, 30);
+      setAdherence(adherencePercent);
+
+      const volume30Days = calculateTotalVolume(loadedHistory, 30);
+      setTotalVolume(volume30Days);
 
       const pinned = progressiveOverloadService.getPinnedExercises();
       setPinnedExercisesState(pinned);
@@ -119,13 +132,6 @@ const ProgressDashboard = () => {
     }
   };
 
-  const handleDeleteStretch = async (sessionId) => {
-    if (window.confirm('Are you sure you want to delete this stretch session? This action cannot be undone.')) {
-      await deleteStretchSession(sessionId);
-      await loadData();
-    }
-  };
-
   const handleEditWorkout = (workout, index) => {
     setEditingSession({ ...workout, index });
     setEditingSessionType('workout');
@@ -148,8 +154,6 @@ const ProgressDashboard = () => {
     }
   };
 
-
-
   const handleRemovePinnedExercise = (exerciseName) => {
     progressiveOverloadService.removePinnedExercise(exerciseName);
     setPinnedExercisesState(pinnedExercises.filter(p => p.exerciseName !== exerciseName));
@@ -162,36 +166,6 @@ const ProgressDashboard = () => {
       setExerciseSearchQuery('');
     }
   };
-
-  const filterByTimePeriod = (sessions) => {
-    if (statsFilter === 'all') return sessions;
-
-    const now = new Date();
-    let cutoffDate;
-
-    if (statsFilter === 'month') {
-      cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    } else if (statsFilter === '2weeks') {
-      cutoffDate = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-    }
-
-    return sessions.filter(session => new Date(session.date) >= cutoffDate);
-  };
-
-  const getFilteredStats = () => {
-    const filteredWorkouts = filterByTimePeriod(history);
-
-    const totalWorkouts = filteredWorkouts.length;
-    const totalWorkoutTime = filteredWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
-    const avgWorkout = totalWorkouts > 0 ? Math.round(totalWorkoutTime / totalWorkouts / 60) : 0;
-
-    return {
-      totalWorkouts,
-      avgWorkout,
-    };
-  };
-
-  const filteredStats = getFilteredStats();
 
   const workoutSessions = [
     ...history.map(workout => ({
@@ -272,46 +246,37 @@ const ProgressDashboard = () => {
       <CompactHeader title="Progress" subtitle="Track your fitness journey" />
 
       <Box sx={{ maxWidth: '1400px', margin: '0 auto', p: { xs: 2, md: 3 } }}>
-        <Stack spacing={2}>
-          {/* Stats Table */}
-          <Card sx={{ bgcolor: 'background.paper' }}>
-            <CardContent>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Typography variant="h6">Statistics</Typography>
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel>Period</InputLabel>
-                  <Select
-                    value={statsFilter}
-                    label="Period"
-                    onChange={(e) => setStatsFilter(e.target.value)}
-                  >
-                    <MenuItem value="all">All Time</MenuItem>
-                    <MenuItem value="month">Past Month</MenuItem>
-                    <MenuItem value="2weeks">Past 2 Weeks</MenuItem>
-                  </Select>
-                </FormControl>
-              </Stack>
+        <Stack spacing={3}>
+          {/* Top Row: Streak, Adherence, Volume */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+              gap: 2,
+            }}
+          >
+            <StreakDisplay
+              currentStreak={streakData.currentStreak}
+              longestStreak={streakData.longestStreak}
+            />
+            <AdherenceDisplay
+              adherence={adherence}
+              completedWorkouts={history.filter(w => {
+                const workoutDate = new Date(w.date);
+                const cutoff = new Date();
+                cutoff.setDate(cutoff.getDate() - 30);
+                return workoutDate >= cutoff;
+              }).length}
+              plannedWorkouts={Math.ceil((30 / 7) * 3)} // 3 workouts per week baseline
+            />
+            <VolumeTrendDisplay
+              totalVolume={totalVolume}
+              volumeChange={0} // Can be enhanced to compare with previous period
+            />
+          </Box>
 
-              <TableContainer component={Paper} variant="outlined">
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700 }}>Sessions</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700 }}>Avg Duration</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Workouts</TableCell>
-                      <TableCell align="right">{filteredStats.totalWorkouts}</TableCell>
-                      <TableCell align="right">{filteredStats.avgWorkout}m</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
+          {/* 4-Week Progression Chart */}
+          <FourWeekProgressionChart workoutHistory={history} />
 
           {/* Calendar */}
           <Card sx={{ bgcolor: 'background.paper' }}>
@@ -490,7 +455,7 @@ const ProgressDashboard = () => {
                 <Typography variant="h6">
                   {selectedDate
                     ? `Activities on ${selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
-                    : 'Recent Activities'}
+                    : 'Recent Activities (Last 10 Workouts)'}
                 </Typography>
                 {selectedDate && (
                   <Button size="small" onClick={() => setSelectedDate(null)}>
@@ -499,44 +464,32 @@ const ProgressDashboard = () => {
                 )}
               </Stack>
 
-              <Stack spacing={1}>
-                {selectedDate && !hasSessionsOnSelectedDay ? (
-                  <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-                    No activities logged for this day.
-                  </Typography>
-                ) : (
-                  <>
-                    {/* Workout Sessions */}
-                    {filteredSessions.workouts.map((workout, idx) => (
-                      <ActivityCard
-                        key={`workout-${idx}`}
-                        type="workout"
-                        session={workout}
-                        index={idx}
-                        onEdit={() => handleEditWorkout(workout, idx)}
-                        onDelete={() => handleDeleteWorkout(idx)}
-                      />
-                    ))}
-
-                    {/* Stretch Sessions */}
-                    {filteredSessions.stretch.map((session) => (
-                      <ActivityCard
-                        key={session.id}
-                        type="stretch"
-                        session={session}
-                        onDelete={() => handleDeleteStretch(session.id)}
-                      />
-                    ))}
-
-                    {!selectedDate && history.length === 0 &&
-                      stretchSessions.length === 0 && (
-                        <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-                          No activity history yet. Complete your first activity to see it here!
-                        </Typography>
-                      )}
-                  </>
-                )}
-              </Stack>
+              {/* Use enhanced ActivitiesList component */}
+              {selectedDate && !hasSessionsOnSelectedDay ? (
+                <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                  No activities logged for this day.
+                </Typography>
+              ) : (
+                <ActivitiesList
+                  activities={selectedDate 
+                    ? [...filteredSessions.workouts, ...filteredSessions.stretch]
+                    : [...history.slice(0, 10)]
+                  }
+                  onEdit={(index) => {
+                    const workout = selectedDate ? filteredSessions.workouts[index] : history[index];
+                    handleEditWorkout(workout, index);
+                  }}
+                  onDelete={(index) => {
+                    if (selectedDate) {
+                      handleDeleteWorkout(index);
+                    } else {
+                      handleDeleteWorkout(index);
+                    }
+                  }}
+                  maxVisible={10}
+                  showLoadMore={!selectedDate && history.length > 10}
+                />
+              )}
             </CardContent>
           </Card>
         </Stack>
@@ -600,120 +553,6 @@ const ProgressDashboard = () => {
       </Box>
     </Box>
   );
-};
-
-// Activity Card Component
-const ActivityCard = ({ type, session, onEdit, onDelete }) => {
-  const FitnessCenter = () => <span>🏋️</span>;
-  const Whatshot = () => <span>🔥</span>;
-  const DirectionsRun = () => <span>🏃</span>;
-  const SelfImprovement = () => <span>🧘</span>;
-
-  const getIcon = () => {
-    switch (type) {
-      case 'hiit': return <Whatshot />;
-      case 'cardio': return <DirectionsRun />;
-      case 'stretch': return <DirectionsRun />;
-      default: return <FitnessCenter />;
-    }
-  };
-
-  const getLabel = () => {
-    switch (type) {
-      case 'hiit': return 'HIIT Session';
-      case 'cardio': return session.cardioType || 'Cardio';
-      case 'stretch': return 'Stretch Session';
-      default: return session.type ? `${session.type.charAt(0).toUpperCase() + session.type.slice(1)} Body` : 'Workout';
-    }
-  };
-
-  const getBorderColor = () => {
-    switch (type) {
-      case 'hiit': return 'secondary.main';
-      case 'cardio': return '#2196f3';
-      case 'stretch': return 'success.main';
-      default: return 'primary.main';
-    }
-  };
-
-  return (
-    <Card sx={{
-      borderLeft: '3px solid',
-      borderLeftColor: getBorderColor(),
-      borderRadius: 1,
-      transition: 'all 0.2s ease',
-      '&:hover': {
-        transform: 'translateX(2px)',
-        boxShadow: '0 2px 8px rgba(48, 86, 105, 0.12)',
-      }
-    }}>
-      <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ flex: 1 }}>
-            <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.25 }}>
-              {getIcon()}
-              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
-                {getLabel()}
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                • {formatDate(session.date)}
-              </Typography>
-              {session.isPartial && (
-                <Chip
-                  label="Partial"
-                  size="small"
-                  sx={{ height: 18, fontSize: '0.65rem' }}
-                  variant="outlined"
-                />
-              )}
-            </Stack>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                {formatDuration(session.duration)}
-              </Typography>
-              {session.exercises && (
-                <>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                    •
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                    {Object.keys(session.exercises).length} exercises
-                  </Typography>
-                </>
-              )}
-            </Stack>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            {onEdit && (
-              <IconButton
-                onClick={onEdit}
-                size="small"
-                sx={{ color: 'text.secondary' }}
-              >
-                <Edit sx={{ fontSize: 18 }} />
-              </IconButton>
-            )}
-            {onDelete && (
-              <IconButton
-                onClick={onDelete}
-                size="small"
-                sx={{ color: 'text.secondary' }}
-              >
-                <Delete sx={{ fontSize: 18 }} />
-              </IconButton>
-            )}
-          </Box>
-        </Box>
-      </CardContent>
-    </Card>
-  );
-};
-
-ActivityCard.propTypes = {
-  type: PropTypes.string.isRequired,
-  session: PropTypes.object.isRequired,
-  onEdit: PropTypes.func,
-  onDelete: PropTypes.func,
 };
 
 // Edit Session Dialog Component

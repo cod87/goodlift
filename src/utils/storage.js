@@ -32,6 +32,9 @@ const KEYS = {
   PINNED_EXERCISES: 'goodlift_pinned_exercises',
   WORKOUT_PLANS: 'goodlift_workout_plans',
   ACTIVE_PLAN: 'goodlift_active_plan',
+  UNLOCKED_ACHIEVEMENTS: 'goodlift_unlocked_achievements',
+  TOTAL_PRS: 'goodlift_total_prs',
+  TOTAL_VOLUME: 'goodlift_total_volume',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -198,6 +201,10 @@ export const getUserStats = async () => {
     // Get workout history (this will fetch from Firebase or localStorage)
     const history = await getWorkoutHistory();
     
+    // Import here to avoid circular dependency
+    const { calculateStreak } = await import('./trackingMetrics');
+    const streak = calculateStreak(history);
+    
     // Calculate stats from actual workout history
     const totalWorkouts = history.length;
     const totalTime = history.reduce((sum, workout) => sum + (workout.duration || 0), 0);
@@ -212,12 +219,20 @@ export const getUserStats = async () => {
     const stretchSessions = getStretchSessions();
     const totalStretchTime = stretchSessions.reduce((sum, session) => sum + (session.duration || 0), 0);
     
+    // Get achievement-related stats
+    const totalPRs = await getTotalPRs();
+    const totalVolume = await getTotalVolume();
+    
     const calculatedStats = { 
       totalWorkouts, 
       totalTime, 
       totalHiitTime,
       totalCardioTime,
-      totalStretchTime
+      totalStretchTime,
+      currentStreak: streak.currentStreak,
+      longestStreak: streak.longestStreak,
+      totalPRs,
+      totalVolume,
     };
     
     // Save the calculated stats back to storage for persistence
@@ -238,7 +253,11 @@ export const getUserStats = async () => {
       totalTime: 0, 
       totalHiitTime: 0,
       totalCardioTime: 0,
-      totalStretchTime: 0
+      totalStretchTime: 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      totalPRs: 0,
+      totalVolume: 0,
     };
   }
 };
@@ -1321,5 +1340,135 @@ export const markWeeklySummaryShown = () => {
     localStorage.setItem(WEEKLY_SUMMARY_KEY, new Date().toISOString());
   } catch (error) {
     console.error('Error marking weekly summary:', error);
+  }
+};
+
+/**
+ * Get unlocked achievement IDs
+ * @returns {Promise<Array>} Array of unlocked achievement IDs
+ */
+export const getUnlockedAchievements = async () => {
+  try {
+    if (isGuestMode()) {
+      const guestData = getGuestData('unlocked_achievements');
+      return guestData || [];
+    }
+
+    const stored = localStorage.getItem(KEYS.UNLOCKED_ACHIEVEMENTS);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Error reading unlocked achievements:', error);
+    return [];
+  }
+};
+
+/**
+ * Save unlocked achievement IDs
+ * @param {Array} achievementIds - Array of achievement IDs
+ */
+export const saveUnlockedAchievements = async (achievementIds) => {
+  try {
+    if (isGuestMode()) {
+      setGuestData('unlocked_achievements', achievementIds);
+    } else {
+      localStorage.setItem(KEYS.UNLOCKED_ACHIEVEMENTS, JSON.stringify(achievementIds));
+    }
+  } catch (error) {
+    console.error('Error saving unlocked achievements:', error);
+  }
+};
+
+/**
+ * Add a newly unlocked achievement
+ * @param {string} achievementId - Achievement ID to add
+ */
+export const addUnlockedAchievement = async (achievementId) => {
+  try {
+    const unlocked = await getUnlockedAchievements();
+    if (!unlocked.includes(achievementId)) {
+      unlocked.push(achievementId);
+      await saveUnlockedAchievements(unlocked);
+    }
+  } catch (error) {
+    console.error('Error adding unlocked achievement:', error);
+  }
+};
+
+/**
+ * Get total PRs count
+ * @returns {Promise<number>} Total number of PRs achieved
+ */
+export const getTotalPRs = async () => {
+  try {
+    if (isGuestMode()) {
+      const guestData = getGuestData('total_prs');
+      return guestData || 0;
+    }
+
+    const stored = localStorage.getItem(KEYS.TOTAL_PRS);
+    return stored ? parseInt(stored, 10) : 0;
+  } catch (error) {
+    console.error('Error reading total PRs:', error);
+    return 0;
+  }
+};
+
+/**
+ * Increment total PRs count
+ */
+export const incrementTotalPRs = async () => {
+  try {
+    const current = await getTotalPRs();
+    const newTotal = current + 1;
+    
+    if (isGuestMode()) {
+      setGuestData('total_prs', newTotal);
+    } else {
+      localStorage.setItem(KEYS.TOTAL_PRS, newTotal.toString());
+    }
+    
+    return newTotal;
+  } catch (error) {
+    console.error('Error incrementing total PRs:', error);
+  }
+};
+
+/**
+ * Get total volume lifted (all-time)
+ * @returns {Promise<number>} Total volume in lbs
+ */
+export const getTotalVolume = async () => {
+  try {
+    if (isGuestMode()) {
+      const guestData = getGuestData('total_volume');
+      return guestData || 0;
+    }
+
+    const stored = localStorage.getItem(KEYS.TOTAL_VOLUME);
+    return stored ? parseFloat(stored) : 0;
+  } catch (error) {
+    console.error('Error reading total volume:', error);
+    return 0;
+  }
+};
+
+/**
+ * Update total volume lifted
+ * @param {number} volume - Volume to add
+ */
+export const addToTotalVolume = async (volume) => {
+  try {
+    const current = await getTotalVolume();
+    const newTotal = current + volume;
+    
+    if (isGuestMode()) {
+      setGuestData('total_volume', newTotal);
+    } else {
+      localStorage.setItem(KEYS.TOTAL_VOLUME, newTotal.toString());
+    }
+    
+    return newTotal;
+  } catch (error) {
+    console.error('Error adding to total volume:', error);
   }
 };

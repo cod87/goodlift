@@ -20,6 +20,10 @@ const GUEST_KEYS = {
   FAVORITE_EXERCISES: 'goodlift_guest_favorite_exercises',
   PINNED_EXERCISES: 'goodlift_guest_pinned_exercises',
   SNACKBAR_DISMISSED: 'goodlift_guest_snackbar_dismissed',
+  UNLOCKED_ACHIEVEMENTS: 'goodlift_guest_unlocked_achievements',
+  TOTAL_PRS: 'goodlift_guest_total_prs',
+  TOTAL_VOLUME: 'goodlift_guest_total_volume',
+  ACTIVE_PLAN: 'goodlift_guest_active_plan',
 };
 
 /**

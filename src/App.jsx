@@ -20,10 +20,23 @@ import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
 import SettingsScreen from './pages/SettingsScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
+import AchievementUnlockedDialog from './components/AchievementUnlockedDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
 import { usePlanIntegration } from './hooks/usePlanIntegration';
-import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps, loadUserDataFromCloud } from './utils/storage';
+import { 
+  saveWorkout, 
+  saveUserStats, 
+  getUserStats, 
+  setExerciseWeight, 
+  getExerciseTargetReps, 
+  loadUserDataFromCloud,
+  getUnlockedAchievements,
+  addUnlockedAchievement,
+  incrementTotalPRs,
+  addToTotalVolume,
+  getWorkoutHistory
+} from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
@@ -33,6 +46,7 @@ import { Snackbar, Alert, Button } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 import { runDataMigration } from './migrations/simplifyDataStructure';
 import { BREAKPOINTS } from './theme/responsive';
+import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achievements';
 
 /**
  * Main app component wrapped with theme
@@ -51,6 +65,8 @@ function AppContent() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
   const [showGuestSnackbar, setShowGuestSnackbar] = useState(false);
   const [showMigrationDialog, setShowMigrationDialog] = useState(false);
+  const [newAchievement, setNewAchievement] = useState(null);
+  const [showAchievementDialog, setShowAchievementDialog] = useState(false);
   const { currentUser, isGuest, hasGuestData } = useAuth();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
@@ -412,9 +428,20 @@ function AppContent() {
     const planContextStr = sessionStorage.getItem('currentWorkoutPlanContext');
     const planContext = planContextStr ? JSON.parse(planContextStr) : null;
     
+    // Calculate workout volume
+    let workoutVolume = 0;
+    
     // Process each exercise for weight tracking and progression
     for (const [exerciseName, data] of Object.entries(workoutData.exercises)) {
       const lastSet = data.sets[data.sets.length - 1];
+      
+      // Calculate volume for this exercise (sets x reps x weight)
+      for (const set of data.sets) {
+        if (set.weight > 0 && set.reps > 0) {
+          workoutVolume += set.weight * set.reps;
+        }
+      }
+      
       if (lastSet?.weight > 0) {
         const targetReps = await getExerciseTargetReps(exerciseName);
         const allSetsMetTarget = data.sets.every(set => set.reps >= targetReps);
@@ -435,6 +462,9 @@ function AppContent() {
                 newWeight,
                 increase: weightIncrease,
               });
+              
+              // Increment PR count
+              await incrementTotalPRs();
             }
           }
         } else {
@@ -442,6 +472,11 @@ function AppContent() {
           await setExerciseWeight(exerciseName, lastSet.weight);
         }
       }
+    }
+    
+    // Add to total volume
+    if (workoutVolume > 0) {
+      await addToTotalVolume(workoutVolume);
     }
 
     // Display progression notification
@@ -472,6 +507,26 @@ function AppContent() {
     stats.totalWorkouts += 1;
     stats.totalTime += workoutData.duration;
     await saveUserStats(stats);
+    
+    // Check for newly unlocked achievements
+    try {
+      const previouslyUnlocked = await getUnlockedAchievements();
+      const workoutHistory = await getWorkoutHistory();
+      const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
+      
+      if (newAchievements.length > 0) {
+        // Save newly unlocked achievements
+        for (const achievement of newAchievements) {
+          await addUnlockedAchievement(achievement.id);
+        }
+        
+        // Show the first achievement (can be enhanced to queue multiple)
+        setNewAchievement(newAchievements[0]);
+        setShowAchievementDialog(true);
+      }
+    } catch (error) {
+      console.error('Error checking achievements:', error);
+    }
     
     setCompletedWorkoutData(finalWorkoutData);
     setCurrentScreen('completion');
@@ -649,6 +704,16 @@ function AppContent() {
           open={showMigrationDialog}
           onClose={handleMigrationClose}
           userId={currentUser?.uid}
+        />
+        
+        {/* Achievement Unlocked Dialog */}
+        <AchievementUnlockedDialog
+          open={showAchievementDialog}
+          onClose={() => {
+            setShowAchievementDialog(false);
+            setNewAchievement(null);
+          }}
+          achievement={newAchievement}
         />
         
         {/* Guest Mode Snackbar */}

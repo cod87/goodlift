@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import {
   Box,
@@ -20,15 +21,40 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Tabs,
+  Tab,
+  Alert,
 } from '@mui/material';
-import { Brightness4, Brightness7, VolumeUp, Delete, CheckCircle, Add, SelfImprovement } from '@mui/icons-material';
+import { 
+  Brightness4, 
+  Brightness7, 
+  VolumeUp, 
+  Delete, 
+  CheckCircle, 
+  Add, 
+  SelfImprovement,
+  Person,
+  FitnessCenter,
+  Apps,
+  Storage,
+  Download,
+} from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
+import { usePreferences } from '../contexts/PreferencesContext';
+import { useAuth } from '../contexts/AuthContext';
 import audioService from '../utils/audioService';
 import { getWorkoutPlans, getActivePlan, setActivePlan, deleteWorkoutPlan } from '../utils/storage';
 import QuickPlanSetup from '../components/PlanBuilder/QuickPlanSetup';
+import { downloadProfileData } from '../utils/profileUtils';
+import { useUserProfile } from '../contexts/UserProfileContext';
 
-const SettingsScreen = () => {
+const SettingsScreen = ({ onNavigate }) => {
   const { mode, toggleTheme } = useTheme();
+  const { preferences, updatePreference } = usePreferences();
+  const { profile, stats } = useUserProfile();
+  const { isGuest } = useAuth();
+  
+  const [tabValue, setTabValue] = useState(0);
   const [volume, setVolume] = useState(() => {
     try {
       const stored = localStorage.getItem('audioVolume');
@@ -160,6 +186,20 @@ const SettingsScreen = () => {
     }));
   };
 
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  const handleExportData = () => {
+    downloadProfileData(profile, stats);
+  };
+
+  const handleNavigateToProfile = () => {
+    if (onNavigate) {
+      onNavigate('profile');
+    }
+  };
+
   const getGoalLabel = (goal) => {
     const labels = {
       strength: 'Strength',
@@ -204,121 +244,44 @@ const SettingsScreen = () => {
           Settings
         </Typography>
 
-        <Card
-          sx={{
-            maxWidth: 600,
-            borderRadius: 2,
-            boxShadow: 3,
-          }}
-        >
-          <CardContent sx={{ p: 3 }}>
-            <Stack spacing={3}>
-              {/* Theme Setting */}
-              <Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mb: 2,
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
-                  {mode === 'dark' ? <Brightness4 /> : <Brightness7 />}
-                  Appearance
-                </Typography>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={mode === 'light'}
-                      onChange={handleThemeToggle}
-                      color="primary"
-                    />
-                  }
-                  label={
-                    <Box>
-                      <Typography variant="body1" fontWeight={500}>
-                        {mode === 'dark' ? 'Dark Theme' : 'Light Theme'}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Switch between dark and light modes
-                      </Typography>
-                    </Box>
-                  }
-                />
-              </Box>
+        {/* Tabs */}
+        <Box sx={{ mb: 3 }}>
+          <Tabs value={tabValue} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
+            <Tab icon={<Person />} label="Profile" />
+            <Tab icon={<FitnessCenter />} label="Workout" />
+            <Tab icon={<Apps />} label="App" />
+            <Tab icon={<Storage />} label="Data" />
+          </Tabs>
+        </Box>
 
-              <Divider />
+        {/* Profile Tab */}
+        {tabValue === 0 && (
+          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="h6" fontWeight={600} gutterBottom>
+                Profile Settings
+              </Typography>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                Manage your profile, avatar, and personal information
+              </Typography>
+              <Button
+                variant="contained"
+                fullWidth
+                startIcon={<Person />}
+                onClick={handleNavigateToProfile}
+                sx={{ textTransform: 'none' }}
+              >
+                Go to Profile
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
-              {/* Volume Setting */}
-              <Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mb: 2,
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
-                  <VolumeUp />
-                  Sound
-                </Typography>
-                <Box sx={{ px: 1 }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Sound Effects Volume
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Slider
-                      value={volume}
-                      onChange={handleVolumeChange}
-                      onChangeCommitted={handleVolumeCommit}
-                      min={0}
-                      max={1}
-                      step={0.1}
-                      valueLabelDisplay="auto"
-                      valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
-                      sx={{
-                        flex: 1,
-                        '& .MuiSlider-thumb': {
-                          width: 20,
-                          height: 20,
-                        },
-                        '& .MuiSlider-track': {
-                          height: 6,
-                        },
-                        '& .MuiSlider-rail': {
-                          height: 6,
-                        },
-                      }}
-                    />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        minWidth: 45,
-                        fontWeight: 600,
-                        color: 'text.secondary',
-                      }}
-                    >
-                      {Math.round(volume * 100)}%
-                    </Typography>
-                  </Box>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: 'block', mt: 1 }}
-                  >
-                    Adjust the volume of sound effects throughout the app. Set to 0 to mute all sounds.
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Divider />
-
-              {/* Stretch Reminders Setting */}
-              <Box>
+        {/* Workout Tab */}
+        {tabValue === 1 && (
+          <>
+            <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3, mb: 3 }}>
+              <CardContent sx={{ p: 3 }}>
                 <Typography
                   variant="h6"
                   sx={{
@@ -412,119 +375,296 @@ const SettingsScreen = () => {
                     </Select>
                   </FormControl>
                 )}
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        {/* Workout Plans Section */}
-        <Card
-          sx={{
-            maxWidth: 600,
-            borderRadius: 2,
-            boxShadow: 3,
-            mt: 3,
-          }}
-        >
-          <CardContent sx={{ p: 3 }}>
-            <Stack spacing={3}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                  }}
-                >
-                  Workout Plans
-                </Typography>
-                <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={<Add />}
-                  onClick={handleOpenPlanModal}
-                  sx={{ textTransform: 'none' }}
-                >
-                  Create Plan
-                </Button>
-              </Box>
-
-              <Divider />
-
-              {plans.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-                  No workout plans yet. Create one to get started!
-                </Typography>
-              ) : (
-                <List sx={{ py: 0 }}>
-                  {plans.map((plan) => (
-                    <ListItem
-                      key={plan.id}
+            {/* Workout Plans Section */}
+            <Card
+              sx={{
+                maxWidth: 600,
+                borderRadius: 2,
+                boxShadow: 3,
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Stack spacing={3}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography
+                      variant="h6"
                       sx={{
-                        border: '1px solid',
-                        borderColor: activePlan?.id === plan.id ? 'primary.main' : 'divider',
-                        borderRadius: 2,
-                        mb: 2,
-                        bgcolor: activePlan?.id === plan.id ? 'action.selected' : 'background.paper',
-                        '&:last-child': { mb: 0 }
+                        fontWeight: 600,
                       }}
                     >
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                            <Typography variant="body1" fontWeight={600}>
-                              {plan.name}
-                            </Typography>
-                            {activePlan?.id === plan.id && (
-                              <CheckCircle color="primary" fontSize="small" />
-                            )}
-                          </Box>
-                        }
-                        secondary={
-                          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                            <Chip
-                              label={getGoalLabel(plan.goal)}
-                              size="small"
-                              sx={{ fontSize: '0.7rem', height: 20 }}
-                            />
-                            <Chip
-                              label={`${plan.daysPerWeek}x/week`}
-                              size="small"
-                              sx={{ fontSize: '0.7rem', height: 20 }}
-                            />
-                            <Chip
-                              label={getExperienceLabel(plan.experienceLevel)}
-                              size="small"
-                              sx={{ fontSize: '0.7rem', height: 20 }}
-                            />
-                          </Stack>
-                        }
-                      />
-                      <Stack direction="row" spacing={1}>
-                        {activePlan?.id !== plan.id && (
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={() => handleActivatePlan(plan.id)}
-                            sx={{ textTransform: 'none' }}
-                          >
-                            Activate
-                          </Button>
-                        )}
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDeletePlan(plan.id)}
-                          sx={{ color: 'error.main' }}
+                      Workout Plans
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<Add />}
+                      onClick={handleOpenPlanModal}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      Create Plan
+                    </Button>
+                  </Box>
+
+                  <Divider />
+
+                  {plans.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                      No workout plans yet. Create one to get started!
+                    </Typography>
+                  ) : (
+                    <List sx={{ py: 0 }}>
+                      {plans.map((plan) => (
+                        <ListItem
+                          key={plan.id}
+                          sx={{
+                            border: '1px solid',
+                            borderColor: activePlan?.id === plan.id ? 'primary.main' : 'divider',
+                            borderRadius: 2,
+                            mb: 2,
+                            bgcolor: activePlan?.id === plan.id ? 'action.selected' : 'background.paper',
+                            '&:last-child': { mb: 0 }
+                          }}
                         >
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Stack>
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </Stack>
-          </CardContent>
-        </Card>
+                          <ListItemText
+                            primary={
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                <Typography variant="body1" fontWeight={600}>
+                                  {plan.name}
+                                </Typography>
+                                {activePlan?.id === plan.id && (
+                                  <CheckCircle color="primary" fontSize="small" />
+                                )}
+                              </Box>
+                            }
+                            secondary={
+                              <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                                <Chip
+                                  label={getGoalLabel(plan.goal)}
+                                  size="small"
+                                  sx={{ fontSize: '0.7rem', height: 20 }}
+                                />
+                                <Chip
+                                  label={`${plan.daysPerWeek}x/week`}
+                                  size="small"
+                                  sx={{ fontSize: '0.7rem', height: 20 }}
+                                />
+                                <Chip
+                                  label={getExperienceLabel(plan.experienceLevel)}
+                                  size="small"
+                                  sx={{ fontSize: '0.7rem', height: 20 }}
+                                />
+                              </Stack>
+                            }
+                          />
+                          <Stack direction="row" spacing={1}>
+                            {activePlan?.id !== plan.id && (
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => handleActivatePlan(plan.id)}
+                                sx={{ textTransform: 'none' }}
+                              >
+                                Activate
+                              </Button>
+                            )}
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeletePlan(plan.id)}
+                              sx={{ color: 'error.main' }}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Stack>
+                        </ListItem>
+                      ))}
+                    </List>
+                  )}
+                </Stack>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* App Tab */}
+        {tabValue === 2 && (
+          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Stack spacing={3}>
+                {/* Theme Setting */}
+                <Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                    }}
+                  >
+                    {mode === 'dark' ? <Brightness4 /> : <Brightness7 />}
+                    Appearance
+                  </Typography>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={mode === 'light'}
+                        onChange={handleThemeToggle}
+                        color="primary"
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography variant="body1" fontWeight={500}>
+                          {mode === 'dark' ? 'Dark Theme' : 'Light Theme'}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Switch between dark and light modes
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </Box>
+
+                <Divider />
+
+                {/* Volume Setting */}
+                <Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                    }}
+                  >
+                    <VolumeUp />
+                    Sound
+                  </Typography>
+                  <Box sx={{ px: 1 }}>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      Sound Effects Volume
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Slider
+                        value={volume}
+                        onChange={handleVolumeChange}
+                        onChangeCommitted={handleVolumeCommit}
+                        min={0}
+                        max={1}
+                        step={0.1}
+                        valueLabelDisplay="auto"
+                        valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
+                        sx={{
+                          flex: 1,
+                          '& .MuiSlider-thumb': {
+                            width: 20,
+                            height: 20,
+                          },
+                          '& .MuiSlider-track': {
+                            height: 6,
+                          },
+                          '& .MuiSlider-rail': {
+                            height: 6,
+                          },
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          minWidth: 45,
+                          fontWeight: 600,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        {Math.round(volume * 100)}%
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: 'block', mt: 1 }}
+                    >
+                      Adjust the volume of sound effects throughout the app. Set to 0 to mute all sounds.
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Divider />
+
+                {/* Unit System */}
+                <Box>
+                  <Typography variant="h6" fontWeight={600} gutterBottom>
+                    Unit System
+                  </Typography>
+                  <FormControl fullWidth>
+                    <InputLabel>Units</InputLabel>
+                    <Select
+                      value={preferences.units}
+                      onChange={(e) => updatePreference('units', e.target.value)}
+                      label="Units"
+                    >
+                      <MenuItem value="imperial">Imperial (lbs, in)</MenuItem>
+                      <MenuItem value="metric">Metric (kg, cm)</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                    Choose your preferred measurement system for weights and distances
+                  </Typography>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Data Tab */}
+        {tabValue === 3 && (
+          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Stack spacing={3}>
+                <Box>
+                  <Typography variant="h6" fontWeight={600} gutterBottom>
+                    Export & Backup
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Download your profile data and statistics as a JSON file for backup or migration
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<Download />}
+                    onClick={handleExportData}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Export Profile Data
+                  </Button>
+                </Box>
+
+                <Divider />
+
+                <Box>
+                  <Typography variant="h6" fontWeight={600} gutterBottom>
+                    Privacy
+                  </Typography>
+                  {isGuest ? (
+                    <Alert severity="info">
+                      Create an account to access cloud sync and data privacy features
+                    </Alert>
+                  ) : (
+                    <Alert severity="success">
+                      Your data is securely stored in Firebase and synced across your devices
+                    </Alert>
+                  )}
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        )}
 
         <Box sx={{ mt: 3 }}>
           <Typography variant="body2" color="text.secondary">
@@ -541,6 +681,10 @@ const SettingsScreen = () => {
       />
     </Box>
   );
+};
+
+SettingsScreen.propTypes = {
+  onNavigate: PropTypes.func,
 };
 
 export default SettingsScreen;

@@ -19,6 +19,7 @@ import { getWorkoutTypeDisplayName } from '../utils/weeklyPlanDefaults';
 import { getWorkoutHistory } from '../utils/storage';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { containerPadding, touchTargets } from '../theme/responsive';
+import ProfileWidget from './ProfileWidget';
 
 /**
  * HomeScreen - Quick-start interface component
@@ -33,6 +34,7 @@ const HomeScreen = memo(({
   currentPlan,
   todaysWorkout,
   onQuickStart,
+  onNavigate,
   loading = false
 }) => {
   const [greeting, setGreeting] = useState('');
@@ -170,6 +172,11 @@ const HomeScreen = memo(({
           {currentDate}
         </Typography>
       </Box>
+
+      {/* Profile Widget */}
+      {onNavigate && (
+        <ProfileWidget onNavigateToProfile={() => onNavigate('profile')} />
+      )}
 
       {/* Main Workout Card */}
       <Card 
@@ -465,6 +472,7 @@ HomeScreen.propTypes = {
     estimatedDuration: PropTypes.number,
   }),
   onQuickStart: PropTypes.func.isRequired,
+  onNavigate: PropTypes.func,
   loading: PropTypes.bool,
 };
 

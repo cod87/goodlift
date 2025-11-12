@@ -19,6 +19,7 @@ import UnifiedTimerScreen from './pages/UnifiedTimerScreen';
 import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
 import SettingsScreen from './pages/SettingsScreen';
+import UserProfileScreen from './pages/UserProfileScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import AchievementUnlockedDialog from './components/AchievementUnlockedDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
@@ -607,6 +608,7 @@ function AppContent() {
               currentPlan={currentPlan}
               todaysWorkout={getTodaysWorkout()}
               onQuickStart={handleTodayViewQuickStart}
+              onNavigate={handleNavigate}
               loading={loading}
             />
           )}
@@ -688,7 +690,9 @@ function AppContent() {
 
           {currentScreen === 'exercise-list' && <ExerciseListPage />}
 
-          {currentScreen === 'settings' && <SettingsScreen />}
+          {currentScreen === 'settings' && <SettingsScreen onNavigate={handleNavigate} />}
+
+          {currentScreen === 'profile' && <UserProfileScreen />}
         </div>
         
         {/* Bottom Navigation - Mobile Only */}

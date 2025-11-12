@@ -2,21 +2,20 @@ import { useState, useEffect, useCallback } from "react";
 import './App.css';
 import Header from './components/Header';
 import NavigationSidebar from './components/NavigationSidebar';
+import TodayView from './components/TodayView/TodayView';
 import SelectionScreen from './components/SelectionScreen';
 import UnifiedWorkoutHub from './components/UnifiedWorkoutHub';
 import WorkoutPlanScreen from './components/WorkoutPlanScreen';
 import WorkoutScreen from './components/WorkoutScreen';
 import WorkoutPreview from './components/WorkoutPreview';
 import CustomizeExerciseScreen from './components/CustomizeExerciseScreen';
-import CustomWorkoutPreview from './components/CustomWorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
-import HiitTimerScreen from './components/HiitTimerScreen';
+import UnifiedTimerScreen from './components/UnifiedTimerScreen';
 import HiitSessionSelection from './components/HiitSessionSelection';
 import HiitSessionScreen from './components/HiitSessionScreen';
 import YogaSessionSelection from './components/YogaSessionSelection';
 import YogaSessionScreen from './components/YogaSessionScreen';
-import UnifiedTimerScreen from './components/UnifiedTimerScreen';
 import AuthScreen from './components/AuthScreen';
 import MobilityScreen from './components/Mobility/MobilityScreen';
 import CardioScreen from './pages/CardioScreen';
@@ -26,7 +25,8 @@ import SettingsScreen from './pages/SettingsScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
-import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps, loadUserDataFromCloud } from './utils/storage';
+import { usePlanIntegration } from './hooks/usePlanIntegration';
+import { saveWorkout, saveUserStats, getUserStats, setExerciseWeight, getExerciseTargetReps, loadUserDataFromCloud, getWorkoutHistory } from './utils/storage';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
@@ -52,10 +52,32 @@ function AppContent() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
   const [showGuestSnackbar, setShowGuestSnackbar] = useState(false);
   const [showMigrationDialog, setShowMigrationDialog] = useState(false);
+  const [lastWorkout, setLastWorkout] = useState(null);
   const { currentUser, isGuest, hasGuestData } = useAuth();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
   const favoriteExercises = useFavoriteExercises();
+  const { 
+    getTodaysWorkout, 
+    getUpcomingWorkouts,
+    createWorkoutNavState
+  } = usePlanIntegration();
+
+  // Load last workout for TodayView
+  useEffect(() => {
+    const loadLastWorkout = async () => {
+      const history = await getWorkoutHistory();
+      if (history && history.length > 0) {
+        const last = history[0];
+        setLastWorkout({
+          date: last.date,
+          duration: last.duration,
+          exercises: last.exercises ? Object.keys(last.exercises) : [],
+        });
+      }
+    };
+    loadLastWorkout();
+  }, []);
 
   // Check if guest snackbar should be shown
   useEffect(() => {
@@ -180,6 +202,24 @@ function AppContent() {
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleTodayViewQuickStart = () => {
+    const todaysWorkout = getTodaysWorkout();
+    if (todaysWorkout && todaysWorkout.type !== 'rest') {
+      // Use today's workout type from weekly plan
+      const workoutTypeValue = todaysWorkout.subtype || todaysWorkout.type;
+      setWorkoutType(workoutTypeValue);
+      const equipmentFilter = selectedEquipment.has('all') 
+        ? 'all' 
+        : Array.from(selectedEquipment);
+      
+      // Create nav state with plan context
+      const today = new Date().getDay();
+      const navState = createWorkoutNavState(today);
+      
+      handleStartWorkout(workoutTypeValue, equipmentFilter, null, navState);
+    }
   };
 
   const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null, planNavState = null) => {
@@ -505,14 +545,11 @@ function AppContent() {
           transition: 'margin-left 0.3s ease',
         }}>
           {currentScreen === 'home' && (
-            <SelectionScreen
-              workoutType={workoutType}
-              selectedEquipment={selectedEquipment}
-              equipmentOptions={equipmentOptions}
-              onWorkoutTypeChange={handleWorkoutTypeChange}
-              onEquipmentChange={handleEquipmentChange}
-              onStartWorkout={handleStartWorkout}
-              onCustomize={handleCustomize}
+            <TodayView
+              todaysWorkout={getTodaysWorkout()}
+              nextWorkouts={getUpcomingWorkouts(2)}
+              lastWorkout={lastWorkout}
+              onQuickStart={handleTodayViewQuickStart}
               onNavigate={handleNavigate}
               loading={loading}
             />
@@ -543,11 +580,13 @@ function AppContent() {
           )}
 
           {currentScreen === 'custom-preview' && currentWorkout.length > 0 && (
-            <CustomWorkoutPreview
+            <WorkoutPreview
               workout={currentWorkout}
               workoutType={workoutType}
               onStart={handleCustomPreviewStart}
               onCancel={handleCustomPreviewCancel}
+              onRandomizeExercise={handleRandomizeExercise}
+              equipmentFilter={Array.from(selectedEquipment)}
             />
           )}
           

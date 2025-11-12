@@ -22,6 +22,8 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -33,15 +35,19 @@ import {
   Delete,
   ExpandMore,
   ExpandLess,
+  EmojiEvents,
+  Assessment,
 } from '@mui/icons-material';
 import CompactHeader from './Common/CompactHeader';
 import Calendar from './Calendar';
+import Achievements from './Achievements';
 import {
   getWorkoutHistory,
   deleteWorkout,
   updateWorkout,
   getStretchSessions,
   getActivePlan,
+  getUserStats,
 } from '../utils/storage';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
@@ -72,23 +78,27 @@ const ProgressDashboard = () => {
   const [editingSession, setEditingSession] = useState(null);
   const [editingSessionType, setEditingSessionType] = useState(null);
   const [calendarExpanded, setCalendarExpanded] = useState(false);
+  const [currentTab, setCurrentTab] = useState(0);
   
   // New tracking metrics state
   const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0 });
   const [adherence, setAdherence] = useState(0);
   const [totalVolume, setTotalVolume] = useState(0);
+  const [userStats, setUserStats] = useState({});
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedHistory, loadedStretches, loadedActivePlan] = await Promise.all([
+      const [loadedHistory, loadedStretches, loadedActivePlan, loadedStats] = await Promise.all([
         getWorkoutHistory(),
         getStretchSessions(),
-        getActivePlan()
+        getActivePlan(),
+        getUserStats()
       ]);
       setHistory(loadedHistory);
       setStretchSessions(loadedStretches);
       setActivePlan(loadedActivePlan);
+      setUserStats(loadedStats);
 
       // Calculate tracking metrics
       const streak = calculateStreak(loadedHistory, loadedActivePlan);
@@ -245,7 +255,32 @@ const ProgressDashboard = () => {
       <CompactHeader title="Progress" subtitle="Track your fitness journey" />
 
       <Box sx={{ maxWidth: '1400px', margin: '0 auto', p: { xs: 2, md: 3 }, pb: { xs: '80px', md: 3 } }}>
-        <Stack spacing={3}>
+        {/* Tab Navigation */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tabs
+            value={currentTab}
+            onChange={(e, newValue) => setCurrentTab(newValue)}
+            variant="fullWidth"
+            sx={{ maxWidth: { xs: '100%', sm: 600 }, margin: '0 auto' }}
+          >
+            <Tab 
+              icon={<Assessment />} 
+              iconPosition="start" 
+              label="Statistics" 
+              sx={{ minHeight: 48 }}
+            />
+            <Tab 
+              icon={<EmojiEvents />} 
+              iconPosition="start" 
+              label="Achievements" 
+              sx={{ minHeight: 48 }}
+            />
+          </Tabs>
+        </Box>
+
+        {/* Statistics Tab */}
+        {currentTab === 0 && (
+          <Stack spacing={3}>
           {/* Top Row: Streak, Adherence, Volume */}
           <Box
             sx={{
@@ -492,6 +527,15 @@ const ProgressDashboard = () => {
             </CardContent>
           </Card>
         </Stack>
+        )}
+
+        {/* Achievements Tab */}
+        {currentTab === 1 && (
+          <Achievements 
+            userStats={userStats} 
+            workoutHistory={history} 
+          />
+        )}
 
         {/* Add Exercise Dialog */}
         <Dialog

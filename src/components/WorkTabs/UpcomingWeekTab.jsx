@@ -30,22 +30,11 @@ const UpcomingWeekTab = memo(({
   onNavigate,
   loading = false
 }) => {
-  const [greeting, setGreeting] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [recentWorkouts, setRecentWorkouts] = useState([]);
 
-  // Set greeting based on time of day
+  // Set current date
   useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) {
-      setGreeting('Good Morning');
-    } else if (hour < 18) {
-      setGreeting('Good Afternoon');
-    } else {
-      setGreeting('Good Evening');
-    }
-
-    // Format current date
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     setCurrentDate(new Date().toLocaleDateString('en-US', options));
   }, []);
@@ -110,24 +99,13 @@ const UpcomingWeekTab = memo(({
 
   return (
     <Box>
-      {/* Greeting Section */}
+      {/* Date Section */}
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography 
-          variant="h3" 
+          variant="h5" 
           sx={{ 
-            fontWeight: 700,
-            color: 'text.primary',
-            mb: 1,
-            fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
-          }}
-        >
-          {greeting}
-        </Typography>
-        <Typography 
-          variant="h6" 
-          sx={{ 
+            fontWeight: 600,
             color: 'text.secondary',
-            fontWeight: 400,
             fontSize: { xs: '1rem', sm: '1.25rem' }
           }}
         >

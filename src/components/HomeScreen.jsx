@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useCallback } from 'react';
+import { memo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { 
   Box, 
@@ -7,38 +7,41 @@ import {
   Typography, 
   Button, 
   Stack,
-  LinearProgress,
-  Chip
+  Chip,
+  Grid
 } from '@mui/material';
 import { 
   PlayArrow, 
-  Whatshot,
-  CalendarToday
+  CalendarToday,
+  Add,
+  Timer,
+  ViewList,
+  TrendingUp
 } from '@mui/icons-material';
 import { getWorkoutTypeDisplayName } from '../utils/weeklyPlanDefaults';
 import { getWorkoutHistory } from '../utils/storage';
-import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { containerPadding, touchTargets } from '../theme/responsive';
 
 /**
  * HomeScreen - Quick-start interface component (Work Tab)
  * Features:
  * - Prominent "Start Today's Workout" button
+ * - Secondary action buttons: Create Plan, Quick Timer, View Plans
  * - Current plan name display
  * - Today's scheduled sessions
- * - Streak counter with fire emoji
- * - Adherence percentage
+ * - Recent workout history (3-5 sessions)
+ * - Weekly schedule overview
  */
 const HomeScreen = memo(({ 
   currentPlan,
   todaysWorkout,
   onQuickStart,
+  onNavigate,
   loading = false
 }) => {
   const [greeting, setGreeting] = useState('');
   const [currentDate, setCurrentDate] = useState('');
-  const [streak, setStreak] = useState(0);
-  const [adherence, setAdherence] = useState(0);
+  const [recentWorkouts, setRecentWorkouts] = useState([]);
 
   // Set greeting based on time of day
   useEffect(() => {
@@ -56,81 +59,35 @@ const HomeScreen = memo(({
     setCurrentDate(new Date().toLocaleDateString('en-US', options));
   }, []);
 
-  // Calculate streak and adherence
+  // Load recent workouts
   useEffect(() => {
-    const calculateMetrics = async () => {
+    const loadRecentWorkouts = async () => {
       try {
         const workoutHistory = await getWorkoutHistory();
-        
-        // Calculate streak using existing service
-        const currentStreak = progressiveOverloadService.calculateStreak(workoutHistory);
-        setStreak(currentStreak);
-        
-        // Calculate adherence: completed workouts vs planned workouts
-        // For now, we'll calculate based on the last 30 days
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
-        // Count completed workouts in last 30 days
-        const completedWorkouts = workoutHistory.filter(w => {
-          const workoutDate = new Date(w.date);
-          return workoutDate >= thirtyDaysAgo;
-        }).length;
-        
-        // If there's a plan, calculate expected workouts
-        let expectedWorkouts = 0;
-        if (currentPlan && currentPlan.days) {
-          // Count non-rest days in the plan
-          const workoutDays = currentPlan.days.filter(day => day.type !== 'rest').length;
-          // Estimate expected workouts over 30 days (roughly 4 weeks)
-          expectedWorkouts = Math.floor((workoutDays / 7) * 30);
-        } else {
-          // Default to 4 workouts per week (standard recommendation)
-          expectedWorkouts = Math.floor((4 / 7) * 30);
-        }
-        
-        // Calculate adherence percentage
-        const adherencePercent = expectedWorkouts > 0 
-          ? Math.min(100, Math.round((completedWorkouts / expectedWorkouts) * 100))
-          : 0;
-        
-        setAdherence(adherencePercent);
+        // Get recent workouts (last 3-5)
+        setRecentWorkouts(workoutHistory.slice(0, 5));
       } catch (error) {
-        console.error('Error calculating metrics:', error);
+        console.error('Error loading recent workouts:', error);
       }
     };
 
-    calculateMetrics();
-  }, [currentPlan]);
-
-  // Get motivational message based on streak
-  const getStreakMessage = useCallback(() => {
-    if (streak === 0) {
-      return "Let's start a streak!";
-    } else if (streak === 1) {
-      return "Great start!";
-    } else if (streak < 7) {
-      return "Keep it going!";
-    } else if (streak < 14) {
-      return "You're on fire!";
-    } else if (streak < 30) {
-      return "Incredible consistency!";
-    } else {
-      return "Legendary dedication!";
-    }
-  }, [streak]);
-
-  // Get adherence color based on percentage
-  const getAdherenceColor = useCallback(() => {
-    if (adherence >= 80) return 'success';
-    if (adherence >= 60) return 'warning';
-    return 'error';
-  }, [adherence]);
+    loadRecentWorkouts();
+  }, []);
 
   const hasToday = todaysWorkout && todaysWorkout.type !== 'rest';
   const planName = currentPlan?.planStyle 
     ? currentPlan.planStyle.toUpperCase().replace('_', ' ')
     : 'Weekly Plan';
+
+  // Format duration helper
+  const formatDuration = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) {
+      return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+  };
 
   return (
     <Box 
@@ -252,7 +209,7 @@ const HomeScreen = memo(({
               <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 2 }}>
                 Rest Day
               </Typography>
-              <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+              <Typography variant="body1" sx={{ color: 'text.secondary', mb: 2 }}>
                 Recovery is essential for growth. Take it easy today!
               </Typography>
             </>
@@ -260,110 +217,121 @@ const HomeScreen = memo(({
         </CardContent>
       </Card>
 
-      {/* Stats Cards - Two-column grid on mobile for small widgets */}
-      <Box 
-        sx={{ 
-          mb: 3,
-          display: 'grid',
-          gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(2, 1fr)' },
-          gap: { xs: 2, sm: 2, md: 3 },
-        }}
-      >
-        {/* Streak Card */}
-        <Card 
-          elevation={2}
-          sx={{ 
-            borderRadius: 3,
-          }}
-        >
-          <CardContent sx={{ p: { xs: 2, sm: 3 }, textAlign: 'center' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
-              <Whatshot sx={{ color: 'warning.main', fontSize: 40, mr: 1 }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                Streak
-              </Typography>
-            </Box>
-            <Typography 
-              variant="h2" 
-              sx={{ 
-                fontWeight: 700, 
-                color: 'warning.main',
-                mb: 1,
-                fontSize: { xs: '2.5rem', sm: '3rem' }
-              }}
-            >
-              {streak}
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {streak === 1 ? 'day' : 'days'}
-            </Typography>
-            <Typography 
-              variant="body1" 
-              sx={{ 
-                color: 'text.primary', 
-                mt: 1, 
-                fontWeight: 500,
-                fontStyle: 'italic' 
-              }}
-            >
-              {getStreakMessage()}
-            </Typography>
-          </CardContent>
-        </Card>
+      {/* Secondary Actions - Quick Access Buttons */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={4}>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<Add />}
+            onClick={() => onNavigate('selection')}
+            sx={{ 
+              py: 1.5,
+              fontSize: '0.95rem',
+              fontWeight: 600,
+            }}
+          >
+            Create Plan
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<Timer />}
+            onClick={() => onNavigate('timer')}
+            sx={{ 
+              py: 1.5,
+              fontSize: '0.95rem',
+              fontWeight: 600,
+            }}
+          >
+            Quick Timer
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<ViewList />}
+            onClick={() => onNavigate('workout-plan')}
+            sx={{ 
+              py: 1.5,
+              fontSize: '0.95rem',
+              fontWeight: 600,
+            }}
+          >
+            View Plans
+          </Button>
+        </Grid>
+      </Grid>
 
-        {/* Adherence Card */}
+      {/* Recent Workout History */}
+      {recentWorkouts.length > 0 && (
         <Card 
           elevation={2}
           sx={{ 
+            mb: 3,
             borderRadius: 3,
           }}
         >
           <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 600, 
-                color: 'text.primary',
-                mb: 2,
-                textAlign: 'center'
-              }}
-            >
-              Adherence
-            </Typography>
-            <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
               <Typography 
-                variant="h2" 
+                variant="h6" 
                 sx={{ 
-                  fontWeight: 700, 
-                  color: `${getAdherenceColor()}.main`,
-                  fontSize: { xs: '2.5rem', sm: '3rem' }
+                  fontWeight: 600, 
+                  color: 'text.primary',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
                 }}
               >
-                {adherence}%
+                <TrendingUp /> Recent Workouts
               </Typography>
-            </Box>
-            <LinearProgress 
-              variant="determinate" 
-              value={adherence} 
-              color={getAdherenceColor()}
-              sx={{ 
-                height: 10, 
-                borderRadius: 5,
-                mb: 1,
-              }}
-            />
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                color: 'text.secondary',
-                textAlign: 'center'
-              }}
-            >
-              Workouts completed vs. planned (30 days)
-            </Typography>
+              <Button
+                size="small"
+                onClick={() => onNavigate('progress')}
+                sx={{ color: 'primary.main' }}
+              >
+                View All
+              </Button>
+            </Stack>
+            <Stack spacing={1.5}>
+              {recentWorkouts.map((workout, index) => (
+                <Box 
+                  key={index}
+                  sx={{ 
+                    p: 2, 
+                    bgcolor: 'background.default', 
+                    borderRadius: 2,
+                    borderLeft: '4px solid',
+                    borderLeftColor: 'primary.main',
+                  }}
+                >
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        {workout.type?.charAt(0).toUpperCase() + workout.type?.slice(1) || 'Workout'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(workout.date).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {formatDuration(workout.duration || 0)}
+                    </Typography>
+                  </Stack>
+                </Box>
+              ))}
+            </Stack>
           </CardContent>
         </Card>
-      </Box>
+      )}
 
       {/* Weekly Overview */}
       {currentPlan && currentPlan.days && (

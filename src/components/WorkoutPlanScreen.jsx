@@ -26,7 +26,8 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   Build as BuildIcon,
-  AutoAwesome as AutoGenerateIcon
+  AutoAwesome as AutoGenerateIcon,
+  ArrowBack as BackIcon,
 } from '@mui/icons-material';
 import CompactHeader from './Common/CompactHeader';
 import WorkoutPlanBuilderDialog from './WorkoutPlanBuilderDialog';
@@ -149,6 +150,17 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh' }}>
+      {/* Back Button */}
+      <Box sx={{ px: 2, pt: 2 }}>
+        <Button
+          startIcon={<BackIcon />}
+          onClick={() => onNavigate('home')}
+          sx={{ color: 'text.secondary' }}
+        >
+          Back to Work Home
+        </Button>
+      </Box>
+      
       <CompactHeader 
         title="Workout Plans" 
         icon="📅"

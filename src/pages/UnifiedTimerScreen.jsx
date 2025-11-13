@@ -44,6 +44,7 @@ import {
   DirectionsRun,
   Add,
   Remove,
+  ArrowBack,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import audioService from '../utils/audioService';
@@ -319,6 +320,17 @@ const UnifiedTimerScreen = ({ onNavigate }) => {
         transition={{ duration: 0.5 }}
         style={{ maxWidth: '800px', margin: '0 auto' }}
       >
+        {/* Back Button */}
+        <Box sx={{ mb: 2 }}>
+          <Button
+            startIcon={<ArrowBack />}
+            onClick={() => onNavigate('home')}
+            sx={{ color: 'text.secondary' }}
+          >
+            Back to Work Home
+          </Button>
+        </Box>
+        
         <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, textAlign: 'center' }}>
           Unified Timer
         </Typography>

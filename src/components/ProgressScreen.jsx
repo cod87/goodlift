@@ -30,16 +30,12 @@ import {
   TrendingDown,
   Remove,
   Add,
-  Close,
   Edit,
   Delete,
-  ExpandMore,
-  ExpandLess,
   EmojiEvents,
   Assessment,
 } from '@mui/icons-material';
 import CompactHeader from './Common/CompactHeader';
-import Calendar from './Calendar';
 import Achievements from './Achievements';
 import {
   getWorkoutHistory,
@@ -67,9 +63,6 @@ import ActivitiesList from './Progress/ActivitiesList';
 const ProgressDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
-  const [stretchSessions, setStretchSessions] = useState([]);
-  const [activePlan, setActivePlan] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [pinnedExercises, setPinnedExercisesState] = useState([]);
   const [availableExercises, setAvailableExercises] = useState([]);
   const [addExerciseDialogOpen, setAddExerciseDialogOpen] = useState(false);
@@ -77,7 +70,6 @@ const ProgressDashboard = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
   const [editingSessionType, setEditingSessionType] = useState(null);
-  const [calendarExpanded, setCalendarExpanded] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
   
   // New tracking metrics state
@@ -89,15 +81,13 @@ const ProgressDashboard = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedHistory, loadedStretches, loadedActivePlan, loadedStats] = await Promise.all([
+      const [loadedHistory, , loadedActivePlan, loadedStats] = await Promise.all([
         getWorkoutHistory(),
         getStretchSessions(),
         getActivePlan(),
         getUserStats()
       ]);
       setHistory(loadedHistory);
-      setStretchSessions(loadedStretches);
-      setActivePlan(loadedActivePlan);
       setUserStats(loadedStats);
 
       // Calculate tracking metrics
@@ -175,65 +165,6 @@ const ProgressDashboard = () => {
       setExerciseSearchQuery('');
     }
   };
-
-  const workoutSessions = [
-    ...history.map(workout => ({
-      date: workout.date,
-      type: workout.type || 'full',
-      duration: workout.duration || 0,
-      status: 'completed'
-    })),
-    ...stretchSessions.map(session => ({
-      date: session.date,
-      type: 'stretch',
-      duration: session.duration || 0,
-      status: 'completed'
-    })),
-    ...(activePlan?.sessions || []).map(session => ({
-      date: session.date,
-      type: session.type,
-      duration: session.duration || 60,
-      status: session.status || 'planned'
-    }))
-  ];
-
-  const handleDayClick = (date) => {
-    setSelectedDate(date);
-    setTimeout(() => {
-      const sessionList = document.querySelector('.activities-section');
-      if (sessionList) {
-        sessionList.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
-  };
-
-  const isSameDay = (date1, date2) => {
-    const d1 = new Date(date1);
-    const d2 = new Date(date2);
-    return d1.getFullYear() === d2.getFullYear() &&
-      d1.getMonth() === d2.getMonth() &&
-      d1.getDate() === d2.getDate();
-  };
-
-  const getFilteredSessions = () => {
-    if (!selectedDate) {
-      return {
-        workouts: history,
-        stretch: stretchSessions,
-      };
-    }
-
-    return {
-      workouts: history.filter(w => isSameDay(w.date, selectedDate)),
-      stretch: stretchSessions.filter(s => isSameDay(s.date, selectedDate)),
-    };
-  };
-
-  const filteredSessions = getFilteredSessions();
-  const hasSessionsOnSelectedDay = selectedDate && (
-    filteredSessions.workouts.length > 0 ||
-    filteredSessions.stretch.length > 0
-  );
 
   if (loading) {
     return (
@@ -318,50 +249,6 @@ const ProgressDashboard = () => {
 
           {/* 4-Week Progression Chart */}
           <FourWeekProgressionChart workoutHistory={history} />
-
-          {/* Calendar */}
-          <Card sx={{ bgcolor: 'background.paper' }}>
-            <CardContent>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Typography variant="h6">Calendar</Typography>
-                <Button
-                  size="small"
-                  endIcon={calendarExpanded ? <ExpandLess /> : <ExpandMore />}
-                  onClick={() => setCalendarExpanded(!calendarExpanded)}
-                >
-                  {calendarExpanded ? 'Monthly' : 'Weekly'}
-                </Button>
-              </Stack>
-              <Calendar 
-                workoutSessions={workoutSessions} 
-                onDayClick={handleDayClick}
-                viewMode={calendarExpanded ? 'monthly' : 'weekly'}
-              />
-              {selectedDate && (
-                <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {selectedDate.toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </Typography>
-                    <IconButton size="small" onClick={() => setSelectedDate(null)}>
-                      <Close fontSize="small" />
-                    </IconButton>
-                  </Stack>
-                  {hasSessionsOnSelectedDay && (
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                      {filteredSessions.workouts.length +
-                        filteredSessions.stretch.length} session(s) recorded
-                    </Typography>
-                  )}
-                </Box>
-              )}
-            </CardContent>
-          </Card>
 
           {/* Progressive Overload Tracking */}
           {history.length > 0 && (
@@ -494,43 +381,23 @@ const ProgressDashboard = () => {
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Typography variant="h6">
-                  {selectedDate
-                    ? `Activities on ${selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
-                    : 'Recent Activities (Last 10 Workouts)'}
+                  Recent Activities (Last 10 Workouts)
                 </Typography>
-                {selectedDate && (
-                  <Button size="small" onClick={() => setSelectedDate(null)}>
-                    Show All
-                  </Button>
-                )}
               </Stack>
 
               {/* Use enhanced ActivitiesList component */}
-              {selectedDate && !hasSessionsOnSelectedDay ? (
-                <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-                  No activities logged for this day.
-                </Typography>
-              ) : (
-                <ActivitiesList
-                  activities={selectedDate 
-                    ? [...filteredSessions.workouts, ...filteredSessions.stretch]
-                    : [...history.slice(0, 10)]
-                  }
-                  onEdit={(index) => {
-                    const workout = selectedDate ? filteredSessions.workouts[index] : history[index];
-                    handleEditWorkout(workout, index);
-                  }}
-                  onDelete={(index) => {
-                    if (selectedDate) {
-                      handleDeleteWorkout(index);
-                    } else {
-                      handleDeleteWorkout(index);
-                    }
-                  }}
-                  maxVisible={10}
-                  showLoadMore={!selectedDate && history.length > 10}
-                />
-              )}
+              <ActivitiesList
+                activities={[...history.slice(0, 10)]}
+                onEdit={(index) => {
+                  const workout = history[index];
+                  handleEditWorkout(workout, index);
+                }}
+                onDelete={(index) => {
+                  handleDeleteWorkout(index);
+                }}
+                maxVisible={10}
+                showLoadMore={history.length > 10}
+              />
             </CardContent>
           </Card>
         </Stack>

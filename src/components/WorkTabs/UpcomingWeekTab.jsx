@@ -132,29 +132,68 @@ const UpcomingWeekTab = memo(({
 
   // Get next 7 days (current day + next 6 days)
   const getNext7Days = () => {
-    if (!displayPlan || !displayPlan.days || !Array.isArray(displayPlan.days)) {
+    if (!displayPlan) {
       return [];
     }
 
     const today = new Date();
     const next7Days = [];
 
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() + i);
-      const dayIndex = date.getDay();
-      
-      const dayData = displayPlan.days[dayIndex] || { type: 'rest' };
-      
-      next7Days.push({
-        date: date,
-        dayIndex: dayIndex,
-        isToday: i === 0,
-        ...dayData
-      });
+    // Handle session-based plans
+    if (displayPlan.sessions && Array.isArray(displayPlan.sessions)) {
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() + i);
+        date.setHours(0, 0, 0, 0);
+        
+        const session = displayPlan.sessions.find(s => {
+          const sessionDate = new Date(s.date);
+          sessionDate.setHours(0, 0, 0, 0);
+          return sessionDate.getTime() === date.getTime();
+        });
+        
+        if (session) {
+          next7Days.push({
+            date: date,
+            dayIndex: date.getDay(),
+            isToday: i === 0,
+            type: session.type,
+            status: session.status,
+            ...session
+          });
+        } else {
+          // No session for this day - it's a rest day
+          next7Days.push({
+            date: date,
+            dayIndex: date.getDay(),
+            isToday: i === 0,
+            type: 'rest'
+          });
+        }
+      }
+      return next7Days;
     }
 
-    return next7Days;
+    // Handle day-based plans
+    if (displayPlan.days && Array.isArray(displayPlan.days)) {
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() + i);
+        const dayIndex = date.getDay();
+        
+        const dayData = displayPlan.days[dayIndex] || { type: 'rest' };
+        
+        next7Days.push({
+          date: date,
+          dayIndex: dayIndex,
+          isToday: i === 0,
+          ...dayData
+        });
+      }
+      return next7Days;
+    }
+
+    return [];
   };
 
   const next7Days = getNext7Days();

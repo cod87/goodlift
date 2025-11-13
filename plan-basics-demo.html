@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan Basics Form - Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .demo-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 24px;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .form-field {
+            margin-bottom: 20px;
+        }
+        
+        .form-field label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-field input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .form-field input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .radio-option {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .radio-option:hover {
+            border-color: #1976d2;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .radio-option.selected {
+            border-color: #1976d2;
+            background: #e3f2fd;
+        }
+        
+        .radio-option input {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+        }
+        
+        .radio-option-content {
+            display: flex;
+            align-items: center;
+        }
+        
+        .radio-option-icon {
+            font-size: 32px;
+            margin-right: 16px;
+        }
+        
+        .radio-option-text h3 {
+            margin: 0 0 4px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .radio-option-text p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .next-button {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            background: #1976d2;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: background 0.2s ease;
+        }
+        
+        .next-button:hover:not(:disabled) {
+            background: #1565c0;
+        }
+        
+        .next-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 16px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>Plan Basics Form Demo</h1>
+        
+        <div class="form-container">
+            <form id="planBasicsForm">
+                <div class="form-field">
+                    <label for="planName">Plan Name</label>
+                    <input 
+                        type="text" 
+                        id="planName" 
+                        placeholder="e.g., Summer Training Program"
+                    >
+                </div>
+                
+                <div class="form-field">
+                    <label>Select Plan Type</label>
+                    <div class="radio-group">
+                        <div class="radio-option" data-value="strength_training">
+                            <div class="radio-option-content">
+                                <input type="radio" name="planType" value="strength_training">
+                                <span class="radio-option-icon">💪</span>
+                                <div class="radio-option-text">
+                                    <h3>Strength Training</h3>
+                                    <p>Build overall strength with compound movements</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="radio-option" data-value="powerlifting">
+                            <div class="radio-option-content">
+                                <input type="radio" name="planType" value="powerlifting">
+                                <span class="radio-option-icon">🏋️</span>
+                                <div class="radio-option-text">
+                                    <h3>Powerlifting</h3>
+                                    <p>Focus on squat, bench press, and deadlift</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="radio-option" data-value="olympic_lifting">
+                            <div class="radio-option-content">
+                                <input type="radio" name="planType" value="olympic_lifting">
+                                <span class="radio-option-icon">🤸</span>
+                                <div class="radio-option-text">
+                                    <h3>Olympic Lifting</h3>
+                                    <p>Master the snatch and clean & jerk</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="radio-option" data-value="general_fitness">
+                            <div class="radio-option-content">
+                                <input type="radio" name="planType" value="general_fitness">
+                                <span class="radio-option-icon">🏃</span>
+                                <div class="radio-option-text">
+                                    <h3>General Fitness</h3>
+                                    <p>Balanced approach for overall health</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="radio-option" data-value="custom">
+                            <div class="radio-option-content">
+                                <input type="radio" name="planType" value="custom">
+                                <span class="radio-option-icon">🔧</span>
+                                <div class="radio-option-text">
+                                    <h3>Custom</h3>
+                                    <p>Create your own personalized plan</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="next-button" id="nextButton" disabled>
+                    Next →
+                </button>
+            </form>
+            
+            <div class="result" id="result">
+                <h3>Form Submitted!</h3>
+                <p id="resultText"></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const radioOptions = document.querySelectorAll('.radio-option');
+        const radioInputs = document.querySelectorAll('input[name="planType"]');
+        const nextButton = document.getElementById('nextButton');
+        const form = document.getElementById('planBasicsForm');
+        const result = document.getElementById('result');
+        const resultText = document.getElementById('resultText');
+        
+        // Handle radio option clicks
+        radioOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+                
+                // Update visual state
+                radioOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                // Enable next button
+                nextButton.disabled = false;
+            });
+        });
+        
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const planName = document.getElementById('planName').value;
+            const selectedType = document.querySelector('input[name="planType"]:checked');
+            
+            if (selectedType) {
+                const typeName = selectedType.parentElement.querySelector('h3').textContent;
+                resultText.innerHTML = `
+                    <strong>Plan Name:</strong> ${planName || 'Untitled Plan'}<br>
+                    <strong>Plan Type:</strong> ${typeName}
+                `;
+                result.classList.add('show');
+                
+                // Scroll to result
+                result.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    </script>
+</body>
+</html>

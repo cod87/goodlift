@@ -166,7 +166,14 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
       >
         <MenuItem onClick={handleCreatePlan}>
           <AutoGenerateIcon sx={{ mr: 1 }} />
-          Create Workout Plan
+          Quick Plan Setup
+        </MenuItem>
+        <MenuItem onClick={() => {
+          handleCloseCreateMenu();
+          onNavigate('plan-basics');
+        }}>
+          <AddIcon sx={{ mr: 1 }} />
+          New Plan (Step-by-Step)
         </MenuItem>
       </Menu>
       

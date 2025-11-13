@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getActivePlan, setActivePlan } from '../utils/storage';
-import { createWeeklyPlan, linkSessionToPlan, getSessionsForPlanDay } from '../utils/sessionStorageSchema';
+import { linkSessionToPlan, getSessionsForPlanDay } from '../utils/sessionStorageSchema';
 
 /**
  * usePlanIntegration hook
@@ -26,19 +26,10 @@ export const usePlanIntegration = () => {
       setLoading(true);
       try {
         const plan = await getActivePlan();
-        if (plan) {
-          setCurrentPlan(plan);
-        } else {
-          // Create a default plan if none exists
-          const defaultPlan = createWeeklyPlan({
-            planStyle: 'ppl',
-            startDate: new Date().toISOString()
-          });
-          await setActivePlan(defaultPlan);
-          setCurrentPlan(defaultPlan);
-        }
+        setCurrentPlan(plan); // Will be null if no active plan exists
       } catch (error) {
         console.error('Error loading plan:', error);
+        setCurrentPlan(null);
       } finally {
         setLoading(false);
       }

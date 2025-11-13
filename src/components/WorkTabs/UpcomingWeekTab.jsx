@@ -23,7 +23,10 @@ import { touchTargets } from '../../theme/responsive';
 import { useUserProfile } from '../../contexts/UserProfileContext';
 import MonthCalendarView from '../Calendar/MonthCalendarView';
 import WorkoutDayDialog from '../Calendar/WorkoutDayDialog';
+import EditWorkoutDialog from '../Calendar/EditWorkoutDialog';
 import StreakWarningDialog from '../Calendar/StreakWarningDialog';
+import RecurringSessionEditor from '../RecurringSessionEditor';
+import { getRecurringSessionsInBlock } from '../../utils/workoutPlanGenerator';
 
 /**
  * UpcomingWeekTab - Shows today's workout and next 6 days schedule
@@ -43,11 +46,16 @@ const UpcomingWeekTab = memo(({
   
   // Dialog states
   const [dayDialogOpen, setDayDialogOpen] = useState(false);
+  const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
+  const [recurringEditorOpen, setRecurringEditorOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
+  const [selectedSessionId, setSelectedSessionId] = useState(null);
+  const [recurringCount, setRecurringCount] = useState(0);
   const [streakWarningOpen, setStreakWarningOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+  const [allExercises, setAllExercises] = useState([]);
 
   // Set current date
   useEffect(() => {
@@ -68,6 +76,23 @@ const UpcomingWeekTab = memo(({
     };
 
     loadRecentWorkouts();
+  }, []);
+
+  // Load exercises database
+  useEffect(() => {
+    const loadExercises = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}data/exercises.json`);
+        if (response.ok) {
+          const data = await response.json();
+          setAllExercises(data);
+        }
+      } catch (error) {
+        console.error('Error loading exercises:', error);
+      }
+    };
+
+    loadExercises();
   }, []);
 
   const hasToday = todaysWorkout && todaysWorkout.type !== 'rest';
@@ -132,12 +157,92 @@ const UpcomingWeekTab = memo(({
   // Handler for edit workout
   const handleEditWorkout = () => {
     handleCloseDayDialog();
+    
+    // Find the session ID for this workout
+    if (!currentPlan?.sessions) {
+      setSnackbar({
+        open: true,
+        message: 'No active plan found',
+        severity: 'error',
+      });
+      return;
+    }
+
+    // Find session for the selected date
+    const sessionDate = new Date(selectedDate);
+    sessionDate.setHours(0, 0, 0, 0);
+    
+    const session = currentPlan.sessions.find(s => {
+      const sDate = new Date(s.date);
+      sDate.setHours(0, 0, 0, 0);
+      return sDate.getTime() === sessionDate.getTime();
+    });
+
+    if (!session) {
+      setSnackbar({
+        open: true,
+        message: 'Session not found',
+        severity: 'error',
+      });
+      return;
+    }
+
+    // Get recurring sessions count
+    const recurringSessions = getRecurringSessionsInBlock(currentPlan, session.id);
+    setRecurringCount(recurringSessions.length);
+    setSelectedSessionId(session.id);
+    
+    // Show edit scope dialog
+    setEditWorkoutDialogOpen(true);
+  };
+
+  // Handler for closing edit workout dialog
+  const handleCloseEditWorkoutDialog = () => {
+    setEditWorkoutDialogOpen(false);
+  };
+
+  // Handler for editing single session
+  const handleEditSingle = () => {
+    setEditWorkoutDialogOpen(false);
     setSnackbar({
       open: true,
-      message: 'Edit functionality coming soon!',
+      message: 'Single session edit not yet implemented',
       severity: 'info',
     });
-    // TODO: Implement edit workout functionality
+    // TODO: Implement single session edit
+  };
+
+  // Handler for editing recurring sessions
+  const handleEditRecurring = () => {
+    setEditWorkoutDialogOpen(false);
+    
+    // Find the session
+    const session = currentPlan.sessions.find(s => s.id === selectedSessionId);
+    if (session && session.exercises) {
+      setRecurringEditorOpen(true);
+    } else {
+      setSnackbar({
+        open: true,
+        message: 'No exercises found for this session',
+        severity: 'error',
+      });
+    }
+  };
+
+  // Handler for closing recurring editor
+  const handleCloseRecurringEditor = () => {
+    setRecurringEditorOpen(false);
+  };
+
+  // Handler for saving recurring session changes
+  const handleSaveRecurringChanges = (newExercises) => {
+    setRecurringEditorOpen(false);
+    setSnackbar({
+      open: true,
+      message: 'Recurring session edit saved! (Note: Changes are not yet persisted)',
+      severity: 'success',
+    });
+    // TODO: Implement actual save to storage using updateRecurringSessionExercises
   };
 
   // Handler for delete workout
@@ -575,6 +680,29 @@ const UpcomingWeekTab = memo(({
         onSkip={handleSkipWorkout}
         onDefer={handleDeferWorkout}
       />
+
+      {/* Edit Workout Dialog - Choose edit scope */}
+      <EditWorkoutDialog
+        open={editWorkoutDialogOpen}
+        date={selectedDate}
+        workout={selectedWorkout}
+        recurringCount={recurringCount}
+        onClose={handleCloseEditWorkoutDialog}
+        onEditSingle={handleEditSingle}
+        onEditRecurring={handleEditRecurring}
+      />
+
+      {/* Recurring Session Editor */}
+      {currentPlan?.sessions && selectedSessionId && (
+        <RecurringSessionEditor
+          open={recurringEditorOpen}
+          onClose={handleCloseRecurringEditor}
+          session={currentPlan.sessions.find(s => s.id === selectedSessionId)}
+          recurringCount={recurringCount}
+          allExercises={allExercises}
+          onSave={handleSaveRecurringChanges}
+        />
+      )}
 
       {/* Streak Warning Dialog */}
       <StreakWarningDialog

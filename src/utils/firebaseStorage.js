@@ -256,3 +256,99 @@ export const saveWeeklyPlanToFirebase = async (userId, weeklyPlan) => {
     console.error('Error saving weekly plan to Firebase:', error);
   }
 };
+
+/**
+ * Save plans (simplified data model) to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} plans - The plans array
+ */
+export const savePlansToFirebase = async (userId, plans) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { plans });
+  } catch (error) {
+    console.error('Error saving plans to Firebase:', error);
+  }
+};
+
+/**
+ * Load plans (simplified data model) from Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @returns {array|null} - The plans array or null if not found
+ */
+export const loadPlansFromFirebase = async (userId) => {
+  if (!userId) return null;
+  
+  try {
+    const userData = await loadUserDataFromFirebase(userId);
+    return userData?.plans || null;
+  } catch (error) {
+    console.error('Error loading plans from Firebase:', error);
+    return null;
+  }
+};
+
+/**
+ * Save plan days (simplified data model) to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} planDays - The plan days array
+ */
+export const savePlanDaysToFirebase = async (userId, planDays) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { planDays });
+  } catch (error) {
+    console.error('Error saving plan days to Firebase:', error);
+  }
+};
+
+/**
+ * Load plan days (simplified data model) from Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @returns {array|null} - The plan days array or null if not found
+ */
+export const loadPlanDaysFromFirebase = async (userId) => {
+  if (!userId) return null;
+  
+  try {
+    const userData = await loadUserDataFromFirebase(userId);
+    return userData?.planDays || null;
+  } catch (error) {
+    console.error('Error loading plan days from Firebase:', error);
+    return null;
+  }
+};
+
+/**
+ * Save plan exercises (simplified data model) to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} planExercises - The plan exercises array
+ */
+export const savePlanExercisesToFirebase = async (userId, planExercises) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { planExercises });
+  } catch (error) {
+    console.error('Error saving plan exercises to Firebase:', error);
+  }
+};
+
+/**
+ * Load plan exercises (simplified data model) from Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @returns {array|null} - The plan exercises array or null if not found
+ */
+export const loadPlanExercisesFromFirebase = async (userId) => {
+  if (!userId) return null;
+  
+  try {
+    const userData = await loadUserDataFromFirebase(userId);
+    return userData?.planExercises || null;
+  } catch (error) {
+    console.error('Error loading plan exercises from Firebase:', error);
+    return null;
+  }
+};

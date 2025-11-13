@@ -25,6 +25,9 @@ const GUEST_KEYS = {
   TOTAL_PRS: 'goodlift_guest_total_prs',
   TOTAL_VOLUME: 'goodlift_guest_total_volume',
   ACTIVE_PLAN: 'goodlift_guest_active_plan',
+  PLANS: 'goodlift_guest_plans',
+  PLAN_DAYS: 'goodlift_guest_plan_days',
+  PLAN_EXERCISES: 'goodlift_guest_plan_exercises',
 };
 
 /**

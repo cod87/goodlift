@@ -26,7 +26,7 @@ import WorkoutDayDialog from '../Calendar/WorkoutDayDialog';
 import EditWorkoutDialog from '../Calendar/EditWorkoutDialog';
 import StreakWarningDialog from '../Calendar/StreakWarningDialog';
 import RecurringSessionEditor from '../RecurringSessionEditor';
-import { getRecurringSessionsInBlock, updateRecurringSessionExercises } from '../../utils/workoutPlanGenerator';
+import { getRecurringSessionsInBlock, updateRecurringSessionExercises, removeSessionFromPlan, updateSessionStatus, moveSession } from '../../utils/workoutPlanGenerator';
 
 /**
  * UpcomingWeekTab - Shows today's workout and next 6 days schedule
@@ -164,6 +164,23 @@ const UpcomingWeekTab = memo(({
     if (!workout || workout.type === 'rest') return;
     setSelectedDate(date);
     setSelectedWorkout(workout);
+    
+    // Find the session ID for this date
+    if (displayPlan?.sessions) {
+      const clickedDate = new Date(date);
+      clickedDate.setHours(0, 0, 0, 0);
+      
+      const session = displayPlan.sessions.find(s => {
+        const sessionDate = new Date(s.date);
+        sessionDate.setHours(0, 0, 0, 0);
+        return sessionDate.getTime() === clickedDate.getTime();
+      });
+      
+      if (session) {
+        setSelectedSessionId(session.id);
+      }
+    }
+    
     setDayDialogOpen(true);
   };
 
@@ -172,6 +189,7 @@ const UpcomingWeekTab = memo(({
     setDayDialogOpen(false);
     setSelectedDate(null);
     setSelectedWorkout(null);
+    setSelectedSessionId(null);
   };
 
   // Handler for edit workout
@@ -338,14 +356,46 @@ const UpcomingWeekTab = memo(({
   };
 
   // Handler for delete workout
-  const handleDeleteWorkout = () => {
+  const handleDeleteWorkout = async () => {
     handleCloseDayDialog();
-    setSnackbar({
-      open: true,
-      message: 'Workout deleted successfully',
-      severity: 'success',
-    });
-    // TODO: Implement delete workout functionality
+    
+    if (!displayPlan?.sessions || !selectedSessionId) {
+      setSnackbar({
+        open: true,
+        message: 'Unable to delete workout',
+        severity: 'error',
+      });
+      return;
+    }
+    
+    // Confirm deletion
+    if (!window.confirm('Are you sure you want to delete this workout? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      // Remove the session from the plan
+      const updatedPlan = removeSessionFromPlan(displayPlan, selectedSessionId);
+      
+      // Save the updated plan to storage
+      await saveWorkoutPlan(updatedPlan);
+      
+      // Reload the plan to refresh the UI
+      await loadActivePlan();
+      
+      setSnackbar({
+        open: true,
+        message: 'Workout deleted successfully',
+        severity: 'success',
+      });
+    } catch (error) {
+      console.error('Error deleting workout:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to delete workout. Please try again.',
+        severity: 'error',
+      });
+    }
   };
 
   // Handler for skip workout
@@ -363,9 +413,27 @@ const UpcomingWeekTab = memo(({
 
   // Execute skip action
   const executeSkip = async () => {
+    if (!displayPlan?.sessions || !selectedSessionId) {
+      setSnackbar({
+        open: true,
+        message: 'Unable to skip workout',
+        severity: 'error',
+      });
+      return;
+    }
+    
     try {
+      // Update the session status to 'skipped'
+      const updatedPlan = updateSessionStatus(displayPlan, selectedSessionId, 'skipped');
+      
+      // Save the updated plan to storage
+      await saveWorkoutPlan(updatedPlan);
+      
+      // Reset streak and reload plan
       await resetCurrentStreak();
       if (refreshStats) await refreshStats();
+      await loadActivePlan();
+      
       setSnackbar({
         open: true,
         message: 'Workout skipped. Streak reset.',
@@ -396,15 +464,43 @@ const UpcomingWeekTab = memo(({
 
   // Execute defer action
   const executeDefer = async () => {
+    if (!displayPlan?.sessions || !selectedSessionId) {
+      setSnackbar({
+        open: true,
+        message: 'Unable to defer workout',
+        severity: 'error',
+      });
+      return;
+    }
+    
     try {
+      // Find the session to defer
+      const session = displayPlan.sessions.find(s => s.id === selectedSessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+      
+      // Calculate next day's date
+      const currentDate = new Date(session.date);
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(nextDate.getDate() + 1);
+      
+      // Move the session to next day
+      const updatedPlan = moveSession(displayPlan, selectedSessionId, nextDate);
+      
+      // Save the updated plan to storage
+      await saveWorkoutPlan(updatedPlan);
+      
+      // Reset streak and reload plan
       await resetCurrentStreak();
       if (refreshStats) await refreshStats();
+      await loadActivePlan();
+      
       setSnackbar({
         open: true,
         message: 'Workout deferred to tomorrow. Streak reset.',
         severity: 'warning',
       });
-      // TODO: Implement actual defer logic (move workout to next day)
     } catch (error) {
       console.error('Error deferring workout:', error);
       setSnackbar({

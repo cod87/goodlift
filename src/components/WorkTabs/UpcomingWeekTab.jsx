@@ -17,7 +17,7 @@ import {
   CalendarToday,
   TrendingUp
 } from '@mui/icons-material';
-import { getWorkoutTypeDisplayName, getWorkoutTypeShorthand } from '../../utils/weeklyPlanDefaults';
+import { getWorkoutTypeDisplayName, getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
 import { getWorkoutHistory, resetCurrentStreak, saveWorkoutPlan, getActivePlan } from '../../utils/storage';
 import { touchTargets } from '../../theme/responsive';
 import { useUserProfile } from '../../contexts/UserProfileContext';

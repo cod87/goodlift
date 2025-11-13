@@ -9,6 +9,18 @@ export const WORKOUT_TYPES = {
   FULL: 'full',
 };
 
+/**
+ * Day types enum for session-based plans
+ * Used to categorize workout sessions by their intensity and focus
+ */
+export const DAY_TYPES = {
+  STRENGTH: 'strength',
+  HYPERTROPHY: 'hypertrophy',
+  CARDIO: 'cardio',
+  ACTIVE_RECOVERY: 'active_recovery',
+  REST: 'rest'
+};
+
 /** Exercise and workout configuration */
 export const SETS_PER_EXERCISE = 3;
 export const EXERCISES_PER_WORKOUT = 8;

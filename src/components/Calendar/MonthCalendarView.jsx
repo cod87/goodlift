@@ -31,6 +31,7 @@ import {
   addMonths,
   subMonths
 } from 'date-fns';
+import { getWorkoutTypeShorthand } from '../../utils/weeklyPlanDefaults';
 
 /**
  * MonthCalendarView - Standard calendar grid view with workout indicators
@@ -84,12 +85,29 @@ const MonthCalendarView = ({
     });
   };
 
-  // Get workout type icon
-  const getWorkoutIcon = (workout) => {
+  // Get workout type icon or shorthand
+  const getWorkoutDisplay = (workout) => {
     if (!workout || workout.type === 'rest') return <Hotel sx={{ fontSize: 16 }} />;
     
     const type = workout.type?.toLowerCase() || workout.workoutType?.toLowerCase();
     
+    // For strength workouts, show shorthand label
+    if (['upper', 'lower', 'push', 'pull', 'legs', 'full'].includes(type)) {
+      return (
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            fontWeight: 700, 
+            fontSize: { xs: '0.65rem', sm: '0.7rem' },
+            lineHeight: 1
+          }}
+        >
+          {getWorkoutTypeShorthand(type)}
+        </Typography>
+      );
+    }
+    
+    // For other workouts, show icons
     if (type === 'cardio' || type === 'hiit') {
       return <DirectionsRun sx={{ fontSize: 16 }} />;
     } else if (type === 'stretch' || type === 'active_recovery') {
@@ -235,7 +253,7 @@ const MonthCalendarView = ({
                         justifyContent: 'center',
                       }}
                     >
-                      {getWorkoutIcon(workout)}
+                      {getWorkoutDisplay(workout)}
                     </Box>
                   )}
                   

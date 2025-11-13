@@ -16,8 +16,11 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Tabs,
-  Tab,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
   Alert,
 } from '@mui/material';
 import { 
@@ -30,6 +33,18 @@ import {
   Apps,
   Storage,
   Download,
+  ChevronRight,
+  EditNote,
+  ListAlt,
+  AccountCircle,
+  Scale,
+  AccountBox,
+  Straighten,
+  Timer,
+  Notifications,
+  CloudUpload,
+  DeleteSweep,
+  Security,
 } from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePreferences } from '../contexts/PreferencesContext';
@@ -44,7 +59,6 @@ const SettingsScreen = ({ onNavigate }) => {
   const { profile, stats } = useUserProfile();
   const { isGuest } = useAuth();
   
-  const [tabValue, setTabValue] = useState(0);
   const [volume, setVolume] = useState(() => {
     try {
       const stored = localStorage.getItem('audioVolume');
@@ -129,17 +143,13 @@ const SettingsScreen = ({ onNavigate }) => {
     }));
   };
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
-
   const handleExportData = () => {
     downloadProfileData(profile, stats);
   };
 
-  const handleNavigateToProfile = () => {
+  const handleNavigate = (screen) => {
     if (onNavigate) {
-      onNavigate('profile');
+      onNavigate(screen);
     }
   };
 
@@ -171,325 +181,336 @@ const SettingsScreen = ({ onNavigate }) => {
           Settings
         </Typography>
 
-        {/* Tabs */}
-        <Box sx={{ mb: 3 }}>
-          <Tabs value={tabValue} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
-            <Tab icon={<Person />} label="Profile" />
-            <Tab icon={<FitnessCenter />} label="Workout" />
-            <Tab icon={<Apps />} label="App" />
-            <Tab icon={<Storage />} label="Data" />
-          </Tabs>
-        </Box>
-
-        {/* Profile Tab */}
-        {tabValue === 0 && (
-          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3, width: '100%', boxSizing: 'border-box' }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
-                Profile Settings
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                Manage your profile, avatar, and personal information
-              </Typography>
-              <Button
-                variant="contained"
-                fullWidth
-                startIcon={<Person />}
-                onClick={handleNavigateToProfile}
-                sx={{ textTransform: 'none' }}
+        <Stack spacing={3} sx={{ maxWidth: 600 }}>
+          {/* Activity Management Section */}
+          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 0 }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  px: 2,
+                  pt: 2,
+                  pb: 1,
+                  display: 'block',
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: '0.1em',
+                }}
               >
-                Go to Profile
-              </Button>
+                Activity Management
+              </Typography>
+              <List sx={{ py: 0 }}>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => handleNavigate('log-activity')}>
+                    <ListItemIcon>
+                      <EditNote sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Log Activity"
+                      secondary="Manually log workouts and activities"
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
+                    <ChevronRight sx={{ color: 'text.secondary' }} />
+                  </ListItemButton>
+                </ListItem>
+              </List>
             </CardContent>
           </Card>
-        )}
 
-        {/* Workout Tab */}
-        {tabValue === 1 && (
-          <>
-            <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3, mb: 3, width: '100%', boxSizing: 'border-box' }}>
-              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mb: 2,
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
-                  <SelfImprovement />
-                  Stretch Reminders
-                </Typography>
-                
-                {/* Warmup Toggle */}
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={stretchPrefs.showWarmup}
-                      onChange={(e) => handleStretchPreferenceChange('showWarmup', e.target.checked)}
-                      color="primary"
+          {/* Exercise Database Section */}
+          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 0 }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  px: 2,
+                  pt: 2,
+                  pb: 1,
+                  display: 'block',
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                Exercise Database
+              </Typography>
+              <List sx={{ py: 0 }}>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => handleNavigate('exercise-list')}>
+                    <ListItemIcon>
+                      <ListAlt sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Browse Exercises"
+                      secondary="View and customize exercise library"
+                      primaryTypographyProps={{ fontWeight: 500 }}
                     />
-                  }
-                  label={
-                    <Box>
-                      <Typography variant="body1" fontWeight={500}>
-                        Show Warmup Reminders
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Display warmup reminder before starting exercises
-                      </Typography>
-                    </Box>
-                  }
-                  sx={{ mb: 2 }}
-                />
+                    <ChevronRight sx={{ color: 'text.secondary' }} />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
 
-                {/* Warmup Duration */}
-                {stretchPrefs.showWarmup && (
-                  <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel id="warmup-duration-label">Default Warmup Duration</InputLabel>
-                    <Select
-                      labelId="warmup-duration-label"
-                      id="warmup-duration-select"
-                      value={stretchPrefs.defaultWarmupDuration}
-                      label="Default Warmup Duration"
-                      onChange={(e) => handleStretchPreferenceChange('defaultWarmupDuration', e.target.value)}
-                    >
-                      <MenuItem value={5}>5 minutes</MenuItem>
-                      <MenuItem value={7}>7 minutes</MenuItem>
-                      <MenuItem value={10}>10 minutes</MenuItem>
-                    </Select>
-                  </FormControl>
-                )}
-
-                {/* Cooldown Toggle */}
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={stretchPrefs.showCooldown}
-                      onChange={(e) => handleStretchPreferenceChange('showCooldown', e.target.checked)}
-                      color="primary"
+          {/* User Profile Section */}
+          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 0 }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  px: 2,
+                  pt: 2,
+                  pb: 1,
+                  display: 'block',
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                User Profile
+              </Typography>
+              <List sx={{ py: 0 }}>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => handleNavigate('profile')}>
+                    <ListItemIcon>
+                      <AccountCircle sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Profile Information"
+                      secondary="Manage profile, avatar, and personal details"
+                      primaryTypographyProps={{ fontWeight: 500 }}
                     />
-                  }
-                  label={
-                    <Box>
-                      <Typography variant="body1" fontWeight={500}>
-                        Show Cooldown Reminders
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Display cooldown reminder after finishing exercises
-                      </Typography>
-                    </Box>
-                  }
-                  sx={{ mb: 2 }}
-                />
+                    <ChevronRight sx={{ color: 'text.secondary' }} />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
 
-                {/* Cooldown Duration */}
-                {stretchPrefs.showCooldown && (
-                  <FormControl fullWidth>
-                    <InputLabel id="cooldown-duration-label">Default Cooldown Duration</InputLabel>
-                    <Select
-                      labelId="cooldown-duration-label"
-                      id="cooldown-duration-select"
-                      value={stretchPrefs.defaultCooldownDuration}
-                      label="Default Cooldown Duration"
-                      onChange={(e) => handleStretchPreferenceChange('defaultCooldownDuration', e.target.value)}
-                    >
-                      <MenuItem value={5}>5 minutes</MenuItem>
-                      <MenuItem value={7}>7 minutes</MenuItem>
-                      <MenuItem value={10}>10 minutes</MenuItem>
-                    </Select>
-                  </FormControl>
-                )}
-              </CardContent>
-            </Card>
-          </>
-        )}
-
-        {/* App Tab */}
-        {tabValue === 2 && (
-          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3, width: '100%', boxSizing: 'border-box' }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Stack spacing={3}>
-                {/* Theme Setting */}
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      mb: 2,
-                      fontWeight: 600,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                    }}
-                  >
-                    {mode === 'dark' ? <Brightness4 /> : <Brightness7 />}
-                    Appearance
-                  </Typography>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={mode === 'light'}
-                        onChange={handleThemeToggle}
-                        color="primary"
-                      />
-                    }
-                    label={
-                      <Box>
-                        <Typography variant="body1" fontWeight={500}>
-                          {mode === 'dark' ? 'Dark Theme' : 'Light Theme'}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Switch between dark and light modes
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </Box>
-
-                <Divider />
-
-                {/* Volume Setting */}
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      mb: 2,
-                      fontWeight: 600,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                    }}
-                  >
-                    <VolumeUp />
-                    Sound
-                  </Typography>
-                  <Box sx={{ px: 1 }}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Sound Effects Volume
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Slider
-                        value={volume}
-                        onChange={handleVolumeChange}
-                        onChangeCommitted={handleVolumeCommit}
-                        min={0}
-                        max={1}
-                        step={0.1}
-                        valueLabelDisplay="auto"
-                        valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
-                        sx={{
-                          flex: 1,
-                          '& .MuiSlider-thumb': {
-                            width: 20,
-                            height: 20,
-                          },
-                          '& .MuiSlider-track': {
-                            height: 6,
-                          },
-                          '& .MuiSlider-rail': {
-                            height: 6,
-                          },
-                        }}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          minWidth: 45,
-                          fontWeight: 600,
-                          color: 'text.secondary',
-                        }}
-                      >
-                        {Math.round(volume * 100)}%
-                      </Typography>
-                    </Box>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: 'block', mt: 1 }}
-                    >
-                      Adjust the volume of sound effects throughout the app. Set to 0 to mute all sounds.
+          {/* App Preferences Section */}
+          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 0 }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  px: 2,
+                  pt: 2,
+                  pb: 1,
+                  display: 'block',
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                App Preferences
+              </Typography>
+              <List sx={{ py: 0 }}>
+                {/* Units */}
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 1 }}>
+                    <ListItemIcon>
+                      <Straighten sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <Typography variant="body1" fontWeight={500}>
+                      Unit System
                     </Typography>
                   </Box>
-                </Box>
-
-                <Divider />
-
-                {/* Unit System */}
-                <Box>
-                  <Typography variant="h6" fontWeight={600} gutterBottom>
-                    Unit System
-                  </Typography>
-                  <FormControl fullWidth>
-                    <InputLabel>Units</InputLabel>
+                  <FormControl size="small" sx={{ ml: 7, minWidth: 180 }}>
                     <Select
                       value={preferences.units}
                       onChange={(e) => updatePreference('units', e.target.value)}
-                      label="Units"
                     >
                       <MenuItem value="imperial">Imperial (lbs, in)</MenuItem>
                       <MenuItem value="metric">Metric (kg, cm)</MenuItem>
                     </Select>
                   </FormControl>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                    Choose your preferred measurement system for weights and distances
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        )}
+                </ListItem>
+                <Divider component="li" />
 
-        {/* Data Tab */}
-        {tabValue === 3 && (
-          <Card sx={{ maxWidth: 600, borderRadius: 2, boxShadow: 3, width: '100%', boxSizing: 'border-box' }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Stack spacing={3}>
-                <Box>
-                  <Typography variant="h6" fontWeight={600} gutterBottom>
-                    Export & Backup
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    Download your profile data and statistics as a JSON file for backup or migration
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    startIcon={<Download />}
-                    onClick={handleExportData}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Export Profile Data
-                  </Button>
-                </Box>
+                {/* Theme */}
+                <ListItem>
+                  <ListItemIcon>
+                    {mode === 'dark' ? <Brightness4 sx={{ color: 'primary.main' }} /> : <Brightness7 sx={{ color: 'primary.main' }} />}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Theme"
+                    secondary={mode === 'dark' ? 'Dark mode' : 'Light mode'}
+                    primaryTypographyProps={{ fontWeight: 500 }}
+                  />
+                  <Switch
+                    checked={mode === 'light'}
+                    onChange={handleThemeToggle}
+                    color="primary"
+                  />
+                </ListItem>
+                <Divider component="li" />
 
-                <Divider />
+                {/* Sound */}
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 1 }}>
+                    <ListItemIcon>
+                      <VolumeUp sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <Typography variant="body1" fontWeight={500}>
+                      Sound Effects
+                    </Typography>
+                  </Box>
+                  <Box sx={{ ml: 7, width: 'calc(100% - 56px)' }}>
+                    <Slider
+                      value={volume}
+                      onChange={handleVolumeChange}
+                      onChangeCommitted={handleVolumeCommit}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
+                      sx={{
+                        width: 180,
+                        '& .MuiSlider-thumb': {
+                          width: 16,
+                          height: 16,
+                        },
+                        '& .MuiSlider-track': {
+                          height: 4,
+                        },
+                        '& .MuiSlider-rail': {
+                          height: 4,
+                        },
+                      }}
+                    />
+                  </Box>
+                </ListItem>
+                <Divider component="li" />
 
-                <Box>
-                  <Typography variant="h6" fontWeight={600} gutterBottom>
-                    Privacy
-                  </Typography>
-                  {isGuest ? (
-                    <Alert severity="info">
-                      Create an account to access cloud sync and data privacy features
-                    </Alert>
-                  ) : (
-                    <Alert severity="success">
-                      Your data is securely stored in Firebase and synced across your devices
-                    </Alert>
+                {/* Warmup Reminders */}
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ListItemIcon>
+                        <SelfImprovement sx={{ color: 'primary.main' }} />
+                      </ListItemIcon>
+                      <Typography variant="body1" fontWeight={500}>
+                        Warmup Reminders
+                      </Typography>
+                    </Box>
+                    <Switch
+                      checked={stretchPrefs.showWarmup}
+                      onChange={(e) => handleStretchPreferenceChange('showWarmup', e.target.checked)}
+                      color="primary"
+                    />
+                  </Box>
+                  {stretchPrefs.showWarmup && (
+                    <FormControl size="small" sx={{ ml: 7, mt: 1, minWidth: 180 }}>
+                      <Select
+                        value={stretchPrefs.defaultWarmupDuration}
+                        onChange={(e) => handleStretchPreferenceChange('defaultWarmupDuration', e.target.value)}
+                      >
+                        <MenuItem value={5}>5 minutes</MenuItem>
+                        <MenuItem value={7}>7 minutes</MenuItem>
+                        <MenuItem value={10}>10 minutes</MenuItem>
+                      </Select>
+                    </FormControl>
                   )}
-                </Box>
-              </Stack>
+                </ListItem>
+                <Divider component="li" />
+
+                {/* Cooldown Reminders */}
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ListItemIcon>
+                        <FitnessCenter sx={{ color: 'primary.main' }} />
+                      </ListItemIcon>
+                      <Typography variant="body1" fontWeight={500}>
+                        Cooldown Reminders
+                      </Typography>
+                    </Box>
+                    <Switch
+                      checked={stretchPrefs.showCooldown}
+                      onChange={(e) => handleStretchPreferenceChange('showCooldown', e.target.checked)}
+                      color="primary"
+                    />
+                  </Box>
+                  {stretchPrefs.showCooldown && (
+                    <FormControl size="small" sx={{ ml: 7, mt: 1, minWidth: 180 }}>
+                      <Select
+                        value={stretchPrefs.defaultCooldownDuration}
+                        onChange={(e) => handleStretchPreferenceChange('defaultCooldownDuration', e.target.value)}
+                      >
+                        <MenuItem value={5}>5 minutes</MenuItem>
+                        <MenuItem value={7}>7 minutes</MenuItem>
+                        <MenuItem value={10}>10 minutes</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
+                </ListItem>
+              </List>
             </CardContent>
           </Card>
-        )}
 
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="body2" color="text.secondary">
-            Your preferences are saved automatically and will persist between sessions.
-          </Typography>
-        </Box>
+          {/* Data & Privacy Section */}
+          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 0 }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  px: 2,
+                  pt: 2,
+                  pb: 1,
+                  display: 'block',
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                Data & Privacy
+              </Typography>
+              <List sx={{ py: 0 }}>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={handleExportData}>
+                    <ListItemIcon>
+                      <Download sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Export Data"
+                      secondary="Download your profile and workout data"
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <Divider component="li" />
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 1 }}>
+                    <ListItemIcon>
+                      <Security sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <Typography variant="body1" fontWeight={500}>
+                      Privacy
+                    </Typography>
+                  </Box>
+                  <Box sx={{ ml: 7, width: 'calc(100% - 56px)' }}>
+                    {isGuest ? (
+                      <Alert severity="info">
+                        Create an account to access cloud sync and data privacy features
+                      </Alert>
+                    ) : (
+                      <Alert severity="success">
+                        Your data is securely stored in Firebase and synced across your devices
+                      </Alert>
+                    )}
+                  </Box>
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
+
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+              Your preferences are saved automatically
+            </Typography>
+          </Box>
+        </Stack>
       </motion.div>
     </Box>
   );

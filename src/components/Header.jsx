@@ -56,7 +56,6 @@ const Header = ({ onNavigate }) => {
         WebkitBackdropFilter: 'blur(10px)',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
         zIndex: 100,
-        transition: 'left 0.3s ease',
         borderBottom: '1px solid rgba(29, 181, 132, 0.2)',
       }}
     >

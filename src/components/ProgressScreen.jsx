@@ -170,17 +170,6 @@ const ProgressDashboard = () => {
     }
   };
 
-
-
-  const getFilteredSessions = () => {
-    return {
-      workouts: history,
-      stretch: stretchSessions,
-    };
-  };
-
-  const filteredSessions = getFilteredSessions();
-
   if (loading) {
     return (
       <Box sx={{
@@ -398,39 +387,21 @@ const ProgressDashboard = () => {
                 <Typography variant="h6">
                   Recent Activities (Last 10 Workouts)
                 </Typography>
-                {selectedDate && (
-                  <Button size="small" onClick={() => setSelectedDate(null)}>
-                    Show All
-                  </Button>
-                )}
               </Stack>
 
               {/* Use enhanced ActivitiesList component */}
-              {selectedDate && !hasSessionsOnSelectedDay ? (
-                <Typography sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-                  No activities logged for this day.
-                </Typography>
-              ) : (
-                <ActivitiesList
-                  activities={selectedDate 
-                    ? [...filteredSessions.workouts, ...filteredSessions.stretch]
-                    : [...history.slice(0, 10)]
-                  }
-                  onEdit={(index) => {
-                    const workout = selectedDate ? filteredSessions.workouts[index] : history[index];
-                    handleEditWorkout(workout, index);
-                  }}
-                  onDelete={(index) => {
-                    if (selectedDate) {
-                      handleDeleteWorkout(index);
-                    } else {
-                      handleDeleteWorkout(index);
-                    }
-                  }}
-                  maxVisible={10}
-                  showLoadMore={!selectedDate && history.length > 10}
-                />
-              )}
+              <ActivitiesList
+                activities={[...history.slice(0, 10)]}
+                onEdit={(index) => {
+                  const workout = history[index];
+                  handleEditWorkout(workout, index);
+                }}
+                onDelete={(index) => {
+                  handleDeleteWorkout(index);
+                }}
+                maxVisible={10}
+                showLoadMore={history.length > 10}
+              />
             </CardContent>
           </Card>
         </Stack>

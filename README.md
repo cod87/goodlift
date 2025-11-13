@@ -39,14 +39,20 @@ This application has been optimized for performance with:
 ```
 src/
 ├── components/          # React components (memoized for performance)
-│   ├── NavigationSidebar.jsx
+│   ├── Navigation/
+│   │   └── BottomNav.jsx      # Fixed bottom navigation
+│   ├── HomeScreen.jsx
 │   ├── SelectionScreen.jsx
 │   ├── WorkoutScreen.jsx
 │   ├── WorkoutPreview.jsx
 │   ├── CompletionScreen.jsx
 │   ├── ProgressScreen.jsx
-│   ├── HiitTimerScreen.jsx
 │   └── AuthScreen.jsx
+├── pages/              # Page-level components
+│   ├── SettingsScreen.jsx
+│   ├── ExerciseListPage.jsx
+│   ├── UnifiedTimerScreen.jsx
+│   └── UnifiedLogActivityScreen.jsx
 ├── hooks/              # Custom React hooks with comprehensive documentation
 │   └── useWorkoutGenerator.js
 ├── utils/              # Utility functions with JSDoc documentation
@@ -55,7 +61,9 @@ src/
 │   ├── storage.js      # Data persistence layer
 │   └── firebaseStorage.js
 ├── contexts/           # React contexts
-│   └── AuthContext.jsx
+│   ├── AuthContext.jsx
+│   ├── ThemeContext.jsx
+│   └── PreferencesContext.jsx
 ├── App.jsx            # Main application component
 ├── App.css            # Application styles
 └── main.jsx           # Entry point

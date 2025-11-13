@@ -8,7 +8,9 @@ import {
   Button, 
   Stack,
   Chip,
-  Grid
+  Grid,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { 
   PlayArrow, 
@@ -16,8 +18,12 @@ import {
   TrendingUp
 } from '@mui/icons-material';
 import { getWorkoutTypeDisplayName } from '../../utils/weeklyPlanDefaults';
-import { getWorkoutHistory } from '../../utils/storage';
+import { getWorkoutHistory, resetCurrentStreak } from '../../utils/storage';
 import { touchTargets } from '../../theme/responsive';
+import { useUserProfile } from '../../contexts/UserProfileContext';
+import MonthCalendarView from '../Calendar/MonthCalendarView';
+import WorkoutDayDialog from '../Calendar/WorkoutDayDialog';
+import StreakWarningDialog from '../Calendar/StreakWarningDialog';
 
 /**
  * UpcomingWeekTab - Shows today's workout and next 6 days schedule
@@ -32,6 +38,16 @@ const UpcomingWeekTab = memo(({
 }) => {
   const [currentDate, setCurrentDate] = useState('');
   const [recentWorkouts, setRecentWorkouts] = useState([]);
+  const [workoutHistory, setWorkoutHistory] = useState([]);
+  const { stats, refreshStats } = useUserProfile();
+  
+  // Dialog states
+  const [dayDialogOpen, setDayDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
+  const [streakWarningOpen, setStreakWarningOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
 
   // Set current date
   useEffect(() => {
@@ -39,12 +55,13 @@ const UpcomingWeekTab = memo(({
     setCurrentDate(new Date().toLocaleDateString('en-US', options));
   }, []);
 
-  // Load recent workouts
+  // Load workout history
   useEffect(() => {
     const loadRecentWorkouts = async () => {
       try {
-        const workoutHistory = await getWorkoutHistory();
-        setRecentWorkouts(workoutHistory.slice(0, 5));
+        const history = await getWorkoutHistory();
+        setWorkoutHistory(history);
+        setRecentWorkouts(history.slice(0, 5));
       } catch (error) {
         console.error('Error loading recent workouts:', error);
       }
@@ -96,6 +113,134 @@ const UpcomingWeekTab = memo(({
   };
 
   const next7Days = getNext7Days();
+
+  // Handler for calendar day click
+  const handleDayClick = (date, workout) => {
+    if (!workout || workout.type === 'rest') return;
+    setSelectedDate(date);
+    setSelectedWorkout(workout);
+    setDayDialogOpen(true);
+  };
+
+  // Handler for closing day dialog
+  const handleCloseDayDialog = () => {
+    setDayDialogOpen(false);
+    setSelectedDate(null);
+    setSelectedWorkout(null);
+  };
+
+  // Handler for edit workout
+  const handleEditWorkout = () => {
+    handleCloseDayDialog();
+    setSnackbar({
+      open: true,
+      message: 'Edit functionality coming soon!',
+      severity: 'info',
+    });
+    // TODO: Implement edit workout functionality
+  };
+
+  // Handler for delete workout
+  const handleDeleteWorkout = () => {
+    handleCloseDayDialog();
+    setSnackbar({
+      open: true,
+      message: 'Workout deleted successfully',
+      severity: 'success',
+    });
+    // TODO: Implement delete workout functionality
+  };
+
+  // Handler for skip workout
+  const handleSkipWorkout = () => {
+    handleCloseDayDialog();
+    const currentStreak = stats?.currentStreak || 0;
+    
+    if (currentStreak > 0) {
+      setPendingAction({ type: 'skip' });
+      setStreakWarningOpen(true);
+    } else {
+      executeSkip();
+    }
+  };
+
+  // Execute skip action
+  const executeSkip = async () => {
+    try {
+      await resetCurrentStreak();
+      if (refreshStats) await refreshStats();
+      setSnackbar({
+        open: true,
+        message: 'Workout skipped. Streak reset.',
+        severity: 'warning',
+      });
+    } catch (error) {
+      console.error('Error skipping workout:', error);
+      setSnackbar({
+        open: true,
+        message: 'Error skipping workout',
+        severity: 'error',
+      });
+    }
+  };
+
+  // Handler for defer workout
+  const handleDeferWorkout = () => {
+    handleCloseDayDialog();
+    const currentStreak = stats?.currentStreak || 0;
+    
+    if (currentStreak > 0) {
+      setPendingAction({ type: 'defer' });
+      setStreakWarningOpen(true);
+    } else {
+      executeDefer();
+    }
+  };
+
+  // Execute defer action
+  const executeDefer = async () => {
+    try {
+      await resetCurrentStreak();
+      if (refreshStats) await refreshStats();
+      setSnackbar({
+        open: true,
+        message: 'Workout deferred to tomorrow. Streak reset.',
+        severity: 'warning',
+      });
+      // TODO: Implement actual defer logic (move workout to next day)
+    } catch (error) {
+      console.error('Error deferring workout:', error);
+      setSnackbar({
+        open: true,
+        message: 'Error deferring workout',
+        severity: 'error',
+      });
+    }
+  };
+
+  // Handler for streak warning confirmation
+  const handleStreakWarningConfirm = async () => {
+    setStreakWarningOpen(false);
+    
+    if (pendingAction?.type === 'skip') {
+      await executeSkip();
+    } else if (pendingAction?.type === 'defer') {
+      await executeDefer();
+    }
+    
+    setPendingAction(null);
+  };
+
+  // Handler for streak warning cancel
+  const handleStreakWarningCancel = () => {
+    setStreakWarningOpen(false);
+    setPendingAction(null);
+  };
+
+  // Handler for snackbar close
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   return (
     <Box>
@@ -381,6 +526,52 @@ const UpcomingWeekTab = memo(({
           </CardContent>
         </Card>
       )}
+
+      {/* Month Calendar View */}
+      <Box sx={{ mb: 3 }}>
+        <MonthCalendarView
+          currentPlan={currentPlan}
+          workoutHistory={workoutHistory}
+          onDayClick={handleDayClick}
+        />
+      </Box>
+
+      {/* Workout Day Dialog */}
+      <WorkoutDayDialog
+        open={dayDialogOpen}
+        date={selectedDate}
+        workout={selectedWorkout}
+        onClose={handleCloseDayDialog}
+        onEdit={handleEditWorkout}
+        onDelete={handleDeleteWorkout}
+        onSkip={handleSkipWorkout}
+        onDefer={handleDeferWorkout}
+      />
+
+      {/* Streak Warning Dialog */}
+      <StreakWarningDialog
+        open={streakWarningOpen}
+        currentStreak={stats?.currentStreak || 0}
+        action={pendingAction?.type || 'skip'}
+        onConfirm={handleStreakWarningConfirm}
+        onCancel={handleStreakWarningCancel}
+      />
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 });

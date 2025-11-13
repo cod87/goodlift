@@ -1472,3 +1472,35 @@ export const addToTotalVolume = async (volume) => {
     console.error('Error adding to total volume:', error);
   }
 };
+
+/**
+ * Reset the current workout streak to 0
+ * Preserves longestStreak for achievements
+ * Used when user skips or defers a workout
+ */
+export const resetCurrentStreak = async () => {
+  try {
+    const stats = await getUserStats();
+    
+    // Reset current streak but preserve longest streak
+    const updatedStats = {
+      ...stats,
+      currentStreak: 0,
+    };
+    
+    // Save the updated stats
+    if (isGuestMode()) {
+      setGuestData('user_stats', updatedStats);
+    } else {
+      localStorage.setItem(KEYS.USER_STATS, JSON.stringify(updatedStats));
+      if (currentUserId) {
+        await saveUserStatsToFirebase(currentUserId, updatedStats);
+      }
+    }
+    
+    return updatedStats;
+  } catch (error) {
+    console.error('Error resetting current streak:', error);
+    throw error;
+  }
+};

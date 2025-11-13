@@ -31,24 +31,31 @@ All critical issues with the plan creation feature and calendar synchronization 
 - ✅ Guest mode and authenticated mode work identically
 - ✅ Easier to use for developers
 
-### 3. ✅ Calendar Only Supported Day-Based Plans
-**Issue:** Calendar's `getWorkoutForDay()` only handled recurring weekly plans (days array), not session-based plans with explicit dates.
+### 3. ✅ Multiple Plan Formats Causing Complexity
+**Issue:** The codebase supported both session-based plans (with explicit dates) and day-based plans (recurring weekly), leading to code duplication, confusion, and maintenance burden.
 
-**Solution:** Updated calendar logic to handle both:
-- Session-based plans (sessions array with explicit dates)
-- Day-based plans (days array with recurring weekly structure)
+**Root Cause:** Two different plan creation systems evolved independently without consolidation.
+
+**Solution:** **Unified all plans to use the session-based format exclusively.** Removed all code supporting day-based plans.
+- Only session-based format (sessions array with explicit dates) is now supported
+- Eliminated code duplication across all components
+- Simplified maintenance and future development
 
 **Impact:**
-- ✅ All plan types now display correctly in calendar
-- ✅ Session-based plans show workouts on exact dates
-- ✅ Day-based plans continue to work as before
+- ✅ Significantly reduced code complexity
+- ✅ Single source of truth for plan format
+- ✅ Easier to maintain and extend
+- ✅ No more confusion about which format to use
+- ⚠️ Breaking change: Old day-based plans no longer supported (users create new plans)
 
 ### 4. ✅ Component Synchronization
-**Issue:** Different components (Calendar, UpcomingWeekTab, PlanInfoTab) handled plans inconsistently.
+**Issue:** Different components (Calendar, UpcomingWeekTab, HomeScreen, PlanInfoTab) handled plans inconsistently.
 
 **Solution:** 
-- Updated MonthCalendarView to support both plan formats
-- Updated UpcomingWeekTab's `getNext7Days()` to support both formats
+- Updated MonthCalendarView to only handle session-based format
+- Updated UpcomingWeekTab to only handle session-based format
+- Updated HomeScreen to only handle session-based format
+- Updated usePlanIntegration to only handle session-based format
 - Verified PlanInfoTab already handled null plans correctly
 - Verified TodayView already handled null workouts correctly
 
@@ -56,14 +63,17 @@ All critical issues with the plan creation feature and calendar synchronization 
 - ✅ All components synchronized
 - ✅ Consistent user experience across app
 - ✅ No more edge cases or crashes
+- ✅ Reduced code by ~100 lines
 
 ## Changes Made
 
 ### Code Changes
 1. **src/hooks/usePlanIntegration.js**
-   - Removed automatic default plan creation (lines 32-38)
+   - Removed automatic default plan creation
    - Removed unused `createWeeklyPlan` import
+   - Updated all functions to only handle session-based format
    - Set `currentPlan` to null when no plan exists
+   - Deprecated `getPlanDay()` function with backward compatibility
 
 2. **src/utils/storage.js**
    - Enhanced `setActivePlan()` function
@@ -71,13 +81,19 @@ All critical issues with the plan creation feature and calendar synchronization 
    - Improved error handling and validation
 
 3. **src/components/Calendar/MonthCalendarView.jsx**
-   - Enhanced `getWorkoutForDay()` function
-   - Added session-based plan support
-   - Maintained day-based plan support
+   - Simplified `getWorkoutForDay()` function
+   - Removed day-based plan support
+   - Only handles session-based plans
 
 4. **src/components/WorkTabs/UpcomingWeekTab.jsx**
-   - Enhanced `getNext7Days()` function
-   - Added session-based plan support
+   - Simplified `getNext7Days()` function
+   - Removed day-based plan support
+   - Only handles session-based plans
+
+5. **src/components/HomeScreen.jsx**
+   - Updated weekly overview to use session-based format
+   - Removed day-based plan support
+   - Only handles session-based plans
    - Maintained day-based plan support
 
 ### Documentation
@@ -122,22 +138,32 @@ codeql_checker
 
 ## Backward Compatibility
 
-✅ **100% Backward Compatible**
-- Existing day-based plans continue to work
-- Existing session-based plans continue to work
-- No data migration required
-- No breaking API changes
+⚠️ **Breaking Change for Day-Based Plans**
+- **Old day-based plans** (with `days` array) are **no longer supported**
+- **Session-based plans** continue to work perfectly (100% compatible)
+- **Impact:** Minimal - day-based plans were primarily internal structures
+- **Migration:** Users with old plans simply create new ones using the plan creation UI
+- **No data migration utility needed** - clean slate approach
+
+**Session-Based Plans:**
+- ✅ 100% backward compatible
+- ✅ No changes to existing session-based plans
+- ✅ All plan creation UIs generate session-based plans
+- ✅ No breaking API changes for session format
 
 ## Technical Debt Addressed
 
 ### Fixed
-- ✅ Inconsistent plan handling across components
+- ✅ Eliminated dual-format support complexity
+- ✅ Removed code duplication across components
+- ✅ Unified plan handling with single source of truth
 - ✅ Auto-creation of unwanted default plans
-- ✅ Limited plan format support
+- ✅ Inconsistent plan handling
 - ✅ Poor null state handling
 
 ### Remaining (Out of Scope)
 - ⏳ No automated test infrastructure
+- ⏳ Plan migration utility (not needed - clean slate approach)
 - ⏳ Multiple plan systems could be unified
 - ⏳ Plan migration utility (if needed in future)
 

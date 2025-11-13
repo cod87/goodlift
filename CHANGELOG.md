@@ -12,33 +12,41 @@ All notable changes to this project will be documented in this file.
 - **Active Plan Handling**: Enhanced `setActivePlan()` API to accept both plan IDs and plan objects
   - Consistent behavior between guest mode and authenticated mode
   - Improved error handling and validation
-- **Plan Format Support**: Calendar and components now support both plan formats
-  - Session-based plans (with explicit dates from workout generator)
-  - Day-based plans (with recurring weekly structure)
-  - Seamless handling of both formats across all components
-- **Component Synchronization**: All components now properly handle both plan formats and null states
-  - MonthCalendarView updated to support both plan types
-  - UpcomingWeekTab updated to support both plan types
+- **Component Synchronization**: All components now properly handle null plan states
+  - MonthCalendarView updated to use unified format
+  - UpcomingWeekTab updated to use unified format
+  - HomeScreen updated to use unified format
   - PlanInfoTab properly handles null plan state
   - TodayView properly handles null workout state
 
 ### Changed
+- **BREAKING: Unified Plan Format**: All plans now use session-based format exclusively
+  - Removed support for day-based plans (with `days` array)
+  - All components now only handle `sessions` array format
+  - Simplified codebase by eliminating dual-format support
+  - Reduced code complexity and maintenance burden
 - `usePlanIntegration` hook no longer auto-creates default plan
 - `setActivePlan()` function signature enhanced to accept plan objects in addition to IDs
-- Calendar's `getWorkoutForDay()` function now handles both session-based and day-based plans
-- UpcomingWeekTab's `getNext7Days()` function now handles both plan formats
+- Calendar's `getWorkoutForDay()` function now only handles session-based plans
+- UpcomingWeekTab's `getNext7Days()` function now only handles session-based format
+- HomeScreen's weekly overview now uses session-based format
+
+### Removed
+- Support for day-based plans (recurring weekly structure with `days` array)
+- Code paths handling dual plan formats
+- Backward compatibility code for old plan format
 
 ### Technical
-- All changes are backward compatible
-- No data migration required
+- All changes maintain backward compatibility for session-based plans
+- Old day-based plans are ignored (no errors, users create new plans)
 - Security scan: 0 vulnerabilities found
 - Build status: Passing
 - Lint status: Passing
 
 ### Documentation
-- Added PLAN_CREATION_FIX.md with comprehensive fix documentation
-- Added IMPLEMENTATION_SUMMARY_PLAN_FIX.md with complete implementation summary
-- Includes verification steps for manual testing
+- Updated PLAN_CREATION_FIX.md with unified format details
+- Updated IMPLEMENTATION_SUMMARY_PLAN_FIX.md with consolidation notes
+- Added migration guidance for users with old plans
 
 ## [Yoga Session UI Enhancement] - 2025-11-06
 

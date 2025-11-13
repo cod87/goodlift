@@ -73,7 +73,7 @@ const YOGA_POSES = [
   { name: 'Bridge Pose (Setu Bandhasana)', defaultDuration: 45 },
 ];
 
-const UnifiedTimerScreen = ({ onNavigate }) => {
+const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   // Mode and configuration
   const [mode, setMode] = useState(TIMER_MODES.COUNTDOWN);
   const [isConfiguring, setIsConfiguring] = useState(true);
@@ -321,15 +321,17 @@ const UnifiedTimerScreen = ({ onNavigate }) => {
         style={{ maxWidth: '800px', margin: '0 auto' }}
       >
         {/* Back Button */}
-        <Box sx={{ mb: 2 }}>
-          <Button
-            startIcon={<ArrowBack />}
-            onClick={() => onNavigate('home')}
-            sx={{ color: 'text.secondary' }}
-          >
-            Back to Work Home
-          </Button>
-        </Box>
+        {!hideBackButton && (
+          <Box sx={{ mb: 2 }}>
+            <Button
+              startIcon={<ArrowBack />}
+              onClick={() => onNavigate('home')}
+              sx={{ color: 'text.secondary' }}
+            >
+              Back to Work Home
+            </Button>
+          </Box>
+        )}
         
         <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, textAlign: 'center' }}>
           Unified Timer
@@ -695,7 +697,7 @@ const UnifiedTimerScreen = ({ onNavigate }) => {
         )}
 
         {/* Back Button */}
-        {onNavigate && (
+        {onNavigate && !hideBackButton && (
           <Button
             variant="outlined"
             fullWidth
@@ -768,6 +770,7 @@ const UnifiedTimerScreen = ({ onNavigate }) => {
 
 UnifiedTimerScreen.propTypes = {
   onNavigate: PropTypes.func,
+  hideBackButton: PropTypes.bool,
 };
 
 export default UnifiedTimerScreen;

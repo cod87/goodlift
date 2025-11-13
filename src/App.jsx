@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import './App.css';
 import Header from './components/Header';
 import BottomNav from './components/Navigation/BottomNav';
-import HomeScreen from './components/HomeScreen';
+import WorkTabs from './components/WorkTabs';
 import TodayView from './components/TodayView/TodayView';
 import SelectionScreen from './components/SelectionScreen';
 import UnifiedWorkoutHub from './components/UnifiedWorkoutHub';
@@ -583,7 +583,7 @@ function AppContent() {
           paddingBottom: '80px', // Space for bottom nav
         }}>
           {currentScreen === 'home' && (
-            <HomeScreen
+            <WorkTabs
               currentPlan={currentPlan}
               todaysWorkout={getTodaysWorkout()}
               onQuickStart={handleTodayViewQuickStart}

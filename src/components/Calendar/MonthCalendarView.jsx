@@ -71,10 +71,29 @@ const MonthCalendarView = ({
 
   // Get workout for a specific day
   const getWorkoutForDay = (date) => {
-    if (!currentPlan || !currentPlan.days) return null;
+    if (!currentPlan) return null;
     
-    const dayOfWeek = date.getDay();
-    return currentPlan.days[dayOfWeek] || null;
+    // Handle session-based plans (with explicit dates)
+    if (currentPlan.sessions && Array.isArray(currentPlan.sessions)) {
+      const targetDate = new Date(date);
+      targetDate.setHours(0, 0, 0, 0);
+      
+      const session = currentPlan.sessions.find(s => {
+        const sessionDate = new Date(s.date);
+        sessionDate.setHours(0, 0, 0, 0);
+        return sessionDate.getTime() === targetDate.getTime();
+      });
+      
+      return session || null;
+    }
+    
+    // Handle day-based plans (recurring weekly structure)
+    if (currentPlan.days && Array.isArray(currentPlan.days)) {
+      const dayOfWeek = date.getDay();
+      return currentPlan.days[dayOfWeek] || null;
+    }
+    
+    return null;
   };
 
   // Check if a workout was completed on this day

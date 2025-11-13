@@ -1,7 +1,7 @@
 {
-  "name": "GoodLife - Randomized Strength Training",
-  "short_name": "GoodLife",
-  "description": "Randomized strength training and workout tracker",
+  "name": "GoodLift",
+  "short_name": "GoodLift",
+  "description": "Strength training and workout tracking designed for progress.",
   "start_url": "/goodlift/",
   "display": "standalone",
   "background_color": "#1e2939",

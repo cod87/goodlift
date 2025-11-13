@@ -9,7 +9,7 @@ import {
   Settings,
   SettingsOutlined,
 } from '@mui/icons-material';
-import { touchTargets, zIndex, safeAreaPadding } from '../../theme/responsive';
+import { touchTargets, zIndex } from '../../theme/responsive';
 
 /**
  * BottomNav - Fixed bottom navigation for all devices
@@ -79,7 +79,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
         bottom: 0,
         left: 0,
         right: 0,
-        height: touchTargets.navigation,
+        height: `calc(${touchTargets.navigation} + env(safe-area-inset-bottom))`,
         backgroundColor: '#2a3647',
         borderTop: '1px solid rgba(29, 181, 132, 0.2)',
         boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.3)',
@@ -87,9 +87,9 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-around',
-        paddingBottom: safeAreaPadding.bottom,
-        paddingLeft: safeAreaPadding.left,
-        paddingRight: safeAreaPadding.right,
+        paddingBottom: `env(safe-area-inset-bottom)`,
+        paddingLeft: `env(safe-area-inset-left)`,
+        paddingRight: `env(safe-area-inset-right)`,
       }}
     >
       {navItems.map((item) => {

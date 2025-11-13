@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Plan Creation & Calendar Synchronization Fix] - 2025-11-13
+
+### Fixed
+- **Calendar Phantom Entries**: Removed automatic default plan creation that caused calendar to display workouts even when no active plan existed
+  - Calendar now properly shows empty state after data reset
+  - Guest mode no longer displays phantom workout plan
+  - "No active plan" state correctly reflected across all UI components
+- **Active Plan Handling**: Enhanced `setActivePlan()` API to accept both plan IDs and plan objects
+  - Consistent behavior between guest mode and authenticated mode
+  - Improved error handling and validation
+- **Plan Format Support**: Calendar and components now support both plan formats
+  - Session-based plans (with explicit dates from workout generator)
+  - Day-based plans (with recurring weekly structure)
+  - Seamless handling of both formats across all components
+- **Component Synchronization**: All components now properly handle both plan formats and null states
+  - MonthCalendarView updated to support both plan types
+  - UpcomingWeekTab updated to support both plan types
+  - PlanInfoTab properly handles null plan state
+  - TodayView properly handles null workout state
+
+### Changed
+- `usePlanIntegration` hook no longer auto-creates default plan
+- `setActivePlan()` function signature enhanced to accept plan objects in addition to IDs
+- Calendar's `getWorkoutForDay()` function now handles both session-based and day-based plans
+- UpcomingWeekTab's `getNext7Days()` function now handles both plan formats
+
+### Technical
+- All changes are backward compatible
+- No data migration required
+- Security scan: 0 vulnerabilities found
+- Build status: Passing
+- Lint status: Passing
+
+### Documentation
+- Added PLAN_CREATION_FIX.md with comprehensive fix documentation
+- Added IMPLEMENTATION_SUMMARY_PLAN_FIX.md with complete implementation summary
+- Includes verification steps for manual testing
+
 ## [Yoga Session UI Enhancement] - 2025-11-06
 
 ### Added

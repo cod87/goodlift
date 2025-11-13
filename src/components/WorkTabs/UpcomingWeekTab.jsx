@@ -18,7 +18,7 @@ import {
   TrendingUp
 } from '@mui/icons-material';
 import { getWorkoutTypeDisplayName, getWorkoutTypeShorthand } from '../../utils/weeklyPlanDefaults';
-import { getWorkoutHistory, resetCurrentStreak } from '../../utils/storage';
+import { getWorkoutHistory, resetCurrentStreak, saveWorkoutPlan, getActivePlan } from '../../utils/storage';
 import { touchTargets } from '../../theme/responsive';
 import { useUserProfile } from '../../contexts/UserProfileContext';
 import MonthCalendarView from '../Calendar/MonthCalendarView';
@@ -26,7 +26,7 @@ import WorkoutDayDialog from '../Calendar/WorkoutDayDialog';
 import EditWorkoutDialog from '../Calendar/EditWorkoutDialog';
 import StreakWarningDialog from '../Calendar/StreakWarningDialog';
 import RecurringSessionEditor from '../RecurringSessionEditor';
-import { getRecurringSessionsInBlock } from '../../utils/workoutPlanGenerator';
+import { getRecurringSessionsInBlock, updateRecurringSessionExercises } from '../../utils/workoutPlanGenerator';
 
 /**
  * UpcomingWeekTab - Shows today's workout and next 6 days schedule
@@ -42,6 +42,7 @@ const UpcomingWeekTab = memo(({
   const [currentDate, setCurrentDate] = useState('');
   const [recentWorkouts, setRecentWorkouts] = useState([]);
   const [workoutHistory, setWorkoutHistory] = useState([]);
+  const [activePlan, setActivePlan] = useState(null);
   const { stats, refreshStats } = useUserProfile();
   
   // Dialog states
@@ -56,6 +57,9 @@ const UpcomingWeekTab = memo(({
   const [pendingAction, setPendingAction] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [allExercises, setAllExercises] = useState([]);
+
+  // Use activePlan if available, otherwise fall back to currentPlan from props
+  const displayPlan = activePlan || currentPlan;
 
   // Set current date
   useEffect(() => {
@@ -95,9 +99,24 @@ const UpcomingWeekTab = memo(({
     loadExercises();
   }, []);
 
+  // Load active plan to local state
+  const loadActivePlan = async () => {
+    try {
+      const plan = await getActivePlan();
+      setActivePlan(plan);
+    } catch (error) {
+      console.error('Error loading active plan:', error);
+    }
+  };
+
+  // Load plan on mount
+  useEffect(() => {
+    loadActivePlan();
+  }, []);
+
   const hasToday = todaysWorkout && todaysWorkout.type !== 'rest';
-  const planName = currentPlan?.planStyle 
-    ? currentPlan.planStyle.toUpperCase().replace('_', ' ')
+  const planName = displayPlan?.planStyle 
+    ? displayPlan.planStyle.toUpperCase().replace('_', ' ')
     : 'Weekly Plan';
 
   // Format duration helper
@@ -112,7 +131,7 @@ const UpcomingWeekTab = memo(({
 
   // Get next 7 days (current day + next 6 days)
   const getNext7Days = () => {
-    if (!currentPlan || !currentPlan.days || !Array.isArray(currentPlan.days)) {
+    if (!displayPlan || !displayPlan.days || !Array.isArray(displayPlan.days)) {
       return [];
     }
 
@@ -124,7 +143,7 @@ const UpcomingWeekTab = memo(({
       date.setDate(date.getDate() + i);
       const dayIndex = date.getDay();
       
-      const dayData = currentPlan.days[dayIndex] || { type: 'rest' };
+      const dayData = displayPlan.days[dayIndex] || { type: 'rest' };
       
       next7Days.push({
         date: date,
@@ -159,7 +178,7 @@ const UpcomingWeekTab = memo(({
     handleCloseDayDialog();
     
     // Find the session ID for this workout
-    if (!currentPlan?.sessions) {
+    if (!displayPlan?.sessions) {
       setSnackbar({
         open: true,
         message: 'No active plan found',
@@ -172,7 +191,7 @@ const UpcomingWeekTab = memo(({
     const sessionDate = new Date(selectedDate);
     sessionDate.setHours(0, 0, 0, 0);
     
-    const session = currentPlan.sessions.find(s => {
+    const session = displayPlan.sessions.find(s => {
       const sDate = new Date(s.date);
       sDate.setHours(0, 0, 0, 0);
       return sDate.getTime() === sessionDate.getTime();
@@ -188,7 +207,7 @@ const UpcomingWeekTab = memo(({
     }
 
     // Get recurring sessions count
-    const recurringSessions = getRecurringSessionsInBlock(currentPlan, session.id);
+    const recurringSessions = getRecurringSessionsInBlock(displayPlan, session.id);
     setRecurringCount(recurringSessions.length);
     setSelectedSessionId(session.id);
     
@@ -217,7 +236,7 @@ const UpcomingWeekTab = memo(({
     setEditWorkoutDialogOpen(false);
     
     // Find the session
-    const session = currentPlan.sessions.find(s => s.id === selectedSessionId);
+    const session = displayPlan.sessions.find(s => s.id === selectedSessionId);
     if (session && session.exercises) {
       setRecurringEditorOpen(true);
     } else {
@@ -235,17 +254,32 @@ const UpcomingWeekTab = memo(({
   };
 
   // Handler for saving recurring session changes
-  const handleSaveRecurringChanges = () => {
+  const handleSaveRecurringChanges = async (newExercises) => {
     setRecurringEditorOpen(false);
-    setSnackbar({
-      open: true,
-      message: 'Recurring session edit saved! (Note: Changes are not yet persisted)',
-      severity: 'success',
-    });
-    // TODO: Implement actual save to storage using updateRecurringSessionExercises
-    // const handleSaveRecurringChanges = (newExercises) => {
-    //   Use updateRecurringSessionExercises(currentPlan, selectedSessionId, newExercises)
-    // }
+    
+    try {
+      // Update the plan with new exercises for all recurring sessions
+      const updatedPlan = updateRecurringSessionExercises(displayPlan, selectedSessionId, newExercises);
+      
+      // Save the updated plan to storage
+      await saveWorkoutPlan(updatedPlan);
+      
+      // Reload the plan to refresh the UI
+      await loadActivePlan();
+      
+      setSnackbar({
+        open: true,
+        message: 'Recurring sessions updated successfully!',
+        severity: 'success',
+      });
+    } catch (error) {
+      console.error('Error saving recurring session changes:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to save changes. Please try again.',
+        severity: 'error',
+      });
+    }
   };
 
   // Handler for delete workout
@@ -666,7 +700,7 @@ const UpcomingWeekTab = memo(({
       {/* Month Calendar View */}
       <Box sx={{ mb: 3 }}>
         <MonthCalendarView
-          currentPlan={currentPlan}
+          currentPlan={displayPlan}
           workoutHistory={workoutHistory}
           onDayClick={handleDayClick}
         />
@@ -696,11 +730,11 @@ const UpcomingWeekTab = memo(({
       />
 
       {/* Recurring Session Editor */}
-      {currentPlan?.sessions && selectedSessionId && (
+      {displayPlan?.sessions && selectedSessionId && (
         <RecurringSessionEditor
           open={recurringEditorOpen}
           onClose={handleCloseRecurringEditor}
-          session={currentPlan.sessions.find(s => s.id === selectedSessionId)}
+          session={displayPlan.sessions.find(s => s.id === selectedSessionId)}
           recurringCount={recurringCount}
           allExercises={allExercises}
           onSave={handleSaveRecurringChanges}

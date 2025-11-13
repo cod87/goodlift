@@ -63,8 +63,6 @@ import ActivitiesList from './Progress/ActivitiesList';
 const ProgressDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
-  const [stretchSessions, setStretchSessions] = useState([]);
-  const [activePlan, setActivePlan] = useState(null);
   const [pinnedExercises, setPinnedExercisesState] = useState([]);
   const [availableExercises, setAvailableExercises] = useState([]);
   const [addExerciseDialogOpen, setAddExerciseDialogOpen] = useState(false);
@@ -83,15 +81,13 @@ const ProgressDashboard = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedHistory, loadedStretches, loadedActivePlan, loadedStats] = await Promise.all([
+      const [loadedHistory, , loadedActivePlan, loadedStats] = await Promise.all([
         getWorkoutHistory(),
         getStretchSessions(),
         getActivePlan(),
         getUserStats()
       ]);
       setHistory(loadedHistory);
-      setStretchSessions(loadedStretches);
-      setActivePlan(loadedActivePlan);
       setUserStats(loadedStats);
 
       // Calculate tracking metrics

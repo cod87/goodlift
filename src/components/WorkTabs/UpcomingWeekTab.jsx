@@ -17,7 +17,7 @@ import {
   CalendarToday,
   TrendingUp
 } from '@mui/icons-material';
-import { getWorkoutTypeDisplayName } from '../../utils/weeklyPlanDefaults';
+import { getWorkoutTypeDisplayName, getWorkoutTypeShorthand } from '../../utils/weeklyPlanDefaults';
 import { getWorkoutHistory, resetCurrentStreak } from '../../utils/storage';
 import { touchTargets } from '../../theme/responsive';
 import { useUserProfile } from '../../contexts/UserProfileContext';
@@ -438,20 +438,48 @@ const UpcomingWeekTab = memo(({
                         sx={{ fontWeight: 600, mb: 1, alignSelf: 'center', height: 20, fontSize: '0.65rem' }}
                       />
                     )}
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        color: day.type === 'rest' ? 'text.secondary' : 'text.primary',
-                        fontWeight: day.type === 'rest' ? 400 : 600,
-                        textAlign: 'center',
-                        mt: isToday ? 0 : 1.5,
-                        fontSize: '0.875rem',
-                      }}
-                    >
-                      {day.type === 'rest' 
-                        ? 'Rest' 
-                        : getWorkoutTypeDisplayName(day.type)}
-                    </Typography>
+                    {/* Show shorthand for strength workouts, full name for others */}
+                    {day.type === 'rest' ? (
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: 'text.secondary',
+                          fontWeight: 400,
+                          textAlign: 'center',
+                          mt: isToday ? 0 : 1.5,
+                          fontSize: '0.875rem',
+                        }}
+                      >
+                        Rest
+                      </Typography>
+                    ) : ['upper', 'lower', 'push', 'pull', 'legs', 'full'].includes(day.type) ? (
+                      <Chip
+                        label={getWorkoutTypeShorthand(day.type)}
+                        size="small"
+                        sx={{ 
+                          alignSelf: 'center',
+                          fontWeight: 700,
+                          bgcolor: 'primary.main',
+                          color: 'primary.contrastText',
+                          mt: isToday ? 0 : 1.5,
+                          fontSize: '0.75rem',
+                          minWidth: '44px',
+                        }}
+                      />
+                    ) : (
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: 'text.primary',
+                          fontWeight: 600,
+                          textAlign: 'center',
+                          mt: isToday ? 0 : 1.5,
+                          fontSize: '0.875rem',
+                        }}
+                      >
+                        {getWorkoutTypeDisplayName(day.type)}
+                      </Typography>
+                    )}
                   </Box>
                 );
               })}

@@ -166,6 +166,35 @@ export const getDefaultWeeklyPlan = (style = 'upper_lower') => {
 };
 
 /**
+ * Get workout type shorthand label for compact display
+ * @param {string} type - Workout type or day type
+ * @returns {string} Shorthand label (e.g., 'UP' for Upper, 'LO' for Lower)
+ */
+export const getWorkoutTypeShorthand = (type) => {
+  const shorthandLabels = {
+    // Legacy workout types - strength training
+    push: 'P',
+    pull: 'PL',
+    legs: 'L',
+    upper: 'UP',
+    lower: 'LO',
+    full: 'FB',
+    // Other workout types
+    stretch: 'ST',
+    hiit: 'HI',
+    rest: 'R',
+    cardio: 'C',
+    // New standardized day types
+    [DAY_TYPES.STRENGTH]: 'STR',
+    [DAY_TYPES.HYPERTROPHY]: 'HYP',
+    [DAY_TYPES.CARDIO]: 'C',
+    [DAY_TYPES.ACTIVE_RECOVERY]: 'AR',
+    [DAY_TYPES.REST]: 'R',
+  };
+  return shorthandLabels[type] || type.substring(0, 2).toUpperCase();
+};
+
+/**
  * Get workout type display name
  * Updated to support both legacy types and new standardized day types
  * @param {string} type - Workout type or day type

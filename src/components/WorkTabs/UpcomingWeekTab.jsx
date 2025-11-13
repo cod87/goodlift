@@ -235,7 +235,7 @@ const UpcomingWeekTab = memo(({
   };
 
   // Handler for saving recurring session changes
-  const handleSaveRecurringChanges = (newExercises) => {
+  const handleSaveRecurringChanges = () => {
     setRecurringEditorOpen(false);
     setSnackbar({
       open: true,
@@ -243,6 +243,9 @@ const UpcomingWeekTab = memo(({
       severity: 'success',
     });
     // TODO: Implement actual save to storage using updateRecurringSessionExercises
+    // const handleSaveRecurringChanges = (newExercises) => {
+    //   Use updateRecurringSessionExercises(currentPlan, selectedSessionId, newExercises)
+    // }
   };
 
   // Handler for delete workout

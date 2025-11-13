@@ -117,21 +117,6 @@ const MonthCalendarView = ({
     }
   };
 
-  // Get workout type icon (for legend only)
-  const getWorkoutIcon = (workout) => {
-    if (!workout || workout.type === 'rest') return <Hotel sx={{ fontSize: 16 }} />;
-    
-    const type = workout.type?.toLowerCase() || workout.workoutType?.toLowerCase();
-    
-    if (type === 'cardio' || type === 'hiit') {
-      return <DirectionsRun sx={{ fontSize: 16 }} />;
-    } else if (type === 'stretch' || type === 'active_recovery') {
-      return <SelfImprovement sx={{ fontSize: 16 }} />;
-    } else {
-      return <FitnessCenter sx={{ fontSize: 16 }} />;
-    }
-  };
-
   // Get workout type color
   const getWorkoutColor = (workout) => {
     if (!workout || workout.type === 'rest') return 'action.disabled';

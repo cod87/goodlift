@@ -225,7 +225,10 @@ function AppContent() {
       const today = new Date().getDay();
       const navState = createWorkoutNavState(today);
       
-      handleStartWorkout(workoutTypeValue, equipmentFilter, null, navState);
+      // Use pre-generated exercises from the plan session if available
+      const preGeneratedWorkout = todaysWorkout.exercises || null;
+      
+      handleStartWorkout(workoutTypeValue, equipmentFilter, preGeneratedWorkout, navState);
     }
   };
 

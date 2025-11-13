@@ -62,7 +62,7 @@ const WorkTabs = ({
           />
           <Tab 
             icon={<Info />} 
-            label="Plan Info" 
+            label="View Plan" 
             iconPosition="start"
           />
           <Tab 

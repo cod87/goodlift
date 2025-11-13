@@ -10,20 +10,13 @@ import {
   IconButton,
   Stack,
   LinearProgress,
-  List,
-  ListItem,
-  ListItemText,
-  Collapse,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   MenuItem,
   Select,
   FormControl,
   InputLabel,
   Grid,
+  Paper,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -31,8 +24,6 @@ import {
   Delete as DeleteIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
   DragIndicator as DragIcon,
   CalendarMonth as CalendarIcon,
 } from '@mui/icons-material';
@@ -41,89 +32,53 @@ import {
   getPlanStatistics
 } from '../../utils/workoutPlanGenerator';
 import {
-  getWorkoutPlans,
   getActivePlan,
-  setActivePlan,
   saveWorkoutPlan,
-  deleteWorkoutPlan,
 } from '../../utils/storage';
 
 /**
- * PlanInfoTab - Shows active plan details with full editing capabilities
- * Replaces the "View Plans" button with comprehensive plan management
+ * ViewPlanTab - Shows active plan with calendar view and drag-and-drop session management
+ * Displays only the active plan with ability to reorder, add, and remove sessions
  */
 const PlanInfoTab = ({ currentPlan }) => {
   const [activePlan, setActivePlanState] = useState(null);
-  const [plans, setPlans] = useState([]);
   const [showPlanCreationModal, setShowPlanCreationModal] = useState(false);
-  const [expandedSession, setExpandedSession] = useState(null);
   const [editingSession, setEditingSession] = useState(null);
   const [editedSessionData, setEditedSessionData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [draggedSession, setDraggedSession] = useState(null);
 
   useEffect(() => {
-    loadPlans();
+    loadPlan();
   }, [currentPlan]);
 
-  const loadPlans = async () => {
+  const loadPlan = async () => {
     setLoading(true);
     try {
-      const loadedPlans = await getWorkoutPlans();
-      setPlans(loadedPlans);
       const active = await getActivePlan();
       setActivePlanState(active);
     } catch (error) {
-      console.error('Error loading plans:', error);
+      console.error('Error loading plan:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSetActive = async (planId) => {
-    try {
-      await setActivePlan(planId);
-      await loadPlans();
-    } catch (error) {
-      console.error('Error setting active plan:', error);
-    }
-  };
-
-  const handleDeletePlan = async (planId) => {
-    if (window.confirm('Are you sure you want to delete this plan?')) {
-      try {
-        await deleteWorkoutPlan(planId);
-        await loadPlans();
-      } catch (error) {
-        console.error('Error deleting plan:', error);
-      }
-    }
-  };
-
-  const handleToggleExpand = (sessionId) => {
-    setExpandedSession(expandedSession === sessionId ? null : sessionId);
-  };
-
-  const handleEditSession = (session) => {
-    setEditingSession(session.id || session.date);
+  const handleEditSession = (session, index) => {
+    setEditingSession(index);
     setEditedSessionData({ ...session });
   };
 
   const handleSaveSession = async () => {
-    if (!activePlan || !editedSessionData) return;
+    if (!activePlan || editingSession === null || !editedSessionData) return;
 
     try {
       const updatedPlan = { ...activePlan };
-      const sessionIndex = updatedPlan.sessions.findIndex(
-        s => (s.id || s.date) === (editedSessionData.id || editedSessionData.date)
-      );
-
-      if (sessionIndex !== -1) {
-        updatedPlan.sessions[sessionIndex] = editedSessionData;
-        await saveWorkoutPlan(updatedPlan);
-        await loadPlans();
-        setEditingSession(null);
-        setEditedSessionData(null);
-      }
+      updatedPlan.sessions[editingSession] = editedSessionData;
+      await saveWorkoutPlan(updatedPlan);
+      await loadPlan();
+      setEditingSession(null);
+      setEditedSessionData(null);
     } catch (error) {
       console.error('Error saving session:', error);
       alert('Failed to save session changes');
@@ -140,6 +95,87 @@ const PlanInfoTab = ({ currentPlan }) => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleDeleteSession = async (index) => {
+    if (!activePlan || !window.confirm('Are you sure you want to delete this session?')) return;
+
+    try {
+      const updatedPlan = { ...activePlan };
+      updatedPlan.sessions.splice(index, 1);
+      await saveWorkoutPlan(updatedPlan);
+      await loadPlan();
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      alert('Failed to delete session');
+    }
+  };
+
+  const handleAddSession = async () => {
+    if (!activePlan) return;
+
+    const today = new Date();
+    const lastSession = activePlan.sessions && activePlan.sessions.length > 0
+      ? activePlan.sessions[activePlan.sessions.length - 1]
+      : null;
+
+    let newDate = new Date(today);
+    if (lastSession && lastSession.date) {
+      const lastDate = new Date(lastSession.date);
+      newDate = new Date(lastDate);
+      newDate.setDate(lastDate.getDate() + 1);
+    }
+
+    const newSession = {
+      id: `session-${Date.now()}`,
+      date: newDate.toISOString(),
+      type: 'strength',
+      exercises: [],
+    };
+
+    try {
+      const updatedPlan = { ...activePlan };
+      if (!updatedPlan.sessions) {
+        updatedPlan.sessions = [];
+      }
+      updatedPlan.sessions.push(newSession);
+      await saveWorkoutPlan(updatedPlan);
+      await loadPlan();
+    } catch (error) {
+      console.error('Error adding session:', error);
+      alert('Failed to add session');
+    }
+  };
+
+  const handleDragStart = (e, index) => {
+    setDraggedSession(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e, targetIndex) => {
+    e.preventDefault();
+    
+    if (draggedSession === null || draggedSession === targetIndex || !activePlan) return;
+
+    try {
+      const updatedPlan = { ...activePlan };
+      const sessions = [...updatedPlan.sessions];
+      const [movedSession] = sessions.splice(draggedSession, 1);
+      sessions.splice(targetIndex, 0, movedSession);
+      
+      updatedPlan.sessions = sessions;
+      await saveWorkoutPlan(updatedPlan);
+      await loadPlan();
+      setDraggedSession(null);
+    } catch (error) {
+      console.error('Error reordering sessions:', error);
+      alert('Failed to reorder sessions');
+    }
   };
 
   const getGoalLabel = (goal) => {
@@ -194,7 +230,7 @@ const PlanInfoTab = ({ currentPlan }) => {
           open={showPlanCreationModal}
           onClose={() => setShowPlanCreationModal(false)}
           onPlanCreated={() => {
-            loadPlans();
+            loadPlan();
             setShowPlanCreationModal(false);
           }}
         />
@@ -263,227 +299,181 @@ const PlanInfoTab = ({ currentPlan }) => {
         </CardContent>
       </Card>
 
-      {/* Workout Sessions */}
+      {/* Calendar View - Workout Sessions */}
       <Card elevation={2} sx={{ borderRadius: 3 }}>
         <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-            Workout Sessions
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CalendarIcon /> Workout Calendar
+            </Typography>
+            <Button
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={handleAddSession}
+              variant="outlined"
+              color="primary"
+            >
+              Add Session
+            </Button>
+          </Box>
 
           {activePlan.sessions && activePlan.sessions.length > 0 ? (
-            <List sx={{ p: 0 }}>
+            <Grid container spacing={2}>
               {activePlan.sessions.map((session, index) => {
-                const sessionKey = session.id || session.date;
-                const isExpanded = expandedSession === sessionKey;
-                const isEditing = editingSession === sessionKey;
+                const isEditing = editingSession === index;
                 const displaySession = isEditing ? editedSessionData : session;
+                const sessionDate = new Date(displaySession.date);
 
                 return (
-                  <Box key={sessionKey}>
-                    <ListItem
+                  <Grid item xs={12} sm={6} md={4} key={session.id || index}>
+                    <Paper
+                      elevation={draggedSession === index ? 8 : 2}
+                      draggable={!isEditing}
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, index)}
                       sx={{
-                        borderBottom: !isExpanded && index < activePlan.sessions.length - 1 ? '1px solid' : 'none',
-                        borderColor: 'divider',
-                        py: 2,
-                        px: 2,
-                        bgcolor: isExpanded ? 'action.hover' : 'transparent',
-                        cursor: 'pointer',
+                        p: 2,
+                        cursor: isEditing ? 'default' : 'grab',
+                        opacity: draggedSession === index ? 0.5 : 1,
+                        transition: 'all 0.2s',
+                        border: '2px solid',
+                        borderColor: draggedSession === index ? 'primary.main' : 'divider',
                         '&:hover': {
-                          bgcolor: 'action.hover'
-                        }
+                          borderColor: 'primary.main',
+                          transform: isEditing ? 'none' : 'translateY(-4px)',
+                        },
                       }}
-                      onClick={() => !isEditing && handleToggleExpand(sessionKey)}
                     >
-                      <ListItemText
-                        sx={{ pr: { xs: 12, sm: 10 } }}
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      {isEditing ? (
+                        <Stack spacing={2}>
+                          <Typography variant="caption" color="text.secondary">
+                            {sessionDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                          </Typography>
+                          
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Session Type</InputLabel>
+                            <Select
+                              value={editedSessionData.type}
+                              label="Session Type"
+                              onChange={(e) => handleSessionFieldChange('type', e.target.value)}
+                            >
+                              <MenuItem value="strength">Strength</MenuItem>
+                              <MenuItem value="upper">Upper Body</MenuItem>
+                              <MenuItem value="lower">Lower Body</MenuItem>
+                              <MenuItem value="full">Full Body</MenuItem>
+                              <MenuItem value="push">Push</MenuItem>
+                              <MenuItem value="pull">Pull</MenuItem>
+                              <MenuItem value="legs">Legs</MenuItem>
+                              <MenuItem value="cardio">Cardio</MenuItem>
+                              <MenuItem value="rest">Rest</MenuItem>
+                            </Select>
+                          </FormControl>
+
+                          <TextField
+                            fullWidth
+                            size="small"
+                            label="Focus (optional)"
+                            value={editedSessionData.focus || ''}
+                            onChange={(e) => handleSessionFieldChange('focus', e.target.value)}
+                          />
+
+                          <Stack direction="row" spacing={1}>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              startIcon={<SaveIcon />}
+                              onClick={handleSaveSession}
+                              fullWidth
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<CancelIcon />}
+                              onClick={handleCancelEdit}
+                              fullWidth
+                            >
+                              Cancel
+                            </Button>
+                          </Stack>
+                        </Stack>
+                      ) : (
+                        <Stack spacing={1.5}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <DragIcon sx={{ color: 'text.secondary', fontSize: '1.2rem' }} />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                              {new Date(displaySession.date).toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric'
-                              })}
+                            <Box sx={{ display: 'flex', gap: 0.5 }}>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleEditSession(session, index)}
+                                sx={{ color: 'primary.main' }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteSession(index)}
+                                sx={{ color: 'error.main' }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Box>
+
+                          <Box>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                              {sessionDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                             </Typography>
                             <Chip
                               label={displaySession.type.toUpperCase()}
                               size="small"
                               color={displaySession.type === 'rest' ? 'default' : 'primary'}
-                              sx={{ height: 20, fontSize: '0.7rem' }}
+                              sx={{ fontWeight: 600 }}
                             />
                           </Box>
-                        }
-                        secondary={
-                          displaySession.exercises && displaySession.exercises.length > 0 && (
+
+                          {displaySession.focus && (
                             <Typography variant="caption" color="text.secondary">
-                              {displaySession.exercises.length} exercises
+                              Focus: {displaySession.focus}
                             </Typography>
-                          )
-                        }
-                      />
-                      <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditSession(session);
-                          }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small" onClick={(e) => e.stopPropagation()}>
-                          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                        </IconButton>
-                      </Box>
-                    </ListItem>
+                          )}
 
-                    <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                      <Box sx={{ px: 2, pb: 2, pt: 1, bgcolor: 'background.default' }}>
-                        {isEditing ? (
-                          <Box sx={{ p: 2 }}>
-                            <Stack spacing={2}>
-                              <FormControl fullWidth size="small">
-                                <InputLabel>Session Type</InputLabel>
-                                <Select
-                                  value={editedSessionData.type}
-                                  label="Session Type"
-                                  onChange={(e) => handleSessionFieldChange('type', e.target.value)}
-                                >
-                                  <MenuItem value="strength">Strength</MenuItem>
-                                  <MenuItem value="upper">Upper Body</MenuItem>
-                                  <MenuItem value="lower">Lower Body</MenuItem>
-                                  <MenuItem value="full">Full Body</MenuItem>
-                                  <MenuItem value="push">Push</MenuItem>
-                                  <MenuItem value="pull">Pull</MenuItem>
-                                  <MenuItem value="legs">Legs</MenuItem>
-                                  <MenuItem value="cardio">Cardio</MenuItem>
-                                  <MenuItem value="rest">Rest</MenuItem>
-                                </Select>
-                              </FormControl>
-
-                              <TextField
-                                fullWidth
-                                size="small"
-                                label="Focus (optional)"
-                                value={editedSessionData.focus || ''}
-                                onChange={(e) => handleSessionFieldChange('focus', e.target.value)}
-                              />
-
-                              <Stack direction="row" spacing={1}>
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  size="small"
-                                  startIcon={<SaveIcon />}
-                                  onClick={handleSaveSession}
-                                >
-                                  Save
-                                </Button>
-                                <Button
-                                  variant="outlined"
-                                  size="small"
-                                  startIcon={<CancelIcon />}
-                                  onClick={handleCancelEdit}
-                                >
-                                  Cancel
-                                </Button>
-                              </Stack>
-                            </Stack>
-                          </Box>
-                        ) : (
-                          <>
-                            {displaySession.focus && (
-                              <Typography variant="body2" sx={{ mb: 1 }}>
-                                <strong>Focus:</strong> {displaySession.focus}
-                              </Typography>
-                            )}
-                            {displaySession.exercises && displaySession.exercises.length > 0 && (
-                              <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                                  Exercises ({displaySession.exercises.length}):
-                                </Typography>
-                                <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
-                                  {displaySession.exercises.map((exercise, exIdx) => (
-                                    <Typography
-                                      key={exIdx}
-                                      variant="body2"
-                                      color="text.secondary"
-                                      sx={{ display: 'block', ml: 1, mb: 0.5 }}
-                                    >
-                                      {exIdx + 1}. {exercise['Exercise Name'] || exercise.name || 'Unknown Exercise'}
-                                    </Typography>
-                                  ))}
-                                </Box>
-                              </Box>
-                            )}
-                          </>
-                        )}
-                      </Box>
-                    </Collapse>
-                  </Box>
-                );
-              })}
-            </List>
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              No sessions available
-            </Typography>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* All Plans Section */}
-      {plans.length > 1 && (
-        <Card elevation={2} sx={{ mt: 3, borderRadius: 3 }}>
-          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-              Other Plans ({plans.length - 1})
-            </Typography>
-            <Grid container spacing={2}>
-              {plans.filter(p => p.id !== activePlan.id).map((plan) => {
-                return (
-                  <Grid item xs={12} sm={6} key={plan.id}>
-                    <Card sx={{ bgcolor: 'background.default', border: '1px solid', borderColor: 'divider' }}>
-                      <CardContent>
-                        <Typography variant="h6" sx={{ mb: 1 }}>
-                          {plan.name}
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 0.5, mb: 1, flexWrap: 'wrap' }}>
-                          <Chip label={getGoalLabel(plan.goal)} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
-                          <Chip label={`${plan.daysPerWeek}x/week`} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
-                        </Box>
-                        <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={() => handleSetActive(plan.id)}
-                          >
-                            Activate
-                          </Button>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDeletePlan(plan.id)}
-                            sx={{ color: 'error.main' }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
+                          {displaySession.exercises && displaySession.exercises.length > 0 && (
+                            <Typography variant="caption" color="text.secondary">
+                              {displaySession.exercises.length} exercise{displaySession.exercises.length !== 1 ? 's' : ''}
+                            </Typography>
+                          )}
                         </Stack>
-                      </CardContent>
-                    </Card>
+                      )}
+                    </Paper>
                   </Grid>
                 );
               })}
             </Grid>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                No sessions in this plan yet
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddSession}
+              >
+                Add First Session
+              </Button>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
 
       <QuickPlanSetup
         open={showPlanCreationModal}
         onClose={() => setShowPlanCreationModal(false)}
         onPlanCreated={() => {
-          loadPlans();
+          loadPlan();
           setShowPlanCreationModal(false);
         }}
       />

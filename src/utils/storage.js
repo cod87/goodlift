@@ -1250,34 +1250,46 @@ export const getActivePlan = async () => {
 
 /**
  * Set the active workout plan
- * @param {string|null} planId - Plan ID to set as active, or null to clear
+ * @param {string|Object|null} planIdOrObject - Plan ID, plan object to set as active, or null to clear
  * @returns {Promise<void>}
  */
-export const setActivePlan = async (planId) => {
+export const setActivePlan = async (planIdOrObject) => {
   try {
-    if (isGuestMode()) {
-      if (planId) {
-        const plans = await getWorkoutPlans();
-        const plan = plans.find(p => p.id === planId);
-        setGuestData('active_plan', plan);
-      } else {
+    // Handle null case - clear active plan
+    if (!planIdOrObject) {
+      if (isGuestMode()) {
         setGuestData('active_plan', null);
-      }
-    } else {
-      if (planId) {
-        localStorage.setItem(KEYS.ACTIVE_PLAN, planId);
-        
-        // Sync to Firebase if user is logged in
-        if (currentUserId) {
-          await saveActivePlanToFirebase(currentUserId, planId);
-        }
       } else {
         localStorage.removeItem(KEYS.ACTIVE_PLAN);
-        
-        // Sync to Firebase if user is logged in
         if (currentUserId) {
           await saveActivePlanToFirebase(currentUserId, null);
         }
+      }
+      return;
+    }
+
+    // Extract plan ID from object or use string directly
+    const planId = typeof planIdOrObject === 'object' ? planIdOrObject.id : planIdOrObject;
+    
+    if (!planId) {
+      throw new Error('Plan ID is required');
+    }
+
+    if (isGuestMode()) {
+      // For guest mode, store the full plan object
+      const plans = await getWorkoutPlans();
+      const plan = plans.find(p => p.id === planId);
+      if (!plan) {
+        throw new Error(`Plan with ID ${planId} not found`);
+      }
+      setGuestData('active_plan', plan);
+    } else {
+      // For authenticated users, store just the ID
+      localStorage.setItem(KEYS.ACTIVE_PLAN, planId);
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveActivePlanToFirebase(currentUserId, planId);
       }
     }
   } catch (error) {

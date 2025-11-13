@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getActivePlan, setActivePlan } from '../utils/storage';
-import { createWeeklyPlan, linkSessionToPlan, getSessionsForPlanDay } from '../utils/sessionStorageSchema';
+import { linkSessionToPlan, getSessionsForPlanDay } from '../utils/sessionStorageSchema';
 
 /**
  * usePlanIntegration hook
@@ -26,19 +26,10 @@ export const usePlanIntegration = () => {
       setLoading(true);
       try {
         const plan = await getActivePlan();
-        if (plan) {
-          setCurrentPlan(plan);
-        } else {
-          // Create a default plan if none exists
-          const defaultPlan = createWeeklyPlan({
-            planStyle: 'ppl',
-            startDate: new Date().toISOString()
-          });
-          await setActivePlan(defaultPlan);
-          setCurrentPlan(defaultPlan);
-        }
+        setCurrentPlan(plan); // Will be null if no active plan exists
       } catch (error) {
         console.error('Error loading plan:', error);
+        setCurrentPlan(null);
       } finally {
         setLoading(false);
       }
@@ -51,33 +42,43 @@ export const usePlanIntegration = () => {
    * Get today's workout from the plan
    */
   const getTodaysWorkout = useCallback(() => {
-    if (!currentPlan) return null;
+    if (!currentPlan || !currentPlan.sessions || !Array.isArray(currentPlan.sessions)) {
+      return null;
+    }
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Handle plan with sessions (from workout plan generator)
-    if (currentPlan.sessions && Array.isArray(currentPlan.sessions)) {
-      const todaySession = currentPlan.sessions.find(s => {
-        const sessionDate = new Date(s.date);
-        sessionDate.setHours(0, 0, 0, 0);
-        return sessionDate.getTime() === today.getTime();
-      });
-      return todaySession || null;
-    }
+    const todaySession = currentPlan.sessions.find(s => {
+      const sessionDate = new Date(s.date);
+      sessionDate.setHours(0, 0, 0, 0);
+      return sessionDate.getTime() === today.getTime();
+    });
     
-    // Handle plan with days (from weekly plan)
-    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
-    return currentPlan.days?.[dayOfWeek] || null;
+    return todaySession || null;
   }, [currentPlan]);
 
   /**
    * Get a specific day's workout from the plan
    * @param {number} dayIndex - Day index (0-6)
+   * @deprecated Use getTodaysWorkout() or search sessions array directly
    */
   const getPlanDay = useCallback((dayIndex) => {
-    if (!currentPlan || !currentPlan.days) return null;
-    return currentPlan.days[dayIndex] || null;
+    if (!currentPlan || !currentPlan.sessions) return null;
+    
+    // For backward compatibility, find session for the specified day of current week
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const daysToAdd = (dayIndex - dayOfWeek + 7) % 7;
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + daysToAdd);
+    targetDate.setHours(0, 0, 0, 0);
+    
+    return currentPlan.sessions.find(s => {
+      const sessionDate = new Date(s.date);
+      sessionDate.setHours(0, 0, 0, 0);
+      return sessionDate.getTime() === targetDate.getTime();
+    }) || null;
   }, [currentPlan]);
 
   /**
@@ -85,47 +86,30 @@ export const usePlanIntegration = () => {
    * @param {number} count - Number of workouts to return
    */
   const getUpcomingWorkouts = useCallback((count = 3) => {
-    if (!currentPlan) return [];
+    if (!currentPlan || !currentPlan.sessions || !Array.isArray(currentPlan.sessions)) {
+      return [];
+    }
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const upcoming = [];
     
-    // Handle plan with sessions (from workout plan generator)
-    if (currentPlan.sessions && Array.isArray(currentPlan.sessions)) {
-      const futureSessions = currentPlan.sessions
-        .filter(s => {
-          const sessionDate = new Date(s.date);
-          sessionDate.setHours(0, 0, 0, 0);
-          return sessionDate > today && s.type !== 'rest';
-        })
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
-        .slice(0, count);
-      
-      return futureSessions.map(s => {
+    const futureSessions = currentPlan.sessions
+      .filter(s => {
         const sessionDate = new Date(s.date);
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        return {
-          ...s,
-          day: days[sessionDate.getDay()],
-        };
-      });
-    }
+        sessionDate.setHours(0, 0, 0, 0);
+        return sessionDate > today && s.type !== 'rest';
+      })
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(0, count);
     
-    // Handle plan with days (from weekly plan)
-    if (!currentPlan.days) return [];
-    
-    const dayOfWeek = today.getDay();
-    
-    for (let i = 1; i <= 7 && upcoming.length < count; i++) {
-      const dayIndex = (dayOfWeek + i) % 7;
-      const day = currentPlan.days[dayIndex];
-      if (day && day.type !== 'rest') {
-        upcoming.push(day);
-      }
-    }
-    
-    return upcoming;
+    return futureSessions.map(s => {
+      const sessionDate = new Date(s.date);
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      return {
+        ...s,
+        day: days[sessionDate.getDay()],
+      };
+    });
   }, [currentPlan]);
 
   /**

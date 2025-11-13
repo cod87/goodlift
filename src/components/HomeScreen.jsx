@@ -312,7 +312,7 @@ const HomeScreen = memo(({
       )}
 
       {/* Weekly Overview */}
-      {currentPlan && currentPlan.days && (
+      {currentPlan && currentPlan.sessions && (
         <Card 
           elevation={2}
           sx={{ 
@@ -352,59 +352,83 @@ const HomeScreen = memo(({
                 },
               }}
             >
-              {currentPlan.days.map((day, index) => {
-                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                const isToday = index === new Date().getDay();
+              {(() => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const next7Days = [];
                 
-                return (
-                  <Box 
-                    key={index}
-                    sx={{ 
-                      minWidth: '140px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      p: 1.5,
-                      borderRadius: 2,
-                      bgcolor: isToday ? 'action.selected' : 'action.hover',
-                      border: isToday ? '2px solid' : '1px solid',
-                      borderColor: isToday ? 'primary.main' : 'divider',
-                    }}
-                  >
-                    <Typography 
-                      variant="body1" 
+                for (let i = 0; i < 7; i++) {
+                  const date = new Date(today);
+                  date.setDate(today.getDate() + i);
+                  date.setHours(0, 0, 0, 0);
+                  
+                  const session = currentPlan.sessions.find(s => {
+                    const sessionDate = new Date(s.date);
+                    sessionDate.setHours(0, 0, 0, 0);
+                    return sessionDate.getTime() === date.getTime();
+                  });
+                  
+                  next7Days.push({
+                    date,
+                    session: session || { type: 'rest' },
+                    isToday: i === 0
+                  });
+                }
+                
+                return next7Days.map((item, index) => {
+                  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                  const dayName = dayNames[item.date.getDay()];
+                  
+                  return (
+                    <Box 
+                      key={index}
                       sx={{ 
-                        fontWeight: isToday ? 700 : 600,
-                        color: 'text.primary',
-                        mb: 0.5,
-                        textAlign: 'center',
+                        minWidth: '140px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        p: 1.5,
+                        borderRadius: 2,
+                        bgcolor: item.isToday ? 'action.selected' : 'action.hover',
+                        border: item.isToday ? '2px solid' : '1px solid',
+                        borderColor: item.isToday ? 'primary.main' : 'divider',
                       }}
                     >
-                      {dayNames[index]}
-                    </Typography>
-                    {isToday && (
-                      <Chip 
-                        label="Today" 
-                        size="small" 
-                        color="primary"
-                        sx={{ fontWeight: 600, mb: 1, alignSelf: 'center' }}
-                      />
-                    )}
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        color: day.type === 'rest' ? 'text.secondary' : 'text.primary',
-                        fontWeight: day.type === 'rest' ? 400 : 500,
-                        textAlign: 'center',
-                        mt: isToday ? 0 : 1.5,
-                      }}
-                    >
-                      {day.type === 'rest' 
-                        ? 'Rest' 
-                        : getWorkoutTypeDisplayName(day.type)}
-                    </Typography>
-                  </Box>
-                );
-              })}
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          fontWeight: item.isToday ? 700 : 600,
+                          color: 'text.primary',
+                          mb: 0.5,
+                          textAlign: 'center',
+                        }}
+                      >
+                        {dayName}
+                      </Typography>
+                      {item.isToday && (
+                        <Chip 
+                          label="Today" 
+                          size="small" 
+                          color="primary"
+                          sx={{ fontWeight: 600, mb: 1, alignSelf: 'center' }}
+                        />
+                      )}
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: item.session.type === 'rest' ? 'text.secondary' : 'text.primary',
+                          fontWeight: item.session.type === 'rest' ? 400 : 500,
+                          textAlign: 'center',
+                          mt: item.isToday ? 0 : 1.5,
+                        }}
+                      >
+                        {item.session.type === 'rest' 
+                          ? 'Rest' 
+                          : getWorkoutTypeDisplayName(item.session.type)}
+                      </Typography>
+                    </Box>
+                  );
+                });
+              })()}
             </Box>
           </CardContent>
         </Card>

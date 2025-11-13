@@ -132,7 +132,7 @@ const UpcomingWeekTab = memo(({
 
   // Get next 7 days (current day + next 6 days)
   const getNext7Days = () => {
-    if (!displayPlan || !displayPlan.days || !Array.isArray(displayPlan.days)) {
+    if (!displayPlan || !displayPlan.sessions || !Array.isArray(displayPlan.sessions)) {
       return [];
     }
 
@@ -142,18 +142,34 @@ const UpcomingWeekTab = memo(({
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() + i);
-      const dayIndex = date.getDay();
+      date.setHours(0, 0, 0, 0);
       
-      const dayData = displayPlan.days[dayIndex] || { type: 'rest' };
-      
-      next7Days.push({
-        date: date,
-        dayIndex: dayIndex,
-        isToday: i === 0,
-        ...dayData
+      const session = displayPlan.sessions.find(s => {
+        const sessionDate = new Date(s.date);
+        sessionDate.setHours(0, 0, 0, 0);
+        return sessionDate.getTime() === date.getTime();
       });
+      
+      if (session) {
+        next7Days.push({
+          date: date,
+          dayIndex: date.getDay(),
+          isToday: i === 0,
+          type: session.type,
+          status: session.status,
+          ...session
+        });
+      } else {
+        // No session for this day - it's a rest day
+        next7Days.push({
+          date: date,
+          dayIndex: date.getDay(),
+          isToday: i === 0,
+          type: 'rest'
+        });
+      }
     }
-
+    
     return next7Days;
   };
 

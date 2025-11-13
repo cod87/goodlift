@@ -73,7 +73,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 - Unused Sidebar.jsx component (replaced by SelectionScreen.jsx)
-- Unused Navigation.jsx component (replaced by NavigationSidebar.jsx)
+- Unused Navigation.jsx component (replaced by BottomNav.jsx with 3-tab navigation)
 
 ### Performance Improvements
 - **Bundle Size Optimization**: Split monolithic 1.25MB bundle into 5 optimized chunks:

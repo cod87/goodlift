@@ -194,13 +194,15 @@ const RecurringSessionEditor = ({
       fullWidth
     >
       <DialogTitle>
-        Edit Recurring {getSessionTypeLabel(session.type)} Sessions
+        Edit {recurringCount === 1 ? '' : 'Recurring '}{getSessionTypeLabel(session.type)} {recurringCount === 1 ? 'Session' : 'Sessions'}
       </DialogTitle>
       
       <DialogContent>
         <Alert severity="info" sx={{ mb: 2 }}>
-          Changes will apply to all {recurringCount} {getSessionTypeLabel(session.type)} sessions 
-          in the current training block (until the next deload week).
+          {recurringCount === 1 
+            ? `Changes will apply only to this ${getSessionTypeLabel(session.type)} session.`
+            : `Changes will apply to all ${recurringCount} ${getSessionTypeLabel(session.type)} sessions in the current training block (until the next deload week).`
+          }
         </Alert>
 
         <Box sx={{ mb: 3 }}>

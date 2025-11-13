@@ -49,6 +49,7 @@ const UpcomingWeekTab = memo(({
   const [dayDialogOpen, setDayDialogOpen] = useState(false);
   const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
   const [recurringEditorOpen, setRecurringEditorOpen] = useState(false);
+  const [singleSessionEditorOpen, setSingleSessionEditorOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
@@ -223,12 +224,66 @@ const UpcomingWeekTab = memo(({
   // Handler for editing single session
   const handleEditSingle = () => {
     setEditWorkoutDialogOpen(false);
-    setSnackbar({
-      open: true,
-      message: 'Single session edit not yet implemented',
-      severity: 'info',
-    });
-    // TODO: Implement single session edit
+    
+    // Find the session
+    const session = displayPlan.sessions.find(s => s.id === selectedSessionId);
+    if (session && session.exercises) {
+      setSingleSessionEditorOpen(true);
+    } else {
+      setSnackbar({
+        open: true,
+        message: 'No exercises found for this session',
+        severity: 'error',
+      });
+    }
+  };
+
+  // Handler for closing single session editor
+  const handleCloseSingleSessionEditor = () => {
+    setSingleSessionEditorOpen(false);
+  };
+
+  // Handler for saving single session changes
+  const handleSaveSingleSessionChanges = async (newExercises) => {
+    setSingleSessionEditorOpen(false);
+    
+    try {
+      // Update only the specific session's exercises
+      const updatedSessions = displayPlan.sessions.map(session => {
+        if (session.id === selectedSessionId) {
+          return {
+            ...session,
+            exercises: newExercises
+          };
+        }
+        return session;
+      });
+      
+      const updatedPlan = {
+        ...displayPlan,
+        sessions: updatedSessions,
+        modified: Date.now()
+      };
+      
+      // Save the updated plan to storage
+      await saveWorkoutPlan(updatedPlan);
+      
+      // Reload the plan to refresh the UI
+      await loadActivePlan();
+      
+      setSnackbar({
+        open: true,
+        message: 'Session updated successfully!',
+        severity: 'success',
+      });
+    } catch (error) {
+      console.error('Error saving single session changes:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to save changes. Please try again.',
+        severity: 'error',
+      });
+    }
   };
 
   // Handler for editing recurring sessions
@@ -738,6 +793,18 @@ const UpcomingWeekTab = memo(({
           recurringCount={recurringCount}
           allExercises={allExercises}
           onSave={handleSaveRecurringChanges}
+        />
+      )}
+
+      {/* Single Session Editor */}
+      {displayPlan?.sessions && selectedSessionId && (
+        <RecurringSessionEditor
+          open={singleSessionEditorOpen}
+          onClose={handleCloseSingleSessionEditor}
+          session={displayPlan.sessions.find(s => s.id === selectedSessionId)}
+          recurringCount={1}
+          allExercises={allExercises}
+          onSave={handleSaveSingleSessionChanges}
         />
       )}
 

@@ -352,7 +352,28 @@ const HomeScreen = memo(({
             >
               This Week&apos;s Schedule
             </Typography>
-            <Stack spacing={1.5}>
+            <Box 
+              sx={{ 
+                display: 'flex',
+                gap: 2,
+                overflowX: 'auto',
+                pb: 1,
+                '&::-webkit-scrollbar': {
+                  height: '8px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: 'rgba(0,0,0,0.1)',
+                  borderRadius: '4px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: 'rgba(0,0,0,0.3)',
+                  borderRadius: '4px',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0,0,0,0.4)',
+                  },
+                },
+              }}
+            >
               {currentPlan.days.map((day, index) => {
                 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                 const isToday = index === new Date().getDay();
@@ -361,9 +382,9 @@ const HomeScreen = memo(({
                   <Box 
                     key={index}
                     sx={{ 
+                      minWidth: '140px',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
+                      flexDirection: 'column',
                       p: 1.5,
                       borderRadius: 2,
                       bgcolor: isToday ? 'action.selected' : 'action.hover',
@@ -371,32 +392,32 @@ const HomeScreen = memo(({
                       borderColor: isToday ? 'primary.main' : 'divider',
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography 
-                        variant="body1" 
-                        sx={{ 
-                          fontWeight: isToday ? 700 : 600,
-                          color: 'text.primary',
-                          minWidth: { xs: '80px', sm: '100px' }
-                        }}
-                      >
-                        {dayNames[index]}
-                      </Typography>
-                      {isToday && (
-                        <Chip 
-                          label="Today" 
-                          size="small" 
-                          color="primary"
-                          sx={{ fontWeight: 600 }}
-                        />
-                      )}
-                    </Box>
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        fontWeight: isToday ? 700 : 600,
+                        color: 'text.primary',
+                        mb: 0.5,
+                        textAlign: 'center',
+                      }}
+                    >
+                      {dayNames[index]}
+                    </Typography>
+                    {isToday && (
+                      <Chip 
+                        label="Today" 
+                        size="small" 
+                        color="primary"
+                        sx={{ fontWeight: 600, mb: 1, alignSelf: 'center' }}
+                      />
+                    )}
                     <Typography 
                       variant="body2" 
                       sx={{ 
                         color: day.type === 'rest' ? 'text.secondary' : 'text.primary',
                         fontWeight: day.type === 'rest' ? 400 : 500,
-                        textAlign: 'right'
+                        textAlign: 'center',
+                        mt: isToday ? 0 : 1.5,
                       }}
                     >
                       {day.type === 'rest' 
@@ -406,7 +427,7 @@ const HomeScreen = memo(({
                   </Box>
                 );
               })}
-            </Stack>
+            </Box>
           </CardContent>
         </Card>
       )}

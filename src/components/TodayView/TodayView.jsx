@@ -19,7 +19,7 @@ import {
   DirectionsRun
 } from '@mui/icons-material';
 import { formatDuration } from '../../utils/helpers';
-import { getWorkoutTypeDisplayName } from '../../utils/weeklyPlanDefaults';
+import { getWorkoutTypeDisplayName } from '../../utils/workoutTypeHelpers';
 import { TIME_CONSTANTS } from '../../utils/constants';
 
 /**

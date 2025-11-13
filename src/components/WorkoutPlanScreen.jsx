@@ -26,19 +26,16 @@ import {
   CheckCircle as CheckCircleIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
-  Build as BuildIcon,
   AutoAwesome as AutoGenerateIcon,
   ArrowBack as BackIcon,
 } from '@mui/icons-material';
 import CompactHeader from './Common/CompactHeader';
-import WorkoutPlanBuilderDialog from './WorkoutPlanBuilderDialog';
 import QuickPlanSetup from './PlanBuilder/QuickPlanSetup';
 import {
   getPlanStatistics
 } from '../utils/workoutPlanGenerator';
 import {
   getWorkoutPlans,
-  saveWorkoutPlan,
   deleteWorkoutPlan,
   getActivePlan,
   setActivePlan
@@ -48,7 +45,6 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   const [plans, setPlans] = useState([]);
   const [activePlan, setActivePlanState] = useState(null);
   const [showPlanCreationModal, setShowPlanCreationModal] = useState(false);
-  const [showBuilderDialog, setShowBuilderDialog] = useState(false);
   const [createMenuAnchor, setCreateMenuAnchor] = useState(null);
   const [expandedPlan, setExpandedPlan] = useState(null); // Track which plan is expanded
 
@@ -74,28 +70,12 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
     setShowPlanCreationModal(true);
   };
 
-  const handleBuildPlan = () => {
-    setCreateMenuAnchor(null);
-    setShowBuilderDialog(true);
-  };
-
   const handleOpenCreateMenu = (event) => {
     setCreateMenuAnchor(event.currentTarget);
   };
 
   const handleCloseCreateMenu = () => {
     setCreateMenuAnchor(null);
-  };
-
-  const handleSaveBuiltPlan = async (plan) => {
-    try {
-      await saveWorkoutPlan(plan);
-      await loadPlans();
-      setShowBuilderDialog(false);
-    } catch (error) {
-      console.error('Error saving built plan:', error);
-      alert(`Failed to save plan: ${error.message}`);
-    }
   };
 
   const handleSetActive = async (planId) => {
@@ -184,13 +164,9 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         open={Boolean(createMenuAnchor)}
         onClose={handleCloseCreateMenu}
       >
-        <MenuItem onClick={handleBuildPlan}>
-          <BuildIcon sx={{ mr: 1 }} />
-          Build Custom Plan
-        </MenuItem>
         <MenuItem onClick={handleCreatePlan}>
           <AutoGenerateIcon sx={{ mr: 1 }} />
-          Auto-Generate Plan
+          Create Workout Plan
         </MenuItem>
       </Menu>
       
@@ -465,13 +441,6 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
           loadPlans();
           setShowPlanCreationModal(false);
         }}
-      />
-
-      {/* Workout Plan Builder Dialog */}
-      <WorkoutPlanBuilderDialog
-        open={showBuilderDialog}
-        onClose={() => setShowBuilderDialog(false)}
-        onSave={handleSaveBuiltPlan}
       />
     </Container>
     </Box>

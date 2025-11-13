@@ -31,7 +31,7 @@ import {
   addMonths,
   subMonths
 } from 'date-fns';
-import { getWorkoutTypeShorthand } from '../../utils/weeklyPlanDefaults';
+import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
 
 /**
  * MonthCalendarView - Standard calendar grid view with workout indicators

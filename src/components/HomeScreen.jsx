@@ -18,7 +18,7 @@ import {
   ViewList,
   TrendingUp
 } from '@mui/icons-material';
-import { getWorkoutTypeDisplayName } from '../utils/weeklyPlanDefaults';
+import { getWorkoutTypeDisplayName } from '../utils/workoutTypeHelpers';
 import { getWorkoutHistory } from '../utils/storage';
 import { containerPadding, touchTargets } from '../theme/responsive';
 

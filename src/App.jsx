@@ -37,6 +37,7 @@ import {
   addToTotalVolume,
   getWorkoutHistory
 } from './utils/storage';
+import { cleanupExpiredBackups } from './utils/dataResetService';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
@@ -93,6 +94,19 @@ function AppContent() {
     };
     
     initializeMigration();
+  }, []); // Run once on mount
+
+  // Cleanup expired backups on app initialization
+  useEffect(() => {
+    const initializeBackupCleanup = async () => {
+      try {
+        await cleanupExpiredBackups();
+      } catch (error) {
+        console.error('Error cleaning up expired backups:', error);
+      }
+    };
+    
+    initializeBackupCleanup();
   }, []); // Run once on mount
 
   // Check if guest snackbar should be shown

@@ -22,6 +22,7 @@ import {
   ListItemIcon,
   ListItemText,
   Alert,
+  Snackbar,
 } from '@mui/material';
 import { 
   Brightness4, 
@@ -45,6 +46,7 @@ import {
   CloudUpload,
   DeleteSweep,
   Security,
+  Restore,
 } from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePreferences } from '../contexts/PreferencesContext';
@@ -52,6 +54,15 @@ import { useAuth } from '../contexts/AuthContext';
 import audioService from '../utils/audioService';
 import { downloadProfileData } from '../utils/profileUtils';
 import { useUserProfile } from '../contexts/UserProfileContext';
+import ResetDataDialog from '../components/ResetDataDialog';
+import RecoverDataDialog from '../components/RecoverDataDialog';
+import {
+  resetUserData,
+  recoverUserData,
+  getBackup,
+  getResetInfo,
+  cleanupExpiredBackups,
+} from '../utils/dataResetService';
 
 const SettingsScreen = ({ onNavigate }) => {
   const { mode, toggleTheme } = useTheme();
@@ -68,6 +79,15 @@ const SettingsScreen = ({ onNavigate }) => {
     }
   });
   const [isMuted, setIsMuted] = useState(audioService.isMutedState());
+
+  // Data reset and recovery states
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [recoverDialogOpen, setRecoverDialogOpen] = useState(false);
+  const [backup, setBackup] = useState(null);
+  const [resetInfo, setResetInfo] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   // Stretch reminder preferences
   const [stretchPrefs, setStretchPrefs] = useState(() => {
@@ -107,6 +127,18 @@ const SettingsScreen = ({ onNavigate }) => {
     }
   }, [stretchPrefs]);
 
+  // Check for backup and cleanup expired backups on mount
+  useEffect(() => {
+    const initializeDataReset = async () => {
+      await cleanupExpiredBackups();
+      const currentBackup = await getBackup();
+      setBackup(currentBackup);
+      setResetInfo(getResetInfo());
+    };
+    
+    initializeDataReset();
+  }, []);
+
   const handleVolumeChange = (event, newValue) => {
     setVolume(newValue);
     // If volume is > 0 and was muted, unmute
@@ -145,6 +177,77 @@ const SettingsScreen = ({ onNavigate }) => {
 
   const handleExportData = () => {
     downloadProfileData(profile, stats);
+  };
+
+  const handleOpenResetDialog = () => {
+    setResetInfo(getResetInfo());
+    setResetDialogOpen(true);
+  };
+
+  const handleCloseResetDialog = () => {
+    setResetDialogOpen(false);
+  };
+
+  const handleConfirmReset = async () => {
+    const result = await resetUserData();
+    
+    if (result.success) {
+      // Update backup state
+      setBackup(result.backup);
+      setResetInfo(getResetInfo());
+      
+      // Show success message
+      setSnackbarMessage(result.message);
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      
+      // Reload the page to reflect reset state
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else {
+      setSnackbarMessage(result.message);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleOpenRecoverDialog = async () => {
+    const currentBackup = await getBackup();
+    setBackup(currentBackup);
+    setRecoverDialogOpen(true);
+  };
+
+  const handleCloseRecoverDialog = () => {
+    setRecoverDialogOpen(false);
+  };
+
+  const handleConfirmRecover = async () => {
+    const result = await recoverUserData();
+    
+    if (result.success) {
+      // Clear backup state
+      setBackup(null);
+      setResetInfo(getResetInfo());
+      
+      // Show success message
+      setSnackbarMessage(result.message);
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      
+      // Reload the page to reflect recovered state
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else {
+      setSnackbarMessage(result.message);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   const handleNavigate = (screen) => {
@@ -480,6 +583,50 @@ const SettingsScreen = ({ onNavigate }) => {
                   </ListItemButton>
                 </ListItem>
                 <Divider component="li" />
+                
+                {/* Recover Data - Only show if backup exists */}
+                {backup && (
+                  <>
+                    <ListItem disablePadding>
+                      <ListItemButton onClick={handleOpenRecoverDialog}>
+                        <ListItemIcon>
+                          <Restore sx={{ color: 'success.main' }} />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary="Recover Data"
+                          secondary="Restore your backed-up workout data"
+                          primaryTypographyProps={{ fontWeight: 500 }}
+                        />
+                        <ChevronRight sx={{ color: 'text.secondary' }} />
+                      </ListItemButton>
+                    </ListItem>
+                    <Divider component="li" />
+                  </>
+                )}
+
+                {/* Reset Personal Data */}
+                <ListItem disablePadding>
+                  <ListItemButton 
+                    onClick={handleOpenResetDialog}
+                    disabled={!resetInfo?.hasData}
+                  >
+                    <ListItemIcon>
+                      <DeleteSweep sx={{ color: resetInfo?.hasData ? 'error.main' : 'text.disabled' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Reset Personal Data"
+                      secondary={
+                        resetInfo?.hasData 
+                          ? "Clear workout history and stats (recoverable for 30 days)"
+                          : "No data to reset"
+                      }
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
+                    <ChevronRight sx={{ color: 'text.secondary' }} />
+                  </ListItemButton>
+                </ListItem>
+                <Divider component="li" />
+
                 <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 1 }}>
                     <ListItemIcon>
@@ -512,6 +659,38 @@ const SettingsScreen = ({ onNavigate }) => {
           </Box>
         </Stack>
       </motion.div>
+
+      {/* Reset Data Dialog */}
+      {resetInfo && (
+        <ResetDataDialog
+          open={resetDialogOpen}
+          onClose={handleCloseResetDialog}
+          onConfirm={handleConfirmReset}
+          resetInfo={resetInfo}
+        />
+      )}
+
+      {/* Recover Data Dialog */}
+      {backup && (
+        <RecoverDataDialog
+          open={recoverDialogOpen}
+          onClose={handleCloseRecoverDialog}
+          onRecover={handleConfirmRecover}
+          backup={backup}
+        />
+      )}
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

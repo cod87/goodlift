@@ -458,9 +458,13 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
       <FitnessPlanWizard
         open={showFitnessPlanWizard}
         onClose={() => setShowFitnessPlanWizard(false)}
-        onPlanCreated={() => {
-          loadPlans();
+        onPlanCreated={async () => {
+          await loadPlans();
           setShowFitnessPlanWizard(false);
+          // Navigate to calendar to show the new plan
+          if (onNavigate) {
+            onNavigate('progress');
+          }
         }}
       />
     </Container>

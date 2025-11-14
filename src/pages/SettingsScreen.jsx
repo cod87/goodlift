@@ -47,6 +47,7 @@ import {
   DeleteSweep,
   Security,
   Restore,
+  CalendarMonth,
 } from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePreferences } from '../contexts/PreferencesContext';
@@ -56,6 +57,7 @@ import { downloadProfileData } from '../utils/profileUtils';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import ResetDataDialog from '../components/ResetDataDialog';
 import RecoverDataDialog from '../components/RecoverDataDialog';
+import PlansManagement from '../components/Settings/PlansManagement';
 import {
   resetUserData,
   recoverUserData,
@@ -285,6 +287,25 @@ const SettingsScreen = ({ onNavigate }) => {
         </Typography>
 
         <Stack spacing={3} sx={{ maxWidth: 600 }}>
+          {/* My Plans Section */}
+          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+            <CardContent>
+              <Typography
+                variant="overline"
+                sx={{
+                  display: 'block',
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: '0.1em',
+                  mb: 2,
+                }}
+              >
+                My Plans
+              </Typography>
+              <PlansManagement onNavigate={handleNavigate} />
+            </CardContent>
+          </Card>
+
           {/* Activity Management Section */}
           <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
             <CardContent sx={{ p: 0 }}>

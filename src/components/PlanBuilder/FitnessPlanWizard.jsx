@@ -32,6 +32,7 @@ import {
   CardContent,
   Paper,
   Slider,
+  Snackbar,
 } from '@mui/material';
 import {
   NavigateNext as NextIcon,
@@ -52,6 +53,7 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Plan configuration - Simplified
   const [planName, setPlanName] = useState('');
@@ -255,12 +257,16 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
       // Set as active plan
       await setActivePlan(plan.id);
 
-      // Notify parent
-      if (onPlanCreated) {
-        onPlanCreated(plan);
-      }
+      // Show success message
+      setSuccessMessage('Plan created successfully! Redirecting to calendar...');
 
-      handleClose();
+      // Notify parent after a short delay
+      setTimeout(() => {
+        if (onPlanCreated) {
+          onPlanCreated(plan);
+        }
+        handleClose();
+      }, 1500);
     } catch (err) {
       console.error('Error creating fitness plan:', err);
       setError(err.message || 'Failed to create plan. Please try again.');
@@ -666,6 +672,18 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
           </Button>
         )}
       </DialogActions>
+      
+      {/* Success Snackbar */}
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={6000}
+        onClose={() => setSuccessMessage('')}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" sx={{ width: '100%' }}>
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
 };

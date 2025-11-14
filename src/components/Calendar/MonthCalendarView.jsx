@@ -99,6 +99,36 @@ const MonthCalendarView = ({
   const getWorkoutDisplay = (workout) => {
     if (!workout || workout.type === 'rest') return <Hotel sx={{ fontSize: 16 }} />;
     
+    // Handle sessions with multiple activities
+    if (workout.activities && Array.isArray(workout.activities)) {
+      // Show main activity type (first activity)
+      const mainActivity = workout.activities[0];
+      const type = mainActivity.type?.toLowerCase();
+      
+      if (['upper', 'lower', 'push', 'pull', 'legs', 'full'].includes(type)) {
+        return (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                fontWeight: 700, 
+                fontSize: { xs: '0.6rem', sm: '0.65rem' },
+                lineHeight: 1
+              }}
+            >
+              {getWorkoutTypeShorthand(type)}
+            </Typography>
+            {workout.activities.length > 1 && (
+              <Box sx={{ display: 'flex', gap: 0.25 }}>
+                <SelfImprovement sx={{ fontSize: 8 }} />
+                <DirectionsRun sx={{ fontSize: 8 }} />
+              </Box>
+            )}
+          </Box>
+        );
+      }
+    }
+    
     const type = workout.type?.toLowerCase() || workout.workoutType?.toLowerCase();
     
     // For strength workouts, show shorthand label
@@ -117,10 +147,20 @@ const MonthCalendarView = ({
       );
     }
     
+    // For yoga/active recovery
+    if (type === 'active_recovery') {
+      return (
+        <Box sx={{ display: 'flex', gap: 0.25 }}>
+          <SelfImprovement sx={{ fontSize: 14 }} />
+          <DirectionsRun sx={{ fontSize: 14 }} />
+        </Box>
+      );
+    }
+    
     // For other workouts, show icons
     if (type === 'cardio' || type === 'hiit') {
       return <DirectionsRun sx={{ fontSize: 16 }} />;
-    } else if (type === 'stretch' || type === 'active_recovery') {
+    } else if (type === 'stretch' || type === 'yoga') {
       return <SelfImprovement sx={{ fontSize: 16 }} />;
     } else {
       return <FitnessCenter sx={{ fontSize: 16 }} />;
@@ -131,11 +171,19 @@ const MonthCalendarView = ({
   const getWorkoutColor = (workout) => {
     if (!workout || workout.type === 'rest') return 'action.disabled';
     
+    // Handle sessions with multiple activities (show strength color)
+    if (workout.activities && Array.isArray(workout.activities)) {
+      const hasStrength = workout.activities.some(a => 
+        a.type === 'strength' || ['upper', 'lower', 'push', 'pull', 'legs', 'full'].includes(a.type?.toLowerCase())
+      );
+      if (hasStrength) return 'primary.main';
+    }
+    
     const type = workout.type?.toLowerCase() || workout.workoutType?.toLowerCase();
     
     if (type === 'cardio' || type === 'hiit') {
       return 'error.main';
-    } else if (type === 'stretch' || type === 'active_recovery') {
+    } else if (type === 'stretch' || type === 'active_recovery' || type === 'yoga') {
       return 'secondary.main';
     } else {
       return 'primary.main';
@@ -301,16 +349,16 @@ const MonthCalendarView = ({
             sx={{ bgcolor: 'primary.light' }}
           />
           <Chip
+            icon={<SelfImprovement />}
+            label="Yoga"
+            size="small"
+            sx={{ bgcolor: 'secondary.light' }}
+          />
+          <Chip
             icon={<DirectionsRun />}
             label="Cardio"
             size="small"
             sx={{ bgcolor: 'error.light' }}
-          />
-          <Chip
-            icon={<SelfImprovement />}
-            label="Recovery"
-            size="small"
-            sx={{ bgcolor: 'secondary.light' }}
           />
           <Chip
             icon={<Hotel />}

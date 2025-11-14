@@ -28,6 +28,7 @@ import {
   CalendarMonth as CalendarIcon,
 } from '@mui/icons-material';
 import CustomWorkoutWizard from '../PlanBuilder/CustomWorkoutWizard';
+import FitnessPlanWizard from '../PlanBuilder/FitnessPlanWizard';
 import {
   getPlanStatistics
 } from '../../utils/workoutPlanGenerator';
@@ -469,7 +470,7 @@ const PlanInfoTab = ({ currentPlan }) => {
         </CardContent>
       </Card>
 
-      <CustomWorkoutWizard
+      <FitnessPlanWizard
         open={showPlanCreationModal}
         onClose={() => setShowPlanCreationModal(false)}
         onPlanCreated={() => {

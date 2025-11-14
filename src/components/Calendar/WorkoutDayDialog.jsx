@@ -45,8 +45,48 @@ const WorkoutDayDialog = ({
 
   const getWorkoutTypeDisplay = (workout) => {
     if (!workout) return 'Rest';
+    
+    // Handle sessions with multiple activities
+    if (workout.activities && Array.isArray(workout.activities) && workout.activities.length > 0) {
+      const activityTypes = workout.activities.map(a => {
+        const type = a.type || 'unknown';
+        return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
+      });
+      
+      // If has strength, show that first
+      const hasStrength = workout.activities.some(a => a.type === 'strength');
+      if (hasStrength) {
+        return 'Strength Training + Yoga + Cardio';
+      }
+      return activityTypes.join(' + ');
+    }
+    
     const type = workout.type || workout.workoutType || 'rest';
     return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
+  };
+
+  const getWorkoutDescription = (workout) => {
+    if (!workout) return '';
+    
+    // Handle sessions with multiple activities
+    if (workout.activities && Array.isArray(workout.activities)) {
+      const descriptions = workout.activities.map(a => {
+        if (a.type === 'strength' && a.exercises) {
+          return `Strength: ${a.exercises.length} exercises`;
+        } else if (a.duration) {
+          return `${a.type.charAt(0).toUpperCase() + a.type.slice(1)}: ${a.duration} min`;
+        }
+        return a.type;
+      });
+      return descriptions.join(' • ');
+    }
+    
+    // Handle legacy format
+    if (workout.exercises && workout.exercises.length > 0) {
+      return `${workout.exercises.length} exercises`;
+    }
+    
+    return workout.notes || '';
   };
 
   const handleAction = (action) => {
@@ -90,6 +130,11 @@ const WorkoutDayDialog = ({
             <Typography variant="body2" color="text.secondary">
               {format(date, 'EEEE, MMMM d, yyyy')}
             </Typography>
+            {getWorkoutDescription(workout) && (
+              <Typography variant="caption" color="text.secondary">
+                {getWorkoutDescription(workout)}
+              </Typography>
+            )}
           </Box>
         </Box>
       </DialogTitle>

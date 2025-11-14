@@ -31,19 +31,18 @@ import {
   addMonths,
   subMonths
 } from 'date-fns';
-import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
+// getWorkoutTypeShorthand import removed - no longer needed
 
 /**
  * MonthCalendarView - Standard calendar grid view with workout indicators
  * Features:
  * - Classic month/week grid layout (7 columns for days of week)
  * - Day-of-week headers (Sun-Sat)
- * - Workout day indicators (icons/colors)
+ * - Workout day indicators showing completed activities only
  * - Mobile-responsive with proper touch targets
- * - Clickable days for interaction
+ * - Large color-coded X markers for logged activities
  */
 const MonthCalendarView = ({ 
-  currentPlan,
   workoutHistory = [],
   onDayClick,
 }) => {
@@ -69,124 +68,33 @@ const MonthCalendarView = ({
     return cells;
   };
 
-  // Get workout for a specific day
-  const getWorkoutForDay = (date) => {
-    if (!currentPlan || !currentPlan.sessions || !Array.isArray(currentPlan.sessions)) {
-      return null;
-    }
-    
-    const targetDate = new Date(date);
-    targetDate.setHours(0, 0, 0, 0);
-    
-    const session = currentPlan.sessions.find(s => {
-      const sessionDate = new Date(s.date);
-      sessionDate.setHours(0, 0, 0, 0);
-      return sessionDate.getTime() === targetDate.getTime();
-    });
-    
-    return session || null;
-  };
-
-  // Check if a workout was completed on this day
-  const hasCompletedWorkout = (date) => {
-    return workoutHistory.some(workout => {
+  // Get all workouts for a specific day (there can be multiple)
+  const getWorkoutsForDay = (date) => {
+    return workoutHistory.filter(workout => {
       const workoutDate = new Date(workout.date);
       return isSameDay(workoutDate, date);
     });
   };
 
-  // Get workout type icon or shorthand
-  const getWorkoutDisplay = (workout) => {
-    if (!workout || workout.type === 'rest') return <Hotel sx={{ fontSize: 16 }} />;
-    
-    // Handle sessions with multiple activities
-    if (workout.activities && Array.isArray(workout.activities)) {
-      // Show main activity type (first activity)
-      const mainActivity = workout.activities[0];
-      const type = mainActivity.type?.toLowerCase();
-      
-      if (['upper', 'lower', 'push', 'pull', 'legs', 'full'].includes(type)) {
-        return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                fontWeight: 700, 
-                fontSize: { xs: '0.6rem', sm: '0.65rem' },
-                lineHeight: 1
-              }}
-            >
-              {getWorkoutTypeShorthand(type)}
-            </Typography>
-            {workout.activities.length > 1 && (
-              <Box sx={{ display: 'flex', gap: 0.25 }}>
-                <SelfImprovement sx={{ fontSize: 8 }} />
-                <DirectionsRun sx={{ fontSize: 8 }} />
-              </Box>
-            )}
-          </Box>
-        );
-      }
-    }
-    
-    const type = workout.type?.toLowerCase() || workout.workoutType?.toLowerCase();
-    
-    // For strength workouts, show shorthand label
-    if (['upper', 'lower', 'push', 'pull', 'legs', 'full'].includes(type)) {
-      return (
-        <Typography 
-          variant="caption" 
-          sx={{ 
-            fontWeight: 700, 
-            fontSize: { xs: '0.65rem', sm: '0.7rem' },
-            lineHeight: 1
-          }}
-        >
-          {getWorkoutTypeShorthand(type)}
-        </Typography>
-      );
-    }
-    
-    // For yoga/active recovery
-    if (type === 'active_recovery') {
-      return (
-        <Box sx={{ display: 'flex', gap: 0.25 }}>
-          <SelfImprovement sx={{ fontSize: 14 }} />
-          <DirectionsRun sx={{ fontSize: 14 }} />
-        </Box>
-      );
-    }
-    
-    // For other workouts, show icons
-    if (type === 'cardio' || type === 'hiit') {
-      return <DirectionsRun sx={{ fontSize: 16 }} />;
-    } else if (type === 'stretch' || type === 'yoga') {
-      return <SelfImprovement sx={{ fontSize: 16 }} />;
-    } else {
-      return <FitnessCenter sx={{ fontSize: 16 }} />;
-    }
+  // hasCompletedWorkout function removed - using getWorkoutsForDay instead
+
+  // Get primary workout type for display (if multiple workouts, show first)
+  const getPrimaryWorkoutType = (workouts) => {
+    if (!workouts || workouts.length === 0) return null;
+    const workout = workouts[0];
+    return workout.type?.toLowerCase() || workout.workoutType?.toLowerCase() || 'strength';
   };
 
-  // Get workout type color
-  const getWorkoutColor = (workout) => {
-    if (!workout || workout.type === 'rest') return 'action.disabled';
-    
-    // Handle sessions with multiple activities (show strength color)
-    if (workout.activities && Array.isArray(workout.activities)) {
-      const hasStrength = workout.activities.some(a => 
-        a.type === 'strength' || ['upper', 'lower', 'push', 'pull', 'legs', 'full'].includes(a.type?.toLowerCase())
-      );
-      if (hasStrength) return 'primary.main';
-    }
-    
-    const type = workout.type?.toLowerCase() || workout.workoutType?.toLowerCase();
+  // Get workout type color for the X marker
+  const getWorkoutColor = (type) => {
+    if (!type) return 'primary.main';
     
     if (type === 'cardio' || type === 'hiit') {
       return 'error.main';
-    } else if (type === 'stretch' || type === 'active_recovery' || type === 'yoga') {
+    } else if (type === 'stretch' || type === 'active_recovery' || type === 'yoga' || type === 'mobility') {
       return 'secondary.main';
     } else {
-      return 'primary.main';
+      return 'primary.main'; // Strength training
     }
   };
 
@@ -255,14 +163,14 @@ const MonthCalendarView = ({
           {cells.map((date, index) => {
             const isCurrentMonth = isSameMonth(date, currentMonth);
             const isToday = isSameDay(date, today);
-            const workout = getWorkoutForDay(date);
-            const isCompleted = hasCompletedWorkout(date);
-            const hasWorkout = workout && workout.type !== 'rest';
+            const workoutsOnDay = getWorkoutsForDay(date);
+            const isCompleted = workoutsOnDay.length > 0;
+            const primaryType = getPrimaryWorkoutType(workoutsOnDay);
 
             return (
               <Grid item xs={12 / 7} key={index}>
                 <Box
-                  onClick={() => onDayClick?.(date, workout)}
+                  onClick={() => isCompleted && onDayClick?.(date, workoutsOnDay[0])}
                   sx={{
                     aspectRatio: '1',
                     display: 'flex',
@@ -270,21 +178,18 @@ const MonthCalendarView = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: 1,
-                    cursor: hasWorkout ? 'pointer' : 'default',
+                    cursor: isCompleted ? 'pointer' : 'default',
                     bgcolor: isToday 
-                      ? 'primary.light' 
-                      : isCompleted 
-                        ? 'success.light'
-                        : hasWorkout 
-                          ? 'action.hover' 
-                          : 'transparent',
+                      ? 'action.selected' 
+                      : 'transparent',
                     opacity: isCurrentMonth ? 1 : 0.3,
                     border: isToday ? 2 : 1,
                     borderColor: isToday ? 'primary.main' : 'transparent',
                     transition: 'all 0.2s ease',
                     minHeight: { xs: 48, sm: 56 },
-                    '&:hover': hasWorkout ? {
-                      bgcolor: isToday ? 'primary.light' : 'action.selected',
+                    position: 'relative',
+                    '&:hover': isCompleted ? {
+                      bgcolor: 'action.hover',
                       transform: 'scale(1.05)',
                       boxShadow: 1,
                     } : {},
@@ -294,7 +199,7 @@ const MonthCalendarView = ({
                     variant="body2"
                     sx={{
                       fontWeight: isToday ? 700 : 500,
-                      color: isToday ? 'primary.contrastText' : 'text.primary',
+                      color: 'text.primary',
                       fontSize: { xs: '0.75rem', sm: '0.875rem' },
                       mb: 0.5,
                     }}
@@ -302,29 +207,19 @@ const MonthCalendarView = ({
                     {format(date, 'd')}
                   </Typography>
                   
-                  {hasWorkout && (
-                    <Box
+                  {/* Large X marker for completed workouts */}
+                  {isCompleted && (
+                    <Typography
                       sx={{
-                        color: isCompleted ? 'success.dark' : getWorkoutColor(workout),
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                        fontWeight: 900,
+                        color: getWorkoutColor(primaryType),
+                        lineHeight: 1,
+                        textShadow: '0 1px 2px rgba(0,0,0,0.1)',
                       }}
                     >
-                      {getWorkoutDisplay(workout)}
-                    </Box>
-                  )}
-                  
-                  {isCompleted && (
-                    <Box
-                      sx={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        bgcolor: 'success.main',
-                        mt: 0.5,
-                      }}
-                    />
+                      ✕
+                    </Typography>
                   )}
                 </Box>
               </Grid>
@@ -373,7 +268,6 @@ const MonthCalendarView = ({
 };
 
 MonthCalendarView.propTypes = {
-  currentPlan: PropTypes.object,
   workoutHistory: PropTypes.array,
   onDayClick: PropTypes.func,
 };

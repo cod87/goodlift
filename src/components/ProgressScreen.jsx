@@ -42,7 +42,7 @@ import {
   deleteWorkout,
   updateWorkout,
   getStretchSessions,
-  getActivePlan,
+  // getActivePlan removed - no longer using plans
   getUserStats,
 } from '../utils/storage';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
@@ -81,20 +81,19 @@ const ProgressDashboard = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedHistory, , loadedActivePlan, loadedStats] = await Promise.all([
+      const [loadedHistory, , loadedStats] = await Promise.all([
         getWorkoutHistory(),
         getStretchSessions(),
-        getActivePlan(),
         getUserStats()
       ]);
       setHistory(loadedHistory);
       setUserStats(loadedStats);
 
-      // Calculate tracking metrics
-      const streak = calculateStreak(loadedHistory, loadedActivePlan);
+      // Calculate tracking metrics (no longer using activePlan parameter)
+      const streak = calculateStreak(loadedHistory);
       setStreakData(streak);
 
-      const adherencePercent = calculateAdherence(loadedHistory, loadedActivePlan, 30);
+      const adherencePercent = calculateAdherence(loadedHistory, null, 30);
       setAdherence(adherencePercent);
 
       const volume30Days = calculateTotalVolume(loadedHistory, 30);

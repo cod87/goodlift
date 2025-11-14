@@ -5,8 +5,8 @@ import BottomNav from './components/Navigation/BottomNav';
 import WorkTabs from './components/WorkTabs';
 import TodayView from './components/TodayView/TodayView';
 import SelectionScreen from './components/SelectionScreen';
-import UnifiedWorkoutHub from './components/UnifiedWorkoutHub';
-import WorkoutPlanScreen from './components/WorkoutPlanScreen';
+// UnifiedWorkoutHub removed - using SelectionScreen instead
+// WorkoutPlanScreen removed - no longer using workout planning
 import WorkoutScreen from './components/WorkoutScreen';
 import WorkoutPreview from './components/WorkoutPreview';
 import CustomizeExerciseScreen from './components/CustomizeExerciseScreen';
@@ -23,7 +23,7 @@ import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import AchievementUnlockedDialog from './components/AchievementUnlockedDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
-import { usePlanIntegration } from './hooks/usePlanIntegration';
+// usePlanIntegration hook removed - no longer using workout planning
 import { 
   saveWorkout, 
   saveUserStats, 
@@ -69,11 +69,6 @@ function AppContent() {
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
   const favoriteExercises = useFavoriteExercises();
-  const { 
-    currentPlan,
-    getTodaysWorkout,
-    createWorkoutNavState
-  } = usePlanIntegration();
 
   // Run data migration on app initialization
   useEffect(() => {
@@ -226,35 +221,13 @@ function AppContent() {
   };
 
   const handleTodayViewQuickStart = () => {
-    const todaysWorkout = getTodaysWorkout();
-    if (todaysWorkout && todaysWorkout.type !== 'rest') {
-      // Use today's workout type from weekly plan
-      const workoutTypeValue = todaysWorkout.subtype || todaysWorkout.type;
-      setWorkoutType(workoutTypeValue);
-      const equipmentFilter = selectedEquipment.has('all') 
-        ? 'all' 
-        : Array.from(selectedEquipment);
-      
-      // Create nav state with plan context
-      const today = new Date().getDay();
-      const navState = createWorkoutNavState(today);
-      
-      // Use pre-generated exercises from the plan session if available
-      const preGeneratedWorkout = todaysWorkout.exercises || null;
-      
-      handleStartWorkout(workoutTypeValue, equipmentFilter, preGeneratedWorkout, navState);
-    }
+    // Simplified quick start - just navigate to selection screen
+    // No plan integration anymore
+    setCurrentScreen('selection');
   };
 
-  const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null, planNavState = null) => {
+  const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null) => {
     setLoading(true);
-    
-    // Store plan context if provided
-    if (planNavState) {
-      sessionStorage.setItem('currentWorkoutPlanContext', JSON.stringify(planNavState));
-    } else {
-      sessionStorage.removeItem('currentWorkoutPlanContext');
-    }
     
     // Simulate loading to show user we're generating
     setTimeout(() => {
@@ -429,10 +402,6 @@ function AppContent() {
   const handleWorkoutComplete = useCallback(async (workoutData) => {
     const progressionNotifications = [];
     
-    // Get plan context from session storage if it exists
-    const planContextStr = sessionStorage.getItem('currentWorkoutPlanContext');
-    const planContext = planContextStr ? JSON.parse(planContextStr) : null;
-    
     // Calculate workout volume
     let workoutVolume = 0;
     
@@ -496,17 +465,12 @@ function AppContent() {
       });
     }
 
-    // Save workout with plan context if available
+    // Save workout without plan context (no longer using plans)
     const finalWorkoutData = { 
       ...workoutData, 
       type: workoutType,
-      planId: planContext?.planId || null,
-      planDay: planContext?.planDay ?? null
     };
     await saveWorkout(finalWorkoutData);
-    
-    // Clear plan context from session storage
-    sessionStorage.removeItem('currentWorkoutPlanContext');
     
     const stats = await getUserStats();
     stats.totalWorkouts += 1;
@@ -601,8 +565,6 @@ function AppContent() {
         }}>
           {currentScreen === 'home' && (
             <WorkTabs
-              currentPlan={currentPlan}
-              todaysWorkout={getTodaysWorkout()}
               onQuickStart={handleTodayViewQuickStart}
               onNavigate={handleNavigate}
               loading={loading}
@@ -610,7 +572,7 @@ function AppContent() {
           )}
 
           {currentScreen === 'selection' && (
-            <UnifiedWorkoutHub
+            <SelectionScreen
               workoutType={workoutType}
               selectedEquipment={selectedEquipment}
               equipmentOptions={equipmentOptions}
@@ -618,7 +580,6 @@ function AppContent() {
               onEquipmentChange={handleEquipmentChange}
               onStartWorkout={handleStartWorkout}
               onCustomize={handleCustomize}
-              onNavigate={handleNavigate}
               loading={loading}
             />
           )}
@@ -674,7 +635,7 @@ function AppContent() {
           
           {currentScreen === 'progress' && <ProgressScreen onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />}
 
-          {currentScreen === 'workout-plan' && <WorkoutPlanScreen onNavigate={handleNavigate} />}
+          {/* Workout planning screen removed - no longer using workout planning */}
 
           {(currentScreen === 'cardio' || currentScreen === 'hiit' || currentScreen === 'timer') && (
             <UnifiedTimerScreen onNavigate={handleNavigate} />

@@ -33,7 +33,6 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       iconInactive: FitnessCenterOutlined,
       screens: [
         'home', 
-        'workout-plan', 
         'selection', 
         'preview', 
         'workout', 
@@ -43,7 +42,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
         'timer',
         'cardio',
         'hiit'
-      ],
+      ], // removed 'workout-plan' - no longer using workout planning
     },
     {
       id: 'progress',

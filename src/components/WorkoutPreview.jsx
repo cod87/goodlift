@@ -316,11 +316,58 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
         alignItems: 'center',
         minHeight: '400px'
       }}>
-        <img 
-          src={`${import.meta.env.BASE_URL}dancing-icon.svg`} 
-          alt="Loading workout..." 
-          style={{ width: '150px', height: '150px' }}
-        />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              color: 'primary.main',
+              fontWeight: 600,
+              fontSize: { xs: '1.5rem', sm: '2rem' }
+            }}
+          >
+            Loading
+            <motion.span
+              animate={{
+                opacity: [0, 1, 1, 1],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                times: [0, 0.33, 0.66, 1],
+              }}
+            >
+              .
+            </motion.span>
+            <motion.span
+              animate={{
+                opacity: [0, 0, 1, 1],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                times: [0, 0.33, 0.66, 1],
+              }}
+            >
+              .
+            </motion.span>
+            <motion.span
+              animate={{
+                opacity: [0, 0, 0, 1],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                times: [0, 0.33, 0.66, 1],
+              }}
+            >
+              .
+            </motion.span>
+          </Typography>
+        </motion.div>
       </Box>
     );
   }

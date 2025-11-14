@@ -354,14 +354,14 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                 }
               }}
             >
-              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
                 <Typography 
                   variant="h6" 
                   gutterBottom 
                   sx={{ 
                     color: 'secondary.main',
                     fontWeight: 600,
-                    mb: 2,
+                    mb: 1.5,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1
@@ -378,7 +378,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                   />
                 </Typography>
                 
-                <Stack spacing={{ xs: 1.5, sm: 2 }}>
+                <Stack spacing={{ xs: 1, sm: 1.5 }}>
                   {superset.map((exercise, exerciseIdx) => {
                     const exerciseName = exercise['Exercise Name'];
                     const settings = exerciseSettings[exerciseName] || { weight: '', targetReps: '' };
@@ -387,8 +387,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                       <Box 
                         key={exerciseIdx}
                         sx={{ 
-                          p: { xs: 1.5, sm: 2 },
-                          bgcolor: 'white',
+                          p: { xs: 1, sm: 1.5 },
+                          bgcolor: 'background.paper',
                           borderRadius: 2,
                           transition: 'all 0.2s ease',
                         }}
@@ -396,15 +396,15 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                         <Box sx={{ 
                           display: 'flex',
                           alignItems: 'flex-start',
-                          gap: { xs: 1, sm: 2 },
-                          mb: { xs: 1.5, sm: 2 }
+                          gap: { xs: 1, sm: 1.5 },
+                          mb: { xs: 1, sm: 1.5 }
                         }}>
                           <Typography 
                             sx={{ 
-                              fontSize: { xs: '1.5rem', sm: '2rem' },
+                              fontSize: { xs: '1.25rem', sm: '1.75rem' },
                               color: 'primary.main',
                               fontWeight: 700,
-                              minWidth: { xs: '30px', sm: '40px' }
+                              minWidth: { xs: '28px', sm: '36px' }
                             }}
                           >
                             {exerciseIdx === 0 ? 'A' : 'B'}
@@ -475,9 +475,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                         </Box>
                         <Stack 
                           direction="row" 
-                          spacing={{ xs: 1, sm: 2 }} 
+                          spacing={{ xs: 1, sm: 1.5 }} 
                           sx={{ 
-                            pl: { xs: 4, sm: 7 },
+                            pl: { xs: 3.5, sm: 5.5 },
                             flexWrap: { xs: 'wrap', sm: 'nowrap' }
                           }}
                         >

@@ -410,75 +410,32 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             {exerciseIdx === 0 ? 'A' : 'B'}
                           </Typography>
                           <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 0.5 }}>
-                              <Box sx={{ flex: 1 }}>
-                                <ExerciseAutocomplete
-                                  value={exercise}
-                                  onChange={(event, newValue) => {
-                                    if (newValue) {
-                                      const globalIndex = idx * 2 + exerciseIdx;
-                                      handleSwapExercise(globalIndex, newValue);
-                                    }
-                                  }}
-                                  availableExercises={availableExercises}
-                                  label="Exercise"
-                                  placeholder="Type to search and swap..."
-                                  disabled={availableExercises.length === 0}
-                                />
-                              </Box>
-                              {onRandomizeExercise && (
-                                <IconButton
-                                  size="small"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
+                            {/* Exercise Autocomplete - Full Width */}
+                            <Box sx={{ mb: 0.5 }}>
+                              <ExerciseAutocomplete
+                                value={exercise}
+                                onChange={(event, newValue) => {
+                                  if (newValue) {
                                     const globalIndex = idx * 2 + exerciseIdx;
-                                    handleRandomizeExercise(exercise, globalIndex);
-                                  }}
-                                  sx={{
-                                    color: 'primary.main',
-                                    minWidth: '44px',
-                                    minHeight: '44px',
-                                    mt: 0.5,
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(19, 70, 134, 0.08)',
-                                    },
-                                  }}
-                                  aria-label={`Randomize ${exerciseName}`}
-                                >
-                                  <Shuffle fontSize="small" />
-                                </IconButton>
-                              )}
+                                    handleSwapExercise(globalIndex, newValue);
+                                  }
+                                }}
+                                availableExercises={availableExercises}
+                                label="Exercise"
+                                placeholder="Type to search and swap..."
+                                disabled={availableExercises.length === 0}
+                              />
                             </Box>
-                            <Stack direction="row" spacing={1} flexWrap="wrap">
-                              <Chip 
-                                label={exercise['Primary Muscle']} 
-                                size="small" 
-                                variant="outlined"
-                                sx={{ 
-                                  borderColor: 'primary.main',
-                                  color: 'primary.main',
-                                  fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                                }}
-                              />
-                              <Chip 
-                                label={exercise['Equipment']} 
-                                size="small" 
-                                variant="outlined"
-                                sx={{ 
-                                  borderColor: 'text.secondary',
-                                  color: 'text.secondary',
-                                  fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                                }}
-                              />
-                            </Stack>
                           </Box>
                         </Box>
+                        {/* Weight and Reps Inputs */}
                         <Stack 
                           direction="row" 
                           spacing={{ xs: 1, sm: 1.5 }} 
                           sx={{ 
                             pl: { xs: 3.5, sm: 5.5 },
-                            flexWrap: { xs: 'wrap', sm: 'nowrap' }
+                            flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                            mb: { xs: 1, sm: 1.5 }
                           }}
                         >
                           <TextField
@@ -524,6 +481,56 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             }}
                           />
                         </Stack>
+                        {/* Muscle, Equipment indicators and Randomize button - Below weight/reps */}
+                        <Box sx={{ 
+                          pl: { xs: 3.5, sm: 5.5 },
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          flexWrap: 'wrap'
+                        }}>
+                          <Chip 
+                            label={exercise['Primary Muscle']} 
+                            size="small" 
+                            variant="outlined"
+                            sx={{ 
+                              borderColor: 'primary.main',
+                              color: 'primary.main',
+                              fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            }}
+                          />
+                          <Chip 
+                            label={exercise['Equipment']} 
+                            size="small" 
+                            variant="outlined"
+                            sx={{ 
+                              borderColor: 'text.secondary',
+                              color: 'text.secondary',
+                              fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            }}
+                          />
+                          {onRandomizeExercise && (
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const globalIndex = idx * 2 + exerciseIdx;
+                                handleRandomizeExercise(exercise, globalIndex);
+                              }}
+                              sx={{
+                                color: 'primary.main',
+                                minWidth: '36px',
+                                minHeight: '36px',
+                                '&:hover': {
+                                  backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                                },
+                              }}
+                              aria-label={`Randomize ${exerciseName}`}
+                            >
+                              <Shuffle fontSize="small" />
+                            </IconButton>
+                          )}
+                        </Box>
                       </Box>
                     );
                   })}

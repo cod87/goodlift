@@ -33,6 +33,7 @@ import { getWorkoutHistory } from '../../utils/storage';
 import { touchTargets } from '../../theme/responsive';
 import { useUserProfile } from '../../contexts/UserProfileContext';
 import MonthCalendarView from '../Calendar/MonthCalendarView';
+import FavouriteWorkoutsWidget from './FavouriteWorkoutsWidget';
 
 /**
  * ActivityLogTab - Integrated workout configuration and activity logging
@@ -291,14 +292,14 @@ const ActivityLogTab = memo(({
               <AccordionSummary
                 expandIcon={<ExpandMore />}
                 sx={{
-                  minHeight: '56px',
+                  minHeight: '48px',
                   '&.Mui-expanded': {
-                    minHeight: '56px',
+                    minHeight: '48px',
                   },
                   '& .MuiAccordionSummary-content': {
-                    margin: '16px 0',
+                    margin: '12px 0',
                     '&.Mui-expanded': {
-                      margin: '16px 0',
+                      margin: '12px 0',
                     },
                   },
                 }}
@@ -307,7 +308,7 @@ const ActivityLogTab = memo(({
                   <Typography 
                     variant="caption" 
                     sx={{ 
-                      color: 'rgba(0, 0, 0, 0.6)',
+                      color: 'success.main',
                       fontSize: '0.75rem',
                       lineHeight: 1,
                       mb: 0.5,
@@ -317,7 +318,7 @@ const ActivityLogTab = memo(({
                   </Typography>
                   <Typography 
                     sx={{ 
-                      color: 'rgba(0, 0, 0, 0.87)',
+                      color: 'success.main',
                       fontSize: '1rem',
                     }}
                   >
@@ -516,6 +517,9 @@ const ActivityLogTab = memo(({
           </Stack>
         </CardContent>
       </Card>
+
+      {/* Favourite Workouts Widget */}
+      <FavouriteWorkoutsWidget onStartWorkout={onStartWorkout} />
 
       {/* Streak & Stats Card */}
       <Card 

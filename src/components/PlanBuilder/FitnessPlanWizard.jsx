@@ -82,6 +82,11 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
   const [planName, setPlanName] = useState('');
   const [duration, setDuration] = useState(4); // 4, 8, or 12 weeks
   
+  // Progressive overload configuration
+  const [enableProgression, setEnableProgression] = useState(true);
+  const [progressionWeightIncrease, setProgressionWeightIncrease] = useState(5); // lbs or kg per week
+  const [progressionRepsTarget, setProgressionRepsTarget] = useState(12); // Target reps before increasing weight
+  
   // Weekly structure
   const [strengthDays, setStrengthDays] = useState(3);
   const [cardioDays, setCardioDays] = useState(1);
@@ -377,7 +382,15 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
       strengthDays,
       cardioDays,
       activeRecoveryDays,
-      restDays
+      restDays,
+      // Progressive overload configuration
+      progressionSettings: {
+        enabled: enableProgression,
+        weightIncrease: progressionWeightIncrease,
+        repsTarget: progressionRepsTarget
+      },
+      // Progression history will be stored per exercise
+      progressionHistory: {}
     };
   };
 
@@ -388,6 +401,9 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
     setActiveStep(0);
     setPlanName('');
     setDuration(4);
+    setEnableProgression(true);
+    setProgressionWeightIncrease(5);
+    setProgressionRepsTarget(12);
     setStrengthDays(3);
     setCardioDays(1);
     setActiveRecoveryDays(1);
@@ -474,6 +490,59 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
           </Grid>
         </Box>
       </FormControl>
+      
+      {/* Progressive Overload Configuration */}
+      <Paper sx={{ p: 2, mt: 3, bgcolor: 'background.default' }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={enableProgression}
+              onChange={(e) => setEnableProgression(e.target.checked)}
+            />
+          }
+          label={
+            <Box>
+              <Typography variant="subtitle1">Enable Progressive Overload Automation</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Automatically increase weights when you hit target reps
+              </Typography>
+            </Box>
+          }
+        />
+        
+        {enableProgression && (
+          <Box sx={{ mt: 2, ml: 4 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Weight Increase (lbs/kg)"
+                  value={progressionWeightIncrease}
+                  onChange={(e) => setProgressionWeightIncrease(Number(e.target.value))}
+                  inputProps={{ min: 1, max: 20, step: 1 }}
+                  helperText="Amount to increase when progressing"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Target Reps for Progression"
+                  value={progressionRepsTarget}
+                  onChange={(e) => setProgressionRepsTarget(Number(e.target.value))}
+                  inputProps={{ min: 8, max: 20, step: 1 }}
+                  helperText="Reps to hit before adding weight"
+                />
+              </Grid>
+            </Grid>
+            <Alert severity="info" sx={{ mt: 2 }}>
+              When you complete all sets at or above the target reps, the system will suggest increasing 
+              weight by {progressionWeightIncrease} lbs/kg for the next workout.
+            </Alert>
+          </Box>
+        )}
+      </Paper>
       
       <Alert severity="info" sx={{ mt: 2 }}>
         <Typography variant="body2">

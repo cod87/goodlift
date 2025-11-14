@@ -30,7 +30,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import CompactHeader from './Common/CompactHeader';
-import QuickPlanSetup from './PlanBuilder/QuickPlanSetup';
+import CustomWorkoutWizard from './PlanBuilder/CustomWorkoutWizard';
 import { usePlanIntegration } from '../hooks/usePlanIntegration';
 import {
   getPlanStatistics,
@@ -538,8 +538,8 @@ const UnifiedWorkoutHub = ({
         </Card>
       </Stack>
 
-      {/* Quick Plan Setup */}
-      <QuickPlanSetup
+      {/* Custom Workout Wizard */}
+      <CustomWorkoutWizard
         open={showPlanCreationModal}
         onClose={() => setShowPlanCreationModal(false)}
         onPlanCreated={() => {

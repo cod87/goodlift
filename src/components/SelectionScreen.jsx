@@ -5,7 +5,7 @@ import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup
 import { ExpandMore, Delete, Star, Edit, Add } from '@mui/icons-material';
 import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName } from '../utils/storage';
 import CompactHeader from './Common/CompactHeader';
-import QuickPlanSetup from './PlanBuilder/QuickPlanSetup';
+import CustomWorkoutWizard from './PlanBuilder/CustomWorkoutWizard';
 
 /**
  * SelectionScreen component for workout configuration
@@ -502,8 +502,8 @@ const SelectionScreen = memo(({
         </DialogActions>
       </Dialog>
 
-      {/* Quick Plan Setup */}
-      <QuickPlanSetup
+      {/* Custom Workout Wizard */}
+      <CustomWorkoutWizard
         open={showPlanModal}
         onClose={handleClosePlanModal}
         onPlanCreated={handlePlanCreated}

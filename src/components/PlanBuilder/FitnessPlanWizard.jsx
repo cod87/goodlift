@@ -87,6 +87,13 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
   const [progressionWeightIncrease, setProgressionWeightIncrease] = useState(5); // lbs or kg per week
   const [progressionRepsTarget, setProgressionRepsTarget] = useState(12); // Target reps before increasing weight
   
+  // Cardio and recovery protocols
+  const [cardioProtocol, setCardioProtocol] = useState('steady-state'); // 'steady-state', 'intervals', 'hiit'
+  const [cardioDuration, setCardioDuration] = useState(30); // minutes
+  const [cardioIntensity, setCardioIntensity] = useState('moderate'); // 'low', 'moderate', 'high'
+  const [recoveryProtocol, setRecoveryProtocol] = useState('restorative-yoga'); // 'restorative-yoga', 'mobility', 'stretching'
+  const [recoveryDuration, setRecoveryDuration] = useState(30); // minutes
+  
   // Weekly structure
   const [strengthDays, setStrengthDays] = useState(3);
   const [cardioDays, setCardioDays] = useState(1);
@@ -176,7 +183,12 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
           name: `Cardio Day ${i + 1}`,
           exercises: null,
           editable: false,
-          instructions: 'Mark as complete when done'
+          protocol: {
+            type: cardioProtocol,
+            duration: cardioDuration,
+            intensity: cardioIntensity
+          },
+          instructions: `${cardioProtocol === 'steady-state' ? 'Steady State' : cardioProtocol === 'intervals' ? 'Interval Training' : 'HIIT'} - ${cardioDuration} min at ${cardioIntensity} intensity`
         });
       }
       
@@ -185,10 +197,14 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
         newWorkouts.push({
           id: `recovery_${i}`,
           type: 'active_recovery',
-          name: `Active Recovery Day ${i + 1} - Restorative Yoga`,
+          name: `Active Recovery Day ${i + 1}`,
           exercises: null,
           editable: false,
-          instructions: 'Mark as complete when done'
+          protocol: {
+            type: recoveryProtocol,
+            duration: recoveryDuration
+          },
+          instructions: `${recoveryProtocol === 'restorative-yoga' ? 'Restorative Yoga' : recoveryProtocol === 'mobility' ? 'Mobility Work' : 'Dynamic Stretching'} - ${recoveryDuration} min`
         });
       }
       
@@ -332,6 +348,11 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
             blockNumber: block + 1
           };
           
+          // Add protocol data for cardio and recovery sessions
+          if (workout.protocol) {
+            session.protocol = workout.protocol;
+          }
+          
           // Add exercises for strength workouts
           if (workout.exercises && workout.exercises.length > 0) {
             session.exercises = workout.exercises.map(ex => {
@@ -389,6 +410,16 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
         weightIncrease: progressionWeightIncrease,
         repsTarget: progressionRepsTarget
       },
+      // Cardio and recovery protocols
+      cardioSettings: {
+        protocol: cardioProtocol,
+        duration: cardioDuration,
+        intensity: cardioIntensity
+      },
+      recoverySettings: {
+        protocol: recoveryProtocol,
+        duration: recoveryDuration
+      },
       // Progression history will be stored per exercise
       progressionHistory: {}
     };
@@ -404,6 +435,11 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
     setEnableProgression(true);
     setProgressionWeightIncrease(5);
     setProgressionRepsTarget(12);
+    setCardioProtocol('steady-state');
+    setCardioDuration(30);
+    setCardioIntensity('moderate');
+    setRecoveryProtocol('restorative-yoga');
+    setRecoveryDuration(30);
     setStrengthDays(3);
     setCardioDays(1);
     setActiveRecoveryDays(1);
@@ -650,6 +686,104 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
           </Paper>
         </Grid>
       </Grid>
+      
+      {/* Cardio Protocol Configuration */}
+      {cardioDays > 0 && (
+        <Paper sx={{ p: 2, mt: 3, bgcolor: 'background.default' }}>
+          <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <CardioIcon color="secondary" />
+            Cardio Session Settings
+          </Typography>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Protocol Type</InputLabel>
+                <Select
+                  value={cardioProtocol}
+                  label="Protocol Type"
+                  onChange={(e) => setCardioProtocol(e.target.value)}
+                >
+                  <MenuItem value="steady-state">Steady State</MenuItem>
+                  <MenuItem value="intervals">Intervals</MenuItem>
+                  <MenuItem value="hiit">HIIT</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label="Duration (minutes)"
+                value={cardioDuration}
+                onChange={(e) => setCardioDuration(Number(e.target.value))}
+                inputProps={{ min: 10, max: 90, step: 5 }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Intensity</InputLabel>
+                <Select
+                  value={cardioIntensity}
+                  label="Intensity"
+                  onChange={(e) => setCardioIntensity(e.target.value)}
+                >
+                  <MenuItem value="low">Low (60-70% max HR)</MenuItem>
+                  <MenuItem value="moderate">Moderate (70-80% max HR)</MenuItem>
+                  <MenuItem value="high">High (80-90% max HR)</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+          <Alert severity="info" sx={{ mt: 2 }}>
+            {cardioProtocol === 'steady-state' && 'Maintain a consistent pace throughout the session for cardiovascular endurance.'}
+            {cardioProtocol === 'intervals' && 'Alternate between high and low intensity periods to improve VO2 max.'}
+            {cardioProtocol === 'hiit' && 'Short bursts of maximum effort followed by brief recovery for metabolic conditioning.'}
+          </Alert>
+        </Paper>
+      )}
+      
+      {/* Recovery Protocol Configuration */}
+      {activeRecoveryDays > 0 && (
+        <Paper sx={{ p: 2, mt: 3, bgcolor: 'background.default' }}>
+          <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <RecoveryIcon color="info" />
+            Active Recovery Session Settings
+          </Typography>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Protocol Type</InputLabel>
+                <Select
+                  value={recoveryProtocol}
+                  label="Protocol Type"
+                  onChange={(e) => setRecoveryProtocol(e.target.value)}
+                >
+                  <MenuItem value="restorative-yoga">Restorative Yoga</MenuItem>
+                  <MenuItem value="mobility">Mobility Work</MenuItem>
+                  <MenuItem value="stretching">Dynamic Stretching</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label="Duration (minutes)"
+                value={recoveryDuration}
+                onChange={(e) => setRecoveryDuration(Number(e.target.value))}
+                inputProps={{ min: 15, max: 60, step: 5 }}
+              />
+            </Grid>
+          </Grid>
+          <Alert severity="info" sx={{ mt: 2 }}>
+            {recoveryProtocol === 'restorative-yoga' && 'Gentle yoga poses held for extended periods to promote relaxation and recovery.'}
+            {recoveryProtocol === 'mobility' && 'Joint mobility exercises and controlled articular rotations to maintain range of motion.'}
+            {recoveryProtocol === 'stretching' && 'Dynamic movements and stretches to improve flexibility and blood flow.'}
+          </Alert>
+        </Paper>
+      )}
       
       {/* Total validation */}
       <Box sx={{ mt: 3 }}>

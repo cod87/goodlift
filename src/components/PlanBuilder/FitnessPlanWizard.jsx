@@ -58,9 +58,11 @@ import {
   DirectionsRun as CardioIcon,
   SelfImprovement as RecoveryIcon,
   Hotel as RestIcon,
+  SwapHoriz as SwapIcon,
 } from '@mui/icons-material';
 import { saveWorkoutPlan, setActivePlan } from '../../utils/storage';
 import { generateScientificWorkout } from '../../utils/scientificWorkoutGenerator';
+import ExerciseAutocomplete from '../ExerciseAutocomplete';
 
 // Wizard steps
 const STEPS = [
@@ -80,6 +82,18 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
   const [planName, setPlanName] = useState('');
   const [duration, setDuration] = useState(4); // 4, 8, or 12 weeks
   
+  // Progressive overload configuration
+  const [enableProgression, setEnableProgression] = useState(true);
+  const [progressionWeightIncrease, setProgressionWeightIncrease] = useState(5); // lbs or kg per week
+  const [progressionRepsTarget, setProgressionRepsTarget] = useState(12); // Target reps before increasing weight
+  
+  // Cardio and recovery protocols
+  const [cardioProtocol, setCardioProtocol] = useState('steady-state'); // 'steady-state', 'intervals', 'hiit'
+  const [cardioDuration, setCardioDuration] = useState(30); // minutes
+  const [cardioIntensity, setCardioIntensity] = useState('moderate'); // 'low', 'moderate', 'high'
+  const [recoveryProtocol, setRecoveryProtocol] = useState('restorative-yoga'); // 'restorative-yoga', 'mobility', 'stretching'
+  const [recoveryDuration, setRecoveryDuration] = useState(30); // minutes
+  
   // Weekly structure
   const [strengthDays, setStrengthDays] = useState(3);
   const [cardioDays, setCardioDays] = useState(1);
@@ -89,6 +103,27 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
   // Workout customization
   const [workouts, setWorkouts] = useState([]);
   const [selectedWorkoutIndex, setSelectedWorkoutIndex] = useState(0);
+  
+  // Exercise database cache
+  const [exerciseDatabase, setExerciseDatabase] = useState(null);
+
+  /**
+   * Load exercise database on component mount
+   */
+  const loadExerciseDatabase = async () => {
+    if (exerciseDatabase) return exerciseDatabase; // Return cached if already loaded
+    
+    try {
+      const response = await fetch('/data/exercises.json');
+      const exercisesData = await response.json();
+      const exercises = exercisesData.exercises || exercisesData;
+      setExerciseDatabase(exercises);
+      return exercises;
+    } catch (error) {
+      console.error('Error loading exercise database:', error);
+      throw error;
+    }
+  };
 
   /**
    * Calculate total days per week
@@ -136,6 +171,10 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
   const generateInitialWorkouts = async () => {
     try {
       setLoading(true);
+      
+      // Load exercise database if not already cached
+      const exercises = await loadExerciseDatabase();
+      
       const newWorkouts = [];
       
       // Generate unique strength workouts based on how many days per week
@@ -148,7 +187,8 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
           type: workoutType,
           experienceLevel: 'intermediate',
           goal: 'hypertrophy',
-          isDeload: false
+          isDeload: false,
+          exercises // Pass cached exercise database
         });
         
         newWorkouts.push({
@@ -169,7 +209,12 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
           name: `Cardio Day ${i + 1}`,
           exercises: null,
           editable: false,
-          instructions: 'Mark as complete when done'
+          protocol: {
+            type: cardioProtocol,
+            duration: cardioDuration,
+            intensity: cardioIntensity
+          },
+          instructions: `${cardioProtocol === 'steady-state' ? 'Steady State' : cardioProtocol === 'intervals' ? 'Interval Training' : 'HIIT'} - ${cardioDuration} min at ${cardioIntensity} intensity`
         });
       }
       
@@ -178,10 +223,14 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
         newWorkouts.push({
           id: `recovery_${i}`,
           type: 'active_recovery',
-          name: `Active Recovery Day ${i + 1} - Restorative Yoga`,
+          name: `Active Recovery Day ${i + 1}`,
           exercises: null,
           editable: false,
-          instructions: 'Mark as complete when done'
+          protocol: {
+            type: recoveryProtocol,
+            duration: recoveryDuration
+          },
+          instructions: `${recoveryProtocol === 'restorative-yoga' ? 'Restorative Yoga' : recoveryProtocol === 'mobility' ? 'Mobility Work' : 'Dynamic Stretching'} - ${recoveryDuration} min`
         });
       }
       
@@ -325,6 +374,11 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
             blockNumber: block + 1
           };
           
+          // Add protocol data for cardio and recovery sessions
+          if (workout.protocol) {
+            session.protocol = workout.protocol;
+          }
+          
           // Add exercises for strength workouts
           if (workout.exercises && workout.exercises.length > 0) {
             session.exercises = workout.exercises.map(ex => {
@@ -375,7 +429,25 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
       strengthDays,
       cardioDays,
       activeRecoveryDays,
-      restDays
+      restDays,
+      // Progressive overload configuration
+      progressionSettings: {
+        enabled: enableProgression,
+        weightIncrease: progressionWeightIncrease,
+        repsTarget: progressionRepsTarget
+      },
+      // Cardio and recovery protocols
+      cardioSettings: {
+        protocol: cardioProtocol,
+        duration: cardioDuration,
+        intensity: cardioIntensity
+      },
+      recoverySettings: {
+        protocol: recoveryProtocol,
+        duration: recoveryDuration
+      },
+      // Progression history will be stored per exercise
+      progressionHistory: {}
     };
   };
 
@@ -386,6 +458,14 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
     setActiveStep(0);
     setPlanName('');
     setDuration(4);
+    setEnableProgression(true);
+    setProgressionWeightIncrease(5);
+    setProgressionRepsTarget(12);
+    setCardioProtocol('steady-state');
+    setCardioDuration(30);
+    setCardioIntensity('moderate');
+    setRecoveryProtocol('restorative-yoga');
+    setRecoveryDuration(30);
     setStrengthDays(3);
     setCardioDays(1);
     setActiveRecoveryDays(1);
@@ -472,6 +552,59 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
           </Grid>
         </Box>
       </FormControl>
+      
+      {/* Progressive Overload Configuration */}
+      <Paper sx={{ p: 2, mt: 3, bgcolor: 'background.default' }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={enableProgression}
+              onChange={(e) => setEnableProgression(e.target.checked)}
+            />
+          }
+          label={
+            <Box>
+              <Typography variant="subtitle1">Enable Progressive Overload Automation</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Automatically increase weights when you hit target reps
+              </Typography>
+            </Box>
+          }
+        />
+        
+        {enableProgression && (
+          <Box sx={{ mt: 2, ml: 4 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Weight Increase (lbs/kg)"
+                  value={progressionWeightIncrease}
+                  onChange={(e) => setProgressionWeightIncrease(Number(e.target.value))}
+                  inputProps={{ min: 1, max: 20, step: 1 }}
+                  helperText="Amount to increase when progressing"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Target Reps for Progression"
+                  value={progressionRepsTarget}
+                  onChange={(e) => setProgressionRepsTarget(Number(e.target.value))}
+                  inputProps={{ min: 8, max: 20, step: 1 }}
+                  helperText="Reps to hit before adding weight"
+                />
+              </Grid>
+            </Grid>
+            <Alert severity="info" sx={{ mt: 2 }}>
+              When you complete all sets at or above the target reps, the system will suggest increasing 
+              weight by {progressionWeightIncrease} lbs/kg for the next workout.
+            </Alert>
+          </Box>
+        )}
+      </Paper>
       
       <Alert severity="info" sx={{ mt: 2 }}>
         <Typography variant="body2">
@@ -580,6 +713,104 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
         </Grid>
       </Grid>
       
+      {/* Cardio Protocol Configuration */}
+      {cardioDays > 0 && (
+        <Paper sx={{ p: 2, mt: 3, bgcolor: 'background.default' }}>
+          <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <CardioIcon color="secondary" />
+            Cardio Session Settings
+          </Typography>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Protocol Type</InputLabel>
+                <Select
+                  value={cardioProtocol}
+                  label="Protocol Type"
+                  onChange={(e) => setCardioProtocol(e.target.value)}
+                >
+                  <MenuItem value="steady-state">Steady State</MenuItem>
+                  <MenuItem value="intervals">Intervals</MenuItem>
+                  <MenuItem value="hiit">HIIT</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label="Duration (minutes)"
+                value={cardioDuration}
+                onChange={(e) => setCardioDuration(Number(e.target.value))}
+                inputProps={{ min: 10, max: 90, step: 5 }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Intensity</InputLabel>
+                <Select
+                  value={cardioIntensity}
+                  label="Intensity"
+                  onChange={(e) => setCardioIntensity(e.target.value)}
+                >
+                  <MenuItem value="low">Low (60-70% max HR)</MenuItem>
+                  <MenuItem value="moderate">Moderate (70-80% max HR)</MenuItem>
+                  <MenuItem value="high">High (80-90% max HR)</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+          <Alert severity="info" sx={{ mt: 2 }}>
+            {cardioProtocol === 'steady-state' && 'Maintain a consistent pace throughout the session for cardiovascular endurance.'}
+            {cardioProtocol === 'intervals' && 'Alternate between high and low intensity periods to improve VO2 max.'}
+            {cardioProtocol === 'hiit' && 'Short bursts of maximum effort followed by brief recovery for metabolic conditioning.'}
+          </Alert>
+        </Paper>
+      )}
+      
+      {/* Recovery Protocol Configuration */}
+      {activeRecoveryDays > 0 && (
+        <Paper sx={{ p: 2, mt: 3, bgcolor: 'background.default' }}>
+          <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <RecoveryIcon color="info" />
+            Active Recovery Session Settings
+          </Typography>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Protocol Type</InputLabel>
+                <Select
+                  value={recoveryProtocol}
+                  label="Protocol Type"
+                  onChange={(e) => setRecoveryProtocol(e.target.value)}
+                >
+                  <MenuItem value="restorative-yoga">Restorative Yoga</MenuItem>
+                  <MenuItem value="mobility">Mobility Work</MenuItem>
+                  <MenuItem value="stretching">Dynamic Stretching</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label="Duration (minutes)"
+                value={recoveryDuration}
+                onChange={(e) => setRecoveryDuration(Number(e.target.value))}
+                inputProps={{ min: 15, max: 60, step: 5 }}
+              />
+            </Grid>
+          </Grid>
+          <Alert severity="info" sx={{ mt: 2 }}>
+            {recoveryProtocol === 'restorative-yoga' && 'Gentle yoga poses held for extended periods to promote relaxation and recovery.'}
+            {recoveryProtocol === 'mobility' && 'Joint mobility exercises and controlled articular rotations to maintain range of motion.'}
+            {recoveryProtocol === 'stretching' && 'Dynamic movements and stretches to improve flexibility and blood flow.'}
+          </Alert>
+        </Paper>
+      )}
+      
       {/* Total validation */}
       <Box sx={{ mt: 3 }}>
         <Paper 
@@ -648,6 +879,7 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
           {workouts[selectedWorkoutIndex] && (
             <WorkoutEditor
               workout={workouts[selectedWorkoutIndex]}
+              exerciseDatabase={exerciseDatabase}
               onUpdate={(updatedWorkout) => {
                 const newWorkouts = [...workouts];
                 newWorkouts[selectedWorkoutIndex] = updatedWorkout;
@@ -772,7 +1004,13 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
 /**
  * WorkoutEditor - Component to edit individual workout details
  */
-const WorkoutEditor = ({ workout, onUpdate }) => {
+const WorkoutEditor = ({ workout, onUpdate, exerciseDatabase }) => {
+  const [substitutionDialog, setSubstitutionDialog] = useState({
+    open: false,
+    exerciseIndex: null,
+    currentExercise: null
+  });
+
   if (!workout.editable || !workout.exercises) {
     return (
       <Paper sx={{ p: 3, textAlign: 'center' }}>
@@ -795,63 +1033,189 @@ const WorkoutEditor = ({ workout, onUpdate }) => {
     });
   };
 
+  const handleOpenSubstitution = (index, exercise) => {
+    setSubstitutionDialog({
+      open: true,
+      exerciseIndex: index,
+      currentExercise: exercise
+    });
+  };
+
+  const handleCloseSubstitution = () => {
+    setSubstitutionDialog({
+      open: false,
+      exerciseIndex: null,
+      currentExercise: null
+    });
+  };
+
+  const handleSubstituteExercise = (newExercise) => {
+    if (!newExercise || substitutionDialog.exerciseIndex === null) return;
+
+    const currentExercise = workout.exercises[substitutionDialog.exerciseIndex];
+    const updatedExercises = [...workout.exercises];
+    
+    // Preserve sets, reps, and weight from the current exercise
+    updatedExercises[substitutionDialog.exerciseIndex] = {
+      ...newExercise,
+      name: newExercise['Exercise Name'],
+      sets: currentExercise.sets,
+      reps: currentExercise.reps,
+      weight: currentExercise.weight || '',
+      restSeconds: currentExercise.restSeconds,
+      notes: currentExercise.notes || '',
+      supersetGroup: currentExercise.supersetGroup,
+      isCompound: newExercise.Type === 'Compound'
+    };
+
+    onUpdate({
+      ...workout,
+      exercises: updatedExercises
+    });
+
+    handleCloseSubstitution();
+  };
+
+  // Filter exercises by muscle group for substitution
+  const getFilteredExercises = () => {
+    if (!exerciseDatabase || !substitutionDialog.currentExercise) return [];
+    
+    const currentMuscle = substitutionDialog.currentExercise['Primary Muscle'];
+    return exerciseDatabase.filter(ex => 
+      ex['Primary Muscle'] === currentMuscle
+    );
+  };
+
   return (
-    <Paper sx={{ p: 2 }}>
-      <List>
-        {workout.exercises.map((exercise) => (
-          <div key={exercise.id || exercise['Exercise Name']}>
-            <ListItem>
-              <ListItemText
-                primary={exercise.name || exercise['Exercise Name']}
-                secondary={
-                  <Box sx={{ mt: 1 }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={4}>
-                        <TextField
-                          size="small"
-                          label="Sets"
-                          type="number"
-                          value={exercise.sets}
-                          onChange={(e) => handleExerciseUpdate(workout.exercises.indexOf(exercise), 'sets', parseInt(e.target.value, 10))}
-                          fullWidth
-                        />
+    <>
+      <Paper sx={{ p: 2 }}>
+        <List>
+          {workout.exercises.map((exercise, index) => (
+            <div key={exercise.id || exercise['Exercise Name']}>
+              <ListItem>
+                <ListItemText
+                  primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body1">
+                        {exercise.name || exercise['Exercise Name']}
+                      </Typography>
+                      <Chip 
+                        label={exercise['Primary Muscle']} 
+                        size="small" 
+                        sx={{ ml: 1 }}
+                      />
+                    </Box>
+                  }
+                  secondary={
+                    <Box sx={{ mt: 1 }}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <TextField
+                            size="small"
+                            label="Sets"
+                            type="number"
+                            value={exercise.sets}
+                            onChange={(e) => handleExerciseUpdate(index, 'sets', parseInt(e.target.value, 10))}
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            size="small"
+                            label="Reps"
+                            type="number"
+                            value={exercise.reps}
+                            onChange={(e) => handleExerciseUpdate(index, 'reps', parseInt(e.target.value, 10))}
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            size="small"
+                            label="Weight (optional)"
+                            placeholder="e.g., 135"
+                            value={exercise.weight || ''}
+                            onChange={(e) => handleExerciseUpdate(index, 'weight', e.target.value)}
+                            fullWidth
+                          />
+                        </Grid>
                       </Grid>
-                      <Grid item xs={4}>
-                        <TextField
-                          size="small"
-                          label="Reps"
-                          type="number"
-                          value={exercise.reps}
-                          onChange={(e) => handleExerciseUpdate(workout.exercises.indexOf(exercise), 'reps', parseInt(e.target.value, 10))}
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={4}>
-                        <TextField
-                          size="small"
-                          label="Weight (optional)"
-                          placeholder="e.g., 135"
-                          value={exercise.weight || ''}
-                          onChange={(e) => handleExerciseUpdate(workout.exercises.indexOf(exercise), 'weight', e.target.value)}
-                          fullWidth
-                        />
-                      </Grid>
-                    </Grid>
-                  </Box>
-                }
+                    </Box>
+                  }
+                />
+                <ListItemSecondaryAction>
+                  <Tooltip title="Replace Exercise">
+                    <IconButton
+                      edge="end"
+                      aria-label="replace exercise"
+                      onClick={() => handleOpenSubstitution(index, exercise)}
+                    >
+                      <SwapIcon />
+                    </IconButton>
+                  </Tooltip>
+                </ListItemSecondaryAction>
+              </ListItem>
+              {index < workout.exercises.length - 1 && <Divider />}
+            </div>
+          ))}
+        </List>
+      </Paper>
+
+      {/* Exercise Substitution Dialog */}
+      <Dialog
+        open={substitutionDialog.open}
+        onClose={handleCloseSubstitution}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Replace Exercise
+          {substitutionDialog.currentExercise && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Current: {substitutionDialog.currentExercise.name || substitutionDialog.currentExercise['Exercise Name']}
+            </Typography>
+          )}
+        </DialogTitle>
+        <DialogContent>
+          {!exerciseDatabase ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+              <CircularProgress />
+              <Typography sx={{ ml: 2 }}>Loading exercises...</Typography>
+            </Box>
+          ) : (
+            <>
+              <Alert severity="info" sx={{ mb: 2 }}>
+                Showing exercises that target the same muscle group
+                {substitutionDialog.currentExercise && ` (${substitutionDialog.currentExercise['Primary Muscle']})`}
+              </Alert>
+              <ExerciseAutocomplete
+                value={null}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    handleSubstituteExercise(newValue);
+                  }
+                }}
+                availableExercises={getFilteredExercises()}
+                label="Select Replacement Exercise"
+                placeholder="Search for an alternative exercise..."
               />
-            </ListItem>
-            {workout.exercises.indexOf(exercise) < workout.exercises.length - 1 && <Divider />}
-          </div>
-        ))}
-      </List>
-    </Paper>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseSubstitution}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 
 WorkoutEditor.propTypes = {
   workout: PropTypes.object.isRequired,
   onUpdate: PropTypes.func.isRequired,
+  exerciseDatabase: PropTypes.array,
 };
 
 FitnessPlanWizard.propTypes = {

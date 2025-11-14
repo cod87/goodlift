@@ -67,18 +67,18 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
     const loadSettings = async () => {
       const settings = {};
       
-      // If in customize mode and workout is empty, initialize with empty workout structure
-      if (isCustomizeMode && workout.length === 0) {
-        // Create empty exercise slots based on superset configuration
-        const totalExercises = supersetConfig.reduce((sum, count) => sum + count, 0);
-        const emptyWorkout = Array(totalExercises).fill(null);
-        setCurrentWorkout(emptyWorkout);
+      // If in customize mode, initialize with the workout structure (which may contain nulls)
+      if (isCustomizeMode) {
+        // Set the current workout as-is (may contain null exercises)
+        setCurrentWorkout(workout);
+        setExerciseSettings({});
         setLoading(false);
         return;
       }
       
-      // Otherwise load normal settings from workout
-      for (const exercise of workout) {
+      // Otherwise load normal settings from workout (filter out any nulls)
+      const validExercises = workout.filter(ex => ex !== null);
+      for (const exercise of validExercises) {
         const exerciseName = exercise['Exercise Name'];
         const [weight, targetReps] = await Promise.all([
           getExerciseWeight(exerciseName),
@@ -101,8 +101,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
     const updateNewExercises = async () => {
       const currentExerciseNames = Object.keys(exerciseSettings);
       
-      // Find new exercises that need settings loaded
-      const newExercises = workout.filter(
+      // Filter out null exercises and find new exercises that need settings loaded
+      const validExercises = workout.filter(ex => ex !== null);
+      const newExercises = validExercises.filter(
         ex => !currentExerciseNames.includes(ex['Exercise Name'])
       );
       
@@ -279,10 +280,13 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
 
   const handleSaveToFavorites = () => {
     try {
+      // Filter out null exercises before saving
+      const validExercises = currentWorkout.filter(ex => ex !== null);
+      
       saveFavoriteWorkout({
         name: `${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`,
         type: workoutType,
-        exercises: currentWorkout.filter(ex => ex !== null),
+        exercises: validExercises,
       });
       setSavedToFavorites(true);
       setShowNotification(true);
@@ -312,9 +316,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
         textAlign: 'center', 
         py: 8, 
         display: 'flex', 
+        flexDirection: 'column',
         justifyContent: 'center', 
         alignItems: 'center',
-        minHeight: '400px'
+        minHeight: '400px',
+        gap: 4,
       }}>
         <motion.div
           initial={{ opacity: 0 }}
@@ -326,48 +332,34 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             sx={{ 
               color: 'primary.main',
               fontWeight: 600,
-              fontSize: { xs: '1.5rem', sm: '2rem' }
+              fontSize: { xs: '1.5rem', sm: '2rem' },
+              mb: 4,
             }}
           >
-            Loading
-            <motion.span
-              animate={{
-                opacity: [0, 1, 1, 1],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                times: [0, 0.33, 0.66, 1],
-              }}
-            >
-              .
-            </motion.span>
-            <motion.span
-              animate={{
-                opacity: [0, 0, 1, 1],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                times: [0, 0.33, 0.66, 1],
-              }}
-            >
-              .
-            </motion.span>
-            <motion.span
-              animate={{
-                opacity: [0, 0, 0, 1],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                times: [0, 0.33, 0.66, 1],
-              }}
-            >
-              .
-            </motion.span>
+            Loading...
           </Typography>
         </motion.div>
+        
+        {/* Animated Barbell Icon */}
+        <motion.img
+          src="/icons/barbell-icon.svg"
+          alt="Loading"
+          style={{
+            width: '80px',
+            height: '80px',
+          }}
+          animate={{
+            x: [-100, 100, -100],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            type: "spring",
+            stiffness: 50,
+            damping: 10,
+          }}
+        />
       </Box>
     );
   }
@@ -424,7 +416,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           {isCustomizeMode ? 'Customize Your Workout' : `Your ${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`}
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-          {supersets.length} Supersets • {currentWorkout.length} Exercises • 3 Sets Each
+          {supersets.length} Supersets • {currentWorkout.filter(ex => ex !== null).length} Exercises • 3 Sets Each
         </Typography>
         <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
           {isCustomizeMode ? 'Select exercises and set your target weight and reps for each' : 'Set your starting target weight and target reps for each exercise'}

@@ -75,6 +75,14 @@ const STEPS = [
 // Days of the week
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+// Day types
+const DAY_TYPES = [
+  { value: 'workout', label: 'Workout', color: 'primary', icon: '💪' },
+  { value: 'cardio', label: 'Cardio', color: 'error', icon: '🏃' },
+  { value: 'yoga', label: 'Yoga', color: 'success', icon: '🧘' },
+  { value: 'rest', label: 'Rest', color: 'default', icon: '😴' },
+];
+
 // Preset workout types
 const PRESET_TYPES = [
   { value: 'full', label: 'Full Body' },
@@ -99,7 +107,7 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
   const [weekPlan, setWeekPlan] = useState(
     DAYS_OF_WEEK.map((day) => ({
       day,
-      isWorkoutDay: false,
+      dayType: 'rest', // 'workout', 'cardio', 'yoga', or 'rest'
       exercises: [],
       expanded: false,
     }))
@@ -147,7 +155,7 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
     setWeekPlan(
       DAYS_OF_WEEK.map((day) => ({
         day,
-        isWorkoutDay: false,
+        dayType: 'rest',
         exercises: [],
         expanded: false,
       }))
@@ -185,16 +193,16 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
       }
 
       case 1: { // Build Week
-        // Check if at least one day is marked as workout day
-        const hasWorkoutDays = weekPlan.some(d => d.isWorkoutDay);
-        if (!hasWorkoutDays) {
-          setError('Please select at least one workout day');
+        // Check if at least one day is marked as active (not rest)
+        const hasActiveDays = weekPlan.some(d => d.dayType !== 'rest');
+        if (!hasActiveDays) {
+          setError('Please select at least one active day (Workout, Cardio, or Yoga)');
           return false;
         }
         // Check if all workout days have exercises
-        const missingExercises = weekPlan.filter(d => d.isWorkoutDay && d.exercises.length === 0);
-        if (missingExercises.length > 0) {
-          setError(`Please add exercises for all workout days (${missingExercises.map(d => d.day).join(', ')})`);
+        const workoutDaysMissingExercises = weekPlan.filter(d => d.dayType === 'workout' && d.exercises.length === 0);
+        if (workoutDaysMissingExercises.length > 0) {
+          setError(`Please add exercises for all workout days (${workoutDaysMissingExercises.map(d => d.day).join(', ')})`);
           return false;
         }
         break;
@@ -244,15 +252,18 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
   };
 
   /**
-   * Toggle workout day
+   * Set day type
    */
-  const toggleWorkoutDay = (dayIndex) => {
+  const setDayType = (dayIndex, dayType) => {
     setWeekPlan((prev) => {
       const updated = [...prev];
       updated[dayIndex] = {
         ...updated[dayIndex],
-        isWorkoutDay: !updated[dayIndex].isWorkoutDay,
-        exercises: updated[dayIndex].isWorkoutDay ? [] : updated[dayIndex].exercises,
+        dayType,
+        // Clear exercises if switching away from workout
+        exercises: dayType === 'workout' ? updated[dayIndex].exercises : [],
+        // Collapse if switching to rest
+        expanded: dayType === 'workout' ? updated[dayIndex].expanded : false,
       };
       return updated;
     });
@@ -435,17 +446,24 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
           const sessionDate = new Date(startDate);
           sessionDate.setDate(sessionDate.getDate() + (weekIdx * 7 + dayIdx));
 
+          // Map day type to session type
+          const sessionType = day.dayType === 'workout' ? 'strength' : day.dayType;
+          const sessionNotes = 
+            day.dayType === 'rest' ? 'Rest day' :
+            day.dayType === 'cardio' ? 'Cardio session' :
+            day.dayType === 'yoga' ? 'Yoga/Flexibility session' : '';
+
           const session = {
             id: `session_${Date.now()}_${weekIdx}_${dayIdx}`,
             date: sessionDate.getTime(),
-            type: day.isWorkoutDay ? 'strength' : 'rest',
+            type: sessionType,
             status: 'planned',
-            notes: day.isWorkoutDay ? '' : 'Rest day',
+            notes: sessionNotes,
             completedAt: null,
             sessionData: null,
             weekNumber: week.weekNumber,
             weekLabel: week.label,
-            exercises: day.isWorkoutDay ? day.exercises : null,
+            exercises: day.dayType === 'workout' ? day.exercises : null,
           };
 
           sessions.push(session);
@@ -458,7 +476,7 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
         name: planName.trim(),
         goal: 'custom',
         experienceLevel: 'custom',
-        daysPerWeek: weekPlan.filter(d => d.isWorkoutDay).length,
+        daysPerWeek: weekPlan.filter(d => d.dayType !== 'rest').length,
         duration: numberOfWeeks * 7,
         startDate: startDate.toISOString(),
         sessions,
@@ -535,168 +553,190 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
         Build Your Week
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Select workout days and configure exercises for each day
+        Select the type for each day and configure exercises for workout days
       </Typography>
 
       <List>
-        {weekPlan.map((dayPlan, dayIndex) => (
-          <Card key={dayPlan.day} sx={{ mb: 2 }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    {dayPlan.day}
-                  </Typography>
-                  <Chip
-                    label={dayPlan.isWorkoutDay ? 'Workout' : 'Rest'}
-                    color={dayPlan.isWorkoutDay ? 'primary' : 'default'}
-                    size="small"
-                  />
-                  {dayPlan.isWorkoutDay && dayPlan.exercises.length > 0 && (
-                    <Chip
-                      label={`${dayPlan.exercises.length} exercises`}
-                      size="small"
-                      variant="outlined"
-                    />
-                  )}
-                </Box>
-                <Box>
-                  <Button
-                    size="small"
-                    variant={dayPlan.isWorkoutDay ? 'outlined' : 'contained'}
-                    onClick={() => toggleWorkoutDay(dayIndex)}
-                  >
-                    {dayPlan.isWorkoutDay ? 'Set as Rest' : 'Set as Workout'}
-                  </Button>
-                  {dayPlan.isWorkoutDay && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setWeekPlan(prev => {
-                          const updated = [...prev];
-                          updated[dayIndex].expanded = !updated[dayIndex].expanded;
-                          return updated;
-                        });
-                      }}
-                    >
-                      {dayPlan.expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </IconButton>
-                  )}
-                </Box>
-              </Box>
+        {weekPlan.map((dayPlan, dayIndex) => {
+          const currentDayType = DAY_TYPES.find(dt => dt.value === dayPlan.dayType);
+          const isWorkout = dayPlan.dayType === 'workout';
+          
+          return (
+            <Card key={dayPlan.day} sx={{ mb: 2 }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {/* Day header and type selector */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {dayPlan.day}
+                      </Typography>
+                      <Chip
+                        label={currentDayType.label}
+                        color={currentDayType.color}
+                        size="small"
+                        icon={<span>{currentDayType.icon}</span>}
+                      />
+                      {isWorkout && dayPlan.exercises.length > 0 && (
+                        <Chip
+                          label={`${dayPlan.exercises.length} exercises`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      )}
+                    </Box>
+                    {isWorkout && (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setWeekPlan(prev => {
+                            const updated = [...prev];
+                            updated[dayIndex].expanded = !updated[dayIndex].expanded;
+                            return updated;
+                          });
+                        }}
+                      >
+                        {dayPlan.expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      </IconButton>
+                    )}
+                  </Box>
 
-              <Collapse in={dayPlan.isWorkoutDay && dayPlan.expanded}>
-                <Divider sx={{ my: 2 }} />
-                
-                {/* Preset workout generation */}
-                <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
-                  Generate Preset Workout:
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-                  {PRESET_TYPES.map((preset) => (
-                    <Button
-                      key={preset.value}
-                      size="small"
-                      variant="outlined"
-                      onClick={() => handleGeneratePreset(dayIndex, preset.value)}
-                      disabled={loading}
-                    >
-                      {preset.label}
-                    </Button>
-                  ))}
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
-                {/* Exercise list */}
-                <Typography variant="subtitle2" gutterBottom>
-                  Exercises:
-                </Typography>
-                {dayPlan.exercises.length === 0 ? (
-                  <Alert severity="warning" sx={{ mb: 2 }}>
-                    No exercises added yet. Generate a preset or add exercises manually.
-                  </Alert>
-                ) : (
-                  <List dense>
-                    {dayPlan.exercises.map((exercise) => (
-                      <Paper key={exercise.id} sx={{ p: 1, mb: 1 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" fontWeight="bold">
-                              {exercise.name}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {exercise['Primary Muscle']} • Superset {exercise.supersetGroup}
-                            </Typography>
-                            <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-                              <TextField
-                                size="small"
-                                label="Reps"
-                                type="number"
-                                value={exercise.reps}
-                                onChange={(e) => handleUpdateExercise(dayIndex, exercise.id, 'reps', parseInt(e.target.value) || 0)}
-                                sx={{ width: 80 }}
-                              />
-                              <TextField
-                                size="small"
-                                label="Weight"
-                                value={exercise.weight}
-                                onChange={(e) => handleUpdateExercise(dayIndex, exercise.id, 'weight', e.target.value)}
-                                placeholder="Optional"
-                                sx={{ width: 100 }}
-                              />
-                              <TextField
-                                size="small"
-                                label="Superset"
-                                type="number"
-                                value={exercise.supersetGroup}
-                                onChange={(e) => handleUpdateExercise(dayIndex, exercise.id, 'supersetGroup', parseInt(e.target.value) || 1)}
-                                sx={{ width: 100 }}
-                              />
-                            </Box>
-                          </Box>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => handleRemoveExercise(dayIndex, exercise.id)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Box>
-                      </Paper>
+                  {/* Day type selection buttons */}
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {DAY_TYPES.map((dayType) => (
+                      <Button
+                        key={dayType.value}
+                        size="small"
+                        variant={dayPlan.dayType === dayType.value ? 'contained' : 'outlined'}
+                        color={dayType.color}
+                        onClick={() => setDayType(dayIndex, dayType.value)}
+                        startIcon={<span>{dayType.icon}</span>}
+                        sx={{
+                          flex: { xs: '1 1 calc(50% - 4px)', sm: '0 1 auto' },
+                          minWidth: { xs: 'auto', sm: '100px' },
+                        }}
+                      >
+                        {dayType.label}
+                      </Button>
                     ))}
-                  </List>
-                )}
+                  </Box>
 
-                {/* Add exercise */}
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle2" gutterBottom>
-                  Add Exercise:
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                  {exerciseDatabase && (
-                    <ExerciseAutocomplete
-                      value={selectedExercise}
-                      onChange={(_, newValue) => setSelectedExercise(newValue)}
-                      availableExercises={exerciseDatabase}
-                      label="Select Exercise"
-                      placeholder="Search exercises..."
-                      sx={{ flex: 1 }}
-                    />
-                  )}
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleAddExercise(dayIndex)}
-                    disabled={!selectedExercise}
-                  >
-                    Add
-                  </Button>
+                  {/* Exercise configuration for workout days */}
+                  <Collapse in={isWorkout && dayPlan.expanded}>
+                    <Divider sx={{ my: 2 }} />
+                    
+                    {/* Preset workout generation */}
+                    <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
+                      Generate Preset Workout:
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                      {PRESET_TYPES.map((preset) => (
+                        <Button
+                          key={preset.value}
+                          size="small"
+                          variant="outlined"
+                          onClick={() => handleGeneratePreset(dayIndex, preset.value)}
+                          disabled={loading}
+                        >
+                          {preset.label}
+                        </Button>
+                      ))}
+                    </Box>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    {/* Exercise list */}
+                    <Typography variant="subtitle2" gutterBottom>
+                      Exercises:
+                    </Typography>
+                    {dayPlan.exercises.length === 0 ? (
+                      <Alert severity="warning" sx={{ mb: 2 }}>
+                        No exercises added yet. Generate a preset or add exercises manually.
+                      </Alert>
+                    ) : (
+                      <List dense>
+                        {dayPlan.exercises.map((exercise) => (
+                          <Paper key={exercise.id} sx={{ p: 1, mb: 1 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                              <Box sx={{ flex: 1 }}>
+                                <Typography variant="body2" fontWeight="bold">
+                                  {exercise.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {exercise['Primary Muscle']} • Superset {exercise.supersetGroup}
+                                </Typography>
+                                <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+                                  <TextField
+                                    size="small"
+                                    label="Reps"
+                                    type="number"
+                                    value={exercise.reps}
+                                    onChange={(e) => handleUpdateExercise(dayIndex, exercise.id, 'reps', parseInt(e.target.value) || 0)}
+                                    sx={{ width: 80 }}
+                                  />
+                                  <TextField
+                                    size="small"
+                                    label="Weight"
+                                    value={exercise.weight}
+                                    onChange={(e) => handleUpdateExercise(dayIndex, exercise.id, 'weight', e.target.value)}
+                                    placeholder="Optional"
+                                    sx={{ width: 100 }}
+                                  />
+                                  <TextField
+                                    size="small"
+                                    label="Superset"
+                                    type="number"
+                                    value={exercise.supersetGroup}
+                                    onChange={(e) => handleUpdateExercise(dayIndex, exercise.id, 'supersetGroup', parseInt(e.target.value) || 1)}
+                                    sx={{ width: 100 }}
+                                  />
+                                </Box>
+                              </Box>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => handleRemoveExercise(dayIndex, exercise.id)}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Box>
+                          </Paper>
+                        ))}
+                      </List>
+                    )}
+
+                    {/* Add exercise */}
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="subtitle2" gutterBottom>
+                      Add Exercise:
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+                      {exerciseDatabase && (
+                        <ExerciseAutocomplete
+                          value={selectedExercise}
+                          onChange={(_, newValue) => setSelectedExercise(newValue)}
+                          availableExercises={exerciseDatabase}
+                          label="Select Exercise"
+                          placeholder="Search exercises..."
+                          sx={{ flex: 1, minWidth: { xs: '100%', sm: 'auto' } }}
+                        />
+                      )}
+                      <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleAddExercise(dayIndex)}
+                        disabled={!selectedExercise}
+                        sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                  </Collapse>
                 </Box>
-              </Collapse>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </List>
     </Box>
   );
@@ -743,7 +783,7 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
                   sx={{ flex: 1, mr: 2 }}
                 />
                 <Chip
-                  label={`${week.days.filter(d => d.isWorkoutDay).length} workout days`}
+                  label={`${week.days.filter(d => d.dayType !== 'rest').length} active days`}
                   size="small"
                   variant="outlined"
                 />
@@ -782,7 +822,7 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
           <strong>Duration:</strong> {weeks.length} weeks ({weeks.length * 7} days)
         </Typography>
         <Typography variant="body2" gutterBottom>
-          <strong>Workout Days per Week:</strong> {weekPlan.filter(d => d.isWorkoutDay).length}
+          <strong>Active Days per Week:</strong> {weekPlan.filter(d => d.dayType !== 'rest').length}
         </Typography>
         <Typography variant="body2" gutterBottom>
           <strong>Total Sessions:</strong> {weeks.length * 7}
@@ -799,24 +839,35 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
               {week.label}
             </Typography>
             <List dense>
-              {week.days.map((day, dayIdx) => (
-                <ListItem key={dayIdx}>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                        <Typography variant="body2">
-                          {day.day}:
-                        </Typography>
-                        <Chip
-                          label={day.isWorkoutDay ? `${day.exercises.length} exercises` : 'Rest'}
-                          size="small"
-                          color={day.isWorkoutDay ? 'primary' : 'default'}
-                        />
-                      </Box>
-                    }
-                  />
-                </ListItem>
-              ))}
+              {week.days.map((day, dayIdx) => {
+                const dayTypeInfo = DAY_TYPES.find(dt => dt.value === day.dayType);
+                return (
+                  <ListItem key={dayIdx}>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                          <Typography variant="body2" sx={{ minWidth: '80px' }}>
+                            {day.day}:
+                          </Typography>
+                          <Chip
+                            label={dayTypeInfo.label}
+                            size="small"
+                            color={dayTypeInfo.color}
+                            icon={<span>{dayTypeInfo.icon}</span>}
+                          />
+                          {day.dayType === 'workout' && day.exercises.length > 0 && (
+                            <Chip
+                              label={`${day.exercises.length} exercises`}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
+                        </Box>
+                      }
+                    />
+                  </ListItem>
+                );
+              })}
             </List>
           </CardContent>
         </Card>

@@ -165,24 +165,7 @@ const SelectionScreen = memo(({
         </Box>
       ) : (
         <Box sx={{ width: '100%', maxWidth: 800 }}>
-          {/* Create New Plan Button */}
-          <Box sx={{ mb: 3 }}>
-            <Button
-              variant="outlined"
-              startIcon={<Add />}
-              onClick={handleOpenPlanModal}
-              fullWidth
-              sx={{
-                py: 1.5,
-                borderRadius: 2,
-                textTransform: 'none',
-                fontSize: '1rem',
-                fontWeight: 600,
-              }}
-            >
-              Create New Plan
-            </Button>
-          </Box>
+          {/* Create New Plan Button removed - no longer using workout planning */}
 
           {/* Main Configuration Card */}
         <Card sx={{ 

@@ -31,7 +31,7 @@ import {
   addMonths,
   subMonths
 } from 'date-fns';
-import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
+// getWorkoutTypeShorthand import removed - no longer needed
 
 /**
  * MonthCalendarView - Standard calendar grid view with workout indicators
@@ -76,10 +76,7 @@ const MonthCalendarView = ({
     });
   };
 
-  // Check if a workout was completed on this day
-  const hasCompletedWorkout = (date) => {
-    return getWorkoutsForDay(date).length > 0;
-  };
+  // hasCompletedWorkout function removed - using getWorkoutsForDay instead
 
   // Get primary workout type for display (if multiple workouts, show first)
   const getPrimaryWorkoutType = (workouts) => {

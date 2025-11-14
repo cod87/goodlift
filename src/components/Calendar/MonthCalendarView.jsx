@@ -149,7 +149,7 @@ const MonthCalendarView = ({
             display: 'grid',
             gridTemplateColumns: 'repeat(7, 1fr)',
             gap: { xs: 0.25, sm: 0.5 },
-            mb: 1,
+            mb: 0.5,
           }}
         >
           {dayNames.map((day) => (
@@ -157,10 +157,11 @@ const MonthCalendarView = ({
               key={day}
               sx={{
                 textAlign: 'center',
-                py: 1,
-                fontWeight: 600,
-                color: 'text.secondary',
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                py: { xs: 0.5, sm: 1 },
+                fontWeight: 700,
+                color: 'text.primary',
+                fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                opacity: 0.8,
               }}
             >
               {isMobile ? day.charAt(0) : day}
@@ -202,9 +203,10 @@ const MonthCalendarView = ({
                   border: isToday ? 2 : 1,
                   borderColor: isToday ? 'primary.main' : 'transparent',
                   transition: 'all 0.2s ease',
-                  minHeight: { xs: 48, sm: 56 },
+                  minHeight: { xs: 40, sm: 52 },
+                  maxHeight: { xs: 44, sm: 60 },
                   position: 'relative',
-                  padding: { xs: '4px 2px', sm: '6px 4px' },
+                  padding: { xs: '3px 2px', sm: '6px 4px' },
                   '&:hover': isCompleted ? {
                     bgcolor: 'action.hover',
                     transform: 'scale(1.05)',
@@ -217,9 +219,9 @@ const MonthCalendarView = ({
                   sx={{
                     fontWeight: isToday ? 700 : 500,
                     color: 'text.primary',
-                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
                     position: 'absolute',
-                    top: { xs: 4, sm: 6 },
+                    top: { xs: 3, sm: 6 },
                     left: '50%',
                     transform: 'translateX(-50%)',
                   }}
@@ -231,13 +233,13 @@ const MonthCalendarView = ({
                 {isCompleted && (
                   <Typography
                     sx={{
-                      fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                      fontSize: { xs: '1.1rem', sm: '1.5rem' },
                       fontWeight: 900,
                       color: getWorkoutColor(primaryType),
                       lineHeight: 1,
                       textShadow: '0 1px 2px rgba(0,0,0,0.1)',
                       marginTop: 'auto',
-                      marginBottom: { xs: '2px', sm: '4px' },
+                      marginBottom: { xs: '1px', sm: '4px' },
                     }}
                   >
                     ✕

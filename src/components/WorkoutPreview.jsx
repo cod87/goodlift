@@ -12,7 +12,7 @@ import ExerciseAutocomplete from './ExerciseAutocomplete';
  * Allows users to set starting weights and target reps before beginning
  * Memoized to prevent unnecessary re-renders
  */
-const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise, isCustomizeMode = false }) => {
+const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise, isCustomizeMode = false, supersetConfig = [2, 2, 2, 2] }) => {
   const [exerciseSettings, setExerciseSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [savedToFavorites, setSavedToFavorites] = useState(false);
@@ -69,8 +69,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
       
       // If in customize mode and workout is empty, initialize with empty workout structure
       if (isCustomizeMode && workout.length === 0) {
-        // Create 8 empty exercise slots (4 supersets of 2)
-        const emptyWorkout = Array(8).fill(null);
+        // Create empty exercise slots based on superset configuration
+        const totalExercises = supersetConfig.reduce((sum, count) => sum + count, 0);
+        const emptyWorkout = Array(totalExercises).fill(null);
         setCurrentWorkout(emptyWorkout);
         setLoading(false);
         return;
@@ -93,7 +94,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
       setLoading(false);
     };
     loadSettings();
-  }, [workout, isCustomizeMode]);
+  }, [workout, isCustomizeMode, supersetConfig]);
 
   // Handle workout changes (e.g., from randomization) and preserve customized settings
   useEffect(() => {
@@ -290,14 +291,18 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
     }
   };
 
-  // Group exercises into supersets (pairs of 2)
+  // Group exercises into supersets based on the supersetConfig
   const supersets = [];
-  for (let i = 0; i < currentWorkout.length; i += 2) {
-    const ex1 = currentWorkout[i];
-    const ex2 = currentWorkout[i + 1];
-    // Include pairs even if one or both are null (for customize mode)
-    if (ex1 !== undefined && ex2 !== undefined) {
-      supersets.push([ex1, ex2]);
+  let exerciseIndex = 0;
+  
+  for (const supersetSize of supersetConfig) {
+    const supersetExercises = [];
+    for (let i = 0; i < supersetSize && exerciseIndex < currentWorkout.length; i++) {
+      supersetExercises.push(currentWorkout[exerciseIndex]);
+      exerciseIndex++;
+    }
+    if (supersetExercises.length > 0) {
+      supersets.push(supersetExercises);
     }
   }
 
@@ -430,6 +435,10 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                   {superset.map((exercise, exerciseIdx) => {
                     const exerciseName = exercise ? exercise['Exercise Name'] : null;
                     const settings = exerciseName ? (exerciseSettings[exerciseName] || { weight: '', targetReps: '' }) : { weight: '', targetReps: '' };
+                    // Calculate global index for this exercise
+                    const globalIndex = supersets.slice(0, idx).reduce((sum, ss) => sum + ss.length, 0) + exerciseIdx;
+                    // Use letters A, B, C, D, etc. based on position in superset
+                    const exerciseLetter = String.fromCharCode(65 + exerciseIdx); // 65 is 'A' in ASCII
                     
                     return (
                       <Box 
@@ -457,7 +466,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               flexShrink: 0,
                             }}
                           >
-                            {exerciseIdx === 0 ? 'A' : 'B'}
+                            {exerciseLetter}
                           </Typography>
                           <Box sx={{ flex: 1, minWidth: 0 }}>
                             {/* Exercise Autocomplete - Full Width */}
@@ -466,7 +475,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                                 value={exercise}
                                 onChange={(event, newValue) => {
                                   if (newValue) {
-                                    const globalIndex = idx * 2 + exerciseIdx;
                                     handleSwapExercise(globalIndex, newValue);
                                   }
                                 }}
@@ -566,7 +574,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               size="small"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                const globalIndex = idx * 2 + exerciseIdx;
                                 handleRandomizeExercise(exercise, globalIndex);
                               }}
                               sx={{
@@ -717,6 +724,7 @@ WorkoutPreview.propTypes = {
   onRandomizeExercise: PropTypes.func,
   equipmentFilter: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   isCustomizeMode: PropTypes.bool,
+  supersetConfig: PropTypes.arrayOf(PropTypes.number),
 };
 
 export default WorkoutPreview;

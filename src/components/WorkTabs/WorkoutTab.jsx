@@ -36,16 +36,15 @@ import MonthCalendarView from '../Calendar/MonthCalendarView';
 import FavouriteWorkoutsWidget from './FavouriteWorkoutsWidget';
 
 /**
- * ActivityLogTab - Integrated workout configuration and activity logging
+ * WorkoutTab - Integrated workout configuration and activity logging
  * Features:
  * - Direct workout type selection
  * - Equipment filter
- * - Exercise count controls
  * - Superset configuration controls
  * - Generate and Customize buttons
  * - Activity stats and history
  */
-const ActivityLogTab = memo(({ 
+const WorkoutTab = memo(({ 
   onNavigate,
   loading = false,
   // New props for workout configuration
@@ -63,7 +62,6 @@ const ActivityLogTab = memo(({
   const { stats } = useUserProfile();
   
   // Workout configuration state
-  const [exerciseCount, setExerciseCount] = useState(8); // Default 8 exercises
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Default: 4 supersets of 2
 
   // Set current date
@@ -87,12 +85,6 @@ const ActivityLogTab = memo(({
     loadRecentWorkouts();
   }, []);
   
-  // Sync exercise count with superset configuration
-  useEffect(() => {
-    const total = supersetConfig.reduce((sum, count) => sum + count, 0);
-    setExerciseCount(total);
-  }, [supersetConfig]);
-
   // Format duration helper
   const formatDuration = (minutes) => {
     const hours = Math.floor(minutes / 60);
@@ -145,41 +137,6 @@ const ActivityLogTab = memo(({
     return `${selected.length} selected`;
   };
   
-  // Handle exercise count change
-  const handleExerciseCountChange = (delta) => {
-    const newCount = Math.max(2, Math.min(20, exerciseCount + delta));
-    
-    // Adjust superset configuration to match new count
-    if (delta > 0) {
-      // Adding exercises - add to last superset or create new one
-      const diff = newCount - exerciseCount;
-      const newConfig = [...supersetConfig];
-      newConfig[newConfig.length - 1] += diff;
-      setSupersetConfig(newConfig);
-    } else {
-      // Removing exercises - remove from last superset
-      const diff = exerciseCount - newCount;
-      let remaining = diff;
-      const newConfig = [...supersetConfig];
-      
-      for (let i = newConfig.length - 1; i >= 0 && remaining > 0; i--) {
-        const canRemove = Math.min(remaining, newConfig[i] - 1);
-        newConfig[i] -= canRemove;
-        remaining -= canRemove;
-        
-        if (newConfig[i] === 0) {
-          newConfig.splice(i, 1);
-        }
-      }
-      
-      if (newConfig.length === 0) {
-        newConfig.push(2);
-      }
-      
-      setSupersetConfig(newConfig);
-    }
-  };
-  
   // Handle superset configuration
   const handleAddSuperset = () => {
     setSupersetConfig([...supersetConfig, 2]);
@@ -205,7 +162,7 @@ const ActivityLogTab = memo(({
       const equipmentFilter = selectedEquipment.has('all') 
         ? 'all' 
         : Array.from(selectedEquipment);
-      onStartWorkout(workoutType, equipmentFilter, null, { exerciseCount, supersetConfig });
+      onStartWorkout(workoutType, equipmentFilter, null, supersetConfig);
     }
   };
   
@@ -215,7 +172,7 @@ const ActivityLogTab = memo(({
       const equipmentFilter = selectedEquipment.has('all') 
         ? 'all' 
         : Array.from(selectedEquipment);
-      onCustomize(workoutType, equipmentFilter, { exerciseCount, supersetConfig });
+      onCustomize(workoutType, equipmentFilter, supersetConfig);
     }
   };
 
@@ -349,49 +306,6 @@ const ActivityLogTab = memo(({
               </AccordionDetails>
             </Accordion>
           </Stack>
-
-          {/* Exercise Count Control */}
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-              Number of Exercises
-            </Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <IconButton
-                onClick={() => handleExerciseCountChange(-2)}
-                disabled={exerciseCount <= 2}
-                size="large"
-                sx={{ 
-                  bgcolor: 'action.hover',
-                  '&:hover': { bgcolor: 'action.selected' },
-                  '&.Mui-disabled': { bgcolor: 'action.disabledBackground' }
-                }}
-              >
-                <Remove />
-              </IconButton>
-              <Typography 
-                variant="h5" 
-                sx={{ 
-                  minWidth: '60px', 
-                  textAlign: 'center',
-                  fontWeight: 600,
-                }}
-              >
-                {exerciseCount}
-              </Typography>
-              <IconButton
-                onClick={() => handleExerciseCountChange(2)}
-                disabled={exerciseCount >= 20}
-                size="large"
-                sx={{ 
-                  bgcolor: 'action.hover',
-                  '&:hover': { bgcolor: 'action.selected' },
-                  '&.Mui-disabled': { bgcolor: 'action.disabledBackground' }
-                }}
-              >
-                <Add />
-              </IconButton>
-            </Stack>
-          </Box>
 
           {/* Superset Configuration */}
           <Accordion 
@@ -652,9 +566,9 @@ const ActivityLogTab = memo(({
   );
 });
 
-ActivityLogTab.displayName = 'ActivityLogTab';
+WorkoutTab.displayName = 'WorkoutTab';
 
-ActivityLogTab.propTypes = {
+WorkoutTab.propTypes = {
   onNavigate: PropTypes.func,
   loading: PropTypes.bool,
   // Workout configuration props
@@ -667,4 +581,4 @@ ActivityLogTab.propTypes = {
   onCustomize: PropTypes.func,
 };
 
-export default ActivityLogTab;
+export default WorkoutTab;

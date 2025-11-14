@@ -114,25 +114,33 @@ export const useWorkoutGenerator = () => {
    * Generate exercise list based on workout type and equipment
    * @param {string} type - Workout type: 'upper', 'lower', or 'full'
    * @param {string|Array} equipmentFilter - Equipment filter(s) to apply
+   * @param {number} totalExercises - Total number of exercises to generate
    * @returns {Array} Array of selected exercises for the workout
    */
-  const generateExerciseList = useCallback((type, equipmentFilter = 'all') => {
+  const generateExerciseList = useCallback((type, equipmentFilter = 'all', totalExercises = EXERCISES_PER_WORKOUT) => {
     let workout = [];
     
     switch (type) {
-      case 'upper':
-        // Upper body: 3 chest, 3 lats, 1 biceps, 1 triceps
-        workout.push(...getRandomExercises('Chest', 3, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Lats', 3, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Biceps', 1, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Triceps', 1, workout, equipmentFilter));
+      case 'upper': {
+        // Upper body: Proportional distribution
+        const upperChestCount = Math.ceil(totalExercises * 0.375); // ~3/8
+        const upperLatCount = Math.ceil(totalExercises * 0.375); // ~3/8
+        const upperBicepsCount = Math.floor(totalExercises * 0.125); // ~1/8
+        const upperTricepsCount = totalExercises - upperChestCount - upperLatCount - upperBicepsCount; // remainder
+        
+        workout.push(...getRandomExercises('Chest', upperChestCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Lats', upperLatCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Biceps', upperBicepsCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Triceps', upperTricepsCount, workout, equipmentFilter));
         break;
+      }
         
       case 'lower': {
         // Lower body: Variable quads/hams, with optional core
-        const quadCount = Math.floor(Math.random() * 2) + 3; // 3-4 exercises
-        const hamCount = Math.floor(Math.random() * 2) + 2; // 2-3 exercises
-        const coreCount = EXERCISES_PER_WORKOUT - quadCount - hamCount;
+        const lowerQuadRatio = 0.375 + Math.random() * 0.125; // 37.5% to 50%
+        const quadCount = Math.ceil(totalExercises * lowerQuadRatio);
+        const hamCount = Math.floor(totalExercises * 0.25) + Math.floor(Math.random() * 2); // ~25% + variance
+        const coreCount = totalExercises - quadCount - hamCount;
         
         workout.push(...getRandomExercises('Quads', quadCount, workout, equipmentFilter));
         workout.push(...getRandomExercises('Hamstrings', hamCount, workout, equipmentFilter));
@@ -144,38 +152,52 @@ export const useWorkoutGenerator = () => {
       
       case 'full': {
         // Full body: Balanced selection across all major muscle groups
-        const hamFullCount = Math.floor(Math.random() * 2) + 1; // 1-2 exercises
-        const coreFullCount = EXERCISES_PER_WORKOUT - 2 - 2 - 2 - hamFullCount;
+        const chestCount = Math.ceil(totalExercises * 0.25); // ~25%
+        const latCount = Math.ceil(totalExercises * 0.25); // ~25%
+        const quadCount = Math.ceil(totalExercises * 0.25); // ~25%
+        const hamCount = Math.floor(totalExercises * 0.125) + Math.floor(Math.random() * 2); // ~12.5% + variance
+        const coreCount = totalExercises - chestCount - latCount - quadCount - hamCount;
         
-        workout.push(...getRandomExercises('Chest', 2, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Lats', 2, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Quads', 2, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Hamstrings', hamFullCount, workout, equipmentFilter));
-        if (coreFullCount > 0) {
-          workout.push(...getRandomExercises('Core', coreFullCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Chest', chestCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Lats', latCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Quads', quadCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Hamstrings', hamCount, workout, equipmentFilter));
+        if (coreCount > 0) {
+          workout.push(...getRandomExercises('Core', coreCount, workout, equipmentFilter));
         }
         break;
       }
       
-      case 'push':
+      case 'push': {
         // Push: Chest, shoulders (delts), triceps - pushing movements
-        workout.push(...getRandomExercises('Chest', 3, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Delts', 3, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Triceps', 2, workout, equipmentFilter));
+        const pushChestCount = Math.ceil(totalExercises * 0.375); // ~37.5%
+        const pushDeltCount = Math.ceil(totalExercises * 0.375); // ~37.5%
+        const pushTricepsCount = totalExercises - pushChestCount - pushDeltCount;
+        
+        workout.push(...getRandomExercises('Chest', pushChestCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Delts', pushDeltCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Triceps', pushTricepsCount, workout, equipmentFilter));
         break;
+      }
       
-      case 'pull':
+      case 'pull': {
         // Pull: Back (lats), rear delts, biceps - pulling movements
-        workout.push(...getRandomExercises('Lats', 4, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Rear Delts', 2, workout, equipmentFilter));
-        workout.push(...getRandomExercises('Biceps', 2, workout, equipmentFilter));
+        const pullLatCount = Math.ceil(totalExercises * 0.5); // ~50%
+        const pullRearDeltCount = Math.ceil(totalExercises * 0.25); // ~25%
+        const pullBicepsCount = totalExercises - pullLatCount - pullRearDeltCount;
+        
+        workout.push(...getRandomExercises('Lats', pullLatCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Rear Delts', pullRearDeltCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Biceps', pullBicepsCount, workout, equipmentFilter));
         break;
+      }
       
       case 'legs': {
         // Legs: Similar to lower body but can include more variety
-        const legsQuadCount = Math.floor(Math.random() * 2) + 3; // 3-4 exercises
-        const legsHamCount = Math.floor(Math.random() * 2) + 2; // 2-3 exercises
-        const legsCoreCount = EXERCISES_PER_WORKOUT - legsQuadCount - legsHamCount;
+        const legsQuadRatio = 0.375 + Math.random() * 0.125; // 37.5% to 50%
+        const legsQuadCount = Math.ceil(totalExercises * legsQuadRatio);
+        const legsHamCount = Math.floor(totalExercises * 0.25) + Math.floor(Math.random() * 2);
+        const legsCoreCount = totalExercises - legsQuadCount - legsHamCount;
         
         workout.push(...getRandomExercises('Quads', legsQuadCount, workout, equipmentFilter));
         workout.push(...getRandomExercises('Hamstrings', legsHamCount, workout, equipmentFilter));
@@ -191,7 +213,7 @@ export const useWorkoutGenerator = () => {
     }
     
     // Fill remaining slots if needed (safety measure)
-    while (workout.length < EXERCISES_PER_WORKOUT && workout.length > 0) {
+    while (workout.length < totalExercises && workout.length > 0) {
       const allMuscles = Object.keys(exerciseDB);
       if (allMuscles.length === 0) break;
       
@@ -204,50 +226,65 @@ export const useWorkoutGenerator = () => {
       }
     }
     
-    return workout.slice(0, EXERCISES_PER_WORKOUT);
+    return workout.slice(0, totalExercises);
   }, [exerciseDB, getRandomExercises]);
 
   /**
-   * Pair exercises into supersets based on opposing muscle groups
+   * Pair exercises into supersets based on configuration and opposing muscle groups
    * Optimally pairs exercises to allow for active recovery between sets
    * @param {Array} exercises - Array of exercise objects to pair
+   * @param {Array} supersetConfig - Array defining exercises per superset, e.g., [3, 3, 2]
    * @returns {Array} Array of exercises ordered for superset execution
    */
-  const pairExercises = useCallback((exercises) => {
+  const pairExercises = useCallback((exercises, supersetConfig = [2, 2, 2, 2]) => {
     const pairings = [];
     const remaining = [...exercises];
-
-    while (remaining.length >= 2) {
-      const exercise1 = remaining.shift();
-      const primaryMuscle1 = exercise1['Primary Muscle'].split('(')[0].trim();
-      const opposingMuscle = OPPOSING_MUSCLES[primaryMuscle1];
-
-      let bestPairIndex = -1;
+    
+    // Process each superset according to configuration
+    for (const supersetSize of supersetConfig) {
+      if (remaining.length === 0) break;
       
-      // First, try to find an opposing muscle group
-      if (opposingMuscle) {
-        bestPairIndex = remaining.findIndex(ex => 
-          ex['Primary Muscle'].includes(opposingMuscle)
-        );
+      const supersetExercises = [];
+      
+      // Get first exercise for this superset
+      if (remaining.length > 0) {
+        const exercise1 = remaining.shift();
+        supersetExercises.push(exercise1);
+        const primaryMuscle1 = exercise1['Primary Muscle'].split('(')[0].trim();
+        const opposingMuscle = OPPOSING_MUSCLES[primaryMuscle1];
+        
+        // Fill the rest of the superset
+        for (let i = 1; i < supersetSize && remaining.length > 0; i++) {
+          let bestPairIndex = -1;
+          
+          // For the second exercise, try to find an opposing muscle group
+          if (i === 1 && opposingMuscle) {
+            bestPairIndex = remaining.findIndex(ex => 
+              ex['Primary Muscle'].includes(opposingMuscle)
+            );
+          }
+          
+          // If no opposing muscle found, pair with a different muscle group
+          if (bestPairIndex === -1) {
+            bestPairIndex = remaining.findIndex(ex => 
+              !supersetExercises.some(se => se['Primary Muscle'].includes(ex['Primary Muscle'].split('(')[0].trim()))
+            );
+          }
+          
+          // Fallback: take the next available exercise
+          if (bestPairIndex === -1) {
+            bestPairIndex = 0;
+          }
+          
+          const exercise = remaining.splice(bestPairIndex, 1)[0];
+          supersetExercises.push(exercise);
+        }
       }
       
-      // If no opposing muscle found, pair with a different muscle group
-      if (bestPairIndex === -1) {
-        bestPairIndex = remaining.findIndex(ex => 
-          !ex['Primary Muscle'].includes(primaryMuscle1)
-        );
-      }
-      
-      // Fallback: pair with any remaining exercise
-      if (bestPairIndex === -1) {
-        bestPairIndex = 0;
-      }
-
-      const exercise2 = remaining.splice(bestPairIndex, 1)[0];
-      pairings.push(exercise1, exercise2);
+      pairings.push(...supersetExercises);
     }
     
-    // Add any remaining unpaired exercise
+    // Add any remaining unpaired exercises
     if (remaining.length > 0) {
       pairings.push(...remaining);
     }
@@ -259,16 +296,20 @@ export const useWorkoutGenerator = () => {
    * Generate a complete workout plan with exercises paired into supersets
    * @param {string} type - Workout type: 'upper', 'lower', or 'full'
    * @param {string|Array} equipmentFilter - Equipment filter(s) to apply
+   * @param {Array} supersetConfig - Array defining exercises per superset, e.g., [3, 3, 2]
    * @returns {Array} Complete workout plan with exercises ordered for supersets
    */
-  const generateWorkout = useCallback((type, equipmentFilter = 'all') => {
+  const generateWorkout = useCallback((type, equipmentFilter = 'all', supersetConfig = [2, 2, 2, 2]) => {
     if (Object.keys(exerciseDB).length === 0) {
       console.error("Exercise database is empty. Cannot generate workout.");
       return [];
     }
     
-    const exerciseList = generateExerciseList(type, equipmentFilter);
-    const pairedList = pairExercises(exerciseList);
+    // Calculate total exercises needed based on superset config
+    const totalExercises = supersetConfig.reduce((sum, count) => sum + count, 0);
+    
+    const exerciseList = generateExerciseList(type, equipmentFilter, totalExercises);
+    const pairedList = pairExercises(exerciseList, supersetConfig);
     
     return pairedList;
   }, [exerciseDB, generateExerciseList, pairExercises]);

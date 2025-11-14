@@ -259,10 +259,10 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         {plans.length === 0 ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <Typography variant="body1" color="text.secondary" gutterBottom>
-              No workout plans yet
+              No fitness plans yet
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Create your first workout plan to get started
+              Create your first fitness plan to get started
             </Typography>
             <Button
               variant="contained"

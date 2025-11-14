@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document provides evidence-based guidance for designing effective workout plans using supersets—a time-efficient training method that maintains training volume, muscle activation, and adaptive responses while reducing session duration by approximately 50%. This guide addresses strength gain, weight loss, and overall health optimization through comprehensive programming strategies for Upper Body, Lower Body, Full Body, High-Intensity Interval Training (HIIT), and Yoga modalities. The information herein is grounded in peer-reviewed research and contemporary strength and conditioning science.
+This document provides evidence-based guidance for designing effective workout plans using supersetsâ€”a time-efficient training method that maintains training volume, muscle activation, and adaptive responses while reducing session duration by approximately 50%. This guide addresses strength gain, weight loss, and overall health optimization through comprehensive programming strategies for Upper Body, Lower Body, Full Body, High-Intensity Interval Training (HIIT), and Yoga modalities. The information herein is grounded in peer-reviewed research and contemporary strength and conditioning science.
 
 ---
 
@@ -79,6 +79,91 @@ Muscle hypertrophy occurs through three primary mechanisms:
 
 **Metabolic Stress**: The metabolic byproducts accumulated during intense training (lactate, phosphate ions) contribute to growth signaling, particularly during moderate-to-high rep ranges with shorter rest periods.
 
+
+## 3. Rep Range to Weight Scaling Guide
+
+### 3.1 Understanding Weight-to-Rep Relationships
+
+Research in strength and conditioning demonstrates a clear inverse relationship between repetition ranges and loading intensity. As repetition targets increase, the absolute load that can be lifted decreases proportionally. This relationship is grounded in the Force-Velocity curve, which illustrates that lighter loads allow for higher velocity and greater repetition capacity, while heavier loads restrict movement velocity and limit repetitions.
+
+For optimal progression, athletes must adjust their working weight based on their target rep range. The following percentages provide **evidence-based guidance for adjusting loads** across different rep ranges, allowing seamless transitions between training goals while maintaining appropriate stimulus.
+
+### 3.2 Weight Scaling by Exercise Category
+
+#### 3.2.1 Barbell Lower Body and Compound Exercises (Squat, Deadlift, etc.)
+*Rounded to nearest 5 lbs*
+
+| Target Rep Range | Percentage of 12-Rep Max | Load Adjustment from Baseline |
+|---|---|---|
+| **3-6 Reps (Strength)** | 80-90% | +10-20 lbs |
+| **8-12 Reps (Hypertrophy Baseline)** | 100% | Baseline |
+| **15-20 Reps (Endurance)** | 50-65% | -35-50 lbs |
+
+**Application Examples:**
+- If your 12-rep max on Back Squat is 225 lbs, your 3-6 rep range should use approximately **245 lbs** (+20 lbs)
+- For 15-20 reps, use approximately **145 lbs** (-80 lbs from 12-rep baseline)
+- Progress within each rep range before increasing the baseline 12-rep weight
+
+#### 3.2.2 Barbell Upper Body Exercises (Bench Press, Overhead Press, Rows)
+*Rounded to nearest 5 lbs*
+
+| Target Rep Range | Percentage of 12-Rep Max | Load Adjustment from Baseline |
+|---|---|---|
+| **4-8 Reps (Strength)** | 75-85% | +5-15 lbs |
+| **8-12 Reps (Hypertrophy Baseline)** | 100% | Baseline |
+| **12-15 Reps (Hypertrophy)** | 85-90% | -5 to -15 lbs |
+| **15-20 Reps (Endurance)** | 60-75% | -25-40 lbs |
+
+**Application Examples:**
+- If your 12-rep max on Barbell Bench Press is 185 lbs, your 4-8 rep range should use approximately **195 lbs** (+10 lbs)
+- For 15-20 reps, use approximately **125 lbs** (-60 lbs)
+- For 12-15 reps, use approximately **160 lbs** (-25 lbs)
+
+#### 3.2.3 Dumbbell Exercises (All Movements)
+*Rounded to nearest 2.5 lbs per hand*
+
+| Target Rep Range | Percentage of 12-Rep Max | Load Adjustment from Baseline |
+|---|---|---|
+| **6-8 Reps (Strength)** | 75-85% | +2.5-5 lbs per dumbbell |
+| **8-12 Reps (Hypertrophy Baseline)** | 100% | Baseline |
+| **12-15 Reps (Hypertrophy)** | 85-90% | -2.5 lbs per dumbbell |
+| **15-20 Reps (Endurance)** | 65-75% | -7.5-15 lbs per dumbbell |
+
+**Application Examples:**
+- If your 12-rep max on Dumbbell Bench Press is 50 lbs per hand, your 6-8 rep range should use approximately **52.5 lbs** (+2.5 lbs per dumbbell)
+- For 15-20 reps, use approximately **37.5 lbs** (-12.5 lbs per dumbbell)
+- For 12-15 reps, use approximately **47.5 lbs** (-2.5 lbs per dumbbell)
+
+#### 3.2.4 Isolation Exercises (Curls, Lateral Raises, Leg Extensions, etc.)
+*Rounded to nearest 2.5 lbs*
+
+| Target Rep Range | Percentage of 12-Rep Max | Load Adjustment from Baseline |
+|---|---|---|
+| **8-12 Reps (Hypertrophy Baseline)** | 100% | Baseline |
+| **12-15 Reps (Hypertrophy)** | 80-90% | -5 to -15 lbs |
+| **15-20 Reps (Endurance/Metabolic)** | 60-75% | -15-25 lbs |
+
+**Application Examples:**
+- If your 12-rep max on Barbell Curls is 95 lbs, your 15-20 rep range should use approximately **70 lbs** (-25 lbs)
+- For 12-15 reps, use approximately **85 lbs** (-10 lbs)
+
+### 3.3 Progressive Load Increases Within Each Rep Range
+
+When progressing within a specific rep range, increase weight conservatively to avoid compromising form:
+
+- **Barbell exercises:** Add 5 lbs when you achieve the upper end of your rep range for 2-3 consecutive sessions
+- **Dumbbell exercises:** Add 2.5 lbs per hand when you achieve the upper end of your rep range consistently
+- **Isolation exercises:** Add 2.5-5 lbs when you achieve 2-3 consecutive sessions at the upper rep range
+
+### 3.4 Deload Weeks and Load Management
+
+Every 4-6 weeks, implement a **deload week** by reducing working weights by approximately 40-50% while maintaining movement patterns and volume. This allows nervous system recovery, reduces injury risk, and prevents accommodation to loading.
+
+During deload weeks:
+- Use weights that are 50-60% of your current working load
+- Maintain the same exercises and movement patterns
+- Keep sets and rep ranges consistent
+- Focus on movement quality and proprioceptive awareness
 ### 2.4 Strength vs. Hypertrophy Development
 
 - **Strength Development**: Best developed through heavy loads (1-6 reps), 3-6 sets per session, and adequate recovery (2-5 minutes)
@@ -249,21 +334,21 @@ Upper body training typically emphasizes:
 
 **Main Workout** (Supersets):
 
-1a) **Barbell Bench Press** - 4 sets × 6-8 reps (84-92% 1RM)
-1b) **Bent-Over Barbell Row** - 4 sets × 6-8 reps
-→ Rest 3 minutes between supersets
+1a) **Barbell Bench Press** - 4 sets Ã— 6-8 reps (84-92% 1RM)
+1b) **Bent-Over Barbell Row** - 4 sets Ã— 6-8 reps
+â†’ Rest 3 minutes between supersets
 
-2a) **Dumbbell Incline Press** - 3 sets × 8-10 reps
-2b) **Lat Pulldown** - 3 sets × 8-10 reps
-→ Rest 2 minutes between supersets
+2a) **Dumbbell Incline Press** - 3 sets Ã— 8-10 reps
+2b) **Lat Pulldown** - 3 sets Ã— 8-10 reps
+â†’ Rest 2 minutes between supersets
 
-3a) **Cable Fly** - 3 sets × 10-12 reps
-3b) **Face Pull** - 3 sets × 12-15 reps
-→ Rest 1.5 minutes between supersets
+3a) **Cable Fly** - 3 sets Ã— 10-12 reps
+3b) **Face Pull** - 3 sets Ã— 12-15 reps
+â†’ Rest 1.5 minutes between supersets
 
-4a) **Dumbbell Curl** - 3 sets × 8-10 reps
-4b) **Triceps Rope Extension** - 3 sets × 10-12 reps
-→ Rest 1.5 minutes between supersets
+4a) **Dumbbell Curl** - 3 sets Ã— 8-10 reps
+4b) **Triceps Rope Extension** - 3 sets Ã— 10-12 reps
+â†’ Rest 1.5 minutes between supersets
 
 **Cool-down**: 5 minutes (stretching)
 
@@ -297,23 +382,23 @@ Lower body training emphasizes:
 
 **Main Workout** (Supersets):
 
-1a) **Barbell Back Squat** - 4 sets × 6-8 reps
-1b) **Romanian Deadlift** - 4 sets × 8-10 reps
-→ Rest 3 minutes between supersets
+1a) **Barbell Back Squat** - 4 sets Ã— 6-8 reps
+1b) **Romanian Deadlift** - 4 sets Ã— 8-10 reps
+â†’ Rest 3 minutes between supersets
 
-2a) **Leg Press** - 3 sets × 8-10 reps
-2b) **Leg Curl (Lying or Seated)** - 3 sets × 10-12 reps
-→ Rest 2 minutes between supersets
+2a) **Leg Press** - 3 sets Ã— 8-10 reps
+2b) **Leg Curl (Lying or Seated)** - 3 sets Ã— 10-12 reps
+â†’ Rest 2 minutes between supersets
 
-3a) **Leg Extension** - 3 sets × 10-12 reps
-3b) **Glute-Ham Raise or Nordic Curl** - 3 sets × 6-10 reps
-→ Rest 1.5 minutes between supersets
+3a) **Leg Extension** - 3 sets Ã— 10-12 reps
+3b) **Glute-Ham Raise or Nordic Curl** - 3 sets Ã— 6-10 reps
+â†’ Rest 1.5 minutes between supersets
 
-4a) **Bulgarian Split Squat** - 3 sets × 8-10 reps per side
-4b) **Lying Leg Curl** - 3 sets × 10-12 reps
-→ Rest 1.5 minutes between supersets
+4a) **Bulgarian Split Squat** - 3 sets Ã— 8-10 reps per side
+4b) **Lying Leg Curl** - 3 sets Ã— 10-12 reps
+â†’ Rest 1.5 minutes between supersets
 
-5) **Standing Calf Raise** - 3 sets × 12-15 reps
+5) **Standing Calf Raise** - 3 sets Ã— 12-15 reps
 
 **Cool-down**: 5 minutes (stretching)
 
@@ -346,25 +431,25 @@ Full body training in a single session addresses all major muscle groups, making
 
 **Main Workout**:
 
-1a) **Barbell Back Squat** - 3 sets × 5-6 reps
-1b) **Bent-Over Barbell Row** - 3 sets × 5-6 reps
-→ Rest 2.5 minutes
+1a) **Barbell Back Squat** - 3 sets Ã— 5-6 reps
+1b) **Bent-Over Barbell Row** - 3 sets Ã— 5-6 reps
+â†’ Rest 2.5 minutes
 
-2a) **Barbell Bench Press** - 3 sets × 6-8 reps
-2b) **Lat Pulldown** - 3 sets × 8-10 reps
-→ Rest 2 minutes
+2a) **Barbell Bench Press** - 3 sets Ã— 6-8 reps
+2b) **Lat Pulldown** - 3 sets Ã— 8-10 reps
+â†’ Rest 2 minutes
 
-3a) **Romanian Deadlift** - 3 sets × 8-10 reps
-3b) **Chest-Supported Row** - 3 sets × 8-10 reps
-→ Rest 2 minutes
+3a) **Romanian Deadlift** - 3 sets Ã— 8-10 reps
+3b) **Chest-Supported Row** - 3 sets Ã— 8-10 reps
+â†’ Rest 2 minutes
 
-4a) **Leg Press** - 2 sets × 10-12 reps
-4b) **Pull-ups or Assisted Pull-ups** - 2 sets × 6-10 reps
-→ Rest 1.5 minutes
+4a) **Leg Press** - 2 sets Ã— 10-12 reps
+4b) **Pull-ups or Assisted Pull-ups** - 2 sets Ã— 6-10 reps
+â†’ Rest 1.5 minutes
 
-5a) **Dumbbell Curl** - 2 sets × 8-10 reps
-5b) **Triceps Rope Extension** - 2 sets × 10-12 reps
-→ Rest 1 minute
+5a) **Dumbbell Curl** - 2 sets Ã— 8-10 reps
+5b) **Triceps Rope Extension** - 2 sets Ã— 10-12 reps
+â†’ Rest 1 minute
 
 **Cool-down**: 5 minutes
 
@@ -386,7 +471,7 @@ Full body training in a single session addresses all major muscle groups, making
 HIIT involves alternating high-intensity exercise bouts with lower-intensity recovery periods. Research demonstrates HIIT is:
 - Effective for cardiovascular fitness improvements
 - Comparable to moderate-intensity continuous training (MICT) for fat loss
-- Superior to MICT for improving cardiorespiratory fitness (VO₂ max)
+- Superior to MICT for improving cardiorespiratory fitness (VOâ‚‚ max)
 - Time-efficient (can accomplish equivalent training in 40% less time)
 - Effective when combined with resistance training for comprehensive fitness
 

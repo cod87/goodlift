@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import CompactHeader from './Common/CompactHeader';
 import CustomWorkoutWizard from './PlanBuilder/CustomWorkoutWizard';
+import FitnessPlanWizard from './PlanBuilder/FitnessPlanWizard';
 import {
   getPlanStatistics
 } from '../utils/workoutPlanGenerator';
@@ -42,6 +43,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   const [plans, setPlans] = useState([]);
   const [activePlan, setActivePlanState] = useState(null);
   const [showCustomWizard, setShowCustomWizard] = useState(false);
+  const [showFitnessWizard, setShowFitnessWizard] = useState(false);
   const [expandedPlan, setExpandedPlan] = useState(null); // Track which plan is expanded
 
   // Load plans on mount
@@ -62,7 +64,8 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   };
 
   const handleCreatePlan = () => {
-    setShowCustomWizard(true);
+    // Open the simplified fitness plan wizard instead
+    setShowFitnessWizard(true);
   };
 
   const handleSetActive = async (planId) => {
@@ -408,7 +411,21 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         )}
       </Paper>
 
-      {/* Custom Workout Wizard */}
+      {/* Fitness Plan Wizard (Simplified) */}
+      <FitnessPlanWizard
+        open={showFitnessWizard}
+        onClose={() => setShowFitnessWizard(false)}
+        onPlanCreated={async () => {
+          await loadPlans();
+          setShowFitnessWizard(false);
+          // Navigate to calendar to show the new plan
+          if (onNavigate) {
+            onNavigate('progress');
+          }
+        }}
+      />
+      
+      {/* Custom Workout Wizard (Legacy) */}
       <CustomWorkoutWizard
         open={showCustomWizard}
         onClose={() => setShowCustomWizard(false)}

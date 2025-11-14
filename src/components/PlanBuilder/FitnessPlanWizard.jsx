@@ -58,9 +58,11 @@ import {
   DirectionsRun as CardioIcon,
   SelfImprovement as RecoveryIcon,
   Hotel as RestIcon,
+  SwapHoriz as SwapIcon,
 } from '@mui/icons-material';
 import { saveWorkoutPlan, setActivePlan } from '../../utils/storage';
 import { generateScientificWorkout } from '../../utils/scientificWorkoutGenerator';
+import ExerciseAutocomplete from '../ExerciseAutocomplete';
 
 // Wizard steps
 const STEPS = [
@@ -773,6 +775,14 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
  * WorkoutEditor - Component to edit individual workout details
  */
 const WorkoutEditor = ({ workout, onUpdate }) => {
+  const [substitutionDialog, setSubstitutionDialog] = useState({
+    open: false,
+    exerciseIndex: null,
+    currentExercise: null
+  });
+  const [allExercises, setAllExercises] = useState([]);
+  const [loadingExercises, setLoadingExercises] = useState(false);
+
   if (!workout.editable || !workout.exercises) {
     return (
       <Paper sx={{ p: 3, textAlign: 'center' }}>
@@ -795,57 +805,195 @@ const WorkoutEditor = ({ workout, onUpdate }) => {
     });
   };
 
+  const handleOpenSubstitution = async (index, exercise) => {
+    // Load exercise database if not already loaded
+    if (allExercises.length === 0) {
+      setLoadingExercises(true);
+      try {
+        const response = await fetch('/data/exercises.json');
+        const exercisesData = await response.json();
+        const exercises = exercisesData.exercises || exercisesData;
+        setAllExercises(exercises);
+      } catch (error) {
+        console.error('Error loading exercises:', error);
+      }
+      setLoadingExercises(false);
+    }
+
+    setSubstitutionDialog({
+      open: true,
+      exerciseIndex: index,
+      currentExercise: exercise
+    });
+  };
+
+  const handleCloseSubstitution = () => {
+    setSubstitutionDialog({
+      open: false,
+      exerciseIndex: null,
+      currentExercise: null
+    });
+  };
+
+  const handleSubstituteExercise = (newExercise) => {
+    if (!newExercise || substitutionDialog.exerciseIndex === null) return;
+
+    const currentExercise = workout.exercises[substitutionDialog.exerciseIndex];
+    const updatedExercises = [...workout.exercises];
+    
+    // Preserve sets, reps, and weight from the current exercise
+    updatedExercises[substitutionDialog.exerciseIndex] = {
+      ...newExercise,
+      name: newExercise['Exercise Name'],
+      sets: currentExercise.sets,
+      reps: currentExercise.reps,
+      weight: currentExercise.weight || '',
+      restSeconds: currentExercise.restSeconds,
+      notes: currentExercise.notes || '',
+      supersetGroup: currentExercise.supersetGroup,
+      isCompound: newExercise.Type === 'Compound'
+    };
+
+    onUpdate({
+      ...workout,
+      exercises: updatedExercises
+    });
+
+    handleCloseSubstitution();
+  };
+
+  // Filter exercises by muscle group for substitution
+  const getFilteredExercises = () => {
+    if (!substitutionDialog.currentExercise) return allExercises;
+    
+    const currentMuscle = substitutionDialog.currentExercise['Primary Muscle'];
+    return allExercises.filter(ex => 
+      ex['Primary Muscle'] === currentMuscle
+    );
+  };
+
   return (
-    <Paper sx={{ p: 2 }}>
-      <List>
-        {workout.exercises.map((exercise) => (
-          <div key={exercise.id || exercise['Exercise Name']}>
-            <ListItem>
-              <ListItemText
-                primary={exercise.name || exercise['Exercise Name']}
-                secondary={
-                  <Box sx={{ mt: 1 }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={4}>
-                        <TextField
-                          size="small"
-                          label="Sets"
-                          type="number"
-                          value={exercise.sets}
-                          onChange={(e) => handleExerciseUpdate(workout.exercises.indexOf(exercise), 'sets', parseInt(e.target.value, 10))}
-                          fullWidth
-                        />
+    <>
+      <Paper sx={{ p: 2 }}>
+        <List>
+          {workout.exercises.map((exercise, index) => (
+            <div key={exercise.id || exercise['Exercise Name']}>
+              <ListItem>
+                <ListItemText
+                  primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body1">
+                        {exercise.name || exercise['Exercise Name']}
+                      </Typography>
+                      <Chip 
+                        label={exercise['Primary Muscle']} 
+                        size="small" 
+                        sx={{ ml: 1 }}
+                      />
+                    </Box>
+                  }
+                  secondary={
+                    <Box sx={{ mt: 1 }}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <TextField
+                            size="small"
+                            label="Sets"
+                            type="number"
+                            value={exercise.sets}
+                            onChange={(e) => handleExerciseUpdate(index, 'sets', parseInt(e.target.value, 10))}
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            size="small"
+                            label="Reps"
+                            type="number"
+                            value={exercise.reps}
+                            onChange={(e) => handleExerciseUpdate(index, 'reps', parseInt(e.target.value, 10))}
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            size="small"
+                            label="Weight (optional)"
+                            placeholder="e.g., 135"
+                            value={exercise.weight || ''}
+                            onChange={(e) => handleExerciseUpdate(index, 'weight', e.target.value)}
+                            fullWidth
+                          />
+                        </Grid>
                       </Grid>
-                      <Grid item xs={4}>
-                        <TextField
-                          size="small"
-                          label="Reps"
-                          type="number"
-                          value={exercise.reps}
-                          onChange={(e) => handleExerciseUpdate(workout.exercises.indexOf(exercise), 'reps', parseInt(e.target.value, 10))}
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={4}>
-                        <TextField
-                          size="small"
-                          label="Weight (optional)"
-                          placeholder="e.g., 135"
-                          value={exercise.weight || ''}
-                          onChange={(e) => handleExerciseUpdate(workout.exercises.indexOf(exercise), 'weight', e.target.value)}
-                          fullWidth
-                        />
-                      </Grid>
-                    </Grid>
-                  </Box>
-                }
+                    </Box>
+                  }
+                />
+                <ListItemSecondaryAction>
+                  <Tooltip title="Replace Exercise">
+                    <IconButton
+                      edge="end"
+                      aria-label="replace exercise"
+                      onClick={() => handleOpenSubstitution(index, exercise)}
+                    >
+                      <SwapIcon />
+                    </IconButton>
+                  </Tooltip>
+                </ListItemSecondaryAction>
+              </ListItem>
+              {index < workout.exercises.length - 1 && <Divider />}
+            </div>
+          ))}
+        </List>
+      </Paper>
+
+      {/* Exercise Substitution Dialog */}
+      <Dialog
+        open={substitutionDialog.open}
+        onClose={handleCloseSubstitution}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Replace Exercise
+          {substitutionDialog.currentExercise && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Current: {substitutionDialog.currentExercise.name || substitutionDialog.currentExercise['Exercise Name']}
+            </Typography>
+          )}
+        </DialogTitle>
+        <DialogContent>
+          {loadingExercises ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <>
+              <Alert severity="info" sx={{ mb: 2 }}>
+                Showing exercises that target the same muscle group
+                {substitutionDialog.currentExercise && ` (${substitutionDialog.currentExercise['Primary Muscle']})`}
+              </Alert>
+              <ExerciseAutocomplete
+                value={null}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    handleSubstituteExercise(newValue);
+                  }
+                }}
+                availableExercises={getFilteredExercises()}
+                label="Select Replacement Exercise"
+                placeholder="Search for an alternative exercise..."
               />
-            </ListItem>
-            {workout.exercises.indexOf(exercise) < workout.exercises.length - 1 && <Divider />}
-          </div>
-        ))}
-      </List>
-    </Paper>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseSubstitution}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

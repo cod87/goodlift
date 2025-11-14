@@ -127,7 +127,7 @@ export const generateWorkoutPlan = async (preferences) => {
     experienceLevel
   });
 
-  // Calculate deload weeks (every 3-4 weeks per guide recommendations)
+  // Calculate deload weeks - ensures three identical weeks followed by deload week
   const deloadWeeks = calculateDeloadWeeks(duration);
   
   // Populate session data for all sessions
@@ -498,7 +498,8 @@ export const getRecommendedPlanTemplate = (goal, experienceLevel) => {
 
 /**
  * Calculate deload weeks for periodization
- * Per WORKOUT-PLANNING-GUIDE.md: deload every 3-4 weeks (25-50% volume reduction)
+ * Creates three identical weeks of workouts followed by a deload week within every four-week set
+ * Per WORKOUT-PLANNING-GUIDE.md: deload every 4 weeks (25-50% volume reduction)
  * @param {number} duration - Plan duration in days
  * @returns {Array<number>} Array of week numbers that should be deload weeks
  */

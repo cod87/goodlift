@@ -5,7 +5,7 @@ import { Box, Card, CardContent, Typography, FormControlLabel, Radio, RadioGroup
 import { ExpandMore, Delete, Star, Edit, Add } from '@mui/icons-material';
 import { getFavoriteWorkouts, deleteFavoriteWorkout, updateFavoriteWorkoutName } from '../utils/storage';
 import CompactHeader from './Common/CompactHeader';
-import CustomWorkoutWizard from './PlanBuilder/CustomWorkoutWizard';
+// CustomWorkoutWizard removed - no longer using workout planning
 
 /**
  * SelectionScreen component for workout configuration
@@ -27,7 +27,7 @@ const SelectionScreen = memo(({
   const [editingWorkout, setEditingWorkout] = useState(null);
   const [editedName, setEditedName] = useState('');
   const [expandedFavorite, setExpandedFavorite] = useState(null);
-  const [showPlanModal, setShowPlanModal] = useState(false);
+  // showPlanModal removed - no longer using workout planning
 
   useEffect(() => {
     // Scroll to top when component mounts
@@ -80,18 +80,7 @@ const SelectionScreen = memo(({
     setEditedName('');
   };
 
-  const handleOpenPlanModal = () => {
-    setShowPlanModal(true);
-  };
-
-  const handleClosePlanModal = () => {
-    setShowPlanModal(false);
-  };
-
-  const handlePlanCreated = () => {
-    // Refresh the page to show the new plan
-    window.location.reload();
-  };
+  // Plan modal handlers removed - no longer using workout planning
 
   const handleLoadFavorite = (favoriteWorkout) => {
     onWorkoutTypeChange(favoriteWorkout.type);
@@ -502,12 +491,7 @@ const SelectionScreen = memo(({
         </DialogActions>
       </Dialog>
 
-      {/* Custom Workout Wizard */}
-      <CustomWorkoutWizard
-        open={showPlanModal}
-        onClose={handleClosePlanModal}
-        onPlanCreated={handlePlanCreated}
-      />
+      {/* Custom Workout Wizard removed - no longer using workout planning */}
     </motion.div>
     </Box>
   );

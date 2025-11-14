@@ -57,7 +57,7 @@ function AppContent() {
   const [selectedEquipment, setSelectedEquipment] = useState(new Set(['all']));
   const [equipmentOptions, setEquipmentOptions] = useState([]);
   const [completedWorkoutData, setCompletedWorkoutData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const [showGuestSnackbar, setShowGuestSnackbar] = useState(false);
@@ -222,39 +222,29 @@ function AppContent() {
   };
 
   const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null, supersetConfigParam = [2, 2, 2, 2]) => {
-    setLoading(true);
     setSupersetConfig(supersetConfigParam); // Store superset config
     
-    // Simulate loading to show user we're generating
-    setTimeout(() => {
-      const workout = preGeneratedWorkout || generateWorkout(type, equipmentFilter, supersetConfigParam);
-      setCurrentWorkout(workout);
-      setWorkoutType(type);
-      setLoading(false);
-      
-      // Show preview screen instead of going directly to workout
-      setIsCustomizeMode(false);
-      setShowPreview(true);
-      setCurrentScreen('preview');
-    }, 500);
+    const workout = preGeneratedWorkout || generateWorkout(type, equipmentFilter, supersetConfigParam);
+    setCurrentWorkout(workout);
+    setWorkoutType(type);
+    
+    // Show preview screen instead of going directly to workout
+    setIsCustomizeMode(false);
+    setShowPreview(true);
+    setCurrentScreen('preview');
   };
 
   const handleCustomize = (type, equipmentFilter, supersetConfigParam = [2, 2, 2, 2]) => {
-    setLoading(true);
     setWorkoutType(type);
     setSupersetConfig(supersetConfigParam); // Store superset config
     
-    // Simulate loading to provide consistent UX with Generate button
-    setTimeout(() => {
-      // Set empty workout for customization mode with the specified superset configuration
-      const totalExercises = supersetConfigParam.reduce((sum, count) => sum + count, 0);
-      const emptyWorkout = Array(totalExercises).fill(null);
-      setCurrentWorkout(emptyWorkout);
-      setLoading(false);
-      setIsCustomizeMode(true);
-      setShowPreview(true);
-      setCurrentScreen('preview');
-    }, 500);
+    // Set empty workout for customization mode with the specified superset configuration
+    const totalExercises = supersetConfigParam.reduce((sum, count) => sum + count, 0);
+    const emptyWorkout = Array(totalExercises).fill(null);
+    setCurrentWorkout(emptyWorkout);
+    setIsCustomizeMode(true);
+    setShowPreview(true);
+    setCurrentScreen('preview');
   };
 
   const handleBeginWorkout = (workout) => {

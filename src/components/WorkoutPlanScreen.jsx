@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import CompactHeader from './Common/CompactHeader';
 import QuickPlanSetup from './PlanBuilder/QuickPlanSetup';
+import FitnessPlanWizard from './PlanBuilder/FitnessPlanWizard';
 import {
   getPlanStatistics
 } from '../utils/workoutPlanGenerator';
@@ -45,6 +46,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   const [plans, setPlans] = useState([]);
   const [activePlan, setActivePlanState] = useState(null);
   const [showPlanCreationModal, setShowPlanCreationModal] = useState(false);
+  const [showFitnessPlanWizard, setShowFitnessPlanWizard] = useState(false);
   const [createMenuAnchor, setCreateMenuAnchor] = useState(null);
   const [expandedPlan, setExpandedPlan] = useState(null); // Track which plan is expanded
 
@@ -68,6 +70,11 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   const handleCreatePlan = () => {
     setCreateMenuAnchor(null);
     setShowPlanCreationModal(true);
+  };
+
+  const handleCreateFitnessPlan = () => {
+    setCreateMenuAnchor(null);
+    setShowFitnessPlanWizard(true);
   };
 
   const handleOpenCreateMenu = (event) => {
@@ -143,7 +150,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
       </Box>
       
       <CompactHeader 
-        title="Workout Plans" 
+        title="Fitness Plans" 
         icon="📅"
         action={
           <Button
@@ -164,9 +171,13 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         open={Boolean(createMenuAnchor)}
         onClose={handleCloseCreateMenu}
       >
+        <MenuItem onClick={handleCreateFitnessPlan}>
+          <AutoGenerateIcon sx={{ mr: 1 }} />
+          Create Fitness Plan (New)
+        </MenuItem>
         <MenuItem onClick={handleCreatePlan}>
           <AutoGenerateIcon sx={{ mr: 1 }} />
-          Create Workout Plan
+          Quick Setup
         </MenuItem>
       </Menu>
       
@@ -248,10 +259,10 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         {plans.length === 0 ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <Typography variant="body1" color="text.secondary" gutterBottom>
-              No workout plans yet
+              No fitness plans yet
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Create your first workout plan to get started
+              Create your first fitness plan to get started
             </Typography>
             <Button
               variant="contained"
@@ -440,6 +451,16 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         onPlanCreated={() => {
           loadPlans();
           setShowPlanCreationModal(false);
+        }}
+      />
+
+      {/* Fitness Plan Wizard */}
+      <FitnessPlanWizard
+        open={showFitnessPlanWizard}
+        onClose={() => setShowFitnessPlanWizard(false)}
+        onPlanCreated={() => {
+          loadPlans();
+          setShowFitnessPlanWizard(false);
         }}
       />
     </Container>

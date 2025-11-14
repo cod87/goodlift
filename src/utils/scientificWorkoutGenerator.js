@@ -18,15 +18,19 @@ import { generateStandardWorkout } from './workoutGenerator.js';
  * @param {string} params.experienceLevel - Experience level
  * @param {string} params.goal - Training goal
  * @param {boolean} params.isDeload - Whether this is a deload workout
+ * @param {Array} params.exercises - Optional pre-loaded exercise database for performance
  * @returns {Promise<Object>} Generated workout with exercises
  */
 export const generateScientificWorkout = async (params) => {
-  const { type, experienceLevel = 'intermediate', goal = 'hypertrophy', isDeload = false } = params;
+  const { type, experienceLevel = 'intermediate', goal = 'hypertrophy', isDeload = false, exercises: providedExercises } = params;
   
-  // Load exercises database
-  const response = await fetch('/data/exercises.json');
-  const exercisesData = await response.json();
-  const allExercises = exercisesData.exercises || exercisesData;
+  // Load exercises database if not provided
+  let allExercises = providedExercises;
+  if (!allExercises) {
+    const response = await fetch('/data/exercises.json');
+    const exercisesData = await response.json();
+    allExercises = exercisesData.exercises || exercisesData;
+  }
   
   // Use the existing workout generator
   const workout = generateStandardWorkout(allExercises, type, 'all', experienceLevel);

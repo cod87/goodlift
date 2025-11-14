@@ -103,6 +103,27 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
   // Workout customization
   const [workouts, setWorkouts] = useState([]);
   const [selectedWorkoutIndex, setSelectedWorkoutIndex] = useState(0);
+  
+  // Exercise database cache
+  const [exerciseDatabase, setExerciseDatabase] = useState(null);
+
+  /**
+   * Load exercise database on component mount
+   */
+  const loadExerciseDatabase = async () => {
+    if (exerciseDatabase) return exerciseDatabase; // Return cached if already loaded
+    
+    try {
+      const response = await fetch('/data/exercises.json');
+      const exercisesData = await response.json();
+      const exercises = exercisesData.exercises || exercisesData;
+      setExerciseDatabase(exercises);
+      return exercises;
+    } catch (error) {
+      console.error('Error loading exercise database:', error);
+      throw error;
+    }
+  };
 
   /**
    * Calculate total days per week
@@ -150,6 +171,10 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
   const generateInitialWorkouts = async () => {
     try {
       setLoading(true);
+      
+      // Load exercise database if not already cached
+      const exercises = await loadExerciseDatabase();
+      
       const newWorkouts = [];
       
       // Generate unique strength workouts based on how many days per week
@@ -162,7 +187,8 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
           type: workoutType,
           experienceLevel: 'intermediate',
           goal: 'hypertrophy',
-          isDeload: false
+          isDeload: false,
+          exercises // Pass cached exercise database
         });
         
         newWorkouts.push({
@@ -853,6 +879,7 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
           {workouts[selectedWorkoutIndex] && (
             <WorkoutEditor
               workout={workouts[selectedWorkoutIndex]}
+              exerciseDatabase={exerciseDatabase}
               onUpdate={(updatedWorkout) => {
                 const newWorkouts = [...workouts];
                 newWorkouts[selectedWorkoutIndex] = updatedWorkout;
@@ -977,14 +1004,12 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
 /**
  * WorkoutEditor - Component to edit individual workout details
  */
-const WorkoutEditor = ({ workout, onUpdate }) => {
+const WorkoutEditor = ({ workout, onUpdate, exerciseDatabase }) => {
   const [substitutionDialog, setSubstitutionDialog] = useState({
     open: false,
     exerciseIndex: null,
     currentExercise: null
   });
-  const [allExercises, setAllExercises] = useState([]);
-  const [loadingExercises, setLoadingExercises] = useState(false);
 
   if (!workout.editable || !workout.exercises) {
     return (
@@ -1008,21 +1033,7 @@ const WorkoutEditor = ({ workout, onUpdate }) => {
     });
   };
 
-  const handleOpenSubstitution = async (index, exercise) => {
-    // Load exercise database if not already loaded
-    if (allExercises.length === 0) {
-      setLoadingExercises(true);
-      try {
-        const response = await fetch('/data/exercises.json');
-        const exercisesData = await response.json();
-        const exercises = exercisesData.exercises || exercisesData;
-        setAllExercises(exercises);
-      } catch (error) {
-        console.error('Error loading exercises:', error);
-      }
-      setLoadingExercises(false);
-    }
-
+  const handleOpenSubstitution = (index, exercise) => {
     setSubstitutionDialog({
       open: true,
       exerciseIndex: index,
@@ -1067,10 +1078,10 @@ const WorkoutEditor = ({ workout, onUpdate }) => {
 
   // Filter exercises by muscle group for substitution
   const getFilteredExercises = () => {
-    if (!substitutionDialog.currentExercise) return allExercises;
+    if (!exerciseDatabase || !substitutionDialog.currentExercise) return [];
     
     const currentMuscle = substitutionDialog.currentExercise['Primary Muscle'];
-    return allExercises.filter(ex => 
+    return exerciseDatabase.filter(ex => 
       ex['Primary Muscle'] === currentMuscle
     );
   };
@@ -1166,9 +1177,10 @@ const WorkoutEditor = ({ workout, onUpdate }) => {
           )}
         </DialogTitle>
         <DialogContent>
-          {loadingExercises ? (
+          {!exerciseDatabase ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
               <CircularProgress />
+              <Typography sx={{ ml: 2 }}>Loading exercises...</Typography>
             </Box>
           ) : (
             <>
@@ -1203,6 +1215,7 @@ const WorkoutEditor = ({ workout, onUpdate }) => {
 WorkoutEditor.propTypes = {
   workout: PropTypes.object.isRequired,
   onUpdate: PropTypes.func.isRequired,
+  exerciseDatabase: PropTypes.array,
 };
 
 FitnessPlanWizard.propTypes = {

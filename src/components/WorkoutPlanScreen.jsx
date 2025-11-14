@@ -14,8 +14,6 @@ import {
   ListItem,
   ListItemText,
   Collapse,
-  Menu,
-  MenuItem
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -26,12 +24,10 @@ import {
   CheckCircle as CheckCircleIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
-  AutoAwesome as AutoGenerateIcon,
   ArrowBack as BackIcon,
 } from '@mui/icons-material';
 import CompactHeader from './Common/CompactHeader';
-import QuickPlanSetup from './PlanBuilder/QuickPlanSetup';
-import FitnessPlanWizard from './PlanBuilder/FitnessPlanWizard';
+import CustomWorkoutWizard from './PlanBuilder/CustomWorkoutWizard';
 import {
   getPlanStatistics
 } from '../utils/workoutPlanGenerator';
@@ -45,9 +41,7 @@ import {
 const WorkoutPlanScreen = ({ onNavigate }) => {
   const [plans, setPlans] = useState([]);
   const [activePlan, setActivePlanState] = useState(null);
-  const [showPlanCreationModal, setShowPlanCreationModal] = useState(false);
-  const [showFitnessPlanWizard, setShowFitnessPlanWizard] = useState(false);
-  const [createMenuAnchor, setCreateMenuAnchor] = useState(null);
+  const [showCustomWizard, setShowCustomWizard] = useState(false);
   const [expandedPlan, setExpandedPlan] = useState(null); // Track which plan is expanded
 
   // Load plans on mount
@@ -68,21 +62,7 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
   };
 
   const handleCreatePlan = () => {
-    setCreateMenuAnchor(null);
-    setShowPlanCreationModal(true);
-  };
-
-  const handleCreateFitnessPlan = () => {
-    setCreateMenuAnchor(null);
-    setShowFitnessPlanWizard(true);
-  };
-
-  const handleOpenCreateMenu = (event) => {
-    setCreateMenuAnchor(event.currentTarget);
-  };
-
-  const handleCloseCreateMenu = () => {
-    setCreateMenuAnchor(null);
+    setShowCustomWizard(true);
   };
 
   const handleSetActive = async (planId) => {
@@ -158,28 +138,12 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
             color="primary"
             size="small"
             startIcon={<AddIcon />}
-            onClick={handleOpenCreateMenu}
+            onClick={handleCreatePlan}
           >
             Create Plan
           </Button>
         }
       />
-
-      {/* Create Plan Menu */}
-      <Menu
-        anchorEl={createMenuAnchor}
-        open={Boolean(createMenuAnchor)}
-        onClose={handleCloseCreateMenu}
-      >
-        <MenuItem onClick={handleCreateFitnessPlan}>
-          <AutoGenerateIcon sx={{ mr: 1 }} />
-          Create Fitness Plan (New)
-        </MenuItem>
-        <MenuItem onClick={handleCreatePlan}>
-          <AutoGenerateIcon sx={{ mr: 1 }} />
-          Quick Setup
-        </MenuItem>
-      </Menu>
       
       <Container maxWidth="lg" sx={{ py: 2, px: { xs: 2, sm: 3 } }}>
 
@@ -444,23 +408,13 @@ const WorkoutPlanScreen = ({ onNavigate }) => {
         )}
       </Paper>
 
-      {/* Quick Plan Setup */}
-      <QuickPlanSetup
-        open={showPlanCreationModal}
-        onClose={() => setShowPlanCreationModal(false)}
-        onPlanCreated={() => {
-          loadPlans();
-          setShowPlanCreationModal(false);
-        }}
-      />
-
-      {/* Fitness Plan Wizard */}
-      <FitnessPlanWizard
-        open={showFitnessPlanWizard}
-        onClose={() => setShowFitnessPlanWizard(false)}
+      {/* Custom Workout Wizard */}
+      <CustomWorkoutWizard
+        open={showCustomWizard}
+        onClose={() => setShowCustomWizard(false)}
         onPlanCreated={async () => {
           await loadPlans();
-          setShowFitnessPlanWizard(false);
+          setShowCustomWizard(false);
           // Navigate to calendar to show the new plan
           if (onNavigate) {
             onNavigate('progress');

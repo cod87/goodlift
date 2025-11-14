@@ -220,12 +220,6 @@ function AppContent() {
     }
   };
 
-  const handleTodayViewQuickStart = () => {
-    // Simplified quick start - just navigate to selection screen
-    // No plan integration anymore
-    setCurrentScreen('selection');
-  };
-
   const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null) => {
     setLoading(true);
     
@@ -253,7 +247,8 @@ function AppContent() {
   };
 
   const handleCustomizeCancel = () => {
-    setCurrentScreen('selection');
+    // Return to home instead of selection
+    setCurrentScreen('home');
   };
 
   const handleCustomPreviewStart = (workout) => {
@@ -263,7 +258,8 @@ function AppContent() {
   };
 
   const handleCustomPreviewCancel = () => {
-    setCurrentScreen('selection');
+    // Return to home instead of selection
+    setCurrentScreen('home');
   };
 
   const handleBeginWorkout = () => {
@@ -273,7 +269,8 @@ function AppContent() {
 
   const handleCancelPreview = () => {
     setShowPreview(false);
-    setCurrentScreen('selection');
+    // Return to home instead of selection
+    setCurrentScreen('home');
   };
 
   /**
@@ -502,11 +499,13 @@ function AppContent() {
   }, [workoutType, currentWorkout, calculateWeightIncrease]);
 
   const handleWorkoutExit = () => {
-    setCurrentScreen('selection');
+    // Return to home instead of selection
+    setCurrentScreen('home');
   };
 
   const handleFinish = () => {
-    setCurrentScreen('selection');
+    // Return to home instead of selection
+    setCurrentScreen('home');
   };
 
   const handleExportCSV = () => {
@@ -565,12 +564,19 @@ function AppContent() {
         }}>
           {currentScreen === 'home' && (
             <WorkTabs
-              onQuickStart={handleTodayViewQuickStart}
               onNavigate={handleNavigate}
               loading={loading}
+              workoutType={workoutType}
+              selectedEquipment={selectedEquipment}
+              equipmentOptions={equipmentOptions}
+              onWorkoutTypeChange={handleWorkoutTypeChange}
+              onEquipmentChange={handleEquipmentChange}
+              onStartWorkout={handleStartWorkout}
+              onCustomize={handleCustomize}
             />
           )}
 
+          {/* SelectionScreen kept for backward compatibility but no longer in main workflow */}
           {currentScreen === 'selection' && (
             <SelectionScreen
               workoutType={workoutType}

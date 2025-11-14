@@ -12,13 +12,20 @@ import TimerTab from './WorkTabs/TimerTab';
  * WorkTabs - Main Work area component with two sub-tabs
  * 
  * Tabs:
- * 1. Workout - Shows quick start feature for workouts
+ * 1. Workout - Shows integrated workout configuration and quick start
  * 2. Timer - Timer functionality for workouts
  */
 const WorkTabs = ({ 
-  onQuickStart,
   onNavigate,
-  loading = false
+  loading = false,
+  // Workout configuration props
+  workoutType,
+  selectedEquipment,
+  equipmentOptions,
+  onWorkoutTypeChange,
+  onEquipmentChange,
+  onStartWorkout,
+  onCustomize,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
 
@@ -67,9 +74,15 @@ const WorkTabs = ({
       <Box sx={{ mt: 2 }}>
         {activeTab === 0 && (
           <ActivityLogTab
-            onQuickStart={onQuickStart}
             onNavigate={onNavigate}
             loading={loading}
+            workoutType={workoutType}
+            selectedEquipment={selectedEquipment}
+            equipmentOptions={equipmentOptions}
+            onWorkoutTypeChange={onWorkoutTypeChange}
+            onEquipmentChange={onEquipmentChange}
+            onStartWorkout={onStartWorkout}
+            onCustomize={onCustomize}
           />
         )}
         {activeTab === 1 && (
@@ -81,9 +94,16 @@ const WorkTabs = ({
 };
 
 WorkTabs.propTypes = {
-  onQuickStart: PropTypes.func.isRequired,
   onNavigate: PropTypes.func,
   loading: PropTypes.bool,
+  // Workout configuration props
+  workoutType: PropTypes.string,
+  selectedEquipment: PropTypes.instanceOf(Set),
+  equipmentOptions: PropTypes.array,
+  onWorkoutTypeChange: PropTypes.func,
+  onEquipmentChange: PropTypes.func,
+  onStartWorkout: PropTypes.func,
+  onCustomize: PropTypes.func,
 };
 
 export default WorkTabs;

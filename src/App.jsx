@@ -65,6 +65,7 @@ function AppContent() {
   const [showMigrationDialog, setShowMigrationDialog] = useState(false);
   const [newAchievement, setNewAchievement] = useState(null);
   const [showAchievementDialog, setShowAchievementDialog] = useState(false);
+  const [customizeConfig, setCustomizeConfig] = useState({ exerciseCount: 8, supersetConfig: [2, 2, 2, 2] });
   const { currentUser, isGuest, hasGuestData } = useAuth();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
@@ -236,8 +237,11 @@ function AppContent() {
     }, 500);
   };
 
-  const handleCustomize = (type) => {
+  const handleCustomize = (type, equipmentFilter, config) => {
     setWorkoutType(type);
+    if (config) {
+      setCustomizeConfig(config);
+    }
     setCurrentScreen('customize');
   };
 
@@ -597,6 +601,8 @@ function AppContent() {
               allExercises={allExercises}
               onCancel={handleCustomizeCancel}
               onContinue={handleCustomizeContinue}
+              exerciseCount={customizeConfig.exerciseCount}
+              supersetConfig={customizeConfig.supersetConfig}
             />
           )}
 

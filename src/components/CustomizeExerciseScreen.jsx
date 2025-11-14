@@ -51,13 +51,16 @@ const CustomizeExerciseScreen = memo(({
   allExercises,
   onCancel,
   onContinue,
+  exerciseCount = EXERCISES_PER_WORKOUT,
+  // eslint-disable-next-line no-unused-vars
+  supersetConfig = [2, 2, 2, 2],
 }) => {
   const [selectedExercises, setSelectedExercises] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [bodyPartFilter, setBodyPartFilter] = useState('all');
   const [equipmentTypeFilter, setEquipmentTypeFilter] = useState('all');
   const [exerciseTypeFilter, setExerciseTypeFilter] = useState('all');
-  const REQUIRED_COUNT = EXERCISES_PER_WORKOUT;
+  const REQUIRED_COUNT = exerciseCount;
 
   // Filter exercises based on all criteria
   const filteredExercises = useMemo(() => {
@@ -691,6 +694,8 @@ CustomizeExerciseScreen.propTypes = {
   allExercises: PropTypes.array.isRequired,
   onCancel: PropTypes.func.isRequired,
   onContinue: PropTypes.func.isRequired,
+  exerciseCount: PropTypes.number,
+  supersetConfig: PropTypes.array,
 };
 
 export default CustomizeExerciseScreen;

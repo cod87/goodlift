@@ -15,7 +15,8 @@ import {
 import { 
   PlayArrow, 
   CalendarToday,
-  TrendingUp
+  TrendingUp,
+  FitnessCenter as WorkoutIcon,
 } from '@mui/icons-material';
 import { getWorkoutTypeDisplayName, getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
 import { getWorkoutHistory, resetCurrentStreak, saveWorkoutPlan, getActivePlan } from '../../utils/storage';
@@ -29,8 +30,8 @@ import RecurringSessionEditor from '../RecurringSessionEditor';
 import { getRecurringSessionsInBlock, updateRecurringSessionExercises, removeSessionFromPlan, updateSessionStatus, moveSession } from '../../utils/workoutPlanGenerator';
 
 /**
- * UpcomingWeekTab - Shows today's workout and next 6 days schedule
- * Displays current day at the far left
+ * WorkoutTab (formerly UpcomingWeekTab) - Shows Quick Start, upcoming schedule, and active plan
+ * Reorganized with Quick Start at top and active plan widget at bottom
  */
 const UpcomingWeekTab = memo(({ 
   currentPlan,
@@ -567,92 +568,56 @@ const UpcomingWeekTab = memo(({
         </Typography>
       </Box>
 
-      {/* Main Workout Card */}
+      {/* Quick Start Section - For individual workouts not tied to the plan */}
       <Card 
         elevation={2}
         sx={{ 
           mb: 3,
           borderRadius: 3,
-          background: 'linear-gradient(135deg, rgba(19, 70, 134, 0.05) 0%, rgba(237, 63, 39, 0.05) 100%)',
+          background: 'linear-gradient(135deg, rgba(237, 63, 39, 0.05) 0%, rgba(19, 70, 134, 0.05) 100%)',
         }}
       >
         <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-          {/* Plan Header */}
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <CalendarToday sx={{ color: 'primary.main', mr: 1 }} />
+            <WorkoutIcon sx={{ color: 'secondary.main', mr: 1 }} />
             <Typography 
-              variant="overline" 
+              variant="h6" 
               sx={{ 
-                color: 'primary.main',
+                color: 'text.primary',
                 fontWeight: 600,
-                letterSpacing: 1,
               }}
             >
-              {planName}
+              Quick Start
             </Typography>
           </Box>
-
-          {/* Today's Session */}
-          {hasToday ? (
-            <>
-              <Typography 
-                variant="h4" 
-                sx={{ 
-                  fontWeight: 700, 
-                  color: 'text.primary', 
-                  mb: 2,
-                  fontSize: { xs: '1.75rem', sm: '2.125rem' }
-                }}
-              >
-                {getWorkoutTypeDisplayName(todaysWorkout.type)}
-                {todaysWorkout.focus && (
-                  <Chip 
-                    label={todaysWorkout.focus}
-                    size="small"
-                    sx={{ ml: 1, textTransform: 'capitalize' }}
-                  />
-                )}
-              </Typography>
-
-              {todaysWorkout.estimatedDuration && (
-                <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3 }}>
-                  Estimated Duration: ~{todaysWorkout.estimatedDuration} min
-                </Typography>
-              )}
-
-              {/* CTA Button */}
-              <Button
-                variant="contained"
-                size="large"
-                fullWidth
-                startIcon={<PlayArrow />}
-                onClick={onQuickStart}
-                disabled={loading}
-                sx={{ 
-                  minHeight: touchTargets.navigation,
-                  fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                  fontWeight: 700,
-                  backgroundColor: 'primary.main',
-                  '&:hover': {
-                    backgroundColor: 'primary.dark',
-                  },
-                  textTransform: 'uppercase',
-                  letterSpacing: 1,
-                }}
-              >
-                Start Today&apos;s Workout
-              </Button>
-            </>
-          ) : (
-            <>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 2 }}>
-                Rest Day
-              </Typography>
-              <Typography variant="body1" sx={{ color: 'text.secondary', mb: 2 }}>
-                Recovery is essential for growth. Take it easy today!
-              </Typography>
-            </>
-          )}
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+            Start a workout not tied to your workout plan
+          </Typography>
+          <Button
+            variant="outlined"
+            size="large"
+            fullWidth
+            startIcon={<PlayArrow />}
+            onClick={() => {
+              // Generate a quick workout independent of the plan
+              if (onNavigate) {
+                onNavigate('workout-hub');
+              }
+            }}
+            sx={{ 
+              minHeight: touchTargets.navigation,
+              fontSize: { xs: '1rem', sm: '1.1rem' },
+              fontWeight: 600,
+              borderColor: 'secondary.main',
+              color: 'secondary.main',
+              '&:hover': {
+                borderColor: 'secondary.dark',
+                backgroundColor: 'rgba(237, 63, 39, 0.08)',
+              },
+            }}
+          >
+            Generate Random Workout
+          </Button>
         </CardContent>
       </Card>
 
@@ -872,6 +837,95 @@ const UpcomingWeekTab = memo(({
           onDayClick={handleDayClick}
         />
       </Box>
+
+      {/* Active Plan Widget - Moved to bottom */}
+      <Card 
+        elevation={2}
+        sx={{ 
+          mb: 3,
+          borderRadius: 3,
+          background: 'linear-gradient(135deg, rgba(19, 70, 134, 0.05) 0%, rgba(237, 63, 39, 0.05) 100%)',
+        }}
+      >
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          {/* Plan Header */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <CalendarToday sx={{ color: 'primary.main', mr: 1 }} />
+            <Typography 
+              variant="overline" 
+              sx={{ 
+                color: 'primary.main',
+                fontWeight: 600,
+                letterSpacing: 1,
+              }}
+            >
+              {planName}
+            </Typography>
+          </Box>
+
+          {/* Today's Session */}
+          {hasToday ? (
+            <>
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  fontWeight: 700, 
+                  color: 'text.primary', 
+                  mb: 2,
+                  fontSize: { xs: '1.75rem', sm: '2.125rem' }
+                }}
+              >
+                {getWorkoutTypeDisplayName(todaysWorkout.type)}
+                {todaysWorkout.focus && (
+                  <Chip 
+                    label={todaysWorkout.focus}
+                    size="small"
+                    sx={{ ml: 1, textTransform: 'capitalize' }}
+                  />
+                )}
+              </Typography>
+
+              {todaysWorkout.estimatedDuration && (
+                <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3 }}>
+                  Estimated Duration: ~{todaysWorkout.estimatedDuration} min
+                </Typography>
+              )}
+
+              {/* CTA Button */}
+              <Button
+                variant="contained"
+                size="large"
+                fullWidth
+                startIcon={<PlayArrow />}
+                onClick={onQuickStart}
+                disabled={loading}
+                sx={{ 
+                  minHeight: touchTargets.navigation,
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                  fontWeight: 700,
+                  backgroundColor: 'primary.main',
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                }}
+              >
+                Start Today&apos;s Workout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 2 }}>
+                Rest Day
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'text.secondary', mb: 2 }}>
+                Recovery is essential for growth. Take it easy today!
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Workout Day Dialog */}
       <WorkoutDayDialog

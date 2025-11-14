@@ -2,21 +2,18 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Tabs, Tab } from '@mui/material';
 import { 
-  CalendarToday, 
-  Info,
+  FitnessCenter,
   Timer as TimerIcon,
 } from '@mui/icons-material';
 import UpcomingWeekTab from './WorkTabs/UpcomingWeekTab';
-import PlanInfoTab from './WorkTabs/PlanInfoTab';
 import TimerTab from './WorkTabs/TimerTab';
 
 /**
- * WorkTabs - Main Work area component with three sub-tabs
+ * WorkTabs - Main Work area component with two sub-tabs
  * 
  * Tabs:
- * 1. Upcoming Week - Shows today's workout and next 6 days
- * 2. Plan Info - Shows active plan details with editing capabilities
- * 3. Timer - Timer functionality for workouts
+ * 1. Workout - Shows today's workout, quick start feature, and active plan
+ * 2. Timer - Timer functionality for workouts
  */
 const WorkTabs = ({ 
   currentPlan,
@@ -56,13 +53,8 @@ const WorkTabs = ({
           }}
         >
           <Tab 
-            icon={<CalendarToday />} 
-            label="Upcoming Week" 
-            iconPosition="start"
-          />
-          <Tab 
-            icon={<Info />} 
-            label="View Plan" 
+            icon={<FitnessCenter />} 
+            label="Workout" 
             iconPosition="start"
           />
           <Tab 
@@ -85,12 +77,6 @@ const WorkTabs = ({
           />
         )}
         {activeTab === 1 && (
-          <PlanInfoTab
-            currentPlan={currentPlan}
-            onNavigate={onNavigate}
-          />
-        )}
-        {activeTab === 2 && (
           <TimerTab onNavigate={onNavigate} />
         )}
       </Box>

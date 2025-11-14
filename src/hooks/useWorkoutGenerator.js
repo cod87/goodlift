@@ -157,6 +157,34 @@ export const useWorkoutGenerator = () => {
         break;
       }
       
+      case 'push':
+        // Push: Chest, shoulders (delts), triceps - pushing movements
+        workout.push(...getRandomExercises('Chest', 3, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Delts', 3, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Triceps', 2, workout, equipmentFilter));
+        break;
+      
+      case 'pull':
+        // Pull: Back (lats), rear delts, biceps - pulling movements
+        workout.push(...getRandomExercises('Lats', 4, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Rear Delts', 2, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Biceps', 2, workout, equipmentFilter));
+        break;
+      
+      case 'legs': {
+        // Legs: Similar to lower body but can include more variety
+        const legsQuadCount = Math.floor(Math.random() * 2) + 3; // 3-4 exercises
+        const legsHamCount = Math.floor(Math.random() * 2) + 2; // 2-3 exercises
+        const legsCoreCount = EXERCISES_PER_WORKOUT - legsQuadCount - legsHamCount;
+        
+        workout.push(...getRandomExercises('Quads', legsQuadCount, workout, equipmentFilter));
+        workout.push(...getRandomExercises('Hamstrings', legsHamCount, workout, equipmentFilter));
+        if (legsCoreCount > 0) {
+          workout.push(...getRandomExercises('Core', legsCoreCount, workout, equipmentFilter));
+        }
+        break;
+      }
+      
       default:
         console.warn(`Unknown workout type: ${type}`);
         break;

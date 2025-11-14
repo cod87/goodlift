@@ -195,6 +195,9 @@ const SelectionScreen = memo(({
                     <MenuItem value="full">Full Body</MenuItem>
                     <MenuItem value="upper">Upper Body</MenuItem>
                     <MenuItem value="lower">Lower Body</MenuItem>
+                    <MenuItem value="push">Push</MenuItem>
+                    <MenuItem value="pull">Pull</MenuItem>
+                    <MenuItem value="legs">Legs</MenuItem>
                   </Select>
                 </FormControl>
 

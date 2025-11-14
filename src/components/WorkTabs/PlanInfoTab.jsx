@@ -27,7 +27,7 @@ import {
   DragIndicator as DragIcon,
   CalendarMonth as CalendarIcon,
 } from '@mui/icons-material';
-import QuickPlanSetup from '../PlanBuilder/QuickPlanSetup';
+import CustomWorkoutWizard from '../PlanBuilder/CustomWorkoutWizard';
 import {
   getPlanStatistics
 } from '../../utils/workoutPlanGenerator';
@@ -226,7 +226,7 @@ const PlanInfoTab = ({ currentPlan }) => {
           Create New Plan
         </Button>
 
-        <QuickPlanSetup
+        <CustomWorkoutWizard
           open={showPlanCreationModal}
           onClose={() => setShowPlanCreationModal(false)}
           onPlanCreated={() => {
@@ -469,7 +469,7 @@ const PlanInfoTab = ({ currentPlan }) => {
         </CardContent>
       </Card>
 
-      <QuickPlanSetup
+      <CustomWorkoutWizard
         open={showPlanCreationModal}
         onClose={() => setShowPlanCreationModal(false)}
         onPlanCreated={() => {

@@ -240,15 +240,21 @@ function AppContent() {
   };
 
   const handleCustomize = (type, equipmentFilter, supersetConfigParam = [2, 2, 2, 2]) => {
+    setLoading(true);
     setWorkoutType(type);
     setSupersetConfig(supersetConfigParam); // Store superset config
-    // Set empty workout for customization mode with the specified superset configuration
-    const totalExercises = supersetConfigParam.reduce((sum, count) => sum + count, 0);
-    const emptyWorkout = Array(totalExercises).fill(null);
-    setCurrentWorkout(emptyWorkout);
-    setIsCustomizeMode(true);
-    setShowPreview(true);
-    setCurrentScreen('preview');
+    
+    // Simulate loading to provide consistent UX with Generate button
+    setTimeout(() => {
+      // Set empty workout for customization mode with the specified superset configuration
+      const totalExercises = supersetConfigParam.reduce((sum, count) => sum + count, 0);
+      const emptyWorkout = Array(totalExercises).fill(null);
+      setCurrentWorkout(emptyWorkout);
+      setLoading(false);
+      setIsCustomizeMode(true);
+      setShowPreview(true);
+      setCurrentScreen('preview');
+    }, 500);
   };
 
   const handleBeginWorkout = (workout) => {

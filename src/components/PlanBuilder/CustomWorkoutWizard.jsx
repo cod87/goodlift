@@ -128,7 +128,7 @@ const CustomWorkoutWizard = ({ open, onClose, onPlanCreated }) => {
 
   const loadExerciseDatabase = async () => {
     try {
-      const response = await fetch('/data/exercises.json');
+      const response = await fetch(`${import.meta.env.BASE_URL}data/exercises.json`);
       const data = await response.json();
       setExerciseDatabase(data);
     } catch (err) {

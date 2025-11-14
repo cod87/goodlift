@@ -601,7 +601,7 @@ const UpcomingWeekTab = memo(({
             onClick={() => {
               // Generate a quick workout independent of the plan
               if (onNavigate) {
-                onNavigate('workout-hub');
+                onNavigate('selection');
               }
             }}
             sx={{ 

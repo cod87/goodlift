@@ -5,7 +5,7 @@ import {
   FitnessCenter,
   Timer as TimerIcon,
 } from '@mui/icons-material';
-import ActivityLogTab from './WorkTabs/ActivityLogTab';
+import WorkoutTab from './WorkTabs/WorkoutTab';
 import TimerTab from './WorkTabs/TimerTab';
 
 /**
@@ -73,7 +73,7 @@ const WorkTabs = ({
       {/* Tab Content */}
       <Box sx={{ mt: 2 }}>
         {activeTab === 0 && (
-          <ActivityLogTab
+          <WorkoutTab
             onNavigate={onNavigate}
             loading={loading}
             workoutType={workoutType}

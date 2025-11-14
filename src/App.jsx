@@ -65,6 +65,7 @@ function AppContent() {
   const [newAchievement, setNewAchievement] = useState(null);
   const [showAchievementDialog, setShowAchievementDialog] = useState(false);
   const [isCustomizeMode, setIsCustomizeMode] = useState(false);
+  const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Track superset configuration
   const { currentUser, isGuest, hasGuestData } = useAuth();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
@@ -220,12 +221,13 @@ function AppContent() {
     }
   };
 
-  const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null) => {
+  const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null, supersetConfigParam = [2, 2, 2, 2]) => {
     setLoading(true);
+    setSupersetConfig(supersetConfigParam); // Store superset config
     
     // Simulate loading to show user we're generating
     setTimeout(() => {
-      const workout = preGeneratedWorkout || generateWorkout(type, equipmentFilter);
+      const workout = preGeneratedWorkout || generateWorkout(type, equipmentFilter, supersetConfigParam);
       setCurrentWorkout(workout);
       setWorkoutType(type);
       setLoading(false);
@@ -237,10 +239,13 @@ function AppContent() {
     }, 500);
   };
 
-  const handleCustomize = (type) => {
+  const handleCustomize = (type, equipmentFilter, supersetConfigParam = [2, 2, 2, 2]) => {
     setWorkoutType(type);
-    // Set empty workout for customization mode
-    setCurrentWorkout([]);
+    setSupersetConfig(supersetConfigParam); // Store superset config
+    // Set empty workout for customization mode with the specified superset configuration
+    const totalExercises = supersetConfigParam.reduce((sum, count) => sum + count, 0);
+    const emptyWorkout = Array(totalExercises).fill(null);
+    setCurrentWorkout(emptyWorkout);
     setIsCustomizeMode(true);
     setShowPreview(true);
     setCurrentScreen('preview');
@@ -589,6 +594,7 @@ function AppContent() {
               onRandomizeExercise={handleRandomizeExercise}
               equipmentFilter={Array.from(selectedEquipment)}
               isCustomizeMode={isCustomizeMode}
+              supersetConfig={supersetConfig}
             />
           )}
           

@@ -6,7 +6,6 @@ import {
   CardContent,
   Typography,
   IconButton,
-  Grid,
   Chip,
   useTheme,
   useMediaQuery,
@@ -103,8 +102,13 @@ const MonthCalendarView = ({
   const today = new Date();
 
   return (
-    <Card elevation={2} sx={{ borderRadius: 3 }}>
-      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+    <Card elevation={2} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+      <CardContent sx={{ 
+        p: { xs: 2, sm: 3 },
+        width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+      }}>
         {/* Month Navigation */}
         <Box 
           sx={{ 
@@ -140,26 +144,38 @@ const MonthCalendarView = ({
         </Box>
 
         {/* Day Headers */}
-        <Grid container spacing={0.5} sx={{ mb: 1 }}>
+        <Box 
+          sx={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: 0.5,
+            mb: 1,
+          }}
+        >
           {dayNames.map((day) => (
-            <Grid item xs={12 / 7} key={day}>
-              <Box
-                sx={{
-                  textAlign: 'center',
-                  py: 1,
-                  fontWeight: 600,
-                  color: 'text.secondary',
-                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                }}
-              >
-                {isMobile ? day.charAt(0) : day}
-              </Box>
-            </Grid>
+            <Box
+              key={day}
+              sx={{
+                textAlign: 'center',
+                py: 1,
+                fontWeight: 600,
+                color: 'text.secondary',
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              }}
+            >
+              {isMobile ? day.charAt(0) : day}
+            </Box>
           ))}
-        </Grid>
+        </Box>
 
         {/* Calendar Grid */}
-        <Grid container spacing={0.5}>
+        <Box 
+          sx={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: 0.5,
+          }}
+        >
           {cells.map((date, index) => {
             const isCurrentMonth = isSameMonth(date, currentMonth);
             const isToday = isSameDay(date, today);
@@ -168,64 +184,63 @@ const MonthCalendarView = ({
             const primaryType = getPrimaryWorkoutType(workoutsOnDay);
 
             return (
-              <Grid item xs={12 / 7} key={index}>
-                <Box
-                  onClick={() => isCompleted && onDayClick?.(date, workoutsOnDay[0])}
+              <Box
+                key={index}
+                onClick={() => isCompleted && onDayClick?.(date, workoutsOnDay[0])}
+                sx={{
+                  aspectRatio: '1',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 1,
+                  cursor: isCompleted ? 'pointer' : 'default',
+                  bgcolor: isToday 
+                    ? 'action.selected' 
+                    : 'transparent',
+                  opacity: isCurrentMonth ? 1 : 0.3,
+                  border: isToday ? 2 : 1,
+                  borderColor: isToday ? 'primary.main' : 'transparent',
+                  transition: 'all 0.2s ease',
+                  minHeight: { xs: 48, sm: 56 },
+                  position: 'relative',
+                  '&:hover': isCompleted ? {
+                    bgcolor: 'action.hover',
+                    transform: 'scale(1.05)',
+                    boxShadow: 1,
+                  } : {},
+                }}
+              >
+                <Typography
+                  variant="body2"
                   sx={{
-                    aspectRatio: '1',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 1,
-                    cursor: isCompleted ? 'pointer' : 'default',
-                    bgcolor: isToday 
-                      ? 'action.selected' 
-                      : 'transparent',
-                    opacity: isCurrentMonth ? 1 : 0.3,
-                    border: isToday ? 2 : 1,
-                    borderColor: isToday ? 'primary.main' : 'transparent',
-                    transition: 'all 0.2s ease',
-                    minHeight: { xs: 48, sm: 56 },
-                    position: 'relative',
-                    '&:hover': isCompleted ? {
-                      bgcolor: 'action.hover',
-                      transform: 'scale(1.05)',
-                      boxShadow: 1,
-                    } : {},
+                    fontWeight: isToday ? 700 : 500,
+                    color: 'text.primary',
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    mb: 0.5,
                   }}
                 >
+                  {format(date, 'd')}
+                </Typography>
+                
+                {/* Large X marker for completed workouts */}
+                {isCompleted && (
                   <Typography
-                    variant="body2"
                     sx={{
-                      fontWeight: isToday ? 700 : 500,
-                      color: 'text.primary',
-                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                      mb: 0.5,
+                      fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                      fontWeight: 900,
+                      color: getWorkoutColor(primaryType),
+                      lineHeight: 1,
+                      textShadow: '0 1px 2px rgba(0,0,0,0.1)',
                     }}
                   >
-                    {format(date, 'd')}
+                    ✕
                   </Typography>
-                  
-                  {/* Large X marker for completed workouts */}
-                  {isCompleted && (
-                    <Typography
-                      sx={{
-                        fontSize: { xs: '1.5rem', sm: '1.75rem' },
-                        fontWeight: 900,
-                        color: getWorkoutColor(primaryType),
-                        lineHeight: 1,
-                        textShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                      }}
-                    >
-                      ✕
-                    </Typography>
-                  )}
-                </Box>
-              </Grid>
+                )}
+              </Box>
             );
           })}
-        </Grid>
+        </Box>
 
         {/* Legend */}
         <Box 

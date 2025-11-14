@@ -7,6 +7,9 @@ export const WORKOUT_TYPES = {
   UPPER: 'upper',
   LOWER: 'lower',
   FULL: 'full',
+  PUSH: 'push',
+  PULL: 'pull',
+  LEGS: 'legs',
 };
 
 /**

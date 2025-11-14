@@ -43,7 +43,7 @@ const WarmupCooldown = ({
   useEffect(() => {
     const loadStretches = async () => {
       try {
-        const response = await fetch('/data/stretching-library.json');
+        const response = await fetch(`${import.meta.env.BASE_URL}data/stretching-library.json`);
         const data = await response.json();
         
         // Extract muscle groups from exercises

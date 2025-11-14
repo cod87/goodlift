@@ -73,7 +73,7 @@ const FitnessPlanWizard = ({ open, onClose, onPlanCreated }) => {
     if (exerciseDatabase) return exerciseDatabase; // Return cached if already loaded
     
     try {
-      const response = await fetch('/data/exercises.json');
+      const response = await fetch(`${import.meta.env.BASE_URL}data/exercises.json`);
       const exercisesData = await response.json();
       const exercises = exercisesData.exercises || exercisesData;
       setExerciseDatabase(exercises);

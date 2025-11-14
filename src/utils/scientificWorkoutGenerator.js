@@ -27,7 +27,7 @@ export const generateScientificWorkout = async (params) => {
   // Load exercises database if not provided
   let allExercises = providedExercises;
   if (!allExercises) {
-    const response = await fetch('/data/exercises.json');
+    const response = await fetch(`${import.meta.env.BASE_URL}data/exercises.json`);
     const exercisesData = await response.json();
     allExercises = exercisesData.exercises || exercisesData;
   }

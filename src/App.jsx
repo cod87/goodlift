@@ -237,7 +237,7 @@ function AppContent() {
     }, 500);
   };
 
-  const handleCustomize = (type, equipmentFilter, config) => {
+  const handleCustomize = (type) => {
     setWorkoutType(type);
     // Set empty workout for customization mode
     setCurrentWorkout([]);

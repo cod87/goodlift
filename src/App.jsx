@@ -9,7 +9,6 @@ import SelectionScreen from './components/SelectionScreen';
 // WorkoutPlanScreen removed - no longer using workout planning
 import WorkoutScreen from './components/WorkoutScreen';
 import WorkoutPreview from './components/WorkoutPreview';
-import CustomizeExerciseScreen from './components/CustomizeExerciseScreen';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import AuthScreen from './components/AuthScreen';
@@ -65,7 +64,7 @@ function AppContent() {
   const [showMigrationDialog, setShowMigrationDialog] = useState(false);
   const [newAchievement, setNewAchievement] = useState(null);
   const [showAchievementDialog, setShowAchievementDialog] = useState(false);
-  const [customizeConfig, setCustomizeConfig] = useState({ exerciseCount: 8, supersetConfig: [2, 2, 2, 2] });
+  const [isCustomizeMode, setIsCustomizeMode] = useState(false);
   const { currentUser, isGuest, hasGuestData } = useAuth();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
@@ -232,6 +231,7 @@ function AppContent() {
       setLoading(false);
       
       // Show preview screen instead of going directly to workout
+      setIsCustomizeMode(false);
       setShowPreview(true);
       setCurrentScreen('preview');
     }, 500);
@@ -239,40 +239,26 @@ function AppContent() {
 
   const handleCustomize = (type, equipmentFilter, config) => {
     setWorkoutType(type);
-    if (config) {
-      setCustomizeConfig(config);
+    // Set empty workout for customization mode
+    setCurrentWorkout([]);
+    setIsCustomizeMode(true);
+    setShowPreview(true);
+    setCurrentScreen('preview');
+  };
+
+  const handleBeginWorkout = (workout) => {
+    // If workout is passed from WorkoutPreview, update it
+    if (workout) {
+      setCurrentWorkout(workout);
     }
-    setCurrentScreen('customize');
-  };
-
-  const handleCustomizeContinue = (selectedExercises) => {
-    setCurrentWorkout(selectedExercises);
-    setCurrentScreen('custom-preview');
-  };
-
-  const handleCustomizeCancel = () => {
-    // Return to home instead of selection
-    setCurrentScreen('home');
-  };
-
-  const handleCustomPreviewStart = (workout) => {
-    setCurrentWorkout(workout);
     setShowPreview(false);
-    setCurrentScreen('workout');
-  };
-
-  const handleCustomPreviewCancel = () => {
-    // Return to home instead of selection
-    setCurrentScreen('home');
-  };
-
-  const handleBeginWorkout = () => {
-    setShowPreview(false);
+    setIsCustomizeMode(false);
     setCurrentScreen('workout');
   };
 
   const handleCancelPreview = () => {
     setShowPreview(false);
+    setIsCustomizeMode(false);
     // Return to home instead of selection
     setCurrentScreen('home');
   };
@@ -593,31 +579,8 @@ function AppContent() {
               loading={loading}
             />
           )}
-
-          {currentScreen === 'customize' && (
-            <CustomizeExerciseScreen
-              workoutType={workoutType}
-              equipmentFilter={selectedEquipment.has('all') ? 'all' : Array.from(selectedEquipment)}
-              allExercises={allExercises}
-              onCancel={handleCustomizeCancel}
-              onContinue={handleCustomizeContinue}
-              exerciseCount={customizeConfig.exerciseCount}
-              supersetConfig={customizeConfig.supersetConfig}
-            />
-          )}
-
-          {currentScreen === 'custom-preview' && currentWorkout.length > 0 && (
-            <WorkoutPreview
-              workout={currentWorkout}
-              workoutType={workoutType}
-              onStart={handleCustomPreviewStart}
-              onCancel={handleCustomPreviewCancel}
-              onRandomizeExercise={handleRandomizeExercise}
-              equipmentFilter={Array.from(selectedEquipment)}
-            />
-          )}
           
-          {currentScreen === 'preview' && showPreview && currentWorkout.length > 0 && (
+          {currentScreen === 'preview' && showPreview && (
             <WorkoutPreview
               workout={currentWorkout}
               workoutType={workoutType}
@@ -625,6 +588,7 @@ function AppContent() {
               onCancel={handleCancelPreview}
               onRandomizeExercise={handleRandomizeExercise}
               equipmentFilter={Array.from(selectedEquipment)}
+              isCustomizeMode={isCustomizeMode}
             />
           )}
           

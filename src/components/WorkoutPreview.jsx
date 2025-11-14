@@ -12,7 +12,7 @@ import ExerciseAutocomplete from './ExerciseAutocomplete';
  * Allows users to set starting weights and target reps before beginning
  * Memoized to prevent unnecessary re-renders
  */
-const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise }) => {
+const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise, isCustomizeMode = false }) => {
   const [exerciseSettings, setExerciseSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [savedToFavorites, setSavedToFavorites] = useState(false);
@@ -20,6 +20,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [customizedSettings, setCustomizedSettings] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [availableExercises, setAvailableExercises] = useState([]);
+  const [currentWorkout, setCurrentWorkout] = useState(workout);
 
   // Load all exercises data
   useEffect(() => {
@@ -65,6 +66,17 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
     
     const loadSettings = async () => {
       const settings = {};
+      
+      // If in customize mode and workout is empty, initialize with empty workout structure
+      if (isCustomizeMode && workout.length === 0) {
+        // Create 8 empty exercise slots (4 supersets of 2)
+        const emptyWorkout = Array(8).fill(null);
+        setCurrentWorkout(emptyWorkout);
+        setLoading(false);
+        return;
+      }
+      
+      // Otherwise load normal settings from workout
       for (const exercise of workout) {
         const exerciseName = exercise['Exercise Name'];
         const [weight, targetReps] = await Promise.all([
@@ -77,10 +89,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
         };
       }
       setExerciseSettings(settings);
+      setCurrentWorkout(workout);
       setLoading(false);
     };
     loadSettings();
-  }, [workout]);
+  }, [workout, isCustomizeMode]);
 
   // Handle workout changes (e.g., from randomization) and preserve customized settings
   useEffect(() => {
@@ -212,14 +225,46 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   }, [onRandomizeExercise]);
 
   const handleSwapExercise = useCallback((globalIndex, newExercise) => {
-    if (!newExercise || !onRandomizeExercise) return;
+    if (!newExercise) return;
     
-    // Use the randomize callback to swap the exercise
-    // This will trigger the parent component to update the workout
-    onRandomizeExercise(newExercise, globalIndex);
-  }, [onRandomizeExercise]);
+    // Update the currentWorkout state with the new exercise
+    setCurrentWorkout(prev => {
+      const updated = [...prev];
+      updated[globalIndex] = newExercise;
+      return updated;
+    });
+    
+    // Load settings for the new exercise if not already customized
+    const exerciseName = newExercise['Exercise Name'];
+    if (!customizedSettings[exerciseName]) {
+      getExerciseWeight(exerciseName).then(weight => {
+        getExerciseTargetReps(exerciseName).then(targetReps => {
+          setExerciseSettings(prev => ({
+            ...prev,
+            [exerciseName]: {
+              weight: weight ?? '',
+              targetReps: targetReps ?? '',
+            }
+          }));
+        });
+      });
+    }
+  }, [customizedSettings]);
 
   const handleStartWorkout = async () => {
+    // In customize mode, check if all exercises are selected
+    if (isCustomizeMode) {
+      const hasEmptySlots = currentWorkout.some(ex => ex === null);
+      if (hasEmptySlots) {
+        setSnackbar({
+          open: true,
+          message: 'Please select exercises for all slots before starting',
+          severity: 'warning'
+        });
+        return;
+      }
+    }
+    
     // Save all settings before starting workout, storing null for empty strings
     // Save sequentially to avoid race conditions with localStorage reads/writes
     for (const [exerciseName, settings] of Object.entries(exerciseSettings)) {
@@ -228,7 +273,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
       await setExerciseWeight(exerciseName, weight);
       await setExerciseTargetReps(exerciseName, targetReps);
     }
-    onStart();
+    onStart(currentWorkout);
   };
 
   const handleSaveToFavorites = () => {
@@ -236,7 +281,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
       saveFavoriteWorkout({
         name: `${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`,
         type: workoutType,
-        exercises: workout,
+        exercises: currentWorkout.filter(ex => ex !== null),
       });
       setSavedToFavorites(true);
       setShowNotification(true);
@@ -247,9 +292,12 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
 
   // Group exercises into supersets (pairs of 2)
   const supersets = [];
-  for (let i = 0; i < workout.length; i += 2) {
-    if (workout[i] && workout[i + 1]) {
-      supersets.push([workout[i], workout[i + 1]]);
+  for (let i = 0; i < currentWorkout.length; i += 2) {
+    const ex1 = currentWorkout[i];
+    const ex2 = currentWorkout[i + 1];
+    // Include pairs even if one or both are null (for customize mode)
+    if (ex1 !== undefined && ex2 !== undefined) {
+      supersets.push([ex1, ex2]);
     }
   }
 
@@ -321,13 +369,13 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           color: 'primary.main',
           fontSize: { xs: '1.5rem', sm: '3rem' }
         }}>
-          Your {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout
+          {isCustomizeMode ? 'Customize Your Workout' : `Your ${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`}
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-          {supersets.length} Supersets • {workout.length} Exercises • 3 Sets Each
+          {supersets.length} Supersets • {currentWorkout.length} Exercises • 3 Sets Each
         </Typography>
         <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-          Set your starting target weight and target reps for each exercise
+          {isCustomizeMode ? 'Select exercises and set your target weight and reps for each' : 'Set your starting target weight and target reps for each exercise'}
         </Typography>
       </Box>
 
@@ -380,8 +428,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                 
                 <Stack spacing={{ xs: 1, sm: 1.5 }}>
                   {superset.map((exercise, exerciseIdx) => {
-                    const exerciseName = exercise['Exercise Name'];
-                    const settings = exerciseSettings[exerciseName] || { weight: '', targetReps: '' };
+                    const exerciseName = exercise ? exercise['Exercise Name'] : null;
+                    const settings = exerciseName ? (exerciseSettings[exerciseName] || { weight: '', targetReps: '' }) : { weight: '', targetReps: '' };
                     
                     return (
                       <Box 
@@ -404,7 +452,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               fontSize: { xs: '1.25rem', sm: '1.75rem' },
                               color: 'primary.main',
                               fontWeight: 700,
-                              minWidth: { xs: '28px', sm: '36px' }
+                              width: { xs: '28px', sm: '36px' },
+                              textAlign: 'center',
+                              flexShrink: 0,
                             }}
                           >
                             {exerciseIdx === 0 ? 'A' : 'B'}
@@ -422,22 +472,24 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                                 }}
                                 availableExercises={availableExercises}
                                 label="Exercise"
-                                placeholder="Type to search and swap..."
+                                placeholder={isCustomizeMode ? "Type to search and select..." : "Type to search and swap..."}
                                 disabled={availableExercises.length === 0}
                               />
                             </Box>
                           </Box>
                         </Box>
-                        {/* Weight and Reps Inputs */}
-                        <Stack 
-                          direction="row" 
-                          spacing={{ xs: 1, sm: 1.5 }} 
-                          sx={{ 
-                            pl: { xs: 3.5, sm: 5.5 },
-                            flexWrap: { xs: 'wrap', sm: 'nowrap' },
-                            mb: { xs: 1, sm: 1.5 }
-                          }}
-                        >
+                        {/* Weight and Reps Inputs - Only show if exercise is selected */}
+                        {exercise && (
+                          <>
+                            <Stack 
+                              direction="row" 
+                              spacing={{ xs: 1, sm: 1.5 }} 
+                              sx={{ 
+                                pl: { xs: 3.5, sm: 5.5 },
+                                flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                                mb: { xs: 1, sm: 1.5 }
+                              }}
+                            >
                           <TextField
                             type="tel"
                             inputMode="decimal"
@@ -509,7 +561,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               fontSize: { xs: '0.65rem', sm: '0.75rem' }
                             }}
                           />
-                          {onRandomizeExercise && (
+                          {onRandomizeExercise && !isCustomizeMode && (
                             <IconButton
                               size="small"
                               onClick={(e) => {
@@ -531,6 +583,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             </IconButton>
                           )}
                         </Box>
+                        </>
+                        )}
                       </Box>
                     );
                   })}
@@ -662,6 +716,7 @@ WorkoutPreview.propTypes = {
   onCancel: PropTypes.func.isRequired,
   onRandomizeExercise: PropTypes.func,
   equipmentFilter: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+  isCustomizeMode: PropTypes.bool,
 };
 
 export default WorkoutPreview;

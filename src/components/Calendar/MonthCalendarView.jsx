@@ -13,10 +13,6 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
-  FitnessCenter,
-  DirectionsRun,
-  SelfImprovement,
-  Hotel,
 } from '@mui/icons-material';
 import { 
   startOfMonth, 
@@ -92,6 +88,8 @@ const MonthCalendarView = ({
       return 'error.main';
     } else if (type === 'stretch' || type === 'active_recovery' || type === 'yoga' || type === 'mobility') {
       return 'secondary.main';
+    } else if (type === 'rest') {
+      return 'action.disabled';
     } else {
       return 'primary.main'; // Strength training
     }
@@ -254,35 +252,48 @@ const MonthCalendarView = ({
         <Box 
           sx={{ 
             display: 'flex', 
-            gap: 2, 
+            gap: { xs: 1, sm: 2 }, 
             mt: 3, 
-            flexWrap: 'wrap',
+            flexWrap: 'nowrap',
             justifyContent: 'center',
+            overflowX: 'auto',
           }}
         >
           <Chip
-            icon={<FitnessCenter />}
             label="Strength"
             size="small"
-            sx={{ bgcolor: 'primary.light' }}
+            sx={{ 
+              bgcolor: 'primary.light',
+              fontSize: { xs: '0.7rem', sm: '0.8125rem' },
+              height: { xs: 24, sm: 32 },
+            }}
           />
           <Chip
-            icon={<SelfImprovement />}
             label="Yoga"
             size="small"
-            sx={{ bgcolor: 'secondary.light' }}
+            sx={{ 
+              bgcolor: 'secondary.light',
+              fontSize: { xs: '0.7rem', sm: '0.8125rem' },
+              height: { xs: 24, sm: 32 },
+            }}
           />
           <Chip
-            icon={<DirectionsRun />}
             label="Cardio"
             size="small"
-            sx={{ bgcolor: 'error.light' }}
+            sx={{ 
+              bgcolor: 'error.light',
+              fontSize: { xs: '0.7rem', sm: '0.8125rem' },
+              height: { xs: 24, sm: 32 },
+            }}
           />
           <Chip
-            icon={<Hotel />}
             label="Rest"
             size="small"
-            sx={{ bgcolor: 'action.disabledBackground' }}
+            sx={{ 
+              bgcolor: 'action.disabledBackground',
+              fontSize: { xs: '0.7rem', sm: '0.8125rem' },
+              height: { xs: 24, sm: 32 },
+            }}
           />
         </Box>
       </CardContent>

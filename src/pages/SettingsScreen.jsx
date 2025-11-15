@@ -35,7 +35,6 @@ import {
   Storage,
   Download,
   ChevronRight,
-  EditNote,
   ListAlt,
   AccountCircle,
   Scale,
@@ -288,41 +287,6 @@ const SettingsScreen = ({ onNavigate }) => {
 
         <Stack spacing={3} sx={{ maxWidth: 600 }}>
           {/* My Plans Section removed - no longer using workout planning */}
-
-          {/* Activity Management Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
-            <CardContent sx={{ p: 0 }}>
-              <Typography
-                variant="overline"
-                sx={{
-                  px: 2,
-                  pt: 2,
-                  pb: 1,
-                  display: 'block',
-                  fontWeight: 700,
-                  color: 'text.secondary',
-                  letterSpacing: '0.1em',
-                }}
-              >
-                Activity Management
-              </Typography>
-              <List sx={{ py: 0 }}>
-                <ListItem disablePadding>
-                  <ListItemButton onClick={() => handleNavigate('log-activity')}>
-                    <ListItemIcon>
-                      <EditNote sx={{ color: 'primary.main' }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Log Activity"
-                      secondary="Manually log workouts and activities"
-                      primaryTypographyProps={{ fontWeight: 500 }}
-                    />
-                    <ChevronRight sx={{ color: 'text.secondary' }} />
-                  </ListItemButton>
-                </ListItem>
-              </List>
-            </CardContent>
-          </Card>
 
           {/* Exercise Database Section */}
           <Card sx={{ borderRadius: 2, boxShadow: 3 }}>

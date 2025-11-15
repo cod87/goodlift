@@ -66,6 +66,7 @@ import {
   saveHiitPreset,
   deleteHiitPreset,
 } from '../utils/storage';
+import HiitExerciseAutocomplete from '../components/HiitExerciseAutocomplete';
 
 const TIMER_MODES = {
   HIIT: 'hiit',
@@ -129,6 +130,9 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [presetName, setPresetName] = useState('');
   const [editingPreset, setEditingPreset] = useState(null);
   
+  // HIIT exercises autocomplete
+  const [hiitExercises, setHiitExercises] = useState([]);
+  
   // Completion dialog
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const [perceivedEffort, setPerceivedEffort] = useState(5);
@@ -150,6 +154,21 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
       }
     };
     loadPresets();
+  }, []);
+
+  // Load HIIT exercises for autocomplete
+  useEffect(() => {
+    const loadHiitExercises = async () => {
+      try {
+        const response = await fetch('/data/hiit-exercises.json');
+        const data = await response.json();
+        setHiitExercises(data);
+      } catch (error) {
+        console.error('Error loading HIIT exercises:', error);
+        setHiitExercises([]);
+      }
+    };
+    loadHiitExercises();
   }, []);
 
   // Initialize audio
@@ -746,15 +765,23 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     </Typography>
                     <Stack spacing={1.5}>
                       {Array.from({ length: rounds || 0 }).map((_, index) => (
-                        <TextField
+                        <HiitExerciseAutocomplete
                           key={index}
                           label={`Round ${index + 1} Exercise`}
                           value={workIntervalNames[index] || ''}
-                          onChange={(e) => {
+                          onChange={(event, newValue) => {
                             const newNames = [...workIntervalNames];
-                            newNames[index] = e.target.value;
+                            // Handle both object (selected from list) and string (typed) values
+                            if (typeof newValue === 'string') {
+                              newNames[index] = newValue;
+                            } else if (newValue && newValue.name) {
+                              newNames[index] = newValue.name;
+                            } else {
+                              newNames[index] = '';
+                            }
                             setWorkIntervalNames(newNames);
                           }}
+                          availableExercises={hiitExercises}
                           placeholder="e.g., push-ups, burpees, jumping jacks"
                           size="small"
                           fullWidth
@@ -787,7 +814,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   
                   {recoveryInterval > 0 && (
                     <TextField
-                      label="Recovery Break After Rounds"
+                      label="Recovery Break Frequency (after every N rounds)"
                       type="number"
                       value={recoveryAfterRounds === null || recoveryAfterRounds === undefined ? '' : recoveryAfterRounds}
                       onChange={(e) => {

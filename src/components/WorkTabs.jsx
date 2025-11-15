@@ -36,6 +36,11 @@ const WorkTabs = ({
     setActiveTab(newValue);
   };
 
+  // Public method to change tab programmatically
+  const changeTab = (tabIndex) => {
+    setActiveTab(tabIndex);
+  };
+
   return (
     <Box 
       sx={{ 
@@ -91,6 +96,7 @@ const WorkTabs = ({
             onEquipmentChange={onEquipmentChange}
             onStartWorkout={onStartWorkout}
             onCustomize={onCustomize}
+            onTabChange={changeTab}
           />
         )}
         {activeTab === 1 && (

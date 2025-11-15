@@ -207,6 +207,11 @@ export const useWorkoutGenerator = () => {
         break;
       }
       
+      case 'core':
+        // Core-focused workout: Core exercises with some lower body stabilization
+        workout.push(...getRandomExercises('Core', totalExercises, workout, equipmentFilter));
+        break;
+      
       default:
         console.warn(`Unknown workout type: ${type}`);
         break;

@@ -9,7 +9,6 @@ import {
   Chip,
   Button,
   IconButton,
-  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -32,16 +31,17 @@ import {
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
 import { getWorkoutHistory } from '../../utils/storage';
 import { motion } from 'framer-motion';
+import RestDayMessage from '../RestDayMessage';
 
 /**
  * WeeklyScheduleView - Displays the current week's workout schedule
  * Shows assigned workouts for each day, with suggestions from previous week
  */
-const WeeklyScheduleView = ({ onStartWorkout }) => {
-  const theme = useTheme();
+const WeeklyScheduleView = ({ onStartWorkout, onNavigate }) => {
   const { weeklySchedule, currentWeek, deloadWeekActive, getWorkoutSuggestion } = useWeekScheduling();
   const [selectedDay, setSelectedDay] = useState(null);
   const [workoutHistory, setWorkoutHistory] = useState([]);
+  const [showRestDayMessage, setShowRestDayMessage] = useState(false);
 
   // Load workout history for suggestions
   useState(() => {
@@ -123,9 +123,33 @@ const WeeklyScheduleView = ({ onStartWorkout }) => {
   };
 
   const handleStartWorkout = () => {
-    if (selectedDay && onStartWorkout) {
+    if (selectedDay && weeklySchedule[selectedDay]) {
       const session = weeklySchedule[selectedDay];
-      onStartWorkout(session);
+      const sessionType = (session.sessionType || '').toLowerCase();
+
+      // Check if it's a rest day
+      if (sessionType.includes('rest')) {
+        handleCloseDialog();
+        setShowRestDayMessage(true);
+        return;
+      }
+
+      // Check if it's cardio or mobility
+      if (sessionType.includes('cardio') || sessionType.includes('hiit') || 
+          sessionType.includes('yoga') || sessionType.includes('mobility') || 
+          sessionType.includes('stretch')) {
+        handleCloseDialog();
+        // Navigate to cardio/timer screen if callback is provided
+        if (onNavigate) {
+          onNavigate('timer');
+        }
+        return;
+      }
+
+      // It's a strength training session
+      if (onStartWorkout) {
+        onStartWorkout(session);
+      }
     }
     handleCloseDialog();
   };
@@ -139,6 +163,11 @@ const WeeklyScheduleView = ({ onStartWorkout }) => {
 
   return (
     <Box sx={{ width: '100%', maxWidth: 800, mx: 'auto', p: 2 }}>
+      {/* Rest Day Message Modal */}
+      {showRestDayMessage && (
+        <RestDayMessage onClose={() => setShowRestDayMessage(false)} />
+      )}
+
       <Box sx={{ mb: 3, textAlign: 'center' }}>
         <Typography variant="h5" fontWeight={700} gutterBottom>
           Week {currentWeek} Schedule
@@ -332,6 +361,7 @@ const WeeklyScheduleView = ({ onStartWorkout }) => {
 
 WeeklyScheduleView.propTypes = {
   onStartWorkout: PropTypes.func,
+  onNavigate: PropTypes.func,
 };
 
 export default WeeklyScheduleView;

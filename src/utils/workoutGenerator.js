@@ -38,7 +38,8 @@ const getOptimalExerciseCount = (sessionType, experienceLevel = 'intermediate') 
       lower: 6,   // Lower body: 6 exercises
       push: 7,    // Push day: 7 exercises
       pull: 7,    // Pull day: 7 exercises
-      legs: 7     // Leg day: 7 exercises
+      legs: 7,    // Leg day: 7 exercises
+      core: 6     // Core day: 6 exercises
     },
     intermediate: {
       full: 8,    // Full body: 8 exercises
@@ -46,7 +47,8 @@ const getOptimalExerciseCount = (sessionType, experienceLevel = 'intermediate') 
       lower: 8,   // Lower body: 8 exercises
       push: 8,    // Push day: 8 exercises
       pull: 8,    // Pull day: 8 exercises
-      legs: 8     // Leg day: 8 exercises
+      legs: 8,    // Leg day: 8 exercises
+      core: 8     // Core day: 8 exercises
     },
     advanced: {
       full: 9,    // Full body: 9 exercises
@@ -54,7 +56,8 @@ const getOptimalExerciseCount = (sessionType, experienceLevel = 'intermediate') 
       lower: 10,  // Lower body: 10 exercises
       push: 10,   // Push day: 10 exercises
       pull: 10,   // Pull day: 10 exercises
-      legs: 10    // Leg day: 10 exercises
+      legs: 10,   // Leg day: 10 exercises
+      core: 10    // Core day: 10 exercises
     }
   };
 
@@ -265,6 +268,12 @@ const generatePPLExercises = (allExercises, type, equipmentFilter = 'all', exper
       }
       break;
     }
+
+    case 'core':
+      // Core-focused workout: Core exercises with some lower body stabilization
+      // Focus on varied core movements (anti-rotation, anti-extension, flexion)
+      workout.push(...getRandomExercises(exerciseDB, 'Core', targetCount, workout, equipmentFilter));
+      break;
 
     default:
       console.warn(`Unknown workout type: ${type}`);

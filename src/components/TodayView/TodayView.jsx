@@ -266,10 +266,18 @@ const TodayView = memo(({
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <WeeklyScheduleView onStartWorkout={(session) => {
-              // Could trigger workout start from schedule
-              console.log('Start workout from schedule:', session);
-            }} />
+            <WeeklyScheduleView 
+              onStartWorkout={(session) => {
+                // Trigger workout start from schedule
+                console.log('Start workout from schedule:', session);
+                if (onQuickStart) {
+                  // Pass session to quick start handler
+                  const sessionType = (session.sessionType || 'full').toLowerCase();
+                  onQuickStart(sessionType);
+                }
+              }}
+              onNavigate={onNavigate}
+            />
           </AccordionDetails>
         </Accordion>
       </Box>

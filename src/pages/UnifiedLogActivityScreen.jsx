@@ -70,10 +70,13 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
       errors.date = 'Date is required';
     }
     
-    if (!values.duration) {
-      errors.duration = 'Duration is required';
-    } else if (isNaN(values.duration) || parseFloat(values.duration) <= 0) {
-      errors.duration = 'Duration must be a positive number';
+    // Only validate duration for non-rest sessions
+    if (values.sessionType !== SESSION_TYPES.REST) {
+      if (!values.duration) {
+        errors.duration = 'Duration is required';
+      } else if (isNaN(values.duration) || parseFloat(values.duration) <= 0) {
+        errors.duration = 'Duration must be a positive number';
+      }
     }
 
     // Validate strength session-specific fields
@@ -97,7 +100,10 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       const timestamp = values.date.getTime();
-      const duration = parseFloat(values.duration) * SECONDS_PER_MINUTE;
+      // For rest days, set duration to 0 if not provided
+      const duration = values.sessionType === SESSION_TYPES.REST && !values.duration 
+        ? 0 
+        : parseFloat(values.duration) * SECONDS_PER_MINUTE;
 
       // Save workout with manual log details
       const workoutData = {
@@ -306,22 +312,24 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                       </FormControl>
                     )}
 
-                    {/* Duration Field */}
-                    <Field name="duration">
-                      {({ field }) => (
-                        <TextField
-                          {...field}
-                          fullWidth
-                          type="number"
-                          label="Duration (minutes)"
-                          placeholder="e.g., 45"
-                          error={touched.duration && Boolean(errors.duration)}
-                          helperText={touched.duration && errors.duration}
-                          variant="outlined"
-                          inputProps={{ min: 0, step: 1 }}
-                        />
-                      )}
-                    </Field>
+                    {/* Duration Field - Hide for Rest Days */}
+                    {values.sessionType !== SESSION_TYPES.REST && (
+                      <Field name="duration">
+                        {({ field }) => (
+                          <TextField
+                            {...field}
+                            fullWidth
+                            type="number"
+                            label="Duration (minutes)"
+                            placeholder="e.g., 45"
+                            error={touched.duration && Boolean(errors.duration)}
+                            helperText={touched.duration && errors.duration}
+                            variant="outlined"
+                            inputProps={{ min: 0, step: 1 }}
+                          />
+                        )}
+                      </Field>
+                    )}
 
                     {/* Strength-specific fields */}
                     {values.sessionType === SESSION_TYPES.STRENGTH && (

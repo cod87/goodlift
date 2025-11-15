@@ -31,7 +31,6 @@ import {
 } from '@mui/icons-material';
 import { getWorkoutHistory } from '../../utils/storage';
 import { touchTargets } from '../../theme/responsive';
-import { useUserProfile } from '../../contexts/UserProfileContext';
 import MonthCalendarView from '../Calendar/MonthCalendarView';
 import FavouriteWorkoutsWidget from './FavouriteWorkoutsWidget';
 
@@ -59,7 +58,6 @@ const WorkoutTab = memo(({
   const [currentDate, setCurrentDate] = useState('');
   const [recentWorkouts, setRecentWorkouts] = useState([]);
   const [workoutHistory, setWorkoutHistory] = useState([]);
-  const { stats } = useUserProfile();
   
   // Workout configuration state
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Default: 4 supersets of 2
@@ -434,60 +432,6 @@ const WorkoutTab = memo(({
 
       {/* Favourite Workouts Widget */}
       <FavouriteWorkoutsWidget onStartWorkout={onStartWorkout} />
-
-      {/* Streak & Stats Card */}
-      <Card 
-        elevation={2}
-        sx={{ 
-          mb: 3,
-          borderRadius: 3,
-        }}
-      >
-        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 600, 
-              color: 'text.primary',
-              mb: 2
-            }}
-          >
-            Your Activity
-          </Typography>
-          <Box 
-            sx={{ 
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr 1fr' },
-              gap: 2,
-            }}
-          >
-            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                {stats?.currentStreak || 0}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Day Streak
-              </Typography>
-            </Box>
-            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                {stats?.totalWorkouts || 0}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Total Workouts
-              </Typography>
-            </Box>
-            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main' }}>
-                {stats?.totalPRs || 0}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Personal Records
-              </Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
 
       {/* Recent Workout History */}
       {recentWorkouts.length > 0 && (

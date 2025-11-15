@@ -34,6 +34,7 @@ import { touchTargets } from '../../theme/responsive';
 import MonthCalendarView from '../Calendar/MonthCalendarView';
 import FavouriteWorkoutsWidget from './FavouriteWorkoutsWidget';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
+import RestDayMessage from '../RestDayMessage';
 
 /**
  * WorkoutTab - Integrated workout configuration and activity logging
@@ -55,10 +56,12 @@ const WorkoutTab = memo(({
   onEquipmentChange,
   onStartWorkout,
   onCustomize,
+  onTabChange, // New prop for changing tabs
 }) => {
   const [currentDate, setCurrentDate] = useState('');
   const [recentWorkouts, setRecentWorkouts] = useState([]);
   const [workoutHistory, setWorkoutHistory] = useState([]);
+  const [showRestDayMessage, setShowRestDayMessage] = useState(false);
   const { weeklySchedule } = useWeekScheduling();
   
   // Workout configuration state
@@ -185,8 +188,56 @@ const WorkoutTab = memo(({
     }
   };
 
+  // Handle clicking on suggested session
+  const handleSuggestedSessionClick = () => {
+    if (!todaysWorkout) return;
+
+    const sessionType = (todaysWorkout.sessionType || '').toLowerCase();
+
+    // Check if it's a rest day
+    if (sessionType.includes('rest')) {
+      setShowRestDayMessage(true);
+      return;
+    }
+
+    // Check if it's cardio or mobility
+    if (sessionType.includes('cardio') || sessionType.includes('hiit') || 
+        sessionType.includes('yoga') || sessionType.includes('mobility') || 
+        sessionType.includes('stretch')) {
+      // Switch to cardio & yoga tab
+      if (onTabChange) {
+        onTabChange(1); // Index 1 is the Cardio & Yoga tab
+      }
+      return;
+    }
+
+    // It's a strength training session - route to workout preview
+    const strengthTypes = ['full', 'upper', 'lower', 'push', 'pull', 'legs', 'core'];
+    if (strengthTypes.includes(sessionType)) {
+      // Update the workout type to match the suggestion
+      onWorkoutTypeChange(sessionType);
+      
+      // Start the workout with the suggested type
+      const equipmentFilter = selectedEquipment.has('all') 
+        ? 'all' 
+        : Array.from(selectedEquipment);
+      
+      // If the session has exercises, use them; otherwise generate
+      if (todaysWorkout.exercises && todaysWorkout.exercises.length > 0) {
+        onStartWorkout(sessionType, equipmentFilter, todaysWorkout.exercises, supersetConfig);
+      } else {
+        onStartWorkout(sessionType, equipmentFilter, null, supersetConfig);
+      }
+    }
+  };
+
   return (
     <Box>
+      {/* Rest Day Message Modal */}
+      {showRestDayMessage && (
+        <RestDayMessage onClose={() => setShowRestDayMessage(false)} />
+      )}
+
       {/* Date Section with Suggested Session */}
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography 
@@ -211,9 +262,14 @@ const WorkoutTab = memo(({
                 color="primary"
                 variant="outlined"
                 size="small"
+                onClick={handleSuggestedSessionClick}
                 sx={{ 
                   fontWeight: 600,
-                  fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                  }
                 }}
               />
             </>
@@ -260,6 +316,7 @@ const WorkoutTab = memo(({
                 <MenuItem value="push">Push</MenuItem>
                 <MenuItem value="pull">Pull</MenuItem>
                 <MenuItem value="legs">Legs</MenuItem>
+                <MenuItem value="core">Core</MenuItem>
               </Select>
             </FormControl>
 
@@ -554,6 +611,7 @@ WorkoutTab.propTypes = {
   onEquipmentChange: PropTypes.func,
   onStartWorkout: PropTypes.func,
   onCustomize: PropTypes.func,
+  onTabChange: PropTypes.func,
 };
 
 export default WorkoutTab;

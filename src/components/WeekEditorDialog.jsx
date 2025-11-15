@@ -57,6 +57,7 @@ const WeekEditorDialog = ({ open, onClose }) => {
     { value: 'push', label: 'Push' },
     { value: 'pull', label: 'Pull' },
     { value: 'legs', label: 'Legs' },
+    { value: 'core', label: 'Core' },
     { value: 'cardio', label: 'Cardio' },
     { value: 'hiit', label: 'HIIT' },
     { value: 'yoga', label: 'Yoga' },
@@ -249,49 +250,95 @@ const WeekEditorDialog = ({ open, onClose }) => {
                     </Box>
                   ) : (
                     // View Mode
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: { xs: 'flex-start', sm: 'center' },
+                      justifyContent: 'space-between',
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      gap: { xs: 1, sm: 0 },
+                    }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: { xs: 'flex-start', sm: 'center' }, 
+                        gap: 2, 
+                        flex: 1,
+                        width: '100%',
+                        flexDirection: { xs: 'column', sm: 'row' },
+                      }}>
                         {/* Day Label */}
-                        <Box sx={{ minWidth: 100 }}>
+                        <Box sx={{ 
+                          minWidth: { xs: 'auto', sm: 100 },
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}>
                           <Typography variant="subtitle1" fontWeight={600}>
                             {day}
                           </Typography>
                           {isToday && (
-                            <Typography variant="caption" color="primary.main">
-                              Today
-                            </Typography>
+                            <Chip 
+                              label="Today" 
+                              size="small" 
+                              color="primary"
+                            />
                           )}
                         </Box>
 
-                        {/* Session Info */}
-                        <Box sx={{ flex: 1 }}>
-                          {session ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              {getSessionIcon(session.sessionType)}
-                              <Typography variant="body1">
-                                {session.sessionName || getSessionTypeDisplay(session.sessionType)}
+                        {/* Session Info and Status Chip */}
+                        <Box sx={{ 
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 1,
+                          width: '100%',
+                        }}>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            {session ? (
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                {getSessionIcon(session.sessionType)}
+                                <Typography 
+                                  variant="body1"
+                                  sx={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {session.sessionName || getSessionTypeDisplay(session.sessionType)}
+                                </Typography>
+                              </Box>
+                            ) : (
+                              <Typography variant="body2" color="text.secondary">
+                                No workout assigned
                               </Typography>
-                            </Box>
-                          ) : (
-                            <Typography variant="body2" color="text.secondary">
-                              No workout assigned
-                            </Typography>
+                            )}
+                          </Box>
+
+                          {/* Status Chip - hidden on mobile */}
+                          {session && (
+                            <Chip
+                              label={getSessionTypeDisplay(session.sessionType)}
+                              color={getSessionColor(session.sessionType)}
+                              size="small"
+                              variant="outlined"
+                              sx={{ 
+                                display: { xs: 'none', sm: 'flex' },
+                                flexShrink: 0,
+                              }}
+                            />
                           )}
                         </Box>
-
-                        {/* Status Chip */}
-                        {session && (
-                          <Chip
-                            label={getSessionTypeDisplay(session.sessionType)}
-                            color={getSessionColor(session.sessionType)}
-                            size="small"
-                            variant="outlined"
-                          />
-                        )}
                       </Box>
 
-                      {/* Action Buttons */}
-                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      {/* Action Buttons - always visible and properly positioned */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        gap: 0.5,
+                        flexShrink: 0,
+                        alignSelf: { xs: 'flex-end', sm: 'center' },
+                        ml: { xs: 0, sm: 1 },
+                      }}>
                         <IconButton
                           size="small"
                           color="primary"

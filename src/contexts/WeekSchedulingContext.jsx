@@ -180,6 +180,16 @@ export const WeekSchedulingProvider = ({ children }) => {
     const updatedState = {
       ...weekState,
       deloadWeekActive: true,
+      // Clear weekly schedule when deload week is initiated
+      weeklySchedule: {
+        Monday: null,
+        Tuesday: null,
+        Wednesday: null,
+        Thursday: null,
+        Friday: null,
+        Saturday: null,
+        Sunday: null,
+      },
     };
     
     setWeekState(updatedState);

@@ -10,14 +10,21 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import { 
   Star,
   PlayArrow,
   Delete,
   FitnessCenter,
+  CalendarMonth,
+  CheckCircle,
 } from '@mui/icons-material';
 import { getFavoriteWorkouts, deleteFavoriteWorkout } from '../../utils/storage';
+import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
 
 /**
  * FavouriteWorkoutsWidget - Displays saved favourite workouts
@@ -25,9 +32,23 @@ import { getFavoriteWorkouts, deleteFavoriteWorkout } from '../../utils/storage'
  * - Compact display of favourite workouts
  * - Quick start button for each workout
  * - Delete functionality
+ * - Assign to specific day of week
  */
 const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
   const [favoriteWorkouts, setFavoriteWorkouts] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
+  const { assignWorkoutToDay, weeklySchedule } = useWeekScheduling();
+
+  const daysOfWeek = [
+    'Monday',
+    'Tuesday', 
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
 
   // Load favorite workouts
   useEffect(() => {
@@ -70,6 +91,47 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
       const preGeneratedWorkout = workout.exercises || [];
       onStartWorkout(workoutType, equipmentFilter, preGeneratedWorkout);
     }
+  };
+
+  const handleOpenDayMenu = (event, workout) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedWorkout(workout);
+  };
+
+  const handleCloseDayMenu = () => {
+    setAnchorEl(null);
+    setSelectedWorkout(null);
+  };
+
+  const handleAssignToDay = async (dayOfWeek) => {
+    if (selectedWorkout) {
+      try {
+        const sessionData = {
+          sessionType: selectedWorkout.type || 'full',
+          sessionName: selectedWorkout.name || `${selectedWorkout.type} Workout`,
+          exercises: selectedWorkout.exercises || [],
+          assignedDate: new Date().toISOString(),
+          fromFavorite: true,
+          favoriteId: selectedWorkout.id,
+        };
+        
+        await assignWorkoutToDay(dayOfWeek, sessionData);
+        handleCloseDayMenu();
+      } catch (error) {
+        console.error('Error assigning workout to day:', error);
+      }
+    }
+  };
+
+  // Check if a workout is assigned to any day
+  const getAssignedDay = (workout) => {
+    for (const day of daysOfWeek) {
+      const session = weeklySchedule[day];
+      if (session && session.favoriteId === workout.id) {
+        return day;
+      }
+    }
+    return null;
   };
 
   if (favoriteWorkouts.length === 0) {
@@ -150,9 +212,36 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
                       }}
                     />
                   )}
+                  {getAssignedDay(workout) && (
+                    <Chip 
+                      icon={<CheckCircle sx={{ fontSize: '0.75rem !important' }} />}
+                      label={getAssignedDay(workout)} 
+                      size="small" 
+                      color="success"
+                      sx={{ 
+                        fontSize: '0.65rem',
+                        height: 20,
+                      }}
+                    />
+                  )}
                 </Stack>
               </Box>
               <Stack direction="row" spacing={0.5}>
+                <Tooltip title="Assign to day">
+                  <IconButton
+                    size="small"
+                    onClick={(e) => handleOpenDayMenu(e, workout)}
+                    sx={{
+                      color: getAssignedDay(workout) ? 'success.main' : 'text.secondary',
+                      '&:hover': {
+                        backgroundColor: 'rgba(46, 125, 50, 0.08)',
+                      },
+                    }}
+                    aria-label={`Assign ${workout.name || 'workout'} to day`}
+                  >
+                    <CalendarMonth fontSize="small" />
+                  </IconButton>
+                </Tooltip>
                 <Tooltip title="Start workout">
                   <IconButton
                     size="small"
@@ -187,6 +276,38 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
             </Box>
           ))}
         </Stack>
+
+        {/* Day Assignment Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleCloseDayMenu}
+          PaperProps={{
+            sx: {
+              maxHeight: 300,
+              width: 200,
+            }
+          }}
+        >
+          <MenuItem disabled sx={{ opacity: 1, fontWeight: 600 }}>
+            <ListItemText>Assign to Day</ListItemText>
+          </MenuItem>
+          {daysOfWeek.map((day) => {
+            const isAssigned = selectedWorkout && weeklySchedule[day]?.favoriteId === selectedWorkout.id;
+            return (
+              <MenuItem 
+                key={day} 
+                onClick={() => handleAssignToDay(day)}
+                selected={isAssigned}
+              >
+                <ListItemIcon>
+                  {isAssigned && <CheckCircle fontSize="small" color="success" />}
+                </ListItemIcon>
+                <ListItemText>{day}</ListItemText>
+              </MenuItem>
+            );
+          })}
+        </Menu>
       </CardContent>
     </Card>
   );

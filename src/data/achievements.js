@@ -65,12 +65,36 @@ export const ACHIEVEMENT_BADGES = [
     condition: { type: 'workoutCount', value: 100 }
   },
   {
+    id: 'dedicated-150',
+    name: 'Elite Athlete',
+    description: 'Complete 150 workouts',
+    icon: '🎖️',
+    tier: 'gold',
+    condition: { type: 'workoutCount', value: 150 }
+  },
+  {
+    id: 'dedicated-200',
+    name: 'Relentless',
+    description: 'Complete 200 workouts',
+    icon: '🔱',
+    tier: 'platinum',
+    condition: { type: 'workoutCount', value: 200 }
+  },
+  {
     id: 'dedicated-250',
     name: 'Iron Legend',
     description: 'Complete 250 workouts',
     icon: '🏆',
     tier: 'platinum',
     condition: { type: 'workoutCount', value: 250 }
+  },
+  {
+    id: 'dedicated-500',
+    name: 'Hall of Fame',
+    description: 'Complete 500 workouts',
+    icon: '⚜️',
+    tier: 'platinum',
+    condition: { type: 'workoutCount', value: 500 }
   },
 
   // Streak Achievements
@@ -235,12 +259,60 @@ export const ACHIEVEMENT_BADGES = [
     condition: { type: 'special', value: 'earlyMorning' }
   },
   {
+    id: 'morning-person',
+    name: 'Morning Person',
+    description: 'Complete 10 workouts in the morning (7 AM - 12 PM)',
+    icon: '☀️',
+    tier: 'silver',
+    condition: { type: 'special', value: 'morningWorkouts', count: 10 }
+  },
+  {
+    id: 'afternoon-warrior',
+    name: 'Afternoon Warrior',
+    description: 'Complete 10 workouts in the afternoon (12 PM - 5 PM)',
+    icon: '🌤️',
+    tier: 'silver',
+    condition: { type: 'special', value: 'afternoonWorkouts', count: 10 }
+  },
+  {
+    id: 'evening-grinder',
+    name: 'Evening Grinder',
+    description: 'Complete 10 workouts in the evening (5 PM - 10 PM)',
+    icon: '🌆',
+    tier: 'silver',
+    condition: { type: 'special', value: 'eveningWorkouts', count: 10 }
+  },
+  {
     id: 'night-owl',
     name: 'Night Owl',
     description: 'Complete a workout after 10 PM',
     icon: '🌙',
     tier: 'bronze',
     condition: { type: 'special', value: 'lateNight' }
+  },
+  {
+    id: 'consecutive-3',
+    name: 'Back to Back',
+    description: 'Complete 3 consecutive workouts within an hour of each other',
+    icon: '⏱️',
+    tier: 'bronze',
+    condition: { type: 'special', value: 'consecutiveWorkouts', count: 3 }
+  },
+  {
+    id: 'consecutive-5',
+    name: 'Chain Reaction',
+    description: 'Complete 5 consecutive workouts within an hour of each other',
+    icon: '🔗',
+    tier: 'silver',
+    condition: { type: 'special', value: 'consecutiveWorkouts', count: 5 }
+  },
+  {
+    id: 'consecutive-10',
+    name: 'Unstoppable',
+    description: 'Complete 10 consecutive workouts within an hour of each other',
+    icon: '⚡',
+    tier: 'gold',
+    condition: { type: 'special', value: 'consecutiveWorkouts', count: 10 }
   },
   {
     id: 'weekend-warrior',
@@ -335,11 +407,60 @@ const checkSpecialCondition = (condition, userStats, workoutHistory) => {
         return hour < 7;
       });
     
+    case 'morningWorkouts': {
+      const morningCount = workoutHistory.filter(w => {
+        const hour = new Date(w.date).getHours();
+        return hour >= 7 && hour < 12;
+      }).length;
+      return morningCount >= (condition.count || 10);
+    }
+    
+    case 'afternoonWorkouts': {
+      const afternoonCount = workoutHistory.filter(w => {
+        const hour = new Date(w.date).getHours();
+        return hour >= 12 && hour < 17;
+      }).length;
+      return afternoonCount >= (condition.count || 10);
+    }
+    
+    case 'eveningWorkouts': {
+      const eveningCount = workoutHistory.filter(w => {
+        const hour = new Date(w.date).getHours();
+        return hour >= 17 && hour < 22;
+      }).length;
+      return eveningCount >= (condition.count || 10);
+    }
+    
     case 'lateNight':
       return workoutHistory.some(w => {
         const hour = new Date(w.date).getHours();
         return hour >= 22;
       });
+    
+    case 'consecutiveWorkouts': {
+      // Sort workouts by date
+      const sortedWorkouts = [...workoutHistory].sort((a, b) => 
+        new Date(a.date) - new Date(b.date)
+      );
+      
+      let maxConsecutive = 0;
+      let currentConsecutive = 1;
+      
+      for (let i = 1; i < sortedWorkouts.length; i++) {
+        const prevDate = new Date(sortedWorkouts[i - 1].date);
+        const currDate = new Date(sortedWorkouts[i].date);
+        const timeDiff = (currDate - prevDate) / (1000 * 60 * 60); // hours
+        
+        if (timeDiff <= 1) {
+          currentConsecutive++;
+          maxConsecutive = Math.max(maxConsecutive, currentConsecutive);
+        } else {
+          currentConsecutive = 1;
+        }
+      }
+      
+      return maxConsecutive >= (condition.count || 3);
+    }
     
     case 'weekendWorkouts': {
       const weekendCount = workoutHistory.filter(w => {

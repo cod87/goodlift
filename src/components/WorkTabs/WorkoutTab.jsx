@@ -263,7 +263,7 @@ const WorkoutTab = memo(({
                   <Typography 
                     variant="caption" 
                     sx={{ 
-                      color: 'success.main',
+                      color: 'text.primary',
                       fontSize: '0.75rem',
                       lineHeight: 1,
                       mb: 0.5,
@@ -273,7 +273,7 @@ const WorkoutTab = memo(({
                   </Typography>
                   <Typography 
                     sx={{ 
-                      color: 'success.main',
+                      color: 'text.primary',
                       fontSize: '1rem',
                     }}
                   >
@@ -433,6 +433,13 @@ const WorkoutTab = memo(({
       {/* Favourite Workouts Widget */}
       <FavouriteWorkoutsWidget onStartWorkout={onStartWorkout} />
 
+      {/* Month Calendar View */}
+      <Box sx={{ mb: 3 }}>
+        <MonthCalendarView
+          workoutHistory={workoutHistory}
+        />
+      </Box>
+
       {/* Recent Workout History */}
       {recentWorkouts.length > 0 && (
         <Card 
@@ -499,13 +506,6 @@ const WorkoutTab = memo(({
           </CardContent>
         </Card>
       )}
-
-      {/* Month Calendar View */}
-      <Box sx={{ mb: 3 }}>
-        <MonthCalendarView
-          workoutHistory={workoutHistory}
-        />
-      </Box>
     </Box>
   );
 });

@@ -320,7 +320,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
         justifyContent: 'center', 
         alignItems: 'center',
         minHeight: '400px',
-        gap: 4,
       }}>
         <motion.div
           initial={{ opacity: 0 }}
@@ -328,38 +327,22 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           transition={{ duration: 0.3 }}
         >
           <Typography 
-            variant="h4" 
+            variant="h5" 
             sx={{ 
-              color: 'primary.main',
-              fontWeight: 600,
-              fontSize: { xs: '1.5rem', sm: '2rem' },
-              mb: 4,
+              color: 'text.secondary',
+              fontWeight: 500,
             }}
           >
-            Loading...
+            Loading
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 1, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              ...
+            </motion.span>
           </Typography>
         </motion.div>
-        
-        {/* Animated Barbell Icon */}
-        <motion.img
-          src="/icons/barbell-icon.svg"
-          alt="Loading"
-          style={{
-            width: '80px',
-            height: '80px',
-          }}
-          animate={{
-            x: [-100, 100, -100],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-            type: "spring",
-            stiffness: 50,
-            damping: 10,
-          }}
-        />
       </Box>
     );
   }

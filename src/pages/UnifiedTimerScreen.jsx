@@ -66,6 +66,7 @@ import {
   saveHiitPreset,
   deleteHiitPreset,
 } from '../utils/storage';
+import { HIIT_EXERCISES_DATA_PATH } from '../utils/constants';
 import HiitExerciseAutocomplete from '../components/HiitExerciseAutocomplete';
 
 const TIMER_MODES = {
@@ -160,7 +161,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   useEffect(() => {
     const loadHiitExercises = async () => {
       try {
-        const response = await fetch('/data/hiit-exercises.json');
+        const response = await fetch(HIIT_EXERCISES_DATA_PATH);
         const data = await response.json();
         setHiitExercises(data);
       } catch (error) {

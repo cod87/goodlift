@@ -5,6 +5,7 @@ import {
   Box, 
   Typography, 
   Button, 
+  CircularProgress, 
   IconButton,
   Chip,
   Alert,
@@ -154,16 +155,8 @@ const WarmupCooldown = ({
   if (stretches.length === 0) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography sx={{ mt: 2, color: 'text.secondary' }}>
-          Loading {phase} routine
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 1, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          >
-            ...
-          </motion.span>
-        </Typography>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Loading {phase} routine...</Typography>
       </Box>
     );
   }

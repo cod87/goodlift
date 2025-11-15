@@ -17,9 +17,7 @@ import {
 import { Edit, Save, Cancel, PhotoCamera } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useUserProfile } from '../contexts/UserProfileContext';
-import { usePreferences } from '../contexts/PreferencesContext';
 import AvatarSelector from '../components/AvatarSelector';
-import WeightTracker from '../components/WeightTracker';
 import { 
   validateDisplayName, 
   validateTextField, 
@@ -35,12 +33,9 @@ const UserProfileScreen = () => {
     loading: profileLoading,
     saveProfile,
     updateProfile,
-    addWeightEntry,
     getInitials,
     getProfileCompletion,
   } = useUserProfile();
-
-  const { getDisplayUnit } = usePreferences();
 
   const [editing, setEditing] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
@@ -124,14 +119,6 @@ const UserProfileScreen = () => {
     } catch (error) {
       console.error('Error updating avatar:', error);
       setSaveError('Failed to update avatar. Please try again.');
-    }
-  };
-
-  const handleAddWeight = async (weight, unit) => {
-    try {
-      await addWeightEntry(weight, unit);
-    } catch (error) {
-      console.error('Error adding weight:', error);
     }
   };
 
@@ -428,14 +415,6 @@ const UserProfileScreen = () => {
             </Card>
           </Grid>
         </Grid>
-
-        {/* Weight Tracker */}
-        <WeightTracker
-          weightHistory={profile.weightHistory || []}
-          currentWeight={profile.currentWeight}
-          currentUnit={profile.weightUnit || getDisplayUnit()}
-          onAddWeight={handleAddWeight}
-        />
       </motion.div>
 
       {/* Avatar Selector Dialog */}

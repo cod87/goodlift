@@ -47,6 +47,7 @@ import {
   Security,
   Restore,
   CalendarMonth,
+  Edit,
 } from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePreferences } from '../contexts/PreferencesContext';
@@ -57,6 +58,7 @@ import { downloadProfileData } from '../utils/profileUtils';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import ResetDataDialog from '../components/ResetDataDialog';
 import RecoverDataDialog from '../components/RecoverDataDialog';
+import WeekEditorDialog from '../components/WeekEditorDialog';
 // PlansManagement removed - no longer using workout planning
 import {
   resetUserData,
@@ -86,6 +88,7 @@ const SettingsScreen = ({ onNavigate }) => {
   // Data reset and recovery states
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [recoverDialogOpen, setRecoverDialogOpen] = useState(false);
+  const [weekEditorOpen, setWeekEditorOpen] = useState(false);
   const [backup, setBackup] = useState(null);
   const [resetInfo, setResetInfo] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -393,6 +396,20 @@ const SettingsScreen = ({ onNavigate }) => {
               </Typography>
               <List sx={{ py: 0 }}>
                 <ListItem disablePadding>
+                  <ListItemButton onClick={() => setWeekEditorOpen(true)}>
+                    <ListItemIcon>
+                      <Edit sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Edit Weekly Schedule"
+                      secondary={`Week ${currentWeek} - Manage your assigned workouts for each day`}
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
+                    <ChevronRight sx={{ color: 'text.secondary' }} />
+                  </ListItemButton>
+                </ListItem>
+                <Divider component="li" />
+                <ListItem disablePadding>
                   <ListItemButton onClick={handleResetWeekCycle}>
                     <ListItemIcon>
                       <CalendarMonth sx={{ color: 'primary.main' }} />
@@ -698,6 +715,12 @@ const SettingsScreen = ({ onNavigate }) => {
           backup={backup}
         />
       )}
+
+      {/* Week Editor Dialog */}
+      <WeekEditorDialog
+        open={weekEditorOpen}
+        onClose={() => setWeekEditorOpen(false)}
+      />
 
       {/* Snackbar for notifications */}
       <Snackbar

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton, Tooltip } from '@mui/material';
+import { Box, IconButton, Tooltip, useTheme } from '@mui/material';
 import { VolumeUp, VolumeOff } from '@mui/icons-material';
 import { MdScreenLockPortrait, MdScreenLockRotation } from 'react-icons/md';
 import audioService from '../utils/audioService';
@@ -11,6 +11,7 @@ import wakeLockManager from '../utils/wakeLock';
  * Appears at the top of all screens
  */
 const Header = ({ onNavigate }) => {
+  const theme = useTheme();
   const [isMuted, setIsMuted] = useState(audioService.isMutedState());
   const [wakeLockActive, setWakeLockActive] = useState(wakeLockManager.isActive());
   const [wakeLockSupported] = useState(wakeLockManager.isWakeLockSupported());
@@ -51,12 +52,16 @@ const Header = ({ onNavigate }) => {
         alignItems: 'center',
         justifyContent: 'flex-start',
         padding: '0 1rem',
-        background: '#2a3647',
+        background: theme.palette.background.paper,
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+        boxShadow: theme.palette.mode === 'dark' 
+          ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+          : '0 2px 8px rgba(0, 0, 0, 0.1)',
         zIndex: 100,
-        borderBottom: '1px solid rgba(29, 181, 132, 0.2)',
+        borderBottom: `1px solid ${theme.palette.mode === 'dark' 
+          ? 'rgba(29, 181, 132, 0.2)' 
+          : 'rgba(0, 0, 0, 0.12)'}`,
       }}
     >
       {/* Left-aligned favicon icon */}
@@ -111,7 +116,9 @@ const Header = ({ onNavigate }) => {
               alignItems: 'center',
               justifyContent: 'center',
               '&:hover': {
-                backgroundColor: 'rgba(29, 181, 132, 0.15)',
+                backgroundColor: theme.palette.mode === 'dark'
+                  ? 'rgba(29, 181, 132, 0.15)'
+                  : 'rgba(24, 160, 113, 0.1)',
               },
             }}
             aria-label={isMuted ? 'Unmute sounds' : 'Mute sounds'}
@@ -133,7 +140,9 @@ const Header = ({ onNavigate }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 140, 0, 0.15)',
+                  backgroundColor: theme.palette.mode === 'dark'
+                    ? 'rgba(255, 140, 0, 0.15)'
+                    : 'rgba(255, 140, 0, 0.1)',
                 },
               }}
               aria-label={wakeLockActive ? 'Release wake lock' : 'Keep screen awake'}

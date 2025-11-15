@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import PropTypes from 'prop-types';
+import { useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
 import { 
   FitnessCenter,
@@ -25,6 +26,7 @@ import { touchTargets, zIndex } from '../../theme/responsive';
  * Visible on all screen sizes
  */
 const BottomNav = memo(({ currentScreen, onNavigate }) => {
+  const theme = useTheme();
   const navItems = [
     {
       id: 'home',
@@ -82,9 +84,13 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
         left: 0,
         right: 0,
         height: `calc(${touchTargets.navigation} + env(safe-area-inset-bottom))`,
-        backgroundColor: '#2a3647',
-        borderTop: '1px solid rgba(29, 181, 132, 0.2)',
-        boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.3)',
+        backgroundColor: theme.palette.background.paper,
+        borderTop: `1px solid ${theme.palette.mode === 'dark' 
+          ? 'rgba(29, 181, 132, 0.2)' 
+          : 'rgba(0, 0, 0, 0.12)'}`,
+        boxShadow: theme.palette.mode === 'dark' 
+          ? '0 -2px 10px rgba(0, 0, 0, 0.3)' 
+          : '0 -2px 10px rgba(0, 0, 0, 0.1)',
         zIndex: zIndex.navigation,
         display: 'flex',
         alignItems: 'center',
@@ -114,7 +120,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              color: active ? item.activeColor : '#a0a8b3',
+              color: active ? item.activeColor : theme.palette.text.secondary,
               transition: 'color 0.2s ease',
               padding: '8px 4px',
             }}

@@ -1,11 +1,11 @@
 /**
- * UnifiedTimerScreen - Consolidated timer for HIIT, Yoga, and Countdown (Cardio)
+ * UnifiedTimerScreen - Consolidated timer for HIIT, Yoga, and Cardio
  * 
  * Features:
- * - Three selectable modes: HIIT, Yoga, Countdown (Cardio)
+ * - Three selectable modes: HIIT, Yoga, Cardio
  * - Visual countdown with circular/ring progress animation
  * - Audio cues at intervals (beep at 10s, 5s, and 0s)
- * - Presets for 20, 30, 45, and 60 minutes
+ * - Custom duration input for Cardio mode
  * - Auto-log session to workout history with quick form
  */
 
@@ -70,10 +70,8 @@ import {
 const TIMER_MODES = {
   HIIT: 'hiit',
   FLOW: 'flow',
-  COUNTDOWN: 'countdown',
+  CARDIO: 'cardio',
 };
-
-const PRESET_DURATIONS = [20, 30, 45, 60]; // minutes
 
 const YOGA_POSES = [
   { name: 'Mountain Pose (Tadasana)', defaultDuration: 30 },
@@ -92,7 +90,7 @@ const YOGA_POSES = [
 
 const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   // Mode and configuration
-  const [mode, setMode] = useState(TIMER_MODES.COUNTDOWN);
+  const [mode, setMode] = useState(TIMER_MODES.CARDIO);
   const [isConfiguring, setIsConfiguring] = useState(true);
   
   // Timer state
@@ -111,7 +109,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [recoveryInterval, setRecoveryInterval] = useState(0); // seconds, 0 means disabled
   const [recoveryAfterRounds, setRecoveryAfterRounds] = useState(4); // recovery after N rounds
   const [sessionName, setSessionName] = useState('');
-  const [intervalNames, setIntervalNames] = useState({ work: 'Work', rest: 'Rest', prep: 'Get Ready', recovery: 'Recovery' });
+  const [workIntervalNames, setWorkIntervalNames] = useState([]); // Array of custom exercise names for each work interval
+  const [intervalNames, setIntervalNames] = useState({ prep: 'Get Ready', recovery: 'Recovery' });
   const [isPrepPeriod, setIsPrepPeriod] = useState(false);
   const [isRecoveryPeriod, setIsRecoveryPeriod] = useState(false);
   
@@ -120,8 +119,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [currentPoseIndex, setCurrentPoseIndex] = useState(0);
   const [poseDuration, setPostDuration] = useState(45); // default duration per pose
   
-  // Countdown mode state
-  const [countdownDuration, setCountdownDuration] = useState(20); // minutes
+  // Cardio mode state
+  const [cardioDuration, setCardioDuration] = useState(20); // minutes
   
   // Presets
   const [yogaPresets, setYogaPresets] = useState([]);
@@ -241,7 +240,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 return 0;
               }
             } else {
-              // Countdown complete
+              // Cardio complete
               handleTimerComplete();
               return 0;
             }
@@ -289,7 +288,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setTimeRemaining(selectedPoses[0]?.duration || 45);
         setCurrentPoseIndex(0);
       } else {
-        const seconds = countdownDuration * 60;
+        const seconds = cardioDuration * 60;
         setTotalTime(seconds);
         setTimeRemaining(seconds);
       }
@@ -325,10 +324,6 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
       setMode(newMode);
       handleReset();
     }
-  };
-
-  const handlePresetSelect = (minutes) => {
-    setCountdownDuration(minutes);
   };
 
   const handleAddPose = (pose) => {
@@ -424,6 +419,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           recoveryInterval,
           recoveryAfterRounds,
           sessionName,
+          workIntervalNames,
           intervalNames,
         };
         await saveHiitPreset(preset);
@@ -453,7 +449,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
       setRecoveryInterval(preset.recoveryInterval || 0);
       setRecoveryAfterRounds(preset.recoveryAfterRounds || 4);
       setSessionName(preset.sessionName || '');
-      setIntervalNames(preset.intervalNames || { work: 'Work', rest: 'Rest', prep: 'Get Ready', recovery: 'Recovery' });
+      setWorkIntervalNames(preset.workIntervalNames || []);
+      setIntervalNames(preset.intervalNames || { prep: 'Get Ready', recovery: 'Recovery' });
     }
   };
 
@@ -552,10 +549,6 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
             </Button>
           </Box>
         )}
-        
-        <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, textAlign: 'center' }}>
-          Unified Timer
-        </Typography>
 
         {/* Mode Selection */}
         {isConfiguring && (
@@ -583,10 +576,10 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     <Typography variant="body2">Yoga</Typography>
                   </Stack>
                 </ToggleButton>
-                <ToggleButton value={TIMER_MODES.COUNTDOWN} sx={{ py: 2 }}>
+                <ToggleButton value={TIMER_MODES.CARDIO} sx={{ py: 2 }}>
                   <Stack alignItems="center" spacing={1}>
                     <DirectionsRun />
-                    <Typography variant="body2">Countdown</Typography>
+                    <Typography variant="body2">Cardio</Typography>
                   </Stack>
                 </ToggleButton>
               </ToggleButtonGroup>
@@ -644,9 +637,21 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   <TextField
                     label="Preparation Interval (seconds)"
                     type="number"
-                    value={preparationInterval}
-                    onChange={(e) => setPreparationInterval(Math.max(0, parseInt(e.target.value) || 10))}
-                    inputProps={{ min: 0, max: 60 }}
+                    value={preparationInterval === null || preparationInterval === undefined ? '' : preparationInterval}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
+                        setPreparationInterval('');
+                      } else {
+                        setPreparationInterval(Math.max(0, parseInt(val) || 0));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || e.target.value === null) {
+                        setPreparationInterval(10);
+                      }
+                    }}
+                    inputProps={{ min: 0, max: 60, inputMode: 'numeric' }}
                     fullWidth
                     helperText="Time to get ready before the workout starts"
                   />
@@ -654,52 +659,128 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   <TextField
                     label="Work Interval (seconds)"
                     type="number"
-                    value={workInterval}
-                    onChange={(e) => setWorkInterval(Math.max(5, parseInt(e.target.value) || 30))}
-                    inputProps={{ min: 5, max: 300 }}
+                    value={workInterval === null || workInterval === undefined ? '' : workInterval}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
+                        setWorkInterval('');
+                      } else {
+                        setWorkInterval(Math.max(5, parseInt(val) || 5));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || e.target.value === null) {
+                        setWorkInterval(30);
+                      }
+                    }}
+                    inputProps={{ min: 5, max: 300, inputMode: 'numeric' }}
                     fullWidth
-                  />
-                  
-                  <TextField
-                    label="Work Interval Name (optional)"
-                    value={intervalNames.work}
-                    onChange={(e) => setIntervalNames({ ...intervalNames, work: e.target.value })}
-                    fullWidth
-                    placeholder="e.g., Burpees, Sprint, Push-ups"
                   />
                   
                   <TextField
                     label="Rest Interval (seconds)"
                     type="number"
-                    value={restInterval}
-                    onChange={(e) => setRestInterval(Math.max(5, parseInt(e.target.value) || 15))}
-                    inputProps={{ min: 5, max: 300 }}
+                    value={restInterval === null || restInterval === undefined ? '' : restInterval}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
+                        setRestInterval('');
+                      } else {
+                        setRestInterval(Math.max(5, parseInt(val) || 5));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || e.target.value === null) {
+                        setRestInterval(15);
+                      }
+                    }}
+                    inputProps={{ min: 5, max: 300, inputMode: 'numeric' }}
                     fullWidth
-                  />
-                  
-                  <TextField
-                    label="Rest Interval Name (optional)"
-                    value={intervalNames.rest}
-                    onChange={(e) => setIntervalNames({ ...intervalNames, rest: e.target.value })}
-                    fullWidth
-                    placeholder="e.g., Active Rest, Recovery"
                   />
                   
                   <TextField
                     label="Number of Rounds"
                     type="number"
-                    value={rounds}
-                    onChange={(e) => setRounds(Math.max(1, parseInt(e.target.value) || 8))}
-                    inputProps={{ min: 1, max: 50 }}
+                    value={rounds === null || rounds === undefined ? '' : rounds}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
+                        setRounds('');
+                      } else {
+                        const newRounds = Math.max(1, parseInt(val) || 1);
+                        setRounds(newRounds);
+                        // Adjust workIntervalNames array to match new rounds count
+                        setWorkIntervalNames(prev => {
+                          const newNames = [...prev];
+                          while (newNames.length < newRounds) {
+                            newNames.push('');
+                          }
+                          return newNames.slice(0, newRounds);
+                        });
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || e.target.value === null) {
+                        setRounds(8);
+                        // Adjust workIntervalNames array to 8 rounds
+                        setWorkIntervalNames(prev => {
+                          const newNames = [...prev];
+                          while (newNames.length < 8) {
+                            newNames.push('');
+                          }
+                          return newNames.slice(0, 8);
+                        });
+                      }
+                    }}
+                    inputProps={{ min: 1, max: 50, inputMode: 'numeric' }}
                     fullWidth
                   />
+                  
+                  {/* Exercise Names for Each Round */}
+                  <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Exercise Names (optional)
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Name each work interval for audio/visual prompts. Leave blank to use &quot;work&quot; as default.
+                    </Typography>
+                    <Stack spacing={1.5}>
+                      {Array.from({ length: rounds || 0 }).map((_, index) => (
+                        <TextField
+                          key={index}
+                          label={`Round ${index + 1} Exercise`}
+                          value={workIntervalNames[index] || ''}
+                          onChange={(e) => {
+                            const newNames = [...workIntervalNames];
+                            newNames[index] = e.target.value;
+                            setWorkIntervalNames(newNames);
+                          }}
+                          placeholder="e.g., push-ups, burpees, jumping jacks"
+                          size="small"
+                          fullWidth
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
                   
                   <TextField
                     label="Recovery Break (seconds, 0 to disable)"
                     type="number"
-                    value={recoveryInterval}
-                    onChange={(e) => setRecoveryInterval(Math.max(0, parseInt(e.target.value) || 0))}
-                    inputProps={{ min: 0, max: 300 }}
+                    value={recoveryInterval === null || recoveryInterval === undefined ? '' : recoveryInterval}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
+                        setRecoveryInterval('');
+                      } else {
+                        setRecoveryInterval(Math.max(0, parseInt(val) || 0));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || e.target.value === null) {
+                        setRecoveryInterval(0);
+                      }
+                    }}
+                    inputProps={{ min: 0, max: 300, inputMode: 'numeric' }}
                     fullWidth
                     helperText="Longer break after several rounds"
                   />
@@ -708,9 +789,21 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     <TextField
                       label="Recovery Break After Rounds"
                       type="number"
-                      value={recoveryAfterRounds}
-                      onChange={(e) => setRecoveryAfterRounds(Math.max(1, parseInt(e.target.value) || 4))}
-                      inputProps={{ min: 1, max: rounds }}
+                      value={recoveryAfterRounds === null || recoveryAfterRounds === undefined ? '' : recoveryAfterRounds}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || val === null) {
+                          setRecoveryAfterRounds('');
+                        } else {
+                          setRecoveryAfterRounds(Math.max(1, parseInt(val) || 1));
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (e.target.value === '' || e.target.value === null) {
+                          setRecoveryAfterRounds(4);
+                        }
+                      }}
+                      inputProps={{ min: 1, max: rounds, inputMode: 'numeric' }}
                       fullWidth
                       helperText={`Recovery break every ${recoveryAfterRounds} rounds`}
                     />
@@ -768,9 +861,21 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   <TextField
                     label="Hold Duration per Pose (seconds)"
                     type="number"
-                    value={poseDuration}
-                    onChange={(e) => setPostDuration(Math.max(15, parseInt(e.target.value) || 45))}
-                    inputProps={{ min: 15, max: 300 }}
+                    value={poseDuration === null || poseDuration === undefined ? '' : poseDuration}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
+                        setPostDuration('');
+                      } else {
+                        setPostDuration(Math.max(15, parseInt(val) || 15));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || e.target.value === null) {
+                        setPostDuration(45);
+                      }
+                    }}
+                    inputProps={{ min: 15, max: 300, inputMode: 'numeric' }}
                     fullWidth
                   />
                   
@@ -835,34 +940,29 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 </Stack>
               )}
 
-              {mode === TIMER_MODES.COUNTDOWN && (
+              {mode === TIMER_MODES.CARDIO && (
                 <Stack spacing={3}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    Countdown Configuration
+                    Cardio Configuration
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Select a preset duration or enter custom:
-                  </Typography>
-                  <Grid container spacing={2}>
-                    {PRESET_DURATIONS.map((duration) => (
-                      <Grid item xs={6} sm={3} key={duration}>
-                        <Button
-                          variant={countdownDuration === duration ? 'contained' : 'outlined'}
-                          onClick={() => handlePresetSelect(duration)}
-                          fullWidth
-                          sx={{ py: 2 }}
-                        >
-                          {duration} min
-                        </Button>
-                      </Grid>
-                    ))}
-                  </Grid>
                   <TextField
-                    label="Custom Duration (minutes)"
+                    label="Duration (minutes)"
                     type="number"
-                    value={countdownDuration}
-                    onChange={(e) => setCountdownDuration(Math.max(1, parseInt(e.target.value) || 20))}
-                    inputProps={{ min: 1, max: 240 }}
+                    value={cardioDuration === null || cardioDuration === undefined ? '' : cardioDuration}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
+                        setCardioDuration('');
+                      } else {
+                        setCardioDuration(Math.max(1, parseInt(val) || 1));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || e.target.value === null) {
+                        setCardioDuration(20);
+                      }
+                    }}
+                    inputProps={{ min: 1, max: 240, inputMode: 'numeric' }}
                     fullWidth
                   />
                 </Stack>
@@ -883,7 +983,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       ? 'HIIT'
                       : mode === TIMER_MODES.FLOW
                       ? 'Yoga'
-                      : 'Countdown'
+                      : 'Cardio'
                   }
                   color="primary"
                   size="medium"
@@ -891,11 +991,19 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
               </Stack>
 
               {/* Circular Progress */}
-              <Box sx={{ textAlign: 'center', mb: 3, position: 'relative' }}>
+              <Box sx={{ 
+                textAlign: 'center', 
+                mb: 3, 
+                position: 'relative',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+              }}>
                 <svg
                   width="280"
                   height="280"
-                  style={{ transform: 'rotate(-90deg)', margin: '0 auto', display: 'block' }}
+                  style={{ transform: 'rotate(-90deg)' }}
                 >
                   {/* Background circle */}
                   <circle
@@ -967,9 +1075,19 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                           : isRecoveryPeriod 
                           ? intervalNames.recovery 
                           : isWorkPeriod 
-                          ? intervalNames.work 
-                          : intervalNames.rest}
+                          ? (workIntervalNames[currentRound - 1] || 'work')
+                          : 'rest'}
                       </Typography>
+                      {isPrepPeriod && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                          Up Next: {workIntervalNames[0] || 'work'}
+                        </Typography>
+                      )}
+                      {!isPrepPeriod && !isWorkPeriod && currentRound < rounds && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                          Up Next: {workIntervalNames[currentRound] || 'work'}
+                        </Typography>
+                      )}
                       {!isPrepPeriod && (
                         <Typography variant="body2" color="text.secondary">
                           Round {currentRound} / {rounds}

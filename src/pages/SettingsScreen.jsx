@@ -73,7 +73,7 @@ const SettingsScreen = ({ onNavigate }) => {
   const { preferences, updatePreference } = usePreferences();
   const { profile, stats } = useUserProfile();
   const { isGuest } = useAuth();
-  const { resetWeekCycle, currentWeek } = useWeekScheduling();
+  const { resetWeekCycle } = useWeekScheduling();
   
   const [volume, setVolume] = useState(() => {
     try {
@@ -293,10 +293,22 @@ const SettingsScreen = ({ onNavigate }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* GoodLift Logo */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+          <img 
+            src="/goodlift-logo.svg" 
+            alt="GoodLift" 
+            style={{ 
+              height: '50px',
+              width: 'auto',
+            }} 
+          />
+        </Box>
+
         <Typography
           variant="h4"
           sx={{
-            mb: 3,
+            mb: 2,
             fontWeight: 700,
             color: 'text.primary',
           }}
@@ -304,7 +316,7 @@ const SettingsScreen = ({ onNavigate }) => {
           Settings
         </Typography>
 
-        <Stack spacing={3} sx={{ maxWidth: 600 }}>
+        <Stack spacing={2} sx={{ maxWidth: 600 }}>
           {/* My Plans Section removed - no longer using workout planning */}
 
           {/* Exercise Database Section */}
@@ -314,25 +326,25 @@ const SettingsScreen = ({ onNavigate }) => {
                 variant="overline"
                 sx={{
                   px: 2,
-                  pt: 2,
-                  pb: 1,
+                  pt: 1.5,
+                  pb: 0.5,
                   display: 'block',
                   fontWeight: 700,
                   color: 'text.secondary',
                   letterSpacing: '0.1em',
+                  fontSize: '0.7rem',
                 }}
               >
                 Exercise Database
               </Typography>
               <List sx={{ py: 0 }}>
                 <ListItem disablePadding>
-                  <ListItemButton onClick={() => handleNavigate('exercise-list')}>
-                    <ListItemIcon>
+                  <ListItemButton onClick={() => handleNavigate('exercise-list')} sx={{ py: 1 }}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
                       <ListAlt sx={{ color: 'primary.main' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Browse Exercises"
-                      secondary="View and customize exercise library"
                       primaryTypographyProps={{ fontWeight: 500 }}
                     />
                     <ChevronRight sx={{ color: 'text.secondary' }} />
@@ -349,25 +361,25 @@ const SettingsScreen = ({ onNavigate }) => {
                 variant="overline"
                 sx={{
                   px: 2,
-                  pt: 2,
-                  pb: 1,
+                  pt: 1.5,
+                  pb: 0.5,
                   display: 'block',
                   fontWeight: 700,
                   color: 'text.secondary',
                   letterSpacing: '0.1em',
+                  fontSize: '0.7rem',
                 }}
               >
                 User Profile
               </Typography>
               <List sx={{ py: 0 }}>
                 <ListItem disablePadding>
-                  <ListItemButton onClick={() => handleNavigate('profile')}>
-                    <ListItemIcon>
+                  <ListItemButton onClick={() => handleNavigate('profile')} sx={{ py: 1 }}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
                       <AccountCircle sx={{ color: 'primary.main' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Profile Information"
-                      secondary="Manage profile, avatar, and personal details"
                       primaryTypographyProps={{ fontWeight: 500 }}
                     />
                     <ChevronRight sx={{ color: 'text.secondary' }} />
@@ -384,25 +396,25 @@ const SettingsScreen = ({ onNavigate }) => {
                 variant="overline"
                 sx={{
                   px: 2,
-                  pt: 2,
-                  pb: 1,
+                  pt: 1.5,
+                  pb: 0.5,
                   display: 'block',
                   fontWeight: 700,
                   color: 'text.secondary',
                   letterSpacing: '0.1em',
+                  fontSize: '0.7rem',
                 }}
               >
                 Workout Scheduling
               </Typography>
               <List sx={{ py: 0 }}>
                 <ListItem disablePadding>
-                  <ListItemButton onClick={() => setWeekEditorOpen(true)}>
-                    <ListItemIcon>
+                  <ListItemButton onClick={() => setWeekEditorOpen(true)} sx={{ py: 1 }}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
                       <Edit sx={{ color: 'primary.main' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Edit Weekly Schedule"
-                      secondary={`Week ${currentWeek} - Manage your assigned workouts for each day`}
                       primaryTypographyProps={{ fontWeight: 500 }}
                     />
                     <ChevronRight sx={{ color: 'text.secondary' }} />
@@ -410,13 +422,12 @@ const SettingsScreen = ({ onNavigate }) => {
                 </ListItem>
                 <Divider component="li" />
                 <ListItem disablePadding>
-                  <ListItemButton onClick={handleResetWeekCycle}>
-                    <ListItemIcon>
+                  <ListItemButton onClick={handleResetWeekCycle} sx={{ py: 1 }}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
                       <CalendarMonth sx={{ color: 'primary.main' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Reset Week Counter"
-                      secondary={`Currently on Week ${currentWeek}. Reset to Week 1 and restart cycle.`}
                       primaryTypographyProps={{ fontWeight: 500 }}
                     />
                     <ChevronRight sx={{ color: 'text.secondary' }} />
@@ -433,28 +444,29 @@ const SettingsScreen = ({ onNavigate }) => {
                 variant="overline"
                 sx={{
                   px: 2,
-                  pt: 2,
-                  pb: 1,
+                  pt: 1.5,
+                  pb: 0.5,
                   display: 'block',
                   fontWeight: 700,
                   color: 'text.secondary',
                   letterSpacing: '0.1em',
+                  fontSize: '0.7rem',
                 }}
               >
                 App Preferences
               </Typography>
               <List sx={{ py: 0 }}>
                 {/* Units */}
-                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 1 }}>
-                    <ListItemIcon>
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 0.5 }}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
                       <Straighten sx={{ color: 'primary.main' }} />
                     </ListItemIcon>
-                    <Typography variant="body1" fontWeight={500}>
+                    <Typography variant="body2" fontWeight={500}>
                       Unit System
                     </Typography>
                   </Box>
-                  <FormControl size="small" sx={{ ml: 7, minWidth: 180 }}>
+                  <FormControl size="small" sx={{ ml: 5, minWidth: 160 }}>
                     <Select
                       value={preferences.units}
                       onChange={(e) => updatePreference('units', e.target.value)}
@@ -467,13 +479,12 @@ const SettingsScreen = ({ onNavigate }) => {
                 <Divider component="li" />
 
                 {/* Theme */}
-                <ListItem>
-                  <ListItemIcon>
+                <ListItem sx={{ py: 1 }}>
+                  <ListItemIcon sx={{ minWidth: 40 }}>
                     {mode === 'dark' ? <Brightness4 sx={{ color: 'primary.main' }} /> : <Brightness7 sx={{ color: 'primary.main' }} />}
                   </ListItemIcon>
                   <ListItemText
                     primary="Theme"
-                    secondary={mode === 'dark' ? 'Dark mode' : 'Light mode'}
                     primaryTypographyProps={{ fontWeight: 500 }}
                   />
                   <Switch
@@ -485,16 +496,16 @@ const SettingsScreen = ({ onNavigate }) => {
                 <Divider component="li" />
 
                 {/* Sound */}
-                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 1 }}>
-                    <ListItemIcon>
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 0.5 }}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
                       <VolumeUp sx={{ color: 'primary.main' }} />
                     </ListItemIcon>
-                    <Typography variant="body1" fontWeight={500}>
+                    <Typography variant="body2" fontWeight={500}>
                       Sound Effects
                     </Typography>
                   </Box>
-                  <Box sx={{ ml: 7, width: 'calc(100% - 56px)' }}>
+                  <Box sx={{ ml: 5, width: 'calc(100% - 40px)' }}>
                     <Slider
                       value={volume}
                       onChange={handleVolumeChange}
@@ -523,13 +534,13 @@ const SettingsScreen = ({ onNavigate }) => {
                 <Divider component="li" />
 
                 {/* Warmup Reminders */}
-                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <ListItemIcon>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
                         <SelfImprovement sx={{ color: 'primary.main' }} />
                       </ListItemIcon>
-                      <Typography variant="body1" fontWeight={500}>
+                      <Typography variant="body2" fontWeight={500}>
                         Warmup Reminders
                       </Typography>
                     </Box>
@@ -540,7 +551,7 @@ const SettingsScreen = ({ onNavigate }) => {
                     />
                   </Box>
                   {stretchPrefs.showWarmup && (
-                    <FormControl size="small" sx={{ ml: 7, mt: 1, minWidth: 180 }}>
+                    <FormControl size="small" sx={{ ml: 5, mt: 0.5, minWidth: 160 }}>
                       <Select
                         value={stretchPrefs.defaultWarmupDuration}
                         onChange={(e) => handleStretchPreferenceChange('defaultWarmupDuration', e.target.value)}
@@ -555,13 +566,13 @@ const SettingsScreen = ({ onNavigate }) => {
                 <Divider component="li" />
 
                 {/* Cooldown Reminders */}
-                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <ListItemIcon>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
                         <FitnessCenter sx={{ color: 'primary.main' }} />
                       </ListItemIcon>
-                      <Typography variant="body1" fontWeight={500}>
+                      <Typography variant="body2" fontWeight={500}>
                         Cooldown Reminders
                       </Typography>
                     </Box>
@@ -572,7 +583,7 @@ const SettingsScreen = ({ onNavigate }) => {
                     />
                   </Box>
                   {stretchPrefs.showCooldown && (
-                    <FormControl size="small" sx={{ ml: 7, mt: 1, minWidth: 180 }}>
+                    <FormControl size="small" sx={{ ml: 5, mt: 0.5, minWidth: 160 }}>
                       <Select
                         value={stretchPrefs.defaultCooldownDuration}
                         onChange={(e) => handleStretchPreferenceChange('defaultCooldownDuration', e.target.value)}
@@ -595,25 +606,25 @@ const SettingsScreen = ({ onNavigate }) => {
                 variant="overline"
                 sx={{
                   px: 2,
-                  pt: 2,
-                  pb: 1,
+                  pt: 1.5,
+                  pb: 0.5,
                   display: 'block',
                   fontWeight: 700,
                   color: 'text.secondary',
                   letterSpacing: '0.1em',
+                  fontSize: '0.7rem',
                 }}
               >
                 Data & Privacy
               </Typography>
               <List sx={{ py: 0 }}>
                 <ListItem disablePadding>
-                  <ListItemButton onClick={handleExportData}>
-                    <ListItemIcon>
+                  <ListItemButton onClick={handleExportData} sx={{ py: 1 }}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
                       <Download sx={{ color: 'primary.main' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Export Data"
-                      secondary="Download your profile and workout data"
                       primaryTypographyProps={{ fontWeight: 500 }}
                     />
                   </ListItemButton>
@@ -624,13 +635,12 @@ const SettingsScreen = ({ onNavigate }) => {
                 {backup && (
                   <>
                     <ListItem disablePadding>
-                      <ListItemButton onClick={handleOpenRecoverDialog}>
-                        <ListItemIcon>
+                      <ListItemButton onClick={handleOpenRecoverDialog} sx={{ py: 1 }}>
+                        <ListItemIcon sx={{ minWidth: 40 }}>
                           <Restore sx={{ color: 'success.main' }} />
                         </ListItemIcon>
                         <ListItemText
                           primary="Recover Data"
-                          secondary="Restore your backed-up workout data"
                           primaryTypographyProps={{ fontWeight: 500 }}
                         />
                         <ChevronRight sx={{ color: 'text.secondary' }} />
@@ -645,17 +655,13 @@ const SettingsScreen = ({ onNavigate }) => {
                   <ListItemButton 
                     onClick={handleOpenResetDialog}
                     disabled={!resetInfo?.hasData}
+                    sx={{ py: 1 }}
                   >
-                    <ListItemIcon>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
                       <DeleteSweep sx={{ color: resetInfo?.hasData ? 'error.main' : 'text.disabled' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Reset Personal Data"
-                      secondary={
-                        resetInfo?.hasData 
-                          ? "Clear workout history and stats (recoverable for 30 days)"
-                          : "No data to reset"
-                      }
                       primaryTypographyProps={{ fontWeight: 500 }}
                     />
                     <ChevronRight sx={{ color: 'text.secondary' }} />
@@ -663,22 +669,22 @@ const SettingsScreen = ({ onNavigate }) => {
                 </ListItem>
                 <Divider component="li" />
 
-                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 1 }}>
-                    <ListItemIcon>
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 0.5 }}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
                       <Security sx={{ color: 'primary.main' }} />
                     </ListItemIcon>
-                    <Typography variant="body1" fontWeight={500}>
+                    <Typography variant="body2" fontWeight={500}>
                       Privacy
                     </Typography>
                   </Box>
-                  <Box sx={{ ml: 7, width: 'calc(100% - 56px)' }}>
+                  <Box sx={{ ml: 5, width: 'calc(100% - 40px)' }}>
                     {isGuest ? (
-                      <Alert severity="info">
+                      <Alert severity="info" sx={{ py: 0.5, fontSize: '0.8rem' }}>
                         Create an account to access cloud sync and data privacy features
                       </Alert>
                     ) : (
-                      <Alert severity="success">
+                      <Alert severity="success" sx={{ py: 0.5, fontSize: '0.8rem' }}>
                         Your data is securely stored in Firebase and synced across your devices
                       </Alert>
                     )}

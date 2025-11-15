@@ -170,7 +170,16 @@ const UserProfileScreen = () => {
   if (profileLoading) {
     return (
       <Box sx={{ p: 3 }}>
-        <Typography>Loading profile...</Typography>
+        <Typography color="text.secondary">
+          Loading profile
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            ...
+          </motion.span>
+        </Typography>
       </Box>
     );
   }

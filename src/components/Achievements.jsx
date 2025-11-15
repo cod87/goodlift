@@ -431,7 +431,7 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
   };
   
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
+    <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header with Level Display */}
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
@@ -478,29 +478,29 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
       </Box>
       
       {/* Progress Cards */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      <Grid container spacing={{ xs: 1, sm: 2 }} sx={{ mb: 4 }}>
+        <Grid item xs={6} sm={6} md={3}>
           <ProgressCard
             title="Workouts"
             icon={<FitnessCenter color="primary" />}
             progressInfo={workoutProgress}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <ProgressCard
             title="Streak"
             icon={<Whatshot sx={{ color: '#FF6B35' }} />}
             progressInfo={streakProgress}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <ProgressCard
             title="Personal Records"
             icon={<TrendingUp color="success" />}
             progressInfo={prProgress}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <ProgressCard
             title="Volume"
             icon={<EmojiEvents sx={{ color: '#FFD700' }} />}
@@ -524,7 +524,7 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
       </Box>
       
       {/* Achievement Grid */}
-      <Grid container spacing={2}>
+      <Grid container spacing={{ xs: 1, sm: 2 }}>
         {displayedAchievements.map((achievement) => {
           const unlocked = isAchievementUnlocked(achievement, userStats, workoutHistory);
           return (

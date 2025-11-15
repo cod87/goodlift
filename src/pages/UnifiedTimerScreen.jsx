@@ -33,6 +33,10 @@ import {
   DialogContent,
   DialogActions,
   Grid,
+  Menu,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
 } from '@mui/material';
 import {
   PlayArrow,
@@ -52,6 +56,7 @@ import {
   Edit,
   Favorite,
   FavoriteBorder,
+  MoreVert,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import audioService from '../utils/audioService';
@@ -66,6 +71,8 @@ import {
   saveHiitPreset,
   deleteHiitPreset,
 } from '../utils/storage';
+import { HIIT_EXERCISES_DATA_PATH } from '../utils/constants';
+import HiitExerciseAutocomplete from '../components/HiitExerciseAutocomplete';
 
 const TIMER_MODES = {
   HIIT: 'hiit',
@@ -128,6 +135,10 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [showPresetDialog, setShowPresetDialog] = useState(false);
   const [presetName, setPresetName] = useState('');
   const [editingPreset, setEditingPreset] = useState(null);
+  const [isEditingPresets, setIsEditingPresets] = useState(false); // New state for edit mode
+  
+  // HIIT exercises autocomplete
+  const [hiitExercises, setHiitExercises] = useState([]);
   
   // Completion dialog
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
@@ -150,6 +161,21 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
       }
     };
     loadPresets();
+  }, []);
+
+  // Load HIIT exercises for autocomplete
+  useEffect(() => {
+    const loadHiitExercises = async () => {
+      try {
+        const response = await fetch(HIIT_EXERCISES_DATA_PATH);
+        const data = await response.json();
+        setHiitExercises(data);
+      } catch (error) {
+        console.error('Error loading HIIT exercises:', error);
+        setHiitExercises([]);
+      }
+    };
+    loadHiitExercises();
   }, []);
 
   // Initialize audio
@@ -607,20 +633,53 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   {/* Presets */}
                   {hiitPresets.length > 0 && (
                     <Box>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Load Preset
-                      </Typography>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                          Saved Presets
+                        </Typography>
+                        <Button
+                          size="small"
+                          startIcon={isEditingPresets ? <Save /> : <Edit />}
+                          onClick={() => setIsEditingPresets(!isEditingPresets)}
+                        >
+                          {isEditingPresets ? 'Done' : 'Manage'}
+                        </Button>
+                      </Stack>
                       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                         {hiitPresets.map((preset) => (
-                          <Chip
-                            key={preset.id}
-                            label={preset.name}
-                            onClick={() => handleLoadPreset(preset)}
-                            onDelete={() => handleDeletePreset(preset.id)}
-                            color="primary"
-                            variant="outlined"
-                            sx={{ mb: 1 }}
-                          />
+                          <Box key={preset.id} sx={{ position: 'relative', display: 'inline-block' }}>
+                            <Chip
+                              label={preset.name}
+                              onClick={() => !isEditingPresets && handleLoadPreset(preset)}
+                              color="primary"
+                              variant="outlined"
+                              sx={{ 
+                                mb: 1,
+                                cursor: isEditingPresets ? 'default' : 'pointer',
+                                opacity: isEditingPresets ? 0.7 : 1,
+                              }}
+                            />
+                            {isEditingPresets && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeletePreset(preset.id)}
+                                sx={{
+                                  position: 'absolute',
+                                  top: -8,
+                                  right: -8,
+                                  bgcolor: 'error.main',
+                                  color: 'white',
+                                  width: 20,
+                                  height: 20,
+                                  '&:hover': {
+                                    bgcolor: 'error.dark',
+                                  },
+                                }}
+                              >
+                                <Delete sx={{ fontSize: 14 }} />
+                              </IconButton>
+                            )}
+                          </Box>
                         ))}
                       </Stack>
                     </Box>
@@ -746,15 +805,23 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     </Typography>
                     <Stack spacing={1.5}>
                       {Array.from({ length: rounds || 0 }).map((_, index) => (
-                        <TextField
+                        <HiitExerciseAutocomplete
                           key={index}
                           label={`Round ${index + 1} Exercise`}
                           value={workIntervalNames[index] || ''}
-                          onChange={(e) => {
+                          onChange={(event, newValue) => {
                             const newNames = [...workIntervalNames];
-                            newNames[index] = e.target.value;
+                            // Handle both object (selected from list) and string (typed) values
+                            if (typeof newValue === 'string') {
+                              newNames[index] = newValue;
+                            } else if (newValue && newValue.name) {
+                              newNames[index] = newValue.name;
+                            } else {
+                              newNames[index] = '';
+                            }
                             setWorkIntervalNames(newNames);
                           }}
+                          availableExercises={hiitExercises}
                           placeholder="e.g., push-ups, burpees, jumping jacks"
                           size="small"
                           fullWidth
@@ -787,7 +854,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   
                   {recoveryInterval > 0 && (
                     <TextField
-                      label="Recovery Break After Rounds"
+                      label="Recovery Break Frequency (after every N rounds)"
                       type="number"
                       value={recoveryAfterRounds === null || recoveryAfterRounds === undefined ? '' : recoveryAfterRounds}
                       onChange={(e) => {
@@ -838,21 +905,54 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   {/* Presets */}
                   {yogaPresets.length > 0 && (
                     <Box>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Load Preset
-                      </Typography>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                          Saved Presets
+                        </Typography>
+                        <Button
+                          size="small"
+                          startIcon={isEditingPresets ? <Save /> : <Edit />}
+                          onClick={() => setIsEditingPresets(!isEditingPresets)}
+                        >
+                          {isEditingPresets ? 'Done' : 'Manage'}
+                        </Button>
+                      </Stack>
                       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                         {yogaPresets.map((preset) => (
-                          <Chip
-                            key={preset.id}
-                            label={preset.name}
-                            onClick={() => handleLoadPreset(preset)}
-                            onDelete={() => handleDeletePreset(preset.id)}
-                            color="primary"
-                            variant="outlined"
-                            icon={<Favorite />}
-                            sx={{ mb: 1 }}
-                          />
+                          <Box key={preset.id} sx={{ position: 'relative', display: 'inline-block' }}>
+                            <Chip
+                              label={preset.name}
+                              onClick={() => !isEditingPresets && handleLoadPreset(preset)}
+                              color="primary"
+                              variant="outlined"
+                              icon={<Favorite />}
+                              sx={{ 
+                                mb: 1,
+                                cursor: isEditingPresets ? 'default' : 'pointer',
+                                opacity: isEditingPresets ? 0.7 : 1,
+                              }}
+                            />
+                            {isEditingPresets && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeletePreset(preset.id)}
+                                sx={{
+                                  position: 'absolute',
+                                  top: -8,
+                                  right: -8,
+                                  bgcolor: 'error.main',
+                                  color: 'white',
+                                  width: 20,
+                                  height: 20,
+                                  '&:hover': {
+                                    bgcolor: 'error.dark',
+                                  },
+                                }}
+                              >
+                                <Delete sx={{ fontSize: 14 }} />
+                              </IconButton>
+                            )}
+                          </Box>
                         ))}
                       </Stack>
                     </Box>

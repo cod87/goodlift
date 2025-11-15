@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Convert exercise-expanded.csv to exercises.json format
- * This script reads exercise-expanded.csv and generates exercises.json with all fields
+ * Convert hiit-exercises.csv to hiit-exercises.json format
+ * This script reads hiit-exercises.csv and generates hiit-exercises.json
  */
 
 import fs from 'fs';
@@ -12,14 +12,14 @@ import Papa from 'papaparse';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const CSV_PATH = path.join(__dirname, '../public/data/exercise-expanded.csv');
-const JSON_OUTPUT_PATH = path.join(__dirname, '../public/data/exercises.json');
-const DOCS_JSON_OUTPUT_PATH = path.join(__dirname, '../docs/data/exercises.json');
+const CSV_PATH = path.join(__dirname, '../public/data/hiit-exercises.csv');
+const JSON_OUTPUT_PATH = path.join(__dirname, '../public/data/hiit-exercises.json');
+const DOCS_JSON_OUTPUT_PATH = path.join(__dirname, '../docs/data/hiit-exercises.json');
 
 /**
- * Convert CSV data to JSON format with all expanded fields
+ * Convert CSV data to JSON format
  * @param {Array} csvData - Parsed CSV data
- * @returns {Array} Array of exercise objects
+ * @returns {Array} Array of HIIT exercise objects
  */
 function convertToJSON(csvData) {
   const exercises = [];
@@ -31,25 +31,16 @@ function convertToJSON(csvData) {
       continue;
     }
     
-    // Skip rows where Exercise Name is empty
-    const exerciseName = row['Exercise Name']?.trim();
+    // Skip rows where Exercise is empty
+    const exerciseName = row['Exercise']?.trim();
     if (!exerciseName) {
       continue;
     }
     
-    // Map CSV columns to JSON structure - preserve all fields from expanded CSV
+    // Map CSV columns to JSON structure
     const exercise = {
-      "Exercise Name": exerciseName,
-      "Primary Muscle": row['Primary Muscle']?.trim() || '',
-      "Secondary Muscles": row['Secondary Muscles']?.trim() || '',
-      "Exercise Type": row['Exercise Type']?.trim() || '',
-      "Equipment": row['Equipment']?.trim() || '',
-      "Difficulty": row['Difficulty']?.trim() || '',
-      "Movement Pattern": row['Movement Pattern']?.trim() || '',
-      "Rep Range": row['Rep Range']?.trim() || '',
-      "Superset Type": row['Superset Type']?.trim() || '',
-      "Workout Type": row['Workout Type']?.trim() || '',
-      "Progression": row['Progression']?.trim() || ''
+      "name": exerciseName,
+      "muscleGroup": row['Muscle Group']?.trim() || ''
     };
     
     exercises.push(exercise);
@@ -61,9 +52,9 @@ function convertToJSON(csvData) {
 /**
  * Main conversion function
  */
-async function convertExercises() {
+async function convertHiitExercises() {
   try {
-    console.log('Starting exercise-expanded.csv to JSON conversion...');
+    console.log('Starting hiit-exercises.csv to JSON conversion...');
     console.log(`Reading CSV from: ${CSV_PATH}`);
     
     // Check if CSV file exists
@@ -98,7 +89,7 @@ async function convertExercises() {
     const uniqueExercises = [];
     const seenNames = new Set();
     for (const exercise of exercises) {
-      const name = exercise["Exercise Name"];
+      const name = exercise.name;
       if (!seenNames.has(name)) {
         seenNames.add(name);
         uniqueExercises.push(exercise);
@@ -115,7 +106,7 @@ async function convertExercises() {
     
     // Sort exercises alphabetically by name for consistency
     uniqueExercises.sort((a, b) => 
-      a["Exercise Name"].localeCompare(b["Exercise Name"])
+      a.name.localeCompare(b.name)
     );
     
     // Ensure output directory exists
@@ -124,7 +115,7 @@ async function convertExercises() {
       fs.mkdirSync(outputDir, { recursive: true });
     }
     
-    // Write JSON to public/data/exercises.json
+    // Write JSON to public/data/hiit-exercises.json
     fs.writeFileSync(
       JSON_OUTPUT_PATH,
       JSON.stringify(uniqueExercises, null, 2),
@@ -132,7 +123,7 @@ async function convertExercises() {
     );
     console.log(`✓ Successfully wrote ${uniqueExercises.length} exercises to: ${JSON_OUTPUT_PATH}`);
     
-    // Also write to docs/data/exercises.json for production build
+    // Also write to docs/data/hiit-exercises.json for production build
     const docsDir = path.dirname(DOCS_JSON_OUTPUT_PATH);
     if (!fs.existsSync(docsDir)) {
       fs.mkdirSync(docsDir, { recursive: true });
@@ -146,9 +137,9 @@ async function convertExercises() {
     console.log(`✓ Successfully wrote ${uniqueExercises.length} exercises to: ${DOCS_JSON_OUTPUT_PATH}`);
     
     // Display sample exercises
-    console.log('\nSample exercises (first 3):');
-    uniqueExercises.slice(0, 3).forEach(ex => {
-      console.log(`  - ${ex["Exercise Name"]} (${ex["Primary Muscle"]}, ${ex["Workout Type"]})`);
+    console.log('\nSample exercises (first 5):');
+    uniqueExercises.slice(0, 5).forEach(ex => {
+      console.log(`  - ${ex.name} (${ex.muscleGroup})`);
     });
     
     console.log('\n✓ Conversion completed successfully!');
@@ -161,4 +152,4 @@ async function convertExercises() {
 }
 
 // Run conversion
-convertExercises();
+convertHiitExercises();

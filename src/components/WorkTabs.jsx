@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Box, Tabs, Tab } from '@mui/material';
 import { 
   FitnessCenter,
-  Timer as TimerIcon,
+  DirectionsRun,
 } from '@mui/icons-material';
 import WorkoutTab from './WorkTabs/WorkoutTab';
 import TimerTab from './WorkTabs/TimerTab';
@@ -63,7 +63,7 @@ const WorkTabs = ({
             iconPosition="start"
           />
           <Tab 
-            icon={<TimerIcon />} 
+            icon={<DirectionsRun />} 
             label="Endurance & Mobility" 
             iconPosition="start"
           />

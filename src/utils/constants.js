@@ -28,6 +28,7 @@ export const DAY_TYPES = {
 export const SETS_PER_EXERCISE = 3;
 export const EXERCISES_PER_WORKOUT = 8;
 export const EXERCISES_DATA_PATH = import.meta.env.BASE_URL + 'data/exercises.json';
+export const HIIT_EXERCISES_DATA_PATH = import.meta.env.BASE_URL + 'data/hiit-exercises.json';
 
 /** Screen route identifiers */
 export const SCREENS = {

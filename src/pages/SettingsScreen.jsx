@@ -51,6 +51,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { usePreferences } from '../contexts/PreferencesContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 import audioService from '../utils/audioService';
 import { downloadProfileData } from '../utils/profileUtils';
 import { useUserProfile } from '../contexts/UserProfileContext';
@@ -70,6 +71,7 @@ const SettingsScreen = ({ onNavigate }) => {
   const { preferences, updatePreference } = usePreferences();
   const { profile, stats } = useUserProfile();
   const { isGuest } = useAuth();
+  const { resetWeekCycle, currentWeek } = useWeekScheduling();
   
   const [volume, setVolume] = useState(() => {
     try {
@@ -257,6 +259,20 @@ const SettingsScreen = ({ onNavigate }) => {
     }
   };
 
+  const handleResetWeekCycle = async () => {
+    try {
+      await resetWeekCycle();
+      setSnackbarMessage('Week cycle reset to Week 1. Automatic workout assignment re-enabled.');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error resetting week cycle:', error);
+      setSnackbarMessage('Failed to reset week cycle');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -349,6 +365,41 @@ const SettingsScreen = ({ onNavigate }) => {
                     <ListItemText
                       primary="Profile Information"
                       secondary="Manage profile, avatar, and personal details"
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
+                    <ChevronRight sx={{ color: 'text.secondary' }} />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
+
+          {/* Workout Scheduling Section */}
+          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 0 }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  px: 2,
+                  pt: 2,
+                  pb: 1,
+                  display: 'block',
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                Workout Scheduling
+              </Typography>
+              <List sx={{ py: 0 }}>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={handleResetWeekCycle}>
+                    <ListItemIcon>
+                      <CalendarMonth sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Reset Week Counter"
+                      secondary={`Currently on Week ${currentWeek}. Reset to Week 1 and restart cycle.`}
                       primaryTypographyProps={{ fontWeight: 500 }}
                     />
                     <ChevronRight sx={{ color: 'text.secondary' }} />

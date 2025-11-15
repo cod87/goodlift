@@ -8,7 +8,10 @@ import {
   Button, 
   Stack,
   Grid,
-  Chip
+  Chip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import { 
   PlayArrow, 
@@ -16,11 +19,13 @@ import {
   CalendarToday,
   Timer,
   SelfImprovement,
-  DirectionsRun
+  DirectionsRun,
+  ExpandMore,
 } from '@mui/icons-material';
 import { formatDuration } from '../../utils/helpers';
 import { getWorkoutTypeDisplayName } from '../../utils/workoutTypeHelpers';
 import { TIME_CONSTANTS } from '../../utils/constants';
+import WeeklyScheduleView from '../Common/WeeklyScheduleView';
 
 /**
  * TodayView - Modern landing page component
@@ -235,6 +240,39 @@ const TodayView = memo(({
           </CardContent>
         </Card>
       )}
+
+      {/* Weekly Schedule Section */}
+      <Box sx={{ mb: 4 }}>
+        <Accordion 
+          defaultExpanded={false}
+          sx={{ 
+            borderRadius: 2,
+            '&:before': { display: 'none' },
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMore />}
+            sx={{
+              '& .MuiAccordionSummary-content': {
+                alignItems: 'center',
+                gap: 1,
+              },
+            }}
+          >
+            <CalendarToday color="primary" />
+            <Typography variant="h6" fontWeight={600}>
+              Weekly Schedule
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <WeeklyScheduleView onStartWorkout={(session) => {
+              // Could trigger workout start from schedule
+              console.log('Start workout from schedule:', session);
+            }} />
+          </AccordionDetails>
+        </Accordion>
+      </Box>
 
       {/* Navigation Tiles */}
       <Box>

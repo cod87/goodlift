@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { Box, Card, CardContent, Typography, Button, Stack, Chip, IconButton, Snackbar, Alert } from '@mui/material';
-import { Download, Check, Celebration, Star, StarBorder } from '@mui/icons-material';
+import { Download, Check, Celebration, Star, StarBorder, CalendarToday } from '@mui/icons-material';
 import { saveFavoriteWorkout, getWorkoutHistory } from '../utils/storage';
 import { getPersonalRecords, detectNewPRs } from '../utils/trackingMetrics';
 import { PRNotification } from './CelebrationNotifications';
+import AssignToDayDialog from './Common/AssignToDayDialog';
+import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 
 /**
  * CompletionScreen component displays workout summary after completion
@@ -18,6 +20,11 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [prNotifications, setPrNotifications] = useState([]);
   const [currentPRIndex, setCurrentPRIndex] = useState(0);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [assignSnackbarOpen, setAssignSnackbarOpen] = useState(false);
+  const [assignSnackbarMessage, setAssignSnackbarMessage] = useState('');
+  
+  const { isAutoAssignWeek, assignWorkoutToDay, weeklySchedule } = useWeekScheduling();
 
   // Check for PRs when component mounts
   useEffect(() => {
@@ -44,6 +51,33 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  // Auto-assign workout to current day in Week 1
+  useEffect(() => {
+    const autoAssignWorkout = async () => {
+      if (isAutoAssignWeek() && workoutData && workoutPlan) {
+        try {
+          const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()];
+          const workoutType = detectWorkoutType(workoutData);
+          
+          const sessionData = {
+            sessionType: workoutType,
+            sessionName: `${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`,
+            exercises: workoutPlan,
+            date: new Date().toISOString(),
+          };
+          
+          await assignWorkoutToDay(dayOfWeek, sessionData);
+          setAssignSnackbarMessage(`Automatically assigned to ${dayOfWeek}`);
+          setAssignSnackbarOpen(true);
+        } catch (error) {
+          console.error('Error auto-assigning workout:', error);
+        }
+      }
+    };
+    
+    autoAssignWorkout();
+  }, [isAutoAssignWeek, workoutData, workoutPlan, assignWorkoutToDay]);
+
   const handleSaveToFavorites = () => {
     try {
       if (!workoutPlan || workoutPlan.length === 0) {
@@ -65,6 +99,31 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
     } catch (error) {
       console.error('Error saving to favorites:', error);
       alert('Failed to save workout to favorites');
+    }
+  };
+
+  const handleAssignToDay = () => {
+    setShowAssignDialog(true);
+  };
+
+  const handleAssignConfirm = async (dayOfWeek, sessionData) => {
+    try {
+      const workoutType = detectWorkoutType(workoutData);
+      
+      const fullSessionData = {
+        sessionType: workoutType,
+        sessionName: `${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`,
+        exercises: workoutPlan,
+        date: new Date().toISOString(),
+      };
+      
+      await assignWorkoutToDay(dayOfWeek, fullSessionData);
+      setAssignSnackbarMessage(`Workout assigned to ${dayOfWeek}`);
+      setAssignSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error assigning workout:', error);
+      setAssignSnackbarMessage('Failed to assign workout');
+      setAssignSnackbarOpen(true);
     }
   };
 
@@ -214,6 +273,29 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
           spacing={2}
           sx={{ mt: 4 }}
         >
+          {!isAutoAssignWeek() && (
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={<CalendarToday />}
+              onClick={handleAssignToDay}
+              sx={{
+                flex: 1,
+                borderRadius: 2,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 600,
+                borderColor: 'info.main',
+                color: 'info.main',
+                '&:hover': {
+                  borderColor: 'info.dark',
+                  bgcolor: 'rgba(33, 150, 243, 0.1)',
+                }
+              }}
+            >
+              Assign to Day
+            </Button>
+          )}
           <Button
             variant="outlined"
             size="large"
@@ -267,6 +349,26 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
           Workout saved to favorites!
         </Alert>
       </Snackbar>
+
+      <Snackbar
+        open={assignSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setAssignSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setAssignSnackbarOpen(false)}>
+          {assignSnackbarMessage}
+        </Alert>
+      </Snackbar>
+
+      {/* Assign to Day Dialog */}
+      <AssignToDayDialog
+        open={showAssignDialog}
+        onClose={() => setShowAssignDialog(false)}
+        onAssign={handleAssignConfirm}
+        workoutData={workoutData}
+        currentSchedule={weeklySchedule}
+      />
 
       {/* PR Notifications */}
       {prNotifications.length > 0 && currentPRIndex < prNotifications.length && (

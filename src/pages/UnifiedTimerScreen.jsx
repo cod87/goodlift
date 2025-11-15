@@ -33,6 +33,10 @@ import {
   DialogContent,
   DialogActions,
   Grid,
+  Menu,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
 } from '@mui/material';
 import {
   PlayArrow,
@@ -52,6 +56,7 @@ import {
   Edit,
   Favorite,
   FavoriteBorder,
+  MoreVert,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import audioService from '../utils/audioService';
@@ -130,6 +135,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [showPresetDialog, setShowPresetDialog] = useState(false);
   const [presetName, setPresetName] = useState('');
   const [editingPreset, setEditingPreset] = useState(null);
+  const [isEditingPresets, setIsEditingPresets] = useState(false); // New state for edit mode
   
   // HIIT exercises autocomplete
   const [hiitExercises, setHiitExercises] = useState([]);
@@ -627,20 +633,53 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   {/* Presets */}
                   {hiitPresets.length > 0 && (
                     <Box>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Load Preset
-                      </Typography>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                          Saved Presets
+                        </Typography>
+                        <Button
+                          size="small"
+                          startIcon={isEditingPresets ? <Save /> : <Edit />}
+                          onClick={() => setIsEditingPresets(!isEditingPresets)}
+                        >
+                          {isEditingPresets ? 'Done' : 'Manage'}
+                        </Button>
+                      </Stack>
                       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                         {hiitPresets.map((preset) => (
-                          <Chip
-                            key={preset.id}
-                            label={preset.name}
-                            onClick={() => handleLoadPreset(preset)}
-                            onDelete={() => handleDeletePreset(preset.id)}
-                            color="primary"
-                            variant="outlined"
-                            sx={{ mb: 1 }}
-                          />
+                          <Box key={preset.id} sx={{ position: 'relative', display: 'inline-block' }}>
+                            <Chip
+                              label={preset.name}
+                              onClick={() => !isEditingPresets && handleLoadPreset(preset)}
+                              color="primary"
+                              variant="outlined"
+                              sx={{ 
+                                mb: 1,
+                                cursor: isEditingPresets ? 'default' : 'pointer',
+                                opacity: isEditingPresets ? 0.7 : 1,
+                              }}
+                            />
+                            {isEditingPresets && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeletePreset(preset.id)}
+                                sx={{
+                                  position: 'absolute',
+                                  top: -8,
+                                  right: -8,
+                                  bgcolor: 'error.main',
+                                  color: 'white',
+                                  width: 20,
+                                  height: 20,
+                                  '&:hover': {
+                                    bgcolor: 'error.dark',
+                                  },
+                                }}
+                              >
+                                <Delete sx={{ fontSize: 14 }} />
+                              </IconButton>
+                            )}
+                          </Box>
                         ))}
                       </Stack>
                     </Box>
@@ -866,21 +905,54 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   {/* Presets */}
                   {yogaPresets.length > 0 && (
                     <Box>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Load Preset
-                      </Typography>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                          Saved Presets
+                        </Typography>
+                        <Button
+                          size="small"
+                          startIcon={isEditingPresets ? <Save /> : <Edit />}
+                          onClick={() => setIsEditingPresets(!isEditingPresets)}
+                        >
+                          {isEditingPresets ? 'Done' : 'Manage'}
+                        </Button>
+                      </Stack>
                       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                         {yogaPresets.map((preset) => (
-                          <Chip
-                            key={preset.id}
-                            label={preset.name}
-                            onClick={() => handleLoadPreset(preset)}
-                            onDelete={() => handleDeletePreset(preset.id)}
-                            color="primary"
-                            variant="outlined"
-                            icon={<Favorite />}
-                            sx={{ mb: 1 }}
-                          />
+                          <Box key={preset.id} sx={{ position: 'relative', display: 'inline-block' }}>
+                            <Chip
+                              label={preset.name}
+                              onClick={() => !isEditingPresets && handleLoadPreset(preset)}
+                              color="primary"
+                              variant="outlined"
+                              icon={<Favorite />}
+                              sx={{ 
+                                mb: 1,
+                                cursor: isEditingPresets ? 'default' : 'pointer',
+                                opacity: isEditingPresets ? 0.7 : 1,
+                              }}
+                            />
+                            {isEditingPresets && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeletePreset(preset.id)}
+                                sx={{
+                                  position: 'absolute',
+                                  top: -8,
+                                  right: -8,
+                                  bgcolor: 'error.main',
+                                  color: 'white',
+                                  width: 20,
+                                  height: 20,
+                                  '&:hover': {
+                                    bgcolor: 'error.dark',
+                                  },
+                                }}
+                              >
+                                <Delete sx={{ fontSize: 14 }} />
+                              </IconButton>
+                            )}
+                          </Box>
                         ))}
                       </Stack>
                     </Box>

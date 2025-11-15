@@ -49,7 +49,7 @@ const Header = ({ onNavigate }) => {
         height: '60px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         padding: '0 1rem',
         background: '#2a3647',
         backdropFilter: 'blur(10px)',
@@ -59,13 +59,12 @@ const Header = ({ onNavigate }) => {
         borderBottom: '1px solid rgba(29, 181, 132, 0.2)',
       }}
     >
-      {/* Center favicon icon */}
+      {/* Left-aligned favicon icon */}
       <Box 
         onClick={() => onNavigate && onNavigate('progress')}
         sx={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
           cursor: onNavigate ? 'pointer' : 'default',
           transition: 'transform 0.2s ease',
           '&:hover': onNavigate ? {

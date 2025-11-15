@@ -74,7 +74,7 @@ export const ThemeProvider = ({ children }) => {
             main: '#6b8a9d',
           },
         } : {
-          // Light theme with tan/beige colors from auth screen
+          // Light theme - clean and bright, inverse of dark mode
           mode: 'light',
           primary: {
             main: '#18a071', // Darker teal for better contrast
@@ -82,16 +82,16 @@ export const ThemeProvider = ({ children }) => {
             dark: '#0f7a55',
           },
           secondary: {
-            main: '#ed3f27', // Red/orange accent
-            light: '#ff6347',
-            dark: '#cc3520',
+            main: '#ff8c00', // Orange accent
+            light: '#ffa333',
+            dark: '#cc7000',
           },
           background: {
-            default: 'rgb(255, 245, 233)', // Lighter tinted beige (60% tint of paper color)
-            paper: 'rgb(254, 230, 200)', // Slightly warmer for cards
+            default: '#f5f5f5', // Light gray background (clean, neutral)
+            paper: '#ffffff', // White for cards and surfaces
           },
           text: {
-            primary: '#1e2939', // Dark text
+            primary: '#1e2939', // Dark text (inverse of dark mode background)
             secondary: '#4a5568', // Medium gray
           },
           success: {
@@ -151,10 +151,10 @@ export const ThemeProvider = ({ children }) => {
                   backgroundColor: '#cc7000',
                 },
               } : {
-                backgroundColor: '#ed3f27',
+                backgroundColor: '#ff8c00',
                 color: '#ffffff',
                 '&:hover': {
-                  backgroundColor: '#cc3520',
+                  backgroundColor: '#cc7000',
                 },
               },
             },

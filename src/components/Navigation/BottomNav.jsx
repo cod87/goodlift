@@ -31,6 +31,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       label: 'Work',
       iconActive: FitnessCenter,
       iconInactive: FitnessCenterOutlined,
+      activeColor: '#1db584', // Green
       screens: [
         'home', 
         'selection', 
@@ -49,6 +50,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       label: 'Progress',
       iconActive: TrendingUp,
       iconInactive: TrendingUpOutlined,
+      activeColor: '#6b8a9d', // Blue accent
       screens: ['progress'],
     },
     {
@@ -56,6 +58,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       label: 'Settings',
       iconActive: Settings,
       iconInactive: SettingsOutlined,
+      activeColor: '#ff8c00', // Orange accent
       screens: ['settings', 'log-activity', 'exercise-list', 'profile', 'stretch', 'mobility'],
     },
   ];
@@ -111,7 +114,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              color: active ? '#1db584' : '#a0a8b3',
+              color: active ? item.activeColor : '#a0a8b3',
               transition: 'color 0.2s ease',
               padding: '8px 4px',
             }}
@@ -151,7 +154,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
                   transform: 'translateX(-50%)',
                   width: '24px',
                   height: '2px',
-                  backgroundColor: '#1db584',
+                  backgroundColor: item.activeColor,
                   borderRadius: '0 0 2px 2px',
                 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}

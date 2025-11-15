@@ -42,6 +42,7 @@ import {
   Timer,
   Close,
   Whatshot,
+  FilterList,
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -51,16 +52,12 @@ import Achievements from './Achievements';
 import WeightTracker from './WeightTracker';
 import {
   getWorkoutHistory,
-  deleteWorkout,
-  updateWorkout,
   getStretchSessions,
   getUserStats,
 } from '../utils/storage';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 import { StreakDisplay, AdherenceDisplay, VolumeTrendDisplay } from './Progress/TrackingCards';
-import { FourWeekProgressionChart } from './Progress/FourWeekProgressionChart';
-import ActivitiesList from './Progress/ActivitiesList';
 import { useUserProfile } from '../contexts/UserProfileContext';
 
 /**
@@ -193,10 +190,8 @@ const ProgressDashboard = () => {
   const [availableExercises, setAvailableExercises] = useState([]);
   const [addExerciseDialogOpen, setAddExerciseDialogOpen] = useState(false);
   const [exerciseSearchQuery, setExerciseSearchQuery] = useState('');
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingSession, setEditingSession] = useState(null);
-  const [editingSessionType, setEditingSessionType] = useState(null);
   const [currentTab, setCurrentTab] = useState(0);
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   
   // Time frame filter state
   const [timeFrame, setTimeFrame] = useState('all'); // '7days', '30days', '3months', 'year', 'custom', 'all'
@@ -375,35 +370,6 @@ const ProgressDashboard = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history, timeFrame, customStartDate, customEndDate]);
 
-  const handleDeleteWorkout = async (index) => {
-    if (window.confirm('Are you sure you want to delete this workout? This action cannot be undone.')) {
-      await deleteWorkout(index);
-      await loadData();
-    }
-  };
-
-  const handleEditWorkout = (workout, index) => {
-    setEditingSession({ ...workout, index });
-    setEditingSessionType('workout');
-    setEditDialogOpen(true);
-  };
-
-  const handleSaveEdit = async (updatedData) => {
-    try {
-      if (editingSessionType === 'workout') {
-        await updateWorkout(editingSession.index, updatedData);
-      }
-
-      await loadData();
-      setEditDialogOpen(false);
-      setEditingSession(null);
-      setEditingSessionType(null);
-    } catch (error) {
-      console.error('Error saving edit:', error);
-      alert('Failed to save changes. Please try again.');
-    }
-  };
-
   const handleRemovePinnedExercise = (exerciseName) => {
     progressiveOverloadService.removePinnedExercise(exerciseName);
     setPinnedExercisesState(pinnedExercises.filter(p => p.exerciseName !== exerciseName));
@@ -470,228 +436,94 @@ const ProgressDashboard = () => {
         {/* Statistics Tab */}
         {currentTab === 0 && (
           <Stack spacing={3}>
-            {/* Time Frame Filter - Compact */}
-            <Card sx={{ bgcolor: 'background.paper' }}>
-              <CardContent sx={{ p: 2 }}>
-                <Stack spacing={2}>
-                  <ToggleButtonGroup
-                    value={timeFrame}
-                    exclusive
-                    onChange={(e, newValue) => {
-                      if (newValue !== null) {
-                        setTimeFrame(newValue);
-                      }
-                    }}
-                    aria-label="time frame filter"
-                    size="small"
-                    fullWidth
-                    sx={{ 
-                      display: 'grid',
-                      gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(6, 1fr)' },
-                      gap: 0.5,
-                    }}
-                  >
-                    <ToggleButton value="7days" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
-                      7d
-                    </ToggleButton>
-                    <ToggleButton value="30days" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
-                      30d
-                    </ToggleButton>
-                    <ToggleButton value="3months" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
-                      3mo
-                    </ToggleButton>
-                    <ToggleButton value="year" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
-                      Year
-                    </ToggleButton>
-                    <ToggleButton value="custom" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
-                      Custom
-                    </ToggleButton>
-                    <ToggleButton value="all" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
-                      All
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                  
-                  {/* Custom Date Range Picker */}
-                  {timeFrame === 'custom' && (
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                        <DatePicker
-                          label="Start Date"
-                          value={customStartDate}
-                          onChange={(newValue) => setCustomStartDate(newValue)}
-                          slotProps={{ 
-                            textField: { 
-                              size: 'small',
-                              fullWidth: true 
-                            } 
-                          }}
-                        />
-                        <DatePicker
-                          label="End Date"
-                          value={customEndDate}
-                          onChange={(newValue) => setCustomEndDate(newValue)}
-                          slotProps={{ 
-                            textField: { 
-                              size: 'small',
-                              fullWidth: true 
-                            } 
-                          }}
-                        />
-                      </Stack>
-                    </LocalizationProvider>
-                  )}
+            {/* Time Frame Filter - Icon Button */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                startIcon={<FilterList />}
+                onClick={() => setFilterDialogOpen(true)}
+                variant="outlined"
+                size="small"
+                sx={{ 
+                  textTransform: 'none',
+                  borderRadius: 2,
+                }}
+              >
+                {timeFrame === 'all' ? 'All Time' : 
+                 timeFrame === '7days' ? '7 Days' :
+                 timeFrame === '30days' ? '30 Days' :
+                 timeFrame === '3months' ? '3 Months' :
+                 timeFrame === 'year' ? 'Year' :
+                 timeFrame === 'custom' ? 'Custom' : 'Filter'}
+              </Button>
+            </Box>
+
+            {/* Streak - Highlighted */}
+            <Card 
+              sx={{ 
+                bgcolor: 'background.paper',
+                boxShadow: 3,
+                border: '2px solid #FF6B35',
+              }}
+            >
+              <CardContent sx={{ p: 2.5 }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Whatshot sx={{ fontSize: 48, color: '#FF6B35' }} />
+                    <Box>
+                      <Typography variant="h2" sx={{ fontWeight: 700, color: '#FF6B35', lineHeight: 1 }}>
+                        {streakData.currentStreak}
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
+                        Day Streak
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Longest
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                      {streakData.longestStreak}
+                    </Typography>
+                  </Box>
                 </Stack>
               </CardContent>
             </Card>
 
-            {/* Compact Streak and Adherence Row */}
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
-                gap: 2,
-              }}
-            >
-              {/* Streak - Inline with Fire Icon */}
-              <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Whatshot sx={{ fontSize: 40, color: '#FF6B35' }} />
-                      <Box>
-                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#FF6B35', lineHeight: 1 }}>
-                          {streakData.currentStreak}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Day Streak
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Longest
-                      </Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                        {streakData.longestStreak}
+            {/* Adherence */}
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardContent sx={{ p: 2 }}>
+                <Stack spacing={1.5}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Assessment sx={{ color: 'secondary.main' }} />
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        Adherence
                       </Typography>
                     </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
-
-              {/* Adherence with Progress Bar */}
-              <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Stack spacing={1.5}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Assessment sx={{ color: 'secondary.main' }} />
-                        <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                          Adherence
-                        </Typography>
-                      </Box>
-                      <Typography variant="h4" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                        {adherence}%
-                      </Typography>
-                    </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={adherence}
-                      sx={{
-                        height: 12,
-                        borderRadius: 6,
-                        bgcolor: 'action.hover',
-                        '& .MuiLinearProgress-bar': {
-                          borderRadius: 6,
-                          background: 'linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%)',
-                        },
-                      }}
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      Last 30 days • 6 workouts/week target
+                    <Typography variant="h4" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                      {adherence}%
                     </Typography>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Box>
-
-            {/* Stats Grid: PRs and Total Workouts (removed Avg Duration) */}
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
-                gap: 2,
-              }}
-            >
-              <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center', p: 2 }}>
-                  <EmojiEvents sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: 'warning.main' }}>
-                    {filteredStats.personalRecords}
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={adherence}
+                    sx={{
+                      height: 12,
+                      borderRadius: 6,
+                      bgcolor: 'action.hover',
+                      '& .MuiLinearProgress-bar': {
+                        borderRadius: 6,
+                        background: 'linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%)',
+                      },
+                    }}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    Last 30 days • 6 workouts/week target
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Personal Records
-                  </Typography>
-                </CardContent>
-              </Card>
-
-              <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center', p: 2 }}>
-                  <FitnessCenter sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                    {filteredStats.totalWorkouts}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Total Workouts
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Box>
-
-            {/* Session Type Stats - More Compact */}
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
-                gap: 2,
-              }}
-            >
-              <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center', p: 2 }}>
-                  <FitnessCenter sx={{ fontSize: 32, color: 'error.main', mb: 0.5 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'error.main' }}>
-                    {filteredStats.strengthSessions}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Strength
-                  </Typography>
-                </CardContent>
-              </Card>
-
-              <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center', p: 2 }}>
-                  <DirectionsRun sx={{ fontSize: 32, color: 'success.main', mb: 0.5 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
-                    {filteredStats.cardioSessions}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Cardio
-                  </Typography>
-                </CardContent>
-              </Card>
-
-              <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center', p: 2 }}>
-                  <SelfImprovement sx={{ fontSize: 32, color: 'secondary.main', mb: 0.5 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                    {filteredStats.yogaSessions}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Yoga
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Box>
+                </Stack>
+              </CardContent>
+            </Card>
 
             {/* Progressive Overload Section - Moved here, below adherence */}
           {history.length > 0 && (
@@ -819,6 +651,74 @@ const ProgressDashboard = () => {
             </Card>
           )}
 
+            {/* Combined Workouts Stats - Stylized table without lines */}
+            <Card sx={{ bgcolor: 'background.paper' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                  Workout Summary
+                </Typography>
+                <Stack spacing={2.5}>
+                  {/* Total Workouts */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <FitnessCenter sx={{ fontSize: 28, color: 'primary.main' }} />
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        Total Workouts
+                      </Typography>
+                    </Box>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                      {filteredStats.totalWorkouts}
+                    </Typography>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Total Strength */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <FitnessCenter sx={{ fontSize: 28, color: 'error.main' }} />
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        Total Strength
+                      </Typography>
+                    </Box>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'error.main' }}>
+                      {filteredStats.strengthSessions}
+                    </Typography>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Total Cardio */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <DirectionsRun sx={{ fontSize: 28, color: 'success.main' }} />
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        Total Cardio
+                      </Typography>
+                    </Box>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
+                      {filteredStats.cardioSessions}
+                    </Typography>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Total Yoga */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <SelfImprovement sx={{ fontSize: 28, color: 'secondary.main' }} />
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        Total Yoga
+                      </Typography>
+                    </Box>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                      {filteredStats.yogaSessions}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+
             {/* Weight Tracking */}
             <WeightTracker
               weightHistory={profile.weightHistory || []}
@@ -826,34 +726,6 @@ const ProgressDashboard = () => {
               currentUnit={profile.weightUnit || 'lbs'}
               onAddWeight={addWeightEntry}
             />
-
-            {/* 4-Week Progression Chart */}
-            <FourWeekProgressionChart workoutHistory={getFilteredHistory()} />
-
-          {/* Recent Activities */}
-          <Card sx={{ bgcolor: 'background.paper' }} className="activities-section">
-            <CardContent>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Typography variant="h6">
-                  Recent Activities (Last 10 Workouts)
-                </Typography>
-              </Stack>
-
-              {/* Use enhanced ActivitiesList component */}
-              <ActivitiesList
-                activities={[...history.slice(0, 10)]}
-                onEdit={(index) => {
-                  const workout = history[index];
-                  handleEditWorkout(workout, index);
-                }}
-                onDelete={(index) => {
-                  handleDeleteWorkout(index);
-                }}
-                maxVisible={10}
-                showLoadMore={history.length > 10}
-              />
-            </CardContent>
-          </Card>
         </Stack>
         )}
 
@@ -907,120 +779,84 @@ const ProgressDashboard = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Edit Session Dialog */}
-        {editingSession && (
-          <EditSessionDialog
-            open={editDialogOpen}
-            onClose={() => {
-              setEditDialogOpen(false);
-              setEditingSession(null);
-              setEditingSessionType(null);
-            }}
-            onSave={handleSaveEdit}
-            session={editingSession}
-            sessionType={editingSessionType}
-          />
-        )}
+        {/* Filter Dialog */}
+        <Dialog
+          open={filterDialogOpen}
+          onClose={() => setFilterDialogOpen(false)}
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle>Time Frame Filter</DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <ToggleButtonGroup
+                value={timeFrame}
+                exclusive
+                onChange={(e, newValue) => {
+                  if (newValue !== null) {
+                    setTimeFrame(newValue);
+                  }
+                }}
+                orientation="vertical"
+                fullWidth
+              >
+                <ToggleButton value="all">All Time</ToggleButton>
+                <ToggleButton value="7days">Last 7 Days</ToggleButton>
+                <ToggleButton value="30days">Last 30 Days</ToggleButton>
+                <ToggleButton value="3months">Last 3 Months</ToggleButton>
+                <ToggleButton value="year">Last Year</ToggleButton>
+                <ToggleButton value="custom">Custom Range</ToggleButton>
+              </ToggleButtonGroup>
+
+              {timeFrame === 'custom' && (
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <Stack spacing={2}>
+                    <DatePicker
+                      label="Start Date"
+                      value={customStartDate}
+                      onChange={(newValue) => setCustomStartDate(newValue)}
+                      slotProps={{ 
+                        textField: { 
+                          fullWidth: true 
+                        } 
+                      }}
+                    />
+                    <DatePicker
+                      label="End Date"
+                      value={customEndDate}
+                      onChange={(newValue) => setCustomEndDate(newValue)}
+                      slotProps={{ 
+                        textField: { 
+                          fullWidth: true 
+                        } 
+                      }}
+                    />
+                  </Stack>
+                </LocalizationProvider>
+              )}
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={() => {
+                setTimeFrame('all');
+                setCustomStartDate(null);
+                setCustomEndDate(null);
+              }}
+            >
+              Clear Filters
+            </Button>
+            <Button 
+              onClick={() => setFilterDialogOpen(false)}
+              variant="contained"
+            >
+              Apply
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );
-};
-
-// Edit Session Dialog Component
-const EditSessionDialog = ({ open, onClose, onSave, session, sessionType }) => {
-  const [duration, setDuration] = useState(session.duration ? Math.round(session.duration / 60) : 0);
-  const [notes, setNotes] = useState(session.notes || '');
-  const [workoutType, setWorkoutType] = useState(session.type || 'full');
-  const [cardioType, setCardioType] = useState(session.cardioType || '');
-
-  const handleSubmit = () => {
-    const updatedData = {
-      duration: duration * 60,
-      notes: notes.trim(),
-    };
-
-    if (sessionType === 'workout') {
-      updatedData.type = workoutType;
-    } else if (sessionType === 'cardio') {
-      updatedData.cardioType = cardioType.trim();
-    }
-
-    onSave(updatedData);
-  };
-
-  const getTitle = () => {
-    switch (sessionType) {
-      case 'workout': return 'Edit Workout';
-      case 'cardio': return 'Edit Cardio Session';
-      case 'hiit': return 'Edit HIIT Session';
-      default: return 'Edit Session';
-    }
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{getTitle()}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField
-            fullWidth
-            type="number"
-            label="Duration (minutes)"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            inputProps={{ min: 0, step: 1 }}
-          />
-
-          {sessionType === 'workout' && (
-            <FormControl fullWidth>
-              <InputLabel>Workout Type</InputLabel>
-              <Select
-                value={workoutType}
-                label="Workout Type"
-                onChange={(e) => setWorkoutType(e.target.value)}
-              >
-                <MenuItem value="upper">Upper Body</MenuItem>
-                <MenuItem value="lower">Lower Body</MenuItem>
-                <MenuItem value="full">Full Body</MenuItem>
-              </Select>
-            </FormControl>
-          )}
-
-          {sessionType === 'cardio' && (
-            <TextField
-              fullWidth
-              label="Cardio Type"
-              value={cardioType}
-              onChange={(e) => setCardioType(e.target.value)}
-            />
-          )}
-
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label="Notes (optional)"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained">
-          Save Changes
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-EditSessionDialog.propTypes = {
-  open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired,
-  session: PropTypes.object.isRequired,
-  sessionType: PropTypes.string.isRequired,
 };
 
 ProgressDashboard.propTypes = {};

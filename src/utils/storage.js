@@ -35,6 +35,8 @@ const KEYS = {
   UNLOCKED_ACHIEVEMENTS: 'goodlift_unlocked_achievements',
   TOTAL_PRS: 'goodlift_total_prs',
   TOTAL_VOLUME: 'goodlift_total_volume',
+  YOGA_PRESETS: 'goodlift_yoga_presets',
+  HIIT_PRESETS: 'goodlift_hiit_presets',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -1513,6 +1515,164 @@ export const resetCurrentStreak = async () => {
     return updatedStats;
   } catch (error) {
     console.error('Error resetting current streak:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get saved yoga presets
+ * @returns {Array} Array of yoga preset objects
+ */
+export const getYogaPresets = () => {
+  try {
+    if (isGuestMode()) {
+      return getGuestData('yoga_presets') || [];
+    }
+    const presets = localStorage.getItem(KEYS.YOGA_PRESETS);
+    return presets ? JSON.parse(presets) : [];
+  } catch (error) {
+    console.error('Error reading yoga presets:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a yoga preset
+ * @param {Object} preset - Yoga preset data including name, poses, and durations
+ */
+export const saveYogaPreset = async (preset) => {
+  try {
+    if (!preset || !preset.name) {
+      throw new Error('Preset must have a name');
+    }
+    
+    const presets = getYogaPresets();
+    const existingIndex = presets.findIndex(p => p.id === preset.id);
+    
+    if (existingIndex >= 0) {
+      // Update existing preset
+      presets[existingIndex] = { ...preset, updatedAt: Date.now() };
+    } else {
+      // Add new preset with timestamp and ID
+      presets.push({
+        ...preset,
+        id: preset.id || `yoga_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    }
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('yoga_presets', presets);
+    } else {
+      localStorage.setItem(KEYS.YOGA_PRESETS, JSON.stringify(presets));
+    }
+    
+    return presets;
+  } catch (error) {
+    console.error('Error saving yoga preset:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a yoga preset
+ * @param {string} presetId - ID of the preset to delete
+ */
+export const deleteYogaPreset = async (presetId) => {
+  try {
+    const presets = getYogaPresets();
+    const filteredPresets = presets.filter(p => p.id !== presetId);
+    
+    if (isGuestMode()) {
+      setGuestData('yoga_presets', filteredPresets);
+    } else {
+      localStorage.setItem(KEYS.YOGA_PRESETS, JSON.stringify(filteredPresets));
+    }
+    
+    return filteredPresets;
+  } catch (error) {
+    console.error('Error deleting yoga preset:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get saved HIIT presets
+ * @returns {Array} Array of HIIT preset objects
+ */
+export const getHiitPresets = () => {
+  try {
+    if (isGuestMode()) {
+      return getGuestData('hiit_presets') || [];
+    }
+    const presets = localStorage.getItem(KEYS.HIIT_PRESETS);
+    return presets ? JSON.parse(presets) : [];
+  } catch (error) {
+    console.error('Error reading HIIT presets:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a HIIT preset
+ * @param {Object} preset - HIIT preset data including name, intervals, and configuration
+ */
+export const saveHiitPreset = async (preset) => {
+  try {
+    if (!preset || !preset.name) {
+      throw new Error('Preset must have a name');
+    }
+    
+    const presets = getHiitPresets();
+    const existingIndex = presets.findIndex(p => p.id === preset.id);
+    
+    if (existingIndex >= 0) {
+      // Update existing preset
+      presets[existingIndex] = { ...preset, updatedAt: Date.now() };
+    } else {
+      // Add new preset with timestamp and ID
+      presets.push({
+        ...preset,
+        id: preset.id || `hiit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    }
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('hiit_presets', presets);
+    } else {
+      localStorage.setItem(KEYS.HIIT_PRESETS, JSON.stringify(presets));
+    }
+    
+    return presets;
+  } catch (error) {
+    console.error('Error saving HIIT preset:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a HIIT preset
+ * @param {string} presetId - ID of the preset to delete
+ */
+export const deleteHiitPreset = async (presetId) => {
+  try {
+    const presets = getHiitPresets();
+    const filteredPresets = presets.filter(p => p.id !== presetId);
+    
+    if (isGuestMode()) {
+      setGuestData('hiit_presets', filteredPresets);
+    } else {
+      localStorage.setItem(KEYS.HIIT_PRESETS, JSON.stringify(filteredPresets));
+    }
+    
+    return filteredPresets;
+  } catch (error) {
+    console.error('Error deleting HIIT preset:', error);
     throw error;
   }
 };

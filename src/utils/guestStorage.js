@@ -28,6 +28,8 @@ const GUEST_KEYS = {
   PLANS: 'goodlift_guest_plans',
   PLAN_DAYS: 'goodlift_guest_plan_days',
   PLAN_EXERCISES: 'goodlift_guest_plan_exercises',
+  YOGA_PRESETS: 'goodlift_guest_yoga_presets',
+  HIIT_PRESETS: 'goodlift_guest_hiit_presets',
 };
 
 /**

@@ -27,6 +27,7 @@ import {
   DirectionsRun,
   SelfImprovement,
   HotelOutlined,
+  Star,
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 
@@ -307,6 +308,15 @@ const WeekEditorDialog = ({ open, onClose }) => {
                                 >
                                   {session.sessionName || getSessionTypeDisplay(session.sessionType)}
                                 </Typography>
+                                {session.fromFavorite && (
+                                  <Star 
+                                    sx={{ 
+                                      fontSize: 16, 
+                                      color: 'warning.main',
+                                      ml: 0.5,
+                                    }} 
+                                  />
+                                )}
                               </Box>
                             ) : (
                               <Typography variant="body2" color="text.secondary">

@@ -4,16 +4,19 @@ import { Box, Tabs, Tab } from '@mui/material';
 import { 
   FitnessCenter,
   DirectionsRun,
+  EditNote,
 } from '@mui/icons-material';
 import WorkoutTab from './WorkTabs/WorkoutTab';
 import TimerTab from './WorkTabs/TimerTab';
+import LogActivityTab from './WorkTabs/LogActivityTab';
 
 /**
- * WorkTabs - Main Work area component with two sub-tabs
+ * WorkTabs - Main Work area component with three sub-tabs
  * 
  * Tabs:
  * 1. Workout - Shows integrated workout configuration and quick start
- * 2. Timer - Timer functionality for workouts
+ * 2. Cardio & Yoga - Timer functionality for workouts
+ * 3. Activity - Manual activity logging
  */
 const WorkTabs = ({ 
   onNavigate,
@@ -64,7 +67,12 @@ const WorkTabs = ({
           />
           <Tab 
             icon={<DirectionsRun />} 
-            label="Endurance & Mobility" 
+            label="Cardio & Yoga" 
+            iconPosition="start"
+          />
+          <Tab 
+            icon={<EditNote />} 
+            label="Activity" 
             iconPosition="start"
           />
         </Tabs>
@@ -87,6 +95,9 @@ const WorkTabs = ({
         )}
         {activeTab === 1 && (
           <TimerTab onNavigate={onNavigate} />
+        )}
+        {activeTab === 2 && (
+          <LogActivityTab onNavigate={onNavigate} />
         )}
       </Box>
     </Box>

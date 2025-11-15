@@ -1,8 +1,8 @@
 /**
- * UnifiedTimerScreen - Consolidated timer for HIIT, Flow (Yoga), and Countdown (Cardio)
+ * UnifiedTimerScreen - Consolidated timer for HIIT, Yoga, and Countdown (Cardio)
  * 
  * Features:
- * - Three selectable modes: HIIT, Flow (Yoga), Countdown (Cardio)
+ * - Three selectable modes: HIIT, Yoga, Countdown (Cardio)
  * - Visual countdown with circular/ring progress animation
  * - Audio cues at intervals (beep at 10s, 5s, and 0s)
  * - Presets for 20, 30, 45, and 60 minutes
@@ -360,7 +360,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 <ToggleButton value={TIMER_MODES.FLOW} sx={{ py: 2 }}>
                   <Stack alignItems="center" spacing={1}>
                     <SelfImprovement />
-                    <Typography variant="body2">Flow (Yoga)</Typography>
+                    <Typography variant="body2">Yoga</Typography>
                   </Stack>
                 </ToggleButton>
                 <ToggleButton value={TIMER_MODES.COUNTDOWN} sx={{ py: 2 }}>
@@ -410,7 +410,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
               {mode === TIMER_MODES.FLOW && (
                 <Stack spacing={3}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    Flow (Yoga) Configuration
+                    Yoga Configuration
                   </Typography>
                   <TextField
                     label="Hold Duration per Pose (seconds)"
@@ -529,7 +529,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     mode === TIMER_MODES.HIIT
                       ? 'HIIT'
                       : mode === TIMER_MODES.FLOW
-                      ? 'Flow (Yoga)'
+                      ? 'Yoga'
                       : 'Countdown'
                   }
                   color="primary"

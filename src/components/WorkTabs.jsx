@@ -64,7 +64,7 @@ const WorkTabs = ({
           />
           <Tab 
             icon={<TimerIcon />} 
-            label="Timer" 
+            label="Endurance & Mobility" 
             iconPosition="start"
           />
         </Tabs>

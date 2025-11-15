@@ -12,11 +12,13 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Stack
+  Stack,
+  Snackbar,
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import { 
-  FitnessCenter
+  FitnessCenter,
+  CalendarToday,
 } from '@mui/icons-material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -27,6 +29,8 @@ import {
   saveUserStats,
   getUserStats
 } from '../utils/storage';
+import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
+import AssignToDayDialog from '../components/Common/AssignToDayDialog';
 
 // Constants
 const SECONDS_PER_MINUTE = 60;
@@ -50,6 +54,12 @@ const WORKOUT_TYPES = {
 
 const UnifiedLogActivityScreen = ({ onNavigate }) => {
   const [notification, setNotification] = useState({ show: false, message: '', severity: 'success' });
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [lastLoggedSession, setLastLoggedSession] = useState(null);
+  const [assignSnackbarOpen, setAssignSnackbarOpen] = useState(false);
+  const [assignSnackbarMessage, setAssignSnackbarMessage] = useState('');
+  
+  const { isAutoAssignWeek, assignWorkoutToDay, weeklySchedule } = useWeekScheduling();
 
   const initialValues = {
     date: new Date(),
@@ -132,11 +142,37 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
         await saveUserStats(stats);
       }
 
-      setNotification({
-        show: true,
-        message: 'Activity logged successfully!',
-        severity: 'success'
-      });
+      // Handle assignment workflow
+      if (isAutoAssignWeek() && values.sessionType !== SESSION_TYPES.REST) {
+        // Auto-assign in Week 1
+        const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(timestamp).getDay()];
+        const sessionData = {
+          sessionType: values.sessionType,
+          sessionName: getSessionTypeName(values.sessionType, values.workoutType),
+          date: new Date(timestamp).toISOString(),
+        };
+        
+        await assignWorkoutToDay(dayOfWeek, sessionData);
+        
+        setNotification({
+          show: true,
+          message: `Activity logged and assigned to ${dayOfWeek}!`,
+          severity: 'success'
+        });
+      } else {
+        // Store session for manual assignment
+        setLastLoggedSession({
+          sessionType: values.sessionType,
+          sessionName: getSessionTypeName(values.sessionType, values.workoutType),
+          date: new Date(timestamp).toISOString(),
+        });
+        
+        setNotification({
+          show: true,
+          message: 'Activity logged successfully!',
+          severity: 'success'
+        });
+      }
       
       resetForm();
       
@@ -155,6 +191,42 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
       });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const getSessionTypeName = (sessionType, workoutType) => {
+    if (sessionType === SESSION_TYPES.STRENGTH) {
+      const typeMap = {
+        [WORKOUT_TYPES.FULL]: 'Full Body',
+        [WORKOUT_TYPES.UPPER]: 'Upper Body',
+        [WORKOUT_TYPES.PUSH]: 'Push',
+        [WORKOUT_TYPES.PULL]: 'Pull',
+        [WORKOUT_TYPES.LEGS]: 'Legs',
+        [WORKOUT_TYPES.CORE]: 'Core',
+      };
+      return typeMap[workoutType] || 'Strength';
+    }
+    
+    const typeMap = {
+      [SESSION_TYPES.CARDIO]: 'Cardio',
+      [SESSION_TYPES.YOGA]: 'Yoga',
+      [SESSION_TYPES.REST]: 'Rest',
+    };
+    return typeMap[sessionType] || sessionType;
+  };
+
+  const handleAssignConfirm = async (dayOfWeek) => {
+    if (lastLoggedSession) {
+      try {
+        await assignWorkoutToDay(dayOfWeek, lastLoggedSession);
+        setAssignSnackbarMessage(`Session assigned to ${dayOfWeek}`);
+        setAssignSnackbarOpen(true);
+        setLastLoggedSession(null);
+      } catch (error) {
+        console.error('Error assigning session:', error);
+        setAssignSnackbarMessage('Failed to assign session');
+        setAssignSnackbarOpen(true);
+      }
     }
   };
 
@@ -401,6 +473,23 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                     >
                       {isSubmitting ? 'Logging...' : `Log ${getActivityTitle().replace('Log ', '')}`}
                     </Button>
+
+                    {/* Assign to Day Button - Show if not auto-assign week and has logged session */}
+                    {!isAutoAssignWeek() && lastLoggedSession && (
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        startIcon={<CalendarToday />}
+                        onClick={() => setShowAssignDialog(true)}
+                        sx={{ 
+                          mt: 1,
+                          py: 1.5,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Assign to Day of Week
+                      </Button>
+                    )}
                   </Stack>
                 </Form>
               )}
@@ -408,6 +497,27 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
           </CardContent>
         </Card>
         </motion.div>
+
+        {/* Snackbars */}
+        <Snackbar
+          open={assignSnackbarOpen}
+          autoHideDuration={3000}
+          onClose={() => setAssignSnackbarOpen(false)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert severity="success" onClose={() => setAssignSnackbarOpen(false)}>
+            {assignSnackbarMessage}
+          </Alert>
+        </Snackbar>
+
+        {/* Assign to Day Dialog */}
+        <AssignToDayDialog
+          open={showAssignDialog}
+          onClose={() => setShowAssignDialog(false)}
+          onAssign={handleAssignConfirm}
+          workoutData={lastLoggedSession}
+          currentSchedule={weeklySchedule}
+        />
       </Box>
     </LocalizationProvider>
   );

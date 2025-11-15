@@ -33,6 +33,7 @@ import { getWorkoutHistory } from '../../utils/storage';
 import { touchTargets } from '../../theme/responsive';
 import MonthCalendarView from '../Calendar/MonthCalendarView';
 import FavouriteWorkoutsWidget from './FavouriteWorkoutsWidget';
+import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
 
 /**
  * WorkoutTab - Integrated workout configuration and activity logging
@@ -58,15 +59,25 @@ const WorkoutTab = memo(({
   const [currentDate, setCurrentDate] = useState('');
   const [recentWorkouts, setRecentWorkouts] = useState([]);
   const [workoutHistory, setWorkoutHistory] = useState([]);
+  const { weeklySchedule } = useWeekScheduling();
   
   // Workout configuration state
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Default: 4 supersets of 2
 
-  // Set current date
+  // Set current date with shortened format
   useEffect(() => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
     setCurrentDate(new Date().toLocaleDateString('en-US', options));
   }, []);
+
+  // Get today's assigned workout
+  const getTodaysWorkout = () => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const todayName = days[new Date().getDay()];
+    return weeklySchedule[todayName];
+  };
+
+  const todaysWorkout = getTodaysWorkout();
 
   // Load workout history
   useEffect(() => {
@@ -176,17 +187,37 @@ const WorkoutTab = memo(({
 
   return (
     <Box>
-      {/* Date Section */}
+      {/* Date Section with Suggested Session */}
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography 
           variant="h5" 
           sx={{ 
             fontWeight: 600,
             color: 'text.secondary',
-            fontSize: { xs: '1rem', sm: '1.25rem' }
+            fontSize: { xs: '1rem', sm: '1.25rem' },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
+            flexWrap: 'wrap',
           }}
         >
-          {currentDate}
+          <span>{currentDate}</span>
+          {todaysWorkout && (
+            <>
+              <span>•</span>
+              <Chip
+                label={`Suggested Session: ${todaysWorkout.sessionName || todaysWorkout.sessionType}`}
+                color="primary"
+                variant="outlined"
+                size="small"
+                sx={{ 
+                  fontWeight: 600,
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                }}
+              />
+            </>
+          )}
         </Typography>
       </Box>
 

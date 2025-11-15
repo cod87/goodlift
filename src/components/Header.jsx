@@ -1,20 +1,24 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton, Tooltip, useTheme } from '@mui/material';
+import { Box, IconButton, Tooltip, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
 import { VolumeUp, VolumeOff } from '@mui/icons-material';
 import { MdScreenLockPortrait, MdScreenLockRotation } from 'react-icons/md';
 import audioService from '../utils/audioService';
 import wakeLockManager from '../utils/wakeLock';
+import WeekBadge from './Common/WeekBadge';
+import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 
 /**
- * Header component - Sticky header with logo, sound toggle, and wake lock toggle
+ * Header component - Sticky header with logo, week badge, sound toggle, and wake lock toggle
  * Appears at the top of all screens
  */
 const Header = ({ onNavigate }) => {
   const theme = useTheme();
+  const { currentWeek, deloadWeekActive, triggerDeloadWeek } = useWeekScheduling();
   const [isMuted, setIsMuted] = useState(audioService.isMutedState());
   const [wakeLockActive, setWakeLockActive] = useState(wakeLockManager.isActive());
   const [wakeLockSupported] = useState(wakeLockManager.isWakeLockSupported());
+  const [showDeloadDialog, setShowDeloadDialog] = useState(false);
 
   useEffect(() => {
     // Setup visibility change handler for wake lock
@@ -37,6 +41,23 @@ const Header = ({ onNavigate }) => {
       const success = await wakeLockManager.requestWakeLock();
       setWakeLockActive(success);
     }
+  };
+
+  const handleDeloadClick = () => {
+    setShowDeloadDialog(true);
+  };
+
+  const handleConfirmDeload = async () => {
+    try {
+      await triggerDeloadWeek();
+      setShowDeloadDialog(false);
+    } catch (error) {
+      console.error('Error triggering deload week:', error);
+    }
+  };
+
+  const handleCancelDeload = () => {
+    setShowDeloadDialog(false);
   };
 
   return (
@@ -93,6 +114,22 @@ const Header = ({ onNavigate }) => {
           src={`${import.meta.env.BASE_URL}goodlift-favicon.svg`}
           alt="GoodLift"
           style={{ height: '40px', width: '40px', display: 'block' }}
+        />
+      </Box>
+
+      {/* Center: Week Badge */}
+      <Box sx={{
+        position: 'absolute',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex',
+        alignItems: 'center',
+      }}>
+        <WeekBadge
+          currentWeek={currentWeek}
+          deloadWeekActive={deloadWeekActive}
+          onDeloadTrigger={handleDeloadClick}
+          clickable={true}
         />
       </Box>
       
@@ -152,6 +189,30 @@ const Header = ({ onNavigate }) => {
           </Tooltip>
         )}
       </Box>
+
+      {/* Deload Confirmation Dialog */}
+      <Dialog
+        open={showDeloadDialog}
+        onClose={handleCancelDeload}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Trigger Deload Week?</DialogTitle>
+        <DialogContent>
+          <Typography>
+            This will activate deload week, replacing your scheduled workouts with recovery-focused sessions.
+            The week counter will continue normally, and deload mode will end after this week completes.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDeload} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDeload} variant="contained" color="warning">
+            Activate Deload
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

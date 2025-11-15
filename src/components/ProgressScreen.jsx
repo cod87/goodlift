@@ -27,6 +27,7 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Divider,
+  LinearProgress,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -40,7 +41,11 @@ import {
   SelfImprovement,
   Timer,
   Close,
+  Whatshot,
 } from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import CompactHeader from './Common/CompactHeader';
 import Achievements from './Achievements';
 import WeightTracker from './WeightTracker';
@@ -194,7 +199,9 @@ const ProgressDashboard = () => {
   const [currentTab, setCurrentTab] = useState(0);
   
   // Time frame filter state
-  const [timeFrame, setTimeFrame] = useState('all'); // '7days', '3months', 'year', 'all'
+  const [timeFrame, setTimeFrame] = useState('all'); // '7days', '30days', '3months', 'year', 'custom', 'all'
+  const [customStartDate, setCustomStartDate] = useState(null);
+  const [customEndDate, setCustomEndDate] = useState(null);
   
   // User profile context for weight tracking
   const { profile, addWeightEntry } = useUserProfile();
@@ -216,8 +223,10 @@ const ProgressDashboard = () => {
   const getTimeFrameDays = () => {
     switch (timeFrame) {
       case '7days': return 7;
+      case '30days': return 30;
       case '3months': return 90;
       case 'year': return 365;
+      case 'custom': return null; // Use custom date range
       case 'all': return null;
       default: return null;
     }
@@ -226,6 +235,20 @@ const ProgressDashboard = () => {
   // Filter history based on time frame
   const getFilteredHistory = () => {
     const days = getTimeFrameDays();
+    
+    if (timeFrame === 'custom' && customStartDate && customEndDate) {
+      // Use custom date range
+      const startTime = new Date(customStartDate);
+      startTime.setHours(0, 0, 0, 0);
+      const endTime = new Date(customEndDate);
+      endTime.setHours(23, 59, 59, 999);
+      
+      return history.filter(w => {
+        const workoutDate = new Date(w.date);
+        return workoutDate >= startTime && workoutDate <= endTime;
+      });
+    }
+    
     if (!days) return history;
     
     const cutoffDate = new Date();
@@ -344,13 +367,13 @@ const ProgressDashboard = () => {
 
   // Update filtered stats when history or time frame changes
   useEffect(() => {
-    if (history.length > 0 || timeFrame) {
+    if (history.length > 0 || timeFrame || customStartDate || customEndDate) {
       const filteredHistory = getFilteredHistory();
       const stats = calculateFilteredStats(filteredHistory);
       setFilteredStats(stats);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [history, timeFrame]);
+  }, [history, timeFrame, customStartDate, customEndDate]);
 
   const handleDeleteWorkout = async (index) => {
     if (window.confirm('Are you sure you want to delete this workout? This action cannot be undone.')) {
@@ -447,13 +470,10 @@ const ProgressDashboard = () => {
         {/* Statistics Tab */}
         {currentTab === 0 && (
           <Stack spacing={3}>
-            {/* Time Frame Filter */}
+            {/* Time Frame Filter - Compact */}
             <Card sx={{ bgcolor: 'background.paper' }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                    Time Frame
-                  </Typography>
+              <CardContent sx={{ p: 2 }}>
+                <Stack spacing={2}>
                   <ToggleButtonGroup
                     value={timeFrame}
                     exclusive
@@ -463,100 +483,148 @@ const ProgressDashboard = () => {
                       }
                     }}
                     aria-label="time frame filter"
+                    size="small"
                     fullWidth
                     sx={{ 
                       display: 'grid',
-                      gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
-                      gap: 1,
+                      gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(6, 1fr)' },
+                      gap: 0.5,
                     }}
                   >
-                    <ToggleButton value="7days" sx={{ borderRadius: 2 }}>
-                      Last 7 Days
+                    <ToggleButton value="7days" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
+                      7d
                     </ToggleButton>
-                    <ToggleButton value="3months" sx={{ borderRadius: 2 }}>
-                      Last 3 Months
+                    <ToggleButton value="30days" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
+                      30d
                     </ToggleButton>
-                    <ToggleButton value="year" sx={{ borderRadius: 2 }}>
-                      Last Year
+                    <ToggleButton value="3months" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
+                      3mo
                     </ToggleButton>
-                    <ToggleButton value="all" sx={{ borderRadius: 2 }}>
-                      All Time
+                    <ToggleButton value="year" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
+                      Year
+                    </ToggleButton>
+                    <ToggleButton value="custom" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
+                      Custom
+                    </ToggleButton>
+                    <ToggleButton value="all" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: 0.75 }}>
+                      All
                     </ToggleButton>
                   </ToggleButtonGroup>
-                </Box>
+                  
+                  {/* Custom Date Range Picker */}
+                  {timeFrame === 'custom' && (
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                        <DatePicker
+                          label="Start Date"
+                          value={customStartDate}
+                          onChange={(newValue) => setCustomStartDate(newValue)}
+                          slotProps={{ 
+                            textField: { 
+                              size: 'small',
+                              fullWidth: true 
+                            } 
+                          }}
+                        />
+                        <DatePicker
+                          label="End Date"
+                          value={customEndDate}
+                          onChange={(newValue) => setCustomEndDate(newValue)}
+                          slotProps={{ 
+                            textField: { 
+                              size: 'small',
+                              fullWidth: true 
+                            } 
+                          }}
+                        />
+                      </Stack>
+                    </LocalizationProvider>
+                  )}
+                </Stack>
               </CardContent>
             </Card>
 
-            {/* Top Row: Streak, Adherence */}
+            {/* Compact Streak and Adherence Row */}
             <Box
               sx={{
                 display: 'grid',
-                gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
                 gap: 2,
               }}
             >
+              {/* Streak - Inline with Fire Icon */}
               <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent>
-                  <Stack spacing={2}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <TrendingUp sx={{ color: 'primary.main' }} />
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Day Streak
+                <CardContent sx={{ p: 2 }}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Whatshot sx={{ fontSize: 40, color: '#FF6B35' }} />
+                      <Box>
+                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#FF6B35', lineHeight: 1 }}>
+                          {streakData.currentStreak}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Day Streak
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="caption" color="text.secondary">
+                        Longest
+                      </Typography>
+                      <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                        {streakData.longestStreak}
                       </Typography>
                     </Box>
-                    <Box sx={{ textAlign: 'center', py: 2 }}>
-                      <Typography variant="h2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                        {streakData.currentStreak}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        Current Streak
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                        Longest: {streakData.longestStreak} days
-                      </Typography>
-                    </Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                      * Allows one rest day per week (missed days must not be within 7 days of each other)
-                    </Typography>
                   </Stack>
                 </CardContent>
               </Card>
 
+              {/* Adherence with Progress Bar */}
               <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent>
-                  <Stack spacing={2}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Assessment sx={{ color: 'secondary.main' }} />
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Adherence
-                      </Typography>
-                    </Box>
-                    <Box sx={{ textAlign: 'center', py: 2 }}>
-                      <Typography variant="h2" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack spacing={1.5}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Assessment sx={{ color: 'secondary.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                          Adherence
+                        </Typography>
+                      </Box>
+                      <Typography variant="h4" sx={{ fontWeight: 700, color: 'secondary.main' }}>
                         {adherence}%
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        Last 30 Days
-                      </Typography>
                     </Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                      * Based on 6 workouts per week standard with one rest day allowed
+                    <LinearProgress
+                      variant="determinate"
+                      value={adherence}
+                      sx={{
+                        height: 12,
+                        borderRadius: 6,
+                        bgcolor: 'action.hover',
+                        '& .MuiLinearProgress-bar': {
+                          borderRadius: 6,
+                          background: 'linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%)',
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      Last 30 days • 6 workouts/week target
                     </Typography>
                   </Stack>
                 </CardContent>
               </Card>
             </Box>
 
-            {/* Stats Grid: PRs, Total Workouts, Avg Duration */}
+            {/* Stats Grid: PRs and Total Workouts (removed Avg Duration) */}
             <Box
               sx={{
                 display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
                 gap: 2,
               }}
             >
               <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center' }}>
+                <CardContent sx={{ textAlign: 'center', p: 2 }}>
                   <EmojiEvents sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
                   <Typography variant="h4" sx={{ fontWeight: 700, color: 'warning.main' }}>
                     {filteredStats.personalRecords}
@@ -568,7 +636,7 @@ const ProgressDashboard = () => {
               </Card>
 
               <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center' }}>
+                <CardContent sx={{ textAlign: 'center', p: 2 }}>
                   <FitnessCenter sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
                   <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
                     {filteredStats.totalWorkouts}
@@ -578,21 +646,9 @@ const ProgressDashboard = () => {
                   </Typography>
                 </CardContent>
               </Card>
-
-              <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Timer sx={{ fontSize: 40, color: 'info.main', mb: 1 }} />
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: 'info.main' }}>
-                    {filteredStats.averageDuration}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Avg Duration (min)
-                  </Typography>
-                </CardContent>
-              </Card>
             </Box>
 
-            {/* Session Type Stats */}
+            {/* Session Type Stats - More Compact */}
             <Box
               sx={{
                 display: 'grid',
@@ -601,54 +657,43 @@ const ProgressDashboard = () => {
               }}
             >
               <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <FitnessCenter sx={{ fontSize: 36, color: 'error.main', mb: 1 }} />
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: 'error.main' }}>
+                <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                  <FitnessCenter sx={{ fontSize: 32, color: 'error.main', mb: 0.5 }} />
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'error.main' }}>
                     {filteredStats.strengthSessions}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Strength Sessions
+                    Strength
                   </Typography>
                 </CardContent>
               </Card>
 
               <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <DirectionsRun sx={{ fontSize: 36, color: 'success.main', mb: 1 }} />
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main' }}>
+                <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                  <DirectionsRun sx={{ fontSize: 32, color: 'success.main', mb: 0.5 }} />
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
                     {filteredStats.cardioSessions}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Cardio Sessions
+                    Cardio
                   </Typography>
                 </CardContent>
               </Card>
 
               <Card sx={{ bgcolor: 'background.paper' }}>
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <SelfImprovement sx={{ fontSize: 36, color: 'secondary.main', mb: 1 }} />
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                  <SelfImprovement sx={{ fontSize: 32, color: 'secondary.main', mb: 0.5 }} />
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
                     {filteredStats.yogaSessions}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Yoga Sessions
+                    Yoga
                   </Typography>
                 </CardContent>
               </Card>
             </Box>
 
-            {/* Weight Tracking */}
-            <WeightTracker
-              weightHistory={profile.weightHistory || []}
-              currentWeight={profile.currentWeight}
-              currentUnit={profile.weightUnit || 'lbs'}
-              onAddWeight={addWeightEntry}
-            />
-
-            {/* 4-Week Progression Chart */}
-            <FourWeekProgressionChart workoutHistory={getFilteredHistory()} />
-
-          {/* Progressive Overload Tracking */}
+            {/* Progressive Overload Section - Moved here, below adherence */}
           {history.length > 0 && (
             <Card sx={{ bgcolor: 'background.paper' }}>
               <CardContent>
@@ -773,6 +818,17 @@ const ProgressDashboard = () => {
               </CardContent>
             </Card>
           )}
+
+            {/* Weight Tracking */}
+            <WeightTracker
+              weightHistory={profile.weightHistory || []}
+              currentWeight={profile.currentWeight}
+              currentUnit={profile.weightUnit || 'lbs'}
+              onAddWeight={addWeightEntry}
+            />
+
+            {/* 4-Week Progression Chart */}
+            <FourWeekProgressionChart workoutHistory={getFilteredHistory()} />
 
           {/* Recent Activities */}
           <Card sx={{ bgcolor: 'background.paper' }} className="activities-section">

@@ -74,9 +74,18 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
     };
   }, []);
 
-  const handleDelete = (index) => {
+  const handleDelete = async (workoutId) => {
     try {
-      deleteFavoriteWorkout(index);
+      // First, check if this favorite is assigned to any day and clear it
+      for (const day of daysOfWeek) {
+        const session = weeklySchedule[day];
+        if (session && session.favoriteId === workoutId) {
+          await assignWorkoutToDay(day, null);
+        }
+      }
+      
+      // Then delete the favorite
+      deleteFavoriteWorkout(workoutId);
       setFavoriteWorkouts(getFavoriteWorkouts());
     } catch (error) {
       console.error('Error deleting favorite workout:', error);
@@ -260,7 +269,7 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
                 <Tooltip title="Delete">
                   <IconButton
                     size="small"
-                    onClick={() => handleDelete(index)}
+                    onClick={() => handleDelete(workout.id)}
                     sx={{
                       color: 'error.main',
                       '&:hover': {

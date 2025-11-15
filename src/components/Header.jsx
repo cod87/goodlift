@@ -49,23 +49,26 @@ const Header = ({ onNavigate }) => {
         height: '60px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         padding: '0 1rem',
-        background: '#2a3647',
+        bgcolor: 'background.paper',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+        boxShadow: (theme) => theme.palette.mode === 'dark' 
+          ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+          : '0 2px 8px rgba(0, 0, 0, 0.1)',
         zIndex: 100,
-        borderBottom: '1px solid rgba(29, 181, 132, 0.2)',
+        borderBottom: (theme) => `1px solid ${theme.palette.mode === 'dark' 
+          ? 'rgba(29, 181, 132, 0.2)' 
+          : 'rgba(29, 181, 132, 0.3)'}`,
       }}
     >
-      {/* Center favicon icon */}
+      {/* Left favicon icon */}
       <Box 
         onClick={() => onNavigate && onNavigate('progress')}
         sx={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
           cursor: onNavigate ? 'pointer' : 'default',
           transition: 'transform 0.2s ease',
           '&:hover': onNavigate ? {
@@ -94,8 +97,6 @@ const Header = ({ onNavigate }) => {
       
       {/* Right controls */}
       <Box sx={{ 
-        position: 'absolute',
-        right: '1rem',
         display: 'flex',
         alignItems: 'center',
         gap: 0.5 

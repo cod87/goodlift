@@ -68,43 +68,43 @@ export const ThemeProvider = ({ children }) => {
             main: '#ff8c00',
           },
           error: {
-            main: '#ef5350',
+            main: '#ef5350', // Red accent
           },
           info: {
-            main: '#6b8a9d',
+            main: '#4a9eff', // Blue accent
           },
         } : {
-          // Light theme with tan/beige colors from auth screen
+          // Light theme - inverted version of dark theme
           mode: 'light',
           primary: {
-            main: '#18a071', // Darker teal for better contrast
-            light: '#1db584',
-            dark: '#0f7a55',
+            main: '#1db584', // Keep same green/teal accent
+            light: '#2dd099',
+            dark: '#18a071',
           },
           secondary: {
-            main: '#ed3f27', // Red/orange accent
-            light: '#ff6347',
-            dark: '#cc3520',
+            main: '#ff8c00', // Keep same orange accent
+            light: '#ffa333',
+            dark: '#cc7000',
           },
           background: {
-            default: 'rgb(255, 245, 233)', // Lighter tinted beige (60% tint of paper color)
-            paper: 'rgb(254, 230, 200)', // Slightly warmer for cards
+            default: '#f5f7fa', // Light gray-blue background (inverted from dark)
+            paper: '#ffffff', // Pure white for cards
           },
           text: {
-            primary: '#1e2939', // Dark text
+            primary: '#1e2939', // Dark text (inverted from dark bg)
             secondary: '#4a5568', // Medium gray
           },
           success: {
-            main: '#18a071',
+            main: '#1db584',
           },
           warning: {
             main: '#ff8c00',
           },
           error: {
-            main: '#ef5350',
+            main: '#ef5350', // Red accent
           },
           info: {
-            main: '#6b8a9d',
+            main: '#4a9eff', // Blue accent
           },
         },
         typography: {

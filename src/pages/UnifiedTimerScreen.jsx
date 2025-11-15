@@ -45,10 +45,27 @@ import {
   Add,
   Remove,
   ArrowBack,
+  SkipNext,
+  SkipPrevious,
+  Save,
+  Delete,
+  Edit,
+  Favorite,
+  FavoriteBorder,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import audioService from '../utils/audioService';
-import { saveWorkout, saveUserStats, getUserStats } from '../utils/storage';
+import { 
+  saveWorkout, 
+  saveUserStats, 
+  getUserStats,
+  getYogaPresets,
+  saveYogaPreset,
+  deleteYogaPreset,
+  getHiitPresets,
+  saveHiitPreset,
+  deleteHiitPreset,
+} from '../utils/storage';
 
 const TIMER_MODES = {
   HIIT: 'hiit',
@@ -90,6 +107,13 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [rounds, setRounds] = useState(8);
   const [currentRound, setCurrentRound] = useState(1);
   const [isWorkPeriod, setIsWorkPeriod] = useState(true);
+  const [preparationInterval, setPreparationInterval] = useState(10); // seconds
+  const [recoveryInterval, setRecoveryInterval] = useState(0); // seconds, 0 means disabled
+  const [recoveryAfterRounds, setRecoveryAfterRounds] = useState(4); // recovery after N rounds
+  const [sessionName, setSessionName] = useState('');
+  const [intervalNames, setIntervalNames] = useState({ work: 'Work', rest: 'Rest', prep: 'Get Ready', recovery: 'Recovery' });
+  const [isPrepPeriod, setIsPrepPeriod] = useState(false);
+  const [isRecoveryPeriod, setIsRecoveryPeriod] = useState(false);
   
   // Flow mode state
   const [selectedPoses, setSelectedPoses] = useState([]);
@@ -99,6 +123,13 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   // Countdown mode state
   const [countdownDuration, setCountdownDuration] = useState(20); // minutes
   
+  // Presets
+  const [yogaPresets, setYogaPresets] = useState([]);
+  const [hiitPresets, setHiitPresets] = useState([]);
+  const [showPresetDialog, setShowPresetDialog] = useState(false);
+  const [presetName, setPresetName] = useState('');
+  const [editingPreset, setEditingPreset] = useState(null);
+  
   // Completion dialog
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const [perceivedEffort, setPerceivedEffort] = useState(5);
@@ -106,6 +137,21 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   
   const timerRef = useRef(null);
   const hasPlayedWarningRef = useRef(false);
+
+  // Load presets on mount
+  useEffect(() => {
+    const loadPresets = async () => {
+      try {
+        const yoga = getYogaPresets();
+        const hiit = getHiitPresets();
+        setYogaPresets(yoga);
+        setHiitPresets(hiit);
+      } catch (error) {
+        console.error('Error loading presets:', error);
+      }
+    };
+    loadPresets();
+  }, []);
 
   // Initialize audio
   useEffect(() => {
@@ -139,20 +185,43 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           if (prev <= 1) {
             if (mode === TIMER_MODES.HIIT) {
               // Handle HIIT transitions
-              if (isWorkPeriod) {
+              if (isPrepPeriod) {
+                // End of preparation, start first work interval
+                setIsPrepPeriod(false);
+                setIsWorkPeriod(true);
+                audioService.playHighBeep();
+                hasPlayedWarningRef.current = false;
+                return workInterval;
+              } else if (isRecoveryPeriod) {
+                // End of recovery, back to work
+                setIsRecoveryPeriod(false);
+                setIsWorkPeriod(true);
+                audioService.playHighBeep();
+                hasPlayedWarningRef.current = false;
+                return workInterval;
+              } else if (isWorkPeriod) {
                 // Switch to rest
                 setIsWorkPeriod(false);
                 audioService.playLowBeep();
                 hasPlayedWarningRef.current = false;
                 return restInterval;
               } else {
-                // End of rest, check if more rounds
+                // End of rest
                 if (currentRound < rounds) {
-                  setCurrentRound(currentRound + 1);
-                  setIsWorkPeriod(true);
-                  audioService.playHighBeep();
-                  hasPlayedWarningRef.current = false;
-                  return workInterval;
+                  // Check if we need a recovery break
+                  if (recoveryInterval > 0 && recoveryAfterRounds > 0 && currentRound % recoveryAfterRounds === 0) {
+                    setIsRecoveryPeriod(true);
+                    audioService.playTransitionBeep();
+                    hasPlayedWarningRef.current = false;
+                    return recoveryInterval;
+                  } else {
+                    // Continue to next round
+                    setCurrentRound(currentRound + 1);
+                    setIsWorkPeriod(true);
+                    audioService.playHighBeep();
+                    hasPlayedWarningRef.current = false;
+                    return workInterval;
+                  }
                 } else {
                   // HIIT session complete
                   handleTimerComplete();
@@ -191,16 +260,29 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, isPaused, mode, isWorkPeriod, currentRound, rounds, currentPoseIndex, selectedPoses, workInterval, restInterval, handleTimerComplete]);
+  }, [isRunning, isPaused, mode, isWorkPeriod, isPrepPeriod, isRecoveryPeriod, currentRound, rounds, currentPoseIndex, selectedPoses, workInterval, restInterval, recoveryInterval, recoveryAfterRounds, handleTimerComplete]);
 
   const handleStart = () => {
     if (isConfiguring) {
       // Initialize based on mode
       if (mode === TIMER_MODES.HIIT) {
-        setTotalTime(rounds * (workInterval + restInterval));
-        setTimeRemaining(workInterval);
+        const totalRecoveries = recoveryInterval > 0 && recoveryAfterRounds > 0 
+          ? Math.floor(rounds / recoveryAfterRounds) * recoveryInterval 
+          : 0;
+        setTotalTime(preparationInterval + rounds * (workInterval + restInterval) + totalRecoveries);
+        
+        // Start with preparation if enabled
+        if (preparationInterval > 0) {
+          setTimeRemaining(preparationInterval);
+          setIsPrepPeriod(true);
+          setIsWorkPeriod(false);
+        } else {
+          setTimeRemaining(workInterval);
+          setIsPrepPeriod(false);
+          setIsWorkPeriod(true);
+        }
         setCurrentRound(1);
-        setIsWorkPeriod(true);
+        setIsRecoveryPeriod(false);
       } else if (mode === TIMER_MODES.FLOW) {
         const total = selectedPoses.reduce((sum, pose) => sum + pose.duration, 0);
         setTotalTime(total);
@@ -233,6 +315,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     handleStop();
     setCurrentRound(1);
     setIsWorkPeriod(true);
+    setIsPrepPeriod(false);
+    setIsRecoveryPeriod(false);
     setCurrentPoseIndex(0);
   };
 
@@ -253,6 +337,142 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
 
   const handleRemovePose = (index) => {
     setSelectedPoses(selectedPoses.filter((_, i) => i !== index));
+  };
+
+  // Skip forward to next interval (HIIT or Yoga)
+  const handleSkipForward = () => {
+    if (mode === TIMER_MODES.HIIT) {
+      // Skip to next phase in HIIT
+      if (isPrepPeriod) {
+        setIsPrepPeriod(false);
+        setIsWorkPeriod(true);
+        setTimeRemaining(workInterval);
+      } else if (isWorkPeriod) {
+        setIsWorkPeriod(false);
+        setTimeRemaining(restInterval);
+      } else if (isRecoveryPeriod) {
+        setIsRecoveryPeriod(false);
+        setIsWorkPeriod(true);
+        setTimeRemaining(workInterval);
+      } else {
+        // End of rest
+        if (currentRound < rounds) {
+          if (recoveryInterval > 0 && recoveryAfterRounds > 0 && currentRound % recoveryAfterRounds === 0) {
+            setIsRecoveryPeriod(true);
+            setTimeRemaining(recoveryInterval);
+          } else {
+            setCurrentRound(currentRound + 1);
+            setIsWorkPeriod(true);
+            setTimeRemaining(workInterval);
+          }
+        }
+      }
+      audioService.playTransitionBeep();
+    } else if (mode === TIMER_MODES.FLOW && currentPoseIndex < selectedPoses.length - 1) {
+      setCurrentPoseIndex(currentPoseIndex + 1);
+      setTimeRemaining(selectedPoses[currentPoseIndex + 1].duration);
+      audioService.playTransitionBeep();
+    }
+  };
+
+  // Skip backward to previous interval (HIIT or Yoga)
+  const handleSkipBackward = () => {
+    if (mode === TIMER_MODES.HIIT) {
+      // Skip to previous phase in HIIT
+      if (isWorkPeriod && currentRound > 1) {
+        setIsWorkPeriod(false);
+        setCurrentRound(currentRound - 1);
+        setTimeRemaining(restInterval);
+      } else if (!isWorkPeriod && !isPrepPeriod && !isRecoveryPeriod) {
+        setIsWorkPeriod(true);
+        setTimeRemaining(workInterval);
+      }
+      audioService.playTransitionBeep();
+    } else if (mode === TIMER_MODES.FLOW && currentPoseIndex > 0) {
+      setCurrentPoseIndex(currentPoseIndex - 1);
+      setTimeRemaining(selectedPoses[currentPoseIndex - 1].duration);
+      audioService.playTransitionBeep();
+    }
+  };
+
+  // Save current configuration as preset
+  const handleSavePreset = async () => {
+    try {
+      if (!presetName.trim()) {
+        alert('Please enter a preset name');
+        return;
+      }
+
+      if (mode === TIMER_MODES.FLOW) {
+        const preset = {
+          id: editingPreset?.id,
+          name: presetName,
+          poses: selectedPoses,
+          defaultDuration: poseDuration,
+        };
+        await saveYogaPreset(preset);
+        const updatedPresets = getYogaPresets();
+        setYogaPresets(updatedPresets);
+      } else if (mode === TIMER_MODES.HIIT) {
+        const preset = {
+          id: editingPreset?.id,
+          name: presetName,
+          workInterval,
+          restInterval,
+          rounds,
+          preparationInterval,
+          recoveryInterval,
+          recoveryAfterRounds,
+          sessionName,
+          intervalNames,
+        };
+        await saveHiitPreset(preset);
+        const updatedPresets = getHiitPresets();
+        setHiitPresets(updatedPresets);
+      }
+
+      setShowPresetDialog(false);
+      setPresetName('');
+      setEditingPreset(null);
+    } catch (error) {
+      console.error('Error saving preset:', error);
+      alert('Failed to save preset');
+    }
+  };
+
+  // Load a preset
+  const handleLoadPreset = (preset) => {
+    if (mode === TIMER_MODES.FLOW) {
+      setSelectedPoses(preset.poses || []);
+      setPostDuration(preset.defaultDuration || 45);
+    } else if (mode === TIMER_MODES.HIIT) {
+      setWorkInterval(preset.workInterval || 30);
+      setRestInterval(preset.restInterval || 15);
+      setRounds(preset.rounds || 8);
+      setPreparationInterval(preset.preparationInterval || 10);
+      setRecoveryInterval(preset.recoveryInterval || 0);
+      setRecoveryAfterRounds(preset.recoveryAfterRounds || 4);
+      setSessionName(preset.sessionName || '');
+      setIntervalNames(preset.intervalNames || { work: 'Work', rest: 'Rest', prep: 'Get Ready', recovery: 'Recovery' });
+    }
+  };
+
+  // Delete a preset
+  const handleDeletePreset = async (presetId) => {
+    try {
+      if (mode === TIMER_MODES.FLOW) {
+        await deleteYogaPreset(presetId);
+        const updatedPresets = getYogaPresets();
+        setYogaPresets(updatedPresets);
+      } else if (mode === TIMER_MODES.HIIT) {
+        await deleteHiitPreset(presetId);
+        const updatedPresets = getHiitPresets();
+        setHiitPresets(updatedPresets);
+      }
+    } catch (error) {
+      console.error('Error deleting preset:', error);
+      alert('Failed to delete preset');
+    }
   };
 
   const handleSaveSession = async () => {
@@ -374,9 +594,63 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
               {/* Mode-specific configuration */}
               {mode === TIMER_MODES.HIIT && (
                 <Stack spacing={3}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    HIIT Configuration
-                  </Typography>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, flex: 1 }}>
+                      HIIT Configuration
+                    </Typography>
+                    <Button
+                      size="small"
+                      startIcon={<Save />}
+                      onClick={() => {
+                        setPresetName('');
+                        setEditingPreset(null);
+                        setShowPresetDialog(true);
+                      }}
+                    >
+                      Save Preset
+                    </Button>
+                  </Stack>
+
+                  {/* Presets */}
+                  {hiitPresets.length > 0 && (
+                    <Box>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Load Preset
+                      </Typography>
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        {hiitPresets.map((preset) => (
+                          <Chip
+                            key={preset.id}
+                            label={preset.name}
+                            onClick={() => handleLoadPreset(preset)}
+                            onDelete={() => handleDeletePreset(preset.id)}
+                            color="primary"
+                            variant="outlined"
+                            sx={{ mb: 1 }}
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+
+                  <TextField
+                    label="Session Name (optional)"
+                    value={sessionName}
+                    onChange={(e) => setSessionName(e.target.value)}
+                    fullWidth
+                    placeholder="e.g., Morning HIIT, Tabata Workout"
+                  />
+                  
+                  <TextField
+                    label="Preparation Interval (seconds)"
+                    type="number"
+                    value={preparationInterval}
+                    onChange={(e) => setPreparationInterval(Math.max(0, parseInt(e.target.value) || 10))}
+                    inputProps={{ min: 0, max: 60 }}
+                    fullWidth
+                    helperText="Time to get ready before the workout starts"
+                  />
+                  
                   <TextField
                     label="Work Interval (seconds)"
                     type="number"
@@ -385,6 +659,15 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     inputProps={{ min: 5, max: 300 }}
                     fullWidth
                   />
+                  
+                  <TextField
+                    label="Work Interval Name (optional)"
+                    value={intervalNames.work}
+                    onChange={(e) => setIntervalNames({ ...intervalNames, work: e.target.value })}
+                    fullWidth
+                    placeholder="e.g., Burpees, Sprint, Push-ups"
+                  />
+                  
                   <TextField
                     label="Rest Interval (seconds)"
                     type="number"
@@ -393,6 +676,15 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     inputProps={{ min: 5, max: 300 }}
                     fullWidth
                   />
+                  
+                  <TextField
+                    label="Rest Interval Name (optional)"
+                    value={intervalNames.rest}
+                    onChange={(e) => setIntervalNames({ ...intervalNames, rest: e.target.value })}
+                    fullWidth
+                    placeholder="e.g., Active Rest, Recovery"
+                  />
+                  
                   <TextField
                     label="Number of Rounds"
                     type="number"
@@ -401,17 +693,78 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     inputProps={{ min: 1, max: 50 }}
                     fullWidth
                   />
+                  
+                  <TextField
+                    label="Recovery Break (seconds, 0 to disable)"
+                    type="number"
+                    value={recoveryInterval}
+                    onChange={(e) => setRecoveryInterval(Math.max(0, parseInt(e.target.value) || 0))}
+                    inputProps={{ min: 0, max: 300 }}
+                    fullWidth
+                    helperText="Longer break after several rounds"
+                  />
+                  
+                  {recoveryInterval > 0 && (
+                    <TextField
+                      label="Recovery Break After Rounds"
+                      type="number"
+                      value={recoveryAfterRounds}
+                      onChange={(e) => setRecoveryAfterRounds(Math.max(1, parseInt(e.target.value) || 4))}
+                      inputProps={{ min: 1, max: rounds }}
+                      fullWidth
+                      helperText={`Recovery break every ${recoveryAfterRounds} rounds`}
+                    />
+                  )}
+                  
                   <Typography variant="body2" color="text.secondary">
-                    Total Duration: {Math.floor((rounds * (workInterval + restInterval)) / 60)} minutes
+                    Total Duration: {Math.floor((preparationInterval + rounds * (workInterval + restInterval) + (recoveryInterval > 0 && recoveryAfterRounds > 0 ? Math.floor(rounds / recoveryAfterRounds) * recoveryInterval : 0)) / 60)} minutes
                   </Typography>
                 </Stack>
               )}
 
               {mode === TIMER_MODES.FLOW && (
                 <Stack spacing={3}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    Yoga Configuration
-                  </Typography>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, flex: 1 }}>
+                      Yoga Configuration
+                    </Typography>
+                    <Button
+                      size="small"
+                      startIcon={<Save />}
+                      onClick={() => {
+                        setPresetName('');
+                        setEditingPreset(null);
+                        setShowPresetDialog(true);
+                      }}
+                      disabled={selectedPoses.length === 0}
+                    >
+                      Save Preset
+                    </Button>
+                  </Stack>
+
+                  {/* Presets */}
+                  {yogaPresets.length > 0 && (
+                    <Box>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Load Preset
+                      </Typography>
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        {yogaPresets.map((preset) => (
+                          <Chip
+                            key={preset.id}
+                            label={preset.name}
+                            onClick={() => handleLoadPreset(preset)}
+                            onDelete={() => handleDeletePreset(preset.id)}
+                            color="primary"
+                            variant="outlined"
+                            icon={<Favorite />}
+                            sx={{ mb: 1 }}
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+
                   <TextField
                     label="Hold Duration per Pose (seconds)"
                     type="number"
@@ -561,6 +914,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     stroke={
                       mode === TIMER_MODES.HIIT && isWorkPeriod
                         ? '#4caf50'
+                        : mode === TIMER_MODES.HIIT && (isPrepPeriod || isRecoveryPeriod)
+                        ? '#ff9800'
                         : mode === TIMER_MODES.HIIT && !isWorkPeriod
                         ? '#f44336'
                         : '#1976d2'
@@ -592,6 +947,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       color:
                         mode === TIMER_MODES.HIIT && isWorkPeriod
                           ? 'success.main'
+                          : mode === TIMER_MODES.HIIT && (isPrepPeriod || isRecoveryPeriod)
+                          ? 'warning.main'
                           : mode === TIMER_MODES.HIIT && !isWorkPeriod
                           ? 'error.main'
                           : 'primary.main',
@@ -605,11 +962,24 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   {mode === TIMER_MODES.HIIT && (
                     <>
                       <Typography variant="h6" sx={{ mt: 1, fontWeight: 600 }}>
-                        {isWorkPeriod ? 'WORK' : 'REST'}
+                        {isPrepPeriod 
+                          ? intervalNames.prep 
+                          : isRecoveryPeriod 
+                          ? intervalNames.recovery 
+                          : isWorkPeriod 
+                          ? intervalNames.work 
+                          : intervalNames.rest}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Round {currentRound} / {rounds}
-                      </Typography>
+                      {!isPrepPeriod && (
+                        <Typography variant="body2" color="text.secondary">
+                          Round {currentRound} / {rounds}
+                        </Typography>
+                      )}
+                      {sessionName && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                          {sessionName}
+                        </Typography>
+                      )}
                     </>
                   )}
                   
@@ -631,7 +1001,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
               )}
 
               {/* Controls */}
-              <Stack direction="row" spacing={2} justifyContent="center">
+              <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
                 {!isRunning ? (
                   <Button
                     variant="contained"
@@ -645,6 +1015,22 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   </Button>
                 ) : (
                   <>
+                    {/* Skip backward for HIIT and Yoga */}
+                    {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
+                      <IconButton
+                        size="large"
+                        onClick={handleSkipBackward}
+                        color="primary"
+                        sx={{ width: 56, height: 56 }}
+                        disabled={
+                          (mode === TIMER_MODES.HIIT && isPrepPeriod) ||
+                          (mode === TIMER_MODES.FLOW && currentPoseIndex === 0)
+                        }
+                      >
+                        <SkipPrevious sx={{ fontSize: 36 }} />
+                      </IconButton>
+                    )}
+                    
                     <IconButton
                       size="large"
                       onClick={handlePause}
@@ -673,6 +1059,22 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     >
                       <Replay sx={{ fontSize: 40 }} />
                     </IconButton>
+                    
+                    {/* Skip forward for HIIT and Yoga */}
+                    {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
+                      <IconButton
+                        size="large"
+                        onClick={handleSkipForward}
+                        color="primary"
+                        sx={{ width: 56, height: 56 }}
+                        disabled={
+                          (mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= rounds) ||
+                          (mode === TIMER_MODES.FLOW && currentPoseIndex >= selectedPoses.length - 1)
+                        }
+                      >
+                        <SkipNext sx={{ fontSize: 36 }} />
+                      </IconButton>
+                    )}
                   </>
                 )}
               </Stack>
@@ -760,6 +1162,53 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
             <Button onClick={() => setShowCompletionDialog(false)}>Skip</Button>
             <Button variant="contained" onClick={handleSaveSession}>
               Save & Sync
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Preset Save Dialog */}
+        <Dialog
+          open={showPresetDialog}
+          onClose={() => {
+            setShowPresetDialog(false);
+            setPresetName('');
+            setEditingPreset(null);
+          }}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Save {mode === TIMER_MODES.FLOW ? 'Yoga' : 'HIIT'} Preset</DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} sx={{ mt: 2 }}>
+              <TextField
+                label="Preset Name"
+                value={presetName}
+                onChange={(e) => setPresetName(e.target.value)}
+                fullWidth
+                autoFocus
+                placeholder={mode === TIMER_MODES.FLOW ? 'e.g., Morning Flow, Evening Stretch' : 'e.g., Tabata, Circuit Training'}
+              />
+              <Typography variant="body2" color="text.secondary">
+                {mode === TIMER_MODES.FLOW 
+                  ? `This will save your current pose sequence (${selectedPoses.length} poses)`
+                  : 'This will save your current interval configuration'}
+              </Typography>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => {
+              setShowPresetDialog(false);
+              setPresetName('');
+              setEditingPreset(null);
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={handleSavePreset}
+              disabled={!presetName.trim()}
+            >
+              Save Preset
             </Button>
           </DialogActions>
         </Dialog>

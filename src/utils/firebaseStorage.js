@@ -352,3 +352,35 @@ export const loadPlanExercisesFromFirebase = async (userId) => {
     return null;
   }
 };
+
+/**
+ * Save favorite workouts to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} favoriteWorkouts - The favorite workouts array
+ */
+export const saveFavoriteWorkoutsToFirebase = async (userId, favoriteWorkouts) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { favoriteWorkouts });
+  } catch (error) {
+    console.error('Error saving favorite workouts to Firebase:', error);
+  }
+};
+
+/**
+ * Load favorite workouts from Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @returns {array|null} - The favorite workouts array or null if not found
+ */
+export const loadFavoriteWorkoutsFromFirebase = async (userId) => {
+  if (!userId) return null;
+  
+  try {
+    const userData = await loadUserDataFromFirebase(userId);
+    return userData?.favoriteWorkouts || null;
+  } catch (error) {
+    console.error('Error loading favorite workouts from Firebase:', error);
+    return null;
+  }
+};

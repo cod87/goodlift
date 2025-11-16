@@ -11,12 +11,12 @@ export const useFavoriteExercises = () => {
   const [favoriteExercises, setFavoriteExercises] = useState(new Set());
   
   useEffect(() => {
-    const loadFavorites = () => {
+    const loadFavorites = async () => {
       // Get directly favorited exercises
       const directFavorites = getFavoriteExercises();
       
       // Get exercises from favorite workouts
-      const favoriteWorkouts = getFavoriteWorkouts();
+      const favoriteWorkouts = await getFavoriteWorkouts();
       const workoutExercises = new Set();
       
       favoriteWorkouts.forEach(fav => {

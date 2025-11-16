@@ -52,9 +52,9 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
 
   // Load favorite workouts
   useEffect(() => {
-    const loadFavorites = () => {
+    const loadFavorites = async () => {
       try {
-        const favorites = getFavoriteWorkouts();
+        const favorites = await getFavoriteWorkouts();
         setFavoriteWorkouts(favorites);
       } catch (error) {
         console.error('Error loading favorite workouts:', error);
@@ -85,8 +85,9 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
       }
       
       // Then delete the favorite
-      deleteFavoriteWorkout(workoutId);
-      setFavoriteWorkouts(getFavoriteWorkouts());
+      await deleteFavoriteWorkout(workoutId);
+      const favorites = await getFavoriteWorkouts();
+      setFavoriteWorkouts(favorites);
     } catch (error) {
       console.error('Error deleting favorite workout:', error);
     }

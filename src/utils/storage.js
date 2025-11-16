@@ -8,6 +8,7 @@ import {
   saveStretchSessionsToFirebase,
   saveWorkoutPlansToFirebase,
   saveActivePlanToFirebase,
+  saveFavoriteWorkoutsToFirebase,
   loadUserDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
@@ -756,14 +757,31 @@ export const updateCardioSession = async (sessionId, updatedData) => {
 };
 
 /**
- * Get favorite workouts from localStorage
- * @returns {Array} Array of favorite workout objects
+ * Get favorite workouts from Firebase (if authenticated) or localStorage
+ * @returns {Promise<Array>} Array of favorite workout objects
  */
-export const getFavoriteWorkouts = () => {
+export const getFavoriteWorkouts = async () => {
   try {
+    // Check if in guest mode first
     if (isGuestMode()) {
       return getGuestData('favorite_workouts') || [];
     }
+
+    // Try Firebase first if user is authenticated
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData?.favoriteWorkouts) {
+          // Update localStorage cache for offline access
+          localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(firebaseData.favoriteWorkouts));
+          return firebaseData.favoriteWorkouts;
+        }
+      } catch (error) {
+        console.error('Firebase fetch failed for favorite workouts, using localStorage:', error);
+      }
+    }
+    
+    // Fallback to localStorage
     const favorites = localStorage.getItem(KEYS.FAVORITE_WORKOUTS);
     return favorites ? JSON.parse(favorites) : [];
   } catch (error) {
@@ -776,13 +794,13 @@ export const getFavoriteWorkouts = () => {
  * Save a workout as a favorite
  * @param {Object} workoutData - Workout data including exercises, type, and equipment
  */
-export const saveFavoriteWorkout = (workoutData) => {
+export const saveFavoriteWorkout = async (workoutData) => {
   try {
     if (!workoutData) {
       throw new Error('Workout data is required');
     }
     
-    const favorites = getFavoriteWorkouts();
+    const favorites = await getFavoriteWorkouts();
     // Use timestamp + random number for better uniqueness
     const favoriteWorkout = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -800,6 +818,10 @@ export const saveFavoriteWorkout = (workoutData) => {
       setGuestData('favorite_workouts', favorites);
     } else {
       localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(favorites));
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveFavoriteWorkoutsToFirebase(currentUserId, favorites);
+      }
     }
   } catch (error) {
     console.error('Error saving favorite workout:', error);
@@ -811,9 +833,9 @@ export const saveFavoriteWorkout = (workoutData) => {
  * Delete a favorite workout
  * @param {number} workoutId - ID of the favorite workout to delete
  */
-export const deleteFavoriteWorkout = (workoutId) => {
+export const deleteFavoriteWorkout = async (workoutId) => {
   try {
-    const favorites = getFavoriteWorkouts();
+    const favorites = await getFavoriteWorkouts();
     const filteredFavorites = favorites.filter(fav => fav.id !== workoutId);
     
     // Save based on mode
@@ -821,6 +843,10 @@ export const deleteFavoriteWorkout = (workoutId) => {
       setGuestData('favorite_workouts', filteredFavorites);
     } else {
       localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(filteredFavorites));
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveFavoriteWorkoutsToFirebase(currentUserId, filteredFavorites);
+      }
     }
   } catch (error) {
     console.error('Error deleting favorite workout:', error);
@@ -833,13 +859,13 @@ export const deleteFavoriteWorkout = (workoutId) => {
  * @param {string} workoutId - ID of the favorite workout to update
  * @param {string} newName - New name for the workout
  */
-export const updateFavoriteWorkoutName = (workoutId, newName) => {
+export const updateFavoriteWorkoutName = async (workoutId, newName) => {
   try {
     if (!workoutId || !newName) {
       throw new Error('Workout ID and new name are required');
     }
     
-    const favorites = getFavoriteWorkouts();
+    const favorites = await getFavoriteWorkouts();
     const updatedFavorites = favorites.map(fav => 
       fav.id === workoutId ? { ...fav, name: newName } : fav
     );
@@ -849,6 +875,10 @@ export const updateFavoriteWorkoutName = (workoutId, newName) => {
       setGuestData('favorite_workouts', updatedFavorites);
     } else {
       localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(updatedFavorites));
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveFavoriteWorkoutsToFirebase(currentUserId, updatedFavorites);
+      }
     }
   } catch (error) {
     console.error('Error updating favorite workout name:', error);

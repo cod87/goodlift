@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatTime, getYoutubeEmbedUrl, detectWorkoutType } from '../utils/helpers';
+import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
-import { SETS_PER_EXERCISE } from '../utils/constants';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp, HelpOutline } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
 
@@ -13,7 +12,7 @@ import { calculateProgressiveOverload } from '../utils/progressiveOverload';
  * WorkoutScreen component manages the active workout session
  * Displays exercises in superset format, tracks time, and collects set data
  */
-const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
+const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -29,6 +28,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   // Current set weight and reps (controlled inputs)
   const [currentWeight, setCurrentWeight] = useState('');
   const [currentReps, setCurrentReps] = useState('');
+  // Track exercises where weight was changed during workout (to disable progressive overload)
+  const [exercisesWithChangedWeight, setExercisesWithChangedWeight] = useState(new Set());
+  // Track the updated weight for each exercise (for propagation to subsequent sets)
+  const [updatedWeights, setUpdatedWeights] = useState({});
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
   
@@ -41,26 +44,35 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
   const [workoutType, setWorkoutType] = useState('full');
 
   // Generate workout sequence (supersets) - memoized to prevent recalculation
+  // Now supports custom superset configurations like [2, 3, 2, 3]
   const workoutSequence = useMemo(() => {
     const sequence = [];
-    const maxPairs = 4; // 4 supersets of 2 exercises each = 8 exercises total
+    let exerciseIndex = 0;
     
-    for (let i = 0; i < maxPairs; i++) {
-      const ex1 = workoutPlan[i * 2];
-      const ex2 = workoutPlan[i * 2 + 1];
+    for (const supersetSize of supersetConfig) {
+      const supersetExercises = [];
       
-      // Skip if either exercise is missing
-      if (!ex1 || !ex2) continue;
+      // Collect exercises for this superset
+      for (let i = 0; i < supersetSize && exerciseIndex < workoutPlan.length; i++) {
+        if (workoutPlan[exerciseIndex]) {
+          supersetExercises.push(workoutPlan[exerciseIndex]);
+        }
+        exerciseIndex++;
+      }
       
-      // Add all sets for this superset pair
-      for (let set = 1; set <= SETS_PER_EXERCISE; set++) {
-        sequence.push({ exercise: ex1, setNumber: set });
-        sequence.push({ exercise: ex2, setNumber: set });
+      // Skip if no exercises in this superset
+      if (supersetExercises.length === 0) continue;
+      
+      // Add all sets for this superset
+      for (let set = 1; set <= setsPerSuperset; set++) {
+        for (const exercise of supersetExercises) {
+          sequence.push({ exercise, setNumber: set });
+        }
       }
     }
     
     return sequence;
-  }, [workoutPlan]);
+  }, [workoutPlan, supersetConfig, setsPerSuperset]);
 
   // Detect workout type and check user preferences for stretch reminders
   useEffect(() => {
@@ -128,13 +140,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     if (step?.exercise?.['Exercise Name']) {
       const exerciseName = step.exercise['Exercise Name'];
       const initialTarget = initialTargets[exerciseName];
+      
+      // Use updated weight if available, otherwise use initial target
+      const targetWeight = updatedWeights[exerciseName] ?? initialTarget?.weight ?? null;
+      
       // Set values from initialTarget if it exists, otherwise use null
       // This ensures we don't show stale values from a previous exercise
-      setPrevWeight(initialTarget?.weight ?? null);
+      setPrevWeight(targetWeight);
       setTargetReps(initialTarget?.reps ?? null);
       
       // Set controlled input values
-      setCurrentWeight(initialTarget?.weight ?? '');
+      setCurrentWeight(targetWeight ?? '');
       setCurrentReps(initialTarget?.reps ?? '');
       
       // Reset suggestion when changing exercises
@@ -144,10 +160,11 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     
     // Scroll to top when exercise changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentStepIndex, initialTargets, workoutSequence]);
+  }, [currentStepIndex, initialTargets, workoutSequence, updatedWeights]);
 
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
+  const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
 
   /**
    * Apply conditional persist rules after workout completion
@@ -273,9 +290,19 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     // Parse and validate reps (should be positive integer)
     const parsedReps = parseInt(repsInput.value, 10);
     const reps = (parsedReps > 0) ? parsedReps : 0;
+    
+    const exerciseName = currentStep.exercise['Exercise Name'];
+
+    // Check if weight was changed from the initial/propagated target
+    const expectedWeight = updatedWeights[exerciseName] ?? initialTargets[exerciseName]?.weight;
+    if (weight !== expectedWeight && expectedWeight !== null && expectedWeight !== undefined) {
+      // Weight was changed - track this exercise and update weight for future sets
+      setExercisesWithChangedWeight(prev => new Set(prev).add(exerciseName));
+      setUpdatedWeights(prev => ({ ...prev, [exerciseName]: weight }));
+    }
 
     const newData = {
-      exerciseName: currentStep.exercise['Exercise Name'],
+      exerciseName,
       setNumber: currentStep.setNumber,
       weight,
       reps,
@@ -284,8 +311,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
     const updatedWorkoutData = [...workoutData, newData];
     setWorkoutData(updatedWorkoutData);
     
-    // Calculate and show progressive overload suggestion
-    if (targetReps && reps > 0) {
+    // Calculate and show progressive overload suggestion only if weight wasn't changed
+    if (targetReps && reps > 0 && !exercisesWithChangedWeight.has(exerciseName)) {
       const suggestion = calculateProgressiveOverload(weight, reps, targetReps);
       if (suggestion) {
         setProgressiveOverloadSuggestion(suggestion);
@@ -586,15 +613,44 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <h2>{exerciseName}</h2>
-              <div className="youtube-embed">
-                <iframe
-                  src={getYoutubeEmbedUrl(currentStep.exercise['YouTube_Demonstration_Link'])}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-              </div>
+              {/* Exercise name with Google search link */}
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                gap: 1,
+                mb: 2
+              }}>
+                <Typography 
+                  variant="h3" 
+                  component="h2"
+                  sx={{ 
+                    fontWeight: 700,
+                    fontSize: { xs: '1.75rem', sm: '2.5rem' },
+                    color: 'primary.main',
+                    textAlign: 'center'
+                  }}
+                >
+                  {exerciseName}
+                </Typography>
+                <IconButton
+                  component="a"
+                  href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    color: 'primary.main',
+                    minWidth: '44px',
+                    minHeight: '44px',
+                    '&:hover': {
+                      backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                    }
+                  }}
+                  aria-label={`Search for ${exerciseName} form guide`}
+                >
+                  <HelpOutline sx={{ fontSize: { xs: 28, sm: 36 } }} />
+                </IconButton>
+              </Box>
               
               {/* Set X of Y indicator with enhanced styling */}
               <Box sx={{ 
@@ -605,7 +661,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                 my: 2 
               }}>
                 <Chip 
-                  label={`Set ${currentStep.setNumber} of ${SETS_PER_EXERCISE}`}
+                  label={`Set ${currentStep.setNumber} of ${setsPerSuperset}`}
                   color="primary"
                   sx={{ fontWeight: 600, fontSize: '1rem', minHeight: '44px', px: 2 }}
                 />
@@ -655,16 +711,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
               
               <div className="input-row">
                 <div className="input-group">
-                  <label htmlFor="weight-select">Weight (lbs)</label>
+                  <label htmlFor="weight-select">Weight (lbs){isBodyweight && ' (N/A)'}</label>
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                     <IconButton 
                       onClick={() => adjustWeight(-2.5)}
+                      disabled={isBodyweight}
                       size="large"
                       sx={{ 
-                        bgcolor: 'action.hover',
+                        bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
                         minWidth: '44px',
                         minHeight: '44px',
-                        '&:hover': { bgcolor: 'action.selected' }
+                        '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
                       }}
                     >
                       <Remove />
@@ -681,6 +738,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                       value={currentWeight}
                       onChange={(e) => setCurrentWeight(e.target.value)}
                       placeholder="–"
+                      disabled={isBodyweight}
                       aria-label="Weight in pounds"
                       onFocus={(e) => {
                         e.target.select();
@@ -706,18 +764,21 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                         border: '2px solid var(--color-border)',
                         fontSize: '1.1rem',
                         fontFamily: 'var(--font-body)',
-                        backgroundColor: 'var(--color-surface)',
-                        color: 'var(--color-text)',
+                        backgroundColor: isBodyweight ? 'var(--color-disabled)' : 'var(--color-surface)',
+                        color: isBodyweight ? 'var(--color-text-disabled)' : 'var(--color-text)',
+                        cursor: isBodyweight ? 'not-allowed' : 'text',
+                        opacity: isBodyweight ? 0.6 : 1,
                       }}
                     />
                     <IconButton 
                       onClick={() => adjustWeight(2.5)}
+                      disabled={isBodyweight}
                       size="large"
                       sx={{ 
-                        bgcolor: 'action.hover',
+                        bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
                         minWidth: '44px',
                         minHeight: '44px',
-                        '&:hover': { bgcolor: 'action.selected' }
+                        '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
                       }}
                     >
                       <Add />
@@ -895,6 +956,8 @@ WorkoutScreen.propTypes = {
   workoutPlan: PropTypes.array.isRequired,
   onComplete: PropTypes.func.isRequired,
   onExit: PropTypes.func.isRequired,
+  supersetConfig: PropTypes.arrayOf(PropTypes.number),
+  setsPerSuperset: PropTypes.number,
 };
 
 export default WorkoutScreen;

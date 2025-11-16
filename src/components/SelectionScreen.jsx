@@ -32,7 +32,7 @@ const SelectionScreen = memo(({
   useEffect(() => {
     // Scroll to top when component mounts
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setFavoriteWorkouts(getFavoriteWorkouts());
+    getFavoriteWorkouts().then(setFavoriteWorkouts);
   }, []);
 
   const handleStartClick = () => {
@@ -53,9 +53,10 @@ const SelectionScreen = memo(({
     }
   };
 
-  const handleDeleteFavorite = (workoutId) => {
-    deleteFavoriteWorkout(workoutId);
-    setFavoriteWorkouts(getFavoriteWorkouts());
+  const handleDeleteFavorite = async (workoutId) => {
+    await deleteFavoriteWorkout(workoutId);
+    const favorites = await getFavoriteWorkouts();
+    setFavoriteWorkouts(favorites);
   };
 
   const handleEditFavorite = (favorite) => {
@@ -64,10 +65,11 @@ const SelectionScreen = memo(({
     setEditDialogOpen(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editingWorkout && editedName.trim()) {
-      updateFavoriteWorkoutName(editingWorkout.id, editedName.trim());
-      setFavoriteWorkouts(getFavoriteWorkouts());
+      await updateFavoriteWorkoutName(editingWorkout.id, editedName.trim());
+      const favorites = await getFavoriteWorkouts();
+      setFavoriteWorkouts(favorites);
       setEditDialogOpen(false);
       setEditingWorkout(null);
       setEditedName('');

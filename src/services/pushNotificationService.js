@@ -150,14 +150,14 @@ export const calculateNextNotificationTime = (preferences, type = 'morning') => 
  * @returns {Object} Notification content
  */
 export const generateMorningNotification = (suggestedWorkout, wellnessTask = null) => {
-  let body = `Today's suggested workout is ${suggestedWorkout}`;
+  let body = `🏋🏻‍♂️ Today's session: ${suggestedWorkout}`;
   
   if (wellnessTask) {
-    body += `\n\n🌟 Today's wellness task: ${wellnessTask.task}`;
+    body += `\n🌟 Today's wellness task: ${wellnessTask.task}`;
   }
 
   return {
-    title: 'Good Morning! 💪',
+    title: 'Good Morning! ☀️',
     body,
   };
 };

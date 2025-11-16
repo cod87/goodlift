@@ -18,6 +18,13 @@ import {
   Chip,
   Divider,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { 
   PlayArrow, 
@@ -29,12 +36,14 @@ import {
   Edit,
   Link as LinkIcon,
 } from '@mui/icons-material';
-import { getWorkoutHistory } from '../../utils/storage';
+import { getWorkoutHistory, deleteWorkout, updateWorkout } from '../../utils/storage';
 import { touchTargets } from '../../theme/responsive';
 import MonthCalendarView from '../Calendar/MonthCalendarView';
 import FavouriteWorkoutsWidget from './FavouriteWorkoutsWidget';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
 import RestDayMessage from '../RestDayMessage';
+import ActivitiesList from '../Progress/ActivitiesList';
+import EditActivityDialog from '../EditActivityDialog';
 
 /**
  * WorkoutTab - Integrated workout configuration and activity logging
@@ -66,6 +75,12 @@ const WorkoutTab = memo(({
   
   // Workout configuration state
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Default: 4 supersets of 2
+  
+  // Edit/Delete state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedActivityIndex, setSelectedActivityIndex] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // Set current date with shortened format
   useEffect(() => {
@@ -83,28 +98,58 @@ const WorkoutTab = memo(({
   const todaysWorkout = getTodaysWorkout();
 
   // Load workout history
-  useEffect(() => {
-    const loadRecentWorkouts = async () => {
-      try {
-        const history = await getWorkoutHistory();
-        setWorkoutHistory(history);
-        setRecentWorkouts(history.slice(0, 5));
-      } catch (error) {
-        console.error('Error loading recent workouts:', error);
-      }
-    };
+  const loadWorkoutHistory = async () => {
+    try {
+      const history = await getWorkoutHistory();
+      setWorkoutHistory(history);
+      setRecentWorkouts(history.slice(0, 5));
+    } catch (error) {
+      console.error('Error loading recent workouts:', error);
+    }
+  };
 
-    loadRecentWorkouts();
+  useEffect(() => {
+    loadWorkoutHistory();
   }, []);
   
-  // Format duration helper
-  const formatDuration = (minutes) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
+  // Handle edit activity
+  const handleEditActivity = (index) => {
+    setSelectedActivityIndex(index);
+    setEditDialogOpen(true);
+  };
+
+  // Handle delete activity
+  const handleDeleteActivity = (index) => {
+    setSelectedActivityIndex(index);
+    setDeleteDialogOpen(true);
+  };
+
+  // Confirm delete
+  const confirmDelete = async () => {
+    try {
+      await deleteWorkout(selectedActivityIndex);
+      setSnackbar({ open: true, message: 'Activity deleted successfully', severity: 'success' });
+      setDeleteDialogOpen(false);
+      setSelectedActivityIndex(null);
+      await loadWorkoutHistory();
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      setSnackbar({ open: true, message: 'Failed to delete activity', severity: 'error' });
     }
-    return `${mins}m`;
+  };
+
+  // Save edited activity
+  const handleSaveActivity = async (updatedActivity) => {
+    try {
+      await updateWorkout(selectedActivityIndex, updatedActivity);
+      setSnackbar({ open: true, message: 'Activity updated successfully', severity: 'success' });
+      setEditDialogOpen(false);
+      setSelectedActivityIndex(null);
+      await loadWorkoutHistory();
+    } catch (error) {
+      console.error('Error updating activity:', error);
+      setSnackbar({ open: true, message: 'Failed to update activity', severity: 'error' });
+    }
   };
   
   // Handle equipment selection
@@ -530,70 +575,91 @@ const WorkoutTab = memo(({
 
       {/* Recent Workout History */}
       {recentWorkouts.length > 0 && (
-        <Card 
-          elevation={2}
-          sx={{ 
-            mb: 3,
-            borderRadius: 3,
-          }}
-        >
-          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 600, 
-                  color: 'text.primary',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1
-                }}
-              >
-                <TrendingUp /> Recent Workouts
-              </Typography>
-              <Button
-                size="small"
-                onClick={() => onNavigate('progress')}
-                sx={{ color: 'primary.main' }}
-              >
-                View All
-              </Button>
-            </Stack>
-            <Stack spacing={1.5}>
-              {recentWorkouts.map((workout, index) => (
-                <Box 
-                  key={index}
-                  sx={{ 
-                    p: 2, 
-                    bgcolor: 'background.default', 
-                    borderRadius: 2,
-                    borderLeft: '4px solid',
-                    borderLeftColor: 'primary.main',
-                  }}
-                >
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Box>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        {workout.type?.charAt(0).toUpperCase() + workout.type?.slice(1) || 'Workout'}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(workout.date).toLocaleDateString('en-US', { 
-                          weekday: 'short', 
-                          month: 'short', 
-                          day: 'numeric' 
-                        })}
-                      </Typography>
-                    </Box>
-                    <Typography variant="body2" color="text.secondary">
-                      {formatDuration(workout.duration || 0)}
-                    </Typography>
-                  </Stack>
-                </Box>
-              ))}
-            </Stack>
-          </CardContent>
-        </Card>
+        <Box sx={{ mb: 3 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 600, 
+                color: 'text.primary',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <TrendingUp /> Recent Activity
+            </Typography>
+            <Button
+              size="small"
+              onClick={() => onNavigate('progress')}
+              sx={{ color: 'primary.main' }}
+            >
+              View All
+            </Button>
+          </Stack>
+          <ActivitiesList 
+            activities={recentWorkouts}
+            onEdit={handleEditActivity}
+            onDelete={handleDeleteActivity}
+            maxVisible={5}
+            showLoadMore={false}
+          />
+        </Box>
       )}
+
+      {/* Edit Activity Dialog */}
+      <EditActivityDialog
+        open={editDialogOpen}
+        onClose={() => {
+          setEditDialogOpen(false);
+          setSelectedActivityIndex(null);
+        }}
+        activity={selectedActivityIndex !== null ? recentWorkouts[selectedActivityIndex] : null}
+        onSave={handleSaveActivity}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setSelectedActivityIndex(null);
+        }}
+      >
+        <DialogTitle>Delete Activity?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this activity? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setDeleteDialogOpen(false);
+            setSelectedActivityIndex(null);
+          }}>
+            Cancel
+          </Button>
+          <Button onClick={confirmDelete} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 });

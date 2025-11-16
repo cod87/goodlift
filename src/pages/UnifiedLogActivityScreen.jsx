@@ -65,6 +65,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
     date: new Date(),
     duration: '',
     notes: '',
+    sessionName: '', // Optional session name
     // Session type selection
     sessionType: SESSION_TYPES.STRENGTH,
     // Workout-specific fields (for strength sessions)
@@ -122,6 +123,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
         type: values.sessionType === SESSION_TYPES.STRENGTH ? values.workoutType : values.sessionType,
         exercises: {},
         notes: values.notes.trim(),
+        sessionName: values.sessionName.trim(), // Store optional session name
         isManualLog: true,
         sessionType: values.sessionType, // Store the session type
       };
@@ -325,7 +327,6 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
               initialValues={initialValues}
               validate={validate}
               onSubmit={handleSubmit}
-              enableReinitialize
             >
               {({ errors, touched, isSubmitting, isValid, dirty, values, setFieldValue }) => (
                 <Form>
@@ -439,6 +440,19 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                         </Field>
                       </>
                     )}
+
+                    {/* Session Name Field - Optional */}
+                    <Field name="sessionName">
+                      {({ field }) => (
+                        <TextField
+                          {...field}
+                          fullWidth
+                          label="Session Name (optional)"
+                          placeholder="e.g., Morning workout, Leg day, etc."
+                          variant="outlined"
+                        />
+                      )}
+                    </Field>
 
                     {/* Notes Field */}
                     <Field name="notes">

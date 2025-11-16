@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "convert:exercises": "node scripts/convert-exercise-expanded.js",
     "convert:hiit": "node scripts/convert-hiit-exercises.js",
-    "convert:all": "npm run convert:exercises && npm run convert:hiit"
+    "convert:wellness": "node scripts/convert-wellness-tasks.js",
+    "convert:all": "npm run convert:exercises && npm run convert:hiit && npm run convert:wellness"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

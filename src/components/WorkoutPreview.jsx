@@ -508,8 +508,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
                             onBlur={(e) => handleWeightBlur(exerciseName, e.target.value)}
                             onFocus={(e) => e.target.select()}
-                            placeholder="Weight (lbs)"
+                            placeholder={exercise['Equipment']?.toLowerCase() === 'bodyweight' ? 'N/A' : 'Weight (lbs)'}
                             size="small"
+                            disabled={exercise['Equipment']?.toLowerCase() === 'bodyweight'}
                             inputProps={{
                               min: 0,
                               max: 500,
@@ -519,7 +520,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             }}
                             sx={{ 
                               minWidth: { xs: 100, sm: 120 },
-                              flex: { xs: '1 1 45%', sm: 'none' }
+                              flex: { xs: '1 1 45%', sm: 'none' },
+                              '& .MuiInputBase-input.Mui-disabled': {
+                                WebkitTextFillColor: 'rgba(0, 0, 0, 0.38)',
+                                backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                              }
                             }}
                           />
                           <TextField

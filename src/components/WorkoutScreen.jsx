@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatTime, getYoutubeEmbedUrl, detectWorkoutType } from '../utils/helpers';
+import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { SETS_PER_EXERCISE } from '../utils/constants';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp, HelpOutline } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
 
@@ -148,6 +148,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
 
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
+  const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
 
   /**
    * Apply conditional persist rules after workout completion
@@ -586,15 +587,44 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <h2>{exerciseName}</h2>
-              <div className="youtube-embed">
-                <iframe
-                  src={getYoutubeEmbedUrl(currentStep.exercise['YouTube_Demonstration_Link'])}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-              </div>
+              {/* Exercise name with Google search link */}
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                gap: 1,
+                mb: 2
+              }}>
+                <Typography 
+                  variant="h3" 
+                  component="h2"
+                  sx={{ 
+                    fontWeight: 700,
+                    fontSize: { xs: '1.75rem', sm: '2.5rem' },
+                    color: 'primary.main',
+                    textAlign: 'center'
+                  }}
+                >
+                  {exerciseName}
+                </Typography>
+                <IconButton
+                  component="a"
+                  href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    color: 'primary.main',
+                    minWidth: '44px',
+                    minHeight: '44px',
+                    '&:hover': {
+                      backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                    }
+                  }}
+                  aria-label={`Search for ${exerciseName} form guide`}
+                >
+                  <HelpOutline sx={{ fontSize: { xs: 28, sm: 36 } }} />
+                </IconButton>
+              </Box>
               
               {/* Set X of Y indicator with enhanced styling */}
               <Box sx={{ 
@@ -655,16 +685,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
               
               <div className="input-row">
                 <div className="input-group">
-                  <label htmlFor="weight-select">Weight (lbs)</label>
+                  <label htmlFor="weight-select">Weight (lbs){isBodyweight && ' (N/A)'}</label>
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                     <IconButton 
                       onClick={() => adjustWeight(-2.5)}
+                      disabled={isBodyweight}
                       size="large"
                       sx={{ 
-                        bgcolor: 'action.hover',
+                        bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
                         minWidth: '44px',
                         minHeight: '44px',
-                        '&:hover': { bgcolor: 'action.selected' }
+                        '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
                       }}
                     >
                       <Remove />
@@ -681,6 +712,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                       value={currentWeight}
                       onChange={(e) => setCurrentWeight(e.target.value)}
                       placeholder="–"
+                      disabled={isBodyweight}
                       aria-label="Weight in pounds"
                       onFocus={(e) => {
                         e.target.select();
@@ -706,18 +738,21 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit }) => {
                         border: '2px solid var(--color-border)',
                         fontSize: '1.1rem',
                         fontFamily: 'var(--font-body)',
-                        backgroundColor: 'var(--color-surface)',
-                        color: 'var(--color-text)',
+                        backgroundColor: isBodyweight ? 'var(--color-disabled)' : 'var(--color-surface)',
+                        color: isBodyweight ? 'var(--color-text-disabled)' : 'var(--color-text)',
+                        cursor: isBodyweight ? 'not-allowed' : 'text',
+                        opacity: isBodyweight ? 0.6 : 1,
                       }}
                     />
                     <IconButton 
                       onClick={() => adjustWeight(2.5)}
+                      disabled={isBodyweight}
                       size="large"
                       sx={{ 
-                        bgcolor: 'action.hover',
+                        bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
                         minWidth: '44px',
                         minHeight: '44px',
-                        '&:hover': { bgcolor: 'action.selected' }
+                        '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
                       }}
                     >
                       <Add />

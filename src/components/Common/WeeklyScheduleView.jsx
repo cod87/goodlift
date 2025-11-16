@@ -53,13 +53,13 @@ const WeeklyScheduleView = ({ onStartWorkout, onNavigate }) => {
   }, []);
 
   const daysOfWeek = [
+    { name: 'Sunday', abbrev: 'SUN' },
     { name: 'Monday', abbrev: 'MON' },
     { name: 'Tuesday', abbrev: 'TUE' },
     { name: 'Wednesday', abbrev: 'WED' },
     { name: 'Thursday', abbrev: 'THU' },
     { name: 'Friday', abbrev: 'FRI' },
     { name: 'Saturday', abbrev: 'SAT' },
-    { name: 'Sunday', abbrev: 'SUN' },
   ];
 
   // Get icon for session type

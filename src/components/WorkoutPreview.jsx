@@ -22,42 +22,23 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [availableExercises, setAvailableExercises] = useState([]);
   const [currentWorkout, setCurrentWorkout] = useState(workout);
 
-  // Load all exercises data
+  // Load all exercises data - includes full library for comprehensive autocomplete
   useEffect(() => {
     const loadExercises = async () => {
       try {
         const response = await fetch(EXERCISES_DATA_PATH);
         const exercisesData = await response.json();
         
-        // Filter exercises based on workout type
-        let filtered = exercisesData;
-        if (workoutType === 'upper') {
-          filtered = exercisesData.filter(ex => 
-            ex['Workout Type'] && 
-            (ex['Workout Type'].includes('Upper Body') || 
-             ex['Workout Type'].includes('Full Body') ||
-             ex['Workout Type'].includes('Push/Pull/Legs'))
-          );
-        } else if (workoutType === 'lower') {
-          filtered = exercisesData.filter(ex => 
-            ex['Workout Type'] && 
-            (ex['Workout Type'].includes('Lower Body') || 
-             ex['Workout Type'].includes('Full Body') ||
-             ex['Workout Type'].includes('Push/Pull/Legs'))
-          );
-        } else if (workoutType === 'full') {
-          filtered = exercisesData.filter(ex => 
-            ex['Workout Type'] && ex['Workout Type'].includes('Full Body')
-          );
-        }
-        setAvailableExercises(filtered);
+        // Load all exercises from the library for autocomplete
+        // This ensures users can search and select any exercise from exercises.json
+        setAvailableExercises(exercisesData);
       } catch (error) {
         console.error('Error loading exercises:', error);
         setAvailableExercises([]);
       }
     };
     loadExercises();
-  }, [workoutType]);
+  }, []);
 
   // Load saved weights and target reps on mount
   useEffect(() => {

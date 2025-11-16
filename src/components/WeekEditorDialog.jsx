@@ -42,13 +42,13 @@ const WeekEditorDialog = ({ open, onClose }) => {
   const [hasChanges, setHasChanges] = useState(false);
 
   const daysOfWeek = [
+    'Sunday',
     'Monday',
     'Tuesday', 
     'Wednesday',
     'Thursday',
     'Friday',
     'Saturday',
-    'Sunday',
   ];
 
   const workoutTypes = [

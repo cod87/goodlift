@@ -38,6 +38,7 @@ import {
 } from './utils/storage';
 import { cleanupExpiredBackups } from './utils/dataResetService';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
+import { shouldReduceWeight } from './utils/progressiveOverload';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
@@ -384,11 +385,33 @@ function AppContent() {
   }, []);
 
   /**
+   * Calculate weight reduction for underperformance based on muscle group and equipment
+   * Uses the same logic as weight increase for consistency
+   * @param {string} primaryMuscle - Primary muscle group being worked
+   * @param {string} equipment - Equipment type being used
+   * @returns {number} Weight reduction in lbs
+   */
+  const calculateWeightDecrease = useCallback((primaryMuscle, equipment) => {
+    const isDumbbell = equipment.includes('Dumbbell') || equipment.includes('Kettlebell');
+
+    if (MUSCLE_GROUPS.UPPER_BODY.includes(primaryMuscle)) {
+      return isDumbbell ? WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL : WEIGHT_INCREMENTS.UPPER_BODY.BARBELL;
+    }
+    
+    if (MUSCLE_GROUPS.LOWER_BODY.includes(primaryMuscle)) {
+      return isDumbbell ? WEIGHT_INCREMENTS.LOWER_BODY.DUMBBELL : WEIGHT_INCREMENTS.LOWER_BODY.BARBELL;
+    }
+    
+    return 0;
+  }, []);
+
+  /**
    * Handle workout completion - save data, check for progression, update stats
    * @param {Object} workoutData - Completed workout data with exercises and duration
    */
   const handleWorkoutComplete = useCallback(async (workoutData) => {
     const progressionNotifications = [];
+    const reductionNotifications = [];
     
     // Calculate workout volume
     let workoutVolume = 0;
@@ -408,7 +431,7 @@ function AppContent() {
         const targetReps = await getExerciseTargetReps(exerciseName);
         const allSetsMetTarget = data.sets.every(set => set.reps >= targetReps);
         
-        // Check for progressive overload criteria
+        // Check for progressive overload criteria (weight increase)
         if (allSetsMetTarget && data.sets.length >= SETS_PER_EXERCISE) {
           const exercise = currentWorkout.find(ex => ex['Exercise Name'] === exerciseName);
           if (exercise) {
@@ -430,8 +453,36 @@ function AppContent() {
             }
           }
         } else {
-          // Save current weight without progression
-          await setExerciseWeight(exerciseName, lastSet.weight);
+          // Check for weight reduction criteria (completed 20% or more fewer reps than target)
+          const shouldReduce = shouldReduceWeight(data.sets, targetReps, SETS_PER_EXERCISE);
+          
+          if (shouldReduce) {
+            const exercise = currentWorkout.find(ex => ex['Exercise Name'] === exerciseName);
+            if (exercise) {
+              const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
+              const weightDecrease = calculateWeightDecrease(primaryMuscle, exercise['Equipment']);
+
+              if (weightDecrease > 0 && lastSet.weight > weightDecrease) {
+                const newWeight = lastSet.weight - weightDecrease;
+                await setExerciseWeight(exerciseName, newWeight);
+                reductionNotifications.push({
+                  exercise: exerciseName,
+                  oldWeight: lastSet.weight,
+                  newWeight,
+                  decrease: weightDecrease,
+                });
+              } else {
+                // If weight would go negative or to zero, just save current weight
+                await setExerciseWeight(exerciseName, lastSet.weight);
+              }
+            } else {
+              // Save current weight without change
+              await setExerciseWeight(exerciseName, lastSet.weight);
+            }
+          } else {
+            // Save current weight without progression or reduction
+            await setExerciseWeight(exerciseName, lastSet.weight);
+          }
         }
       }
     }
@@ -450,6 +501,16 @@ function AppContent() {
         open: true,
         message: `🎉 Progressive Overload! You hit your target reps!\n\n${messages.join('\n')}`,
         severity: 'success',
+      });
+    } else if (reductionNotifications.length > 0) {
+      // Display weight reduction notification if no progressions occurred
+      const messages = reductionNotifications.map(red => 
+        `${red.exercise}: ${red.oldWeight} → ${red.newWeight} lbs (-${red.decrease} lbs)`
+      );
+      setNotification({
+        open: true,
+        message: `💪 Weight adjusted for next session. Keep pushing!\n\n${messages.join('\n')}`,
+        severity: 'info',
       });
     }
 
@@ -487,7 +548,7 @@ function AppContent() {
     
     setCompletedWorkoutData(finalWorkoutData);
     setCurrentScreen('completion');
-  }, [workoutType, currentWorkout, calculateWeightIncrease]);
+  }, [workoutType, currentWorkout, calculateWeightIncrease, calculateWeightDecrease]);
 
   const handleWorkoutExit = () => {
     // Return to home instead of selection

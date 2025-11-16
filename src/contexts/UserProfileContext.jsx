@@ -34,6 +34,7 @@ export const UserProfileProvider = ({ children }) => {
     favoriteExercise: '',
     totalVolume: 0,
     totalPRs: 0,
+    completedWellnessTasks: 0, // New: track wellness task completion
   });
   const [loading, setLoading] = useState(true);
 
@@ -104,6 +105,13 @@ export const UserProfileProvider = ({ children }) => {
         ? parseInt(localStorage.getItem('goodlift_total_prs')) 
         : 0;
       
+      // Wellness tasks completed
+      const storageKey = currentUser?.uid 
+        ? `wellness_completed_${currentUser.uid}` 
+        : 'wellness_completed_guest';
+      const wellnessData = localStorage.getItem(storageKey);
+      const completedWellnessTasks = wellnessData ? JSON.parse(wellnessData).length : 0;
+      
       return {
         totalWorkouts,
         currentStreak,
@@ -111,6 +119,7 @@ export const UserProfileProvider = ({ children }) => {
         favoriteExercise,
         totalVolume,
         totalPRs,
+        completedWellnessTasks,
       };
     } catch (error) {
       console.error('Error calculating stats:', error);
@@ -121,9 +130,10 @@ export const UserProfileProvider = ({ children }) => {
         favoriteExercise: '',
         totalVolume: 0,
         totalPRs: 0,
+        completedWellnessTasks: 0,
       };
     }
-  }, []);
+  }, [currentUser]);
 
   // Load profile on mount or when user changes
   useEffect(() => {

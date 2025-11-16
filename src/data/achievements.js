@@ -329,6 +329,48 @@ export const ACHIEVEMENT_BADGES = [
     icon: '🎨',
     tier: 'gold',
     condition: { type: 'special', value: 'allWorkoutTypes' }
+  },
+
+  // Wellness Task Achievements
+  {
+    id: 'wellness-first',
+    name: 'Wellness Beginner',
+    description: 'Complete your first wellness task',
+    icon: '🌱',
+    tier: 'bronze',
+    condition: { type: 'wellnessTaskCount', value: 1 }
+  },
+  {
+    id: 'wellness-10',
+    name: 'Wellness Explorer',
+    description: 'Complete 10 wellness tasks',
+    icon: '🌿',
+    tier: 'bronze',
+    condition: { type: 'wellnessTaskCount', value: 10 }
+  },
+  {
+    id: 'wellness-25',
+    name: 'Wellness Enthusiast',
+    description: 'Complete 25 wellness tasks',
+    icon: '🍀',
+    tier: 'silver',
+    condition: { type: 'wellnessTaskCount', value: 25 }
+  },
+  {
+    id: 'wellness-50',
+    name: 'Wellness Champion',
+    description: 'Complete 50 wellness tasks',
+    icon: '🌺',
+    tier: 'gold',
+    condition: { type: 'wellnessTaskCount', value: 50 }
+  },
+  {
+    id: 'wellness-100',
+    name: 'Wellness Master',
+    description: 'Complete 100 wellness tasks',
+    icon: '🌸',
+    tier: 'platinum',
+    condition: { type: 'wellnessTaskCount', value: 100 }
   }
 ];
 
@@ -383,6 +425,9 @@ export const isAchievementUnlocked = (achievement, userStats, workoutHistory = [
     
     case 'totalTime':
       return (userStats.totalTime || 0) >= condition.value;
+    
+    case 'wellnessTaskCount':
+      return (userStats.completedWellnessTasks || 0) >= condition.value;
     
     case 'special':
       return checkSpecialCondition(condition, userStats, workoutHistory);

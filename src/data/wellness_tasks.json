@@ -1,0 +1,5710 @@
+{
+  "version": "1.0",
+  "categories": [
+    "Communication",
+    "Mental Health",
+    "Learning",
+    "Volunteering",
+    "New Experiences",
+    "Physical",
+    "Nature",
+    "Personal Growth",
+    "Creativity",
+    "Seeking Connection",
+    "Media",
+    "Maintenance"
+  ],
+  "tasks": [
+    {
+      "id": "wellness_1",
+      "task": "Call or text a friend or family member",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_2",
+      "task": "Send a thoughtful message to someone you appreciate",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_3",
+      "task": "Compliment a friend, family member, or coworker",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_4",
+      "task": "Ask a close friend or family member how they're really doing",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_5",
+      "task": "Invite someone for coffee, lunch, or a casual hangout",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_6",
+      "task": "Check in with a neighbor or acquaintance",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_7",
+      "task": "Send an encouraging text to someone going through a challenge",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_8",
+      "task": "Reach out to someone you haven't talked to in a while",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_9",
+      "task": "Express appreciation to a family member or friend",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_10",
+      "task": "Join a group chat or online community around shared interests",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_11",
+      "task": "Smile and greet five people with genuine warmth",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_12",
+      "task": "Listen actively to someone without planning your response",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_13",
+      "task": "Share a personal update or story with someone you trust",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_14",
+      "task": "Invite family to a meal together",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_15",
+      "task": "Organize a group activity or outing via text or message",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_16",
+      "task": "Say hello to a coworker you don't usually interact with",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_17",
+      "task": "Text three people you care about just to say hello",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_18",
+      "task": "Host a dinner, potluck, or casual meal gathering",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_19",
+      "task": "Organize a game night or board game gathering with friends",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_20",
+      "task": "Attend a local community event, meetup, or group gathering",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_21",
+      "task": "Host a book club, discussion, or movie watch party",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_22",
+      "task": "Plan a group outing (hike, picnic, movie, restaurant)",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_23",
+      "task": "Attend or volunteer at a community event or festival",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_24",
+      "task": "Visit a friend or family member in person",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_25",
+      "task": "Start or join a hobby club or group activity",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_26",
+      "task": "Participate in a group fitness class or sports activity",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_27",
+      "task": "Attend a cultural or social gathering",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_28",
+      "task": "Organize a skill-share or knowledge-sharing session with friends",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_29",
+      "task": "Host a phone or video call with distant friends or family",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_30",
+      "task": "Invite a friend to try a new restaurant or café",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_31",
+      "task": "Join a professional networking group or meetup",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_32",
+      "task": "Attend a workshop, class, or event with friends or family",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_33",
+      "task": "Create a community chat group or event planning forum",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_34",
+      "task": "Have a meaningful one-on-one conversation over coffee or meal",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_35",
+      "task": "Update or refresh your online dating profile",
+      "timing": "Daily",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_36",
+      "task": "Browse dating apps with intention and genuine interest",
+      "timing": "Daily",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_37",
+      "task": "Send a thoughtful message to someone new on a dating app",
+      "timing": "Daily",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_38",
+      "task": "Write a genuine response to a match or connection",
+      "timing": "Daily",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_39",
+      "task": "Reflect on qualities you want in a partner and community",
+      "timing": "Daily",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_40",
+      "task": "Attend a social event where you might meet people",
+      "timing": "Daily",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_41",
+      "task": "Compliment or show interest in someone you're attracted to",
+      "timing": "Daily",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_42",
+      "task": "Work on your confidence and self-presentation",
+      "timing": "Daily",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_43",
+      "task": "Practice vulnerability in conversations with new people",
+      "timing": "Daily",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_44",
+      "task": "Schedule or go on a first date",
+      "timing": "Weekly",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_45",
+      "task": "Plan a follow-up date with someone you like",
+      "timing": "Weekly",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_46",
+      "task": "Attend a speed dating, singles event, or mixer",
+      "timing": "Weekly",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_47",
+      "task": "Join a social or hobby group where you can meet people",
+      "timing": "Weekly",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_48",
+      "task": "Volunteer or attend a community event to expand your social circle",
+      "timing": "Weekly",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_49",
+      "task": "Get feedback on your dating profile from a trusted friend",
+      "timing": "Weekly",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_50",
+      "task": "Attend a party or social gathering with friends",
+      "timing": "Weekly",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_51",
+      "task": "Go out to a venue where you might meet people naturally",
+      "timing": "Weekly",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_52",
+      "task": "Join a group activity or class to meet people with similar interests",
+      "timing": "Weekly",
+      "relationshipStatus": "Single",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_53",
+      "task": "Send your partner a loving or appreciative message",
+      "timing": "Daily",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_54",
+      "task": "Give your partner a genuine compliment",
+      "timing": "Daily",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_55",
+      "task": "Ask your partner about their day and listen deeply",
+      "timing": "Daily",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_56",
+      "task": "Show physical affection (hug, kiss, hand-hold)",
+      "timing": "Daily",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_57",
+      "task": "Express gratitude for something your partner did",
+      "timing": "Daily",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_58",
+      "task": "Do a small act of kindness for your partner",
+      "timing": "Daily",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_59",
+      "task": "Make eye contact and be fully present with your partner",
+      "timing": "Daily",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_60",
+      "task": "Say 'I love you' or reaffirm your connection",
+      "timing": "Daily",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_61",
+      "task": "Cook a meal together or for your partner",
+      "timing": "Daily",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_62",
+      "task": "Share a laugh or funny moment together",
+      "timing": "Daily",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_63",
+      "task": "Schedule a dedicated date night with your partner",
+      "timing": "Weekly",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_64",
+      "task": "Have a deep conversation about feelings and goals",
+      "timing": "Weekly",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_65",
+      "task": "Try a new experience or activity together",
+      "timing": "Weekly",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "New Experiences",
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_66",
+      "task": "Plan a weekend getaway or day trip",
+      "timing": "Weekly",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_67",
+      "task": "Give each other a massage or quality physical time",
+      "timing": "Weekly",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_68",
+      "task": "Celebrate each other's wins and accomplishments",
+      "timing": "Weekly",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_69",
+      "task": "Watch a movie or show you both enjoy together",
+      "timing": "Weekly",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_70",
+      "task": "Share a meal without distractions and connect",
+      "timing": "Weekly",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_71",
+      "task": "Create a shared bucket list or future plans together",
+      "timing": "Weekly",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_72",
+      "task": "Write a love letter or heartfelt note to your partner",
+      "timing": "Weekly",
+      "relationshipStatus": "In a Relationship",
+      "holiday": null,
+      "categories": [
+        "Maintenance"
+      ]
+    },
+    {
+      "id": "wellness_73",
+      "task": "Practice gratitude - write down 3 things you're grateful for",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_74",
+      "task": "Meditate or practice mindfulness for 5-10 minutes",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_75",
+      "task": "Practice deep breathing exercises",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_76",
+      "task": "Write in your journal about your thoughts and feelings",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_77",
+      "task": "Practice positive affirmations or self-talk",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_78",
+      "task": "Give yourself permission to rest without guilt",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_79",
+      "task": "Practice self-compassion when facing a setback",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_80",
+      "task": "Identify one personal strength you possess",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_81",
+      "task": "Spend 5 minutes in quiet reflection or stillness",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_82",
+      "task": "Say something kind to yourself out loud",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_83",
+      "task": "Light a candle and create a calm environment",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_84",
+      "task": "Practice progressive muscle relaxation",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_85",
+      "task": "Set a meaningful intention for the day",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_86",
+      "task": "Acknowledge and accept your emotions without judgment",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_87",
+      "task": "Take a mental health check-in with yourself",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_88",
+      "task": "Limit news or negative content intake",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_89",
+      "task": "Practice forgiveness toward yourself",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_90",
+      "task": "Write down one thing that went well today",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_91",
+      "task": "Ground yourself using the 5 senses technique",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_92",
+      "task": "Take a warm shower or bath for comfort",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_93",
+      "task": "Attend therapy or counseling session",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_94",
+      "task": "Practice yoga or tai chi",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_95",
+      "task": "Take a relaxing bath with essential oils or music",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_96",
+      "task": "Get a massage or practice self-massage",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_97",
+      "task": "Create an at-home spa day",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_98",
+      "task": "Organize and declutter your personal space",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_99",
+      "task": "Declutter a significant area of your home",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_100",
+      "task": "Reflect on the week and journal lessons learned",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_101",
+      "task": "Write letters to process difficult emotions",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_102",
+      "task": "Set healthy boundaries with demanding people",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_103",
+      "task": "Read a chapter or section of a book",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_104",
+      "task": "Learn one new thing or skill",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_105",
+      "task": "Listen to an educational podcast or audiobook",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_106",
+      "task": "Practice a skill you're actively developing",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_107",
+      "task": "Reflect on a lesson or growth moment from today",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_108",
+      "task": "Work on a personal project or goal",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_109",
+      "task": "Practice a language for 15 minutes",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_110",
+      "task": "Identify an area where you want to improve",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_111",
+      "task": "Set a small daily goal and work toward it",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_112",
+      "task": "Practice positive thinking about a challenge",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_113",
+      "task": "Take an online course or class",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_114",
+      "task": "Read a challenging or thought-provoking book",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_115",
+      "task": "Attend a workshop, seminar, or webinar",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_116",
+      "task": "Start learning a new skill or hobby",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning",
+        "New Experiences",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_117",
+      "task": "Create a vision board for your goals",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_118",
+      "task": "Review your goals and track progress",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_119",
+      "task": "Seek mentorship or advice from someone you admire",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_120",
+      "task": "Practice public speaking or presentation skills",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_121",
+      "task": "Join a professional or personal development group",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_122",
+      "task": "Mentor someone or teach a skill to others",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Personal Growth"
+      ]
+    },
+    {
+      "id": "wellness_123",
+      "task": "Do 10 minutes of stretching or yoga",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_124",
+      "task": "Drink 8 glasses of water throughout the day",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_125",
+      "task": "Take a 10-minute walk",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_126",
+      "task": "Do light cardio or movement",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_127",
+      "task": "Practice good posture throughout the day",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_128",
+      "task": "Eat a nutritious meal or snack",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_129",
+      "task": "Get 7-9 hours of quality sleep",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_130",
+      "task": "Do 10 push-ups or bodyweight exercises",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_131",
+      "task": "Stretch your neck and shoulders",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_132",
+      "task": "Practice proper breathing techniques",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_133",
+      "task": "Do a HIIT or cardio workout",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_134",
+      "task": "Go for a run, bike ride, or swim",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_135",
+      "task": "Do a strength training session",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_136",
+      "task": "Attend a fitness class or gym session",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_137",
+      "task": "Meal prep for the week",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_138",
+      "task": "Practice a sport or recreational activity",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_139",
+      "task": "Do a flexibility or mobility workout",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_140",
+      "task": "Schedule a health checkup or dental visit",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_141",
+      "task": "Try a new wellness practice",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences",
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_142",
+      "task": "Do a longer nature walk or outdoor activity",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Physical",
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_143",
+      "task": "Take a 10-minute walk outside",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_144",
+      "task": "Notice and appreciate something in nature",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_145",
+      "task": "Open your window and breathe fresh air",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_146",
+      "task": "Water your plants or tend your garden",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_147",
+      "task": "Watch the sunrise or sunset",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_148",
+      "task": "Take a barefoot walk in grass or soil",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_149",
+      "task": "Listen to birds singing or nature sounds",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_150",
+      "task": "Take a photo of something beautiful in nature",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_151",
+      "task": "Identify a tree, flower, or plant near you",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_152",
+      "task": "Eat a meal outside if possible",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_153",
+      "task": "Go on a nature hike",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_154",
+      "task": "Visit a park or green space",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_155",
+      "task": "Go to a botanical garden or arboretum",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_156",
+      "task": "Volunteer for environmental conservation",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering",
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_157",
+      "task": "Spend time gardening or planting",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_158",
+      "task": "Go camping or spend the night outdoors",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_159",
+      "task": "Take a nature photography walk",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_160",
+      "task": "Go fishing, kayaking, or canoeing",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_161",
+      "task": "Explore a local nature trail or forest",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_162",
+      "task": "Join a naturalist or outdoor club",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_163",
+      "task": "Draw, doodle, or sketch something",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_164",
+      "task": "Write poetry, lyrics, or creative writing",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_165",
+      "task": "Play a musical instrument",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_166",
+      "task": "Take creative or artistic photos",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_167",
+      "task": "Make or edit a short video",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_168",
+      "task": "Craft or make something by hand",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_169",
+      "task": "Paint or color something",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_170",
+      "task": "Create digital art or graphic design",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_171",
+      "task": "Write in a creative or expressive way",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_172",
+      "task": "Work on a creative side project",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_173",
+      "task": "Attend an art class or creative workshop",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning",
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_174",
+      "task": "Visit an art gallery or museum",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_175",
+      "task": "Create a mixed media project",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_176",
+      "task": "Share your creative work with others",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_177",
+      "task": "Collaborate on a creative project with someone",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_178",
+      "task": "Attend a poetry reading or open mic night",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_179",
+      "task": "Create handmade gifts for others",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_180",
+      "task": "Join a creative community or group",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_181",
+      "task": "Explore a new creative medium",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences",
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_182",
+      "task": "Attend a performance or show",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_183",
+      "task": "Read an article on a topic of interest",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_184",
+      "task": "Watch an educational video",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_185",
+      "task": "Study a subject you're interested in",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_186",
+      "task": "Research something that fascinates you",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_187",
+      "task": "Take notes on something you learned",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_188",
+      "task": "Watch a documentary",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_189",
+      "task": "Read the news and stay informed",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_190",
+      "task": "Teach someone something you know",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_191",
+      "task": "Explore a new topic through research",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_192",
+      "task": "Listen to an educational podcast",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_193",
+      "task": "Enroll in an online course",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_194",
+      "task": "Attend a lecture or webinar",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_195",
+      "task": "Join a discussion group or book club",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_196",
+      "task": "Visit the library and research",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_197",
+      "task": "Read multiple books or articles",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_198",
+      "task": "Create study notes or flashcards",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_199",
+      "task": "Interview an expert in a field",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_200",
+      "task": "Join a learning community online",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_201",
+      "task": "Complete a certification or training",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_202",
+      "task": "Attend a workshop in your field",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning"
+      ]
+    },
+    {
+      "id": "wellness_203",
+      "task": "Help a friend or neighbor with a task",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_204",
+      "task": "Perform a random act of kindness",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_205",
+      "task": "Donate items to charity",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_206",
+      "task": "Offer emotional support to someone",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_207",
+      "task": "Give genuine compliments freely",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_208",
+      "task": "Help with household chores for someone",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_209",
+      "task": "Send a care package or thoughtful gift",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_210",
+      "task": "Offer your time or skills to someone",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_211",
+      "task": "Donate money to a cause you believe in",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_212",
+      "task": "Mentor or guide someone",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_213",
+      "task": "Volunteer at a local organization",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_214",
+      "task": "Volunteer at a food bank or soup kitchen",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_215",
+      "task": "Volunteer for environmental conservation",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering",
+        "Nature"
+      ]
+    },
+    {
+      "id": "wellness_216",
+      "task": "Mentor a young person or colleague",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_217",
+      "task": "Volunteer at an animal rescue or shelter",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_218",
+      "task": "Participate in community cleanup",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_219",
+      "task": "Volunteer for a cause you care about",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_220",
+      "task": "Help organize a fundraiser or event",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_221",
+      "task": "Volunteer with vulnerable or senior populations",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_222",
+      "task": "Join a volunteer board or committee",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_223",
+      "task": "Try a new food or cuisine",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_224",
+      "task": "Take a different route to work or home",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_225",
+      "task": "Listen to a new genre of music",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_226",
+      "task": "Try a new recipe or cooking method",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_227",
+      "task": "Wear something you wouldn't normally wear",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_228",
+      "task": "Visit a new store or café",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_229",
+      "task": "Try a new exercise or movement practice",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences",
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_230",
+      "task": "Try a new hairstyle or look",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_231",
+      "task": "Use a new app or technology tool",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_232",
+      "task": "Try a new hobby or craft",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences",
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_233",
+      "task": "Take a class in something you've never done",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Learning",
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_234",
+      "task": "Try a new restaurant or food truck",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_235",
+      "task": "Explore a new neighborhood or area",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_236",
+      "task": "Attend an event in an unfamiliar genre",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_237",
+      "task": "Try a new sport or physical activity",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences",
+        "Physical"
+      ]
+    },
+    {
+      "id": "wellness_238",
+      "task": "Visit a museum or gallery you've never been to",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_239",
+      "task": "Try a new form of art or creative expression",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences",
+        "Creativity"
+      ]
+    },
+    {
+      "id": "wellness_240",
+      "task": "Go to an event or venue in a different part of town",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_241",
+      "task": "Try something on your bucket list",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_242",
+      "task": "Volunteer for a new type of cause",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Volunteering",
+        "New Experiences"
+      ]
+    },
+    {
+      "id": "wellness_243",
+      "task": "Turn off notifications for social media",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_244",
+      "task": "Take a one-hour social media break",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_245",
+      "task": "Leave your phone in another room for 30 minutes",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_246",
+      "task": "Avoid checking email first thing in the morning",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_247",
+      "task": "Practice presence during meals without devices",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_248",
+      "task": "Limit screen time after 8 PM",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_249",
+      "task": "Read a physical book instead of scrolling",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_250",
+      "task": "Unfollow accounts that trigger negative feelings",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_251",
+      "task": "Have a conversation without checking your phone",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_252",
+      "task": "Watch a sunset without recording it",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_253",
+      "task": "Disable social media and streaming apps for a full day",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_254",
+      "task": "Have a phone-free meal with friends or family",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_255",
+      "task": "Take a full digital detox day",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_256",
+      "task": "Create a 'no screens' bedroom policy this week",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_257",
+      "task": "Replace scrolling time with a meaningful hobby",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Creativity",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_258",
+      "task": "Organize a phone-free game night",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_259",
+      "task": "Stop using your phone while commuting",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_260",
+      "task": "Remove social media apps you don't need",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Mental Health",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_261",
+      "task": "Create a designated screen-free evening time",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": null,
+      "categories": [
+        "Communication",
+        "Media"
+      ]
+    },
+    {
+      "id": "wellness_262",
+      "task": "Attend or host a Canada Day community celebration",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": "Canada Day (July 1)",
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_263",
+      "task": "Participate in Canada Day festivities with friends or family",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": "Canada Day (July 1)",
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_264",
+      "task": "Host or attend a Thanksgiving dinner gathering",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": "Thanksgiving (2nd Monday October)",
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_265",
+      "task": "Share gratitude and appreciation with family for Thanksgiving",
+      "timing": "Daily",
+      "relationshipStatus": "All",
+      "holiday": "Thanksgiving (2nd Monday October)",
+      "categories": [
+        "Communication",
+        "Mental Health"
+      ]
+    },
+    {
+      "id": "wellness_266",
+      "task": "Attend a Halloween social event or party with friends",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": "Halloween (October 31)",
+      "categories": [
+        "Communication",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_267",
+      "task": "Send holiday cards to friends and family",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": "Christmas (December 25)",
+      "categories": [
+        "Communication"
+      ]
+    },
+    {
+      "id": "wellness_268",
+      "task": "Volunteer at a shelter or food bank during Christmas",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": "Christmas (December 25)",
+      "categories": [
+        "Communication",
+        "Volunteering"
+      ]
+    },
+    {
+      "id": "wellness_269",
+      "task": "Attend a New Year's Eve celebration with friends",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": "New Year's Eve (December 31)",
+      "categories": [
+        "Communication",
+        "Seeking Connection"
+      ]
+    },
+    {
+      "id": "wellness_270",
+      "task": "Reflect on the past year and set new community goals",
+      "timing": "Weekly",
+      "relationshipStatus": "All",
+      "holiday": "New Year's Eve (December 31)",
+      "categories": [
+        "Communication",
+        "Personal Growth"
+      ]
+    }
+  ],
+  "tasksByTiming": {
+    "daily": [
+      {
+        "id": "wellness_1",
+        "task": "Call or text a friend or family member",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_2",
+        "task": "Send a thoughtful message to someone you appreciate",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_3",
+        "task": "Compliment a friend, family member, or coworker",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_4",
+        "task": "Ask a close friend or family member how they're really doing",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_5",
+        "task": "Invite someone for coffee, lunch, or a casual hangout",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_6",
+        "task": "Check in with a neighbor or acquaintance",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_7",
+        "task": "Send an encouraging text to someone going through a challenge",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_8",
+        "task": "Reach out to someone you haven't talked to in a while",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_9",
+        "task": "Express appreciation to a family member or friend",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_10",
+        "task": "Join a group chat or online community around shared interests",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_11",
+        "task": "Smile and greet five people with genuine warmth",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_12",
+        "task": "Listen actively to someone without planning your response",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_13",
+        "task": "Share a personal update or story with someone you trust",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_14",
+        "task": "Invite family to a meal together",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_15",
+        "task": "Organize a group activity or outing via text or message",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_16",
+        "task": "Say hello to a coworker you don't usually interact with",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_17",
+        "task": "Text three people you care about just to say hello",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_35",
+        "task": "Update or refresh your online dating profile",
+        "timing": "Daily",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_36",
+        "task": "Browse dating apps with intention and genuine interest",
+        "timing": "Daily",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_37",
+        "task": "Send a thoughtful message to someone new on a dating app",
+        "timing": "Daily",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_38",
+        "task": "Write a genuine response to a match or connection",
+        "timing": "Daily",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_39",
+        "task": "Reflect on qualities you want in a partner and community",
+        "timing": "Daily",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_40",
+        "task": "Attend a social event where you might meet people",
+        "timing": "Daily",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_41",
+        "task": "Compliment or show interest in someone you're attracted to",
+        "timing": "Daily",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_42",
+        "task": "Work on your confidence and self-presentation",
+        "timing": "Daily",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_43",
+        "task": "Practice vulnerability in conversations with new people",
+        "timing": "Daily",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_53",
+        "task": "Send your partner a loving or appreciative message",
+        "timing": "Daily",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_54",
+        "task": "Give your partner a genuine compliment",
+        "timing": "Daily",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_55",
+        "task": "Ask your partner about their day and listen deeply",
+        "timing": "Daily",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_56",
+        "task": "Show physical affection (hug, kiss, hand-hold)",
+        "timing": "Daily",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_57",
+        "task": "Express gratitude for something your partner did",
+        "timing": "Daily",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_58",
+        "task": "Do a small act of kindness for your partner",
+        "timing": "Daily",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_59",
+        "task": "Make eye contact and be fully present with your partner",
+        "timing": "Daily",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_60",
+        "task": "Say 'I love you' or reaffirm your connection",
+        "timing": "Daily",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_61",
+        "task": "Cook a meal together or for your partner",
+        "timing": "Daily",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_62",
+        "task": "Share a laugh or funny moment together",
+        "timing": "Daily",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_73",
+        "task": "Practice gratitude - write down 3 things you're grateful for",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_74",
+        "task": "Meditate or practice mindfulness for 5-10 minutes",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_75",
+        "task": "Practice deep breathing exercises",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_76",
+        "task": "Write in your journal about your thoughts and feelings",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_77",
+        "task": "Practice positive affirmations or self-talk",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_78",
+        "task": "Give yourself permission to rest without guilt",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_79",
+        "task": "Practice self-compassion when facing a setback",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_80",
+        "task": "Identify one personal strength you possess",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_81",
+        "task": "Spend 5 minutes in quiet reflection or stillness",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_82",
+        "task": "Say something kind to yourself out loud",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_83",
+        "task": "Light a candle and create a calm environment",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_84",
+        "task": "Practice progressive muscle relaxation",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_85",
+        "task": "Set a meaningful intention for the day",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_86",
+        "task": "Acknowledge and accept your emotions without judgment",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_87",
+        "task": "Take a mental health check-in with yourself",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_88",
+        "task": "Limit news or negative content intake",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_89",
+        "task": "Practice forgiveness toward yourself",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_90",
+        "task": "Write down one thing that went well today",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_91",
+        "task": "Ground yourself using the 5 senses technique",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_92",
+        "task": "Take a warm shower or bath for comfort",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_103",
+        "task": "Read a chapter or section of a book",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_104",
+        "task": "Learn one new thing or skill",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_105",
+        "task": "Listen to an educational podcast or audiobook",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_106",
+        "task": "Practice a skill you're actively developing",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_107",
+        "task": "Reflect on a lesson or growth moment from today",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_108",
+        "task": "Work on a personal project or goal",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_109",
+        "task": "Practice a language for 15 minutes",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_110",
+        "task": "Identify an area where you want to improve",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_111",
+        "task": "Set a small daily goal and work toward it",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_112",
+        "task": "Practice positive thinking about a challenge",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_123",
+        "task": "Do 10 minutes of stretching or yoga",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_124",
+        "task": "Drink 8 glasses of water throughout the day",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_125",
+        "task": "Take a 10-minute walk",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_126",
+        "task": "Do light cardio or movement",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_127",
+        "task": "Practice good posture throughout the day",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_128",
+        "task": "Eat a nutritious meal or snack",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_129",
+        "task": "Get 7-9 hours of quality sleep",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_130",
+        "task": "Do 10 push-ups or bodyweight exercises",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_131",
+        "task": "Stretch your neck and shoulders",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_132",
+        "task": "Practice proper breathing techniques",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_143",
+        "task": "Take a 10-minute walk outside",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_144",
+        "task": "Notice and appreciate something in nature",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_145",
+        "task": "Open your window and breathe fresh air",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_146",
+        "task": "Water your plants or tend your garden",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_147",
+        "task": "Watch the sunrise or sunset",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_148",
+        "task": "Take a barefoot walk in grass or soil",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_149",
+        "task": "Listen to birds singing or nature sounds",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_150",
+        "task": "Take a photo of something beautiful in nature",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_151",
+        "task": "Identify a tree, flower, or plant near you",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_152",
+        "task": "Eat a meal outside if possible",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_163",
+        "task": "Draw, doodle, or sketch something",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_164",
+        "task": "Write poetry, lyrics, or creative writing",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_165",
+        "task": "Play a musical instrument",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_166",
+        "task": "Take creative or artistic photos",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_167",
+        "task": "Make or edit a short video",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_168",
+        "task": "Craft or make something by hand",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_169",
+        "task": "Paint or color something",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_170",
+        "task": "Create digital art or graphic design",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_171",
+        "task": "Write in a creative or expressive way",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_172",
+        "task": "Work on a creative side project",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_183",
+        "task": "Read an article on a topic of interest",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_184",
+        "task": "Watch an educational video",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_185",
+        "task": "Study a subject you're interested in",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_186",
+        "task": "Research something that fascinates you",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_187",
+        "task": "Take notes on something you learned",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_188",
+        "task": "Watch a documentary",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_189",
+        "task": "Read the news and stay informed",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_190",
+        "task": "Teach someone something you know",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_191",
+        "task": "Explore a new topic through research",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_192",
+        "task": "Listen to an educational podcast",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_203",
+        "task": "Help a friend or neighbor with a task",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_204",
+        "task": "Perform a random act of kindness",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_205",
+        "task": "Donate items to charity",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_206",
+        "task": "Offer emotional support to someone",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_207",
+        "task": "Give genuine compliments freely",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_208",
+        "task": "Help with household chores for someone",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_209",
+        "task": "Send a care package or thoughtful gift",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_210",
+        "task": "Offer your time or skills to someone",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_211",
+        "task": "Donate money to a cause you believe in",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_212",
+        "task": "Mentor or guide someone",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_223",
+        "task": "Try a new food or cuisine",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_224",
+        "task": "Take a different route to work or home",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_225",
+        "task": "Listen to a new genre of music",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_226",
+        "task": "Try a new recipe or cooking method",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_227",
+        "task": "Wear something you wouldn't normally wear",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_228",
+        "task": "Visit a new store or café",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_229",
+        "task": "Try a new exercise or movement practice",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences",
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_230",
+        "task": "Try a new hairstyle or look",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_231",
+        "task": "Use a new app or technology tool",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_232",
+        "task": "Try a new hobby or craft",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences",
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_243",
+        "task": "Turn off notifications for social media",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_244",
+        "task": "Take a one-hour social media break",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_245",
+        "task": "Leave your phone in another room for 30 minutes",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_246",
+        "task": "Avoid checking email first thing in the morning",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_247",
+        "task": "Practice presence during meals without devices",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_248",
+        "task": "Limit screen time after 8 PM",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_249",
+        "task": "Read a physical book instead of scrolling",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_250",
+        "task": "Unfollow accounts that trigger negative feelings",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_251",
+        "task": "Have a conversation without checking your phone",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_252",
+        "task": "Watch a sunset without recording it",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_265",
+        "task": "Share gratitude and appreciation with family for Thanksgiving",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": "Thanksgiving (2nd Monday October)",
+        "categories": [
+          "Communication",
+          "Mental Health"
+        ]
+      }
+    ],
+    "weekly": [
+      {
+        "id": "wellness_18",
+        "task": "Host a dinner, potluck, or casual meal gathering",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_19",
+        "task": "Organize a game night or board game gathering with friends",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_20",
+        "task": "Attend a local community event, meetup, or group gathering",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_21",
+        "task": "Host a book club, discussion, or movie watch party",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_22",
+        "task": "Plan a group outing (hike, picnic, movie, restaurant)",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_23",
+        "task": "Attend or volunteer at a community event or festival",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_24",
+        "task": "Visit a friend or family member in person",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_25",
+        "task": "Start or join a hobby club or group activity",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_26",
+        "task": "Participate in a group fitness class or sports activity",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_27",
+        "task": "Attend a cultural or social gathering",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_28",
+        "task": "Organize a skill-share or knowledge-sharing session with friends",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_29",
+        "task": "Host a phone or video call with distant friends or family",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_30",
+        "task": "Invite a friend to try a new restaurant or café",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_31",
+        "task": "Join a professional networking group or meetup",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_32",
+        "task": "Attend a workshop, class, or event with friends or family",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_33",
+        "task": "Create a community chat group or event planning forum",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_34",
+        "task": "Have a meaningful one-on-one conversation over coffee or meal",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_44",
+        "task": "Schedule or go on a first date",
+        "timing": "Weekly",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_45",
+        "task": "Plan a follow-up date with someone you like",
+        "timing": "Weekly",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_46",
+        "task": "Attend a speed dating, singles event, or mixer",
+        "timing": "Weekly",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_47",
+        "task": "Join a social or hobby group where you can meet people",
+        "timing": "Weekly",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_48",
+        "task": "Volunteer or attend a community event to expand your social circle",
+        "timing": "Weekly",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_49",
+        "task": "Get feedback on your dating profile from a trusted friend",
+        "timing": "Weekly",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_50",
+        "task": "Attend a party or social gathering with friends",
+        "timing": "Weekly",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_51",
+        "task": "Go out to a venue where you might meet people naturally",
+        "timing": "Weekly",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_52",
+        "task": "Join a group activity or class to meet people with similar interests",
+        "timing": "Weekly",
+        "relationshipStatus": "Single",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_63",
+        "task": "Schedule a dedicated date night with your partner",
+        "timing": "Weekly",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_64",
+        "task": "Have a deep conversation about feelings and goals",
+        "timing": "Weekly",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_65",
+        "task": "Try a new experience or activity together",
+        "timing": "Weekly",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "New Experiences",
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_66",
+        "task": "Plan a weekend getaway or day trip",
+        "timing": "Weekly",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_67",
+        "task": "Give each other a massage or quality physical time",
+        "timing": "Weekly",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_68",
+        "task": "Celebrate each other's wins and accomplishments",
+        "timing": "Weekly",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_69",
+        "task": "Watch a movie or show you both enjoy together",
+        "timing": "Weekly",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_70",
+        "task": "Share a meal without distractions and connect",
+        "timing": "Weekly",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_71",
+        "task": "Create a shared bucket list or future plans together",
+        "timing": "Weekly",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_72",
+        "task": "Write a love letter or heartfelt note to your partner",
+        "timing": "Weekly",
+        "relationshipStatus": "In a Relationship",
+        "holiday": null,
+        "categories": [
+          "Maintenance"
+        ]
+      },
+      {
+        "id": "wellness_93",
+        "task": "Attend therapy or counseling session",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_94",
+        "task": "Practice yoga or tai chi",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_95",
+        "task": "Take a relaxing bath with essential oils or music",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_96",
+        "task": "Get a massage or practice self-massage",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_97",
+        "task": "Create an at-home spa day",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_98",
+        "task": "Organize and declutter your personal space",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_99",
+        "task": "Declutter a significant area of your home",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_100",
+        "task": "Reflect on the week and journal lessons learned",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_101",
+        "task": "Write letters to process difficult emotions",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_102",
+        "task": "Set healthy boundaries with demanding people",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_113",
+        "task": "Take an online course or class",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_114",
+        "task": "Read a challenging or thought-provoking book",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_115",
+        "task": "Attend a workshop, seminar, or webinar",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_116",
+        "task": "Start learning a new skill or hobby",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning",
+          "New Experiences",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_117",
+        "task": "Create a vision board for your goals",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_118",
+        "task": "Review your goals and track progress",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_119",
+        "task": "Seek mentorship or advice from someone you admire",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_120",
+        "task": "Practice public speaking or presentation skills",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_121",
+        "task": "Join a professional or personal development group",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_122",
+        "task": "Mentor someone or teach a skill to others",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Personal Growth"
+        ]
+      },
+      {
+        "id": "wellness_133",
+        "task": "Do a HIIT or cardio workout",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_134",
+        "task": "Go for a run, bike ride, or swim",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_135",
+        "task": "Do a strength training session",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_136",
+        "task": "Attend a fitness class or gym session",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_137",
+        "task": "Meal prep for the week",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_138",
+        "task": "Practice a sport or recreational activity",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_139",
+        "task": "Do a flexibility or mobility workout",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_140",
+        "task": "Schedule a health checkup or dental visit",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_141",
+        "task": "Try a new wellness practice",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences",
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_142",
+        "task": "Do a longer nature walk or outdoor activity",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Physical",
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_153",
+        "task": "Go on a nature hike",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_154",
+        "task": "Visit a park or green space",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_155",
+        "task": "Go to a botanical garden or arboretum",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_156",
+        "task": "Volunteer for environmental conservation",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering",
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_157",
+        "task": "Spend time gardening or planting",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_158",
+        "task": "Go camping or spend the night outdoors",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_159",
+        "task": "Take a nature photography walk",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_160",
+        "task": "Go fishing, kayaking, or canoeing",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_161",
+        "task": "Explore a local nature trail or forest",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_162",
+        "task": "Join a naturalist or outdoor club",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_173",
+        "task": "Attend an art class or creative workshop",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning",
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_174",
+        "task": "Visit an art gallery or museum",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_175",
+        "task": "Create a mixed media project",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_176",
+        "task": "Share your creative work with others",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_177",
+        "task": "Collaborate on a creative project with someone",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_178",
+        "task": "Attend a poetry reading or open mic night",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_179",
+        "task": "Create handmade gifts for others",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_180",
+        "task": "Join a creative community or group",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_181",
+        "task": "Explore a new creative medium",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences",
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_182",
+        "task": "Attend a performance or show",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_193",
+        "task": "Enroll in an online course",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_194",
+        "task": "Attend a lecture or webinar",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_195",
+        "task": "Join a discussion group or book club",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_196",
+        "task": "Visit the library and research",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_197",
+        "task": "Read multiple books or articles",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_198",
+        "task": "Create study notes or flashcards",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_199",
+        "task": "Interview an expert in a field",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_200",
+        "task": "Join a learning community online",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_201",
+        "task": "Complete a certification or training",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_202",
+        "task": "Attend a workshop in your field",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning"
+        ]
+      },
+      {
+        "id": "wellness_213",
+        "task": "Volunteer at a local organization",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_214",
+        "task": "Volunteer at a food bank or soup kitchen",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_215",
+        "task": "Volunteer for environmental conservation",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering",
+          "Nature"
+        ]
+      },
+      {
+        "id": "wellness_216",
+        "task": "Mentor a young person or colleague",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_217",
+        "task": "Volunteer at an animal rescue or shelter",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_218",
+        "task": "Participate in community cleanup",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_219",
+        "task": "Volunteer for a cause you care about",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_220",
+        "task": "Help organize a fundraiser or event",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_221",
+        "task": "Volunteer with vulnerable or senior populations",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_222",
+        "task": "Join a volunteer board or committee",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_233",
+        "task": "Take a class in something you've never done",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Learning",
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_234",
+        "task": "Try a new restaurant or food truck",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_235",
+        "task": "Explore a new neighborhood or area",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_236",
+        "task": "Attend an event in an unfamiliar genre",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_237",
+        "task": "Try a new sport or physical activity",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences",
+          "Physical"
+        ]
+      },
+      {
+        "id": "wellness_238",
+        "task": "Visit a museum or gallery you've never been to",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_239",
+        "task": "Try a new form of art or creative expression",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences",
+          "Creativity"
+        ]
+      },
+      {
+        "id": "wellness_240",
+        "task": "Go to an event or venue in a different part of town",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_241",
+        "task": "Try something on your bucket list",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_242",
+        "task": "Volunteer for a new type of cause",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Volunteering",
+          "New Experiences"
+        ]
+      },
+      {
+        "id": "wellness_253",
+        "task": "Disable social media and streaming apps for a full day",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_254",
+        "task": "Have a phone-free meal with friends or family",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_255",
+        "task": "Take a full digital detox day",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_256",
+        "task": "Create a 'no screens' bedroom policy this week",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_257",
+        "task": "Replace scrolling time with a meaningful hobby",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Creativity",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_258",
+        "task": "Organize a phone-free game night",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_259",
+        "task": "Stop using your phone while commuting",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_260",
+        "task": "Remove social media apps you don't need",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Mental Health",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_261",
+        "task": "Create a designated screen-free evening time",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": null,
+        "categories": [
+          "Communication",
+          "Media"
+        ]
+      },
+      {
+        "id": "wellness_262",
+        "task": "Attend or host a Canada Day community celebration",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Canada Day (July 1)",
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_263",
+        "task": "Participate in Canada Day festivities with friends or family",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Canada Day (July 1)",
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_264",
+        "task": "Host or attend a Thanksgiving dinner gathering",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Thanksgiving (2nd Monday October)",
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_266",
+        "task": "Attend a Halloween social event or party with friends",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Halloween (October 31)",
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_267",
+        "task": "Send holiday cards to friends and family",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Christmas (December 25)",
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_268",
+        "task": "Volunteer at a shelter or food bank during Christmas",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Christmas (December 25)",
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_269",
+        "task": "Attend a New Year's Eve celebration with friends",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "New Year's Eve (December 31)",
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_270",
+        "task": "Reflect on the past year and set new community goals",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "New Year's Eve (December 31)",
+        "categories": [
+          "Communication",
+          "Personal Growth"
+        ]
+      }
+    ],
+    "holiday": [
+      {
+        "id": "wellness_262",
+        "task": "Attend or host a Canada Day community celebration",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Canada Day (July 1)",
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_263",
+        "task": "Participate in Canada Day festivities with friends or family",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Canada Day (July 1)",
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_264",
+        "task": "Host or attend a Thanksgiving dinner gathering",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Thanksgiving (2nd Monday October)",
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_265",
+        "task": "Share gratitude and appreciation with family for Thanksgiving",
+        "timing": "Daily",
+        "relationshipStatus": "All",
+        "holiday": "Thanksgiving (2nd Monday October)",
+        "categories": [
+          "Communication",
+          "Mental Health"
+        ]
+      },
+      {
+        "id": "wellness_266",
+        "task": "Attend a Halloween social event or party with friends",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Halloween (October 31)",
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_267",
+        "task": "Send holiday cards to friends and family",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Christmas (December 25)",
+        "categories": [
+          "Communication"
+        ]
+      },
+      {
+        "id": "wellness_268",
+        "task": "Volunteer at a shelter or food bank during Christmas",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "Christmas (December 25)",
+        "categories": [
+          "Communication",
+          "Volunteering"
+        ]
+      },
+      {
+        "id": "wellness_269",
+        "task": "Attend a New Year's Eve celebration with friends",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "New Year's Eve (December 31)",
+        "categories": [
+          "Communication",
+          "Seeking Connection"
+        ]
+      },
+      {
+        "id": "wellness_270",
+        "task": "Reflect on the past year and set new community goals",
+        "timing": "Weekly",
+        "relationshipStatus": "All",
+        "holiday": "New Year's Eve (December 31)",
+        "categories": [
+          "Communication",
+          "Personal Growth"
+        ]
+      }
+    ]
+  }
+}

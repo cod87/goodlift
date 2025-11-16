@@ -20,6 +20,14 @@ const DEFAULT_PREFERENCES = {
   restTimerDefault: 90,
   autoProgressionEnabled: true,
   language: 'en',
+  // Wellness task and push notification preferences
+  pushNotificationsEnabled: false,
+  dailyWellnessTasksEnabled: false,
+  wellnessCategories: [], // Selected categories for wellness tasks
+  relationshipStatus: 'All', // 'All', 'Single', 'In Relationship'
+  morningNotificationTime: { hour: 8, minute: 0 }, // Time for morning notifications
+  followupNotificationTime: { hour: 21, minute: 0 }, // Time for follow-up notifications
+  enableFollowupNotifications: true, // Enable/disable follow-up notifications
 };
 
 export const PreferencesProvider = ({ children }) => {

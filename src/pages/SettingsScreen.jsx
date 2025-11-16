@@ -296,7 +296,7 @@ const SettingsScreen = ({ onNavigate }) => {
         {/* GoodLift Logo */}
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
           <img 
-            src="/goodlift-logo.svg" 
+            src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
             alt="GoodLift" 
             style={{ 
               height: '50px',
@@ -318,41 +318,6 @@ const SettingsScreen = ({ onNavigate }) => {
 
         <Stack spacing={2} sx={{ maxWidth: 600 }}>
           {/* My Plans Section removed - no longer using workout planning */}
-
-          {/* Exercise Database Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
-            <CardContent sx={{ p: 0 }}>
-              <Typography
-                variant="overline"
-                sx={{
-                  px: 2,
-                  pt: 1.5,
-                  pb: 0.5,
-                  display: 'block',
-                  fontWeight: 700,
-                  color: 'text.secondary',
-                  letterSpacing: '0.1em',
-                  fontSize: '0.7rem',
-                }}
-              >
-                Exercise Database
-              </Typography>
-              <List sx={{ py: 0 }}>
-                <ListItem disablePadding>
-                  <ListItemButton onClick={() => handleNavigate('exercise-list')} sx={{ py: 1 }}>
-                    <ListItemIcon sx={{ minWidth: 40 }}>
-                      <ListAlt sx={{ color: 'primary.main' }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Browse Exercises"
-                      primaryTypographyProps={{ fontWeight: 500 }}
-                    />
-                    <ChevronRight sx={{ color: 'text.secondary' }} />
-                  </ListItemButton>
-                </ListItem>
-              </List>
-            </CardContent>
-          </Card>
 
           {/* User Profile Section */}
           <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
@@ -380,6 +345,41 @@ const SettingsScreen = ({ onNavigate }) => {
                     </ListItemIcon>
                     <ListItemText
                       primary="Profile Information"
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
+                    <ChevronRight sx={{ color: 'text.secondary' }} />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
+
+          {/* Exercise Database Section */}
+          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 0 }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  px: 2,
+                  pt: 1.5,
+                  pb: 0.5,
+                  display: 'block',
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: '0.1em',
+                  fontSize: '0.7rem',
+                }}
+              >
+                Exercise Database
+              </Typography>
+              <List sx={{ py: 0 }}>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => handleNavigate('exercise-list')} sx={{ py: 1 }}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
+                      <ListAlt sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Browse Exercises"
                       primaryTypographyProps={{ fontWeight: 500 }}
                     />
                     <ChevronRight sx={{ color: 'text.secondary' }} />

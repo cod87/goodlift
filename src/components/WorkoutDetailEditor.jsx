@@ -69,11 +69,12 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
     if (workout) {
       setWorkoutName(workout.sessionName || '');
       // Deep clone exercises to avoid mutating the original
-      const clonedExercises = (workout.exercises || []).map(ex => ({
+      const clonedExercises = (workout.exercises || []).map((ex, idx) => ({
         ...ex,
         sets: ex.sets ? [...ex.sets] : [{ weight: 0, reps: 10 }, { weight: 0, reps: 10 }, { weight: 0, reps: 10 }],
         name: ex.name || ex.exerciseName || ex['Exercise Name'] || 'Unknown Exercise',
         muscleGroup: ex.muscleGroup || ex.category || ex['Muscle Group'] || '',
+        supersetGroup: ex.supersetGroup !== undefined ? ex.supersetGroup : (idx % 2 === 0 ? Math.floor(idx / 2) : Math.floor(idx / 2)), // Assign default groups in pairs
       }));
       setExercises(clonedExercises);
     }
@@ -82,12 +83,18 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
   const handleAddExercise = (selectedExercise) => {
     if (!selectedExercise) return;
 
+    // Find the highest superset group number
+    const maxGroup = exercises.length > 0 
+      ? Math.max(...exercises.map(ex => ex.supersetGroup || 0))
+      : -1;
+
     const newExercise = {
       id: `ex_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       name: selectedExercise['Exercise Name'] || selectedExercise.name,
       exerciseName: selectedExercise['Exercise Name'] || selectedExercise.name,
       muscleGroup: selectedExercise['Muscle Group'] || selectedExercise.category || '',
       category: selectedExercise['Muscle Group'] || selectedExercise.category || '',
+      supersetGroup: maxGroup + 1, // New exercises get their own group by default
       sets: [
         { weight: 0, reps: 10 },
         { weight: 0, reps: 10 },
@@ -155,6 +162,16 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
       [field]: parseFloat(value) || 0,
     };
     
+    setExercises(updated);
+    setHasChanges(true);
+  };
+
+  const handleChangeSupersetGroup = (exerciseIndex, newGroup) => {
+    const updated = [...exercises];
+    updated[exerciseIndex] = {
+      ...updated[exerciseIndex],
+      supersetGroup: parseInt(newGroup),
+    };
     setExercises(updated);
     setHasChanges(true);
   };
@@ -309,6 +326,33 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
                             ),
                           }}
                         />
+                      </Box>
+
+                      {/* Superset Group Selector */}
+                      <Box>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Superset Group</InputLabel>
+                          <Select
+                            value={exercise.supersetGroup !== undefined ? exercise.supersetGroup : 0}
+                            label="Superset Group"
+                            onChange={(e) => handleChangeSupersetGroup(exIdx, e.target.value)}
+                          >
+                            {Array.from({ length: exercises.length }, (_, i) => (
+                              <MenuItem key={i} value={i}>
+                                Group {i + 1}
+                                {exercises.filter(ex => ex.supersetGroup === i).length > 1 && 
+                                  ` (${exercises.filter(ex => ex.supersetGroup === i).length} exercises)`
+                                }
+                              </MenuItem>
+                            ))}
+                            <MenuItem value={exercises.length}>
+                              New Group {exercises.length + 1}
+                            </MenuItem>
+                          </Select>
+                        </FormControl>
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                          Exercises in the same group will be performed as a superset
+                        </Typography>
                       </Box>
 
                       {/* Sets Editor */}

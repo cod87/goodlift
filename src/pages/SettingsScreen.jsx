@@ -48,6 +48,9 @@ import {
   Restore,
   CalendarMonth,
   Edit,
+  NotificationsActive,
+  Schedule,
+  Category,
 } from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePreferences } from '../contexts/PreferencesContext';
@@ -59,6 +62,8 @@ import { useUserProfile } from '../contexts/UserProfileContext';
 import ResetDataDialog from '../components/ResetDataDialog';
 import RecoverDataDialog from '../components/RecoverDataDialog';
 import WeekEditorDialog from '../components/WeekEditorDialog';
+import { getWellnessCategories } from '../utils/wellnessTaskService';
+import { requestNotificationPermission, sendTestNotification } from '../services/pushNotificationService';
 // PlansManagement removed - no longer using workout planning
 import {
   resetUserData,
@@ -94,6 +99,9 @@ const SettingsScreen = ({ onNavigate }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+  // Wellness task categories
+  const [wellnessCategories] = useState(() => getWellnessCategories());
 
   // Stretch reminder preferences
   const [stretchPrefs, setStretchPrefs] = useState(() => {
@@ -274,6 +282,43 @@ const SettingsScreen = ({ onNavigate }) => {
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
     }
+  };
+
+  // Wellness notification handlers
+  const handleEnablePushNotifications = async (enabled) => {
+    if (enabled) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        updatePreference('pushNotificationsEnabled', true);
+        setSnackbarMessage('Push notifications enabled!');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+      } else {
+        setSnackbarMessage('Permission denied. Please enable notifications in your browser settings.');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      }
+    } else {
+      updatePreference('pushNotificationsEnabled', false);
+      setSnackbarMessage('Push notifications disabled');
+      setSnackbarSeverity('info');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleToggleWellnessCategory = (category) => {
+    const currentCategories = preferences.wellnessCategories || [];
+    const newCategories = currentCategories.includes(category)
+      ? currentCategories.filter(c => c !== category)
+      : [...currentCategories, category];
+    updatePreference('wellnessCategories', newCategories);
+  };
+
+  const handleTestNotification = () => {
+    sendTestNotification(preferences);
+    setSnackbarMessage('Test notification sent!');
+    setSnackbarSeverity('success');
+    setSnackbarOpen(true);
   };
 
   return (
@@ -595,6 +640,245 @@ const SettingsScreen = ({ onNavigate }) => {
                     </FormControl>
                   )}
                 </ListItem>
+              </List>
+            </CardContent>
+          </Card>
+
+          {/* Wellness & Push Notifications Section */}
+          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: 0 }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  px: 2,
+                  pt: 1.5,
+                  pb: 0.5,
+                  display: 'block',
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: '0.1em',
+                  fontSize: '0.7rem',
+                }}
+              >
+                Wellness & Notifications
+              </Typography>
+              <List sx={{ py: 0 }}>
+                {/* Push Notifications Toggle */}
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        <Notifications sx={{ color: 'primary.main' }} />
+                      </ListItemIcon>
+                      <Typography variant="body2" fontWeight={500}>
+                        Push Notifications
+                      </Typography>
+                    </Box>
+                    <Switch
+                      checked={preferences.pushNotificationsEnabled || false}
+                      onChange={(e) => handleEnablePushNotifications(e.target.checked)}
+                      color="primary"
+                    />
+                  </Box>
+                  {preferences.pushNotificationsEnabled && (
+                    <Box sx={{ ml: 5, mt: 1, width: 'calc(100% - 40px)' }}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={handleTestNotification}
+                        sx={{ fontSize: '0.75rem' }}
+                      >
+                        Send Test Notification
+                      </Button>
+                    </Box>
+                  )}
+                </ListItem>
+                <Divider component="li" />
+
+                {/* Daily Wellness Tasks */}
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        <NotificationsActive sx={{ color: 'primary.main' }} />
+                      </ListItemIcon>
+                      <Typography variant="body2" fontWeight={500}>
+                        Daily Wellness Tasks
+                      </Typography>
+                    </Box>
+                    <Switch
+                      checked={preferences.dailyWellnessTasksEnabled || false}
+                      onChange={(e) => updatePreference('dailyWellnessTasksEnabled', e.target.checked)}
+                      color="primary"
+                      disabled={!preferences.pushNotificationsEnabled}
+                    />
+                  </Box>
+                </ListItem>
+                <Divider component="li" />
+
+                {/* Relationship Status */}
+                {preferences.dailyWellnessTasksEnabled && (
+                  <>
+                    <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 0.5 }}>
+                        <ListItemIcon sx={{ minWidth: 40 }}>
+                          <Person sx={{ color: 'primary.main' }} />
+                        </ListItemIcon>
+                        <Typography variant="body2" fontWeight={500}>
+                          Relationship Status
+                        </Typography>
+                      </Box>
+                      <FormControl size="small" sx={{ ml: 5, minWidth: 160 }}>
+                        <Select
+                          value={preferences.relationshipStatus || 'All'}
+                          onChange={(e) => updatePreference('relationshipStatus', e.target.value)}
+                        >
+                          <MenuItem value="All">All</MenuItem>
+                          <MenuItem value="Single">Single</MenuItem>
+                          <MenuItem value="In Relationship">In Relationship</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </ListItem>
+                    <Divider component="li" />
+
+                    {/* Wellness Categories */}
+                    <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 1 }}>
+                        <ListItemIcon sx={{ minWidth: 40 }}>
+                          <Category sx={{ color: 'primary.main' }} />
+                        </ListItemIcon>
+                        <Typography variant="body2" fontWeight={500}>
+                          Wellness Categories
+                        </Typography>
+                      </Box>
+                      <Box sx={{ ml: 5, width: 'calc(100% - 40px)' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                          Select categories for personalized wellness tasks
+                        </Typography>
+                        <Stack spacing={0.5}>
+                          {wellnessCategories.map((category) => (
+                            <FormControlLabel
+                              key={category}
+                              control={
+                                <Switch
+                                  size="small"
+                                  checked={(preferences.wellnessCategories || []).includes(category)}
+                                  onChange={() => handleToggleWellnessCategory(category)}
+                                  color="primary"
+                                />
+                              }
+                              label={<Typography variant="caption">{category}</Typography>}
+                              sx={{ m: 0 }}
+                            />
+                          ))}
+                        </Stack>
+                      </Box>
+                    </ListItem>
+                    <Divider component="li" />
+                  </>
+                )}
+
+                {/* Morning Notification Time */}
+                {preferences.pushNotificationsEnabled && (
+                  <>
+                    <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 0.5 }}>
+                        <ListItemIcon sx={{ minWidth: 40 }}>
+                          <Schedule sx={{ color: 'primary.main' }} />
+                        </ListItemIcon>
+                        <Typography variant="body2" fontWeight={500}>
+                          Morning Notification Time
+                        </Typography>
+                      </Box>
+                      <Box sx={{ ml: 5, display: 'flex', gap: 1 }}>
+                        <FormControl size="small" sx={{ minWidth: 80 }}>
+                          <Select
+                            value={(preferences.morningNotificationTime?.hour) || 8}
+                            onChange={(e) => updatePreference('morningNotificationTime', {
+                              ...preferences.morningNotificationTime,
+                              hour: e.target.value
+                            })}
+                          >
+                            {Array.from({ length: 24 }, (_, i) => (
+                              <MenuItem key={i} value={i}>{i.toString().padStart(2, '0')}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                        <Typography variant="body2" sx={{ alignSelf: 'center' }}>:</Typography>
+                        <FormControl size="small" sx={{ minWidth: 80 }}>
+                          <Select
+                            value={(preferences.morningNotificationTime?.minute) || 0}
+                            onChange={(e) => updatePreference('morningNotificationTime', {
+                              ...preferences.morningNotificationTime,
+                              minute: e.target.value
+                            })}
+                          >
+                            {[0, 15, 30, 45].map((minute) => (
+                              <MenuItem key={minute} value={minute}>{minute.toString().padStart(2, '0')}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Box>
+                    </ListItem>
+                    <Divider component="li" />
+
+                    {/* Follow-up Notifications */}
+                    <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', mb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ListItemIcon sx={{ minWidth: 40 }}>
+                            <Timer sx={{ color: 'primary.main' }} />
+                          </ListItemIcon>
+                          <Typography variant="body2" fontWeight={500}>
+                            Follow-up Notifications
+                          </Typography>
+                        </Box>
+                        <Switch
+                          checked={preferences.enableFollowupNotifications ?? true}
+                          onChange={(e) => updatePreference('enableFollowupNotifications', e.target.checked)}
+                          color="primary"
+                        />
+                      </Box>
+                      {preferences.enableFollowupNotifications && (
+                        <>
+                          <Typography variant="caption" color="text.secondary" sx={{ ml: 5, mb: 0.5, display: 'block' }}>
+                            Daily tasks: 9 PM | Weekly tasks: Saturday morning
+                          </Typography>
+                          <Box sx={{ ml: 5, display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <Typography variant="caption">Follow-up time:</Typography>
+                            <FormControl size="small" sx={{ minWidth: 80 }}>
+                              <Select
+                                value={(preferences.followupNotificationTime?.hour) || 21}
+                                onChange={(e) => updatePreference('followupNotificationTime', {
+                                  ...preferences.followupNotificationTime,
+                                  hour: e.target.value
+                                })}
+                              >
+                                {Array.from({ length: 24 }, (_, i) => (
+                                  <MenuItem key={i} value={i}>{i.toString().padStart(2, '0')}</MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                            <Typography variant="body2">:</Typography>
+                            <FormControl size="small" sx={{ minWidth: 80 }}>
+                              <Select
+                                value={(preferences.followupNotificationTime?.minute) || 0}
+                                onChange={(e) => updatePreference('followupNotificationTime', {
+                                  ...preferences.followupNotificationTime,
+                                  minute: e.target.value
+                                })}
+                              >
+                                {[0, 15, 30, 45].map((minute) => (
+                                  <MenuItem key={minute} value={minute}>{minute.toString().padStart(2, '0')}</MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          </Box>
+                        </>
+                      )}
+                    </ListItem>
+                  </>
+                )}
               </List>
             </CardContent>
           </Card>

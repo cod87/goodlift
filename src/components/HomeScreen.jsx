@@ -21,6 +21,7 @@ import {
 import { getWorkoutTypeDisplayName } from '../utils/workoutTypeHelpers';
 import { getWorkoutHistory } from '../utils/storage';
 import { containerPadding, touchTargets } from '../theme/responsive';
+import WellnessTaskCard from './WellnessTaskCard';
 
 /**
  * HomeScreen - Quick-start interface component (Work Tab)
@@ -194,6 +195,11 @@ const HomeScreen = memo(({
           )}
         </CardContent>
       </Card>
+
+      {/* Wellness Task Card */}
+      <Box sx={{ mb: 3 }}>
+        <WellnessTaskCard type="daily" />
+      </Box>
 
       {/* Secondary Actions - Quick Access Buttons */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

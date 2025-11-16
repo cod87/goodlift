@@ -409,6 +409,22 @@ const UserProfileScreen = () => {
             </Card>
           </Grid>
 
+          <Grid item xs={6} sm={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Wellness Tasks
+                </Typography>
+                <Typography variant="h4" fontWeight={700} color="secondary.main">
+                  {stats.completedWellnessTasks || 0}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  completed
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
           <Grid item xs={12} sm={8}>
             <Card>
               <CardContent>

@@ -103,23 +103,77 @@ export const meetsProgressiveOverloadCriteria = (repsCompleted, targetReps) => {
  * Calculate weight adjustment based on muscle group and equipment
  * @param {string} primaryMuscle - Primary muscle group being worked
  * @param {string} equipment - Equipment type being used
- * @returns {number} Weight adjustment in lbs (5 or 10)
+ * @returns {number} Weight adjustment in lbs (0 for bodyweight, 2.5-10 for others)
  */
 export const calculateWeightAdjustment = (primaryMuscle, equipment) => {
+  // Bodyweight exercises should not have progressive overload
+  if (equipment?.toLowerCase().includes('bodyweight') || equipment?.toLowerCase().includes('body weight')) {
+    return 0;
+  }
+  
   const upperBodyMuscles = ['Chest', 'Back', 'Shoulders', 'Delts', 'Biceps', 'Triceps', 'Lats', 'Traps'];
   const lowerBodyMuscles = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Legs'];
   
   const isUpperBody = upperBodyMuscles.some(muscle => primaryMuscle?.includes(muscle));
   const isLowerBody = lowerBodyMuscles.some(muscle => primaryMuscle?.includes(muscle));
   const isDumbbell = equipment?.includes('Dumbbell') || equipment?.includes('Kettlebell');
+  const isBarbell = equipment?.toLowerCase().includes('barbell');
   
   if (isUpperBody) {
-    return isDumbbell ? 5 : 5; // Upper body: +5lbs
+    if (isBarbell) {
+      return 5; // Upper body barbell: +5lbs
+    }
+    return isDumbbell ? 2.5 : 2.5; // Upper body dumbbell/other: +2.5lbs
   }
   
   if (isLowerBody) {
-    return isDumbbell ? 5 : 10; // Lower body: +5lbs for dumbbells, +10lbs for barbells
+    if (isBarbell) {
+      return 5; // Lower body barbell: +5lbs
+    }
+    return isDumbbell ? 10 : 5; // Lower body dumbbell: +10lbs, other: +5lbs
   }
   
-  return 5; // Default +5lbs
+  return 2.5; // Default +2.5lbs for other exercises
+};
+
+/**
+ * Calculate weight reduction based on muscle group and equipment
+ * This mirrors the weight increase logic but for reductions
+ * @param {string} primaryMuscle - Primary muscle group being worked
+ * @param {string} equipment - Equipment type being used
+ * @returns {number} Weight reduction in lbs (5 or 10)
+ */
+export const calculateWeightReduction = (primaryMuscle, equipment) => {
+  // Use the same logic as weight adjustment for consistency
+  return calculateWeightAdjustment(primaryMuscle, equipment);
+};
+
+/**
+ * Check if weight should be reduced based on total reps completed across all sets
+ * Weight should be reduced if user completes 20% or more fewer reps than target across all sets
+ * @param {Array} sets - Array of set objects with reps property
+ * @param {number} targetReps - Target reps per set
+ * @param {number} minimumSets - Minimum number of sets required (default: 3)
+ * @returns {boolean} True if weight should be reduced
+ */
+export const shouldReduceWeight = (sets, targetReps, minimumSets = 3) => {
+  if (!sets || !Array.isArray(sets) || sets.length < minimumSets) {
+    return false;
+  }
+  
+  if (!targetReps || targetReps <= 0) {
+    return false;
+  }
+  
+  // Calculate total target reps across all sets
+  const totalTargetReps = targetReps * sets.length;
+  
+  // Calculate total actual reps completed
+  const totalActualReps = sets.reduce((sum, set) => sum + (set.reps || 0), 0);
+  
+  // Check if actual reps are 20% or more below target
+  // 20% or more fewer means completing 80% or less of target
+  const threshold = totalTargetReps * 0.8;
+  
+  return totalActualReps <= threshold;
 };

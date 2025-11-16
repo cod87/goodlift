@@ -181,7 +181,7 @@ const ExerciseListPage = () => {
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh' }}>
-      <CompactHeader title="Exercise Database" icon="💪" />
+      <CompactHeader title="Exercise Database" />
       
       <motion.div
         initial={{ opacity: 0 }}
@@ -190,102 +190,109 @@ const ExerciseListPage = () => {
         style={{ padding: '1rem', maxWidth: '1400px', margin: '0 auto' }}
       >
 
-      {/* Compact Filter Bar */}
-      <Card
-        sx={{
-          mb: 2,
-          p: { xs: 1, sm: 2 },
-          borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(19, 70, 134, 0.08)',
-        }}
-      >
-        <Stack spacing={1.5}>
-          {/* Search */}
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Search exercises..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 1.5,
-              },
-            }}
-          />
-
-          {/* Compact Filter Row */}
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ width: '100%' }}>
-            <FormControl size="small" sx={{ minWidth: 120, flex: 1 }}>
-              <InputLabel>Muscle</InputLabel>
-              <Select
-                value={selectedCategory}
-                label="Muscle"
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <MenuItem value="all">All Muscles</MenuItem>
-                {categories.filter(c => c !== 'all').map(category => (
-                  <MenuItem key={category} value={category}>{category}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl size="small" sx={{ minWidth: 120, flex: 1 }}>
-              <InputLabel>Equipment</InputLabel>
-              <Select
-                value={selectedEquipment}
-                label="Equipment"
-                onChange={(e) => setSelectedEquipment(e.target.value)}
-              >
-                <MenuItem value="all">All Equipment</MenuItem>
-                {equipmentTypes.filter(e => e !== 'all').map(equipment => (
-                  <MenuItem key={equipment} value={equipment}>{equipment}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl size="small" sx={{ minWidth: 120, flex: 1 }}>
-              <InputLabel>Type</InputLabel>
-              <Select
-                value={selectedType}
-                label="Type"
-                onChange={(e) => setSelectedType(e.target.value)}
-              >
-                <MenuItem value="all">All Types</MenuItem>
-                {exerciseTypes.filter(t => t !== 'all').map(type => (
-                  <MenuItem key={type} value={type}>{type}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Stack>
-        </Stack>
-      </Card>
-
-      {/* Results Count */}
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, textAlign: 'center', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-        Showing {filteredExercises.length} of {allExercises.length} exercises
-      </Typography>
-
-      {/* Exercise Table */}
-      {filteredExercises.length > 0 ? (
+      {/* Exercise Table with Integrated Filters */}
+      {filteredExercises.length > 0 || searchTerm || selectedCategory !== 'all' || selectedEquipment !== 'all' || selectedType !== 'all' ? (
         <TableContainer 
           component={Paper} 
           sx={{ 
             borderRadius: 2,
             boxShadow: '0 2px 8px rgba(19, 70, 134, 0.08)',
-            maxHeight: 'calc(100vh - 350px)',
+            maxHeight: 'calc(100vh - 200px)',
             overflow: 'auto'
           }}
         >
           <Table stickyHeader size="small" sx={{ minWidth: { xs: 300, sm: 650 } }}>
             <TableHead>
+              {/* Integrated Search and Filter Row */}
+              <TableRow>
+                <TableCell colSpan={6} sx={{ bgcolor: 'background.paper', py: 1, px: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="center">
+                    {/* Search */}
+                    <TextField
+                      size="small"
+                      placeholder="Search exercises..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small" />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        minWidth: { xs: '100%', sm: 200 },
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 1,
+                          bgcolor: 'background.default',
+                        },
+                        '& .MuiInputBase-input': {
+                          fontSize: '0.875rem',
+                        },
+                      }}
+                    />
+
+                    {/* Compact Filters */}
+                    <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 110 } }}>
+                      <Select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        displayEmpty
+                        sx={{ 
+                          fontSize: '0.875rem',
+                          bgcolor: 'background.default',
+                        }}
+                      >
+                        <MenuItem value="all">All Muscles</MenuItem>
+                        {categories.filter(c => c !== 'all').map(category => (
+                          <MenuItem key={category} value={category}>{category}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 110 } }}>
+                      <Select
+                        value={selectedEquipment}
+                        onChange={(e) => setSelectedEquipment(e.target.value)}
+                        displayEmpty
+                        sx={{ 
+                          fontSize: '0.875rem',
+                          bgcolor: 'background.default',
+                        }}
+                      >
+                        <MenuItem value="all">All Equipment</MenuItem>
+                        {equipmentTypes.filter(e => e !== 'all').map(equipment => (
+                          <MenuItem key={equipment} value={equipment}>{equipment}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 110 } }}>
+                      <Select
+                        value={selectedType}
+                        onChange={(e) => setSelectedType(e.target.value)}
+                        displayEmpty
+                        sx={{ 
+                          fontSize: '0.875rem',
+                          bgcolor: 'background.default',
+                        }}
+                      >
+                        <MenuItem value="all">All Types</MenuItem>
+                        {exerciseTypes.filter(t => t !== 'all').map(type => (
+                          <MenuItem key={type} value={type}>{type}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    {/* Results Count */}
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: { xs: 0, sm: 'auto' }, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                      {filteredExercises.length} of {allExercises.length}
+                    </Typography>
+                  </Stack>
+                </TableCell>
+              </TableRow>
+              
+              {/* Table Header Row */}
               <TableRow>
                 <TableCell sx={{ fontWeight: 600, bgcolor: 'primary.main', color: 'white', py: 1.5 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -464,14 +471,100 @@ const ExerciseListPage = () => {
           </Table>
         </TableContainer>
       ) : (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" color="text.secondary">
-            No exercises found
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Try adjusting your search or filters
-          </Typography>
-        </Box>
+        <Paper sx={{ borderRadius: 2, boxShadow: '0 2px 8px rgba(19, 70, 134, 0.08)' }}>
+          {/* Search and Filters for empty state */}
+          <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="center">
+              <TextField
+                size="small"
+                placeholder="Search exercises..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  minWidth: { xs: '100%', sm: 200 },
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1,
+                    bgcolor: 'background.default',
+                  },
+                  '& .MuiInputBase-input': {
+                    fontSize: '0.875rem',
+                  },
+                }}
+              />
+
+              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 110 } }}>
+                <Select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  displayEmpty
+                  sx={{ 
+                    fontSize: '0.875rem',
+                    bgcolor: 'background.default',
+                  }}
+                >
+                  <MenuItem value="all">All Muscles</MenuItem>
+                  {categories.filter(c => c !== 'all').map(category => (
+                    <MenuItem key={category} value={category}>{category}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 110 } }}>
+                <Select
+                  value={selectedEquipment}
+                  onChange={(e) => setSelectedEquipment(e.target.value)}
+                  displayEmpty
+                  sx={{ 
+                    fontSize: '0.875rem',
+                    bgcolor: 'background.default',
+                  }}
+                >
+                  <MenuItem value="all">All Equipment</MenuItem>
+                  {equipmentTypes.filter(e => e !== 'all').map(equipment => (
+                    <MenuItem key={equipment} value={equipment}>{equipment}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 110 } }}>
+                <Select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  displayEmpty
+                  sx={{ 
+                    fontSize: '0.875rem',
+                    bgcolor: 'background.default',
+                  }}
+                >
+                  <MenuItem value="all">All Types</MenuItem>
+                  {exerciseTypes.filter(t => t !== 'all').map(type => (
+                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Typography variant="caption" color="text.secondary" sx={{ ml: { xs: 0, sm: 'auto' }, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                0 of {allExercises.length}
+              </Typography>
+            </Stack>
+          </Box>
+          
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" color="text.secondary">
+              No exercises found
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Try adjusting your search or filters
+            </Typography>
+          </Box>
+        </Paper>
       )}
     </motion.div>
     </Box>

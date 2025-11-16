@@ -2,7 +2,7 @@ import { useState, useEffect, memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, Snackbar, Alert, IconButton } from '@mui/material';
-import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle } from '@mui/icons-material';
+import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle, Add, Remove } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 import ExerciseAutocomplete from './ExerciseAutocomplete';
@@ -12,7 +12,7 @@ import ExerciseAutocomplete from './ExerciseAutocomplete';
  * Allows users to set starting weights and target reps before beginning
  * Memoized to prevent unnecessary re-renders
  */
-const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise, isCustomizeMode = false, supersetConfig = [2, 2, 2, 2] }) => {
+const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise, isCustomizeMode = false, supersetConfig = [2, 2, 2, 2], setsPerSuperset: initialSetsPerSuperset = 3 }) => {
   const [exerciseSettings, setExerciseSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [savedToFavorites, setSavedToFavorites] = useState(false);
@@ -21,6 +21,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [availableExercises, setAvailableExercises] = useState([]);
   const [currentWorkout, setCurrentWorkout] = useState(workout);
+  const [setsPerSuperset, setSetsPerSuperset] = useState(initialSetsPerSuperset);
 
   // Load all exercises data - includes full library for comprehensive autocomplete
   useEffect(() => {
@@ -256,7 +257,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
       await setExerciseWeight(exerciseName, weight);
       await setExerciseTargetReps(exerciseName, targetReps);
     }
-    onStart(currentWorkout);
+    onStart(currentWorkout, supersetConfig, setsPerSuperset);
   };
 
   const handleSaveToFavorites = () => {
@@ -380,8 +381,60 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           {isCustomizeMode ? 'Customize Your Workout' : `Your ${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`}
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-          {supersets.length} Supersets • {currentWorkout.filter(ex => ex !== null).length} Exercises • 3 Sets Each
+          {supersets.length} Supersets • {currentWorkout.filter(ex => ex !== null).length} Exercises • {setsPerSuperset} Sets Each
         </Typography>
+        {/* Sets per superset control */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          gap: 1,
+          mb: 1
+        }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+            Sets per superset:
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <IconButton
+              size="small"
+              onClick={() => setSetsPerSuperset(prev => Math.max(1, prev - 1))}
+              disabled={setsPerSuperset <= 1}
+              sx={{ 
+                minWidth: '32px',
+                minHeight: '32px',
+                bgcolor: 'action.hover',
+                '&:hover': { bgcolor: 'action.selected' }
+              }}
+            >
+              <Remove fontSize="small" />
+            </IconButton>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 700,
+                color: 'primary.main',
+                minWidth: '32px',
+                textAlign: 'center',
+                fontSize: { xs: '1rem', sm: '1.25rem' }
+              }}
+            >
+              {setsPerSuperset}
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={() => setSetsPerSuperset(prev => Math.min(10, prev + 1))}
+              disabled={setsPerSuperset >= 10}
+              sx={{ 
+                minWidth: '32px',
+                minHeight: '32px',
+                bgcolor: 'action.hover',
+                '&:hover': { bgcolor: 'action.selected' }
+              }}
+            >
+              <Add fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
         <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
           {isCustomizeMode ? 'Select exercises and set your target weight and reps for each' : 'Set your starting target weight and target reps for each exercise'}
         </Typography>
@@ -733,6 +786,7 @@ WorkoutPreview.propTypes = {
   equipmentFilter: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   isCustomizeMode: PropTypes.bool,
   supersetConfig: PropTypes.arrayOf(PropTypes.number),
+  setsPerSuperset: PropTypes.number,
 };
 
 export default WorkoutPreview;

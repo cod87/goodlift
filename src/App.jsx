@@ -67,6 +67,7 @@ function AppContent() {
   const [showAchievementDialog, setShowAchievementDialog] = useState(false);
   const [isCustomizeMode, setIsCustomizeMode] = useState(false);
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Track superset configuration
+  const [setsPerSuperset, setSetsPerSuperset] = useState(3); // Track number of sets per superset
   const { currentUser, isGuest, hasGuestData } = useAuth();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
@@ -248,10 +249,17 @@ function AppContent() {
     setCurrentScreen('preview');
   };
 
-  const handleBeginWorkout = (workout) => {
+  const handleBeginWorkout = (workout, workoutSupersetConfig, workoutSetsPerSuperset) => {
     // If workout is passed from WorkoutPreview, update it
     if (workout) {
       setCurrentWorkout(workout);
+    }
+    // Store superset config and sets per superset if provided
+    if (workoutSupersetConfig) {
+      setSupersetConfig(workoutSupersetConfig);
+    }
+    if (workoutSetsPerSuperset !== undefined) {
+      setSetsPerSuperset(workoutSetsPerSuperset);
     }
     setShowPreview(false);
     setIsCustomizeMode(false);
@@ -676,6 +684,7 @@ function AppContent() {
               equipmentFilter={Array.from(selectedEquipment)}
               isCustomizeMode={isCustomizeMode}
               supersetConfig={supersetConfig}
+              setsPerSuperset={setsPerSuperset}
             />
           )}
           
@@ -684,6 +693,8 @@ function AppContent() {
               workoutPlan={currentWorkout}
               onComplete={handleWorkoutComplete}
               onExit={handleWorkoutExit}
+              supersetConfig={supersetConfig}
+              setsPerSuperset={setsPerSuperset}
             />
           )}
           

@@ -22,22 +22,34 @@ const shouldReduceWeight = (sets, targetReps, minimumSets = 3) => {
 };
 
 const calculateWeightAdjustment = (primaryMuscle, equipment) => {
+  // Bodyweight exercises should not have progressive overload
+  if (equipment?.toLowerCase().includes('bodyweight') || equipment?.toLowerCase().includes('body weight')) {
+    return 0;
+  }
+  
   const upperBodyMuscles = ['Chest', 'Back', 'Shoulders', 'Delts', 'Biceps', 'Triceps', 'Lats', 'Traps'];
   const lowerBodyMuscles = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Legs'];
   
   const isUpperBody = upperBodyMuscles.some(muscle => primaryMuscle?.includes(muscle));
   const isLowerBody = lowerBodyMuscles.some(muscle => primaryMuscle?.includes(muscle));
   const isDumbbell = equipment?.includes('Dumbbell') || equipment?.includes('Kettlebell');
+  const isBarbell = equipment?.toLowerCase().includes('barbell');
   
   if (isUpperBody) {
-    return isDumbbell ? 5 : 5; // Upper body: +5lbs for all equipment
+    if (isBarbell) {
+      return 5; // Upper body barbell: +5lbs
+    }
+    return isDumbbell ? 2.5 : 2.5; // Upper body dumbbell/other: +2.5lbs
   }
   
   if (isLowerBody) {
-    return isDumbbell ? 10 : 5; // Lower body: +10lbs for dumbbells, +5lbs for barbells
+    if (isBarbell) {
+      return 5; // Lower body barbell: +5lbs
+    }
+    return isDumbbell ? 10 : 5; // Lower body dumbbell: +10lbs, other: +5lbs
   }
   
-  return 5; // Default +5lbs
+  return 2.5; // Default +2.5lbs
 };
 
 const calculateWeightReduction = (primaryMuscle, equipment) => {
@@ -46,7 +58,7 @@ const calculateWeightReduction = (primaryMuscle, equipment) => {
 
 const WEIGHT_INCREMENTS = {
   UPPER_BODY: {
-    DUMBBELL: 5,
+    DUMBBELL: 2.5,
     BARBELL: 5,
   },
   LOWER_BODY: {
@@ -137,9 +149,9 @@ console.log(`  Match: ${increment2b === decrement2b && increment2b === 5 ? '✓ 
 const increment2c = calculateWeightAdjustment('Shoulders', 'Dumbbell');
 const decrement2c = calculateWeightReduction('Shoulders', 'Dumbbell');
 console.log(`Upper body dumbbell (Shoulders):`);
-console.log(`  Increment: ${increment2c} lbs (Expected: 5 lbs)`);
-console.log(`  Decrement: ${decrement2c} lbs (Expected: 5 lbs)`);
-console.log(`  Match: ${increment2c === decrement2c && increment2c === 5 ? '✓ PASS' : '✗ FAIL'}\n`);
+console.log(`  Increment: ${increment2c} lbs (Expected: 2.5 lbs)`);
+console.log(`  Decrement: ${decrement2c} lbs (Expected: 2.5 lbs)`);
+console.log(`  Match: ${increment2c === decrement2c && increment2c === 2.5 ? '✓ PASS' : '✗ FAIL'}\n`);
 
 // Test case 2d: Lower body dumbbell
 const increment2d = calculateWeightAdjustment('Glutes', 'Dumbbell');
@@ -149,18 +161,26 @@ console.log(`  Increment: ${increment2d} lbs (Expected: 10 lbs)`);
 console.log(`  Decrement: ${decrement2d} lbs (Expected: 10 lbs)`);
 console.log(`  Match: ${increment2d === decrement2d && increment2d === 10 ? '✓ PASS' : '✗ FAIL'}\n`);
 
+// Test case 2e: Bodyweight exercise
+const increment2e = calculateWeightAdjustment('Chest', 'Bodyweight');
+const decrement2e = calculateWeightReduction('Chest', 'Bodyweight');
+console.log(`Bodyweight exercise (Push-ups):`);
+console.log(`  Increment: ${increment2e} lbs (Expected: 0 lbs - no progressive overload)`);
+console.log(`  Decrement: ${decrement2e} lbs (Expected: 0 lbs - no progressive overload)`);
+console.log(`  Match: ${increment2e === decrement2e && increment2e === 0 ? '✓ PASS' : '✗ FAIL'}\n`);
+
 // Test 3: Verify WEIGHT_INCREMENTS constants
 console.log('Test 3: WEIGHT_INCREMENTS Constants');
 console.log('------------------------------------');
 console.log(`Upper body barbell: ${WEIGHT_INCREMENTS.UPPER_BODY.BARBELL} lbs (Expected: 5 lbs)`);
 console.log(`Lower body barbell: ${WEIGHT_INCREMENTS.LOWER_BODY.BARBELL} lbs (Expected: 5 lbs)`);
-console.log(`Upper body dumbbell: ${WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL} lbs (Expected: 5 lbs)`);
+console.log(`Upper body dumbbell: ${WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL} lbs (Expected: 2.5 lbs)`);
 console.log(`Lower body dumbbell: ${WEIGHT_INCREMENTS.LOWER_BODY.DUMBBELL} lbs (Expected: 10 lbs)`);
 
 const allCorrect = 
   WEIGHT_INCREMENTS.UPPER_BODY.BARBELL === 5 &&
   WEIGHT_INCREMENTS.LOWER_BODY.BARBELL === 5 &&
-  WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL === 5 &&
+  WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL === 2.5 &&
   WEIGHT_INCREMENTS.LOWER_BODY.DUMBBELL === 10;
 
 console.log(`${allCorrect ? '✓ PASS' : '✗ FAIL'}\n`);

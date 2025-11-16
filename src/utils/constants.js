@@ -64,12 +64,12 @@ export const ALL_MUSCLE_GROUPS = [
  * Different increments for upper/lower body and equipment types
  * - Upper body uses smaller increments due to smaller muscle groups
  * - Lower body uses larger increments due to larger muscle groups
- * - Dumbbell/Kettlebell increments are larger (total weight across both hands)
  * - All barbell exercises use 5lbs increment regardless of muscle group
+ * - Bodyweight exercises are not included in progressive overload
  */
 export const WEIGHT_INCREMENTS = {
   UPPER_BODY: {
-    DUMBBELL: 5,    // 5 lbs per dumbbell (10 lbs total)
+    DUMBBELL: 2.5,  // 2.5 lbs per dumbbell (5 lbs total)
     BARBELL: 5,     // 5 lbs total for all barbell exercises
   },
   LOWER_BODY: {

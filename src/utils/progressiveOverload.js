@@ -103,25 +103,37 @@ export const meetsProgressiveOverloadCriteria = (repsCompleted, targetReps) => {
  * Calculate weight adjustment based on muscle group and equipment
  * @param {string} primaryMuscle - Primary muscle group being worked
  * @param {string} equipment - Equipment type being used
- * @returns {number} Weight adjustment in lbs (5 or 10)
+ * @returns {number} Weight adjustment in lbs (0 for bodyweight, 2.5-10 for others)
  */
 export const calculateWeightAdjustment = (primaryMuscle, equipment) => {
+  // Bodyweight exercises should not have progressive overload
+  if (equipment?.toLowerCase().includes('bodyweight') || equipment?.toLowerCase().includes('body weight')) {
+    return 0;
+  }
+  
   const upperBodyMuscles = ['Chest', 'Back', 'Shoulders', 'Delts', 'Biceps', 'Triceps', 'Lats', 'Traps'];
   const lowerBodyMuscles = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Legs'];
   
   const isUpperBody = upperBodyMuscles.some(muscle => primaryMuscle?.includes(muscle));
   const isLowerBody = lowerBodyMuscles.some(muscle => primaryMuscle?.includes(muscle));
   const isDumbbell = equipment?.includes('Dumbbell') || equipment?.includes('Kettlebell');
+  const isBarbell = equipment?.toLowerCase().includes('barbell');
   
   if (isUpperBody) {
-    return isDumbbell ? 5 : 5; // Upper body: +5lbs for all equipment
+    if (isBarbell) {
+      return 5; // Upper body barbell: +5lbs
+    }
+    return isDumbbell ? 2.5 : 2.5; // Upper body dumbbell/other: +2.5lbs
   }
   
   if (isLowerBody) {
-    return isDumbbell ? 10 : 5; // Lower body: +10lbs for dumbbells, +5lbs for barbells
+    if (isBarbell) {
+      return 5; // Lower body barbell: +5lbs
+    }
+    return isDumbbell ? 10 : 5; // Lower body dumbbell: +10lbs, other: +5lbs
   }
   
-  return 5; // Default +5lbs
+  return 2.5; // Default +2.5lbs for other exercises
 };
 
 /**

@@ -368,20 +368,32 @@ function AppContent() {
    * Calculate weight increase for progressive overload based on muscle group and equipment
    * @param {string} primaryMuscle - Primary muscle group being worked
    * @param {string} equipment - Equipment type being used
-   * @returns {number} Weight increase in lbs
+   * @returns {number} Weight increase in lbs (0 for bodyweight exercises)
    */
   const calculateWeightIncrease = useCallback((primaryMuscle, equipment) => {
+    // Bodyweight exercises should not have progressive overload
+    if (equipment?.toLowerCase().includes('bodyweight') || equipment?.toLowerCase().includes('body weight')) {
+      return 0;
+    }
+    
     const isDumbbell = equipment.includes('Dumbbell') || equipment.includes('Kettlebell');
+    const isBarbell = equipment?.toLowerCase().includes('barbell');
 
     if (MUSCLE_GROUPS.UPPER_BODY.includes(primaryMuscle)) {
-      return isDumbbell ? WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL : WEIGHT_INCREMENTS.UPPER_BODY.BARBELL;
+      if (isBarbell) {
+        return WEIGHT_INCREMENTS.UPPER_BODY.BARBELL; // 5 lbs for barbell
+      }
+      return WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL; // 2.5 lbs for dumbbell/other
     }
     
     if (MUSCLE_GROUPS.LOWER_BODY.includes(primaryMuscle)) {
-      return isDumbbell ? WEIGHT_INCREMENTS.LOWER_BODY.DUMBBELL : WEIGHT_INCREMENTS.LOWER_BODY.BARBELL;
+      if (isBarbell) {
+        return WEIGHT_INCREMENTS.LOWER_BODY.BARBELL; // 5 lbs for barbell
+      }
+      return isDumbbell ? WEIGHT_INCREMENTS.LOWER_BODY.DUMBBELL : 5; // 10 lbs for dumbbell, 5 lbs for other
     }
     
-    return 0;
+    return 2.5; // Default 2.5 lbs for other exercises
   }, []);
 
   /**
@@ -389,20 +401,32 @@ function AppContent() {
    * Uses the same logic as weight increase for consistency
    * @param {string} primaryMuscle - Primary muscle group being worked
    * @param {string} equipment - Equipment type being used
-   * @returns {number} Weight reduction in lbs
+   * @returns {number} Weight reduction in lbs (0 for bodyweight exercises)
    */
   const calculateWeightDecrease = useCallback((primaryMuscle, equipment) => {
+    // Bodyweight exercises should not have progressive overload
+    if (equipment?.toLowerCase().includes('bodyweight') || equipment?.toLowerCase().includes('body weight')) {
+      return 0;
+    }
+    
     const isDumbbell = equipment.includes('Dumbbell') || equipment.includes('Kettlebell');
+    const isBarbell = equipment?.toLowerCase().includes('barbell');
 
     if (MUSCLE_GROUPS.UPPER_BODY.includes(primaryMuscle)) {
-      return isDumbbell ? WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL : WEIGHT_INCREMENTS.UPPER_BODY.BARBELL;
+      if (isBarbell) {
+        return WEIGHT_INCREMENTS.UPPER_BODY.BARBELL; // 5 lbs for barbell
+      }
+      return WEIGHT_INCREMENTS.UPPER_BODY.DUMBBELL; // 2.5 lbs for dumbbell/other
     }
     
     if (MUSCLE_GROUPS.LOWER_BODY.includes(primaryMuscle)) {
-      return isDumbbell ? WEIGHT_INCREMENTS.LOWER_BODY.DUMBBELL : WEIGHT_INCREMENTS.LOWER_BODY.BARBELL;
+      if (isBarbell) {
+        return WEIGHT_INCREMENTS.LOWER_BODY.BARBELL; // 5 lbs for barbell
+      }
+      return isDumbbell ? WEIGHT_INCREMENTS.LOWER_BODY.DUMBBELL : 5; // 10 lbs for dumbbell, 5 lbs for other
     }
     
-    return 0;
+    return 2.5; // Default 2.5 lbs for other exercises
   }, []);
 
   /**

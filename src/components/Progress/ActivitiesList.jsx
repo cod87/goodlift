@@ -147,7 +147,7 @@ const ActivitiesList = memo(({
                     </Box>
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                        {formatActivityType(activityType)}
+                        {activity.sessionName || formatActivityType(activityType)}
                         {activity.isPartial && (
                           <Chip 
                             label="Partial"
@@ -156,6 +156,11 @@ const ActivitiesList = memo(({
                           />
                         )}
                       </Typography>
+                      {activity.sessionName && (
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>
+                          {formatActivityType(activityType)}
+                        </Typography>
+                      )}
                       <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
                         <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
                           {formatDate(activity.date)}
@@ -287,6 +292,7 @@ ActivitiesList.propTypes = {
     date: PropTypes.string,
     type: PropTypes.string,
     duration: PropTypes.number,
+    sessionName: PropTypes.string,
     exercises: PropTypes.oneOfType([
       PropTypes.array,
       PropTypes.object,

@@ -28,8 +28,10 @@ import {
   SelfImprovement,
   HotelOutlined,
   Star,
+  Settings,
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
+import WorkoutDetailEditor from './WorkoutDetailEditor';
 
 /**
  * WeekEditorDialog - Dialog for editing weekly workout assignments
@@ -40,6 +42,8 @@ const WeekEditorDialog = ({ open, onClose }) => {
   const [editingDay, setEditingDay] = useState(null);
   const [selectedWorkoutType, setSelectedWorkoutType] = useState('');
   const [hasChanges, setHasChanges] = useState(false);
+  const [detailEditorOpen, setDetailEditorOpen] = useState(false);
+  const [detailEditorDay, setDetailEditorDay] = useState(null);
 
   const daysOfWeek = [
     'Sunday',
@@ -137,6 +141,24 @@ const WeekEditorDialog = ({ open, onClose }) => {
   const handleClearDay = async (day) => {
     await assignWorkoutToDay(day, null);
     setHasChanges(true);
+  };
+
+  const handleOpenDetailEditor = (day) => {
+    setDetailEditorDay(day);
+    setDetailEditorOpen(true);
+  };
+
+  const handleCloseDetailEditor = () => {
+    setDetailEditorOpen(false);
+    setDetailEditorDay(null);
+  };
+
+  const handleSaveWorkoutDetails = async (updatedWorkout) => {
+    if (detailEditorDay) {
+      await assignWorkoutToDay(detailEditorDay, updatedWorkout);
+      setHasChanges(true);
+      handleCloseDetailEditor();
+    }
   };
 
   const handleClose = () => {
@@ -353,19 +375,29 @@ const WeekEditorDialog = ({ open, onClose }) => {
                           size="small"
                           color="primary"
                           onClick={() => handleEditDay(day)}
-                          title="Edit workout"
+                          title="Edit workout type"
                         >
                           <Edit fontSize="small" />
                         </IconButton>
                         {session && (
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => handleClearDay(day)}
-                            title="Clear workout"
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
+                          <>
+                            <IconButton
+                              size="small"
+                              color="secondary"
+                              onClick={() => handleOpenDetailEditor(day)}
+                              title="Edit exercises and sets"
+                            >
+                              <Settings fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleClearDay(day)}
+                              title="Clear workout"
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </>
                         )}
                       </Box>
                     </Box>
@@ -382,6 +414,17 @@ const WeekEditorDialog = ({ open, onClose }) => {
           Done
         </Button>
       </DialogActions>
+
+      {/* Workout Detail Editor */}
+      {detailEditorDay && weeklySchedule[detailEditorDay] && (
+        <WorkoutDetailEditor
+          open={detailEditorOpen}
+          onClose={handleCloseDetailEditor}
+          workout={weeklySchedule[detailEditorDay]}
+          dayOfWeek={detailEditorDay}
+          onSave={handleSaveWorkoutDetails}
+        />
+      )}
     </Dialog>
   );
 };

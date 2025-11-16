@@ -114,3 +114,76 @@ self.addEventListener('fetch', (event) => {
 // When you update the app, increment CACHE_NAME (e.g., 'goodlift-pwa-v2').
 // This ensures old cached files are cleared and new versions are loaded.
 // Consider using a build step to auto-update cache names based on asset hashes.
+
+// Push notification event handler
+// This event is triggered when a push notification is received
+self.addEventListener('push', (event) => {
+  console.log('[Service Worker] Push notification received');
+
+  // Default notification options
+  const defaultOptions = {
+    icon: '/goodlift/icons/goodlift-icon-192.png',
+    badge: '/goodlift/icons/goodlift-icon-192.png',
+    vibrate: [200, 100, 200],
+    tag: 'goodlift-notification',
+  };
+
+  let notificationData = {
+    title: 'GoodLift',
+    body: 'You have a new notification',
+    ...defaultOptions,
+  };
+
+  // Parse notification data if provided
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      notificationData = {
+        title: data.title || notificationData.title,
+        body: data.body || data.message || notificationData.body,
+        icon: data.icon || defaultOptions.icon,
+        badge: data.badge || defaultOptions.badge,
+        data: data.data || {},
+        ...defaultOptions,
+      };
+    } catch (error) {
+      console.error('[Service Worker] Error parsing push notification data:', error);
+      // Use text content as fallback
+      notificationData.body = event.data.text();
+    }
+  }
+
+  // Show the notification
+  const promiseChain = self.registration.showNotification(
+    notificationData.title,
+    notificationData
+  );
+
+  event.waitUntil(promiseChain);
+});
+
+// Notification click event handler
+// This event is triggered when user clicks on a notification
+self.addEventListener('notificationclick', (event) => {
+  console.log('[Service Worker] Notification clicked');
+  
+  event.notification.close();
+
+  // Handle notification click action
+  // Open the app or focus existing window
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // If a window is already open, focus it
+        for (const client of clientList) {
+          if (client.url.includes('/goodlift') && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        // Otherwise, open a new window
+        if (clients.openWindow) {
+          return clients.openWindow('/goodlift/');
+        }
+      })
+  );
+});

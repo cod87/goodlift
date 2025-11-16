@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import PropTypes from 'prop-types';
 import { useAuth } from './AuthContext';
 import { saveUserDataToFirebase, loadUserDataFromFirebase } from '../utils/firebaseStorage';
-import { startOfWeek, addWeeks, isAfter } from 'date-fns';
+import { startOfWeek, isAfter } from 'date-fns';
 
 const WeekSchedulingContext = createContext({});
 
@@ -13,6 +13,7 @@ export const useWeekScheduling = () => {
 
 const DEFAULT_STATE = {
   currentWeek: 1,
+  initialWeek: 1, // The week number that the cycle started at (0 or 1)
   cycleStartDate: null, // Will be set to most recent Sunday
   deloadWeekActive: false,
   weeklySchedule: {
@@ -40,17 +41,25 @@ export const WeekSchedulingProvider = ({ children }) => {
     return sunday.toISOString();
   }, []);
 
+  // Determine initial week based on current day of week
+  // Sunday (0) or Monday (1) → Week 1
+  // Other days (Tue-Sat) → Week 0
+  const getInitialWeek = useCallback(() => {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    return (dayOfWeek === 0 || dayOfWeek === 1) ? 1 : 0;
+  }, []);
+
   // Calculate current week number based on cycle start date
-  const calculateCurrentWeek = useCallback((cycleStartDate) => {
-    if (!cycleStartDate) return 1;
+  const calculateCurrentWeek = useCallback((cycleStartDate, initialWeek = 1) => {
+    if (!cycleStartDate) return initialWeek;
     
     const startDate = new Date(cycleStartDate);
-    const now = new Date();
     const mostRecentSunday = new Date(getMostRecentSunday());
     
     // Calculate weeks elapsed
     const weeksElapsed = Math.floor((mostRecentSunday - startDate) / (7 * 24 * 60 * 60 * 1000));
-    return weeksElapsed + 1;
+    return weeksElapsed + initialWeek;
   }, [getMostRecentSunday]);
 
   // Check if week needs to increment
@@ -59,7 +68,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     
     // If we've passed a Sunday boundary, recalculate week
     if (currentState.cycleStartDate && isAfter(new Date(mostRecentSunday), new Date(currentState.cycleStartDate))) {
-      const newWeek = calculateCurrentWeek(currentState.cycleStartDate);
+      const newWeek = calculateCurrentWeek(currentState.cycleStartDate, currentState.initialWeek || 1);
       
       if (newWeek !== currentState.currentWeek) {
         // Week has incremented, check if we're ending a deload week
@@ -78,7 +87,23 @@ export const WeekSchedulingProvider = ({ children }) => {
     }
     
     return { updated: false, wasDeloadActive: false };
-  }, [getMostRecentSunday, calculateCurrentWeek]);
+  }, [getMostRecentSunday, calculateCurrentWeek, saveWeekState]);
+
+  // Save week state
+  const saveWeekState = useCallback(async (state) => {
+    try {
+      if (currentUser && !isGuest) {
+        // Save to Firebase
+        await saveUserDataToFirebase(currentUser.uid, { weekScheduling: state });
+      } else {
+        // Save to localStorage
+        localStorage.setItem('goodlift_week_scheduling', JSON.stringify(state));
+      }
+    } catch (error) {
+      console.error('Error saving week state:', error);
+      throw error;
+    }
+  }, [currentUser, isGuest]);
 
   // Load week state from storage
   useEffect(() => {
@@ -115,9 +140,12 @@ export const WeekSchedulingProvider = ({ children }) => {
           // Check if week needs to increment
           await checkAndIncrementWeek(mergedState);
         } else {
-          // Initialize with default state
+          // Initialize with default state for new users
+          const initialWeek = getInitialWeek();
           const initialState = {
             ...DEFAULT_STATE,
+            currentWeek: initialWeek,
+            initialWeek: initialWeek,
             cycleStartDate: getMostRecentSunday(),
           };
           setWeekState(initialState);
@@ -125,8 +153,11 @@ export const WeekSchedulingProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('Error loading week state:', error);
+        const initialWeek = getInitialWeek();
         const initialState = {
           ...DEFAULT_STATE,
+          currentWeek: initialWeek,
+          initialWeek: initialWeek,
           cycleStartDate: getMostRecentSunday(),
         };
         setWeekState(initialState);
@@ -138,29 +169,16 @@ export const WeekSchedulingProvider = ({ children }) => {
     if (currentUser !== undefined) {
       loadWeekState();
     }
-  }, [currentUser, isGuest, getMostRecentSunday, checkAndIncrementWeek]);
-
-  // Save week state
-  const saveWeekState = async (state) => {
-    try {
-      if (currentUser && !isGuest) {
-        // Save to Firebase
-        await saveUserDataToFirebase(currentUser.uid, { weekScheduling: state });
-      } else {
-        // Save to localStorage
-        localStorage.setItem('goodlift_week_scheduling', JSON.stringify(state));
-      }
-    } catch (error) {
-      console.error('Error saving week state:', error);
-      throw error;
-    }
-  };
+  }, [currentUser, isGuest, getMostRecentSunday, getInitialWeek, checkAndIncrementWeek, saveWeekState]);
 
   // Reset week cycle (manual reset from settings)
-  const resetWeekCycle = useCallback(async () => {
+  // weekNumber: optional parameter to reset to specific week (0 or 1)
+  // If not provided, defaults to week 1 for backward compatibility
+  const resetWeekCycle = useCallback(async (weekNumber = 1) => {
     const resetState = {
       ...weekState,
-      currentWeek: 1,
+      currentWeek: weekNumber,
+      initialWeek: weekNumber,
       cycleStartDate: getMostRecentSunday(),
       deloadWeekActive: false,
     };
@@ -169,7 +187,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     await saveWeekState(resetState);
     
     return resetState;
-  }, [weekState, getMostRecentSunday]);
+  }, [weekState, getMostRecentSunday, saveWeekState]);
 
   // Trigger deload week (only available from week 4+)
   const triggerDeloadWeek = useCallback(async () => {
@@ -196,7 +214,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     await saveWeekState(updatedState);
     
     return updatedState;
-  }, [weekState]);
+  }, [weekState, saveWeekState]);
 
   // Check if current week should auto-assign workouts
   const isAutoAssignWeek = useCallback(() => {
@@ -220,7 +238,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     await saveWeekState(updatedState);
     
     return updatedState;
-  }, [weekState]);
+  }, [weekState, saveWeekState]);
 
   // Add workout to favorites
   const addToFavorites = useCallback(async (workout) => {
@@ -241,7 +259,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     await saveWeekState(updatedState);
     
     return workoutWithId;
-  }, [weekState]);
+  }, [weekState, saveWeekState]);
 
   // Remove workout from favorites
   const removeFromFavorites = useCallback(async (favoriteId) => {
@@ -256,7 +274,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     await saveWeekState(updatedState);
     
     return updatedState;
-  }, [weekState]);
+  }, [weekState, saveWeekState]);
 
   // Get workout suggestion for a day (from previous week same day)
   const getWorkoutSuggestion = useCallback((dayOfWeek, workoutHistory = []) => {

@@ -62,6 +62,7 @@ import { useUserProfile } from '../contexts/UserProfileContext';
 import ResetDataDialog from '../components/ResetDataDialog';
 import RecoverDataDialog from '../components/RecoverDataDialog';
 import WeekEditorDialog from '../components/WeekEditorDialog';
+import ResetWeekDialog from '../components/ResetWeekDialog';
 import { getWellnessCategories } from '../utils/wellnessTaskService';
 import { requestNotificationPermission, sendTestNotification } from '../services/pushNotificationService';
 // PlansManagement removed - no longer using workout planning
@@ -94,6 +95,7 @@ const SettingsScreen = ({ onNavigate }) => {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [recoverDialogOpen, setRecoverDialogOpen] = useState(false);
   const [weekEditorOpen, setWeekEditorOpen] = useState(false);
+  const [resetWeekDialogOpen, setResetWeekDialogOpen] = useState(false);
   const [backup, setBackup] = useState(null);
   const [resetInfo, setResetInfo] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -270,10 +272,18 @@ const SettingsScreen = ({ onNavigate }) => {
     }
   };
 
-  const handleResetWeekCycle = async () => {
+  const handleOpenResetWeekDialog = () => {
+    setResetWeekDialogOpen(true);
+  };
+
+  const handleCloseResetWeekDialog = () => {
+    setResetWeekDialogOpen(false);
+  };
+
+  const handleConfirmResetWeek = async (weekNumber) => {
     try {
-      await resetWeekCycle();
-      setSnackbarMessage('Week cycle reset to Week 1. Automatic workout assignment re-enabled.');
+      await resetWeekCycle(weekNumber);
+      setSnackbarMessage(`Week cycle reset to Week ${weekNumber}. Automatic workout assignment re-enabled.`);
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
     } catch (error) {
@@ -467,7 +477,7 @@ const SettingsScreen = ({ onNavigate }) => {
                 </ListItem>
                 <Divider component="li" />
                 <ListItem disablePadding>
-                  <ListItemButton onClick={handleResetWeekCycle} sx={{ py: 1 }}>
+                  <ListItemButton onClick={handleOpenResetWeekDialog} sx={{ py: 1 }}>
                     <ListItemIcon sx={{ minWidth: 40 }}>
                       <CalendarMonth sx={{ color: 'primary.main' }} />
                     </ListItemIcon>
@@ -1010,6 +1020,13 @@ const SettingsScreen = ({ onNavigate }) => {
       <WeekEditorDialog
         open={weekEditorOpen}
         onClose={() => setWeekEditorOpen(false)}
+      />
+
+      {/* Reset Week Dialog */}
+      <ResetWeekDialog
+        open={resetWeekDialogOpen}
+        onClose={handleCloseResetWeekDialog}
+        onConfirm={handleConfirmResetWeek}
       />
 
       {/* Snackbar for notifications */}

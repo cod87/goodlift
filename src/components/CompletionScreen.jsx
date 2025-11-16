@@ -106,7 +106,7 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
     setShowAssignDialog(true);
   };
 
-  const handleAssignConfirm = async (dayOfWeek, sessionData) => {
+  const handleAssignConfirm = async (dayOfWeek) => {
     try {
       const workoutType = detectWorkoutType(workoutData);
       

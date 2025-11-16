@@ -23,6 +23,11 @@ import {
   ListItemText,
   Alert,
   Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
 import { 
   Brightness4, 
@@ -94,6 +99,7 @@ const SettingsScreen = ({ onNavigate }) => {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [recoverDialogOpen, setRecoverDialogOpen] = useState(false);
   const [weekEditorOpen, setWeekEditorOpen] = useState(false);
+  const [weekResetConfirmOpen, setWeekResetConfirmOpen] = useState(false);
   const [backup, setBackup] = useState(null);
   const [resetInfo, setResetInfo] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -270,7 +276,16 @@ const SettingsScreen = ({ onNavigate }) => {
     }
   };
 
+  const handleOpenWeekResetConfirm = () => {
+    setWeekResetConfirmOpen(true);
+  };
+
+  const handleCloseWeekResetConfirm = () => {
+    setWeekResetConfirmOpen(false);
+  };
+
   const handleResetWeekCycle = async () => {
+    setWeekResetConfirmOpen(false);
     try {
       await resetWeekCycle();
       setSnackbarMessage('Week cycle reset to Week 1. Automatic workout assignment re-enabled.');
@@ -467,7 +482,7 @@ const SettingsScreen = ({ onNavigate }) => {
                 </ListItem>
                 <Divider component="li" />
                 <ListItem disablePadding>
-                  <ListItemButton onClick={handleResetWeekCycle} sx={{ py: 1 }}>
+                  <ListItemButton onClick={handleOpenWeekResetConfirm} sx={{ py: 1 }}>
                     <ListItemIcon sx={{ minWidth: 40 }}>
                       <CalendarMonth sx={{ color: 'primary.main' }} />
                     </ListItemIcon>
@@ -1011,6 +1026,30 @@ const SettingsScreen = ({ onNavigate }) => {
         open={weekEditorOpen}
         onClose={() => setWeekEditorOpen(false)}
       />
+
+      {/* Week Reset Confirmation Dialog */}
+      <Dialog
+        open={weekResetConfirmOpen}
+        onClose={handleCloseWeekResetConfirm}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Reset Week Counter?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to reset the week counter back to Week 1? 
+            This will re-enable automatic workout assignment.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseWeekResetConfirm} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleResetWeekCycle} color="primary" variant="contained">
+            Continue
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Snackbar for notifications */}
       <Snackbar

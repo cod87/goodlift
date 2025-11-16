@@ -494,6 +494,45 @@
     "Progression": "Power Development"
   },
   {
+    "Exercise Name": "Cable Pull-Up",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Rear Delts, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Difficulty": "Intermediate",
+    "Movement Pattern": "Upper Pull",
+    "Rep Range": "",
+    "Superset Type": "Agonist-Antagonist",
+    "Workout Type": "Upper Body Strength, Full Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Cable Skull Crusher",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Front Delts, Chest",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "Difficulty": "Intermediate",
+    "Movement Pattern": "Arm",
+    "Rep Range": "",
+    "Superset Type": "Same Muscle",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Cable Tricep Extension",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Front Delts, Chest",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "Difficulty": "Beginner",
+    "Movement Pattern": "Arm",
+    "Rep Range": "",
+    "Superset Type": "Same Muscle",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Calf Raise",
     "Primary Muscle": "Calves",
     "Secondary Muscles": "Core",
@@ -517,6 +556,19 @@
     "Rep Range": "",
     "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Close Grip Lat Pulldown",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Rhomboids, Traps",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Difficulty": "Beginner",
+    "Movement Pattern": "Upper Pull",
+    "Rep Range": "",
+    "Superset Type": "Agonist-Antagonist",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
   {
@@ -1417,6 +1469,19 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Lat Pulldown",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Rear Delts, Traps",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Difficulty": "Beginner",
+    "Movement Pattern": "Upper Pull",
+    "Rep Range": "",
+    "Superset Type": "Agonist-Antagonist",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Lateral Bound",
     "Primary Muscle": "Glutes",
     "Secondary Muscles": "Adductors, Abductors, Core",
@@ -1664,6 +1729,19 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Rope Tricep Extension",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Chest, Front Delts",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "Difficulty": "Beginner",
+    "Movement Pattern": "Arm",
+    "Rep Range": "",
+    "Superset Type": "Same Muscle",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Russian Twist",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Obliques, Hip Flexors",
@@ -1687,6 +1765,19 @@
     "Rep Range": "",
     "Superset Type": "Same Muscle",
     "Workout Type": "Core",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Seated Cable Row",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Traps, Rhomboids, Biceps, Rear Delts",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Difficulty": "Beginner",
+    "Movement Pattern": "Upper Pull",
+    "Rep Range": "",
+    "Superset Type": "Agonist-Antagonist",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
   {
@@ -1857,6 +1948,19 @@
     "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
+  },
+  {
+    "Exercise Name": "V-Bar Seated Cable Row",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Traps, Rhomboids, Biceps, Rear Delts",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Difficulty": "Beginner",
+    "Movement Pattern": "Upper Pull",
+    "Rep Range": "",
+    "Superset Type": "Agonist-Antagonist",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "V-Up",

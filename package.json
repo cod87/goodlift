@@ -11,6 +11,7 @@
     "convert:exercises": "node scripts/convert-exercise-expanded.js",
     "convert:hiit": "node scripts/convert-hiit-exercises.js",
     "convert:wellness": "node scripts/convert-wellness-tasks.js",
+    "merge:cable": "node scripts/merge-cable-exercises.js",
     "convert:all": "npm run convert:exercises && npm run convert:hiit && npm run convert:wellness"
   },
   "dependencies": {

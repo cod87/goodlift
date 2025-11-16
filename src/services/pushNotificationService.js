@@ -6,11 +6,12 @@
  */
 
 import { messaging } from '../firebase';
-import { onMessage } from 'firebase/messaging';
+import { onMessage, getToken } from 'firebase/messaging';
 import { getTodaysWellnessTask } from '../utils/wellnessTaskService';
 
-// Service worker registration is handled by the browser
-const VAPID_KEY = 'YOUR_VAPID_KEY_HERE'; // This would be set in production
+// VAPID public key from vapid-key.env
+// This key is also configured in Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
+const VAPID_KEY = 'BE0ZQSJHIlmXfeA5ddjITNrqrS0TmGfGGQjBufmOlUKxRUtEwja2qHmTZ0pXHepJzGV2qcwH0gJ_D6ot6cWGB6w';
 
 /**
  * Request notification permission from the user
@@ -43,21 +44,34 @@ export const requestNotificationPermission = async () => {
 export const getFCMToken = async () => {
   try {
     if (!messaging) {
-      console.warn('Firebase Messaging not available');
+      console.warn('[FCM] Firebase Messaging not available');
       return null;
     }
 
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
-      console.warn('Notification permission not granted');
+      console.warn('[FCM] Notification permission not granted');
       return null;
     }
 
-    // Note: In production, VAPID_KEY should be configured properly
-    // For now, we'll use local notifications as fallback
-    return null;
+    console.log('[FCM] Requesting FCM token with VAPID key...');
+    
+    // Get FCM token using the VAPID key
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY
+    });
+    
+    if (token) {
+      console.log('[FCM] ✅ FCM token obtained successfully');
+      console.log('[FCM] 📋 FCM Token:', token);
+      console.log('[FCM] 📤 Send this token to your backend to enable Firebase push notifications');
+      return token;
+    } else {
+      console.warn('[FCM] No FCM token available. User may need to grant permission.');
+      return null;
+    }
   } catch (error) {
-    console.error('Error getting FCM token:', error);
+    console.error('[FCM] Error getting FCM token:', error);
     return null;
   }
 };

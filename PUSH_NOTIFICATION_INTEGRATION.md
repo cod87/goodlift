@@ -2,14 +2,25 @@
 
 ## Overview
 
-This implementation integrates browser push notification subscription using the Web Push API and VAPID (Voluntary Application Server Identification) protocol. The subscription happens automatically when the app loads, assuming the user grants permission.
+This implementation integrates **dual push notification systems**:
+1. **Firebase Cloud Messaging (FCM)** - Enterprise-grade push notifications via Firebase
+2. **Native Web Push API** - Direct browser push notifications using VAPID protocol
+
+Both systems use the same VAPID public key configured in Firebase Console and the codebase.
+
+## VAPID Key Configuration
+
+The VAPID public key `BE0ZQSJHIlmXfeA5ddjITNrqrS0TmGfGGQjBufmOlUKxRUtEwja2qHmTZ0pXHepJzGV2qcwH0gJ_D6ot6cWGB6w` is configured in:
+- ✅ Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
+- ✅ `vapid-key.env` file in the project root
+- ✅ Client-side code (`src/utils/pushNotificationInit.js` and `src/services/pushNotificationService.js`)
 
 ## Files Added/Modified
 
 ### New Files
 
 1. **`src/utils/pushNotifications.js`**
-   - Core utility module for push notification functionality
+   - Core utility module for native Web Push API
    - Functions:
      - `urlBase64ToUint8Array()`: Converts base64 VAPID key to Uint8Array
      - `subscribeToPushNotifications()`: Main subscription function
@@ -17,10 +28,10 @@ This implementation integrates browser push notification subscription using the 
      - `unsubscribeFromPushNotifications()`: Remove subscription
 
 2. **`src/utils/pushNotificationInit.js`**
-   - Initialization module that auto-subscribes users
-   - Contains the VAPID public key from `vapid-key.env`
+   - Initialization module that sets up BOTH FCM and Web Push
+   - Contains the VAPID public key
    - Functions:
-     - `initializePushNotifications()`: Auto-subscribe on app load
+     - `initializePushNotifications()`: Auto-subscribe on app load (dual setup)
      - `requestPushNotificationSubscription()`: Manual subscription trigger
 
 ### Modified Files
@@ -30,67 +41,175 @@ This implementation integrates browser push notification subscription using the 
    - Added event listener to call `initializePushNotifications()` on page load
    - Only executes if browser supports service workers and push API
 
-2. **`public/service-worker.js`**
-   - Added `push` event handler to receive push notifications
+2. **`src/services/pushNotificationService.js`**
+   - Updated VAPID key from placeholder to actual key
+   - Updated `getFCMToken()` to use the VAPID key with Firebase `getToken()`
+   - Added detailed logging for FCM token acquisition
+
+3. **`public/service-worker.js`**
+   - Added `push` event handler for native Web Push notifications
    - Added `notificationclick` event handler to handle user clicks
    - Proper parsing of notification data with fallbacks
 
+4. **`public/firebase-messaging-sw.js`**
+   - Added VAPID key documentation in comments
+   - Improved notification options (better icons, vibration)
+   - Enhanced notification click handler to focus existing windows
+   - Better logging with FCM-specific prefixes
+
 ## How It Works
 
-### Initialization Flow
+### Dual Initialization Flow
 
-1. When the app loads, `main.jsx` checks for browser support
-2. If supported, `initializePushNotifications()` is called
-3. The function checks for an existing subscription
-4. If no subscription exists, it requests notification permission
-5. Once permission is granted, it subscribes via the service worker
-6. The subscription object is logged to console with backend integration instructions
+When the app loads, both push notification systems are initialized:
+
+#### Firebase Cloud Messaging (FCM) Flow:
+1. App loads and `initializePushNotifications()` is called
+2. `getFCMToken()` is invoked from `pushNotificationService.js`
+3. Requests notification permission if not already granted
+4. Calls Firebase's `getToken()` with the VAPID key
+5. Receives FCM token for this device/browser
+6. Logs FCM token to console for backend integration
+7. Foreground messages handled by `onMessage()` listener
+8. Background messages handled by `firebase-messaging-sw.js`
+
+#### Native Web Push API Flow:
+1. Checks for existing push subscription
+2. If no subscription exists, requests notification permission
+3. Waits for service worker to be ready
+4. Converts VAPID key from base64 to Uint8Array
+5. Subscribes via `pushManager.subscribe()` with VAPID key
+6. Logs subscription object to console for backend integration
+7. Push events handled by `service-worker.js`
 
 ### VAPID Key
 
-The VAPID public key is stored in `vapid-key.env`:
+The VAPID public key is stored in `vapid-key.env` and configured in Firebase:
 ```
 REACT_APP_VAPID_PUBLIC_KEY=BE0ZQSJHIlmXfeA5ddjITNrqrS0TmGfGGQjBufmOlUKxRUtEwja2qHmTZ0pXHepJzGV2qcwH0gJ_D6ot6cWGB6w
 ```
 
-This public key is hardcoded in `pushNotificationInit.js` for simplicity. Since it's a public key, it's safe to include in client-side code.
+**Firebase Configuration:**
+- Go to Firebase Console > Project Settings > Cloud Messaging
+- Click "Web Push certificates" tab
+- The VAPID key pair is configured there
+- The public key shown above is used by clients
+- The private key remains on Firebase servers
 
 ### Console Output
 
-When a user is successfully subscribed, the console will display:
+When a user's push notifications are initialized, the console will display:
 
 ```
 [Push Init] Initializing push notification subscription...
+[Push Init] Setting up both Firebase Cloud Messaging and native Web Push API
+[Push Init] Step 1: Getting Firebase Cloud Messaging token...
+[FCM] Requesting FCM token with VAPID key...
+[FCM] ✅ FCM token obtained successfully
+[FCM] 📋 FCM Token: cXt7Y3Rh...
+[FCM] 📤 Send this token to your backend to enable Firebase push notifications
+[Push Init] ✅ Firebase Cloud Messaging initialized
+
+[Push Init] Step 2: Setting up native Web Push API subscription...
 [Push Notifications] Requesting notification permission...
 [Push Notifications] Notification permission granted
 [Push Notifications] Waiting for service worker to be ready...
 [Push Notifications] Service worker is ready
 [Push Notifications] Subscribing to push notifications...
 [Push Notifications] ✅ Successfully subscribed to push notifications!
-[Push Notifications] 📋 Subscription object:
-{
-  "endpoint": "https://...",
-  "keys": {
-    "p256dh": "...",
-    "auth": "..."
-  }
-}
+[Push Notifications] 📋 Subscription object: {...}
 
-[Push Notifications] 📤 To enable push notifications:
-1. Send this subscription object to your backend server
-2. Store it in your database associated with this user
-3. Use it to send push notifications via web-push library or similar
-
-Example backend code (Node.js with web-push):
-const webpush = require("web-push");
-webpush.sendNotification(subscription, "Your notification message");
+[Push Init] ═══════════════════════════════════════════════════════
+[Push Init] 🎉 Push notification setup complete!
+[Push Init] ═══════════════════════════════════════════════════════
+[Push Init] You now have two ways to send push notifications:
+[Push Init] 1️⃣  Firebase Cloud Messaging (FCM):
+[Push Init]     - Use the FCM token logged above
+[Push Init]     - Send via Firebase Admin SDK or FCM REST API
+[Push Init]     - Background messages handled by firebase-messaging-sw.js
+[Push Init] 2️⃣  Native Web Push API:
+[Push Init]     - Use the subscription object logged above
+[Push Init]     - Send via web-push library or any Web Push service
+[Push Init]     - Push events handled by service-worker.js
+[Push Init] ═══════════════════════════════════════════════════════
 ```
 
 ## Backend Integration
 
-To send push notifications from your backend:
+You now have **two methods** to send push notifications:
 
-### Node.js Example
+### Method 1: Firebase Cloud Messaging (Recommended)
+
+Firebase handles the complexity of push notifications across platforms.
+
+#### Setup:
+1. Use the FCM token logged in the console
+2. Store it in your database associated with each user
+3. Send notifications via Firebase Admin SDK
+
+#### Node.js Example (Firebase Admin SDK):
+
+```javascript
+const admin = require('firebase-admin');
+
+// Initialize Firebase Admin (one time setup)
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccountKey),
+  projectId: 'goodlift-7760a'
+});
+
+// Send notification to a specific user
+async function sendFCMNotification(fcmToken, title, body) {
+  const message = {
+    notification: {
+      title: title,
+      body: body
+    },
+    token: fcmToken
+  };
+
+  try {
+    const response = await admin.messaging().send(message);
+    console.log('Successfully sent FCM message:', response);
+    return response;
+  } catch (error) {
+    console.error('Error sending FCM message:', error);
+    throw error;
+  }
+}
+
+// Usage:
+sendFCMNotification(
+  'cXt7Y3Rh...', // FCM token from console
+  'Workout Reminder',
+  'Time for your daily workout!'
+);
+```
+
+#### FCM REST API Example:
+
+```bash
+curl -X POST https://fcm.googleapis.com/v1/projects/goodlift-7760a/messages:send \
+  -H "Authorization: Bearer YOUR_SERVER_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": {
+      "token": "FCM_TOKEN_HERE",
+      "notification": {
+        "title": "GoodLift Reminder",
+        "body": "Time for your workout!"
+      }
+    }
+  }'
+```
+
+### Method 2: Native Web Push API
+
+### Method 2: Native Web Push API
+
+Direct browser push notifications using the web-push library.
+
+#### Node.js Example:
 
 ```javascript
 const webpush = require('web-push');
@@ -121,6 +240,22 @@ webpush.sendNotification(subscription, payload)
   .then(response => console.log('Notification sent'))
   .catch(error => console.error('Error sending notification:', error));
 ```
+
+### Which Method to Use?
+
+**Use Firebase Cloud Messaging if:**
+- ✅ You want unified notifications across web, iOS, and Android
+- ✅ You need advanced features (topics, device groups, analytics)
+- ✅ You want Firebase to handle token refresh and cleanup
+- ✅ You're already using Firebase for your app
+
+**Use Native Web Push API if:**
+- ✅ You want complete control over the push notification flow
+- ✅ You're not using Firebase for other services
+- ✅ You want to avoid vendor lock-in
+- ✅ You need custom push notification handling
+
+**Best Practice:** Use both! Firebase for reliability and features, Web Push as a fallback.
 
 ## Testing
 

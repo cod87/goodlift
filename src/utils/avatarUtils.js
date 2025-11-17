@@ -24,13 +24,13 @@ export const PRESET_AVATARS = [
 
 /**
  * Compress an image file to reduce size before upload
+ * For avatars, creates a square image by cropping and centering
  * @param {File} file - Image file to compress
- * @param {number} maxWidth - Maximum width (default 200px for avatars)
- * @param {number} maxHeight - Maximum height (default 200px for avatars)
+ * @param {number} size - Target size for width and height (default 200px for avatars)
  * @param {number} quality - Compression quality 0-1 (default 0.8)
  * @returns {Promise<Blob>} Compressed image blob
  */
-export const compressImage = (file, maxWidth = 200, maxHeight = 200, quality = 0.8) => {
+export const compressImage = (file, size = 200, quality = 0.8) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
@@ -38,29 +38,24 @@ export const compressImage = (file, maxWidth = 200, maxHeight = 200, quality = 0
       const img = new Image();
       
       img.onload = () => {
-        // Calculate new dimensions while maintaining aspect ratio
-        let width = img.width;
-        let height = img.height;
-        
-        if (width > height) {
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = Math.round((width * maxHeight) / height);
-            height = maxHeight;
-          }
-        }
-        
-        // Create canvas and draw resized image
+        // Create a square canvas
         const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = size;
+        canvas.height = size;
         
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Calculate dimensions to crop and center the image
+        const sourceSize = Math.min(img.width, img.height);
+        const sourceX = (img.width - sourceSize) / 2;
+        const sourceY = (img.height - sourceSize) / 2;
+        
+        // Draw the cropped, centered, and scaled image
+        ctx.drawImage(
+          img,
+          sourceX, sourceY, sourceSize, sourceSize, // Source rectangle (square crop from center)
+          0, 0, size, size // Destination rectangle (full canvas)
+        );
         
         // Convert to blob
         canvas.toBlob(
@@ -168,10 +163,10 @@ export const getPresetAvatarColor = (presetId) => {
 /**
  * Generate avatar initials element
  * @param {string} initials - User initials
- * @param {string} color - Background color
+ * @param {string} color - Background color (defaults to app orange #ff8c00)
  * @returns {Object} Style object for avatar display
  */
-export const getInitialsAvatarStyle = (initials, color = '#1976d2') => {
+export const getInitialsAvatarStyle = (initials, color = '#ff8c00') => {
   return {
     display: 'flex',
     alignItems: 'center',

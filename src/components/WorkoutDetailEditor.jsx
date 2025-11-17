@@ -40,8 +40,9 @@ import {
 import ExerciseAutocomplete from './ExerciseAutocomplete';
 
 /**
- * WorkoutDetailEditor - Component for editing workout details including exercises, supersets, and sets
- * Allows granular editing at exercise, superset, and set levels
+ * WorkoutDetailEditor - Component for editing workout details including exercises, supersets, and set values
+ * Allows granular editing at exercise and superset levels, with the ability to modify weight/reps for existing sets
+ * Note: Set count is fixed - users cannot add or remove sets during schedule editing
  */
 const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
   const [workoutName, setWorkoutName] = useState('');

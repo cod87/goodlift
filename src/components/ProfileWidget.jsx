@@ -12,7 +12,7 @@ import {
 import { Edit } from '@mui/icons-material';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import { usePreferences } from '../contexts/PreferencesContext';
-import { isPresetAvatar, getPresetAvatarColor, getInitialsAvatarStyle } from '../utils/avatarUtils';
+import { isPresetAvatar, isDoggoAvatar, getPresetAvatarColor, getDoggoAvatarUrl, getInitialsAvatarStyle } from '../utils/avatarUtils';
 import { formatWeight } from '../utils/weightUtils';
 
 const ProfileWidget = memo(({ onNavigateToProfile }) => {
@@ -28,7 +28,15 @@ const ProfileWidget = memo(({ onNavigateToProfile }) => {
     const size = 60;
 
     if (profile.avatar) {
-      if (isPresetAvatar(profile.avatar)) {
+      if (isDoggoAvatar(profile.avatar)) {
+        const url = getDoggoAvatarUrl(profile.avatar);
+        return (
+          <Avatar
+            src={url}
+            sx={{ width: size, height: size }}
+          />
+        );
+      } else if (isPresetAvatar(profile.avatar)) {
         const color = getPresetAvatarColor(profile.avatar);
         return (
           <Avatar
@@ -43,6 +51,7 @@ const ProfileWidget = memo(({ onNavigateToProfile }) => {
           </Avatar>
         );
       } else {
+        // Legacy custom avatar URL - display as-is but won't be selectable
         return (
           <Avatar
             src={profile.avatar}

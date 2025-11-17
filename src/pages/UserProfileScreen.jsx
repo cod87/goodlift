@@ -24,7 +24,7 @@ import {
   sanitizeText,
   formatLongDate 
 } from '../utils/profileUtils';
-import { isPresetAvatar, getPresetAvatarColor, getInitialsAvatarStyle } from '../utils/avatarUtils';
+import { isPresetAvatar, isDoggoAvatar, getPresetAvatarColor, getDoggoAvatarUrl, getInitialsAvatarStyle } from '../utils/avatarUtils';
 
 const UserProfileScreen = () => {
   const { 
@@ -127,7 +127,15 @@ const UserProfileScreen = () => {
     const size = 100;
 
     if (profile.avatar) {
-      if (isPresetAvatar(profile.avatar)) {
+      if (isDoggoAvatar(profile.avatar)) {
+        const url = getDoggoAvatarUrl(profile.avatar);
+        return (
+          <Avatar
+            src={url}
+            sx={{ width: size, height: size }}
+          />
+        );
+      } else if (isPresetAvatar(profile.avatar)) {
         const color = getPresetAvatarColor(profile.avatar);
         return (
           <Avatar
@@ -142,6 +150,7 @@ const UserProfileScreen = () => {
           </Avatar>
         );
       } else {
+        // Legacy custom avatar URL - display as-is but won't be selectable
         return (
           <Avatar
             src={profile.avatar}

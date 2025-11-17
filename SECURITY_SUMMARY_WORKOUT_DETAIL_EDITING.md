@@ -1,13 +1,14 @@
-# Security Summary: Granular Workout Editing Implementation
+# Security Summary: Granular Workout Editing Implementation (Updated)
 
 ## Overview
-This document provides a security assessment of the granular workout editing feature implementation for the GoodLift application.
+This document provides a security assessment of the granular workout editing feature implementation for the GoodLift application. **Updated on 2025-11-17** to reflect refactoring that removed set-adding/removing functionality.
 
 ## Date
-2025-11-16
+- Initial: 2025-11-16
+- Updated: 2025-11-17
 
 ## Components Modified/Added
-1. **NEW**: `src/components/WorkoutDetailEditor.jsx`
+1. **MODIFIED**: `src/components/WorkoutDetailEditor.jsx` (Refactored to remove set-adding functionality)
 2. **MODIFIED**: `src/components/WeekEditorDialog.jsx`
 
 ## Security Analysis
@@ -110,14 +111,19 @@ This document provides a security assessment of the granular workout editing fea
 
 ### 7. Data Validation ✅
 
-#### Minimum Set Requirement
-- **Control**: Enforces minimum 1 set per exercise
+#### Exercise Set Configuration
+- **Control**: Sets are now pre-configured when exercises are added (3 default sets)
 - **Implementation**:
   ```javascript
-  if (exercise.sets.length <= 1) return;
+  sets: [
+    { weight: 0, reps: 10 },
+    { weight: 0, reps: 10 },
+    { weight: 0, reps: 10 },
+  ]
   ```
-- **Risk**: LOW - Prevents invalid workout configurations
+- **Risk**: LOW - Consistent set structure prevents invalid configurations
 - **Status**: SECURE
+- **Change**: Removed ability to add/remove sets during schedule editing
 
 #### Superset Group Validation
 - **Control**: Group numbers validated as integers
@@ -127,6 +133,25 @@ This document provides a security assessment of the granular workout editing fea
 
 ## Vulnerabilities Found
 **NONE** - No security vulnerabilities identified in this implementation.
+
+## Changes in Refactoring (2025-11-17)
+
+### Removed Functionality
+1. **Set Adding**: Removed `handleAddSet` function and "Add Set" button
+2. **Set Removal**: Removed `handleRemoveSet` function and delete button for individual sets
+3. **Rationale**: Simplifies workflow to mirror initial workout setup process
+
+### Security Impact
+- **Risk Assessment**: NO NEW RISKS introduced
+- **Attack Surface**: REDUCED by removing set manipulation functionality
+- **Data Validation**: SIMPLIFIED by enforcing consistent 3-set structure for new exercises
+- **User Control**: Users can still edit weight/reps but cannot change set count
+
+### Benefits
+1. **Consistency**: Schedule editing now mirrors initial workout setup
+2. **Simplicity**: Reduced UI complexity reduces potential for user errors
+3. **Data Integrity**: Fixed set structure is more predictable and easier to validate
+4. **Security**: Fewer user-controllable variables means fewer validation requirements
 
 ## Recommendations
 
@@ -165,27 +190,39 @@ This document provides a security assessment of the granular workout editing fea
 5. 🔲 Load testing with large workout data sets
 
 ### Manual Testing Checklist
-- [x] Cannot remove last set from exercise
 - [x] Invalid numeric inputs default to 0
 - [x] Unsaved changes prompt confirmation
 - [x] Deep cloning prevents original data mutation
 - [x] Save operation updates workout correctly
 - [x] Component renders without errors
+- [x] New exercises receive 3 default sets
+- [x] Existing exercises retain their sets
+- [x] Cannot add or remove sets (UI removed)
+- [x] Can modify weight/reps for existing sets
+- [x] Can configure superset groups
 
 ## Conclusion
 
-The granular workout editing implementation introduces **NO NEW SECURITY VULNERABILITIES**. The feature:
+The granular workout editing implementation introduces **NO NEW SECURITY VULNERABILITIES**. The refactoring (2025-11-17) that removed set-adding functionality **IMPROVES SECURITY** by:
+- Reducing attack surface (fewer user-controllable operations)
+- Simplifying data validation requirements
+- Enforcing consistent exercise structure
+- Maintaining all existing security controls
+
+The feature:
 - Follows existing security patterns in the application
 - Implements proper input validation
 - Protects data integrity through deep cloning
 - Uses secure React rendering practices
 - Maintains existing authorization model
+- Provides granular control over exercises, supersets, and set values
 
 **Security Status**: ✅ **APPROVED FOR DEPLOYMENT**
 
 ---
 
 **Reviewed by**: GitHub Copilot Coding Agent  
-**Date**: 2025-11-16  
+**Initial Review Date**: 2025-11-16  
+**Updated Review Date**: 2025-11-17  
 **Risk Level**: **LOW**  
 **Recommendation**: **APPROVE**

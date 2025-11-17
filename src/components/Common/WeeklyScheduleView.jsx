@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -44,7 +44,7 @@ const WeeklyScheduleView = ({ onStartWorkout, onNavigate }) => {
   const [showRestDayMessage, setShowRestDayMessage] = useState(false);
 
   // Load workout history for suggestions
-  useState(() => {
+  useEffect(() => {
     const loadHistory = async () => {
       const history = await getWorkoutHistory();
       setWorkoutHistory(history);

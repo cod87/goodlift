@@ -56,7 +56,7 @@ const DAYS_OF_WEEK = [
  * Features day-of-week tabs, superset management, exercise editing, and timer configuration
  */
 const EditWeeklyScheduleScreen = ({ onNavigate }) => {
-  const { weeklySchedule, assignWorkoutToDay } = useWeekScheduling();
+  const { weeklySchedule, assignWorkoutToDay, loading } = useWeekScheduling();
   const [selectedDay, setSelectedDay] = useState('Monday');
   const [dayWorkouts, setDayWorkouts] = useState({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState({});
@@ -82,6 +82,9 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
 
   // Initialize day workouts from context
   useEffect(() => {
+    // Don't initialize while context is still loading
+    if (loading) return;
+    
     const initialWorkouts = {};
     DAYS_OF_WEEK.forEach(day => {
       if (weeklySchedule[day]) {
@@ -91,7 +94,7 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
       }
     });
     setDayWorkouts(initialWorkouts);
-  }, [weeklySchedule]);
+  }, [weeklySchedule, loading]);
 
   // Get workout type from session data
   const getWorkoutType = (sessionData) => {
@@ -405,6 +408,25 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   const isRest = isRestDay(workoutType);
 
   const hasAnyUnsavedChanges = Object.values(hasUnsavedChanges).some(v => v);
+
+  // Show loading state while context is loading
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          padding: { xs: 2, sm: 3 },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography variant="h6" color="text.secondary">
+          Loading schedule...
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box

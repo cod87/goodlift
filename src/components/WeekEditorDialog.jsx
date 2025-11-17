@@ -385,7 +385,7 @@ const WeekEditorDialog = ({ open, onClose }) => {
                               size="small"
                               color="secondary"
                               onClick={() => handleOpenDetailEditor(day)}
-                              title="Edit exercises and sets"
+                              title="Edit exercises, supersets, and set values"
                             >
                               <Settings fontSize="small" />
                             </IconButton>

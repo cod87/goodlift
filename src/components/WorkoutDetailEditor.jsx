@@ -40,8 +40,9 @@ import {
 import ExerciseAutocomplete from './ExerciseAutocomplete';
 
 /**
- * WorkoutDetailEditor - Component for editing workout details including exercises, supersets, and sets
- * Allows granular editing at exercise, superset, and set levels
+ * WorkoutDetailEditor - Component for editing workout details including exercises, supersets, and set values
+ * Allows granular editing at exercise and superset levels, with the ability to modify weight/reps for existing sets
+ * Note: Set count is fixed - users cannot add or remove sets during schedule editing
  */
 const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
   const [workoutName, setWorkoutName] = useState('');
@@ -123,35 +124,7 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
     setHasChanges(true);
   };
 
-  const handleAddSet = (exerciseIndex) => {
-    const updated = [...exercises];
-    const exercise = updated[exerciseIndex];
-    
-    // Add a new set with default values
-    const lastSet = exercise.sets[exercise.sets.length - 1];
-    const newSet = {
-      weight: lastSet?.weight || 0,
-      reps: lastSet?.reps || 10,
-    };
-    
-    exercise.sets.push(newSet);
-    setExercises(updated);
-    setHasChanges(true);
-  };
 
-  const handleRemoveSet = (exerciseIndex, setIndex) => {
-    const updated = [...exercises];
-    const exercise = updated[exerciseIndex];
-    
-    // Don't allow removing if only one set remains
-    if (exercise.sets.length <= 1) {
-      return;
-    }
-    
-    exercise.sets.splice(setIndex, 1);
-    setExercises(updated);
-    setHasChanges(true);
-  };
 
   const handleUpdateSet = (exerciseIndex, setIndex, field, value) => {
     const updated = [...exercises];
@@ -218,7 +191,7 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
               Edit Workout Details
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {dayOfWeek} - Customize exercises, sets, and reps
+              {dayOfWeek} - Manage exercises, supersets, and set values
             </Typography>
           </Box>
           <IconButton onClick={handleClose} size="small">
@@ -244,7 +217,7 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
 
           {/* Info Alert */}
           <Alert severity="info" sx={{ fontSize: '0.875rem' }}>
-            Add, remove, or edit exercises. Modify sets, reps, and weights for each exercise. Changes are preserved without data loss.
+            Add or remove exercises. Configure superset groups. Edit exercise names and modify weight/reps for existing sets. Changes are preserved without data loss.
           </Alert>
 
           {/* Add Exercise */}
@@ -357,18 +330,9 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
 
                       {/* Sets Editor */}
                       <Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="subtitle2" fontWeight={600}>
-                            Sets
-                          </Typography>
-                          <Button
-                            size="small"
-                            startIcon={<Add />}
-                            onClick={() => handleAddSet(exIdx)}
-                          >
-                            Add Set
-                          </Button>
-                        </Box>
+                        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+                          Sets
+                        </Typography>
                         
                         <List dense>
                           {exercise.sets?.map((set, setIdx) => (
@@ -406,15 +370,6 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
                                   size="small"
                                   sx={{ flex: 1 }}
                                 />
-                                
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() => handleRemoveSet(exIdx, setIdx)}
-                                  disabled={exercise.sets.length <= 1}
-                                >
-                                  <Delete fontSize="small" />
-                                </IconButton>
                               </ListItem>
                               {setIdx < exercise.sets.length - 1 && <Divider />}
                             </Box>

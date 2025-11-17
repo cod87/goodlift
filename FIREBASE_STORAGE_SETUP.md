@@ -1,5 +1,27 @@
 # Firebase Storage Setup for GoodLift
 
+## Quick Start
+
+If you're experiencing avatar upload failures, follow these steps:
+
+1. **Enable Firebase Storage**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Select your project (goodlift-7760a)
+   - Navigate to Storage in the left sidebar
+   - Click "Get Started" if Storage is not enabled
+
+2. **Deploy Security Rules**
+   - In Firebase Console > Storage > Rules tab
+   - Copy and paste the security rules from this document (see below)
+   - Click "Publish"
+
+3. **Test Upload**
+   - Sign in to the app (not as guest)
+   - Go to Profile screen
+   - Click on your avatar
+   - Select "Upload Custom" tab
+   - Choose an image and verify it uploads successfully
+
 ## Overview
 GoodLift uses Firebase Storage to store user avatar images. This document explains the configuration and security rules needed for avatar uploads to work properly.
 
@@ -148,6 +170,20 @@ To test if avatar uploads are working:
 - Check security rules allow read access
 - Verify download URL is being saved to user profile
 - Check browser console for CORS errors
+
+## Deployment Checklist
+
+Before deploying to production, ensure:
+
+- [ ] Firebase Storage is enabled in Firebase Console
+- [ ] Security rules are deployed and tested
+- [ ] Test avatar upload works for authenticated users
+- [ ] Test that guest users see appropriate error message
+- [ ] Verify uploaded avatars display correctly in profile
+- [ ] Test with various image formats (JPEG, PNG, WebP)
+- [ ] Test file size validation (reject files > 5MB)
+- [ ] Test invalid file type rejection
+- [ ] Verify error messages are user-friendly and actionable
 
 ## Benefits
 

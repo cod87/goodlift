@@ -190,7 +190,7 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
               Edit Workout Details
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {dayOfWeek} - Customize exercises, sets, and reps
+              {dayOfWeek} - Manage exercises, supersets, and set values
             </Typography>
           </Box>
           <IconButton onClick={handleClose} size="small">

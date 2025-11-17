@@ -38,7 +38,9 @@ import {
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 import ExerciseAutocomplete from '../components/ExerciseAutocomplete';
+import SessionTypeQuickToggle from '../components/SessionTypeQuickToggle';
 import { getExerciseWeight, getExerciseTargetReps } from '../utils/storage';
+import { getDefaultSessionData } from '../utils/sessionTemplates';
 
 // Days of the week constant - Sunday through Saturday
 const DAYS_OF_WEEK = [
@@ -443,6 +445,42 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
     setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
   };
 
+  // Handle session type change via quick toggle
+  const handleSessionTypeChange = (newType) => {
+    const currentWorkout = dayWorkouts[selectedDay];
+    if (!currentWorkout) {
+      // Create new session if no workout exists for this day
+      const newSessionData = getDefaultSessionData(newType);
+      setDayWorkouts(prev => ({
+        ...prev,
+        [selectedDay]: newSessionData,
+      }));
+      setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
+      setSnackbar({
+        open: true,
+        message: `Session type changed to ${newSessionData.sessionName}`,
+        severity: 'success',
+      });
+      return;
+    }
+
+    // Get default data for the new session type
+    const newSessionData = getDefaultSessionData(newType);
+    
+    // Replace the current workout with the new session data
+    setDayWorkouts(prev => ({
+      ...prev,
+      [selectedDay]: newSessionData,
+    }));
+    setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
+    
+    setSnackbar({
+      open: true,
+      message: `Session type changed to ${newSessionData.sessionName}. Previous data has been replaced.`,
+      severity: 'info',
+    });
+  };
+
   // Save all changes
   const handleSaveAll = async () => {
     try {
@@ -627,14 +665,34 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
 
         {/* Content Area */}
         <Box sx={{ maxWidth: 900, mx: 'auto' }}>
+          {/* Quick Toggle for Session Type - shown when a workout exists */}
+          {currentWorkout && (
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <SessionTypeQuickToggle
+                  currentType={workoutType || 'full'}
+                  onChange={handleSessionTypeChange}
+                  compact={true}
+                />
+              </CardContent>
+            </Card>
+          )}
+
           {!currentWorkout && (
             <Card sx={{ p: 4, textAlign: 'center' }}>
               <Typography variant="h6" color="text.secondary">
                 No workout assigned for {selectedDay}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Use the Week Editor to assign a workout type first
+                Use the quick toggle below to assign a workout type
               </Typography>
+              <Box sx={{ mt: 3, maxWidth: 600, mx: 'auto' }}>
+                <SessionTypeQuickToggle
+                  currentType="full"
+                  onChange={handleSessionTypeChange}
+                  compact={false}
+                />
+              </Box>
             </Card>
           )}
 

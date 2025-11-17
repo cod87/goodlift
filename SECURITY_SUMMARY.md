@@ -96,17 +96,18 @@ export const PRESET_AVATARS = [
 #### Doggo Avatars (avatarUtils.js, Line 20-39)
 ```javascript
 export const DOGGO_AVATARS = [
-  { id: 'doggo-1', url: 'https://drive.google.com/uc?...', label: 'Doggo 1' },
+  { id: 'doggo-1', url: '/avatars/doggo-1.jpeg', label: 'Doggo 1' },
   // ... 3 more
 ];
 ```
 - ✅ Static URLs only
 - ✅ No user-provided URLs
-- ⚠️ External domain (Google Drive) - requires HTTPS
+- ✅ Hosted locally in repository assets
 - ✅ URLs are trusted and predefined
-- ℹ️ Image content controlled by repository owners
+- ✅ Image content controlled by repository owners
+- ✅ No external domain dependencies
 
-**Note:** Google Drive URLs point to trusted, predefined images. However, if Google Drive files are compromised, malicious images could be served. Consider hosting images in the repository for better control.
+**Note:** Doggo avatars are now hosted locally in `/public/avatars/`, eliminating external dependencies and improving security.
 
 #### Avatar Selection (AvatarSelector.jsx)
 ```javascript
@@ -145,21 +146,18 @@ const handleDoggoSelect = (doggoId) => {
 
 #### For Production Deployment
 
-1. **Host Dog Images Locally** (Priority: Medium)
-   - Instead of Google Drive URLs, host images in repository
-   - Eliminates external dependency
-   - Better control over image content
-   - Example: `/public/assets/avatars/doggo-1.jpg`
+1. **✅ Dog Images Now Hosted Locally** (COMPLETED)
+   - Dog images are now hosted in `/public/avatars/`
+   - External dependency eliminated
+   - Full control over image content
+   - Files: `doggo-1.jpeg`, `doggo-2.jpeg`, `doggo-3.jpeg`, `doggo-4.jpeg`
 
 2. **Content Security Policy** (Priority: Low)
-   - If keeping Google Drive URLs, add CSP header:
+   - With local hosting, CSP can be simplified:
    ```
-   img-src 'self' https://drive.google.com;
+   img-src 'self';
    ```
-
-3. **Regular Audit** (Priority: Low)
-   - Periodically verify Google Drive files are not compromised
-   - Check that files remain under authorized access
+   - No external domains needed for avatars
 
 #### For Future Development
 
@@ -182,10 +180,11 @@ This refactor eliminates multiple attack vectors by removing file upload functio
 - **Simpler:** Fewer moving parts = fewer bugs
 - **Safer:** No user file uploads = no upload vulnerabilities
 - **Cleaner:** Reduced code = reduced attack surface
+- **Self-contained:** All avatar assets hosted locally in repository
 
 **No new vulnerabilities introduced.**
 
-The only security consideration is the use of Google Drive URLs for dog images, which is a low-risk dependency that can be further mitigated by hosting images locally.
+**Latest Update (2025-11-17):** Dog images are now hosted locally in the repository (`/public/avatars/`), eliminating the previously identified low-risk external dependency on Google Drive. This further improves security by ensuring full control over all avatar assets.
 
 ---
 

@@ -16,26 +16,27 @@ export const PRESET_AVATARS = [
 /**
  * Doggo avatars - preset dog images
  * Users can select these as their avatar in the Doggos section
+ * Images are hosted locally in the repository
  */
 export const DOGGO_AVATARS = [
   { 
     id: 'doggo-1', 
-    url: 'https://drive.google.com/uc?export=view&id=1RlHVpGdyrsXVT-nnrl0eXjayvqBUBeec',
+    url: '/avatars/doggo-1.jpeg',
     label: 'Doggo 1' 
   },
   { 
     id: 'doggo-2', 
-    url: 'https://drive.google.com/uc?export=view&id=1XedMcLt7MyAOMD2ujvLZmrr7lcIz4da9',
+    url: '/avatars/doggo-2.jpeg',
     label: 'Doggo 2' 
   },
   { 
     id: 'doggo-3', 
-    url: 'https://drive.google.com/uc?export=view&id=1HZKiIf8whCu_LbLe31agUhgA6ddHzaOy',
+    url: '/avatars/doggo-3.jpeg',
     label: 'Doggo 3' 
   },
   { 
     id: 'doggo-4', 
-    url: 'https://drive.google.com/uc?export=view&id=11WU3s-u5AfBLmMmQaKom5xyg-idJ4Rh7',
+    url: '/avatars/doggo-4.jpeg',
     label: 'Doggo 4' 
   },
 ];

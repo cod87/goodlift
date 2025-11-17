@@ -56,7 +56,12 @@ const AvatarSelector = ({ open, onClose, onSelect, currentAvatar, initials }) =>
     }
 
     if (isGuest) {
-      setError('Please sign in to upload custom avatars');
+      setError('Please sign in to upload custom avatars. Guest users can only use preset avatars.');
+      return;
+    }
+
+    if (!currentUser || !currentUser.uid) {
+      setError('Authentication error: Please sign out and sign back in, then try again.');
       return;
     }
 
@@ -73,7 +78,8 @@ const AvatarSelector = ({ open, onClose, onSelect, currentAvatar, initials }) =>
       setError(null);
     } catch (err) {
       console.error('Error uploading avatar:', err);
-      setError('Failed to upload avatar. Please try again.');
+      // Display the user-friendly error message from avatarUtils
+      setError(err.message || 'Failed to upload avatar. Please try again.');
     } finally {
       setUploading(false);
     }

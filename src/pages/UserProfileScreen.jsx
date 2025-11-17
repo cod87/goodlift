@@ -215,17 +215,30 @@ const UserProfileScreen = () => {
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3, mb: 3 }}>
               {/* Avatar */}
               <Box sx={{ position: 'relative', alignSelf: { xs: 'center', sm: 'flex-start' } }}>
-                {renderAvatar()}
+                <Box sx={{ 
+                  borderRadius: '50%', 
+                  overflow: 'hidden',
+                  width: 100,
+                  height: 100,
+                  border: '2px solid',
+                  borderColor: 'divider',
+                }}>
+                  {renderAvatar()}
+                </Box>
                 <IconButton
                   onClick={() => setShowAvatarSelector(true)}
                   size="small"
                   sx={{
                     position: 'absolute',
-                    bottom: 0,
-                    right: 0,
+                    bottom: -4,
+                    right: -4,
                     bgcolor: 'primary.main',
                     color: 'white',
-                    '&:hover': { bgcolor: 'primary.dark' },
+                    boxShadow: 2,
+                    '&:hover': { 
+                      bgcolor: 'primary.dark',
+                      boxShadow: 4,
+                    },
                   }}
                 >
                   <PhotoCamera fontSize="small" />

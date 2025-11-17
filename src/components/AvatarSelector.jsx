@@ -64,7 +64,7 @@ const AvatarSelector = ({ open, onClose, onSelect, currentAvatar, initials }) =>
       setUploading(true);
 
       // Compress image
-      const compressedBlob = await compressImage(file, 200, 200, 0.8);
+      const compressedBlob = await compressImage(file, 200, 0.8);
 
       // Upload to Firebase Storage
       const downloadURL = await uploadAvatar(currentUser.uid, compressedBlob);
@@ -217,7 +217,7 @@ const AvatarSelector = ({ open, onClose, onSelect, currentAvatar, initials }) =>
                 )}
 
                 <Alert severity="info" sx={{ mt: 2 }}>
-                  Image will be resized to 200x200px. Maximum file size: 5MB.
+                  Images will be cropped to a square and resized to 200x200px. Maximum file size: 5MB.
                   <br />
                   Supported formats: JPEG, PNG, WebP
                 </Alert>

@@ -32,12 +32,8 @@ import {
   Remove,
   Delete,
   Save,
-  FitnessCenter,
-  DirectionsRun,
-  SelfImprovement,
   HotelOutlined,
   Timer,
-  Shuffle,
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 import { EXERCISES_DATA_PATH } from '../utils/constants';

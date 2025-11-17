@@ -66,7 +66,6 @@ import { downloadProfileData } from '../utils/profileUtils';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import ResetDataDialog from '../components/ResetDataDialog';
 import RecoverDataDialog from '../components/RecoverDataDialog';
-import WeekEditorDialog from '../components/WeekEditorDialog';
 import { getWellnessCategories } from '../utils/wellnessTaskService';
 import { requestNotificationPermission, sendTestNotification } from '../services/pushNotificationService';
 // PlansManagement removed - no longer using workout planning
@@ -98,7 +97,6 @@ const SettingsScreen = ({ onNavigate }) => {
   // Data reset and recovery states
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [recoverDialogOpen, setRecoverDialogOpen] = useState(false);
-  const [weekEditorOpen, setWeekEditorOpen] = useState(false);
   const [weekResetConfirmOpen, setWeekResetConfirmOpen] = useState(false);
   const [backup, setBackup] = useState(null);
   const [resetInfo, setResetInfo] = useState(null);
@@ -1020,12 +1018,6 @@ const SettingsScreen = ({ onNavigate }) => {
           backup={backup}
         />
       )}
-
-      {/* Week Editor Dialog */}
-      <WeekEditorDialog
-        open={weekEditorOpen}
-        onClose={() => setWeekEditorOpen(false)}
-      />
 
       {/* Week Reset Confirmation Dialog */}
       <Dialog

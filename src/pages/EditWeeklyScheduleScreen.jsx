@@ -40,15 +40,15 @@ import { EXERCISES_DATA_PATH } from '../utils/constants';
 import ExerciseAutocomplete from '../components/ExerciseAutocomplete';
 import { getExerciseWeight, getExerciseTargetReps } from '../utils/storage';
 
-// Days of the week constant
+// Days of the week constant - Sunday through Saturday
 const DAYS_OF_WEEK = [
+  'Sunday',
   'Monday',
   'Tuesday',
   'Wednesday',
   'Thursday',
   'Friday',
   'Saturday',
-  'Sunday',
 ];
 
 /**
@@ -57,7 +57,7 @@ const DAYS_OF_WEEK = [
  */
 const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   const { weeklySchedule, assignWorkoutToDay, loading } = useWeekScheduling();
-  const [selectedDay, setSelectedDay] = useState('Monday');
+  const [selectedDay, setSelectedDay] = useState('Sunday');
   const [dayWorkouts, setDayWorkouts] = useState({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState({});
   const [availableExercises, setAvailableExercises] = useState([]);
@@ -80,21 +80,124 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
     loadExercises();
   }, []);
 
+  // Transform raw exercises from saved workouts to the format expected by this editor
+  const transformExercisesToEditorFormat = useCallback(async (exercises, supersetConfig = [2, 2, 2, 2]) => {
+    if (!exercises || exercises.length === 0) return [];
+    
+    const transformed = [];
+    let exerciseIndex = 0;
+    let supersetGroup = 0;
+    
+    // Group exercises based on superset configuration
+    for (const supersetSize of supersetConfig) {
+      for (let i = 0; i < supersetSize && exerciseIndex < exercises.length; i++) {
+        const exercise = exercises[exerciseIndex];
+        
+        // Check if exercise already has the editor format (has id and supersetGroup)
+        if (exercise.id && exercise.supersetGroup !== undefined && exercise.sets) {
+          transformed.push(exercise);
+          exerciseIndex++;
+          continue;
+        }
+        
+        // Transform raw exercise to editor format
+        const exerciseName = exercise['Exercise Name'] || exercise.exerciseName || exercise.name;
+        
+        // Load saved weight and reps for this exercise
+        const [weight, targetReps] = await Promise.all([
+          getExerciseWeight(exerciseName),
+          getExerciseTargetReps(exerciseName),
+        ]);
+        
+        const transformedExercise = {
+          id: exercise.id || `ex_${Date.now()}_${exerciseIndex}_${Math.random().toString(36).substring(2, 9)}`,
+          name: exerciseName,
+          exerciseName: exerciseName,
+          supersetGroup: supersetGroup,
+          muscleGroup: exercise['Primary Muscle'] || exercise.muscleGroup || exercise.category,
+          equipment: exercise.Equipment || exercise.equipment,
+          category: exercise['Primary Muscle'] || exercise.muscleGroup || exercise.category,
+          sets: exercise.sets || [
+            { weight: weight || 0, reps: targetReps || 10 },
+            { weight: weight || 0, reps: targetReps || 10 },
+            { weight: weight || 0, reps: targetReps || 10 },
+          ],
+        };
+        
+        transformed.push(transformedExercise);
+        exerciseIndex++;
+      }
+      supersetGroup++;
+    }
+    
+    // Handle any remaining exercises that don't fit the superset config
+    while (exerciseIndex < exercises.length) {
+      const exercise = exercises[exerciseIndex];
+      
+      if (exercise.id && exercise.supersetGroup !== undefined && exercise.sets) {
+        transformed.push(exercise);
+        exerciseIndex++;
+        continue;
+      }
+      
+      const exerciseName = exercise['Exercise Name'] || exercise.exerciseName || exercise.name;
+      const [weight, targetReps] = await Promise.all([
+        getExerciseWeight(exerciseName),
+        getExerciseTargetReps(exerciseName),
+      ]);
+      
+      const transformedExercise = {
+        id: exercise.id || `ex_${Date.now()}_${exerciseIndex}_${Math.random().toString(36).substring(2, 9)}`,
+        name: exerciseName,
+        exerciseName: exerciseName,
+        supersetGroup: supersetGroup,
+        muscleGroup: exercise['Primary Muscle'] || exercise.muscleGroup || exercise.category,
+        equipment: exercise.Equipment || exercise.equipment,
+        category: exercise['Primary Muscle'] || exercise.muscleGroup || exercise.category,
+        sets: exercise.sets || [
+          { weight: weight || 0, reps: targetReps || 10 },
+          { weight: weight || 0, reps: targetReps || 10 },
+          { weight: weight || 0, reps: targetReps || 10 },
+        ],
+      };
+      
+      transformed.push(transformedExercise);
+      exerciseIndex++;
+      supersetGroup++;
+    }
+    
+    return transformed;
+  }, []);
+
   // Initialize day workouts from context
   useEffect(() => {
     // Don't initialize while context is still loading
     if (loading) return;
     
-    const initialWorkouts = {};
-    DAYS_OF_WEEK.forEach(day => {
-      if (weeklySchedule[day]) {
-        initialWorkouts[day] = JSON.parse(JSON.stringify(weeklySchedule[day]));
-      } else {
-        initialWorkouts[day] = null;
+    const initializeWorkouts = async () => {
+      const initialWorkouts = {};
+      
+      for (const day of DAYS_OF_WEEK) {
+        if (weeklySchedule[day]) {
+          const dayData = JSON.parse(JSON.stringify(weeklySchedule[day]));
+          
+          // Transform exercises if this is a strength workout
+          if (dayData.exercises && Array.isArray(dayData.exercises) && dayData.exercises.length > 0) {
+            const supersetConfig = dayData.supersetConfig || [2, 2, 2, 2];
+            dayData.exercises = await transformExercisesToEditorFormat(dayData.exercises, supersetConfig);
+          }
+          
+          initialWorkouts[day] = dayData;
+        } else {
+          initialWorkouts[day] = null;
+        }
       }
-    });
-    setDayWorkouts(initialWorkouts);
-  }, [weeklySchedule, loading]);
+      
+      setDayWorkouts(initialWorkouts);
+    };
+    
+    initializeWorkouts();
+  }, [weeklySchedule, loading, transformExercisesToEditorFormat]);
 
   // Get workout type from session data
   const getWorkoutType = (sessionData) => {
@@ -346,7 +449,25 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
       // Save all days with unsaved changes
       for (const day of DAYS_OF_WEEK) {
         if (hasUnsavedChanges[day]) {
-          await assignWorkoutToDay(day, dayWorkouts[day]);
+          const workout = dayWorkouts[day];
+          
+          // Calculate superset configuration from exercises if this is a strength workout
+          if (workout && workout.exercises && Array.isArray(workout.exercises)) {
+            const supersetGroups = {};
+            workout.exercises.forEach(ex => {
+              const group = ex.supersetGroup ?? 0;
+              supersetGroups[group] = (supersetGroups[group] || 0) + 1;
+            });
+            
+            // Convert to array format [2, 2, 2, 2] etc.
+            const supersetConfig = Object.keys(supersetGroups)
+              .sort((a, b) => parseInt(a) - parseInt(b))
+              .map(key => supersetGroups[key]);
+            
+            workout.supersetConfig = supersetConfig.length > 0 ? supersetConfig : [2, 2, 2, 2];
+          }
+          
+          await assignWorkoutToDay(day, workout);
         }
       }
 

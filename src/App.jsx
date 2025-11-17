@@ -18,6 +18,7 @@ import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
 import ExerciseListPage from './pages/ExerciseListPage';
 import SettingsScreen from './pages/SettingsScreen';
 import UserProfileScreen from './pages/UserProfileScreen';
+import EditWeeklyScheduleScreen from './pages/EditWeeklyScheduleScreen';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import AchievementUnlockedDialog from './components/AchievementUnlockedDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
@@ -724,6 +725,8 @@ function AppContent() {
           {currentScreen === 'settings' && <SettingsScreen onNavigate={handleNavigate} />}
 
           {currentScreen === 'profile' && <UserProfileScreen />}
+
+          {currentScreen === 'edit-weekly-schedule' && <EditWeeklyScheduleScreen onNavigate={handleNavigate} />}
         </div>
         
         {/* Bottom Navigation - Always visible */}

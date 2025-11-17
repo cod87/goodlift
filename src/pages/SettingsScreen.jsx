@@ -469,7 +469,7 @@ const SettingsScreen = ({ onNavigate }) => {
               </Typography>
               <List sx={{ py: 0 }}>
                 <ListItem disablePadding>
-                  <ListItemButton onClick={() => setWeekEditorOpen(true)} sx={{ py: 1 }}>
+                  <ListItemButton onClick={() => handleNavigate('edit-weekly-schedule')} sx={{ py: 1 }}>
                     <ListItemIcon sx={{ minWidth: 40 }}>
                       <Edit sx={{ color: 'primary.main' }} />
                     </ListItemIcon>

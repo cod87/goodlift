@@ -22,7 +22,7 @@ Refactor the avatar system to remove custom avatar upload functionality and prov
   - Dark Orange (#cc7000)
   - Red (#ef5350)
   - Blue Grey (#6b8a9d)
-- 4 doggo avatars with Google Drive URLs
+- 4 doggo avatars hosted locally in repository (`/public/avatars/`)
 - Removed all Firebase Storage code
 - Added `isDoggoAvatar()` and `getDoggoAvatarUrl()` helper functions
 - ~120 lines of code (63% reduction)
@@ -83,7 +83,8 @@ Total: ~31 KB of outdated documentation removed
 - 8 color options matching the app's design system
 
 ### Doggos Section
-- 4 dog image options from Google Drive
+- 4 dog image options hosted locally in repository
+- Images stored in `/public/avatars/` directory
 - Separate tab in avatar selector
 - Simple selection interface
 
@@ -100,24 +101,29 @@ Total: ~31 KB of outdated documentation removed
 - Avatar selector opens correctly
 - Both tabs display properly
 - Preset avatars show correct colors with initials
-- Doggo avatars display (when Google Drive files are public)
+- Doggo avatars display from local repository assets
 - Avatar selection and saving works
 - Profile completion percentage updates correctly
 - Avatars display in profile widget and user profile screen
 
 ## Important Notes
 
-### Google Drive URLs
-The doggo avatar URLs use Google Drive's direct embed format:
-```
-https://drive.google.com/uc?export=view&id={FILE_ID}
-```
+### Local Avatar Hosting
+The doggo avatar images are now hosted locally in the repository:
+- **Location:** `/public/avatars/`
+- **Files:** 
+  - `doggo-1.jpeg` (451 KB)
+  - `doggo-2.jpeg` (123 KB)
+  - `doggo-3.jpeg` (1.1 MB)
+  - `doggo-4.jpeg` (30 KB)
 
-**For images to display properly, the Google Drive files must be:**
-1. Shared publicly (Anyone with the link can view)
-2. Not restricted by organization policies
+**Benefits:**
+- No external dependencies
+- Always available (no network issues)
+- Full control over image content
+- Better security posture
 
-Current status: Images show 403 errors, indicating files need permission updates.
+**Update (2025-11-17):** Previously used Google Drive URLs have been replaced with local paths for improved reliability and security.
 
 ### Theme Colors Used
 All preset avatars now use colors from the app's theme:
@@ -131,11 +137,13 @@ This ensures visual consistency throughout the application.
 ## Benefits
 
 1. **Simplified codebase:** Removed 1,321 lines of code
-2. **No Firebase Storage dependency:** Reduced external dependencies
+2. **No external dependencies:** All avatar assets hosted locally
 3. **Better design consistency:** All avatars use theme colors
 4. **Improved user experience:** Simpler, cleaner interface
 5. **Lower maintenance:** No upload validation, compression, or error handling needed
-6. **Cost reduction:** No Firebase Storage usage or quota concerns
+6. **Cost reduction:** No Firebase Storage or external hosting costs
+7. **Better reliability:** No dependency on external services (e.g., Google Drive)
+8. **Enhanced security:** Full control over all avatar assets
 
 ## Migration Path
 
@@ -147,9 +155,11 @@ Users with existing custom avatars:
 
 ## Future Considerations
 
-If dog images are needed in the future:
-1. Host images in the repository's public assets folder, OR
-2. Use a CDN or image hosting service, OR
-3. Ensure Google Drive files are properly shared publicly
+✅ **Completed:** Dog images are now hosted in the repository's `/public/avatars/` folder for maximum reliability and security.
 
-Hosting in the repository would be the most reliable option.
+If additional dog images are needed in the future:
+1. Add new images to `/public/avatars/` with consistent naming (e.g., `doggo-5.jpeg`)
+2. Update the `DOGGO_AVATARS` array in `src/utils/avatarUtils.js`
+3. Ensure images are optimized for web (reasonable file sizes)
+
+**Recommended approach:** Continue using local repository hosting to maintain consistency and reliability.

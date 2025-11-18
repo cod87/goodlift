@@ -18,25 +18,30 @@ export const PRESET_AVATARS = [
  * Users can select these as their avatar in the Doggos section
  * Images are hosted locally in the repository
  */
+const getBaseUrl = () => {
+  // Use Vite's BASE_URL to handle deployment paths (e.g., /goodlift/)
+  return import.meta.env.BASE_URL || '/';
+};
+
 export const DOGGO_AVATARS = [
   { 
     id: 'doggo-1', 
-    url: '/avatars/doggo-1.jpeg',
+    url: `${getBaseUrl()}avatars/doggo-1.jpeg`,
     label: 'Doggo 1' 
   },
   { 
     id: 'doggo-2', 
-    url: '/avatars/doggo-2.jpeg',
+    url: `${getBaseUrl()}avatars/doggo-2.jpeg`,
     label: 'Doggo 2' 
   },
   { 
     id: 'doggo-3', 
-    url: '/avatars/doggo-3.jpeg',
+    url: `${getBaseUrl()}avatars/doggo-3.jpeg`,
     label: 'Doggo 3' 
   },
   { 
     id: 'doggo-4', 
-    url: '/avatars/doggo-4.jpeg',
+    url: `${getBaseUrl()}avatars/doggo-4.jpeg`,
     label: 'Doggo 4' 
   },
 ];

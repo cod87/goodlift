@@ -34,6 +34,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const [updatedWeights, setUpdatedWeights] = useState({});
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
+  const exerciseNameRef = useRef(null);
+  const [exerciseFontSize, setExerciseFontSize] = useState('3rem');
   
   // Stretching phase state
   const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
@@ -161,6 +163,66 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
     // Scroll to top when exercise changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentStepIndex, initialTargets, workoutSequence, updatedWeights]);
+
+  // Calculate responsive font size for exercise name to fit on one line
+  useEffect(() => {
+    const calculateFontSize = () => {
+      const nameElement = exerciseNameRef.current;
+      if (!nameElement || !exerciseName) return;
+
+      // Get the container width (accounting for padding)
+      const container = nameElement.parentElement;
+      if (!container) return;
+      
+      const containerWidth = container.clientWidth;
+      const paddingX = window.innerWidth < 600 ? 16 : 32; // xs: 1rem, sm: 2rem
+      const availableWidth = containerWidth - (paddingX * 2);
+      
+      // Calculate optimal font size
+      // Start with a large size and work down until text fits
+      let fontSize = Math.min(containerWidth * 0.15, 120); // Max 120px or 15% of width
+      const minFontSize = 32; // Minimum 32px
+      
+      // Create a temporary element to measure text width
+      const tempElement = document.createElement('span');
+      tempElement.style.visibility = 'hidden';
+      tempElement.style.position = 'absolute';
+      tempElement.style.whiteSpace = 'nowrap';
+      tempElement.style.fontFamily = getComputedStyle(nameElement).fontFamily;
+      tempElement.style.fontWeight = '700';
+      tempElement.textContent = exerciseName;
+      document.body.appendChild(tempElement);
+      
+      // Binary search for optimal font size
+      while (fontSize > minFontSize) {
+        tempElement.style.fontSize = fontSize + 'px';
+        const textWidth = tempElement.offsetWidth;
+        
+        if (textWidth <= availableWidth) {
+          break;
+        }
+        fontSize -= 2;
+      }
+      
+      document.body.removeChild(tempElement);
+      setExerciseFontSize(`${fontSize}px`);
+    };
+
+    // Calculate on mount and when exercise changes
+    calculateFontSize();
+    
+    // Recalculate on window resize
+    const handleResize = () => calculateFontSize();
+    window.addEventListener('resize', handleResize);
+    
+    // Small delay to ensure DOM is ready
+    const timeout = setTimeout(calculateFontSize, 100);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeout);
+    };
+  }, [exerciseName]);
 
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
@@ -612,97 +674,92 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              {/* End Workout Controls - Right Justified at Top */}
+              {/* Top Controls - Help icon on left, End Workout Controls on right */}
               <Box sx={{ 
                 display: 'flex',
-                justifyContent: 'flex-end',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 gap: 1,
                 mb: 2
               }}>
-                <IconButton
-                  onClick={handleExit}
-                  sx={{
-                    minWidth: '44px',
-                    minHeight: '44px',
-                    color: 'rgb(237, 63, 39)',
-                    border: '2px solid rgb(237, 63, 39)',
-                    borderRadius: '8px',
-                    '&:hover': {
-                      backgroundColor: 'rgba(237, 63, 39, 0.08)',
-                    },
-                  }}
-                  aria-label="End workout without saving"
-                >
-                  <ExitToApp />
-                </IconButton>
-                {workoutData.length > 0 && (
-                  <IconButton
-                    onClick={handlePartialComplete}
-                    sx={{
-                      minWidth: '44px',
-                      minHeight: '44px',
-                      color: 'rgb(254, 178, 26)',
-                      border: '2px solid rgb(254, 178, 26)',
-                      borderRadius: '8px',
-                      '&:hover': {
-                        backgroundColor: 'rgba(254, 178, 26, 0.08)',
-                      },
-                    }}
-                    aria-label="End and save workout"
-                  >
-                    <Save />
-                  </IconButton>
-                )}
-              </Box>
-
-              {/* Exercise name with Google search icon in top right */}
-              <Box sx={{ 
-                position: 'relative',
-                mb: 2
-              }}>
+                {/* Help Icon - Left side */}
                 <IconButton
                   component="a"
                   href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  size="small"
                   sx={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    color: 'primary.main',
                     minWidth: '44px',
                     minHeight: '44px',
-                    zIndex: 1,
+                    color: 'primary.main',
+                    border: '2px solid',
+                    borderColor: 'primary.main',
+                    borderRadius: '8px',
                     '&:hover': {
                       backgroundColor: 'rgba(19, 70, 134, 0.08)',
                     }
                   }}
                   aria-label={`Search for ${exerciseName} form guide`}
                 >
-                  <HelpOutline sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                  <HelpOutline sx={{ fontSize: 24 }} />
                 </IconButton>
+                
+                {/* End Workout Controls - Right side */}
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  {workoutData.length > 0 && (
+                    <IconButton
+                      onClick={handlePartialComplete}
+                      sx={{
+                        minWidth: '44px',
+                        minHeight: '44px',
+                        color: 'rgb(254, 178, 26)',
+                        border: '2px solid rgb(254, 178, 26)',
+                        borderRadius: '8px',
+                        '&:hover': {
+                          backgroundColor: 'rgba(254, 178, 26, 0.08)',
+                        },
+                      }}
+                      aria-label="End and save workout"
+                    >
+                      <Save />
+                    </IconButton>
+                  )}
+                  <IconButton
+                    onClick={handleExit}
+                    sx={{
+                      minWidth: '44px',
+                      minHeight: '44px',
+                      color: 'rgb(237, 63, 39)',
+                      border: '2px solid rgb(237, 63, 39)',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(237, 63, 39, 0.08)',
+                      },
+                    }}
+                    aria-label="End workout without saving"
+                  >
+                    <ExitToApp />
+                  </IconButton>
+                </Box>
+              </Box>
+
+              {/* Exercise name - responsive sizing */}
+              <Box sx={{ mb: 2 }}>
                 <Typography 
+                  ref={exerciseNameRef}
                   variant="h3" 
                   component="h2"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: { 
-                      xs: 'clamp(3rem, 12vw, 8rem) !important', 
-                      sm: 'clamp(4rem, 10vw, 8rem) !important', 
-                      md: 'clamp(5rem, 8vw, 8rem) !important' 
-                    },
+                    fontSize: exerciseFontSize,
                     color: 'primary.main',
                     textAlign: 'center',
-                    lineHeight: '1.1 !important',
-                    px: { xs: 4, sm: 5 },
-                    wordBreak: 'break-word',
-                    mb: { xs: 1, sm: 1.5 },
-                    display: '-webkit-box !important',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
+                    lineHeight: '1.2 !important',
+                    px: { xs: 2, sm: 4 },
+                    whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
+                    mb: { xs: 1, sm: 1.5 },
                   }}
                 >
                   {exerciseName}

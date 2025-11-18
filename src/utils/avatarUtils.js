@@ -27,22 +27,22 @@ export const DOGGO_AVATARS = [
   { 
     id: 'doggo-1', 
     url: `${getBaseUrl()}avatars/doggo-1.jpeg`,
-    label: 'Doggo 1' 
+    label: 'Percy' 
   },
   { 
     id: 'doggo-2', 
     url: `${getBaseUrl()}avatars/doggo-2.jpeg`,
-    label: 'Doggo 2' 
+    label: 'Leo' 
   },
   { 
     id: 'doggo-3', 
     url: `${getBaseUrl()}avatars/doggo-3.jpeg`,
-    label: 'Doggo 3' 
+    label: 'Monty' 
   },
   { 
     id: 'doggo-4', 
     url: `${getBaseUrl()}avatars/doggo-4.jpeg`,
-    label: 'Doggo 4' 
+    label: 'Whiskey' 
   },
 ];
 

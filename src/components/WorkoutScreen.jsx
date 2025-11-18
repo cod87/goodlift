@@ -181,9 +181,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       if (!container) return;
       
       const containerWidth = container.clientWidth;
-      // Reduce padding significantly - we want to use most of the space
-      // MUI px: { xs: 2, sm: 4 } = 16px or 32px, but let's only account for half to be more aggressive
-      const paddingX = window.innerWidth < 600 ? 8 : 16;
+      // The Box wrapper has px: { xs: 2, sm: 4 } which is 16px or 32px per side
+      // Account for this padding to get the actual available width for text
+      const paddingX = window.innerWidth < 600 ? 16 : 32;
       const availableWidth = containerWidth - (paddingX * 2);
       
       if (availableWidth <= 0) return;
@@ -843,8 +843,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 </Box>
               </Box>
 
-              {/* Exercise name - responsive sizing */}
-              <Box sx={{ mb: 2 }}>
+              {/* Exercise name - responsive sizing with no extra padding constraints */}
+              <Box sx={{ mb: 2, px: { xs: 2, sm: 4 } }}>
                 <Typography 
                   ref={exerciseNameRef}
                   variant="h3" 
@@ -855,7 +855,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                     color: 'primary.main',
                     textAlign: 'center',
                     lineHeight: '1.2 !important',
-                    px: { xs: 2, sm: 4 },
                     wordBreak: 'break-word',
                     overflowWrap: 'break-word',
                     whiteSpace: 'pre-wrap',

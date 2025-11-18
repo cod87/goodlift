@@ -181,14 +181,16 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       if (!container) return;
       
       const containerWidth = container.clientWidth;
-      const paddingX = window.innerWidth < 600 ? 32 : 64; // xs: 2rem, sm: 4rem (match Typography px)
+      // Reduce padding significantly - we want to use most of the space
+      // MUI px: { xs: 2, sm: 4 } = 16px or 32px, but let's only account for half to be more aggressive
+      const paddingX = window.innerWidth < 600 ? 8 : 16;
       const availableWidth = containerWidth - (paddingX * 2);
       
       if (availableWidth <= 0) return;
       
-      // Maximum font size we'll allow - set high to allow largest possible
-      const maxFontSize = 500;
-      const minFontSize = 32;
+      // Maximum font size we'll allow - set very high to allow largest possible
+      const maxFontSize = 800;
+      const minFontSize = 40;
       
       // Split text at word boundaries for optimal line distribution
       const words = exerciseName.split(' ');

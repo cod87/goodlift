@@ -384,3 +384,33 @@ export const loadFavoriteWorkoutsFromFirebase = async (userId) => {
     return null;
   }
 };
+
+/**
+ * Save HIIT presets to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} hiitPresets - The HIIT presets array
+ */
+export const saveHiitPresetsToFirebase = async (userId, hiitPresets) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { hiitPresets });
+  } catch (error) {
+    console.error('Error saving HIIT presets to Firebase:', error);
+  }
+};
+
+/**
+ * Save Yoga presets to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} yogaPresets - The Yoga presets array
+ */
+export const saveYogaPresetsToFirebase = async (userId, yogaPresets) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { yogaPresets });
+  } catch (error) {
+    console.error('Error saving Yoga presets to Firebase:', error);
+  }
+};

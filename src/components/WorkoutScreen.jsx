@@ -36,6 +36,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const timerRef = useRef(null);
   const exerciseNameRef = useRef(null);
   const [exerciseFontSize, setExerciseFontSize] = useState('3rem');
+  const [splitExerciseName, setSplitExerciseName] = useState(null);
   
   // Stretching phase state
   const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
@@ -169,6 +170,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
 
   // Calculate responsive font size for exercise name to fit up to 2 lines
+  // with word-split optimization for balanced line lengths
   useEffect(() => {
     const calculateFontSize = () => {
       const nameElement = exerciseNameRef.current;
@@ -179,31 +181,57 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       if (!container) return;
       
       const containerWidth = container.clientWidth;
-      const paddingX = window.innerWidth < 600 ? 32 : 64; // xs: 2rem, sm: 4rem (match Typography px)
+      // The Box wrapper has px: { xs: 2, sm: 4 } which is 16px or 32px per side
+      // Account for this padding to get the actual available width for text
+      const paddingX = window.innerWidth < 600 ? 16 : 32;
       const availableWidth = containerWidth - (paddingX * 2);
       
       if (availableWidth <= 0) return;
       
-      // Maximum font size we'll allow
-      const maxFontSize = 150;
-      const minFontSize = 32;
-      const maxLines = 2;
+      // Maximum font size we'll allow - set very high to allow largest possible
+      const maxFontSize = 800;
+      const minFontSize = 40;
+      
+      // Split text at word boundaries for optimal line distribution
+      const words = exerciseName.split(' ');
+      let bestLayout = exerciseName;
+      let useTwoLines = false;
+      
+      if (words.length > 1) {
+        // Try to find the best split point for balanced line lengths
+        let bestDiff = Infinity;
+        
+        for (let i = 1; i < words.length; i++) {
+          const line1 = words.slice(0, i).join(' ');
+          const line2 = words.slice(i).join(' ');
+          const diff = Math.abs(line1.length - line2.length);
+          
+          if (diff < bestDiff) {
+            bestDiff = diff;
+            bestLayout = `${line1}\n${line2}`;
+          }
+        }
+        useTwoLines = true;
+      }
+      
+      // Store the split name for rendering
+      setSplitExerciseName(useTwoLines ? bestLayout.split('\n') : [exerciseName]);
       
       // Create a temporary element to measure text dimensions
       const tempElement = document.createElement('div');
       tempElement.style.visibility = 'hidden';
       tempElement.style.position = 'absolute';
-      tempElement.style.width = availableWidth + 'px';
       tempElement.style.fontFamily = getComputedStyle(nameElement).fontFamily;
       tempElement.style.fontWeight = '700';
       tempElement.style.lineHeight = '1.2';
-      tempElement.style.wordBreak = 'break-word';
-      tempElement.style.overflowWrap = 'break-word';
+      tempElement.style.whiteSpace = 'nowrap';
       tempElement.style.textAlign = 'center';
-      tempElement.textContent = exerciseName;
       document.body.appendChild(tempElement);
       
-      // Binary search for the largest font size that fits in maxLines
+      // Get the lines to measure
+      const lines = useTwoLines ? bestLayout.split('\n') : [exerciseName];
+      
+      // Binary search for the largest font size where the longest line fits
       let low = minFontSize;
       let high = maxFontSize;
       let bestSize = minFontSize;
@@ -212,11 +240,18 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
         const mid = Math.floor((low + high) / 2);
         tempElement.style.fontSize = mid + 'px';
         
-        const lineHeight = mid * 1.2;
-        const elementHeight = tempElement.offsetHeight;
-        const lines = Math.ceil(elementHeight / lineHeight);
+        // Check if all lines fit within available width
+        let allLinesFit = true;
+        for (const line of lines) {
+          tempElement.textContent = line;
+          const lineWidth = tempElement.offsetWidth;
+          if (lineWidth > availableWidth) {
+            allLinesFit = false;
+            break;
+          }
+        }
         
-        if (lines <= maxLines) {
+        if (allLinesFit) {
           // This size fits, try larger
           bestSize = mid;
           low = mid + 1;
@@ -643,6 +678,15 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
             {formatTime(elapsedTime)}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
+            <Chip 
+              label={`Set ${currentStep.setNumber} of ${setsPerSuperset}`}
+              color="primary"
+              size="small"
+              sx={{ fontWeight: 600, fontSize: { xs: '0.7rem', sm: '0.8rem' } }}
+            />
+            <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
+              {currentStepIndex + 1}/{workoutSequence.length}
+            </Typography>
             <IconButton 
               onClick={handleSaveToFavorites}
               disabled={isFavorite}
@@ -656,9 +700,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
             >
               {isFavorite ? <Star sx={{ fontSize: { xs: 20, sm: 24 } }} /> : <StarBorder sx={{ fontSize: { xs: 20, sm: 24 } }} />}
             </IconButton>
-            <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
-              {currentStepIndex + 1}/{workoutSequence.length}
-            </Typography>
           </Box>
         </Box>
         <LinearProgress 
@@ -691,8 +732,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: 'calc(100vh - 200px)',
+              }}
             >
-              {/* Top Controls - Help icon on left, End Workout Controls on right */}
+              {/* Top Controls - Help, Skip, Swap icons on left, End Workout Controls on right */}
               <Box sx={{ 
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -700,27 +746,63 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 gap: 1,
                 mb: 2
               }}>
-                {/* Help Icon - Left side */}
-                <IconButton
-                  component="a"
-                  href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    minWidth: '44px',
-                    minHeight: '44px',
-                    color: 'primary.main',
-                    border: '2px solid',
-                    borderColor: 'primary.main',
-                    borderRadius: '8px',
-                    '&:hover': {
-                      backgroundColor: 'rgba(19, 70, 134, 0.08)',
-                    }
-                  }}
-                  aria-label={`Search for ${exerciseName} form guide`}
-                >
-                  <HelpOutline sx={{ fontSize: 24 }} />
-                </IconButton>
+                {/* Left: Help, Skip, Swap Icons */}
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <IconButton
+                    component="a"
+                    href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{
+                      minWidth: { xs: '36px', sm: '44px' },
+                      minHeight: { xs: '36px', sm: '44px' },
+                      color: 'primary.main',
+                      border: '2px solid',
+                      borderColor: 'primary.main',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                      }
+                    }}
+                    aria-label={`Search for ${exerciseName} form guide`}
+                  >
+                    <HelpOutline sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                  </IconButton>
+                  <IconButton
+                    onClick={skipExercise}
+                    sx={{
+                      minWidth: { xs: '36px', sm: '44px' },
+                      minHeight: { xs: '36px', sm: '44px' },
+                      color: 'primary.main',
+                      border: '2px solid',
+                      borderColor: 'primary.main',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                      }
+                    }}
+                    aria-label="Skip exercise"
+                  >
+                    <SkipNext sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                  </IconButton>
+                  <IconButton
+                    onClick={swapExercise}
+                    sx={{
+                      minWidth: { xs: '36px', sm: '44px' },
+                      minHeight: { xs: '36px', sm: '44px' },
+                      color: 'primary.main',
+                      border: '2px solid',
+                      borderColor: 'primary.main',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                      }
+                    }}
+                    aria-label="Swap exercise"
+                  >
+                    <SwapHoriz sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                  </IconButton>
+                </Box>
                 
                 {/* End Workout Controls - Right side */}
                 <Box sx={{ display: 'flex', gap: 1 }}>
@@ -728,8 +810,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                     <IconButton
                       onClick={handlePartialComplete}
                       sx={{
-                        minWidth: '44px',
-                        minHeight: '44px',
+                        minWidth: { xs: '36px', sm: '44px' },
+                        minHeight: { xs: '36px', sm: '44px' },
                         color: 'rgb(254, 178, 26)',
                         border: '2px solid rgb(254, 178, 26)',
                         borderRadius: '8px',
@@ -739,14 +821,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                       }}
                       aria-label="End and save workout"
                     >
-                      <Save />
+                      <Save sx={{ fontSize: { xs: 20, sm: 24 } }} />
                     </IconButton>
                   )}
                   <IconButton
                     onClick={handleExit}
                     sx={{
-                      minWidth: '44px',
-                      minHeight: '44px',
+                      minWidth: { xs: '36px', sm: '44px' },
+                      minHeight: { xs: '36px', sm: '44px' },
                       color: 'rgb(237, 63, 39)',
                       border: '2px solid rgb(237, 63, 39)',
                       borderRadius: '8px',
@@ -756,13 +838,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                     }}
                     aria-label="End workout without saving"
                   >
-                    <ExitToApp />
+                    <ExitToApp sx={{ fontSize: { xs: 20, sm: 24 } }} />
                   </IconButton>
                 </Box>
               </Box>
 
-              {/* Exercise name - responsive sizing */}
-              <Box sx={{ mb: 2 }}>
+              {/* Exercise name - responsive sizing with no extra padding constraints */}
+              <Box sx={{ mb: 2, px: { xs: 2, sm: 4 } }}>
                 <Typography 
                   ref={exerciseNameRef}
                   variant="h3" 
@@ -773,34 +855,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                     color: 'primary.main',
                     textAlign: 'center',
                     lineHeight: '1.2 !important',
-                    px: { xs: 2, sm: 4 },
                     wordBreak: 'break-word',
                     overflowWrap: 'break-word',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
+                    whiteSpace: 'pre-wrap',
                     mb: { xs: 1, sm: 1.5 },
                   }}
                 >
-                  {exerciseName}
+                  {splitExerciseName ? splitExerciseName.join('\n') : exerciseName}
                 </Typography>
-              </Box>
-              
-              {/* Set X of Y indicator with smaller styling */}
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                gap: 1,
-                my: { xs: 1, sm: 1.5 }
-              }}>
-                <Chip 
-                  label={`Set ${currentStep.setNumber} of ${setsPerSuperset}`}
-                  color="primary"
-                  size="small"
-                  sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.85rem' }, minHeight: '32px', px: 1.5 }}
-                />
               </Box>
               
               {(prevWeight !== null || targetReps !== null) && (
@@ -844,6 +906,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   </motion.div>
                 )}
               </AnimatePresence>
+              
+              {/* Flexible spacer to push inputs to bottom */}
+              <Box sx={{ flex: 1, minHeight: { xs: '20px', sm: '40px' } }} />
               
               <div className="input-row">
                 <div className="input-group">
@@ -997,28 +1062,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   </Box>
                 </div>
               </div>
-              
-              {/* Quick Actions */}
-              <Box sx={{ display: 'flex', gap: 1, mt: 2, mb: 2 }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<SkipNext />}
-                  onClick={skipExercise}
-                  sx={{ flex: 1, minHeight: '44px' }}
-                >
-                  Skip Exercise
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<SwapHoriz />}
-                  onClick={swapExercise}
-                  sx={{ flex: 1, minHeight: '44px' }}
-                >
-                  Swap Exercise
-                </Button>
-              </Box>
               
               <div className="workout-nav-buttons">
                 {currentStepIndex > 0 && (

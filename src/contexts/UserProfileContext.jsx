@@ -17,6 +17,7 @@ const DEFAULT_PROFILE = {
   email: '',
   avatar: null, // null = use initials, string = url or preset id
   currentWeight: null,
+  targetWeight: null, // New: user's target weight goal
   weightHistory: [], // [{weight: number, date: string, unit: string}]
   bio: '',
   goals: '',

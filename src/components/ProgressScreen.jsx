@@ -269,13 +269,13 @@ const ProgressDashboard = () => {
     
     filteredHistory.forEach(workout => {
       // Count session types based on workout.type or workout properties
-      if (workout.type === 'strength' || workout.type === 'full' || workout.type === 'upper' || 
+      if (workout.type === 'cardio' || workout.type === 'hiit' || workout.cardioType) {
+        cardioSessions++;
+      } else if (workout.type === 'yoga' || workout.type === 'stretch' || workout.type === 'mobility' || workout.yogaType) {
+        yogaSessions++;
+      } else if (workout.type === 'strength' || workout.type === 'full' || workout.type === 'upper' || 
           workout.type === 'lower' || workout.type === 'push' || workout.type === 'pull' || workout.type === 'legs') {
         strengthSessions++;
-      } else if (workout.type === 'cardio' || workout.cardioType) {
-        cardioSessions++;
-      } else if (workout.type === 'yoga' || workout.yogaType) {
-        yogaSessions++;
       } else if (workout.exercises && Object.keys(workout.exercises).length > 0) {
         // If it has exercises, assume it's a strength session
         strengthSessions++;
@@ -731,6 +731,7 @@ const ProgressDashboard = () => {
               weightHistory={profile.weightHistory || []}
               currentWeight={profile.currentWeight}
               currentUnit={profile.weightUnit || 'lbs'}
+              targetWeight={profile.targetWeight}
               onAddWeight={addWeightEntry}
             />
         </Stack>

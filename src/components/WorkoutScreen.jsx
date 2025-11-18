@@ -164,6 +164,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentStepIndex, initialTargets, workoutSequence, updatedWeights]);
 
+  const currentStep = workoutSequence[currentStepIndex];
+  const exerciseName = currentStep?.exercise?.['Exercise Name'];
+  const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
+
   // Calculate responsive font size for exercise name to fit on one line
   useEffect(() => {
     const calculateFontSize = () => {
@@ -223,10 +227,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       clearTimeout(timeout);
     };
   }, [exerciseName]);
-
-  const currentStep = workoutSequence[currentStepIndex];
-  const exerciseName = currentStep?.exercise?.['Exercise Name'];
-  const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
 
   /**
    * Apply conditional persist rules after workout completion

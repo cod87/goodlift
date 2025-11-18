@@ -383,15 +383,15 @@ button:active {
 /* Mobile and tablet: fill viewport */
 @media (max-width: 1024px) {
     .exercise-card-container {
-        min-height: calc(100vh - 160px);
+        min-height: calc(100vh - 120px);
         padding: max(0.5rem, env(safe-area-inset-left)) max(0.5rem, env(safe-area-inset-right));
     }
 }
 
-/* Portrait orientation: prioritize height */
+/* Portrait orientation: prioritize height, fill more of viewport */
 @media (max-width: 1024px) and (orientation: portrait) {
     .exercise-card-container {
-        min-height: calc(100vh - 140px);
+        min-height: calc(100vh - 100px);
     }
 }
 

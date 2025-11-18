@@ -45,10 +45,8 @@ class ProgressiveOverloadService {
 
     const progressionData = [];
 
-    // Iterate through workout history in reverse (oldest to newest)
-    const sortedHistory = [...workoutHistory].reverse();
-
-    sortedHistory.forEach((workout) => {
+    // Iterate through workout history
+    workoutHistory.forEach((workout) => {
       if (!workout.exercises || !workout.exercises[exerciseName]) {
         return;
       }
@@ -78,6 +76,9 @@ class ProgressiveOverloadService {
         });
       }
     });
+
+    // Sort by date (oldest to newest) to ensure correct progression order
+    progressionData.sort((a, b) => a.date - b.date);
 
     return progressionData;
   }

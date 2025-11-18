@@ -53,6 +53,7 @@ const WeightTracker = ({
   weightHistory, 
   currentWeight, 
   currentUnit,
+  targetWeight,
   onAddWeight,
 }) => {
   const [newWeight, setNewWeight] = useState('');
@@ -87,6 +88,14 @@ const WeightTracker = ({
   // Prepare chart data
   const chartData = prepareWeightChartData(weightHistory, 30, selectedUnit);
 
+  // Calculate y-axis minimum based on target weight
+  let yAxisMin = undefined;
+  if (targetWeight && chartData.data.length > 0) {
+    // Use target weight as minimum, with some padding below
+    const minDataValue = Math.min(...chartData.data);
+    yAxisMin = Math.min(targetWeight, minDataValue) - 5; // 5 units below target or min data
+  }
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -103,6 +112,7 @@ const WeightTracker = ({
     scales: {
       y: {
         beginAtZero: false,
+        min: yAxisMin,
         ticks: {
           callback: (value) => `${value} ${selectedUnit}`,
         },
@@ -295,6 +305,7 @@ WeightTracker.propTypes = {
   ).isRequired,
   currentWeight: PropTypes.number,
   currentUnit: PropTypes.string,
+  targetWeight: PropTypes.number,
   onAddWeight: PropTypes.func.isRequired,
 };
 

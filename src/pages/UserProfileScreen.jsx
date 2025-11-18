@@ -13,6 +13,10 @@ import {
   IconButton,
   Alert,
   Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { Edit, Save, Cancel, PhotoCamera } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -365,6 +369,42 @@ const UserProfileScreen = () => {
               ) : (
                 <Typography variant="body2" color="text.secondary">
                   {profile.goals || 'No goals set yet'}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Target Weight */}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                Target Weight
+              </Typography>
+              {editing ? (
+                <Stack direction="row" spacing={2} alignItems="flex-start">
+                  <TextField
+                    type="number"
+                    label="Target Weight"
+                    value={editedProfile.targetWeight || ''}
+                    onChange={(e) => handleFieldChange('targetWeight', e.target.value ? parseFloat(e.target.value) : null)}
+                    inputProps={{ step: 0.1, min: 0 }}
+                    sx={{ flex: 1, maxWidth: 200 }}
+                  />
+                  <FormControl size="small" sx={{ minWidth: 80 }}>
+                    <InputLabel>Unit</InputLabel>
+                    <Select
+                      value={editedProfile.weightUnit || 'lbs'}
+                      onChange={(e) => handleFieldChange('weightUnit', e.target.value)}
+                      label="Unit"
+                    >
+                      <MenuItem value="lbs">lbs</MenuItem>
+                      <MenuItem value="kg">kg</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  {profile.targetWeight 
+                    ? `${profile.targetWeight} ${profile.weightUnit || 'lbs'}` 
+                    : 'No target weight set'}
                 </Typography>
               )}
             </Box>

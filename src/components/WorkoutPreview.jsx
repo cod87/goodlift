@@ -15,6 +15,7 @@ import ExerciseAutocomplete from './ExerciseAutocomplete';
 const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise, isCustomizeMode = false, supersetConfig = [2, 2, 2, 2], setsPerSuperset: initialSetsPerSuperset = 3 }) => {
   const [exerciseSettings, setExerciseSettings] = useState({});
   const [loading, setLoading] = useState(true);
+  const [isStarting, setIsStarting] = useState(false); // New: prevent multiple rapid starts
   const [savedToFavorites, setSavedToFavorites] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [customizedSettings, setCustomizedSettings] = useState({});
@@ -236,28 +237,41 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   }, [customizedSettings]);
 
   const handleStartWorkout = async () => {
-    // In customize mode, check if all exercises are selected
-    if (isCustomizeMode) {
-      const hasEmptySlots = currentWorkout.some(ex => ex === null);
-      if (hasEmptySlots) {
-        setSnackbar({
-          open: true,
-          message: 'Please select exercises for all slots before starting',
-          severity: 'warning'
-        });
-        return;
-      }
+    // Prevent multiple rapid clicks
+    if (isStarting) {
+      return;
     }
     
-    // Save all settings before starting workout, storing null for empty strings
-    // Save sequentially to avoid race conditions with localStorage reads/writes
-    for (const [exerciseName, settings] of Object.entries(exerciseSettings)) {
-      const weight = settings.weight === '' ? null : settings.weight;
-      const targetReps = settings.targetReps === '' ? null : settings.targetReps;
-      await setExerciseWeight(exerciseName, weight);
-      await setExerciseTargetReps(exerciseName, targetReps);
+    setIsStarting(true);
+    
+    try {
+      // In customize mode, check if all exercises are selected
+      if (isCustomizeMode) {
+        const hasEmptySlots = currentWorkout.some(ex => ex === null);
+        if (hasEmptySlots) {
+          setSnackbar({
+            open: true,
+            message: 'Please select exercises for all slots before starting',
+            severity: 'warning'
+          });
+          setIsStarting(false);
+          return;
+        }
+      }
+      
+      // Save all settings before starting workout, storing null for empty strings
+      // Save sequentially to avoid race conditions with localStorage reads/writes
+      for (const [exerciseName, settings] of Object.entries(exerciseSettings)) {
+        const weight = settings.weight === '' ? null : settings.weight;
+        const targetReps = settings.targetReps === '' ? null : settings.targetReps;
+        await setExerciseWeight(exerciseName, weight);
+        await setExerciseTargetReps(exerciseName, targetReps);
+      }
+      onStart(currentWorkout, supersetConfig, setsPerSuperset);
+    } catch (error) {
+      console.error('Error starting workout:', error);
+      setIsStarting(false);
     }
-    onStart(currentWorkout, supersetConfig, setsPerSuperset);
   };
 
   const handleSaveToFavorites = () => {
@@ -727,6 +741,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             size="large"
             startIcon={<PlayArrow />}
             onClick={handleStartWorkout}
+            disabled={isStarting}
             sx={{
               borderRadius: 2,
               flex: 1,
@@ -742,10 +757,15 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                 transform: 'translateY(-2px)',
                 boxShadow: '0 8px 16px rgba(19, 70, 134, 0.3)',
               },
+              '&:disabled': {
+                bgcolor: 'rgb(19, 70, 134)',
+                color: 'white',
+                opacity: 0.6,
+              },
               transition: 'all 0.3s ease'
             }}
           >
-            Begin
+            {isStarting ? 'Starting...' : 'Begin'}
           </Button>
         </Stack>
       </motion.div>

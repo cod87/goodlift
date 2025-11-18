@@ -62,6 +62,7 @@ const ExerciseCard = memo(({
   const [suggestionAccepted, setSuggestionAccepted] = useState(false);
   const exerciseNameRef = useRef(null);
   const [exerciseFontSize, setExerciseFontSize] = useState('3rem');
+  const [displayExerciseName, setDisplayExerciseName] = useState(exerciseName);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -160,6 +161,7 @@ const ExerciseCard = memo(({
       
       document.body.removeChild(tempElement);
       setExerciseFontSize(`${bestSize}px`);
+      setDisplayExerciseName(bestLayout);
     };
 
     // Calculate on mount and when exercise changes
@@ -388,15 +390,12 @@ const ExerciseCard = memo(({
             textAlign: 'center',
             lineHeight: '1.2 !important',
             px: { xs: 2, sm: 4 },
+            whiteSpace: 'pre-line',
             wordBreak: 'break-word',
             overflowWrap: 'break-word',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
           }}
         >
-          {exerciseName}
+          {displayExerciseName}
         </Typography>
       </Box>
 

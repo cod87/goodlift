@@ -168,7 +168,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
   const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
 
-  // Calculate responsive font size for exercise name to fit on one line
+  // Calculate responsive font size for exercise name to fit up to 2 lines
   useEffect(() => {
     const calculateFontSize = () => {
       const nameElement = exerciseNameRef.current;
@@ -182,27 +182,33 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       const paddingX = window.innerWidth < 600 ? 16 : 32; // xs: 1rem, sm: 2rem
       const availableWidth = containerWidth - (paddingX * 2);
       
-      // Calculate optimal font size
-      // Start with a large size and work down until text fits
-      let fontSize = Math.min(containerWidth * 0.15, 120); // Max 120px or 15% of width
+      // Calculate optimal font size allowing up to 2 lines
+      // Start with a larger size since we can use 2 lines
+      let fontSize = Math.min(containerWidth * 0.2, 150); // Max 150px or 20% of width
       const minFontSize = 32; // Minimum 32px
+      const maxLines = 2;
       
-      // Create a temporary element to measure text width
-      const tempElement = document.createElement('span');
+      // Create a temporary element to measure text dimensions
+      const tempElement = document.createElement('div');
       tempElement.style.visibility = 'hidden';
       tempElement.style.position = 'absolute';
-      tempElement.style.whiteSpace = 'nowrap';
+      tempElement.style.width = availableWidth + 'px';
       tempElement.style.fontFamily = getComputedStyle(nameElement).fontFamily;
       tempElement.style.fontWeight = '700';
+      tempElement.style.lineHeight = '1.2';
+      tempElement.style.wordBreak = 'break-word'; // Allow breaking at word boundaries
+      tempElement.style.overflowWrap = 'break-word';
       tempElement.textContent = exerciseName;
       document.body.appendChild(tempElement);
       
-      // Binary search for optimal font size
+      // Find optimal font size that fits within maxLines
       while (fontSize > minFontSize) {
         tempElement.style.fontSize = fontSize + 'px';
-        const textWidth = tempElement.offsetWidth;
+        const lineHeight = fontSize * 1.2; // Match lineHeight: '1.2'
+        const elementHeight = tempElement.offsetHeight;
+        const lines = Math.ceil(elementHeight / lineHeight);
         
-        if (textWidth <= availableWidth) {
+        if (lines <= maxLines) {
           break;
         }
         fontSize -= 2;
@@ -756,9 +762,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                     textAlign: 'center',
                     lineHeight: '1.2 !important',
                     px: { xs: 2, sm: 4 },
-                    whiteSpace: 'nowrap',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis',
                     mb: { xs: 1, sm: 1.5 },
                   }}
                 >

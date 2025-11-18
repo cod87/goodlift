@@ -200,8 +200,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     if (isRunning && !isPaused) {
       timerRef.current = setInterval(() => {
         setTimeRemaining((prev) => {
-          // Play audio cues
-          if (prev === 10 || prev === 5) {
+          // Play audio cues during final 3 seconds
+          if (prev === 3 || prev === 2) {
             audioService.playBeep(800, 150);
             hasPlayedWarningRef.current = true;
           } else if (prev === 1) {
@@ -758,12 +758,17 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       if (val === '' || val === null) {
                         setPreparationInterval('');
                       } else {
-                        setPreparationInterval(Math.max(0, parseInt(val) || 0));
+                        const parsed = parseInt(val);
+                        setPreparationInterval(isNaN(parsed) ? '' : parsed);
                       }
                     }}
                     onBlur={(e) => {
-                      if (e.target.value === '' || e.target.value === null) {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
                         setPreparationInterval(10);
+                      } else {
+                        const parsed = parseInt(val);
+                        setPreparationInterval(Math.max(0, Math.min(60, isNaN(parsed) ? 10 : parsed)));
                       }
                     }}
                     inputProps={{ min: 0, max: 60, inputMode: 'numeric' }}
@@ -780,12 +785,17 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       if (val === '' || val === null) {
                         setWorkInterval('');
                       } else {
-                        setWorkInterval(Math.max(5, parseInt(val) || 5));
+                        const parsed = parseInt(val);
+                        setWorkInterval(isNaN(parsed) ? '' : parsed);
                       }
                     }}
                     onBlur={(e) => {
-                      if (e.target.value === '' || e.target.value === null) {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
                         setWorkInterval(30);
+                      } else {
+                        const parsed = parseInt(val);
+                        setWorkInterval(Math.max(5, Math.min(300, isNaN(parsed) ? 30 : parsed)));
                       }
                     }}
                     inputProps={{ min: 5, max: 300, inputMode: 'numeric' }}
@@ -801,12 +811,17 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       if (val === '' || val === null) {
                         setRestInterval('');
                       } else {
-                        setRestInterval(Math.max(5, parseInt(val) || 5));
+                        const parsed = parseInt(val);
+                        setRestInterval(isNaN(parsed) ? '' : parsed);
                       }
                     }}
                     onBlur={(e) => {
-                      if (e.target.value === '' || e.target.value === null) {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
                         setRestInterval(15);
+                      } else {
+                        const parsed = parseInt(val);
+                        setRestInterval(Math.max(5, Math.min(300, isNaN(parsed) ? 15 : parsed)));
                       }
                     }}
                     inputProps={{ min: 5, max: 300, inputMode: 'numeric' }}
@@ -822,20 +837,24 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       if (val === '' || val === null) {
                         setRoundsPerSet('');
                       } else {
-                        const newRounds = Math.max(1, parseInt(val) || 1);
+                        const parsed = parseInt(val);
+                        const newRounds = isNaN(parsed) ? '' : parsed;
                         setRoundsPerSet(newRounds);
-                        // Adjust workIntervalNames array to match new rounds count
-                        setWorkIntervalNames(prev => {
-                          const newNames = [...prev];
-                          while (newNames.length < newRounds) {
-                            newNames.push('');
-                          }
-                          return newNames.slice(0, newRounds);
-                        });
+                        // Adjust workIntervalNames array to match new rounds count if valid
+                        if (newRounds !== '' && newRounds > 0) {
+                          setWorkIntervalNames(prev => {
+                            const newNames = [...prev];
+                            while (newNames.length < newRounds) {
+                              newNames.push('');
+                            }
+                            return newNames.slice(0, newRounds);
+                          });
+                        }
                       }
                     }}
                     onBlur={(e) => {
-                      if (e.target.value === '' || e.target.value === null) {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
                         setRoundsPerSet(8);
                         // Adjust workIntervalNames array to 8 rounds
                         setWorkIntervalNames(prev => {
@@ -844,6 +863,18 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                             newNames.push('');
                           }
                           return newNames.slice(0, 8);
+                        });
+                      } else {
+                        const parsed = parseInt(val);
+                        const clamped = Math.max(1, Math.min(50, isNaN(parsed) ? 8 : parsed));
+                        setRoundsPerSet(clamped);
+                        // Adjust workIntervalNames array to match clamped rounds
+                        setWorkIntervalNames(prev => {
+                          const newNames = [...prev];
+                          while (newNames.length < clamped) {
+                            newNames.push('');
+                          }
+                          return newNames.slice(0, clamped);
                         });
                       }
                     }}
@@ -861,12 +892,17 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       if (val === '' || val === null) {
                         setNumberOfSets('');
                       } else {
-                        setNumberOfSets(Math.max(1, parseInt(val) || 1));
+                        const parsed = parseInt(val);
+                        setNumberOfSets(isNaN(parsed) ? '' : parsed);
                       }
                     }}
                     onBlur={(e) => {
-                      if (e.target.value === '' || e.target.value === null) {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
                         setNumberOfSets(1);
+                      } else {
+                        const parsed = parseInt(val);
+                        setNumberOfSets(Math.max(1, Math.min(10, isNaN(parsed) ? 1 : parsed)));
                       }
                     }}
                     inputProps={{ min: 1, max: 10, inputMode: 'numeric' }}
@@ -919,12 +955,17 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                         if (val === '' || val === null) {
                           setRecoveryBetweenSets('');
                         } else {
-                          setRecoveryBetweenSets(Math.max(0, parseInt(val) || 0));
+                          const parsed = parseInt(val);
+                          setRecoveryBetweenSets(isNaN(parsed) ? '' : parsed);
                         }
                       }}
                       onBlur={(e) => {
-                        if (e.target.value === '' || e.target.value === null) {
+                        const val = e.target.value;
+                        if (val === '' || val === null) {
                           setRecoveryBetweenSets(0);
+                        } else {
+                          const parsed = parseInt(val);
+                          setRecoveryBetweenSets(Math.max(0, Math.min(300, isNaN(parsed) ? 0 : parsed)));
                         }
                       }}
                       inputProps={{ min: 0, max: 300, inputMode: 'numeric' }}
@@ -1024,12 +1065,17 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       if (val === '' || val === null) {
                         setPostDuration('');
                       } else {
-                        setPostDuration(Math.max(15, parseInt(val) || 15));
+                        const parsed = parseInt(val);
+                        setPostDuration(isNaN(parsed) ? '' : parsed);
                       }
                     }}
                     onBlur={(e) => {
-                      if (e.target.value === '' || e.target.value === null) {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
                         setPostDuration(45);
+                      } else {
+                        const parsed = parseInt(val);
+                        setPostDuration(Math.max(15, Math.min(300, isNaN(parsed) ? 45 : parsed)));
                       }
                     }}
                     inputProps={{ min: 15, max: 300, inputMode: 'numeric' }}
@@ -1111,12 +1157,17 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       if (val === '' || val === null) {
                         setCardioDuration('');
                       } else {
-                        setCardioDuration(Math.max(1, parseInt(val) || 1));
+                        const parsed = parseInt(val);
+                        setCardioDuration(isNaN(parsed) ? '' : parsed);
                       }
                     }}
                     onBlur={(e) => {
-                      if (e.target.value === '' || e.target.value === null) {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
                         setCardioDuration(20);
+                      } else {
+                        const parsed = parseInt(val);
+                        setCardioDuration(Math.max(1, Math.min(240, isNaN(parsed) ? 20 : parsed)));
                       }
                     }}
                     inputProps={{ min: 1, max: 240, inputMode: 'numeric' }}
@@ -1157,57 +1208,53 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 alignItems: 'center',
                 width: '100%',
               }}>
-                <svg
-                  width="280"
-                  height="280"
-                  style={{ transform: 'rotate(-90deg)' }}
-                >
-                  {/* Background circle */}
-                  <circle
-                    cx="140"
-                    cy="140"
-                    r={radius}
-                    stroke="#e0e0e0"
-                    strokeWidth="12"
-                    fill="none"
-                  />
-                  {/* Progress circle */}
-                  <circle
-                    cx="140"
-                    cy="140"
-                    r={radius}
-                    stroke={
-                      mode === TIMER_MODES.HIIT && isWorkPeriod
-                        ? '#4caf50'
-                        : mode === TIMER_MODES.HIIT && (isPrepPeriod || isRecoveryPeriod)
-                        ? '#ff9800'
-                        : mode === TIMER_MODES.HIIT && !isWorkPeriod
-                        ? '#f44336'
-                        : '#1976d2'
-                    }
-                    strokeWidth="12"
-                    fill="none"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
-                    style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-                  />
-                </svg>
+                {/* Show SVG ring only for Flow and Cardio modes */}
+                {mode !== TIMER_MODES.HIIT && (
+                  <svg
+                    width="280"
+                    height="280"
+                    style={{ transform: 'rotate(-90deg)' }}
+                  >
+                    {/* Background circle */}
+                    <circle
+                      cx="140"
+                      cy="140"
+                      r={radius}
+                      stroke="#e0e0e0"
+                      strokeWidth="12"
+                      fill="none"
+                    />
+                    {/* Progress circle */}
+                    <circle
+                      cx="140"
+                      cy="140"
+                      r={radius}
+                      stroke="#1976d2"
+                      strokeWidth="12"
+                      fill="none"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                      style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+                    />
+                  </svg>
+                )}
                 
                 {/* Timer in center */}
                 <Box
                   sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
+                    position: mode !== TIMER_MODES.HIIT ? 'absolute' : 'relative',
+                    top: mode !== TIMER_MODES.HIIT ? '50%' : 'auto',
+                    left: mode !== TIMER_MODES.HIIT ? '50%' : 'auto',
+                    transform: mode !== TIMER_MODES.HIIT ? 'translate(-50%, -50%)' : 'none',
                     textAlign: 'center',
+                    width: '100%',
                   }}
                 >
                   <Typography
                     variant="h1"
                     sx={{
-                      fontSize: '4rem',
+                      fontSize: mode === TIMER_MODES.HIIT ? { xs: '8rem', sm: '10rem', md: '12rem' } : '4rem',
                       fontWeight: 700,
                       color:
                         mode === TIMER_MODES.HIIT && isWorkPeriod
@@ -1226,7 +1273,14 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   
                   {mode === TIMER_MODES.HIIT && (
                     <>
-                      <Typography variant="h6" sx={{ mt: 1, fontWeight: 600 }}>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          mt: 2, 
+                          fontWeight: 600,
+                          fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+                        }}
+                      >
                         {isPrepPeriod 
                           ? intervalNames.prep 
                           : isRecoveryPeriod 
@@ -1236,34 +1290,34 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                           : 'rest'}
                       </Typography>
                       {isPrepPeriod && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
                           Up Next: {workIntervalNames[0] || 'work'}
                         </Typography>
                       )}
                       {isRecoveryPeriod && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
                           Up Next (Set {currentSet + 1}): {workIntervalNames[0] || 'work'}
                         </Typography>
                       )}
                       {!isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound < roundsPerSet && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
                           Up Next: {workIntervalNames[currentRound] || 'work'}
                         </Typography>
                       )}
                       {!isPrepPeriod && !isRecoveryPeriod && (
                         <>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}>
                             Round {currentRound} / {roundsPerSet}
                           </Typography>
                           {numberOfSets > 1 && (
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}>
                               Set {currentSet} / {numberOfSets}
                             </Typography>
                           )}
                         </>
                       )}
                       {sessionName && (
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                           {sessionName}
                         </Typography>
                       )}

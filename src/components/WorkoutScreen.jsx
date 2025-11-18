@@ -688,17 +688,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   sx={{ 
                     fontWeight: 700,
                     fontSize: { 
-                      xs: 'clamp(2rem, 8vw, 5rem)', 
-                      sm: 'clamp(2.5rem, 7vw, 5rem)', 
-                      md: 'clamp(3rem, 6vw, 5rem)' 
+                      xs: 'clamp(3rem, 12vw, 8rem) !important', 
+                      sm: 'clamp(4rem, 10vw, 8rem) !important', 
+                      md: 'clamp(5rem, 8vw, 8rem) !important' 
                     },
                     color: 'primary.main',
                     textAlign: 'center',
-                    lineHeight: 1.1,
+                    lineHeight: '1.1 !important',
                     px: { xs: 4, sm: 5 },
                     wordBreak: 'break-word',
                     mb: { xs: 1, sm: 1.5 },
-                    display: '-webkit-box',
+                    display: '-webkit-box !important',
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',

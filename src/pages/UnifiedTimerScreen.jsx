@@ -109,15 +109,16 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   // HIIT mode state
   const [workInterval, setWorkInterval] = useState(30); // seconds
   const [restInterval, setRestInterval] = useState(15); // seconds
-  const [rounds, setRounds] = useState(8);
-  const [currentRound, setCurrentRound] = useState(1);
+  const [roundsPerSet, setRoundsPerSet] = useState(8); // rounds per set
+  const [numberOfSets, setNumberOfSets] = useState(1); // number of sets
+  const [currentSet, setCurrentSet] = useState(1); // current set number
+  const [currentRound, setCurrentRound] = useState(1); // current round within set
   const [isWorkPeriod, setIsWorkPeriod] = useState(true);
   const [preparationInterval, setPreparationInterval] = useState(10); // seconds
-  const [recoveryInterval, setRecoveryInterval] = useState(0); // seconds, 0 means disabled
-  const [recoveryAfterRounds, setRecoveryAfterRounds] = useState(4); // recovery after N rounds
+  const [recoveryBetweenSets, setRecoveryBetweenSets] = useState(0); // seconds between sets, 0 means disabled
   const [sessionName, setSessionName] = useState('');
-  const [workIntervalNames, setWorkIntervalNames] = useState([]); // Array of custom exercise names for each work interval
-  const [intervalNames, setIntervalNames] = useState({ prep: 'Get Ready', recovery: 'Recovery' });
+  const [workIntervalNames, setWorkIntervalNames] = useState([]); // Array of custom exercise names for each round in a set
+  const [intervalNames, setIntervalNames] = useState({ prep: 'Get Ready', recovery: 'Set Break' });
   const [isPrepPeriod, setIsPrepPeriod] = useState(false);
   const [isRecoveryPeriod, setIsRecoveryPeriod] = useState(false);
   
@@ -152,8 +153,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   useEffect(() => {
     const loadPresets = async () => {
       try {
-        const yoga = getYogaPresets();
-        const hiit = getHiitPresets();
+        const yoga = await getYogaPresets();
+        const hiit = await getHiitPresets();
         setYogaPresets(yoga);
         setHiitPresets(hiit);
       } catch (error) {
@@ -218,8 +219,10 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 hasPlayedWarningRef.current = false;
                 return workInterval;
               } else if (isRecoveryPeriod) {
-                // End of recovery, back to work
+                // End of set break, start next set
                 setIsRecoveryPeriod(false);
+                setCurrentSet(currentSet + 1);
+                setCurrentRound(1);
                 setIsWorkPeriod(true);
                 audioService.playHighBeep();
                 hasPlayedWarningRef.current = false;
@@ -232,25 +235,36 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 return restInterval;
               } else {
                 // End of rest
-                if (currentRound < rounds) {
-                  // Check if we need a recovery break
-                  if (recoveryInterval > 0 && recoveryAfterRounds > 0 && currentRound % recoveryAfterRounds === 0) {
-                    setIsRecoveryPeriod(true);
-                    audioService.playTransitionBeep();
-                    hasPlayedWarningRef.current = false;
-                    return recoveryInterval;
-                  } else {
-                    // Continue to next round
-                    setCurrentRound(currentRound + 1);
-                    setIsWorkPeriod(true);
-                    audioService.playHighBeep();
-                    hasPlayedWarningRef.current = false;
-                    return workInterval;
-                  }
+                if (currentRound < roundsPerSet) {
+                  // Continue to next round in current set
+                  setCurrentRound(currentRound + 1);
+                  setIsWorkPeriod(true);
+                  audioService.playHighBeep();
+                  hasPlayedWarningRef.current = false;
+                  return workInterval;
                 } else {
-                  // HIIT session complete
-                  handleTimerComplete();
-                  return 0;
+                  // End of current set
+                  if (currentSet < numberOfSets) {
+                    // Check if we need a recovery break between sets
+                    if (recoveryBetweenSets > 0) {
+                      setIsRecoveryPeriod(true);
+                      audioService.playTransitionBeep();
+                      hasPlayedWarningRef.current = false;
+                      return recoveryBetweenSets;
+                    } else {
+                      // No recovery, go straight to next set
+                      setCurrentSet(currentSet + 1);
+                      setCurrentRound(1);
+                      setIsWorkPeriod(true);
+                      audioService.playHighBeep();
+                      hasPlayedWarningRef.current = false;
+                      return workInterval;
+                    }
+                  } else {
+                    // All sets complete
+                    handleTimerComplete();
+                    return 0;
+                  }
                 }
               }
             } else if (mode === TIMER_MODES.FLOW) {
@@ -285,16 +299,18 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, isPaused, mode, isWorkPeriod, isPrepPeriod, isRecoveryPeriod, currentRound, rounds, currentPoseIndex, selectedPoses, workInterval, restInterval, recoveryInterval, recoveryAfterRounds, handleTimerComplete]);
+  }, [isRunning, isPaused, mode, isWorkPeriod, isPrepPeriod, isRecoveryPeriod, currentRound, currentSet, roundsPerSet, numberOfSets, currentPoseIndex, selectedPoses, workInterval, restInterval, recoveryBetweenSets, handleTimerComplete]);
 
   const handleStart = () => {
     if (isConfiguring) {
       // Initialize based on mode
       if (mode === TIMER_MODES.HIIT) {
-        const totalRecoveries = recoveryInterval > 0 && recoveryAfterRounds > 0 
-          ? Math.floor(rounds / recoveryAfterRounds) * recoveryInterval 
+        // Calculate total time for all sets
+        const timePerSet = roundsPerSet * (workInterval + restInterval);
+        const totalSetBreaks = numberOfSets > 1 && recoveryBetweenSets > 0 
+          ? (numberOfSets - 1) * recoveryBetweenSets 
           : 0;
-        setTotalTime(preparationInterval + rounds * (workInterval + restInterval) + totalRecoveries);
+        setTotalTime(preparationInterval + (numberOfSets * timePerSet) + totalSetBreaks);
         
         // Start with preparation if enabled
         if (preparationInterval > 0) {
@@ -306,6 +322,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           setIsPrepPeriod(false);
           setIsWorkPeriod(true);
         }
+        setCurrentSet(1);
         setCurrentRound(1);
         setIsRecoveryPeriod(false);
       } else if (mode === TIMER_MODES.FLOW) {
@@ -338,6 +355,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
 
   const handleReset = () => {
     handleStop();
+    setCurrentSet(1);
     setCurrentRound(1);
     setIsWorkPeriod(true);
     setIsPrepPeriod(false);
@@ -373,16 +391,23 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setTimeRemaining(restInterval);
       } else if (isRecoveryPeriod) {
         setIsRecoveryPeriod(false);
+        setCurrentSet(currentSet + 1);
+        setCurrentRound(1);
         setIsWorkPeriod(true);
         setTimeRemaining(workInterval);
       } else {
         // End of rest
-        if (currentRound < rounds) {
-          if (recoveryInterval > 0 && recoveryAfterRounds > 0 && currentRound % recoveryAfterRounds === 0) {
+        if (currentRound < roundsPerSet) {
+          setCurrentRound(currentRound + 1);
+          setIsWorkPeriod(true);
+          setTimeRemaining(workInterval);
+        } else if (currentSet < numberOfSets) {
+          if (recoveryBetweenSets > 0) {
             setIsRecoveryPeriod(true);
-            setTimeRemaining(recoveryInterval);
+            setTimeRemaining(recoveryBetweenSets);
           } else {
-            setCurrentRound(currentRound + 1);
+            setCurrentSet(currentSet + 1);
+            setCurrentRound(1);
             setIsWorkPeriod(true);
             setTimeRemaining(workInterval);
           }
@@ -404,9 +429,26 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setIsWorkPeriod(false);
         setCurrentRound(currentRound - 1);
         setTimeRemaining(restInterval);
+      } else if (isWorkPeriod && currentRound === 1 && currentSet > 1) {
+        // Go back to previous set
+        if (recoveryBetweenSets > 0) {
+          setIsRecoveryPeriod(true);
+          setCurrentSet(currentSet - 1);
+          setCurrentRound(roundsPerSet);
+          setTimeRemaining(recoveryBetweenSets);
+        } else {
+          setCurrentSet(currentSet - 1);
+          setCurrentRound(roundsPerSet);
+          setIsWorkPeriod(false);
+          setTimeRemaining(restInterval);
+        }
       } else if (!isWorkPeriod && !isPrepPeriod && !isRecoveryPeriod) {
         setIsWorkPeriod(true);
         setTimeRemaining(workInterval);
+      } else if (isRecoveryPeriod) {
+        setIsRecoveryPeriod(false);
+        setIsWorkPeriod(false);
+        setTimeRemaining(restInterval);
       }
       audioService.playTransitionBeep();
     } else if (mode === TIMER_MODES.FLOW && currentPoseIndex > 0) {
@@ -432,7 +474,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           defaultDuration: poseDuration,
         };
         await saveYogaPreset(preset);
-        const updatedPresets = getYogaPresets();
+        const updatedPresets = await getYogaPresets();
         setYogaPresets(updatedPresets);
       } else if (mode === TIMER_MODES.HIIT) {
         const preset = {
@@ -440,16 +482,16 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           name: presetName,
           workInterval,
           restInterval,
-          rounds,
+          roundsPerSet,
+          numberOfSets,
           preparationInterval,
-          recoveryInterval,
-          recoveryAfterRounds,
+          recoveryBetweenSets,
           sessionName,
           workIntervalNames,
           intervalNames,
         };
         await saveHiitPreset(preset);
-        const updatedPresets = getHiitPresets();
+        const updatedPresets = await getHiitPresets();
         setHiitPresets(updatedPresets);
       }
 
@@ -470,13 +512,24 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     } else if (mode === TIMER_MODES.HIIT) {
       setWorkInterval(preset.workInterval || 30);
       setRestInterval(preset.restInterval || 15);
-      setRounds(preset.rounds || 8);
+      // Handle backward compatibility: if preset has 'rounds', it's old format
+      if (preset.rounds !== undefined && preset.roundsPerSet === undefined) {
+        setRoundsPerSet(preset.rounds);
+        setNumberOfSets(1);
+      } else {
+        setRoundsPerSet(preset.roundsPerSet || 8);
+        setNumberOfSets(preset.numberOfSets || 1);
+      }
       setPreparationInterval(preset.preparationInterval || 10);
-      setRecoveryInterval(preset.recoveryInterval || 0);
-      setRecoveryAfterRounds(preset.recoveryAfterRounds || 4);
+      // Handle backward compatibility for recovery
+      if (preset.recoveryInterval !== undefined && preset.recoveryBetweenSets === undefined) {
+        setRecoveryBetweenSets(preset.recoveryInterval || 0);
+      } else {
+        setRecoveryBetweenSets(preset.recoveryBetweenSets || 0);
+      }
       setSessionName(preset.sessionName || '');
       setWorkIntervalNames(preset.workIntervalNames || []);
-      setIntervalNames(preset.intervalNames || { prep: 'Get Ready', recovery: 'Recovery' });
+      setIntervalNames(preset.intervalNames || { prep: 'Get Ready', recovery: 'Set Break' });
     }
   };
 
@@ -485,11 +538,11 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     try {
       if (mode === TIMER_MODES.FLOW) {
         await deleteYogaPreset(presetId);
-        const updatedPresets = getYogaPresets();
+        const updatedPresets = await getYogaPresets();
         setYogaPresets(updatedPresets);
       } else if (mode === TIMER_MODES.HIIT) {
         await deleteHiitPreset(presetId);
-        const updatedPresets = getHiitPresets();
+        const updatedPresets = await getHiitPresets();
         setHiitPresets(updatedPresets);
       }
     } catch (error) {
@@ -540,11 +593,14 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
 
   const getProgress = () => {
     if (mode === TIMER_MODES.HIIT) {
-      const roundProgress = ((currentRound - 1) / rounds) * 100;
+      // Calculate progress based on sets and rounds
+      const totalRounds = numberOfSets * roundsPerSet;
+      const completedRounds = (currentSet - 1) * roundsPerSet + (currentRound - 1);
+      const roundProgress = (completedRounds / totalRounds) * 100;
       const withinRoundProgress = isWorkPeriod
         ? (workInterval - timeRemaining) / workInterval
         : (restInterval - timeRemaining) / restInterval;
-      return roundProgress + (withinRoundProgress * (100 / rounds));
+      return roundProgress + (withinRoundProgress * (100 / totalRounds));
     } else {
       return ((totalTime - timeRemaining) / totalTime) * 100;
     }
@@ -758,16 +814,16 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   />
                   
                   <TextField
-                    label="Number of Rounds"
+                    label="Rounds per Set"
                     type="number"
-                    value={rounds === null || rounds === undefined ? '' : rounds}
+                    value={roundsPerSet === null || roundsPerSet === undefined ? '' : roundsPerSet}
                     onChange={(e) => {
                       const val = e.target.value;
                       if (val === '' || val === null) {
-                        setRounds('');
+                        setRoundsPerSet('');
                       } else {
                         const newRounds = Math.max(1, parseInt(val) || 1);
-                        setRounds(newRounds);
+                        setRoundsPerSet(newRounds);
                         // Adjust workIntervalNames array to match new rounds count
                         setWorkIntervalNames(prev => {
                           const newNames = [...prev];
@@ -780,7 +836,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     }}
                     onBlur={(e) => {
                       if (e.target.value === '' || e.target.value === null) {
-                        setRounds(8);
+                        setRoundsPerSet(8);
                         // Adjust workIntervalNames array to 8 rounds
                         setWorkIntervalNames(prev => {
                           const newNames = [...prev];
@@ -793,18 +849,41 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     }}
                     inputProps={{ min: 1, max: 50, inputMode: 'numeric' }}
                     fullWidth
+                    helperText="Number of work/rest cycles in each set"
+                  />
+
+                  <TextField
+                    label="Number of Sets"
+                    type="number"
+                    value={numberOfSets === null || numberOfSets === undefined ? '' : numberOfSets}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || val === null) {
+                        setNumberOfSets('');
+                      } else {
+                        setNumberOfSets(Math.max(1, parseInt(val) || 1));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || e.target.value === null) {
+                        setNumberOfSets(1);
+                      }
+                    }}
+                    inputProps={{ min: 1, max: 10, inputMode: 'numeric' }}
+                    fullWidth
+                    helperText="Number of sets to perform (exercises repeat for each set)"
                   />
                   
                   {/* Exercise Names for Each Round */}
                   <Box>
                     <Typography variant="subtitle2" gutterBottom>
-                      Exercise Names (optional)
+                      Exercise Names per Round (optional)
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Name each work interval for audio/visual prompts. Leave blank to use &quot;work&quot; as default.
+                      Name each round&apos;s exercise. These will repeat for all sets. Leave blank to use &quot;work&quot; as default.
                     </Typography>
                     <Stack spacing={1.5}>
-                      {Array.from({ length: rounds || 0 }).map((_, index) => (
+                      {Array.from({ length: roundsPerSet || 0 }).map((_, index) => (
                         <HiitExerciseAutocomplete
                           key={index}
                           label={`Round ${index + 1} Exercise`}
@@ -830,54 +909,32 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     </Stack>
                   </Box>
                   
-                  <TextField
-                    label="Recovery Break (seconds, 0 to disable)"
-                    type="number"
-                    value={recoveryInterval === null || recoveryInterval === undefined ? '' : recoveryInterval}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setRecoveryInterval('');
-                      } else {
-                        setRecoveryInterval(Math.max(0, parseInt(val) || 0));
-                      }
-                    }}
-                    onBlur={(e) => {
-                      if (e.target.value === '' || e.target.value === null) {
-                        setRecoveryInterval(0);
-                      }
-                    }}
-                    inputProps={{ min: 0, max: 300, inputMode: 'numeric' }}
-                    fullWidth
-                    helperText="Longer break after several rounds"
-                  />
-                  
-                  {recoveryInterval > 0 && (
+                  {numberOfSets > 1 && (
                     <TextField
-                      label="Recovery Break Frequency (after every N rounds)"
+                      label="Set Break Duration (seconds, 0 to disable)"
                       type="number"
-                      value={recoveryAfterRounds === null || recoveryAfterRounds === undefined ? '' : recoveryAfterRounds}
+                      value={recoveryBetweenSets === null || recoveryBetweenSets === undefined ? '' : recoveryBetweenSets}
                       onChange={(e) => {
                         const val = e.target.value;
                         if (val === '' || val === null) {
-                          setRecoveryAfterRounds('');
+                          setRecoveryBetweenSets('');
                         } else {
-                          setRecoveryAfterRounds(Math.max(1, parseInt(val) || 1));
+                          setRecoveryBetweenSets(Math.max(0, parseInt(val) || 0));
                         }
                       }}
                       onBlur={(e) => {
                         if (e.target.value === '' || e.target.value === null) {
-                          setRecoveryAfterRounds(4);
+                          setRecoveryBetweenSets(0);
                         }
                       }}
-                      inputProps={{ min: 1, max: rounds, inputMode: 'numeric' }}
+                      inputProps={{ min: 0, max: 300, inputMode: 'numeric' }}
                       fullWidth
-                      helperText={`Recovery break every ${recoveryAfterRounds} rounds`}
+                      helperText="Rest period between sets"
                     />
                   )}
                   
                   <Typography variant="body2" color="text.secondary">
-                    Total Duration: {Math.floor((preparationInterval + rounds * (workInterval + restInterval) + (recoveryInterval > 0 && recoveryAfterRounds > 0 ? Math.floor(rounds / recoveryAfterRounds) * recoveryInterval : 0)) / 60)} minutes
+                    Total Duration: {Math.floor((preparationInterval + (numberOfSets * roundsPerSet) * (workInterval + restInterval) + (numberOfSets > 1 && recoveryBetweenSets > 0 ? (numberOfSets - 1) * recoveryBetweenSets : 0)) / 60)} minutes
                   </Typography>
                 </Stack>
               )}
@@ -1183,15 +1240,27 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                           Up Next: {workIntervalNames[0] || 'work'}
                         </Typography>
                       )}
-                      {!isPrepPeriod && !isWorkPeriod && currentRound < rounds && (
+                      {isRecoveryPeriod && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                          Up Next (Set {currentSet + 1}): {workIntervalNames[0] || 'work'}
+                        </Typography>
+                      )}
+                      {!isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound < roundsPerSet && (
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                           Up Next: {workIntervalNames[currentRound] || 'work'}
                         </Typography>
                       )}
-                      {!isPrepPeriod && (
-                        <Typography variant="body2" color="text.secondary">
-                          Round {currentRound} / {rounds}
-                        </Typography>
+                      {!isPrepPeriod && !isRecoveryPeriod && (
+                        <>
+                          <Typography variant="body2" color="text.secondary">
+                            Round {currentRound} / {roundsPerSet}
+                          </Typography>
+                          {numberOfSets > 1 && (
+                            <Typography variant="body2" color="text.secondary">
+                              Set {currentSet} / {numberOfSets}
+                            </Typography>
+                          )}
+                        </>
                       )}
                       {sessionName && (
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
@@ -1286,7 +1355,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                         color="primary"
                         sx={{ width: 56, height: 56 }}
                         disabled={
-                          (mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= rounds) ||
+                          (mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= roundsPerSet && currentSet >= numberOfSets) ||
                           (mode === TIMER_MODES.FLOW && currentPoseIndex >= selectedPoses.length - 1)
                         }
                       >

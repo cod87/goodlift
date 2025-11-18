@@ -9,6 +9,8 @@ import {
   saveWorkoutPlansToFirebase,
   saveActivePlanToFirebase,
   saveFavoriteWorkoutsToFirebase,
+  saveHiitPresetsToFirebase,
+  saveYogaPresetsToFirebase,
   loadUserDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
@@ -1553,11 +1555,32 @@ export const resetCurrentStreak = async () => {
  * Get saved yoga presets
  * @returns {Array} Array of yoga preset objects
  */
-export const getYogaPresets = () => {
+/**
+ * Get saved Yoga presets
+ * @returns {Promise<Array>} Array of Yoga preset objects
+ */
+export const getYogaPresets = async () => {
   try {
+    // Check if in guest mode first
     if (isGuestMode()) {
       return getGuestData('yoga_presets') || [];
     }
+
+    // Try Firebase first if user is authenticated
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData?.yogaPresets) {
+          // Update localStorage cache for offline access
+          localStorage.setItem(KEYS.YOGA_PRESETS, JSON.stringify(firebaseData.yogaPresets));
+          return firebaseData.yogaPresets;
+        }
+      } catch (error) {
+        console.error('Firebase fetch failed for yoga presets, using localStorage:', error);
+      }
+    }
+
+    // Fallback to localStorage
     const presets = localStorage.getItem(KEYS.YOGA_PRESETS);
     return presets ? JSON.parse(presets) : [];
   } catch (error) {
@@ -1576,7 +1599,7 @@ export const saveYogaPreset = async (preset) => {
       throw new Error('Preset must have a name');
     }
     
-    const presets = getYogaPresets();
+    const presets = await getYogaPresets();
     const existingIndex = presets.findIndex(p => p.id === preset.id);
     
     if (existingIndex >= 0) {
@@ -1597,6 +1620,11 @@ export const saveYogaPreset = async (preset) => {
       setGuestData('yoga_presets', presets);
     } else {
       localStorage.setItem(KEYS.YOGA_PRESETS, JSON.stringify(presets));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveYogaPresetsToFirebase(currentUserId, presets);
+      }
     }
     
     return presets;
@@ -1612,13 +1640,18 @@ export const saveYogaPreset = async (preset) => {
  */
 export const deleteYogaPreset = async (presetId) => {
   try {
-    const presets = getYogaPresets();
+    const presets = await getYogaPresets();
     const filteredPresets = presets.filter(p => p.id !== presetId);
     
     if (isGuestMode()) {
       setGuestData('yoga_presets', filteredPresets);
     } else {
       localStorage.setItem(KEYS.YOGA_PRESETS, JSON.stringify(filteredPresets));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveYogaPresetsToFirebase(currentUserId, filteredPresets);
+      }
     }
     
     return filteredPresets;
@@ -1630,13 +1663,30 @@ export const deleteYogaPreset = async (presetId) => {
 
 /**
  * Get saved HIIT presets
- * @returns {Array} Array of HIIT preset objects
+ * @returns {Promise<Array>} Array of HIIT preset objects
  */
-export const getHiitPresets = () => {
+export const getHiitPresets = async () => {
   try {
+    // Check if in guest mode first
     if (isGuestMode()) {
       return getGuestData('hiit_presets') || [];
     }
+
+    // Try Firebase first if user is authenticated
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData?.hiitPresets) {
+          // Update localStorage cache for offline access
+          localStorage.setItem(KEYS.HIIT_PRESETS, JSON.stringify(firebaseData.hiitPresets));
+          return firebaseData.hiitPresets;
+        }
+      } catch (error) {
+        console.error('Firebase fetch failed for HIIT presets, using localStorage:', error);
+      }
+    }
+
+    // Fallback to localStorage
     const presets = localStorage.getItem(KEYS.HIIT_PRESETS);
     return presets ? JSON.parse(presets) : [];
   } catch (error) {
@@ -1655,7 +1705,7 @@ export const saveHiitPreset = async (preset) => {
       throw new Error('Preset must have a name');
     }
     
-    const presets = getHiitPresets();
+    const presets = await getHiitPresets();
     const existingIndex = presets.findIndex(p => p.id === preset.id);
     
     if (existingIndex >= 0) {
@@ -1676,6 +1726,11 @@ export const saveHiitPreset = async (preset) => {
       setGuestData('hiit_presets', presets);
     } else {
       localStorage.setItem(KEYS.HIIT_PRESETS, JSON.stringify(presets));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveHiitPresetsToFirebase(currentUserId, presets);
+      }
     }
     
     return presets;
@@ -1691,13 +1746,18 @@ export const saveHiitPreset = async (preset) => {
  */
 export const deleteHiitPreset = async (presetId) => {
   try {
-    const presets = getHiitPresets();
+    const presets = await getHiitPresets();
     const filteredPresets = presets.filter(p => p.id !== presetId);
     
     if (isGuestMode()) {
       setGuestData('hiit_presets', filteredPresets);
     } else {
       localStorage.setItem(KEYS.HIIT_PRESETS, JSON.stringify(filteredPresets));
+      
+      // Sync to Firebase if user is logged in
+      if (currentUserId) {
+        await saveHiitPresetsToFirebase(currentUserId, filteredPresets);
+      }
     }
     
     return filteredPresets;

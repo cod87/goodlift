@@ -186,10 +186,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       
       if (availableWidth <= 0) return;
       
-      // Maximum font size we'll allow
-      const maxFontSize = 150;
+      // Maximum font size we'll allow - set high to allow largest possible
+      const maxFontSize = 500;
       const minFontSize = 32;
-      const maxLines = 2;
       
       // Split text at word boundaries for optimal line distribution
       const words = exerciseName.split(' ');
@@ -220,16 +219,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       const tempElement = document.createElement('div');
       tempElement.style.visibility = 'hidden';
       tempElement.style.position = 'absolute';
-      tempElement.style.width = availableWidth + 'px';
       tempElement.style.fontFamily = getComputedStyle(nameElement).fontFamily;
       tempElement.style.fontWeight = '700';
       tempElement.style.lineHeight = '1.2';
-      tempElement.style.whiteSpace = 'pre-wrap';
+      tempElement.style.whiteSpace = 'nowrap';
       tempElement.style.textAlign = 'center';
-      tempElement.textContent = bestLayout;
       document.body.appendChild(tempElement);
       
-      // Binary search for the largest font size that fits in maxLines
+      // Get the lines to measure
+      const lines = useTwoLines ? bestLayout.split('\n') : [exerciseName];
+      
+      // Binary search for the largest font size where the longest line fits
       let low = minFontSize;
       let high = maxFontSize;
       let bestSize = minFontSize;
@@ -238,11 +238,18 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
         const mid = Math.floor((low + high) / 2);
         tempElement.style.fontSize = mid + 'px';
         
-        const lineHeight = mid * 1.2;
-        const elementHeight = tempElement.offsetHeight;
-        const lines = Math.ceil(elementHeight / lineHeight);
+        // Check if all lines fit within available width
+        let allLinesFit = true;
+        for (const line of lines) {
+          tempElement.textContent = line;
+          const lineWidth = tempElement.offsetWidth;
+          if (lineWidth > availableWidth) {
+            allLinesFit = false;
+            break;
+          }
+        }
         
-        if (lines <= maxLines) {
+        if (allLinesFit) {
           // This size fits, try larger
           bestSize = mid;
           low = mid + 1;

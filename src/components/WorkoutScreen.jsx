@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatTime, detectWorkoutType } from '../utils/helpers';
+import { detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
-import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
+import { Box, LinearProgress, Typography, Snackbar, Alert, Button } from '@mui/material';
+import { Celebration } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
+import ExerciseCard from './Workout/ExerciseCard';
 
 /**
  * WorkoutScreen component manages the active workout session
@@ -22,20 +23,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   // Store initial target values for each exercise at workout start
   const [initialTargets, setInitialTargets] = useState({});
-  // Progressive overload suggestion state
-  const [progressiveOverloadSuggestion, setProgressiveOverloadSuggestion] = useState(null);
-  const [showSuggestion, setShowSuggestion] = useState(false);
-  // Current set weight and reps (controlled inputs)
-  const [currentWeight, setCurrentWeight] = useState('');
-  const [currentReps, setCurrentReps] = useState('');
   // Track exercises where weight was changed during workout (to disable progressive overload)
   const [exercisesWithChangedWeight, setExercisesWithChangedWeight] = useState(new Set());
   // Track the updated weight for each exercise (for propagation to subsequent sets)
   const [updatedWeights, setUpdatedWeights] = useState({});
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
-  const exerciseNameRef = useRef(null);
-  const [exerciseFontSize, setExerciseFontSize] = useState('3rem');
   
   // Stretching phase state
   const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
@@ -150,14 +143,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       // This ensures we don't show stale values from a previous exercise
       setPrevWeight(targetWeight);
       setTargetReps(initialTarget?.reps ?? null);
-      
-      // Set controlled input values
-      setCurrentWeight(targetWeight ?? '');
-      setCurrentReps(initialTarget?.reps ?? '');
-      
-      // Reset suggestion when changing exercises
-      setProgressiveOverloadSuggestion(null);
-      setShowSuggestion(false);
     }
     
     // Scroll to top when exercise changes
@@ -166,85 +151,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
-  const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
 
-  // Calculate responsive font size for exercise name to fit up to 2 lines
-  useEffect(() => {
-    const calculateFontSize = () => {
-      const nameElement = exerciseNameRef.current;
-      if (!nameElement || !exerciseName) return;
-
-      // Get the container width (accounting for padding)
-      const container = nameElement.parentElement;
-      if (!container) return;
-      
-      const containerWidth = container.clientWidth;
-      const paddingX = window.innerWidth < 600 ? 32 : 64; // xs: 2rem, sm: 4rem (match Typography px)
-      const availableWidth = containerWidth - (paddingX * 2);
-      
-      if (availableWidth <= 0) return;
-      
-      // Maximum font size we'll allow
-      const maxFontSize = 150;
-      const minFontSize = 32;
-      const maxLines = 2;
-      
-      // Create a temporary element to measure text dimensions
-      const tempElement = document.createElement('div');
-      tempElement.style.visibility = 'hidden';
-      tempElement.style.position = 'absolute';
-      tempElement.style.width = availableWidth + 'px';
-      tempElement.style.fontFamily = getComputedStyle(nameElement).fontFamily;
-      tempElement.style.fontWeight = '700';
-      tempElement.style.lineHeight = '1.2';
-      tempElement.style.wordBreak = 'break-word';
-      tempElement.style.overflowWrap = 'break-word';
-      tempElement.style.textAlign = 'center';
-      tempElement.textContent = exerciseName;
-      document.body.appendChild(tempElement);
-      
-      // Binary search for the largest font size that fits in maxLines
-      let low = minFontSize;
-      let high = maxFontSize;
-      let bestSize = minFontSize;
-      
-      while (low <= high) {
-        const mid = Math.floor((low + high) / 2);
-        tempElement.style.fontSize = mid + 'px';
-        
-        const lineHeight = mid * 1.2;
-        const elementHeight = tempElement.offsetHeight;
-        const lines = Math.ceil(elementHeight / lineHeight);
-        
-        if (lines <= maxLines) {
-          // This size fits, try larger
-          bestSize = mid;
-          low = mid + 1;
-        } else {
-          // Too big, try smaller
-          high = mid - 1;
-        }
-      }
-      
-      document.body.removeChild(tempElement);
-      setExerciseFontSize(`${bestSize}px`);
-    };
-
-    // Calculate on mount and when exercise changes
-    calculateFontSize();
+  // Calculate progressive overload suggestion for current exercise
+  const progressiveOverloadSuggestion = useMemo(() => {
+    if (!exerciseName || !targetReps || !prevWeight) return null;
+    if (exercisesWithChangedWeight.has(exerciseName)) return null;
     
-    // Recalculate on window resize
-    const handleResize = () => calculateFontSize();
-    window.addEventListener('resize', handleResize);
-    
-    // Small delay to ensure DOM is ready
-    const timeout = setTimeout(calculateFontSize, 100);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(timeout);
-    };
-  }, [exerciseName]);
+    return calculateProgressiveOverload(prevWeight, targetReps, targetReps);
+  }, [exerciseName, targetReps, prevWeight, exercisesWithChangedWeight]);
 
   /**
    * Apply conditional persist rules after workout completion
@@ -353,22 +267,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
     onComplete(finalData);
   };
 
-  const handleNext = async (e) => {
-    e.preventDefault();
-    const form = e.target.closest('form') || document.querySelector('form');
-    const weightInput = form?.querySelector('#weight-select');
-    const repsInput = form?.querySelector('#reps-select');
-    
-    if (!weightInput || !repsInput) {
-      console.error('Form inputs not found');
-      return;
-    }
-    
+  const handleNext = async (data) => {
     // Parse and validate weight (should be non-negative)
-    const weight = Math.max(0, parseFloat(weightInput.value) || 0);
+    const weight = Math.max(0, parseFloat(data.weight) || 0);
     
     // Parse and validate reps (should be positive integer)
-    const parsedReps = parseInt(repsInput.value, 10);
+    const parsedReps = parseInt(data.reps, 10);
     const reps = (parsedReps > 0) ? parsedReps : 0;
     
     const exerciseName = currentStep.exercise['Exercise Name'];
@@ -390,17 +294,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
     const updatedWorkoutData = [...workoutData, newData];
     setWorkoutData(updatedWorkoutData);
-    
-    // Calculate and show progressive overload suggestion only if weight wasn't changed
-    if (targetReps && reps > 0 && !exercisesWithChangedWeight.has(exerciseName)) {
-      const suggestion = calculateProgressiveOverload(weight, reps, targetReps);
-      if (suggestion) {
-        setProgressiveOverloadSuggestion(suggestion);
-        setShowSuggestion(true);
-        // Auto-hide suggestion after 5 seconds
-        setTimeout(() => setShowSuggestion(false), 5000);
-      }
-    }
     
     if (currentStepIndex + 1 >= workoutSequence.length) {
       // Exercises complete - check if cooldown is enabled, otherwise complete
@@ -482,27 +375,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
     } catch (error) {
       console.error('Error saving to favorites:', error);
       alert('Failed to save workout to favorites');
-    }
-  };
-
-  // Helper functions for +/- buttons
-  const adjustWeight = (delta) => {
-    const current = parseFloat(currentWeight) || 0;
-    const newWeight = Math.max(0, current + delta);
-    // Round to 1 decimal place to handle 2.5lb increments cleanly
-    setCurrentWeight(newWeight.toFixed(1));
-  };
-
-  const adjustReps = (delta) => {
-    const current = parseInt(currentReps, 10) || 0;
-    const newReps = Math.max(0, current + delta);
-    setCurrentReps(newReps.toString());
-  };
-
-  const applySuggestion = () => {
-    if (progressiveOverloadSuggestion?.suggestedWeight) {
-      setCurrentWeight(progressiveOverloadSuggestion.suggestedWeight.toString());
-      setShowSuggestion(false);
     }
   };
 
@@ -632,35 +504,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       }}
     >
       <Box sx={{ mb: 1.5, px: { xs: 0.5, sm: 0 } }}>
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          mb: 0.5,
-          gap: 1
-        }}>
-          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
-            {formatTime(elapsedTime)}
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
-            <IconButton 
-              onClick={handleSaveToFavorites}
-              disabled={isFavorite}
-              size="small"
-              sx={{ 
-                color: isFavorite ? 'warning.main' : 'action.active',
-                '&:hover': { color: 'warning.main' },
-                p: { xs: 0.5, sm: 1 }
-              }}
-              aria-label="Save to favorites"
-            >
-              {isFavorite ? <Star sx={{ fontSize: { xs: 20, sm: 24 } }} /> : <StarBorder sx={{ fontSize: { xs: 20, sm: 24 } }} />}
-            </IconButton>
-            <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
-              {currentStepIndex + 1}/{workoutSequence.length}
-            </Typography>
-          </Box>
-        </Box>
         <LinearProgress 
           variant="determinate" 
           value={(currentStepIndex / workoutSequence.length) * 100}
@@ -678,373 +521,37 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       
       <div className="exercise-card-container">
         <AnimatePresence mode="wait">
-          <motion.form
+          <motion.div
             key={currentStepIndex}
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.3 }}
-            onSubmit={handleNext}
           >
-            <motion.div
-              className="exercise-card"
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Top Controls - Help icon on left, End Workout Controls on right */}
-              <Box sx={{ 
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 1,
-                mb: 2
-              }}>
-                {/* Help Icon - Left side */}
-                <IconButton
-                  component="a"
-                  href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    minWidth: '44px',
-                    minHeight: '44px',
-                    color: 'primary.main',
-                    border: '2px solid',
-                    borderColor: 'primary.main',
-                    borderRadius: '8px',
-                    '&:hover': {
-                      backgroundColor: 'rgba(19, 70, 134, 0.08)',
-                    }
-                  }}
-                  aria-label={`Search for ${exerciseName} form guide`}
-                >
-                  <HelpOutline sx={{ fontSize: 24 }} />
-                </IconButton>
-                
-                {/* End Workout Controls - Right side */}
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  {workoutData.length > 0 && (
-                    <IconButton
-                      onClick={handlePartialComplete}
-                      sx={{
-                        minWidth: '44px',
-                        minHeight: '44px',
-                        color: 'rgb(254, 178, 26)',
-                        border: '2px solid rgb(254, 178, 26)',
-                        borderRadius: '8px',
-                        '&:hover': {
-                          backgroundColor: 'rgba(254, 178, 26, 0.08)',
-                        },
-                      }}
-                      aria-label="End and save workout"
-                    >
-                      <Save />
-                    </IconButton>
-                  )}
-                  <IconButton
-                    onClick={handleExit}
-                    sx={{
-                      minWidth: '44px',
-                      minHeight: '44px',
-                      color: 'rgb(237, 63, 39)',
-                      border: '2px solid rgb(237, 63, 39)',
-                      borderRadius: '8px',
-                      '&:hover': {
-                        backgroundColor: 'rgba(237, 63, 39, 0.08)',
-                      },
-                    }}
-                    aria-label="End workout without saving"
-                  >
-                    <ExitToApp />
-                  </IconButton>
-                </Box>
-              </Box>
-
-              {/* Exercise name - responsive sizing */}
-              <Box sx={{ mb: 2 }}>
-                <Typography 
-                  ref={exerciseNameRef}
-                  variant="h3" 
-                  component="h2"
-                  sx={{ 
-                    fontWeight: 700,
-                    fontSize: exerciseFontSize,
-                    color: 'primary.main',
-                    textAlign: 'center',
-                    lineHeight: '1.2 !important',
-                    px: { xs: 2, sm: 4 },
-                    wordBreak: 'break-word',
-                    overflowWrap: 'break-word',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    mb: { xs: 1, sm: 1.5 },
-                  }}
-                >
-                  {exerciseName}
-                </Typography>
-              </Box>
-              
-              {/* Set X of Y indicator with smaller styling */}
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                gap: 1,
-                my: { xs: 1, sm: 1.5 }
-              }}>
-                <Chip 
-                  label={`Set ${currentStep.setNumber} of ${setsPerSuperset}`}
-                  color="primary"
-                  size="small"
-                  sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.85rem' }, minHeight: '32px', px: 1.5 }}
-                />
-              </Box>
-              
-              {(prevWeight !== null || targetReps !== null) && (
-                <motion.p
-                  className="prev-weight"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  Target: {prevWeight ?? '–'} lbs • {targetReps ?? '–'} reps
-                </motion.p>
-              )}
-              
-              {/* Progressive Overload Suggestion */}
-              <AnimatePresence>
-                {showSuggestion && progressiveOverloadSuggestion && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                  >
-                    <Alert 
-                      severity={progressiveOverloadSuggestion.type === 'excellent' ? 'success' : 'info'}
-                      icon={<TrendingUp />}
-                      action={
-                        progressiveOverloadSuggestion.suggestedWeight !== parseFloat(currentWeight) && (
-                          <Button 
-                            color="inherit" 
-                            size="small" 
-                            onClick={applySuggestion}
-                            sx={{ minHeight: '44px' }}
-                          >
-                            Apply
-                          </Button>
-                        )
-                      }
-                      sx={{ mb: 2, minHeight: '44px' }}
-                    >
-                      {progressiveOverloadSuggestion.message}
-                    </Alert>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              
-              <div className="input-row">
-                <div className="input-group">
-                  <label htmlFor="weight-select">Weight (lbs){isBodyweight && ' (N/A)'}</label>
-                  <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, alignItems: 'center' }}>
-                    <IconButton 
-                      onClick={() => adjustWeight(-2.5)}
-                      disabled={isBodyweight}
-                      size="small"
-                      sx={{ 
-                        bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
-                        minWidth: { xs: '36px', sm: '40px' },
-                        minHeight: { xs: '36px', sm: '40px' },
-                        p: { xs: 0.5, sm: 1 },
-                        '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
-                      }}
-                    >
-                      <Remove sx={{ fontSize: { xs: 18, sm: 20 } }} />
-                    </IconButton>
-                    <input
-                      id="weight-select"
-                      type="tel"
-                      inputMode="decimal"
-                      pattern="[0-9]*([.,][0-9]+)?"
-                      step="2.5"
-                      min="0"
-                      max="500"
-                      className="exercise-input"
-                      value={currentWeight}
-                      onChange={(e) => setCurrentWeight(e.target.value)}
-                      placeholder="–"
-                      disabled={isBodyweight}
-                      aria-label="Weight in pounds"
-                      onFocus={(e) => {
-                        e.target.select();
-                        const rect = e.target.getBoundingClientRect();
-                        const inputBottom = rect.bottom;
-                        const viewportHeight = window.innerHeight;
-                        const threshold = viewportHeight * 0.55;
-                        
-                        if (inputBottom > threshold) {
-                          setTimeout(() => {
-                            e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            setTimeout(() => {
-                              window.scrollBy({ top: -80, behavior: 'smooth' });
-                            }, 100);
-                          }, 300);
-                        }
-                      }}
-                      style={{
-                        width: '100%',
-                        minWidth: '80px',
-                        padding: '12px',
-                        minHeight: '44px',
-                        borderRadius: '8px',
-                        border: '2px solid var(--color-border)',
-                        fontSize: '1.1rem',
-                        fontFamily: 'var(--font-body)',
-                        backgroundColor: isBodyweight ? 'var(--color-disabled)' : 'var(--color-surface)',
-                        color: isBodyweight ? 'var(--color-text-disabled)' : 'var(--color-text)',
-                        cursor: isBodyweight ? 'not-allowed' : 'text',
-                        opacity: isBodyweight ? 0.6 : 1,
-                      }}
-                    />
-                    <IconButton 
-                      onClick={() => adjustWeight(2.5)}
-                      disabled={isBodyweight}
-                      size="small"
-                      sx={{ 
-                        bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
-                        minWidth: { xs: '36px', sm: '40px' },
-                        minHeight: { xs: '36px', sm: '40px' },
-                        p: { xs: 0.5, sm: 1 },
-                        '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
-                      }}
-                    >
-                      <Add sx={{ fontSize: { xs: 18, sm: 20 } }} />
-                    </IconButton>
-                  </Box>
-                </div>
-                <div className="input-group">
-                  <label htmlFor="reps-select">Reps</label>
-                  <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, alignItems: 'center' }}>
-                    <IconButton 
-                      onClick={() => adjustReps(-1)}
-                      size="small"
-                      sx={{ 
-                        bgcolor: 'action.hover',
-                        minWidth: { xs: '36px', sm: '40px' },
-                        minHeight: { xs: '36px', sm: '40px' },
-                        p: { xs: 0.5, sm: 1 },
-                        '&:hover': { bgcolor: 'action.selected' }
-                      }}
-                    >
-                      <Remove sx={{ fontSize: { xs: 18, sm: 20 } }} />
-                    </IconButton>
-                    <input
-                      id="reps-select"
-                      type="number"
-                      inputMode="numeric"
-                      step="1"
-                      min="1"
-                      max="20"
-                      className="exercise-input"
-                      value={currentReps}
-                      onChange={(e) => setCurrentReps(e.target.value)}
-                      placeholder="–"
-                      aria-label="Repetitions"
-                      onFocus={(e) => {
-                        e.target.select();
-                        const rect = e.target.getBoundingClientRect();
-                        const inputBottom = rect.bottom;
-                        const viewportHeight = window.innerHeight;
-                        const threshold = viewportHeight * 0.55;
-                        
-                        if (inputBottom > threshold) {
-                          setTimeout(() => {
-                            e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            setTimeout(() => {
-                              window.scrollBy({ top: -80, behavior: 'smooth' });
-                            }, 100);
-                          }, 300);
-                        }
-                      }}
-                      style={{
-                        width: '100%',
-                        minWidth: '80px',
-                        padding: '12px',
-                        minHeight: '44px',
-                        borderRadius: '8px',
-                        border: '2px solid var(--color-border)',
-                        fontSize: '1.1rem',
-                        fontFamily: 'var(--font-body)',
-                        backgroundColor: 'var(--color-surface)',
-                        color: 'var(--color-text)',
-                      }}
-                    />
-                    <IconButton 
-                      onClick={() => adjustReps(1)}
-                      size="small"
-                      sx={{ 
-                        bgcolor: 'action.hover',
-                        minWidth: { xs: '36px', sm: '40px' },
-                        minHeight: { xs: '36px', sm: '40px' },
-                        p: { xs: 0.5, sm: 1 },
-                        '&:hover': { bgcolor: 'action.selected' }
-                      }}
-                    >
-                      <Add sx={{ fontSize: { xs: 18, sm: 20 } }} />
-                    </IconButton>
-                  </Box>
-                </div>
-              </div>
-              
-              {/* Quick Actions */}
-              <Box sx={{ display: 'flex', gap: 1, mt: 2, mb: 2 }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<SkipNext />}
-                  onClick={skipExercise}
-                  sx={{ flex: 1, minHeight: '44px' }}
-                >
-                  Skip Exercise
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<SwapHoriz />}
-                  onClick={swapExercise}
-                  sx={{ flex: 1, minHeight: '44px' }}
-                >
-                  Swap Exercise
-                </Button>
-              </Box>
-              
-              <div className="workout-nav-buttons">
-                {currentStepIndex > 0 && (
-                  <motion.button
-                    type="button"
-                    className="back-btn"
-                    onClick={handleBack}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{ minHeight: '44px' }}
-                  >
-                    <ArrowBack sx={{ fontSize: 18, mr: 0.5 }} /> Back
-                  </motion.button>
-                )}
-                <motion.button
-                  type="submit"
-                  className="next-btn"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{ minHeight: '44px' }}
-                >
-                  Next <ArrowForward sx={{ fontSize: 18, ml: 0.5 }} />
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.form>
+            <ExerciseCard
+              exerciseName={exerciseName}
+              setNumber={currentStep.setNumber}
+              totalSets={setsPerSuperset}
+              lastWeight={prevWeight}
+              lastReps={targetReps}
+              suggestedWeight={progressiveOverloadSuggestion?.suggestedWeight}
+              suggestedReps={progressiveOverloadSuggestion?.suggestedReps}
+              showSuggestions={!exercisesWithChangedWeight.has(exerciseName)}
+              onSubmit={handleNext}
+              onBack={currentStepIndex > 0 ? handleBack : null}
+              showBack={currentStepIndex > 0}
+              elapsedTime={elapsedTime}
+              currentStep={currentStepIndex + 1}
+              totalSteps={workoutSequence.length}
+              isFavorite={isFavorite}
+              onToggleFavorite={handleSaveToFavorites}
+              onSkip={skipExercise}
+              onSwap={swapExercise}
+              onPartialComplete={workoutData.length > 0 ? handlePartialComplete : null}
+              onExit={handleExit}
+              showPartialComplete={workoutData.length > 0}
+            />
+          </motion.div>
         </AnimatePresence>
       </div>
       

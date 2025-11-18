@@ -564,6 +564,25 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
             {formatTime(elapsedTime)}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
+            <IconButton
+              component="a"
+              href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="small"
+              sx={{
+                color: 'primary.main',
+                minWidth: '44px',
+                minHeight: '44px',
+                p: { xs: 0.5, sm: 1 },
+                '&:hover': {
+                  backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                }
+              }}
+              aria-label={`Search for ${exerciseName} form guide`}
+            >
+              <HelpOutline sx={{ fontSize: { xs: 20, sm: 24 } }} />
+            </IconButton>
             <IconButton 
               onClick={handleSaveToFavorites}
               disabled={isFavorite}
@@ -613,12 +632,11 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Exercise name with Google search link */}
+              {/* Exercise name */}
               <Box sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center',
-                gap: 1,
                 mb: 2
               }}>
                 <Typography 
@@ -626,30 +644,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   component="h2"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: { xs: '1.75rem', sm: '2.5rem' },
+                    fontSize: { xs: '2.5rem', sm: '3.5rem' },
                     color: 'primary.main',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    flex: 1
                   }}
                 >
                   {exerciseName}
                 </Typography>
-                <IconButton
-                  component="a"
-                  href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    color: 'primary.main',
-                    minWidth: '44px',
-                    minHeight: '44px',
-                    '&:hover': {
-                      backgroundColor: 'rgba(19, 70, 134, 0.08)',
-                    }
-                  }}
-                  aria-label={`Search for ${exerciseName} form guide`}
-                >
-                  <HelpOutline sx={{ fontSize: { xs: 28, sm: 36 } }} />
-                </IconButton>
               </Box>
               
               {/* Set X of Y indicator with enhanced styling */}

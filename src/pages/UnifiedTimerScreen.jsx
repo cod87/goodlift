@@ -1254,7 +1254,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   <Typography
                     variant="h1"
                     sx={{
-                      fontSize: mode === TIMER_MODES.HIIT ? { xs: '8rem', sm: '10rem', md: '12rem' } : '4rem',
+                      fontSize: mode === TIMER_MODES.HIIT ? { xs: 'clamp(3rem, 15vw, 8rem)', sm: 'clamp(5rem, 20vw, 10rem)', md: '12rem' } : '4rem',
                       fontWeight: 700,
                       color:
                         mode === TIMER_MODES.HIIT && isWorkPeriod

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp, HelpOutline } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
 
@@ -546,7 +546,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   return (
     <div className="screen"
       style={{
-        paddingBottom: '100px',
         padding: '0.5rem',
         maxWidth: '100vw',
         boxSizing: 'border-box',
@@ -613,6 +612,49 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
             >
+              {/* End Workout Controls - Right Justified at Top */}
+              <Box sx={{ 
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 1,
+                mb: 2
+              }}>
+                <IconButton
+                  onClick={handleExit}
+                  sx={{
+                    minWidth: '44px',
+                    minHeight: '44px',
+                    color: 'rgb(237, 63, 39)',
+                    border: '2px solid rgb(237, 63, 39)',
+                    borderRadius: '8px',
+                    '&:hover': {
+                      backgroundColor: 'rgba(237, 63, 39, 0.08)',
+                    },
+                  }}
+                  aria-label="End workout without saving"
+                >
+                  <ExitToApp />
+                </IconButton>
+                {workoutData.length > 0 && (
+                  <IconButton
+                    onClick={handlePartialComplete}
+                    sx={{
+                      minWidth: '44px',
+                      minHeight: '44px',
+                      color: 'rgb(254, 178, 26)',
+                      border: '2px solid rgb(254, 178, 26)',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(254, 178, 26, 0.08)',
+                      },
+                    }}
+                    aria-label="End and save workout"
+                  >
+                    <Save />
+                  </IconButton>
+                )}
+              </Box>
+
               {/* Exercise name with Google search icon in top right */}
               <Box sx={{ 
                 position: 'relative',
@@ -645,13 +687,22 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   component="h2"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: { xs: 'clamp(2.5rem, 14vw, 6rem)', sm: 'clamp(3.5rem, 10vw, 6rem)', md: '5rem' },
+                    fontSize: { 
+                      xs: 'clamp(3rem, 12vw, 8rem) !important', 
+                      sm: 'clamp(4rem, 10vw, 8rem) !important', 
+                      md: 'clamp(5rem, 8vw, 8rem) !important' 
+                    },
                     color: 'primary.main',
                     textAlign: 'center',
-                    lineHeight: 1.1,
+                    lineHeight: '1.1 !important',
                     px: { xs: 4, sm: 5 },
                     wordBreak: 'break-word',
-                    mb: { xs: 1, sm: 1.5 }
+                    mb: { xs: 1, sm: 1.5 },
+                    display: '-webkit-box !important',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                   }}
                 >
                   {exerciseName}
@@ -917,38 +968,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
             </motion.div>
           </motion.form>
         </AnimatePresence>
-      </div>
-      
-      <div className="workout-controls">
-        <motion.button
-          className="exit-workout-btn"
-          onClick={handleExit}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          style={{
-            background: 'rgb(237, 63, 39)',
-            marginBottom: '12px',
-            color: 'white',
-            minHeight: '44px',
-          }}
-        >
-          <ExitToApp sx={{ fontSize: 18, mr: 0.5 }} /> End Workout
-        </motion.button>
-        {workoutData.length > 0 && (
-          <motion.button
-            className="partial-complete-btn"
-            onClick={handlePartialComplete}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            style={{
-              background: 'rgb(254, 178, 26)',
-              color: 'rgb(19, 70, 134)',
-              minHeight: '44px',
-            }}
-          >
-            End and Save
-          </motion.button>
-        )}
       </div>
       
       <Snackbar

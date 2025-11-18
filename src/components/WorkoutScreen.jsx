@@ -564,25 +564,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
             {formatTime(elapsedTime)}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
-            <IconButton
-              component="a"
-              href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              size="small"
-              sx={{
-                color: 'primary.main',
-                minWidth: '44px',
-                minHeight: '44px',
-                p: { xs: 0.5, sm: 1 },
-                '&:hover': {
-                  backgroundColor: 'rgba(19, 70, 134, 0.08)',
-                }
-              }}
-              aria-label={`Search for ${exerciseName} form guide`}
-            >
-              <HelpOutline sx={{ fontSize: { xs: 20, sm: 24 } }} />
-            </IconButton>
             <IconButton 
               onClick={handleSaveToFavorites}
               disabled={isFavorite}
@@ -632,22 +613,44 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Exercise name */}
+              {/* Exercise name with Google search icon in top right */}
               <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
+                position: 'relative',
                 mb: 2
               }}>
+                <IconButton
+                  component="a"
+                  href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  size="small"
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    color: 'primary.main',
+                    minWidth: '44px',
+                    minHeight: '44px',
+                    zIndex: 1,
+                    '&:hover': {
+                      backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                    }
+                  }}
+                  aria-label={`Search for ${exerciseName} form guide`}
+                >
+                  <HelpOutline sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                </IconButton>
                 <Typography 
                   variant="h3" 
                   component="h2"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: { xs: '2.5rem', sm: '3.5rem' },
+                    fontSize: { xs: 'clamp(2rem, 12vw, 4.5rem)', sm: 'clamp(3rem, 8vw, 5rem)', md: '4.5rem' },
                     color: 'primary.main',
                     textAlign: 'center',
-                    flex: 1
+                    lineHeight: 1.2,
+                    px: { xs: 4, sm: 5 },
+                    wordBreak: 'break-word'
                   }}
                 >
                   {exerciseName}

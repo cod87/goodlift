@@ -645,30 +645,32 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   component="h2"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: { xs: 'clamp(2rem, 12vw, 4.5rem)', sm: 'clamp(3rem, 8vw, 5rem)', md: '4.5rem' },
+                    fontSize: { xs: 'clamp(2.5rem, 14vw, 6rem)', sm: 'clamp(3.5rem, 10vw, 6rem)', md: '5rem' },
                     color: 'primary.main',
                     textAlign: 'center',
-                    lineHeight: 1.2,
+                    lineHeight: 1.1,
                     px: { xs: 4, sm: 5 },
-                    wordBreak: 'break-word'
+                    wordBreak: 'break-word',
+                    mb: { xs: 1, sm: 1.5 }
                   }}
                 >
                   {exerciseName}
                 </Typography>
               </Box>
               
-              {/* Set X of Y indicator with enhanced styling */}
+              {/* Set X of Y indicator with smaller styling */}
               <Box sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center',
                 gap: 1,
-                my: 2 
+                my: { xs: 1, sm: 1.5 }
               }}>
                 <Chip 
                   label={`Set ${currentStep.setNumber} of ${setsPerSuperset}`}
                   color="primary"
-                  sx={{ fontWeight: 600, fontSize: '1rem', minHeight: '44px', px: 2 }}
+                  size="small"
+                  sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.85rem' }, minHeight: '32px', px: 1.5 }}
                 />
               </Box>
               
@@ -717,19 +719,20 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               <div className="input-row">
                 <div className="input-group">
                   <label htmlFor="weight-select">Weight (lbs){isBodyweight && ' (N/A)'}</label>
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, alignItems: 'center' }}>
                     <IconButton 
                       onClick={() => adjustWeight(-2.5)}
                       disabled={isBodyweight}
-                      size="large"
+                      size="small"
                       sx={{ 
                         bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
-                        minWidth: '44px',
-                        minHeight: '44px',
+                        minWidth: { xs: '36px', sm: '40px' },
+                        minHeight: { xs: '36px', sm: '40px' },
+                        p: { xs: 0.5, sm: 1 },
                         '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
                       }}
                     >
-                      <Remove />
+                      <Remove sx={{ fontSize: { xs: 18, sm: 20 } }} />
                     </IconButton>
                     <input
                       id="weight-select"
@@ -763,6 +766,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                       }}
                       style={{
                         width: '100%',
+                        minWidth: '80px',
                         padding: '12px',
                         minHeight: '44px',
                         borderRadius: '8px',
@@ -778,32 +782,34 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                     <IconButton 
                       onClick={() => adjustWeight(2.5)}
                       disabled={isBodyweight}
-                      size="large"
+                      size="small"
                       sx={{ 
                         bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
-                        minWidth: '44px',
-                        minHeight: '44px',
+                        minWidth: { xs: '36px', sm: '40px' },
+                        minHeight: { xs: '36px', sm: '40px' },
+                        p: { xs: 0.5, sm: 1 },
                         '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
                       }}
                     >
-                      <Add />
+                      <Add sx={{ fontSize: { xs: 18, sm: 20 } }} />
                     </IconButton>
                   </Box>
                 </div>
                 <div className="input-group">
                   <label htmlFor="reps-select">Reps</label>
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, alignItems: 'center' }}>
                     <IconButton 
                       onClick={() => adjustReps(-1)}
-                      size="large"
+                      size="small"
                       sx={{ 
                         bgcolor: 'action.hover',
-                        minWidth: '44px',
-                        minHeight: '44px',
+                        minWidth: { xs: '36px', sm: '40px' },
+                        minHeight: { xs: '36px', sm: '40px' },
+                        p: { xs: 0.5, sm: 1 },
                         '&:hover': { bgcolor: 'action.selected' }
                       }}
                     >
-                      <Remove />
+                      <Remove sx={{ fontSize: { xs: 18, sm: 20 } }} />
                     </IconButton>
                     <input
                       id="reps-select"
@@ -835,6 +841,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                       }}
                       style={{
                         width: '100%',
+                        minWidth: '80px',
                         padding: '12px',
                         minHeight: '44px',
                         borderRadius: '8px',
@@ -847,15 +854,16 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                     />
                     <IconButton 
                       onClick={() => adjustReps(1)}
-                      size="large"
+                      size="small"
                       sx={{ 
                         bgcolor: 'action.hover',
-                        minWidth: '44px',
-                        minHeight: '44px',
+                        minWidth: { xs: '36px', sm: '40px' },
+                        minHeight: { xs: '36px', sm: '40px' },
+                        p: { xs: 0.5, sm: 1 },
                         '&:hover': { bgcolor: 'action.selected' }
                       }}
                     >
-                      <Add />
+                      <Add sx={{ fontSize: { xs: 18, sm: 20 } }} />
                     </IconButton>
                   </Box>
                 </div>

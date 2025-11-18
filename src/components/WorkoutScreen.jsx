@@ -179,13 +179,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       if (!container) return;
       
       const containerWidth = container.clientWidth;
-      const paddingX = window.innerWidth < 600 ? 16 : 32; // xs: 1rem, sm: 2rem
+      const paddingX = window.innerWidth < 600 ? 32 : 64; // xs: 2rem, sm: 4rem (match Typography px)
       const availableWidth = containerWidth - (paddingX * 2);
       
-      // Calculate optimal font size allowing up to 2 lines
-      // Start with a larger size since we can use 2 lines
-      let fontSize = Math.min(containerWidth * 0.2, 150); // Max 150px or 20% of width
-      const minFontSize = 32; // Minimum 32px
+      if (availableWidth <= 0) return;
+      
+      // Maximum font size we'll allow
+      const maxFontSize = 150;
+      const minFontSize = 32;
       const maxLines = 2;
       
       // Create a temporary element to measure text dimensions
@@ -196,26 +197,37 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       tempElement.style.fontFamily = getComputedStyle(nameElement).fontFamily;
       tempElement.style.fontWeight = '700';
       tempElement.style.lineHeight = '1.2';
-      tempElement.style.wordBreak = 'break-word'; // Allow breaking at word boundaries
+      tempElement.style.wordBreak = 'break-word';
       tempElement.style.overflowWrap = 'break-word';
+      tempElement.style.textAlign = 'center';
       tempElement.textContent = exerciseName;
       document.body.appendChild(tempElement);
       
-      // Find optimal font size that fits within maxLines
-      while (fontSize > minFontSize) {
-        tempElement.style.fontSize = fontSize + 'px';
-        const lineHeight = fontSize * 1.2; // Match lineHeight: '1.2'
+      // Binary search for the largest font size that fits in maxLines
+      let low = minFontSize;
+      let high = maxFontSize;
+      let bestSize = minFontSize;
+      
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        tempElement.style.fontSize = mid + 'px';
+        
+        const lineHeight = mid * 1.2;
         const elementHeight = tempElement.offsetHeight;
         const lines = Math.ceil(elementHeight / lineHeight);
         
         if (lines <= maxLines) {
-          break;
+          // This size fits, try larger
+          bestSize = mid;
+          low = mid + 1;
+        } else {
+          // Too big, try smaller
+          high = mid - 1;
         }
-        fontSize -= 2;
       }
       
       document.body.removeChild(tempElement);
-      setExerciseFontSize(`${fontSize}px`);
+      setExerciseFontSize(`${bestSize}px`);
     };
 
     // Calculate on mount and when exercise changes

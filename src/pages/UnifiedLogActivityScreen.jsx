@@ -52,6 +52,14 @@ const WORKOUT_TYPES = {
   CORE: 'core',
 };
 
+const CARDIO_TYPES = {
+  GENERAL: 'general',
+  RUNNING: 'running',
+  CYCLING: 'cycling',
+  SWIMMING: 'swimming',
+  HIIT: 'hiit',
+};
+
 const UnifiedLogActivityScreen = ({ onNavigate }) => {
   const [notification, setNotification] = useState({ show: false, message: '', severity: 'success' });
   const [showAssignDialog, setShowAssignDialog] = useState(false);
@@ -70,6 +78,8 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
     sessionType: SESSION_TYPES.STRENGTH,
     // Workout-specific fields (for strength sessions)
     workoutType: WORKOUT_TYPES.FULL,
+    // Cardio-specific fields
+    cardioType: CARDIO_TYPES.GENERAL,
     numExercises: '',
     setsPerExercise: '',
   };
@@ -120,7 +130,11 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
       const workoutData = {
         date: timestamp,
         duration: duration,
-        type: values.sessionType === SESSION_TYPES.STRENGTH ? values.workoutType : values.sessionType,
+        type: values.sessionType === SESSION_TYPES.STRENGTH 
+          ? values.workoutType 
+          : values.sessionType === SESSION_TYPES.CARDIO 
+          ? values.cardioType 
+          : values.sessionType,
         exercises: {},
         notes: values.notes.trim(),
         sessionName: values.sessionName.trim(), // Store optional session name
@@ -150,7 +164,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
         const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(timestamp).getDay()];
         const sessionData = {
           sessionType: values.sessionType,
-          sessionName: getSessionTypeName(values.sessionType, values.workoutType),
+          sessionName: getSessionTypeName(values.sessionType, values.workoutType, values.cardioType),
           date: new Date(timestamp).toISOString(),
         };
         
@@ -165,7 +179,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
         // Store session for manual assignment
         setLastLoggedSession({
           sessionType: values.sessionType,
-          sessionName: getSessionTypeName(values.sessionType, values.workoutType),
+          sessionName: getSessionTypeName(values.sessionType, values.workoutType, values.cardioType),
           date: new Date(timestamp).toISOString(),
         });
         
@@ -196,7 +210,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
     }
   };
 
-  const getSessionTypeName = (sessionType, workoutType) => {
+  const getSessionTypeName = (sessionType, workoutType, cardioType) => {
     if (sessionType === SESSION_TYPES.STRENGTH) {
       const typeMap = {
         [WORKOUT_TYPES.FULL]: 'Full Body',
@@ -209,8 +223,18 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
       return typeMap[workoutType] || 'Strength';
     }
     
+    if (sessionType === SESSION_TYPES.CARDIO) {
+      const cardioTypeMap = {
+        [CARDIO_TYPES.GENERAL]: 'Cardio',
+        [CARDIO_TYPES.RUNNING]: 'Running',
+        [CARDIO_TYPES.CYCLING]: 'Cycling',
+        [CARDIO_TYPES.SWIMMING]: 'Swimming',
+        [CARDIO_TYPES.HIIT]: 'HIIT',
+      };
+      return cardioTypeMap[cardioType] || 'Cardio';
+    }
+    
     const typeMap = {
-      [SESSION_TYPES.CARDIO]: 'Cardio',
       [SESSION_TYPES.YOGA]: 'Yoga',
       [SESSION_TYPES.REST]: 'Rest',
     };
@@ -381,6 +405,24 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                           <MenuItem value={WORKOUT_TYPES.PULL}>Pull</MenuItem>
                           <MenuItem value={WORKOUT_TYPES.LEGS}>Legs</MenuItem>
                           <MenuItem value={WORKOUT_TYPES.CORE}>Core</MenuItem>
+                        </Select>
+                      </FormControl>
+                    )}
+
+                    {/* Cardio Type for Cardio Sessions */}
+                    {values.sessionType === SESSION_TYPES.CARDIO && (
+                      <FormControl fullWidth>
+                        <InputLabel>Cardio Type</InputLabel>
+                        <Select
+                          value={values.cardioType}
+                          label="Cardio Type"
+                          onChange={(e) => setFieldValue('cardioType', e.target.value)}
+                        >
+                          <MenuItem value={CARDIO_TYPES.GENERAL}>General Cardio</MenuItem>
+                          <MenuItem value={CARDIO_TYPES.RUNNING}>Running</MenuItem>
+                          <MenuItem value={CARDIO_TYPES.CYCLING}>Cycling</MenuItem>
+                          <MenuItem value={CARDIO_TYPES.SWIMMING}>Swimming</MenuItem>
+                          <MenuItem value={CARDIO_TYPES.HIIT}>HIIT</MenuItem>
                         </Select>
                       </FormControl>
                     )}

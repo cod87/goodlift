@@ -79,8 +79,9 @@ const SavedWorkoutsList = memo(({
 
   const handleWorkoutClick = (workout) => {
     if (onStartWorkout && workout.exercises) {
-      // Start the saved workout
-      onStartWorkout(workout.type || 'full', 'all', workout.exercises, workout.supersetConfig);
+      // Start the saved workout with superset config (or default if not defined)
+      const config = workout.supersetConfig || [2, 2, 2, 2];
+      onStartWorkout(workout.type || 'full', 'all', workout.exercises, config);
     }
   };
 
@@ -148,7 +149,7 @@ const SavedWorkoutsList = memo(({
                       </Typography>
                     }
                     secondary={
-                      <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                      <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap">
                         <Chip
                           label={`${workout.exercises?.length || 0} exercises`}
                           size="small"
@@ -159,6 +160,14 @@ const SavedWorkoutsList = memo(({
                           <Chip
                             label={workout.type}
                             size="small"
+                            variant="outlined"
+                          />
+                        )}
+                        {workout.supersetConfig && workout.supersetConfig.length > 0 && (
+                          <Chip
+                            label={`${workout.supersetConfig.filter(count => count > 1).length} supersets`}
+                            size="small"
+                            color="secondary"
                             variant="outlined"
                           />
                         )}

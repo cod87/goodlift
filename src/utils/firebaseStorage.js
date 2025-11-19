@@ -414,3 +414,35 @@ export const saveYogaPresetsToFirebase = async (userId, yogaPresets) => {
     console.error('Error saving Yoga presets to Firebase:', error);
   }
 };
+
+/**
+ * Save saved workouts to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} savedWorkouts - The saved workouts array
+ */
+export const saveSavedWorkoutsToFirebase = async (userId, savedWorkouts) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { savedWorkouts });
+  } catch (error) {
+    console.error('Error saving saved workouts to Firebase:', error);
+  }
+};
+
+/**
+ * Load saved workouts from Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @returns {array|null} - The saved workouts array or null if not found
+ */
+export const loadSavedWorkoutsFromFirebase = async (userId) => {
+  if (!userId) return null;
+  
+  try {
+    const userData = await loadUserDataFromFirebase(userId);
+    return userData?.savedWorkouts || null;
+  } catch (error) {
+    console.error('Error loading saved workouts from Firebase:', error);
+    return null;
+  }
+};

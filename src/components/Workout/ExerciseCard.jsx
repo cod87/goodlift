@@ -455,6 +455,11 @@ const ExerciseCard = memo(({
               height: 'auto',
               borderRadius: 2,
               objectFit: 'contain',
+              // Semi-transparent white background for visibility of dark line drawings
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              padding: 2,
+              // Add subtle border for better definition
+              border: '1px solid rgba(255, 255, 255, 0.1)',
             }}
             loading="lazy"
           />

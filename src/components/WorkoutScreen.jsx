@@ -201,8 +201,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
         ? (split.line1.length >= split.line2.length ? split.line1 : split.line2)
         : exerciseName;
       
-      // For split names, the longer line should fit in 90% of available width
-      const targetWidth = split.isSplit ? availableWidth * 0.9 : availableWidth;
+      // All names should fit in 80% of available width
+      const targetWidth = availableWidth * 0.8;
       
       // Create a temporary element to measure text dimensions with wrapping
       const tempElement = document.createElement('div');
@@ -830,7 +830,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               {/* Exercise name - extremely large text (minimum 100pt) with natural wrapping */}
               <Box sx={{ mb: 2, px: { xs: 2, sm: 4 } }}>
                 {splitName.isSplit ? (
-                  // Split display: two lines with longer line at 90% width
+                  // Split display: two lines with longer line at 80% width
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
                     <Typography 
                       ref={exerciseNameRef}
@@ -842,7 +842,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                         color: 'primary.main',
                         textAlign: 'center',
                         lineHeight: '1.2 !important',
-                        width: splitName.line1.length >= splitName.line2.length ? '90%' : 'auto',
+                        width: splitName.line1.length >= splitName.line2.length ? '80%' : 'auto',
                         whiteSpace: 'nowrap',
                         overflow: 'visible',
                         mb: 0,
@@ -859,7 +859,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                         color: 'primary.main',
                         textAlign: 'center',
                         lineHeight: '1.2 !important',
-                        width: splitName.line2.length >= splitName.line1.length ? '90%' : 'auto',
+                        width: splitName.line2.length >= splitName.line1.length ? '80%' : 'auto',
                         whiteSpace: 'nowrap',
                         overflow: 'visible',
                         mb: { xs: 1, sm: 1.5 },
@@ -880,7 +880,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                       color: 'primary.main',
                       textAlign: 'center',
                       lineHeight: '1.2 !important',
-                      width: '90%',
+                      width: '80%',
                       wordBreak: 'break-word',
                       overflowWrap: 'break-word',
                       whiteSpace: 'normal',

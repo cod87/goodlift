@@ -22,41 +22,67 @@ const urlsToCache = [
 
 // Install event - cache essential files
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing...');
+  console.log('[Service Worker] Installing service worker...');
+  console.log('[Service Worker] Version:', CACHE_NAME);
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[Service Worker] Caching app shell');
+        console.log('[Service Worker] Opened cache:', CACHE_NAME);
+        console.log('[Service Worker] Caching', urlsToCache.length, 'files...');
         return cache.addAll(urlsToCache);
       })
       .then(() => {
-        console.log('[Service Worker] Install complete');
+        console.log('[Service Worker] ✅ All files cached successfully');
+        console.log('[Service Worker] Install complete - skipping waiting to activate immediately');
         return self.skipWaiting(); // Activate immediately
       })
       .catch((error) => {
-        console.error('[Service Worker] Install failed:', error);
+        console.error('[Service Worker] ❌ Install failed');
+        console.error('[Service Worker] Error name:', error.name);
+        console.error('[Service Worker] Error message:', error.message);
+        console.error('[Service Worker] Failed files may be missing or inaccessible');
+        console.error('[Service Worker] Check that all URLs in urlsToCache are correct');
+        throw error;
       })
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating...');
+  console.log('[Service Worker] Activating service worker...');
+  console.log('[Service Worker] Current cache version:', CACHE_NAME);
+  
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
+        console.log('[Service Worker] Found', cacheNames.length, 'cache(s):', cacheNames);
+        
+        const cachesToDelete = cacheNames.filter(cacheName => cacheName !== CACHE_NAME);
+        if (cachesToDelete.length > 0) {
+          console.log('[Service Worker] Deleting', cachesToDelete.length, 'old cache(s):', cachesToDelete);
+        } else {
+          console.log('[Service Worker] No old caches to delete');
+        }
+        
         return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              console.log('[Service Worker] Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            }
+          cachesToDelete.map((cacheName) => {
+            console.log('[Service Worker] Deleting cache:', cacheName);
+            return caches.delete(cacheName);
           })
         );
       })
       .then(() => {
-        console.log('[Service Worker] Activate complete');
+        console.log('[Service Worker] ✅ Cache cleanup complete');
+        console.log('[Service Worker] Taking control of all pages immediately');
         return self.clients.claim(); // Take control immediately
+      })
+      .then(() => {
+        console.log('[Service Worker] ✅ Activation complete');
+      })
+      .catch((error) => {
+        console.error('[Service Worker] ❌ Activation failed');
+        console.error('[Service Worker] Error:', error);
       })
   );
 });
@@ -118,7 +144,19 @@ self.addEventListener('fetch', (event) => {
 // Push notification event handler
 // This event is triggered when a push notification is received
 self.addEventListener('push', (event) => {
+  console.log('[Service Worker] ═══════════════════════════════════════');
   console.log('[Service Worker] Push notification received');
+  console.log('[Service Worker] Event has data:', event.data !== null);
+  
+  if (event.data) {
+    console.log('[Service Worker] Data type:', typeof event.data);
+    try {
+      const rawText = event.data.text();
+      console.log('[Service Worker] Raw data:', rawText);
+    } catch (e) {
+      console.log('[Service Worker] Could not read raw data:', e.message);
+    }
+  }
 
   // Default notification options
   const defaultOptions = {
@@ -138,6 +176,8 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       const data = event.data.json();
+      console.log('[Service Worker] Parsed JSON data:', data);
+      
       notificationData = {
         title: data.title || notificationData.title,
         body: data.body || data.message || notificationData.body,
@@ -146,18 +186,42 @@ self.addEventListener('push', (event) => {
         data: data.data || {},
         ...defaultOptions,
       };
+      
+      console.log('[Service Worker] Notification will show:');
+      console.log('[Service Worker]   Title:', notificationData.title);
+      console.log('[Service Worker]   Body:', notificationData.body);
+      console.log('[Service Worker]   Icon:', notificationData.icon);
     } catch (error) {
-      console.error('[Service Worker] Error parsing push notification data:', error);
+      console.error('[Service Worker] ❌ Error parsing push notification data:', error);
+      console.error('[Service Worker] Error name:', error.name);
+      console.error('[Service Worker] Error message:', error.message);
+      
       // Use text content as fallback
-      notificationData.body = event.data.text();
+      try {
+        notificationData.body = event.data.text();
+        console.log('[Service Worker] Using text fallback:', notificationData.body);
+      } catch (textError) {
+        console.error('[Service Worker] ❌ Could not read text data:', textError);
+      }
     }
+  } else {
+    console.warn('[Service Worker] ⚠️  No data in push event, using default notification');
   }
 
   // Show the notification
+  console.log('[Service Worker] Showing notification...');
   const promiseChain = self.registration.showNotification(
     notificationData.title,
     notificationData
-  );
+  ).then(() => {
+    console.log('[Service Worker] ✅ Notification shown successfully');
+    console.log('[Service Worker] ═══════════════════════════════════════');
+  }).catch((error) => {
+    console.error('[Service Worker] ❌ Error showing notification:', error);
+    console.error('[Service Worker] Error name:', error.name);
+    console.error('[Service Worker] Error message:', error.message);
+    console.error('[Service Worker] ═══════════════════════════════════════');
+  });
 
   event.waitUntil(promiseChain);
 });
@@ -165,25 +229,53 @@ self.addEventListener('push', (event) => {
 // Notification click event handler
 // This event is triggered when user clicks on a notification
 self.addEventListener('notificationclick', (event) => {
+  console.log('[Service Worker] ═══════════════════════════════════════');
   console.log('[Service Worker] Notification clicked');
+  console.log('[Service Worker] Notification tag:', event.notification.tag);
+  console.log('[Service Worker] Notification title:', event.notification.title);
   
+  // Close the notification
   event.notification.close();
+  console.log('[Service Worker] Notification closed');
 
-  // Handle notification click action
-  // Open the app or focus existing window
+  // Handle notification click action - open the app or focus existing window
+  console.log('[Service Worker] Looking for open app windows...');
+  
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
+        console.log('[Service Worker] Found', clientList.length, 'window client(s)');
+        
         // If a window is already open, focus it
         for (const client of clientList) {
+          console.log('[Service Worker] Checking client URL:', client.url);
+          
           if (client.url.includes('/goodlift') && 'focus' in client) {
+            console.log('[Service Worker] ✅ Focusing existing window');
             return client.focus();
           }
         }
+        
         // Otherwise, open a new window
         if (clients.openWindow) {
-          return clients.openWindow('/goodlift/');
+          console.log('[Service Worker] No open window found, opening new window');
+          return clients.openWindow('/goodlift/').then((client) => {
+            console.log('[Service Worker] ✅ New window opened');
+            return client;
+          });
+        } else {
+          console.warn('[Service Worker] ⚠️  Cannot open new window (openWindow not supported)');
         }
+      })
+      .then(() => {
+        console.log('[Service Worker] ✅ Notification click handled');
+        console.log('[Service Worker] ═══════════════════════════════════════');
+      })
+      .catch((error) => {
+        console.error('[Service Worker] ❌ Error handling notification click:', error);
+        console.error('[Service Worker] Error name:', error.name);
+        console.error('[Service Worker] Error message:', error.message);
+        console.error('[Service Worker] ═══════════════════════════════════════');
       })
   );
 });

@@ -7,6 +7,7 @@ import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, C
 import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
+import { getDemoImagePath } from '../utils/exerciseDemoImages';
 
 /**
  * WorkoutScreen component manages the active workout session

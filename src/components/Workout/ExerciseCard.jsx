@@ -67,6 +67,7 @@ const ExerciseCard = memo(({
   const [imageError, setImageError] = useState(false);
   const exerciseNameRef = useRef(null);
   const [exerciseFontSize, setExerciseFontSize] = useState('3rem');
+  const [exerciseText, setExerciseText] = useState(exerciseName);
 
   // Update image source when demoImage prop changes
   useEffect(() => {
@@ -107,91 +108,80 @@ const ExerciseCard = memo(({
       const nameElement = exerciseNameRef.current;
       if (!nameElement || !exerciseName) return;
 
-      // Get the container width (accounting for padding)
       const container = nameElement.parentElement;
       if (!container) return;
       
+      // Determine available width based on container, accounting for padding
       const containerWidth = container.clientWidth;
-      const paddingX = window.innerWidth < 600 ? 32 : 64; // xs: 2rem, sm: 4rem
-      const availableWidth = containerWidth - (paddingX * 2);
+      const paddingX = parseFloat(getComputedStyle(nameElement).paddingLeft) + parseFloat(getComputedStyle(nameElement).paddingRight);
+      const availableWidth = containerWidth - paddingX;
       
       if (availableWidth <= 0) return;
-      
-      // Maximum and minimum font sizes
-      const maxFontSize = 150;
-      const minFontSize = 32;
-      const maxLines = 2;
-      
-      // Split text at word boundaries for optimal line distribution
+
       const words = exerciseName.split(' ');
-      let bestLayout = exerciseName;
-      
+      let bestLayout = { text: exerciseName, longestLine: exerciseName };
+
+      // Find the best split point for 2 lines to make them as even as possible
       if (words.length > 1) {
-        // Try to find the best split point for balanced line lengths
         let bestDiff = Infinity;
         
         for (let i = 1; i < words.length; i++) {
           const line1 = words.slice(0, i).join(' ');
           const line2 = words.slice(i).join(' ');
           const diff = Math.abs(line1.length - line2.length);
-          
+
           if (diff < bestDiff) {
             bestDiff = diff;
-            bestLayout = `${line1}\n${line2}`;
+            bestLayout = {
+              text: `${line1}\n${line2}`,
+              longestLine: line1.length > line2.length ? line1 : line2,
+            };
           }
         }
       }
+
+      setExerciseText(bestLayout.text);
+
+      // Measure the width of the longest line to determine the font size
+      const tempSpan = document.createElement('span');
+      tempSpan.style.visibility = 'hidden';
+      tempSpan.style.position = 'absolute';
+      tempSpan.style.whiteSpace = 'nowrap';
+      tempSpan.style.fontFamily = getComputedStyle(nameElement).fontFamily;
+      tempSpan.style.fontWeight = getComputedStyle(nameElement).fontWeight;
+      tempSpan.textContent = bestLayout.longestLine;
+      document.body.appendChild(tempSpan);
+
+      // Calculate the font size that makes the longest line fit the available width
+      const maxFontSize = 150; // A reasonable upper limit
+      let fontSize = maxFontSize;
+
+      // Adjust font size until the text fits
+      tempSpan.style.fontSize = `${fontSize}px`;
+      let textWidth = tempSpan.getBoundingClientRect().width;
       
-      // Create a temporary element to measure text dimensions
-      const tempElement = document.createElement('div');
-      tempElement.style.visibility = 'hidden';
-      tempElement.style.position = 'absolute';
-      tempElement.style.width = availableWidth + 'px';
-      tempElement.style.fontFamily = getComputedStyle(nameElement).fontFamily;
-      tempElement.style.fontWeight = '700';
-      tempElement.style.lineHeight = '1.2';
-      tempElement.style.whiteSpace = 'pre-wrap';
-      tempElement.style.textAlign = 'center';
-      tempElement.textContent = bestLayout;
-      document.body.appendChild(tempElement);
-      
-      // Binary search for the largest font size that fits in maxLines
-      let low = minFontSize;
-      let high = maxFontSize;
-      let bestSize = minFontSize;
-      
-      while (low <= high) {
-        const mid = Math.floor((low + high) / 2);
-        tempElement.style.fontSize = mid + 'px';
-        
-        const lineHeight = mid * 1.2;
-        const elementHeight = tempElement.offsetHeight;
-        const lines = Math.ceil(elementHeight / lineHeight);
-        
-        if (lines <= maxLines) {
-          // This size fits, try larger
-          bestSize = mid;
-          low = mid + 1;
-        } else {
-          // Too big, try smaller
-          high = mid - 1;
-        }
+      if (textWidth > availableWidth) {
+        fontSize = (availableWidth / textWidth) * fontSize;
       }
       
-      document.body.removeChild(tempElement);
-      setExerciseFontSize(`${bestSize}px`);
+      // Ensure the font size doesn't create more than 2 lines (especially with lineHeight)
+      const finalFontSize = Math.min(fontSize, maxFontSize);
+      
+      // Also ensure it's not too small
+      const minFontSize = 32;
+      setExerciseFontSize(`${Math.max(finalFontSize, minFontSize)}px`);
+      
+      document.body.removeChild(tempSpan);
     };
 
-    // Calculate on mount and when exercise changes
+    // Calculate on mount, resize, and when exercise name changes
     calculateFontSize();
-    
-    // Recalculate on window resize
     const handleResize = () => calculateFontSize();
     window.addEventListener('resize', handleResize);
-    
+
     // Small delay to ensure DOM is ready
     const timeout = setTimeout(calculateFontSize, 100);
-    
+
     return () => {
       window.removeEventListener('resize', handleResize);
       clearTimeout(timeout);
@@ -408,7 +398,7 @@ const ExerciseCard = memo(({
       </Box>
 
       {/* Exercise Name - Responsive font size, max 2 lines */}
-      <Box sx={{ mb: 2, flexShrink: 0 }}>
+      <Box sx={{ mb: 1, flexShrink: 0 }}>
         <Typography 
           ref={exerciseNameRef}
           variant="h3" 
@@ -422,13 +412,14 @@ const ExerciseCard = memo(({
             px: { xs: 2, sm: 4 },
             wordBreak: 'break-word',
             overflowWrap: 'break-word',
+            whiteSpace: 'pre-wrap', // Use pre-wrap to respect newline characters
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
           }}
         >
-          {exerciseName}
+          {exerciseText}
         </Typography>
       </Box>
 
@@ -436,7 +427,7 @@ const ExerciseCard = memo(({
       {imageSrc && (
         <Box 
           sx={{ 
-            mb: 2,
+            mb: 1,
             flexShrink: 0,
             display: 'flex',
             justifyContent: 'center',
@@ -450,14 +441,14 @@ const ExerciseCard = memo(({
             onError={handleImageError}
             sx={{
               maxWidth: '100%',
-              maxHeight: { xs: '250px', sm: '350px' },
+              maxHeight: { xs: '350px', sm: '500px' },
               width: 'auto',
               height: 'auto',
               borderRadius: 2,
               objectFit: 'contain',
               // Semi-transparent white background for visibility of dark line drawings
               backgroundColor: 'rgba(255, 255, 255, 0.15)',
-              padding: 2,
+              padding: 1,
               // Add subtle border for better definition
               border: '1px solid rgba(255, 255, 255, 0.1)',
             }}
@@ -493,6 +484,7 @@ const ExerciseCard = memo(({
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
+            title={`${exerciseName} video`}
           />
         </Box>
       )}
@@ -524,8 +516,8 @@ const ExerciseCard = memo(({
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <Typography variant="body2">
               💡 Try: {suggestedWeight} lbs × {suggestedReps} reps
-              {lastWeight && suggestedWeight > lastWeight && ' (↑ weight)'}
-              {lastWeight && suggestedWeight === lastWeight && suggestedReps > lastReps && ' (↑ reps)'}
+              {lastWeight != null && suggestedWeight > lastWeight && ' (↑ weight)'}
+              {lastWeight != null && suggestedWeight === lastWeight && suggestedReps > lastReps && ' (↑ reps)'}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button 

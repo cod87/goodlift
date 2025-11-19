@@ -11,6 +11,7 @@ import {
   saveFavoriteWorkoutsToFirebase,
   saveHiitPresetsToFirebase,
   saveYogaPresetsToFirebase,
+  saveSavedWorkoutsToFirebase,
   loadUserDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
@@ -545,6 +546,11 @@ export const loadUserDataFromCloud = async (userId) => {
       if (firebaseData.activePlanId) {
         localStorage.setItem(KEYS.ACTIVE_PLAN, firebaseData.activePlanId);
       }
+      
+      // Sync saved workouts
+      if (firebaseData.savedWorkouts) {
+        localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(firebaseData.savedWorkouts));
+      }
     } else {
       // No data in Firebase, sync current localStorage data to Firebase
       const localHistory = await getWorkoutHistory();
@@ -559,13 +565,16 @@ export const loadUserDataFromCloud = async (userId) => {
       const localPlans = localStorage.getItem(KEYS.WORKOUT_PLANS);
       const plansArray = localPlans ? JSON.parse(localPlans) : [];
       const localActivePlanId = localStorage.getItem(KEYS.ACTIVE_PLAN);
+      const localSavedWorkouts = localStorage.getItem(KEYS.SAVED_WORKOUTS);
+      const savedWorkoutsArray = localSavedWorkouts ? JSON.parse(localSavedWorkouts) : [];
       
       // If user has local data, sync it to Firebase
       if (localHistory.length > 0 || localStats?.totalWorkouts > 0 || 
           Object.keys(weightsObj).length > 0 || Object.keys(targetRepsObj).length > 0 ||
           localHiit.length > 0 || localCardio.length > 0 || 
           localStretch.length > 0 ||
-          plansArray.length > 0 || localActivePlanId) {
+          plansArray.length > 0 || localActivePlanId ||
+          savedWorkoutsArray.length > 0) {
         await Promise.all([
           saveWorkoutHistoryToFirebase(userId, localHistory),
           saveUserStatsToFirebase(userId, localStats),
@@ -575,7 +584,8 @@ export const loadUserDataFromCloud = async (userId) => {
           saveCardioSessionsToFirebase(userId, localCardio),
           saveStretchSessionsToFirebase(userId, localStretch),
           saveWorkoutPlansToFirebase(userId, plansArray),
-          saveActivePlanToFirebase(userId, localActivePlanId)
+          saveActivePlanToFirebase(userId, localActivePlanId),
+          saveSavedWorkoutsToFirebase(userId, savedWorkoutsArray)
         ]);
       }
     }
@@ -1779,6 +1789,20 @@ export const getSavedWorkouts = async () => {
       return guestData || [];
     }
 
+    // Try Firebase first if user is authenticated
+    if (currentUserId) {
+      try {
+        const firebaseData = await loadUserDataFromFirebase(currentUserId);
+        if (firebaseData?.savedWorkouts) {
+          // Update localStorage cache for offline access
+          localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(firebaseData.savedWorkouts));
+          return firebaseData.savedWorkouts;
+        }
+      } catch (error) {
+        console.error('Firebase fetch failed, using localStorage:', error);
+      }
+    }
+
     const workouts = localStorage.getItem(KEYS.SAVED_WORKOUTS);
     return workouts ? JSON.parse(workouts) : [];
   } catch (error) {
@@ -1807,7 +1831,11 @@ export const saveSavedWorkout = async (workout) => {
       setGuestData('saved_workouts', workouts);
     } else {
       localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(workouts));
-      // TODO: Add Firebase sync when implemented
+      
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveSavedWorkoutsToFirebase(currentUserId, workouts);
+      }
     }
     
     return workouts;
@@ -1831,7 +1859,11 @@ export const deleteSavedWorkout = async (index) => {
       setGuestData('saved_workouts', workouts);
     } else {
       localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(workouts));
-      // TODO: Add Firebase sync when implemented
+      
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveSavedWorkoutsToFirebase(currentUserId, workouts);
+      }
     }
     
     return workouts;

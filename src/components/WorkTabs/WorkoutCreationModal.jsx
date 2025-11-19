@@ -26,12 +26,17 @@ import {
   Select,
   MenuItem,
   Divider,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
 } from '@mui/material';
 import {
   Close,
   Search,
   FitnessCenter,
   DragIndicator,
+  ViewAgenda,
+  ViewStream,
 } from '@mui/icons-material';
 import {
   DndContext,
@@ -53,7 +58,15 @@ import { CSS } from '@dnd-kit/utilities';
 /**
  * SortableExerciseItem - Draggable exercise item in My Workout
  */
-const SortableExerciseItem = ({ exercise, index, myWorkout, setMyWorkout, selectedExercises, setSelectedExercises }) => {
+const SortableExerciseItem = ({ 
+  exercise, 
+  index, 
+  myWorkout, 
+  setMyWorkout, 
+  selectedExercises, 
+  setSelectedExercises,
+  onToggleSupersetGroup,
+}) => {
   const {
     attributes,
     listeners,
@@ -69,11 +82,19 @@ const SortableExerciseItem = ({ exercise, index, myWorkout, setMyWorkout, select
     opacity: isDragging ? 0.5 : 1,
   };
 
+  // Check if this exercise is in a superset group
+  const supersetGroupId = exercise.supersetGroup;
+  const isInSuperset = supersetGroupId !== null && supersetGroupId !== undefined;
+
   return (
     <Card
       ref={setNodeRef}
       style={style}
       elevation={isDragging ? 4 : 1}
+      sx={{
+        borderLeft: isInSuperset ? 4 : 0,
+        borderColor: isInSuperset ? 'primary.main' : 'transparent',
+      }}
     >
       <CardContent>
         <Stack direction="row" alignItems="center" spacing={2}>
@@ -81,13 +102,32 @@ const SortableExerciseItem = ({ exercise, index, myWorkout, setMyWorkout, select
             <DragIndicator sx={{ color: 'text.secondary' }} />
           </Box>
           <Box sx={{ flex: 1 }}>
-            <Typography variant="body1" sx={{ fontWeight: 600 }}>
-              {exercise['Exercise Name']}
-            </Typography>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                {exercise['Exercise Name']}
+              </Typography>
+              {isInSuperset && (
+                <Chip 
+                  label={`Superset ${supersetGroupId}`} 
+                  size="small" 
+                  color="primary"
+                  variant="outlined"
+                />
+              )}
+            </Stack>
             <Typography variant="caption" color="text.secondary">
               {exercise['Primary Muscle']} • {exercise.Equipment}
             </Typography>
           </Box>
+          <Tooltip title={isInSuperset ? "Remove from superset" : "Add to superset"}>
+            <IconButton
+              size="small"
+              onClick={() => onToggleSupersetGroup(index)}
+              color={isInSuperset ? "primary" : "default"}
+            >
+              {isInSuperset ? <ViewAgenda /> : <ViewStream />}
+            </IconButton>
+          </Tooltip>
           <IconButton
             size="small"
             onClick={() => {
@@ -154,6 +194,7 @@ SortableExerciseItem.propTypes = {
   setMyWorkout: PropTypes.func.isRequired,
   selectedExercises: PropTypes.instanceOf(Set).isRequired,
   setSelectedExercises: PropTypes.func.isRequired,
+  onToggleSupersetGroup: PropTypes.func.isRequired,
 };
 
 /**
@@ -233,17 +274,50 @@ const WorkoutCreationModal = ({
       setMyWorkout(myWorkout.filter(e => e['Exercise Name'] !== exerciseName));
     } else {
       newSelected.add(exerciseName);
-      // Add to myWorkout
+      // Add to myWorkout without superset group initially
       setMyWorkout([...myWorkout, {
         ...exercise,
         sets: 3,
         reps: 10,
         weight: 0,
         restTime: 60,
+        supersetGroup: null, // No superset group initially
       }]);
     }
     
     setSelectedExercises(newSelected);
+  };
+
+  // Toggle superset group for an exercise
+  const handleToggleSupersetGroup = (index) => {
+    const updated = [...myWorkout];
+    const exercise = updated[index];
+    
+    if (exercise.supersetGroup !== null && exercise.supersetGroup !== undefined) {
+      // Remove from superset
+      exercise.supersetGroup = null;
+    } else {
+      // Find the next superset group ID
+      // Check if there's a previous exercise to group with
+      if (index > 0) {
+        const prevExercise = updated[index - 1];
+        // If previous exercise is in a superset, join that group
+        if (prevExercise.supersetGroup !== null && prevExercise.supersetGroup !== undefined) {
+          exercise.supersetGroup = prevExercise.supersetGroup;
+        } else {
+          // Create a new superset group with previous exercise
+          const newGroupId = Math.max(0, ...updated.map(e => e.supersetGroup || 0)) + 1;
+          prevExercise.supersetGroup = newGroupId;
+          exercise.supersetGroup = newGroupId;
+        }
+      } else {
+        // First exercise - create a new group for it (will need another exercise to join)
+        const newGroupId = Math.max(0, ...updated.map(e => e.supersetGroup || 0)) + 1;
+        exercise.supersetGroup = newGroupId;
+      }
+    }
+    
+    setMyWorkout(updated);
   };
 
   // Handle drag and drop reordering
@@ -259,12 +333,53 @@ const WorkoutCreationModal = ({
     }
   };
 
+  // Calculate superset configuration
+  const calculateSupersetConfig = () => {
+    const groups = new Map();
+    
+    // Group exercises by their supersetGroup ID
+    myWorkout.forEach(exercise => {
+      if (exercise.supersetGroup !== null && exercise.supersetGroup !== undefined) {
+        if (!groups.has(exercise.supersetGroup)) {
+          groups.set(exercise.supersetGroup, []);
+        }
+        groups.get(exercise.supersetGroup).push(exercise);
+      }
+    });
+    
+    // Build config based on groups
+    const config = [];
+    let processedExercises = new Set();
+    
+    myWorkout.forEach(exercise => {
+      const exerciseName = exercise['Exercise Name'];
+      if (processedExercises.has(exerciseName)) return;
+      
+      if (exercise.supersetGroup !== null && exercise.supersetGroup !== undefined) {
+        const groupExercises = groups.get(exercise.supersetGroup);
+        if (groupExercises && groupExercises.length > 0) {
+          config.push(groupExercises.length);
+          groupExercises.forEach(e => processedExercises.add(e['Exercise Name']));
+        }
+      } else {
+        // Single exercise (not in a superset)
+        config.push(1);
+        processedExercises.add(exerciseName);
+      }
+    });
+    
+    return config.length > 0 ? config : [2, 2, 2, 2]; // Default config
+  };
+
   // Handle save
   const handleSave = () => {
+    const supersetConfig = calculateSupersetConfig();
+    
     const workout = {
       name: workoutName || `${workoutType} Workout`,
       type: workoutType,
       exercises: myWorkout,
+      supersetConfig: supersetConfig,
       createdAt: new Date().toISOString(),
     };
     
@@ -460,8 +575,11 @@ const WorkoutCreationModal = ({
             <Divider sx={{ my: 2 }} />
 
             {/* Exercise List with Drag and Drop */}
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
               Exercises ({myWorkout.length})
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Click the icon next to an exercise to create or join a superset group
             </Typography>
             
             {myWorkout.length > 0 ? (
@@ -484,6 +602,7 @@ const WorkoutCreationModal = ({
                         setMyWorkout={setMyWorkout}
                         selectedExercises={selectedExercises}
                         setSelectedExercises={setSelectedExercises}
+                        onToggleSupersetGroup={handleToggleSupersetGroup}
                       />
                     ))}
                   </Stack>

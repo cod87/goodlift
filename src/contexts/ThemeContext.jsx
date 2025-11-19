@@ -33,6 +33,22 @@ export const ThemeProvider = ({ children }) => {
     }
   }, [mode]);
 
+  // Update CSS custom properties when theme changes
+  useEffect(() => {
+    const root = document.documentElement;
+    if (mode === 'dark') {
+      root.style.setProperty('--color-bg', '#1e2939');
+      root.style.setProperty('--color-surface', '#2a3647');
+      root.style.setProperty('--color-text', '#ffffff');
+      root.style.setProperty('--color-text-light', '#a0a8b3');
+    } else {
+      root.style.setProperty('--color-bg', '#f5f5f5');
+      root.style.setProperty('--color-surface', '#ffffff');
+      root.style.setProperty('--color-text', '#1e2939');
+      root.style.setProperty('--color-text-light', '#4a5568');
+    }
+  }, [mode]);
+
   const toggleTheme = () => {
     setMode((prevMode) => (prevMode === 'dark' ? 'light' : 'dark'));
   };

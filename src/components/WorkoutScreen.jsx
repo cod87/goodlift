@@ -7,6 +7,7 @@ import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, C
 import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
+import { getDemoImagePath } from '../utils/exerciseDemoImages';
 
 /**
  * WorkoutScreen component manages the active workout session
@@ -36,6 +37,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const timerRef = useRef(null);
   const exerciseNameRef = useRef(null);
   const [exerciseFontSize, setExerciseFontSize] = useState('48px'); // Default responsive size for mobile
+  
+  // Demo image state
+  const [demoImageSrc, setDemoImageSrc] = useState(null);
+  const [imageError, setImageError] = useState(false);
   
   // Stretching phase state
   const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
@@ -267,6 +272,24 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       clearTimeout(timeout);
     };
   }, [exerciseName]);
+
+  // Update demo image when exercise changes
+  useEffect(() => {
+    if (exerciseName) {
+      const imagePath = getDemoImagePath(exerciseName);
+      setDemoImageSrc(imagePath);
+      setImageError(false);
+    }
+  }, [exerciseName]);
+
+  const handleImageError = () => {
+    if (!imageError) {
+      setImageError(true);
+      // Fall back to placeholder if image fails to load
+      const baseUrl = import.meta.env.BASE_URL || '/';
+      setDemoImageSrc(`${baseUrl}placeholder-exercise.svg`);
+    }
+  };
 
   /**
    * Apply conditional persist rules after workout completion
@@ -865,6 +888,40 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   {exerciseName}
                 </Typography>
               </Box>
+              
+              {/* Demo Image - Shows if available */}
+              {demoImageSrc && (
+                <Box 
+                  sx={{ 
+                    mb: 2,
+                    mt: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={demoImageSrc}
+                    alt={`${exerciseName} demonstration`}
+                    onError={handleImageError}
+                    sx={{
+                      maxWidth: '100%',
+                      maxHeight: { xs: '200px', sm: '280px' },
+                      width: 'auto',
+                      height: 'auto',
+                      borderRadius: 2,
+                      objectFit: 'contain',
+                      // Semi-transparent white background for visibility of dark line drawings
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      padding: 2,
+                      // Add subtle border for better definition
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                    }}
+                    loading="lazy"
+                  />
+                </Box>
+              )}
               
               {(prevWeight !== null || targetReps !== null) && (
                 <motion.p

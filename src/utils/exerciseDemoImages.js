@@ -29,19 +29,19 @@ const AVAILABLE_DEMO_IMAGES = [
   'barbell-pullover',
   'barbell-push-press',
   'barbell-romanian-deadlift',
-  'barbell-shrug',
+  'barbell-shrugs',
   'barbell-sumo-deadlift',
   'barbell-upright-row',
   'behind-neck-pulldown',
   'bent-over-lateral-raise',
   'bodyweight-bulgarian-split-squat',
   'bodyweight-squat',
-  'burpees',
+  'burpee',
   'close-grip-bench-press',
   'close-grip-pulldown',
   'dumbbell-bench-press',
   'dumbbell-bent-over-row-single-arm',
-  'dumbbell-bent-over-rows',
+  'dumbbell-bent-over-row',
   'dumbbell-concentration-curl',
   'dumbbell-deadlift',
   'dumbbell-declined-bench-press',
@@ -53,8 +53,7 @@ const AVAILABLE_DEMO_IMAGES = [
   'dumbbell-romanian-deadlift',
   'dumbbell-shoulder-press-2',
   'dumbbell-shoulder-press',
-  'dumbbell-shrugs',
-  'dumbell-deadlift',
+  'dumbbell-shrug',
   'front-squat',
   'good-morning',
   'hammer-curl',
@@ -67,13 +66,13 @@ const AVAILABLE_DEMO_IMAGES = [
   'lat-pulldown',
   'lunge',
   'pull-up',
-  'push-ups',
+  'push-up',
   'reverse-grip-pulldown',
   'rope-pulldown',
   'seated-cable-row',
   'slamball-squat',
   'straight-arm-lat-pulldown',
-  't-bar-rows',
+  't-bar-row',
   'trap-bar-deadlift',
   'wall-sit',
 ];
@@ -105,13 +104,14 @@ export const normalizeExerciseName = (exerciseName) => {
 
 /**
  * Gets the demo image path for a given exercise name
- * Returns null if no matching image is found
+ * Returns a placeholder image path if no matching image is found
  * 
  * @param {string} exerciseName - The exercise name to find an image for
- * @returns {string|null} Path to the demo image or null if not found
+ * @param {boolean} usePlaceholder - Whether to return placeholder if no match (default: true)
+ * @returns {string|null} Path to the demo image, placeholder, or null if not found
  */
-export const getDemoImagePath = (exerciseName) => {
-  if (!exerciseName) return null;
+export const getDemoImagePath = (exerciseName, usePlaceholder = true) => {
+  if (!exerciseName) return usePlaceholder ? `${getBaseUrl()}placeholder-exercise.svg` : null;
   
   const normalized = normalizeExerciseName(exerciseName);
   
@@ -134,7 +134,8 @@ export const getDemoImagePath = (exerciseName) => {
     return `${getBaseUrl()}demos/${fuzzyMatch}.webp`;
   }
   
-  return null;
+  // Return placeholder if enabled, otherwise null
+  return usePlaceholder ? `${getBaseUrl()}placeholder-exercise.svg` : null;
 };
 
 /**
@@ -201,13 +202,6 @@ const findFuzzyMatch = (normalized) => {
  */
 const getExerciseVariations = (normalized) => {
   const variations = [];
-  
-  // Plural/singular variations (try early for better matching)
-  if (normalized.endsWith('s')) {
-    variations.push(normalized.slice(0, -1));
-  } else {
-    variations.push(normalized + 's');
-  }
   
   // Handle "Dumbbell Incline X" vs "Incline Dumbbell X" variations
   if (normalized.startsWith('dumbbell-incline-')) {
@@ -285,18 +279,6 @@ const getExerciseVariations = (normalized) => {
     variations.push(withoutSingleArm + '-single-arm');
   }
   
-  // Handle bent-over row variations
-  if (normalized.includes('bent-over-row')) {
-    variations.push(normalized.replace('bent-over-row', 'bent-over-rows'));
-  }
-  
-  // Handle row/rows variations (more general)
-  if (normalized.endsWith('-row')) {
-    variations.push(normalized + 's');
-  } else if (normalized.endsWith('-rows')) {
-    variations.push(normalized.slice(0, -1));
-  }
-  
   // Handle curl type variations (hammer, concentration, etc.)
   if (normalized.includes('hammer-curl')) {
     variations.push(normalized.replace('hammer-curl', 'curl'));
@@ -333,31 +315,10 @@ const getExerciseVariations = (normalized) => {
     variations.push(normalized.replace('shoulder-press', 'shoulder-press-2'));
   }
   
-  // Handle pull-up variations
-  if (normalized === 'pull-up' || normalized === 'pullup') {
-    variations.push('pull-up');
-  } else if (normalized === 'pull-ups' || normalized === 'pullups') {
-    variations.push('pull-up');
-  }
-  
-  // Handle push-up variations
-  if (normalized === 'push-up' || normalized === 'pushup') {
-    variations.push('push-ups');
-  } else if (normalized === 'push-ups' || normalized === 'pushups') {
-    variations.push('push-ups');
-  }
-  
   // Handle squat variations
   if (normalized === 'squat') {
     variations.push('bodyweight-squat');
     variations.push('back-squat');
-  }
-  
-  // Handle burpee/burpees
-  if (normalized === 'burpee') {
-    variations.push('burpees');
-  } else if (normalized === 'burpees') {
-    variations.push('burpee');
   }
   
   return variations;

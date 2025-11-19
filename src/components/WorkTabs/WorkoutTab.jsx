@@ -13,7 +13,6 @@ import { EXERCISES_DATA_PATH } from '../../utils/constants';
  * - Create new workout button
  */
 const WorkoutTab = memo(({ 
-  onNavigate,
   onStartWorkout,
 }) => {
   const [showWorkoutCreator, setShowWorkoutCreator] = useState(false);
@@ -77,7 +76,6 @@ const WorkoutTab = memo(({
 WorkoutTab.displayName = 'WorkoutTab';
 
 WorkoutTab.propTypes = {
-  onNavigate: PropTypes.func,
   onStartWorkout: PropTypes.func,
 };
 

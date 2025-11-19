@@ -35,7 +35,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
   const exerciseNameRef = useRef(null);
-  const [exerciseFontSize, setExerciseFontSize] = useState('44px'); // Default responsive size for mobile
+  const [exerciseFontSize, setExerciseFontSize] = useState('48px'); // Default responsive size for mobile
   
   // Stretching phase state
   const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
@@ -194,10 +194,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       if (availableWidth <= 0) return;
       
       // Responsive minimum font size based on viewport width
-      // Mobile: 44px, Tablet: 56px, Desktop: 64px
-      const minFontSize = window.innerWidth < 600 ? 44 : window.innerWidth < 1024 ? 56 : 64;
+      // Mobile: 48px, Tablet: 60px, Desktop: 72px
+      const minFontSize = window.innerWidth < 600 ? 48 : window.innerWidth < 1024 ? 60 : 72;
       // Maximum font size - scale with viewport
-      const maxFontSize = window.innerWidth < 600 ? 96 : window.innerWidth < 1024 ? 128 : 160;
+      const maxFontSize = window.innerWidth < 600 ? 110 : window.innerWidth < 1024 ? 140 : 180;
       
       // Use full exercise name for measurement (no split logic)
       const textToMeasure = exerciseName;
@@ -210,7 +210,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       tempElement.style.visibility = 'hidden';
       tempElement.style.position = 'absolute';
       tempElement.style.fontFamily = getComputedStyle(nameElement).fontFamily;
-      tempElement.style.fontWeight = '700';
+      tempElement.style.fontWeight = '600';
       tempElement.style.lineHeight = '1.2';
       tempElement.style.width = targetWidth + 'px';
       tempElement.style.wordBreak = 'break-word';
@@ -846,7 +846,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   variant="h3" 
                   component="h2"
                   sx={{ 
-                    fontWeight: 700,
+                    fontWeight: 600,
                     fontSize: exerciseFontSize + ' !important',
                     color: 'primary.main',
                     textAlign: 'center',

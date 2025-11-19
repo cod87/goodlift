@@ -79,8 +79,9 @@ const SavedWorkoutsList = memo(({
 
   const handleWorkoutClick = (workout) => {
     if (onStartWorkout && workout.exercises) {
-      // Start the saved workout
-      onStartWorkout(workout.type || 'full', 'all', workout.exercises, workout.supersetConfig);
+      // Start the saved workout with superset config (or default if not defined)
+      const config = workout.supersetConfig || [2, 2, 2, 2];
+      onStartWorkout(workout.type || 'full', 'all', workout.exercises, config);
     }
   };
 

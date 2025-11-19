@@ -80,7 +80,24 @@ const MonthCalendarView = ({
     return workout.type?.toLowerCase() || workout.workoutType?.toLowerCase() || 'strength';
   };
 
-  // Get workout type color for the X marker
+  // Get workout type abbreviation for display
+  const getWorkoutTypeLabel = (type) => {
+    if (!type) return 'X';
+    
+    const normalizedType = type.toLowerCase();
+    const labelMap = {
+      'upper': 'UP',
+      'lower': 'LO',
+      'full': 'FL',
+      'push': 'PS',
+      'pull': 'PL',
+      'legs': 'LG',
+    };
+    
+    return labelMap[normalizedType] || 'X';
+  };
+
+  // Get workout type color for the marker
   const getWorkoutColor = (type) => {
     if (!type) return 'primary.main';
     
@@ -227,20 +244,21 @@ const MonthCalendarView = ({
                   {format(date, 'd')}
                 </Typography>
                 
-                {/* Large X marker for completed workouts */}
+                {/* Workout type label for completed workouts */}
                 {isCompleted && (
                   <Typography
                     sx={{
-                      fontSize: { xs: '1.1rem', sm: '1.5rem' },
+                      fontSize: { xs: '0.65rem', sm: '0.75rem' },
                       fontWeight: 900,
                       color: getWorkoutColor(primaryType),
                       lineHeight: 1,
                       textShadow: '0 1px 2px rgba(0,0,0,0.1)',
                       marginTop: 'auto',
                       marginBottom: { xs: '1px', sm: '4px' },
+                      letterSpacing: '0.5px',
                     }}
                   >
-                    ✕
+                    {getWorkoutTypeLabel(primaryType)}
                   </Typography>
                 )}
               </Box>

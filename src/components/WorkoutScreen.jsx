@@ -188,8 +188,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       const availableWidth = containerWidth - (paddingX * 2);
       
       // Limit height to reasonable portion of viewport to prevent overflow
-      // Use a maximum of 30vh to leave room for other UI elements
-      const maxHeight = Math.min(containerHeight * 0.8, window.innerHeight * 0.3);
+      // Use a maximum of 25vh to match the new container maxHeight
+      const maxHeight = Math.min(containerHeight * 0.8, window.innerHeight * 0.25);
       
       if (availableWidth <= 0) return;
       
@@ -722,7 +722,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                minHeight: 'calc(100vh - 200px)',
               }}
             >
               {/* Top Controls - Help, Skip, Swap icons on left, End Workout Controls on right */}
@@ -832,13 +831,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
               {/* Exercise name - responsive text that wraps and scales to fit */}
               <Box sx={{ 
-                mb: 2, 
+                mb: 3,
+                mt: 2,
                 px: { xs: 2, sm: 4 },
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: { xs: '60px', sm: '80px' },
-                maxHeight: { xs: '30vh', sm: '30vh' },
+                minHeight: { xs: '80px', sm: '100px' },
+                maxHeight: { xs: '25vh', sm: '25vh' },
                 overflow: 'hidden'
               }}>
                 <Typography 
@@ -872,6 +872,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
+                  style={{ marginBottom: '1rem', marginTop: '0.5rem', textAlign: 'center' }}
                 >
                   Target: {prevWeight ?? '–'} lbs • {targetReps ?? '–'} reps
                 </motion.p>
@@ -907,9 +908,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   </motion.div>
                 )}
               </AnimatePresence>
-              
-              {/* Flexible spacer to push inputs to bottom */}
-              <Box sx={{ flex: 1, minHeight: { xs: '20px', sm: '40px' } }} />
               
               <div className="input-row">
                 <div className="input-group">

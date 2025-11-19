@@ -114,3 +114,49 @@ export const detectWorkoutType = (data) => {
 export const generateSessionId = () => {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 };
+
+/**
+ * Splits an exercise name intelligently for better display
+ * If name is longer than 15 characters, splits it into two lines
+ * at the position that makes both lines as close to even as possible
+ * 
+ * @param {string} name - The exercise name to split
+ * @returns {{ line1: string, line2: string, isSplit: boolean }} Split result
+ * @example
+ * splitExerciseName('Dumbbell Bench Press')
+ * // Returns { line1: 'Dumbbell', line2: 'Bench Press', isSplit: true }
+ */
+export const splitExerciseName = (name) => {
+  if (!name || name.length <= 15) {
+    return { line1: name, line2: '', isSplit: false };
+  }
+
+  // Find all word boundaries (spaces)
+  const words = name.split(' ');
+  
+  if (words.length === 1) {
+    // Single long word - no natural split point
+    return { line1: name, line2: '', isSplit: false };
+  }
+
+  // Try to find the split that makes lines most even
+  let bestSplitIndex = 1;
+  let bestDiff = Math.abs(words[0].length - (name.length - words[0].length - 1));
+
+  let currentLength = 0;
+  for (let i = 0; i < words.length - 1; i++) {
+    currentLength += (i === 0 ? 0 : 1) + words[i].length; // +1 for space
+    const remainingLength = name.length - currentLength - 1; // -1 for the split space
+    const diff = Math.abs(currentLength - remainingLength);
+
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      bestSplitIndex = i + 1;
+    }
+  }
+
+  const line1 = words.slice(0, bestSplitIndex).join(' ');
+  const line2 = words.slice(bestSplitIndex).join(' ');
+
+  return { line1, line2, isSplit: true };
+};

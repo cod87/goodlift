@@ -35,8 +35,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
   const exerciseNameRef = useRef(null);
-  const [exerciseFontSize, setExerciseFontSize] = useState('3rem');
-  const [splitExerciseName, setSplitExerciseName] = useState(null);
+  const [exerciseFontSize, setExerciseFontSize] = useState('133px'); // Default to minimum 100pt
   
   // Stretching phase state
   const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
@@ -169,8 +168,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
   const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
 
-  // Calculate responsive font size for exercise name to fit up to 2 lines
-  // with word-split optimization for balanced line lengths
+  // Calculate responsive font size for exercise name - minimum 100pt (133px)
+  // Text wraps naturally using CSS, ensuring always extremely large and visible
   useEffect(() => {
     const calculateFontSize = () => {
       const nameElement = exerciseNameRef.current;
@@ -188,50 +187,27 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       
       if (availableWidth <= 0) return;
       
+      // Minimum font size is 100pt (133px) as required - always extremely large
+      const minFontSize = 133;
       // Maximum font size we'll allow - set very high to allow largest possible
       const maxFontSize = 800;
-      const minFontSize = 40;
       
-      // Split text at word boundaries for optimal line distribution
-      const words = exerciseName.split(' ');
-      let bestLayout = exerciseName;
-      let useTwoLines = false;
-      
-      if (words.length > 1) {
-        // Try to find the best split point for balanced line lengths
-        let bestDiff = Infinity;
-        
-        for (let i = 1; i < words.length; i++) {
-          const line1 = words.slice(0, i).join(' ');
-          const line2 = words.slice(i).join(' ');
-          const diff = Math.abs(line1.length - line2.length);
-          
-          if (diff < bestDiff) {
-            bestDiff = diff;
-            bestLayout = `${line1}\n${line2}`;
-          }
-        }
-        useTwoLines = true;
-      }
-      
-      // Store the split name for rendering
-      setSplitExerciseName(useTwoLines ? bestLayout.split('\n') : [exerciseName]);
-      
-      // Create a temporary element to measure text dimensions
+      // Create a temporary element to measure text dimensions with wrapping
       const tempElement = document.createElement('div');
       tempElement.style.visibility = 'hidden';
       tempElement.style.position = 'absolute';
       tempElement.style.fontFamily = getComputedStyle(nameElement).fontFamily;
       tempElement.style.fontWeight = '700';
       tempElement.style.lineHeight = '1.2';
-      tempElement.style.whiteSpace = 'nowrap';
+      tempElement.style.width = availableWidth + 'px';
+      tempElement.style.wordWrap = 'break-word';
+      tempElement.style.overflowWrap = 'break-word';
+      tempElement.style.whiteSpace = 'normal';
       tempElement.style.textAlign = 'center';
+      tempElement.textContent = exerciseName;
       document.body.appendChild(tempElement);
       
-      // Get the lines to measure
-      const lines = useTwoLines ? bestLayout.split('\n') : [exerciseName];
-      
-      // Binary search for the largest font size where the longest line fits
+      // Binary search for the largest font size that fits
       let low = minFontSize;
       let high = maxFontSize;
       let bestSize = minFontSize;
@@ -240,18 +216,11 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
         const mid = Math.floor((low + high) / 2);
         tempElement.style.fontSize = mid + 'px';
         
-        // Check if all lines fit within available width
-        let allLinesFit = true;
-        for (const line of lines) {
-          tempElement.textContent = line;
-          const lineWidth = tempElement.offsetWidth;
-          if (lineWidth > availableWidth) {
-            allLinesFit = false;
-            break;
-          }
-        }
+        // Allow any height - we only care about width fitting
+        // The text will wrap to multiple lines as needed
+        const textWidth = tempElement.scrollWidth;
         
-        if (allLinesFit) {
+        if (textWidth <= availableWidth) {
           // This size fits, try larger
           bestSize = mid;
           low = mid + 1;
@@ -262,7 +231,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       }
       
       document.body.removeChild(tempElement);
-      setExerciseFontSize(`${bestSize}px`);
+      
+      // Always use at least the minimum font size
+      const finalSize = Math.max(bestSize, minFontSize);
+      setExerciseFontSize(`${finalSize}px`);
     };
 
     // Calculate on mount and when exercise changes
@@ -843,7 +815,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 </Box>
               </Box>
 
-              {/* Exercise name - responsive sizing with no extra padding constraints */}
+              {/* Exercise name - extremely large text (minimum 100pt) with natural wrapping */}
               <Box sx={{ mb: 2, px: { xs: 2, sm: 4 } }}>
                 <Typography 
                   ref={exerciseNameRef}
@@ -851,17 +823,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   component="h2"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: exerciseFontSize,
+                    fontSize: exerciseFontSize + ' !important',
                     color: 'primary.main',
                     textAlign: 'center',
                     lineHeight: '1.2 !important',
                     wordBreak: 'break-word',
                     overflowWrap: 'break-word',
-                    whiteSpace: 'pre-wrap',
+                    whiteSpace: 'normal',
                     mb: { xs: 1, sm: 1.5 },
                   }}
                 >
-                  {splitExerciseName ? splitExerciseName.join('\n') : exerciseName}
+                  {exerciseName}
                 </Typography>
               </Box>
               

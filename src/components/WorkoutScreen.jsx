@@ -843,6 +843,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                         textAlign: 'center',
                         lineHeight: '1.2 !important',
                         width: splitName.line1.length >= splitName.line2.length ? '90%' : 'auto',
+                        whiteSpace: 'nowrap',
+                        overflow: 'visible',
                         mb: 0,
                       }}
                     >
@@ -858,6 +860,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                         textAlign: 'center',
                         lineHeight: '1.2 !important',
                         width: splitName.line2.length >= splitName.line1.length ? '90%' : 'auto',
+                        whiteSpace: 'nowrap',
+                        overflow: 'visible',
                         mb: { xs: 1, sm: 1.5 },
                       }}
                     >

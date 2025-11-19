@@ -30,14 +30,71 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
+          console.log('[SW Registration] Starting service worker registration...');
+          console.log('[SW Registration] Current URL:', window.location.href);
+          console.log('[SW Registration] Is Secure Context:', window.isSecureContext);
+          
           navigator.serviceWorker.register('/goodlift/service-worker.js')
             .then(registration => {
-              console.log('Service Worker registered successfully:', registration.scope);
+              console.log('[SW Registration] ✅ Service Worker registered successfully');
+              console.log('[SW Registration] Scope:', registration.scope);
+              console.log('[SW Registration] Active:', registration.active !== null);
+              console.log('[SW Registration] Installing:', registration.installing !== null);
+              console.log('[SW Registration] Waiting:', registration.waiting !== null);
+              
+              // Listen for updates
+              registration.addEventListener('updatefound', () => {
+                console.log('[SW Registration] 🔄 Service Worker update found');
+                const newWorker = registration.installing;
+                
+                if (newWorker) {
+                  newWorker.addEventListener('statechange', () => {
+                    console.log('[SW Registration] Service Worker state changed to:', newWorker.state);
+                    if (newWorker.state === 'activated') {
+                      console.log('[SW Registration] ✅ New Service Worker activated');
+                    }
+                  });
+                }
+              });
+              
+              // Check for existing service worker
+              if (registration.active) {
+                console.log('[SW Registration] Service Worker already active and controlling pages');
+              } else if (registration.installing) {
+                console.log('[SW Registration] Service Worker is installing...');
+              } else if (registration.waiting) {
+                console.log('[SW Registration] Service Worker is waiting to activate...');
+              }
             })
             .catch(error => {
-              console.log('Service Worker registration failed:', error);
+              console.error('[SW Registration] ❌ Service Worker registration failed');
+              console.error('[SW Registration] Error type:', error.name);
+              console.error('[SW Registration] Error message:', error.message);
+              console.error('[SW Registration] Full error:', error);
+              
+              // Provide helpful debugging information
+              if (error.name === 'SecurityError') {
+                console.error('[SW Registration] 🔒 Security Error: Service Workers require HTTPS or localhost');
+                console.error('[SW Registration] Current protocol:', window.location.protocol);
+              } else if (error.name === 'TypeError') {
+                console.error('[SW Registration] ⚠️  Type Error: Check service worker file path');
+                console.error('[SW Registration] Attempted path: /goodlift/service-worker.js');
+              }
             });
+          
+          // Log initial service worker controller status
+          if (navigator.serviceWorker.controller) {
+            console.log('[SW Registration] Page is currently controlled by service worker:', 
+              navigator.serviceWorker.controller.scriptURL);
+          } else {
+            console.log('[SW Registration] Page is not currently controlled by a service worker');
+            console.log('[SW Registration] Will be controlled after first registration completes');
+          }
         });
+      } else {
+        console.error('[SW Registration] ❌ Service Workers are not supported in this browser');
+        console.error('[SW Registration] User Agent:', navigator.userAgent);
+        console.error('[SW Registration] Push notifications will not work without service worker support');
       }
     </script>
   </body>

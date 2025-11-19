@@ -19,20 +19,59 @@ const VAPID_KEY = 'BE0ZQSJHIlmXfeA5ddjITNrqrS0TmGfGGQjBufmOlUKxRUtEwja2qHmTZ0pXH
  */
 export const requestNotificationPermission = async () => {
   try {
+    console.log('[Notification Permission] Requesting notification permission...');
+    
     if (!('Notification' in window)) {
-      console.warn('This browser does not support notifications');
+      console.error('[Notification Permission] ❌ Notification API not supported in this browser');
+      console.error('[Notification Permission] User agent:', navigator.userAgent);
+      return false;
+    }
+
+    // Check current permission state
+    const currentPermission = Notification.permission;
+    console.log('[Notification Permission] Current permission state:', currentPermission);
+    
+    if (currentPermission === 'granted') {
+      console.log('[Notification Permission] ✅ Permission already granted');
+      return true;
+    }
+    
+    if (currentPermission === 'denied') {
+      console.error('[Notification Permission] ❌ Permission previously denied by user');
+      console.error('[Notification Permission] User must manually enable notifications in browser settings');
       return false;
     }
 
     if (!messaging) {
-      console.warn('Firebase Messaging not supported in this browser');
-      return false;
+      console.warn('[Notification Permission] ⚠️  Firebase Messaging not supported in this browser');
+      console.warn('[Notification Permission] Will still request permission for native notifications');
     }
 
+    // Request permission
+    console.log('[Notification Permission] Requesting permission from user...');
     const permission = await Notification.requestPermission();
-    return permission === 'granted';
+    console.log('[Notification Permission] User response:', permission);
+    
+    if (permission === 'granted') {
+      console.log('[Notification Permission] ✅ Permission granted by user');
+      return true;
+    } else if (permission === 'denied') {
+      console.warn('[Notification Permission] ❌ Permission denied by user');
+      return false;
+    } else {
+      console.warn('[Notification Permission] ⚠️  Permission dismissed by user (default state)');
+      return false;
+    }
   } catch (error) {
-    console.error('Error requesting notification permission:', error);
+    console.error('[Notification Permission] ❌ Error requesting notification permission');
+    console.error('[Notification Permission] Error name:', error.name);
+    console.error('[Notification Permission] Error message:', error.message);
+    
+    if (error.name === 'NotAllowedError') {
+      console.error('[Notification Permission] Permission request blocked by browser');
+      console.error('[Notification Permission] May need to be triggered by user interaction');
+    }
+    
     return false;
   }
 };
@@ -43,18 +82,39 @@ export const requestNotificationPermission = async () => {
  */
 export const getFCMToken = async () => {
   try {
+    console.log('[FCM] Starting FCM token retrieval...');
+    
     if (!messaging) {
-      console.warn('[FCM] Firebase Messaging not available');
+      console.warn('[FCM] ⚠️  Firebase Messaging not available in this browser');
+      console.warn('[FCM] This is expected on Safari/iOS which does not support FCM');
+      console.warn('[FCM] Browser:', navigator.userAgent);
       return null;
     }
+    
+    console.log('[FCM] Firebase Messaging instance available');
 
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      console.warn('[FCM] Notification permission not granted');
+    // Check notification permission
+    const currentPermission = Notification.permission;
+    console.log('[FCM] Current notification permission:', currentPermission);
+    
+    if (currentPermission === 'denied') {
+      console.error('[FCM] ❌ Notification permission denied - cannot get FCM token');
       return null;
+    }
+    
+    if (currentPermission !== 'granted') {
+      console.log('[FCM] Requesting notification permission...');
+      const permission = await Notification.requestPermission();
+      console.log('[FCM] Permission request result:', permission);
+      
+      if (permission !== 'granted') {
+        console.warn('[FCM] ⚠️  Notification permission not granted');
+        return null;
+      }
     }
 
     console.log('[FCM] Requesting FCM token with VAPID key...');
+    console.log('[FCM] VAPID key (first 20 chars):', VAPID_KEY.substring(0, 20) + '...');
     
     // Get FCM token using the VAPID key
     const token = await getToken(messaging, {
@@ -63,15 +123,44 @@ export const getFCMToken = async () => {
     
     if (token) {
       console.log('[FCM] ✅ FCM token obtained successfully');
-      console.log('[FCM] 📋 FCM Token:', token);
+      console.log('[FCM] 📋 FCM Token (first 30 chars):', token.substring(0, 30) + '...');
+      console.log('[FCM] Full token length:', token.length, 'characters');
       console.log('[FCM] 📤 Send this token to your backend to enable Firebase push notifications');
+      console.log('[FCM] Token should be stored in your database associated with this user/device');
       return token;
     } else {
-      console.warn('[FCM] No FCM token available. User may need to grant permission.');
+      console.warn('[FCM] ⚠️  No FCM token received from Firebase');
+      console.warn('[FCM] This may indicate:');
+      console.warn('[FCM]   - Service worker not properly registered');
+      console.warn('[FCM]   - VAPID key mismatch with Firebase console configuration');
+      console.warn('[FCM]   - Firebase project configuration issue');
       return null;
     }
   } catch (error) {
-    console.error('[FCM] Error getting FCM token:', error);
+    console.error('[FCM] ❌ Error getting FCM token');
+    console.error('[FCM] Error name:', error.name);
+    console.error('[FCM] Error message:', error.message);
+    console.error('[FCM] Error code:', error.code);
+    
+    // Provide specific error guidance
+    if (error.code === 'messaging/permission-blocked') {
+      console.error('[FCM] Permission blocked by user - cannot retrieve token');
+      console.error('[FCM] User must enable notifications in browser settings');
+    } else if (error.code === 'messaging/unsupported-browser') {
+      console.error('[FCM] Firebase Messaging not supported in this browser');
+      console.error('[FCM] Try using Chrome, Firefox, or Edge');
+    } else if (error.code === 'messaging/failed-service-worker-registration') {
+      console.error('[FCM] Service worker registration failed');
+      console.error('[FCM] Check that service-worker.js and firebase-messaging-sw.js are accessible');
+    } else if (error.code === 'messaging/token-subscribe-failed') {
+      console.error('[FCM] Failed to subscribe to FCM');
+      console.error('[FCM] Possible causes:');
+      console.error('[FCM]   - Network connectivity issue');
+      console.error('[FCM]   - Firebase project configuration problem');
+      console.error('[FCM]   - VAPID key mismatch');
+    }
+    
+    console.error('[FCM] Full error object:', error);
     return null;
   }
 };
@@ -239,20 +328,55 @@ export const shouldSendNotification = (preferences, type) => {
  * Setup message listener for foreground notifications
  */
 export const setupMessageListener = (callback) => {
+  console.log('[FCM Listener] Setting up foreground message listener...');
+  
   if (!messaging) {
-    console.warn('Firebase Messaging not available');
+    console.warn('[FCM Listener] ⚠️  Firebase Messaging not available - cannot setup listener');
+    console.warn('[FCM Listener] This is expected on Safari/iOS');
     return null;
   }
 
   try {
-    return onMessage(messaging, (payload) => {
-      console.log('Received foreground message:', payload);
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log('[FCM Listener] ✅ Received foreground message from Firebase');
+      console.log('[FCM Listener] Message payload:', {
+        notification: payload.notification,
+        data: payload.data,
+        from: payload.from,
+        collapseKey: payload.collapseKey
+      });
+      
+      // Log notification details
+      if (payload.notification) {
+        console.log('[FCM Listener] Notification details:');
+        console.log('[FCM Listener]   Title:', payload.notification.title);
+        console.log('[FCM Listener]   Body:', payload.notification.body);
+        console.log('[FCM Listener]   Icon:', payload.notification.icon);
+      }
+      
+      // Log data payload
+      if (payload.data) {
+        console.log('[FCM Listener] Data payload:', payload.data);
+      }
+      
       if (callback) {
-        callback(payload);
+        try {
+          callback(payload);
+        } catch (error) {
+          console.error('[FCM Listener] ❌ Error in message callback:', error);
+        }
       }
     });
+    
+    console.log('[FCM Listener] ✅ Foreground message listener setup complete');
+    console.log('[FCM Listener] Will receive notifications when app is open and in focus');
+    
+    return unsubscribe;
   } catch (error) {
-    console.error('Error setting up message listener:', error);
+    console.error('[FCM Listener] ❌ Error setting up message listener');
+    console.error('[FCM Listener] Error name:', error.name);
+    console.error('[FCM Listener] Error message:', error.message);
+    console.error('[FCM Listener] Full error:', error);
     return null;
   }
 };

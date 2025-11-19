@@ -21,12 +21,30 @@ const storage = getStorage(app);
 
 // Initialize messaging only if supported (not in all browsers)
 let messaging = null;
+
+console.log('[Firebase] Checking Firebase Messaging support...');
+
 isSupported().then((supported) => {
   if (supported) {
-    messaging = getMessaging(app);
+    console.log('[Firebase] ✅ Firebase Messaging is supported in this browser');
+    try {
+      messaging = getMessaging(app);
+      console.log('[Firebase] ✅ Firebase Messaging instance created successfully');
+    } catch (error) {
+      console.error('[Firebase] ❌ Error creating Firebase Messaging instance:', error);
+      console.error('[Firebase] Error name:', error.name);
+      console.error('[Firebase] Error message:', error.message);
+    }
+  } else {
+    console.warn('[Firebase] ⚠️  Firebase Messaging is not supported in this browser');
+    console.warn('[Firebase] This is expected on Safari/iOS which does not support FCM');
+    console.warn('[Firebase] Use native Web Push API instead');
   }
 }).catch((err) => {
-  console.warn('Firebase Messaging not supported:', err);
+  console.error('[Firebase] ❌ Error checking Firebase Messaging support:', err);
+  console.error('[Firebase] Error name:', err.name);
+  console.error('[Firebase] Error message:', err.message);
+  console.warn('[Firebase] Firebase Messaging will not be available');
 });
 
 export { db, auth, storage, messaging };

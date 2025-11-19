@@ -111,7 +111,6 @@ const ExerciseCard = memo(({
       const container = nameElement.parentElement;
       if (!container) return;
       
-      // Determine available width based on container, accounting for padding
       const containerWidth = container.clientWidth;
       const paddingX = parseFloat(getComputedStyle(nameElement).paddingLeft) + parseFloat(getComputedStyle(nameElement).paddingRight);
       const availableWidth = containerWidth - paddingX;
@@ -121,28 +120,26 @@ const ExerciseCard = memo(({
       const words = exerciseName.split(' ');
       let bestLayout = { text: exerciseName, longestLine: exerciseName };
 
-      // Find the best split point for 2 lines to make them as even as possible
       if (words.length > 1) {
         let bestDiff = Infinity;
-        
         for (let i = 1; i < words.length; i++) {
           const line1 = words.slice(0, i).join(' ');
           const line2 = words.slice(i).join(' ');
-          const diff = Math.abs(line1.length - line2.length);
-
-          if (diff < bestDiff) {
-            bestDiff = diff;
-            bestLayout = {
-              text: `${line1}\n${line2}`,
-              longestLine: line1.length > line2.length ? line1 : line2,
-            };
+          if (line2) { // Ensure second line is not empty
+            const diff = Math.abs(line1.length - line2.length);
+            if (diff < bestDiff) {
+              bestDiff = diff;
+              bestLayout = {
+                text: `${line1}\n${line2}`,
+                longestLine: line1.length > line2.length ? line1 : line2,
+              };
+            }
           }
         }
       }
 
       setExerciseText(bestLayout.text);
 
-      // Measure the width of the longest line to determine the font size
       const tempSpan = document.createElement('span');
       tempSpan.style.visibility = 'hidden';
       tempSpan.style.position = 'absolute';
@@ -152,34 +149,47 @@ const ExerciseCard = memo(({
       tempSpan.textContent = bestLayout.longestLine;
       document.body.appendChild(tempSpan);
 
-      // Calculate the font size that makes the longest line fit the available width
-      const maxFontSize = 150; // A reasonable upper limit
-      let fontSize = maxFontSize;
-
-      // Adjust font size until the text fits
-      tempSpan.style.fontSize = `${fontSize}px`;
-      let textWidth = tempSpan.getBoundingClientRect().width;
+      const tempDiv = document.createElement('div');
+      tempDiv.style.visibility = 'hidden';
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.whiteSpace = 'pre-wrap';
+      tempDiv.style.fontFamily = getComputedStyle(nameElement).fontFamily;
+      tempDiv.style.fontWeight = getComputedStyle(nameElement).fontWeight;
+      tempDiv.style.lineHeight = '1.1'; // Use a tight line height
+      tempDiv.style.width = `${availableWidth}px`;
+      tempDiv.textContent = bestLayout.text;
+      document.body.appendChild(tempDiv);
       
-      if (textWidth > availableWidth) {
-        fontSize = (availableWidth / textWidth) * fontSize;
+      let low = 16; // Min font size
+      let high = 120; // Max font size
+      let bestSize = low;
+
+      while (low <= high) {
+        const mid = (low + high) / 2;
+        tempSpan.style.fontSize = `${mid}px`;
+        tempDiv.style.fontSize = `${mid}px`;
+        
+        const textWidth = tempSpan.getBoundingClientRect().width;
+        const textHeight = tempDiv.getBoundingClientRect().height;
+        const maxTextHeight = mid * 1.1 * 2.5; // Allow a little tolerance
+
+        if (textWidth <= availableWidth && textHeight <= maxTextHeight) {
+          bestSize = mid;
+          low = mid + 1;
+        } else {
+          high = mid - 1;
+        }
       }
       
-      // Ensure the font size doesn't create more than 2 lines (especially with lineHeight)
-      const finalFontSize = Math.min(fontSize, maxFontSize);
-      
-      // Also ensure it's not too small
-      const minFontSize = 32;
-      setExerciseFontSize(`${Math.max(finalFontSize, minFontSize)}px`);
+      setExerciseFontSize(`${bestSize}px`);
       
       document.body.removeChild(tempSpan);
+      document.body.removeChild(tempDiv);
     };
 
-    // Calculate on mount, resize, and when exercise name changes
     calculateFontSize();
     const handleResize = () => calculateFontSize();
     window.addEventListener('resize', handleResize);
-
-    // Small delay to ensure DOM is ready
     const timeout = setTimeout(calculateFontSize, 100);
 
     return () => {
@@ -207,12 +217,13 @@ const ExerciseCard = memo(({
       sx={{ 
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
-        minHeight: {
-          xs: 'calc(100vh - 140px)', // Mobile: close to bottom nav
-          sm: 'calc(100vh - 160px)',
+        // Use fixed height to prevent scrolling
+        height: {
+          xs: 'calc(100dvh - 140px)', // Mobile (Dynamic Viewport Height)
+          sm: 'calc(100vh - 160px)', // Desktop
         },
         p: { xs: 2, sm: 3 },
+        overflow: 'hidden', // Ensure no internal overflow triggers scroll
       }}
     >
       {/* Top Header Bar - Timer, Step Counter, Set Indicator, Favorite */}
@@ -398,7 +409,7 @@ const ExerciseCard = memo(({
       </Box>
 
       {/* Exercise Name - Responsive font size, max 2 lines */}
-      <Box sx={{ mb: 1, flexShrink: 0 }}>
+      <Box sx={{ mb: 0.5, flexShrink: 0 }}>
         <Typography 
           ref={exerciseNameRef}
           variant="h3" 
@@ -408,11 +419,11 @@ const ExerciseCard = memo(({
             fontSize: exerciseFontSize,
             color: 'primary.main',
             textAlign: 'center',
-            lineHeight: '1.2 !important',
-            px: { xs: 2, sm: 4 },
+            lineHeight: '1.1 !important',
+            px: { xs: 1, sm: 2 },
             wordBreak: 'break-word',
             overflowWrap: 'break-word',
-            whiteSpace: 'pre-wrap', // Use pre-wrap to respect newline characters
+            whiteSpace: 'pre-wrap',
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
@@ -423,53 +434,29 @@ const ExerciseCard = memo(({
         </Typography>
       </Box>
 
-      {/* Demo Image - Shows if available */}
-      {imageSrc && (
-        <Box 
-          sx={{ 
-            mb: 1,
-            flexShrink: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+      {/* Demo Image (flexible) or Video */}
+      <Box sx={{ flexGrow: 1, flexShrink: 1, position: 'relative', mb: 1, minHeight: 0 }}>
+        {imageSrc && (
           <Box
             component="img"
             src={imageSrc}
             alt={`${exerciseName} demonstration`}
             onError={handleImageError}
             sx={{
-              maxWidth: '100%',
-              maxHeight: { xs: '350px', sm: '500px' },
-              width: 'auto',
-              height: 'auto',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
               borderRadius: 2,
               objectFit: 'contain',
-              // Semi-transparent white background for visibility of dark line drawings
-              backgroundColor: 'rgba(255, 255, 255, 0.15)',
-              padding: 1,
-              // Add subtle border for better definition
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              p: 1,
             }}
             loading="lazy"
           />
-        </Box>
-      )}
-
-      {/* Video Embed - Shows if available and no demo image */}
-      {videoUrl && !demoImage && (
-        <Box 
-          sx={{ 
-            position: 'relative',
-            paddingBottom: '56.25%', // 16:9 aspect ratio
-            height: 0,
-            overflow: 'hidden',
-            borderRadius: 2,
-            mb: 2,
-            flexShrink: 0,
-          }}
-        >
+        )}
+        {videoUrl && !demoImage && (
           <iframe
             src={videoUrl}
             style={{
@@ -486,65 +473,59 @@ const ExerciseCard = memo(({
             allowFullScreen
             title={`${exerciseName} video`}
           />
-        </Box>
-      )}
+        )}
+      </Box>
 
-      {/* Set Logged Confirmation */}
-      {setLogged && (
-        <Alert 
-          icon={<CheckCircle />}
-          severity="success"
-          sx={{ mb: 2, flexShrink: 0 }}
-        >
-          Set logged! Moving to next...
-        </Alert>
-      )}
-
-      {/* Progressive Overload Suggestion */}
-      {shouldShowSuggestion() && (
-        <Alert 
-          icon={<TrendingUp />}
-          severity="info"
-          sx={{ 
-            mb: 2,
-            flexShrink: 0,
-            '& .MuiAlert-message': {
-              width: '100%',
-            }
-          }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <Typography variant="body2">
-              💡 Try: {suggestedWeight} lbs × {suggestedReps} reps
-              {lastWeight != null && suggestedWeight > lastWeight && ' (↑ weight)'}
-              {lastWeight != null && suggestedWeight === lastWeight && suggestedReps > lastReps && ' (↑ reps)'}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button 
-                size="small" 
-                onClick={handleAcceptSuggestion}
-                variant="contained"
-              >
-                Accept
-              </Button>
-              <Button 
-                size="small" 
-                onClick={() => setSuggestionAccepted(true)}
-                variant="outlined"
-              >
-                Skip
-              </Button>
+      {/* Set Logged & Suggestion Alerts */}
+      <Box sx={{ flexShrink: 0, mb: 1 }}>
+        {setLogged && (
+          <Alert 
+            icon={<CheckCircle />}
+            severity="success"
+          >
+            Set logged! Moving to next...
+          </Alert>
+        )}
+        {shouldShowSuggestion() && (
+          <Alert 
+            icon={<TrendingUp />}
+            severity="info"
+            sx={{ 
+              '& .MuiAlert-message': {
+                width: '100%',
+              }
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <Typography variant="body2" sx={{ mr: 1 }}>
+                💡 Try: {suggestedWeight} lbs × {suggestedReps} reps
+                {lastWeight != null && suggestedWeight > lastWeight && ' (↑ weight)'}
+                {lastWeight != null && suggestedWeight === lastWeight && suggestedReps > lastReps && ' (↑ reps)'}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button 
+                  size="small" 
+                  onClick={handleAcceptSuggestion}
+                  variant="contained"
+                >
+                  Accept
+                </Button>
+                <Button 
+                  size="small" 
+                  onClick={() => setSuggestionAccepted(true)}
+                  variant="outlined"
+                >
+                  Skip
+                </Button>
+              </Box>
             </Box>
-          </Box>
-        </Alert>
-      )}
-
-      {/* Flexible spacer to push content to top and bottom */}
-      <Box sx={{ flex: 1, minHeight: { xs: '20px', sm: '40px' } }} />
-
+          </Alert>
+        )}
+      </Box>
+      
       {/* Input Form - anchored near bottom */}
       <Box component="form" onSubmit={handleSubmit} sx={{ flexShrink: 0 }}>
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 2 }}>
           <ExerciseInputs
             weight={weight}
             reps={reps}

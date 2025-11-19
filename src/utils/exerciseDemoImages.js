@@ -6,6 +6,14 @@
  * maps to "dumbbell-incline-bench-press.webp")
  */
 
+/**
+ * Get the base URL for the application
+ * Uses Vite's BASE_URL to handle deployment paths (e.g., /goodlift/)
+ */
+const getBaseUrl = () => {
+  return import.meta.env.BASE_URL || '/';
+};
+
 // List of all available demo images in public/demos/
 const AVAILABLE_DEMO_IMAGES = [
   'back-squat',
@@ -109,14 +117,14 @@ export const getDemoImagePath = (exerciseName) => {
   
   // Check if we have an exact match
   if (AVAILABLE_DEMO_IMAGES.includes(normalized)) {
-    return `/demos/${normalized}.webp`;
+    return `${getBaseUrl()}demos/${normalized}.webp`;
   }
   
   // Check for common variations/aliases
   const variations = getExerciseVariations(normalized);
   for (const variation of variations) {
     if (AVAILABLE_DEMO_IMAGES.includes(variation)) {
-      return `/demos/${variation}.webp`;
+      return `${getBaseUrl()}demos/${variation}.webp`;
     }
   }
   
@@ -279,8 +287,11 @@ export const analyzeImageUsage = (exerciseNames) => {
   exerciseNames.forEach(name => {
     const imagePath = getDemoImagePath(name);
     if (imagePath) {
-      // Extract filename without path and extension
-      const imageFile = imagePath.replace('/demos/', '').replace('.webp', '');
+      // Extract filename without path, base URL, and extension
+      // Handle both /demos/ and /goodlift/demos/ paths
+      const imageFile = imagePath
+        .replace(/.*\/demos\//, '') // Remove everything up to and including /demos/
+        .replace('.webp', '');
       usedImages.add(imageFile);
       exerciseNameToImage.set(name, imageFile);
     }

@@ -180,11 +180,11 @@ const ExerciseCard = memo(({
             textAlign: 'center',
             lineHeight: '1.2 !important',
             fontFamily: "'Montserrat', sans-serif !important",
-            // Responsive font sizing that scales appropriately
+            // Responsive font sizing - smaller on mobile to ensure 2-line display
             fontSize: {
-              xs: 'clamp(1.5rem, 5vw, 2.5rem) !important',
-              sm: 'clamp(2rem, 4vw, 3rem) !important',
-              md: 'clamp(2.5rem, 3.5vw, 4rem) !important',
+              xs: '1.25rem !important', // 20px on mobile
+              sm: '1.75rem !important', // 28px on tablet
+              md: '2.5rem !important',  // 40px on desktop
             },
             // Limit to max 2 lines with ellipsis
             display: '-webkit-box',

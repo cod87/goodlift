@@ -128,7 +128,68 @@ export const getDemoImagePath = (exerciseName) => {
     }
   }
   
+  // Try fuzzy matching as a last resort
+  const fuzzyMatch = findFuzzyMatch(normalized);
+  if (fuzzyMatch) {
+    return `${getBaseUrl()}demos/${fuzzyMatch}.webp`;
+  }
+  
   return null;
+};
+
+/**
+ * Find a fuzzy match for an exercise name
+ * Uses word-based matching with scoring to find the best matching demo image
+ * 
+ * @param {string} normalized - Normalized exercise name
+ * @returns {string|null} Best matching image filename or null
+ */
+const findFuzzyMatch = (normalized) => {
+  const words = normalized.split('-').filter(w => w.length > 2);
+  if (words.length === 0) return null;
+  
+  let bestScore = 0;
+  let bestImage = null;
+  
+  for (const image of AVAILABLE_DEMO_IMAGES) {
+    const imageWords = image.split('-');
+    let score = 0;
+    let matchedWords = 0;
+    
+    for (const word of words) {
+      if (imageWords.includes(word)) {
+        score += 2; // Exact word match
+        matchedWords++;
+      } else {
+        // Check for similar words (plural/singular)
+        const singular = word.endsWith('s') ? word.slice(0, -1) : word;
+        const plural = word.endsWith('s') ? word : word + 's';
+        if (imageWords.includes(singular) || imageWords.includes(plural)) {
+          score += 1.5;
+          matchedWords++;
+        }
+      }
+    }
+    
+    // Bonus for matching equipment type (first word)
+    if (words[0] && imageWords[0] === words[0]) {
+      score += 1;
+    }
+    
+    // Penalty for length mismatch
+    const lengthDiff = Math.abs(words.length - imageWords.length);
+    score -= lengthDiff * 0.3;
+    
+    // Require at least 70% of words to match for a valid fuzzy match
+    const matchPercentage = matchedWords / words.length;
+    if (score > bestScore && matchPercentage >= 0.7) {
+      bestScore = score;
+      bestImage = image;
+    }
+  }
+  
+  // Only return if score is meaningful (at least 2 words matched)
+  return bestScore >= 3 ? bestImage : null;
 };
 
 /**
@@ -140,6 +201,13 @@ export const getDemoImagePath = (exerciseName) => {
  */
 const getExerciseVariations = (normalized) => {
   const variations = [];
+  
+  // Plural/singular variations (try early for better matching)
+  if (normalized.endsWith('s')) {
+    variations.push(normalized.slice(0, -1));
+  } else {
+    variations.push(normalized + 's');
+  }
   
   // Handle "Dumbbell Incline X" vs "Incline Dumbbell X" variations
   if (normalized.startsWith('dumbbell-incline-')) {
@@ -155,18 +223,37 @@ const getExerciseVariations = (normalized) => {
     variations.push(normalized.replace(/^incline-barbell-/, 'barbell-incline-'));
   }
   
-  // Handle "Dumbbell Declined X" vs "Declined Dumbbell X" variations
-  if (normalized.startsWith('dumbbell-declined-')) {
-    variations.push(normalized.replace(/^dumbbell-declined-/, 'declined-dumbbell-'));
-  } else if (normalized.startsWith('declined-dumbbell-')) {
-    variations.push(normalized.replace(/^declined-dumbbell-/, 'dumbbell-declined-'));
+  // Handle "Dumbbell Decline X" vs "Decline Dumbbell X" variations
+  if (normalized.startsWith('dumbbell-decline-')) {
+    variations.push(normalized.replace(/^dumbbell-decline-/, 'decline-dumbbell-'));
+    variations.push(normalized.replace('decline-', 'declined-'));
+  } else if (normalized.startsWith('decline-dumbbell-')) {
+    variations.push(normalized.replace(/^decline-dumbbell-/, 'dumbbell-decline-'));
   }
   
-  // Handle "Barbell Declined X" vs "Declined Barbell X" variations
-  if (normalized.startsWith('barbell-declined-')) {
-    variations.push(normalized.replace(/^barbell-declined-/, 'declined-barbell-'));
-  } else if (normalized.startsWith('declined-barbell-')) {
-    variations.push(normalized.replace(/^declined-barbell-/, 'barbell-declined-'));
+  // Handle "Barbell Decline X" vs "Decline Barbell X" and decline/declined variations
+  if (normalized.startsWith('barbell-decline-')) {
+    variations.push(normalized.replace(/^barbell-decline-/, 'decline-barbell-'));
+    variations.push(normalized.replace('decline-', 'declined-'));
+    variations.push(normalized.replace(/^barbell-decline-/, 'barbell-declined-'));
+  } else if (normalized.startsWith('decline-barbell-')) {
+    variations.push(normalized.replace(/^decline-barbell-/, 'barbell-decline-'));
+  }
+  
+  // Handle equipment prefix removal for exercises named with just equipment + action
+  // e.g., "Barbell Good Morning" -> "good-morning", "Barbell Front Squat" -> "front-squat"
+  const equipmentTypes = ['barbell', 'dumbbell', 'kettlebell', 'cable', 'bodyweight'];
+  for (const equipment of equipmentTypes) {
+    if (normalized.startsWith(`${equipment}-`)) {
+      const withoutEquipment = normalized.replace(`${equipment}-`, '');
+      variations.push(withoutEquipment);
+      // Also try with other equipment types
+      for (const otherEquipment of equipmentTypes) {
+        if (otherEquipment !== equipment) {
+          variations.push(`${otherEquipment}-${withoutEquipment}`);
+        }
+      }
+    }
   }
   
   // Handle "Dumbbell X" vs "DB X" variations
@@ -183,6 +270,50 @@ const getExerciseVariations = (normalized) => {
     variations.push(normalized.replace(/^barbell-/, 'bb-'));
   }
   
+  // Handle close-grip variations
+  if (normalized.includes('close-grip-')) {
+    variations.push(normalized.replace('close-grip-', 'close-'));
+  } else if (normalized.startsWith('barbell-close-')) {
+    variations.push(normalized.replace('barbell-close-', 'close-'));
+  }
+  
+  // Handle single-arm variations
+  if (normalized.includes('single-arm-')) {
+    // Try without the "single-arm" prefix
+    const withoutSingleArm = normalized.replace('single-arm-', '');
+    variations.push(withoutSingleArm);
+    variations.push(withoutSingleArm + '-single-arm');
+  }
+  
+  // Handle bent-over row variations
+  if (normalized.includes('bent-over-row')) {
+    variations.push(normalized.replace('bent-over-row', 'bent-over-rows'));
+  }
+  
+  // Handle row/rows variations (more general)
+  if (normalized.endsWith('-row')) {
+    variations.push(normalized + 's');
+  } else if (normalized.endsWith('-rows')) {
+    variations.push(normalized.slice(0, -1));
+  }
+  
+  // Handle curl type variations (hammer, concentration, etc.)
+  if (normalized.includes('hammer-curl')) {
+    variations.push(normalized.replace('hammer-curl', 'curl'));
+    variations.push('hammer-curl');
+  }
+  if (normalized.includes('concentration-curl')) {
+    variations.push(normalized.replace('concentration-curl', 'curl'));
+    variations.push('concentration-curl');
+  }
+  
+  // Handle lunge variations
+  if (normalized.includes('lunge')) {
+    variations.push('lunge');
+    variations.push('walking-lunge');
+    variations.push('reverse-lunge');
+  }
+  
   // Handle incline/inclined variations
   if (normalized.includes('incline-')) {
     variations.push(normalized.replace('incline-', 'inclined-'));
@@ -197,21 +328,9 @@ const getExerciseVariations = (normalized) => {
     variations.push(normalized.replace('declined-', 'decline-'));
   }
   
-  // Handle row/rows variations
-  if (normalized.endsWith('-row')) {
-    variations.push(normalized + 's');
-  } else if (normalized.endsWith('-rows')) {
-    variations.push(normalized.slice(0, -1));
-  }
-  
   // Handle press variations
   if (normalized.includes('shoulder-press')) {
     variations.push(normalized.replace('shoulder-press', 'shoulder-press-2'));
-  }
-  
-  // Handle single-arm variations
-  if (normalized.includes('single-arm')) {
-    variations.push(normalized.replace('single-arm', 'single-arm-row'));
   }
   
   // Handle pull-up variations
@@ -231,6 +350,14 @@ const getExerciseVariations = (normalized) => {
   // Handle squat variations
   if (normalized === 'squat') {
     variations.push('bodyweight-squat');
+    variations.push('back-squat');
+  }
+  
+  // Handle burpee/burpees
+  if (normalized === 'burpee') {
+    variations.push('burpees');
+  } else if (normalized === 'burpees') {
+    variations.push('burpee');
   }
   
   return variations;

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatTime, detectWorkoutType, splitExerciseName } from '../utils/helpers';
+import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip } from '@mui/material';
 import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
@@ -35,7 +35,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
   const exerciseNameRef = useRef(null);
-  const [exerciseFontSize, setExerciseFontSize] = useState('133px'); // Default to minimum 100pt
+  const [exerciseFontSize, setExerciseFontSize] = useState('44px'); // Default responsive size for mobile
   
   // Stretching phase state
   const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
@@ -167,42 +167,43 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
   const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
-  
-  // Split exercise name if longer than 15 characters
-  const splitName = exerciseName ? splitExerciseName(exerciseName) : { line1: '', line2: '', isSplit: false };
 
-  // Calculate responsive font size for exercise name - minimum 100pt (133px)
-  // Text wraps naturally using CSS, ensuring always extremely large and visible
+  // Calculate responsive font size for exercise name
+  // Ensures text is large and readable but always fits within available space
   useEffect(() => {
     const calculateFontSize = () => {
       const nameElement = exerciseNameRef.current;
       if (!nameElement || !exerciseName) return;
 
-      // Get the container width (accounting for padding)
+      // Get the container dimensions
       const container = nameElement.parentElement;
       if (!container) return;
       
       const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+      
       // The Box wrapper has px: { xs: 2, sm: 4 } which is 16px or 32px per side
       // Account for this padding to get the actual available width for text
       const paddingX = window.innerWidth < 600 ? 16 : 32;
       const availableWidth = containerWidth - (paddingX * 2);
       
+      // Limit height to reasonable portion of viewport to prevent overflow
+      // Use a maximum of 30vh to leave room for other UI elements
+      const maxHeight = Math.min(containerHeight * 0.8, window.innerHeight * 0.3);
+      
       if (availableWidth <= 0) return;
       
-      // Minimum font size is 100pt (133px) as required - always extremely large
-      const minFontSize = 133;
-      // Maximum font size we'll allow - set very high to allow largest possible
-      const maxFontSize = 800;
+      // Responsive minimum font size based on viewport width
+      // Mobile: 44px, Tablet: 56px, Desktop: 64px
+      const minFontSize = window.innerWidth < 600 ? 44 : window.innerWidth < 1024 ? 56 : 64;
+      // Maximum font size - scale with viewport
+      const maxFontSize = window.innerWidth < 600 ? 96 : window.innerWidth < 1024 ? 128 : 160;
       
-      // Determine which text to measure based on whether name is split
-      const split = splitExerciseName(exerciseName);
-      const textToMeasure = split.isSplit 
-        ? (split.line1.length >= split.line2.length ? split.line1 : split.line2)
-        : exerciseName;
+      // Use full exercise name for measurement (no split logic)
+      const textToMeasure = exerciseName;
       
-      // All names should fit in 80% of available width
-      const targetWidth = availableWidth * 0.8;
+      // Target 90% of available width to ensure some margin
+      const targetWidth = availableWidth * 0.9;
       
       // Create a temporary element to measure text dimensions with wrapping
       const tempElement = document.createElement('div');
@@ -212,14 +213,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       tempElement.style.fontWeight = '700';
       tempElement.style.lineHeight = '1.2';
       tempElement.style.width = targetWidth + 'px';
-      tempElement.style.wordWrap = 'break-word';
+      tempElement.style.wordBreak = 'break-word';
       tempElement.style.overflowWrap = 'break-word';
       tempElement.style.whiteSpace = 'normal';
       tempElement.style.textAlign = 'center';
       tempElement.textContent = textToMeasure;
       document.body.appendChild(tempElement);
       
-      // Binary search for the largest font size that fits
+      // Binary search for the largest font size that fits both width and height
       let low = minFontSize;
       let high = maxFontSize;
       let bestSize = minFontSize;
@@ -228,11 +229,11 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
         const mid = Math.floor((low + high) / 2);
         tempElement.style.fontSize = mid + 'px';
         
-        // Allow any height - we only care about width fitting
-        // The text will wrap to multiple lines as needed
+        // Check both width and height constraints
         const textWidth = tempElement.scrollWidth;
+        const textHeight = tempElement.scrollHeight;
         
-        if (textWidth <= targetWidth) {
+        if (textWidth <= targetWidth && textHeight <= maxHeight) {
           // This size fits, try larger
           bestSize = mid;
           low = mid + 1;
@@ -244,23 +245,25 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       
       document.body.removeChild(tempElement);
       
-      // Always use at least the minimum font size
-      const finalSize = Math.max(bestSize, minFontSize);
+      // Ensure we stay within min/max bounds
+      const finalSize = Math.max(minFontSize, Math.min(bestSize, maxFontSize));
       setExerciseFontSize(`${finalSize}px`);
     };
 
     // Calculate on mount and when exercise changes
     calculateFontSize();
     
-    // Recalculate on window resize
+    // Recalculate on window resize and orientation change
     const handleResize = () => calculateFontSize();
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
     
     // Small delay to ensure DOM is ready
     const timeout = setTimeout(calculateFontSize, 100);
     
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
       clearTimeout(timeout);
     };
   }, [exerciseName]);
@@ -827,69 +830,40 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 </Box>
               </Box>
 
-              {/* Exercise name - extremely large text (minimum 100pt) with natural wrapping */}
-              <Box sx={{ mb: 2, px: { xs: 2, sm: 4 } }}>
-                {splitName.isSplit ? (
-                  // Split display: two lines with longer line at 80% width
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-                    <Typography 
-                      ref={exerciseNameRef}
-                      variant="h3" 
-                      component="h2"
-                      sx={{ 
-                        fontWeight: 700,
-                        fontSize: exerciseFontSize + ' !important',
-                        color: 'primary.main',
-                        textAlign: 'center',
-                        lineHeight: '1.2 !important',
-                        width: splitName.line1.length >= splitName.line2.length ? '80%' : 'auto',
-                        whiteSpace: 'nowrap',
-                        overflow: 'visible',
-                        mb: 0,
-                      }}
-                    >
-                      {splitName.line1}
-                    </Typography>
-                    <Typography 
-                      variant="h3" 
-                      component="h2"
-                      sx={{ 
-                        fontWeight: 700,
-                        fontSize: exerciseFontSize + ' !important',
-                        color: 'primary.main',
-                        textAlign: 'center',
-                        lineHeight: '1.2 !important',
-                        width: splitName.line2.length >= splitName.line1.length ? '80%' : 'auto',
-                        whiteSpace: 'nowrap',
-                        overflow: 'visible',
-                        mb: { xs: 1, sm: 1.5 },
-                      }}
-                    >
-                      {splitName.line2}
-                    </Typography>
-                  </Box>
-                ) : (
-                  // Normal display for short names
-                  <Typography 
-                    ref={exerciseNameRef}
-                    variant="h3" 
-                    component="h2"
-                    sx={{ 
-                      fontWeight: 700,
-                      fontSize: exerciseFontSize + ' !important',
-                      color: 'primary.main',
-                      textAlign: 'center',
-                      lineHeight: '1.2 !important',
-                      width: '80%',
-                      wordBreak: 'break-word',
-                      overflowWrap: 'break-word',
-                      whiteSpace: 'normal',
-                      mb: { xs: 1, sm: 1.5 },
-                    }}
-                  >
-                    {exerciseName}
-                  </Typography>
-                )}
+              {/* Exercise name - responsive text that wraps and scales to fit */}
+              <Box sx={{ 
+                mb: 2, 
+                px: { xs: 2, sm: 4 },
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: { xs: '60px', sm: '80px' },
+                maxHeight: { xs: '30vh', sm: '30vh' },
+                overflow: 'hidden'
+              }}>
+                <Typography 
+                  ref={exerciseNameRef}
+                  variant="h3" 
+                  component="h2"
+                  sx={{ 
+                    fontWeight: 700,
+                    fontSize: exerciseFontSize + ' !important',
+                    color: 'primary.main',
+                    textAlign: 'center',
+                    lineHeight: '1.2 !important',
+                    width: '100%',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
+                    whiteSpace: 'normal',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 4,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {exerciseName}
+                </Typography>
               </Box>
               
               {(prevWeight !== null || targetReps !== null) && (

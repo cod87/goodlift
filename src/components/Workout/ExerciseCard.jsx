@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { 
   Box, 
@@ -24,6 +24,42 @@ import {
   ArrowForward,
 } from '@mui/icons-material';
 import ExerciseInputs from './ExerciseInputs';
+
+/**
+ * Optimally break a heading into two lines with balanced lengths
+ * Only breaks at spaces, tries to make lines as even as possible
+ * @param {string} text - The text to break
+ * @returns {string} Text with '\n' inserted at optimal break point, or original if no good break
+ */
+const balancedLineBreak = (text) => {
+  if (!text || text.length < 15) return text; // Don't break short text
+  
+  const words = text.split(' ');
+  if (words.length < 2) return text; // Can't break single word
+  
+  let bestBreak = -1;
+  let minDiff = Infinity;
+  
+  // Try breaking after each word and find the most balanced split
+  for (let i = 1; i < words.length; i++) {
+    const firstLine = words.slice(0, i).join(' ');
+    const secondLine = words.slice(i).join(' ');
+    const diff = Math.abs(firstLine.length - secondLine.length);
+    
+    if (diff < minDiff) {
+      minDiff = diff;
+      bestBreak = i;
+    }
+  }
+  
+  if (bestBreak > 0) {
+    const firstLine = words.slice(0, bestBreak).join(' ');
+    const secondLine = words.slice(bestBreak).join(' ');
+    return `${firstLine}\n${secondLine}`;
+  }
+  
+  return text;
+};
 
 /**
  * ExerciseCard - Enhanced exercise display with improved layout
@@ -65,6 +101,9 @@ const ExerciseCard = memo(({
   const [suggestionAccepted, setSuggestionAccepted] = useState(false);
   const [imageSrc, setImageSrc] = useState(demoImage);
   const [imageError, setImageError] = useState(false);
+  
+  // Optimally break exercise name into balanced lines
+  const balancedExerciseName = useMemo(() => balancedLineBreak(exerciseName), [exerciseName]);
 
   // Update image source when demoImage prop changes
   useEffect(() => {
@@ -119,11 +158,12 @@ const ExerciseCard = memo(({
         display: 'flex',
         flexDirection: 'column',
         height: {
-          xs: 'calc(100dvh - 140px)', // Mobile (Dynamic Viewport Height)
-          sm: 'calc(100vh - 160px)', // Desktop
+          xs: 'calc(100dvh - 140px)', // Mobile (Dynamic Viewport Height - header 60px - nav 60px - padding)
+          sm: 'calc(100dvh - 140px)', // Tablet
+          md: 'calc(100dvh - 140px)', // Desktop
         },
         p: { xs: 2, sm: 3 },
-        overflow: 'hidden',
+        overflow: 'hidden', // Prevent any scrolling
         // Establish this as a container for container query units (cqw, cqi)
         containerType: 'inline-size',
       }}
@@ -133,7 +173,7 @@ const ExerciseCard = memo(({
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        mb: 1,
+        mb: 0.3,
         flexShrink: 0,
       }}>
         {elapsedTime !== null && (
@@ -155,7 +195,7 @@ const ExerciseCard = memo(({
       </Box>
 
       {/* Action Icons Row */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, mb: 1, flexShrink: 0 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, mb: 0.3, flexShrink: 0 }}>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <IconButton component="a" href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`} target="_blank" rel="noopener noreferrer" sx={{ minWidth: { xs: '36px', sm: '44px' }, minHeight: { xs: '36px', sm: '44px' }, color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)', } }} aria-label={`Search for ${exerciseName} form guide`}>
             <HelpOutline sx={{ fontSize: { xs: 20, sm: 24 } }} />
@@ -169,34 +209,48 @@ const ExerciseCard = memo(({
         </Box>
       </Box>
 
-      {/* Exercise Name - Pure CSS Fluid Typography */}
-      <Box sx={{ mb: 0.5, flexShrink: 0 }}>
+      {/* Exercise Name - Custom Typography with Maximum Control */}
+      <Box sx={{ mb: 0.3, flexShrink: 0 }}>
         <Typography 
-          variant="h3" 
-          component="h2"
+          component="div"
           sx={{ 
-            fontWeight: 700,
+            fontWeight: '700 !important',
             color: 'primary.main',
             textAlign: 'center',
-            lineHeight: 1.15,
+            lineHeight: '1.15 !important',
+            fontFamily: "'Montserrat', sans-serif !important",
             // Automatically balance text across lines
             textWrap: 'balance',
-            // Fluid font size using container query width (cqw)
-            // clamp(MIN, PREFERRED, MAX)
-            fontSize: 'clamp(2rem, 18cqw, 6rem)',
-            // Ensure it doesn't exceed 2 lines (fallback for older browsers)
+            whiteSpace: 'pre-wrap', // Preserve line breaks from JS logic
+            // Fluid font size using clamp with container query width (cqw)
+            // clamp(MIN, PREFERRED, MAX) - overrides all theme defaults
+            fontSize: 'clamp(1.5rem, 16cqw, 5rem) !important',
+            // Limit to max 2 lines with ellipsis
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
+            // Additional specificity overrides
+            '&, & *': {
+              fontSize: 'clamp(1.5rem, 16cqw, 5rem) !important',
+            },
           }}
         >
-          {exerciseName}
+          {balancedExerciseName}
         </Typography>
       </Box>
 
-      {/* Demo Image (flexible) or Video */}
-      <Box sx={{ flexGrow: 1, flexShrink: 1, position: 'relative', mb: 1, minHeight: 0 }}>
+      {/* Demo Image or Video - Fills all available space */}
+      <Box sx={{ 
+        flexGrow: 1, 
+        flexShrink: 1, 
+        position: 'relative', 
+        mb: 0.3, 
+        minHeight: 0, // Critical for flexbox child to shrink
+        display: 'flex', // Enable flex for better space utilization
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
         {imageSrc ? (
           <Box
             component="img"
@@ -235,7 +289,7 @@ const ExerciseCard = memo(({
       </Box>
 
       {/* Alerts */}
-      <Box sx={{ flexShrink: 0, mb: 1 }}>
+      <Box sx={{ flexShrink: 0, mb: 0.3 }}>
         {setLogged && (
           <Alert icon={<CheckCircle />} severity="success">
             Set logged! Moving to next...

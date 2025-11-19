@@ -105,13 +105,14 @@ export const normalizeExerciseName = (exerciseName) => {
 
 /**
  * Gets the demo image path for a given exercise name
- * Returns null if no matching image is found
+ * Returns a placeholder image path if no matching image is found
  * 
  * @param {string} exerciseName - The exercise name to find an image for
- * @returns {string|null} Path to the demo image or null if not found
+ * @param {boolean} usePlaceholder - Whether to return placeholder if no match (default: true)
+ * @returns {string|null} Path to the demo image, placeholder, or null if not found
  */
-export const getDemoImagePath = (exerciseName) => {
-  if (!exerciseName) return null;
+export const getDemoImagePath = (exerciseName, usePlaceholder = true) => {
+  if (!exerciseName) return usePlaceholder ? `${getBaseUrl()}placeholder-exercise.svg` : null;
   
   const normalized = normalizeExerciseName(exerciseName);
   
@@ -134,7 +135,8 @@ export const getDemoImagePath = (exerciseName) => {
     return `${getBaseUrl()}demos/${fuzzyMatch}.webp`;
   }
   
-  return null;
+  // Return placeholder if enabled, otherwise null
+  return usePlaceholder ? `${getBaseUrl()}placeholder-exercise.svg` : null;
 };
 
 /**

@@ -8,6 +8,7 @@ import {
   Alert,
   Stack,
   IconButton,
+  useTheme,
 } from '@mui/material';
 import { 
   CheckCircle,
@@ -57,12 +58,30 @@ const ExerciseCard = memo(({
   onExit = null,
   showPartialComplete = false,
 }) => {
+  const theme = useTheme();
   const [weight, setWeight] = useState(lastWeight || '');
   const [reps, setReps] = useState(lastReps || '');
   const [setLogged, setSetLogged] = useState(false);
   const [suggestionAccepted, setSuggestionAccepted] = useState(false);
+  const [imageSrc, setImageSrc] = useState(demoImage);
+  const [imageError, setImageError] = useState(false);
   const exerciseNameRef = useRef(null);
   const [exerciseFontSize, setExerciseFontSize] = useState('3rem');
+
+  // Update image source when demoImage prop changes
+  useEffect(() => {
+    setImageSrc(demoImage);
+    setImageError(false);
+  }, [demoImage]);
+
+  const handleImageError = () => {
+    if (!imageError) {
+      setImageError(true);
+      // Fall back to placeholder if image fails to load
+      const baseUrl = import.meta.env.BASE_URL || '/';
+      setImageSrc(`${baseUrl}placeholder-exercise.svg`);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -288,7 +307,9 @@ const ExerciseCard = memo(({
               borderColor: 'primary.main',
               borderRadius: '8px',
               '&:hover': {
-                backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                backgroundColor: theme.palette.mode === 'dark' 
+                  ? 'rgba(29, 181, 132, 0.08)' 
+                  : 'rgba(24, 160, 113, 0.08)',
               }
             }}
             aria-label={`Search for ${exerciseName} form guide`}
@@ -306,7 +327,9 @@ const ExerciseCard = memo(({
                 borderColor: 'primary.main',
                 borderRadius: '8px',
                 '&:hover': {
-                  backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                  backgroundColor: theme.palette.mode === 'dark' 
+                    ? 'rgba(29, 181, 132, 0.08)' 
+                    : 'rgba(24, 160, 113, 0.08)',
                 }
               }}
               aria-label="Skip exercise"
@@ -325,7 +348,9 @@ const ExerciseCard = memo(({
                 borderColor: 'primary.main',
                 borderRadius: '8px',
                 '&:hover': {
-                  backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                  backgroundColor: theme.palette.mode === 'dark' 
+                    ? 'rgba(29, 181, 132, 0.08)' 
+                    : 'rgba(24, 160, 113, 0.08)',
                 }
               }}
               aria-label="Swap exercise"
@@ -343,11 +368,14 @@ const ExerciseCard = memo(({
               sx={{
                 minWidth: { xs: '36px', sm: '44px' },
                 minHeight: { xs: '36px', sm: '44px' },
-                color: 'rgb(254, 178, 26)',
-                border: '2px solid rgb(254, 178, 26)',
+                color: 'warning.main',
+                border: '2px solid',
+                borderColor: 'warning.main',
                 borderRadius: '8px',
                 '&:hover': {
-                  backgroundColor: 'rgba(254, 178, 26, 0.08)',
+                  backgroundColor: theme.palette.mode === 'dark'
+                    ? 'rgba(255, 140, 0, 0.08)'
+                    : 'rgba(255, 140, 0, 0.08)',
                 },
               }}
               aria-label="End and save workout"
@@ -361,11 +389,14 @@ const ExerciseCard = memo(({
               sx={{
                 minWidth: { xs: '36px', sm: '44px' },
                 minHeight: { xs: '36px', sm: '44px' },
-                color: 'rgb(237, 63, 39)',
-                border: '2px solid rgb(237, 63, 39)',
+                color: 'error.main',
+                border: '2px solid',
+                borderColor: 'error.main',
                 borderRadius: '8px',
                 '&:hover': {
-                  backgroundColor: 'rgba(237, 63, 39, 0.08)',
+                  backgroundColor: theme.palette.mode === 'dark'
+                    ? 'rgba(239, 83, 80, 0.08)'
+                    : 'rgba(239, 83, 80, 0.08)',
                 },
               }}
               aria-label="End workout without saving"
@@ -402,7 +433,7 @@ const ExerciseCard = memo(({
       </Box>
 
       {/* Demo Image - Shows if available */}
-      {demoImage && (
+      {imageSrc && (
         <Box 
           sx={{ 
             mb: 2,
@@ -414,8 +445,9 @@ const ExerciseCard = memo(({
         >
           <Box
             component="img"
-            src={demoImage}
+            src={imageSrc}
             alt={`${exerciseName} demonstration`}
+            onError={handleImageError}
             sx={{
               maxWidth: '100%',
               maxHeight: { xs: '250px', sm: '350px' },

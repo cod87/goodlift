@@ -823,7 +823,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   component="h2"
                   sx={{ 
                     fontWeight: 700,
-                    fontSize: exerciseFontSize,
+                    fontSize: exerciseFontSize + ' !important',
                     color: 'primary.main',
                     textAlign: 'center',
                     lineHeight: '1.2 !important',

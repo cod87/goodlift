@@ -36,6 +36,7 @@ const ExerciseCard = memo(({
   setNumber,
   totalSets,
   videoUrl,
+  demoImage = null,
   lastWeight = null,
   lastReps = null,
   onSubmit,
@@ -400,8 +401,36 @@ const ExerciseCard = memo(({
         </Typography>
       </Box>
 
-      {/* Video Embed */}
-      {videoUrl && (
+      {/* Demo Image - Shows if available */}
+      {demoImage && (
+        <Box 
+          sx={{ 
+            mb: 2,
+            flexShrink: 0,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Box
+            component="img"
+            src={demoImage}
+            alt={`${exerciseName} demonstration`}
+            sx={{
+              maxWidth: '100%',
+              maxHeight: { xs: '250px', sm: '350px' },
+              width: 'auto',
+              height: 'auto',
+              borderRadius: 2,
+              objectFit: 'contain',
+            }}
+            loading="lazy"
+          />
+        </Box>
+      )}
+
+      {/* Video Embed - Shows if available and no demo image */}
+      {videoUrl && !demoImage && (
         <Box 
           sx={{ 
             position: 'relative',
@@ -535,6 +564,7 @@ ExerciseCard.propTypes = {
   setNumber: PropTypes.number.isRequired,
   totalSets: PropTypes.number.isRequired,
   videoUrl: PropTypes.string,
+  demoImage: PropTypes.string,
   lastWeight: PropTypes.number,
   lastReps: PropTypes.number,
   onSubmit: PropTypes.func.isRequired,

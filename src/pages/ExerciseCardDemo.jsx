@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { Box, Container } from '@mui/material';
 import ExerciseCard from '../components/Workout/ExerciseCard';
+import { getDemoImagePath } from '../utils/exerciseDemoImages';
 
 /**
  * Demo page for the revamped ExerciseCard component
- * Shows the new layout with all features
+ * Shows the new layout with all features including demo images
  */
 const ExerciseCardDemo = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  const exerciseName = 'Dumbbell Incline Bench Press';
+  const demoImage = getDemoImagePath(exerciseName);
 
   // Simulate timer
   useState(() => {
@@ -67,7 +71,8 @@ const ExerciseCardDemo = () => {
         {/* ExerciseCard */}
         <Box sx={{ flex: 1, overflow: 'auto', pb: '60px' }}>
           <ExerciseCard
-            exerciseName="Dumbbell Incline Bench Press"
+            exerciseName={exerciseName}
+            demoImage={demoImage}
             setNumber={2}
             totalSets={3}
             lastWeight={65}

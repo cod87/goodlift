@@ -880,6 +880,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                       color: 'primary.main',
                       textAlign: 'center',
                       lineHeight: '1.2 !important',
+                      width: '90%',
                       wordBreak: 'break-word',
                       overflowWrap: 'break-word',
                       whiteSpace: 'normal',

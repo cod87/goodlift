@@ -40,6 +40,7 @@ const KEYS = {
   TOTAL_VOLUME: 'goodlift_total_volume',
   YOGA_PRESETS: 'goodlift_yoga_presets',
   HIIT_PRESETS: 'goodlift_hiit_presets',
+  SAVED_WORKOUTS: 'goodlift_saved_workouts',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -1763,6 +1764,79 @@ export const deleteHiitPreset = async (presetId) => {
     return filteredPresets;
   } catch (error) {
     console.error('Error deleting HIIT preset:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get saved workouts from localStorage
+ * @returns {Promise<Array>} Array of saved workout objects
+ */
+export const getSavedWorkouts = async () => {
+  try {
+    if (isGuestMode()) {
+      const guestData = getGuestData('saved_workouts');
+      return guestData || [];
+    }
+
+    const workouts = localStorage.getItem(KEYS.SAVED_WORKOUTS);
+    return workouts ? JSON.parse(workouts) : [];
+  } catch (error) {
+    console.error('Error reading saved workouts:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a new workout template
+ * @param {Object} workout - Workout object with exercises and configuration
+ * @returns {Promise<Array>} Updated list of saved workouts
+ */
+export const saveSavedWorkout = async (workout) => {
+  try {
+    const workouts = await getSavedWorkouts();
+    const newWorkout = {
+      ...workout,
+      id: Date.now(),
+      createdAt: new Date().toISOString(),
+    };
+    
+    workouts.push(newWorkout);
+    
+    if (isGuestMode()) {
+      setGuestData('saved_workouts', workouts);
+    } else {
+      localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(workouts));
+      // TODO: Add Firebase sync when implemented
+    }
+    
+    return workouts;
+  } catch (error) {
+    console.error('Error saving workout:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a saved workout by index
+ * @param {number} index - Index of the workout to delete
+ * @returns {Promise<Array>} Updated list of saved workouts
+ */
+export const deleteSavedWorkout = async (index) => {
+  try {
+    const workouts = await getSavedWorkouts();
+    workouts.splice(index, 1);
+    
+    if (isGuestMode()) {
+      setGuestData('saved_workouts', workouts);
+    } else {
+      localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(workouts));
+      // TODO: Add Firebase sync when implemented
+    }
+    
+    return workouts;
+  } catch (error) {
+    console.error('Error deleting saved workout:', error);
     throw error;
   }
 };

@@ -28,6 +28,8 @@ import {
   ToggleButton,
   Divider,
   LinearProgress,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -50,10 +52,15 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import CompactHeader from './Common/CompactHeader';
 import Achievements from './Achievements';
 import WeightTracker from './WeightTracker';
+import MonthCalendarView from './Calendar/MonthCalendarView';
+import ActivitiesList from './Progress/ActivitiesList';
+import EditActivityDialog from './EditActivityDialog';
 import {
   getWorkoutHistory,
   getStretchSessions,
   getUserStats,
+  deleteWorkout,
+  updateWorkout,
 } from '../utils/storage';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
@@ -213,6 +220,12 @@ const ProgressDashboard = () => {
     cardioSessions: 0,
     yogaSessions: 0,
   });
+
+  // Edit/Delete state for activities
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedActivityIndex, setSelectedActivityIndex] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // Get time frame in days
   const getTimeFrameDays = () => {
@@ -383,6 +396,46 @@ const ProgressDashboard = () => {
     }
   };
 
+  // Handle edit activity
+  const handleEditActivity = (index) => {
+    setSelectedActivityIndex(index);
+    setEditDialogOpen(true);
+  };
+
+  // Handle delete activity
+  const handleDeleteActivity = (index) => {
+    setSelectedActivityIndex(index);
+    setDeleteDialogOpen(true);
+  };
+
+  // Confirm delete
+  const confirmDelete = async () => {
+    try {
+      await deleteWorkout(selectedActivityIndex);
+      setSnackbar({ open: true, message: 'Activity deleted successfully', severity: 'success' });
+      setDeleteDialogOpen(false);
+      setSelectedActivityIndex(null);
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      setSnackbar({ open: true, message: 'Failed to delete activity', severity: 'error' });
+    }
+  };
+
+  // Save edited activity
+  const handleSaveActivity = async (updatedActivity) => {
+    try {
+      await updateWorkout(selectedActivityIndex, updatedActivity);
+      setSnackbar({ open: true, message: 'Activity updated successfully', severity: 'success' });
+      setEditDialogOpen(false);
+      setSelectedActivityIndex(null);
+      await loadData();
+    } catch (error) {
+      console.error('Error updating activity:', error);
+      setSnackbar({ open: true, message: 'Failed to update activity', severity: 'error' });
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{
@@ -443,6 +496,13 @@ const ProgressDashboard = () => {
         {/* Statistics Tab */}
         {currentTab === 0 && (
           <Stack spacing={3}>
+            {/* Monthly Calendar View - at the top */}
+            <Box>
+              <MonthCalendarView
+                workoutHistory={history}
+              />
+            </Box>
+
             {/* Time Frame Filter - Icon Button */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Button
@@ -734,6 +794,32 @@ const ProgressDashboard = () => {
               targetWeight={profile.targetWeight}
               onAddWeight={addWeightEntry}
             />
+
+            {/* Recent Activity Section - at the bottom */}
+            {history.length > 0 && (
+              <Box>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 600, 
+                    color: 'text.primary',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    mb: 2,
+                  }}
+                >
+                  <TrendingUp /> Recent Activity
+                </Typography>
+                <ActivitiesList 
+                  activities={history}
+                  onEdit={handleEditActivity}
+                  onDelete={handleDeleteActivity}
+                  maxVisible={10}
+                  showLoadMore={true}
+                />
+              </Box>
+            )}
         </Stack>
         )}
 
@@ -862,6 +948,60 @@ const ProgressDashboard = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Edit Activity Dialog */}
+        <EditActivityDialog
+          open={editDialogOpen}
+          onClose={() => {
+            setEditDialogOpen(false);
+            setSelectedActivityIndex(null);
+          }}
+          activity={selectedActivityIndex !== null ? history[selectedActivityIndex] : null}
+          onSave={handleSaveActivity}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={() => {
+            setDeleteDialogOpen(false);
+            setSelectedActivityIndex(null);
+          }}
+        >
+          <DialogTitle>Delete Activity?</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Are you sure you want to delete this activity? This action cannot be undone.
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => {
+              setDeleteDialogOpen(false);
+              setSelectedActivityIndex(null);
+            }}>
+              Cancel
+            </Button>
+            <Button onClick={confirmDelete} color="error" variant="contained">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert 
+            onClose={() => setSnackbar({ ...snackbar, open: false })} 
+            severity={snackbar.severity}
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </Box>
   );

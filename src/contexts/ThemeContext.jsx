@@ -14,13 +14,13 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  // Load theme preference from localStorage, default to 'dark'
+  // Load theme preference from localStorage, default to 'light'
   const [mode, setMode] = useState(() => {
     try {
       const stored = localStorage.getItem('themeMode');
-      return stored === 'light' ? 'light' : 'dark';
+      return stored === 'dark' ? 'dark' : 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
 

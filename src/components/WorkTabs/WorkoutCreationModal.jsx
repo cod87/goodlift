@@ -329,12 +329,12 @@ const WorkoutCreationModal = ({
           setHighlightedExercises(highlighted);
           
           // Set current superset number to the max + 1
-          const maxSuperset = Math.max(
-            0, 
-            ...existingWorkout.exercises
-              .filter(ex => ex.supersetGroup)
-              .map(ex => ex.supersetGroup)
-          );
+          const supersetGroups = existingWorkout.exercises
+            .filter(ex => ex.supersetGroup)
+            .map(ex => ex.supersetGroup);
+          const maxSuperset = supersetGroups.length > 0 
+            ? Math.max(...supersetGroups)
+            : 0;
           setCurrentSupersetNumber(maxSuperset + 1);
         }
       } else {

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Box } from '@mui/material';
 import SavedWorkoutsList from './SavedWorkoutsList';
 import WorkoutCreationModal from './WorkoutCreationModal';
-import { saveSavedWorkout } from '../../utils/storage';
+import { saveSavedWorkout, updateSavedWorkout } from '../../utils/storage';
 import { EXERCISES_DATA_PATH } from '../../utils/constants';
 
 /**
@@ -54,7 +54,6 @@ const StrengthTab = memo(({
     try {
       if (editingIndex !== null) {
         // Update existing workout
-        const { updateSavedWorkout } = await import('../../utils/storage');
         await updateSavedWorkout(editingIndex, workout);
       } else {
         // Create new workout

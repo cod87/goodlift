@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
   Box,
   IconButton,
   Button,
@@ -36,6 +37,7 @@ import {
   FitnessCenter,
   DragIndicator,
   Reorder,
+  AutoAwesome,
 } from '@mui/icons-material';
 import {
   DndContext,
@@ -54,6 +56,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
+import { generateStandardWorkout } from '../../utils/workoutGenerator';
 
 /**
  * Superset color palette - cycling through distinct colors
@@ -150,7 +153,7 @@ const SortableExerciseItem = ({
           : (isHighlighted ? highlightColor?.light : 'background.paper'),
         transition: 'background-color 0.2s ease, border-color 0.2s ease, opacity 0.15s ease, margin-left 0.3s ease, padding-left 0.3s ease',
         opacity: isDragging ? 0.5 : 1,
-        marginLeft: isHighlighted ? 2 : 0,
+        marginLeft: isHighlighted ? 3 : 0,
         paddingLeft: isHighlighted ? 1 : 0,
         '&:hover': {
           opacity: 0.9,
@@ -295,6 +298,11 @@ const WorkoutCreationModal = ({
   const [highlightedExercises, setHighlightedExercises] = useState(new Set());
   const [currentSupersetNumber, setCurrentSupersetNumber] = useState(1);
   const [isReorderMode, setIsReorderMode] = useState(false);
+  
+  // Generate workout state
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
+  const [generateCountDialogOpen, setGenerateCountDialogOpen] = useState(false);
+  const [exerciseCount, setExerciseCount] = useState(8);
 
   // DnD sensors with improved activation constraints
   const sensors = useSensors(
@@ -545,6 +553,71 @@ const WorkoutCreationModal = ({
     onClose();
   };
 
+  // Handle Generate button click
+  const handleGenerateClick = () => {
+    if (myWorkout.length > 0) {
+      // Show warning dialog if exercises already exist
+      setGenerateDialogOpen(true);
+    } else {
+      // Show exercise count dialog
+      setGenerateCountDialogOpen(true);
+    }
+  };
+
+  // Handle generate confirmation (clear existing exercises)
+  const handleGenerateConfirm = () => {
+    setGenerateDialogOpen(false);
+    setGenerateCountDialogOpen(true);
+  };
+
+  // Handle generate workout with selected count
+  const handleGenerateWorkout = async () => {
+    // Clear existing exercises
+    setMyWorkout([]);
+    setSelectedExercises(new Set());
+    setHighlightedExercises(new Set());
+    setCurrentSupersetNumber(1);
+    
+    // Generate new workout
+    const generatedExercises = generateStandardWorkout(
+      exercises,
+      workoutType,
+      'all',
+      'intermediate'
+    );
+    
+    // Limit to the selected count
+    const limitedExercises = generatedExercises.slice(0, exerciseCount);
+    
+    // Load saved weights and reps for each exercise
+    const exercisesWithData = await Promise.all(
+      limitedExercises.map(async (exercise) => {
+        const [savedWeight, savedReps] = await Promise.all([
+          getExerciseWeight(exercise['Exercise Name']),
+          getExerciseTargetReps(exercise['Exercise Name'])
+        ]);
+        
+        return {
+          ...exercise,
+          sets: exercise.sets || 3,
+          reps: savedReps ?? (exercise.reps || 10),
+          weight: savedWeight ?? (exercise.weight || 0),
+          restTime: exercise.restTime || 60,
+        };
+      })
+    );
+    
+    setMyWorkout(exercisesWithData);
+    
+    // Update selected exercises set
+    const newSelected = new Set(exercisesWithData.map(e => e['Exercise Name']));
+    setSelectedExercises(newSelected);
+    
+    // Switch to My Workout tab
+    setCurrentTab(1);
+    setGenerateCountDialogOpen(false);
+  };
+
   return (
     <Dialog
       fullScreen
@@ -659,9 +732,11 @@ const WorkoutCreationModal = ({
                     sx={{
                       cursor: 'pointer',
                       position: 'relative',
-                      transition: 'border-color 0.2s ease, opacity 0.15s ease',
+                      transition: 'border-color 0.2s ease, opacity 0.15s ease, margin-left 0.3s ease, padding-left 0.3s ease',
                       borderLeft: isSelected ? '4px solid' : '4px solid transparent',
                       borderLeftColor: isSelected ? 'success.main' : 'transparent',
+                      marginLeft: isSelected ? 3 : 0,
+                      paddingLeft: isSelected ? 1 : 0,
                       '&:hover': {
                         borderLeftColor: isSelected ? 'success.dark' : 'primary.light',
                       },
@@ -740,20 +815,30 @@ const WorkoutCreationModal = ({
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   Exercises ({myWorkout.length})
                 </Typography>
-                <Button
-                  variant={isReorderMode ? "contained" : "outlined"}
-                  size="small"
-                  startIcon={<Reorder />}
-                  onClick={() => {
-                    setIsReorderMode(!isReorderMode);
-                    // Clear highlights when entering reorder mode
-                    if (!isReorderMode) {
-                      setHighlightedExercises(new Set());
-                    }
-                  }}
-                >
-                  {isReorderMode ? "Done Reordering" : "Reorder"}
-                </Button>
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<AutoAwesome />}
+                    onClick={handleGenerateClick}
+                  >
+                    Generate
+                  </Button>
+                  <Button
+                    variant={isReorderMode ? "contained" : "outlined"}
+                    size="small"
+                    startIcon={<Reorder />}
+                    onClick={() => {
+                      setIsReorderMode(!isReorderMode);
+                      // Clear highlights when entering reorder mode
+                      if (!isReorderMode) {
+                        setHighlightedExercises(new Set());
+                      }
+                    }}
+                  >
+                    {isReorderMode ? "Done Reordering" : "Reorder"}
+                  </Button>
+                </Stack>
               </Stack>
               <Typography variant="body2" color="text.secondary">
                 {isReorderMode 
@@ -840,6 +925,63 @@ const WorkoutCreationModal = ({
           </Box>
         )}
       </DialogContent>
+
+      {/* Warning Dialog - Clear Existing Exercises */}
+      <Dialog
+        open={generateDialogOpen}
+        onClose={() => setGenerateDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Clear Existing Exercises?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Generating a new workout will clear all existing exercises in &quot;My Workout&quot;. 
+            Do you want to proceed?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setGenerateDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleGenerateConfirm} variant="contained" color="warning">
+            Clear and Continue
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Exercise Count Selection Dialog */}
+      <Dialog
+        open={generateCountDialogOpen}
+        onClose={() => setGenerateCountDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Generate Workout</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            How many exercises would you like in your workout?
+          </Typography>
+          <FormControl fullWidth>
+            <InputLabel>Number of Exercises</InputLabel>
+            <Select
+              value={exerciseCount}
+              label="Number of Exercises"
+              onChange={(e) => setExerciseCount(e.target.value)}
+            >
+              <MenuItem value={4}>4 exercises</MenuItem>
+              <MenuItem value={6}>6 exercises</MenuItem>
+              <MenuItem value={8}>8 exercises</MenuItem>
+              <MenuItem value={10}>10 exercises</MenuItem>
+              <MenuItem value={12}>12 exercises</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setGenerateCountDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleGenerateWorkout} variant="contained">
+            Generate
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };

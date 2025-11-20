@@ -24,6 +24,8 @@ import {
   Add,
   MoreVert,
   CalendarMonth,
+  Edit,
+  Delete,
 } from '@mui/icons-material';
 import { getSavedWorkouts, deleteSavedWorkout, updateSavedWorkout } from '../../utils/storage';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
@@ -304,12 +306,18 @@ const SavedWorkoutsList = memo(({
         open={Boolean(menuAnchorEl)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={handleEditWorkout}>Edit</MenuItem>
+        <MenuItem onClick={handleEditWorkout}>
+          <Edit sx={{ mr: 1 }} fontSize="small" />
+          Edit
+        </MenuItem>
         <MenuItem onClick={() => handleOpenDayPicker(selectedWorkoutIndex)}>
           <CalendarMonth sx={{ mr: 1 }} fontSize="small" />
           Assign to Day
         </MenuItem>
-        <MenuItem onClick={handleDeleteWorkout}>Delete</MenuItem>
+        <MenuItem onClick={handleDeleteWorkout}>
+          <Delete sx={{ mr: 1 }} fontSize="small" />
+          Delete
+        </MenuItem>
       </Menu>
 
       {/* Day Picker Dialog */}

@@ -208,7 +208,8 @@ const WeekEditorDialog = ({ open, onClose }) => {
 
       <DialogContent>
         <Alert severity="info" sx={{ mb: 3 }}>
-          Assign or modify workouts for each day of the week. Changes are saved automatically.
+          Set a suggested workout type for each day. To assign a specific saved workout, 
+          use the &quot;Assign to Day&quot; option from your Saved Workouts menu.
         </Alert>
 
         <Stack spacing={2}>
@@ -241,12 +242,15 @@ const WeekEditorDialog = ({ open, onClose }) => {
                           />
                         )}
                       </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        Select a suggested workout type for this day
+                      </Typography>
                       <Box sx={{ mt: 2 }}>
                         <FormControl fullWidth size="small">
-                          <InputLabel>Workout Type</InputLabel>
+                          <InputLabel>Suggested Workout Type</InputLabel>
                           <Select
                             value={selectedWorkoutType}
-                            label="Workout Type"
+                            label="Suggested Workout Type"
                             onChange={(e) => setSelectedWorkoutType(e.target.value)}
                           >
                             {workoutTypes.map((type) => (
@@ -318,7 +322,7 @@ const WeekEditorDialog = ({ open, onClose }) => {
                         }}>
                           <Box sx={{ flex: 1, minWidth: 0 }}>
                             {session ? (
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                                 {getSessionIcon(session.sessionType)}
                                 <Typography 
                                   variant="body1"
@@ -339,10 +343,19 @@ const WeekEditorDialog = ({ open, onClose }) => {
                                     }} 
                                   />
                                 )}
+                                {(!session.exercises || session.exercises.length === 0) && (
+                                  <Chip
+                                    label="Suggested"
+                                    size="small"
+                                    color="default"
+                                    variant="outlined"
+                                    sx={{ fontSize: '0.7rem', height: 20 }}
+                                  />
+                                )}
                               </Box>
                             ) : (
                               <Typography variant="body2" color="text.secondary">
-                                No workout assigned
+                                No workout set
                               </Typography>
                             )}
                           </Box>

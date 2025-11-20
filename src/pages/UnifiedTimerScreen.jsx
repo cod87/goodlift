@@ -95,15 +95,7 @@ const YOGA_POSES = [
   { name: 'Bridge Pose (Setu Bandhasana)', defaultDuration: 45 },
 ];
 
-const UnifiedTimerScreen = ({ 
-  onNavigate, 
-  hideBackButton = false,
-  updateTimerState,
-  registerHandlers,
-  onComplete: onCompleteCallback,
-  getPauseHandler,
-  getStopHandler,
-}) => {
+const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   // Mode and configuration
   const [mode, setMode] = useState(TIMER_MODES.CARDIO);
   const [isConfiguring, setIsConfiguring] = useState(true);
@@ -195,44 +187,6 @@ const UnifiedTimerScreen = ({
       }
     };
   }, []);
-
-  // Register handlers for external control (when used in modal)
-  useEffect(() => {
-    if (registerHandlers) {
-      registerHandlers({
-        pause: () => {
-          setIsPaused(prev => !prev);
-        },
-        stop: handleStop,
-      });
-    }
-  }, [registerHandlers]);
-
-  // Update external timer state (when used in modal)
-  useEffect(() => {
-    if (updateTimerState && !isConfiguring) {
-      const statusText = 
-        mode === TIMER_MODES.HIIT 
-          ? isPrepPeriod 
-            ? 'Get Ready'
-            : isRecoveryPeriod 
-            ? 'Set Break'
-            : isWorkPeriod 
-            ? (workIntervalNames[currentRound - 1] || 'Work')
-            : 'Rest'
-          : mode === TIMER_MODES.FLOW 
-          ? selectedPoses[currentPoseIndex]?.name || ''
-          : 'Cardio';
-
-      updateTimerState({
-        timeDisplay: formatTime(timeRemaining),
-        progress: getProgress(),
-        isPaused,
-        statusText,
-        mode,
-      });
-    }
-  }, [updateTimerState, isConfiguring, timeRemaining, isPaused, mode, isWorkPeriod, isPrepPeriod, isRecoveryPeriod, currentRound, workIntervalNames, currentPoseIndex, selectedPoses]);
 
   const handleTimerComplete = useCallback(() => {
     setIsRunning(false);
@@ -622,11 +576,8 @@ const UnifiedTimerScreen = ({
       // Reset and return to config
       handleReset();
       
-      // Call the completion callback if provided (for modal mode)
-      if (onCompleteCallback) {
-        onCompleteCallback();
-      } else if (onNavigate) {
-        // Navigate back if callback provided (for standalone mode)
+      // Navigate back if callback provided
+      if (onNavigate) {
         setTimeout(() => onNavigate('selection'), 500);
       }
     } catch (error) {
@@ -640,7 +591,7 @@ const UnifiedTimerScreen = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getProgress = useCallback(() => {
+  const getProgress = () => {
     if (mode === TIMER_MODES.HIIT) {
       // Calculate progress based on sets and rounds
       const totalRounds = numberOfSets * roundsPerSet;
@@ -653,7 +604,7 @@ const UnifiedTimerScreen = ({
     } else {
       return ((totalTime - timeRemaining) / totalTime) * 100;
     }
-  }, [mode, numberOfSets, roundsPerSet, currentSet, currentRound, isWorkPeriod, workInterval, timeRemaining, restInterval, totalTime]);
+  };
 
   const progress = getProgress();
   const radius = 120;
@@ -1610,11 +1561,6 @@ const UnifiedTimerScreen = ({
 UnifiedTimerScreen.propTypes = {
   onNavigate: PropTypes.func,
   hideBackButton: PropTypes.bool,
-  updateTimerState: PropTypes.func,
-  registerHandlers: PropTypes.func,
-  onComplete: PropTypes.func,
-  getPauseHandler: PropTypes.func,
-  getStopHandler: PropTypes.func,
 };
 
 export default UnifiedTimerScreen;

@@ -52,6 +52,21 @@ const TimerDisplay = ({
   handleSkipForward,
   handleSkipBackward,
 }) => {
+  // Determine background color for HIIT mode
+  const getBackgroundColor = () => {
+    if (mode !== TIMER_MODES.HIIT) {
+      return 'background.default';
+    }
+    
+    if (isWorkPeriod) {
+      return '#1b5e20'; // Dark green for Work
+    } else if (isPrepPeriod || isRecoveryPeriod) {
+      return '#0d47a1'; // Dark blue for Set break/Prep
+    } else {
+      return '#b71c1c'; // Dark red for Rest
+    }
+  };
+
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -60,6 +75,8 @@ const TimerDisplay = ({
       justifyContent: 'center',
       minHeight: '100%',
       p: 4,
+      bgcolor: getBackgroundColor(),
+      transition: 'background-color 0.5s ease',
     }}>
       {/* Timer Display */}
       <Box sx={{ 
@@ -72,7 +89,7 @@ const TimerDisplay = ({
           sx={{
             fontSize: { xs: 'clamp(3rem, 15vw, 8rem)', sm: 'clamp(5rem, 20vw, 10rem)', md: '12rem' },
             fontWeight: 700,
-            color:
+            color: mode === TIMER_MODES.HIIT ? '#ffffff' : 
               mode === TIMER_MODES.HIIT && isWorkPeriod
                 ? 'success.main'
                 : mode === TIMER_MODES.HIIT && (isPrepPeriod || isRecoveryPeriod)
@@ -93,8 +110,11 @@ const TimerDisplay = ({
               variant="h6" 
               sx={{ 
                 mt: 2, 
-                fontWeight: 600,
-                fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+                fontWeight: 700,
+                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                color: '#ffffff',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
               }}
             >
               {isPrepPeriod 
@@ -102,38 +122,38 @@ const TimerDisplay = ({
                 : isRecoveryPeriod 
                 ? intervalNames.recovery 
                 : isWorkPeriod 
-                ? (workIntervalNames[currentRound - 1] || 'work')
-                : 'rest'}
+                ? (workIntervalNames[currentRound - 1] || 'Work')
+                : 'Rest'}
             </Typography>
             {isPrepPeriod && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
+              <Typography variant="body2" sx={{ mt: 1, fontSize: { xs: '1.1rem', sm: '1.3rem' }, color: 'rgba(255, 255, 255, 0.9)', fontWeight: 500 }}>
                 Up Next: {workIntervalNames[0] || 'work'}
               </Typography>
             )}
             {isRecoveryPeriod && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
+              <Typography variant="body2" sx={{ mt: 1, fontSize: { xs: '1.1rem', sm: '1.3rem' }, color: 'rgba(255, 255, 255, 0.9)', fontWeight: 500 }}>
                 Up Next (Set {currentSet + 1}): {workIntervalNames[0] || 'work'}
               </Typography>
             )}
             {!isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound < roundsPerSet && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
+              <Typography variant="body2" sx={{ mt: 1, fontSize: { xs: '1.1rem', sm: '1.3rem' }, color: 'rgba(255, 255, 255, 0.9)', fontWeight: 500 }}>
                 Up Next: {workIntervalNames[currentRound] || 'work'}
               </Typography>
             )}
             {!isPrepPeriod && !isRecoveryPeriod && (
               <>
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}>
+                <Typography variant="body2" sx={{ fontSize: { xs: '1.1rem', sm: '1.3rem' }, color: 'rgba(255, 255, 255, 0.9)', fontWeight: 500 }}>
                   Round {currentRound} / {roundsPerSet}
                 </Typography>
                 {numberOfSets > 1 && (
-                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}>
+                  <Typography variant="body2" sx={{ fontSize: { xs: '1.1rem', sm: '1.3rem' }, color: 'rgba(255, 255, 255, 0.9)', fontWeight: 500 }}>
                     Set {currentSet} / {numberOfSets}
                   </Typography>
                 )}
               </>
             )}
             {sessionName && (
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+              <Typography variant="caption" sx={{ display: 'block', mt: 1, fontSize: { xs: '0.9rem', sm: '1rem' }, color: 'rgba(255, 255, 255, 0.8)', fontWeight: 500 }}>
                 {sessionName}
               </Typography>
             )}

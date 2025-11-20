@@ -751,166 +751,209 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     placeholder="e.g., Morning HIIT, Tabata Workout"
                   />
                   
-                  <TextField
-                    label="Preparation Interval (seconds)"
-                    type="number"
-                    value={preparationInterval === null || preparationInterval === undefined ? '' : preparationInterval}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setPreparationInterval('');
-                      } else {
-                        const parsed = parseInt(val);
-                        setPreparationInterval(isNaN(parsed) ? '' : parsed);
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setPreparationInterval(10);
-                      } else {
-                        const parsed = parseInt(val);
-                        setPreparationInterval(Math.max(0, Math.min(60, isNaN(parsed) ? 10 : parsed)));
-                      }
-                    }}
-                    inputProps={{ min: 0, max: 60, inputMode: 'numeric' }}
-                    fullWidth
-                    helperText="Time to get ready before the workout starts"
-                  />
+                  {/* Time inputs in 2-column layout */}
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Prep"
+                        type="number"
+                        value={preparationInterval === null || preparationInterval === undefined ? '' : preparationInterval}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setPreparationInterval('');
+                          } else {
+                            const parsed = parseInt(val);
+                            setPreparationInterval(isNaN(parsed) ? '' : parsed);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setPreparationInterval(10);
+                          } else {
+                            const parsed = parseInt(val);
+                            setPreparationInterval(Math.max(0, Math.min(60, isNaN(parsed) ? 10 : parsed)));
+                          }
+                        }}
+                        inputProps={{ min: 0, max: 60, inputMode: 'numeric' }}
+                        fullWidth
+                        helperText="seconds"
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Break"
+                        type="number"
+                        value={recoveryBetweenSets === null || recoveryBetweenSets === undefined ? '' : recoveryBetweenSets}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setRecoveryBetweenSets('');
+                          } else {
+                            const parsed = parseInt(val);
+                            setRecoveryBetweenSets(isNaN(parsed) ? '' : parsed);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setRecoveryBetweenSets(0);
+                          } else {
+                            const parsed = parseInt(val);
+                            setRecoveryBetweenSets(Math.max(0, Math.min(99, isNaN(parsed) ? 0 : parsed)));
+                          }
+                        }}
+                        inputProps={{ min: 0, max: 99, inputMode: 'numeric' }}
+                        fullWidth
+                        helperText="between sets"
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Work"
+                        type="number"
+                        value={workInterval === null || workInterval === undefined ? '' : workInterval}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setWorkInterval('');
+                          } else {
+                            const parsed = parseInt(val);
+                            setWorkInterval(isNaN(parsed) ? '' : parsed);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setWorkInterval(30);
+                          } else {
+                            const parsed = parseInt(val);
+                            setWorkInterval(Math.max(5, Math.min(99, isNaN(parsed) ? 30 : parsed)));
+                          }
+                        }}
+                        inputProps={{ min: 5, max: 99, inputMode: 'numeric' }}
+                        fullWidth
+                        helperText="seconds"
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Rest"
+                        type="number"
+                        value={restInterval === null || restInterval === undefined ? '' : restInterval}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setRestInterval('');
+                          } else {
+                            const parsed = parseInt(val);
+                            setRestInterval(isNaN(parsed) ? '' : parsed);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setRestInterval(15);
+                          } else {
+                            const parsed = parseInt(val);
+                            setRestInterval(Math.max(5, Math.min(99, isNaN(parsed) ? 15 : parsed)));
+                          }
+                        }}
+                        inputProps={{ min: 5, max: 99, inputMode: 'numeric' }}
+                        fullWidth
+                        helperText="seconds"
+                      />
+                    </Grid>
+                  </Grid>
                   
-                  <TextField
-                    label="Work Interval (seconds)"
-                    type="number"
-                    value={workInterval === null || workInterval === undefined ? '' : workInterval}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setWorkInterval('');
-                      } else {
-                        const parsed = parseInt(val);
-                        setWorkInterval(isNaN(parsed) ? '' : parsed);
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setWorkInterval(30);
-                      } else {
-                        const parsed = parseInt(val);
-                        setWorkInterval(Math.max(5, Math.min(300, isNaN(parsed) ? 30 : parsed)));
-                      }
-                    }}
-                    inputProps={{ min: 5, max: 300, inputMode: 'numeric' }}
-                    fullWidth
-                  />
-                  
-                  <TextField
-                    label="Rest Interval (seconds)"
-                    type="number"
-                    value={restInterval === null || restInterval === undefined ? '' : restInterval}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setRestInterval('');
-                      } else {
-                        const parsed = parseInt(val);
-                        setRestInterval(isNaN(parsed) ? '' : parsed);
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setRestInterval(15);
-                      } else {
-                        const parsed = parseInt(val);
-                        setRestInterval(Math.max(5, Math.min(300, isNaN(parsed) ? 15 : parsed)));
-                      }
-                    }}
-                    inputProps={{ min: 5, max: 300, inputMode: 'numeric' }}
-                    fullWidth
-                  />
-                  
-                  <TextField
-                    label="Rounds per Set"
-                    type="number"
-                    value={roundsPerSet === null || roundsPerSet === undefined ? '' : roundsPerSet}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setRoundsPerSet('');
-                      } else {
-                        const parsed = parseInt(val);
-                        const newRounds = isNaN(parsed) ? '' : parsed;
-                        setRoundsPerSet(newRounds);
-                        // Adjust workIntervalNames array to match new rounds count if valid
-                        if (newRounds !== '' && newRounds > 0) {
-                          setWorkIntervalNames(prev => {
-                            const newNames = [...prev];
-                            while (newNames.length < newRounds) {
-                              newNames.push('');
+                  {/* Rounds and Sets in 2-column layout */}
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Rounds"
+                        type="number"
+                        value={roundsPerSet === null || roundsPerSet === undefined ? '' : roundsPerSet}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setRoundsPerSet('');
+                          } else {
+                            const parsed = parseInt(val);
+                            const newRounds = isNaN(parsed) ? '' : parsed;
+                            setRoundsPerSet(newRounds);
+                            // Adjust workIntervalNames array to match new rounds count if valid
+                            if (newRounds !== '' && newRounds > 0) {
+                              setWorkIntervalNames(prev => {
+                                const newNames = [...prev];
+                                while (newNames.length < newRounds) {
+                                  newNames.push('');
+                                }
+                                return newNames.slice(0, newRounds);
+                              });
                             }
-                            return newNames.slice(0, newRounds);
-                          });
-                        }
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setRoundsPerSet(8);
-                        // Adjust workIntervalNames array to 8 rounds
-                        setWorkIntervalNames(prev => {
-                          const newNames = [...prev];
-                          while (newNames.length < 8) {
-                            newNames.push('');
                           }
-                          return newNames.slice(0, 8);
-                        });
-                      } else {
-                        const parsed = parseInt(val);
-                        const clamped = Math.max(1, Math.min(50, isNaN(parsed) ? 8 : parsed));
-                        setRoundsPerSet(clamped);
-                        // Adjust workIntervalNames array to match clamped rounds
-                        setWorkIntervalNames(prev => {
-                          const newNames = [...prev];
-                          while (newNames.length < clamped) {
-                            newNames.push('');
+                        }}
+                        onBlur={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setRoundsPerSet(8);
+                            // Adjust workIntervalNames array to 8 rounds
+                            setWorkIntervalNames(prev => {
+                              const newNames = [...prev];
+                              while (newNames.length < 8) {
+                                newNames.push('');
+                              }
+                              return newNames.slice(0, 8);
+                            });
+                          } else {
+                            const parsed = parseInt(val);
+                            const clamped = Math.max(1, Math.min(50, isNaN(parsed) ? 8 : parsed));
+                            setRoundsPerSet(clamped);
+                            // Adjust workIntervalNames array to match clamped rounds
+                            setWorkIntervalNames(prev => {
+                              const newNames = [...prev];
+                              while (newNames.length < clamped) {
+                                newNames.push('');
+                              }
+                              return newNames.slice(0, clamped);
+                            });
                           }
-                          return newNames.slice(0, clamped);
-                        });
-                      }
-                    }}
-                    inputProps={{ min: 1, max: 50, inputMode: 'numeric' }}
-                    fullWidth
-                    helperText="Number of work/rest cycles in each set"
-                  />
-
-                  <TextField
-                    label="Number of Sets"
-                    type="number"
-                    value={numberOfSets === null || numberOfSets === undefined ? '' : numberOfSets}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setNumberOfSets('');
-                      } else {
-                        const parsed = parseInt(val);
-                        setNumberOfSets(isNaN(parsed) ? '' : parsed);
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || val === null) {
-                        setNumberOfSets(1);
-                      } else {
-                        const parsed = parseInt(val);
-                        setNumberOfSets(Math.max(1, Math.min(10, isNaN(parsed) ? 1 : parsed)));
-                      }
-                    }}
-                    inputProps={{ min: 1, max: 10, inputMode: 'numeric' }}
-                    fullWidth
-                    helperText="Number of sets to perform (exercises repeat for each set)"
-                  />
+                        }}
+                        inputProps={{ min: 1, max: 50, inputMode: 'numeric' }}
+                        fullWidth
+                        helperText="per set"
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Sets"
+                        type="number"
+                        value={numberOfSets === null || numberOfSets === undefined ? '' : numberOfSets}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setNumberOfSets('');
+                          } else {
+                            const parsed = parseInt(val);
+                            setNumberOfSets(isNaN(parsed) ? '' : parsed);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || val === null) {
+                            setNumberOfSets(1);
+                          } else {
+                            const parsed = parseInt(val);
+                            setNumberOfSets(Math.max(1, Math.min(10, isNaN(parsed) ? 1 : parsed)));
+                          }
+                        }}
+                        inputProps={{ min: 1, max: 10, inputMode: 'numeric' }}
+                        fullWidth
+                        helperText="total"
+                      />
+                    </Grid>
+                  </Grid>
                   
                   {/* Exercise Names for Each Round */}
                   <Box>
@@ -946,35 +989,6 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       ))}
                     </Stack>
                   </Box>
-                  
-                  {numberOfSets > 1 && (
-                    <TextField
-                      label="Set Break Duration (seconds, 0 to disable)"
-                      type="number"
-                      value={recoveryBetweenSets === null || recoveryBetweenSets === undefined ? '' : recoveryBetweenSets}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === '' || val === null) {
-                          setRecoveryBetweenSets('');
-                        } else {
-                          const parsed = parseInt(val);
-                          setRecoveryBetweenSets(isNaN(parsed) ? '' : parsed);
-                        }
-                      }}
-                      onBlur={(e) => {
-                        const val = e.target.value;
-                        if (val === '' || val === null) {
-                          setRecoveryBetweenSets(0);
-                        } else {
-                          const parsed = parseInt(val);
-                          setRecoveryBetweenSets(Math.max(0, Math.min(300, isNaN(parsed) ? 0 : parsed)));
-                        }
-                      }}
-                      inputProps={{ min: 0, max: 300, inputMode: 'numeric' }}
-                      fullWidth
-                      helperText="Rest period between sets"
-                    />
-                  )}
                   
                   <Typography variant="body2" color="text.secondary">
                     Total Duration: {Math.floor((preparationInterval + (numberOfSets * roundsPerSet) * (workInterval + restInterval) + (numberOfSets > 1 && recoveryBetweenSets > 0 ? (numberOfSets - 1) * recoveryBetweenSets : 0)) / 60)} minutes

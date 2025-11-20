@@ -22,7 +22,6 @@ const WorkoutScreenModal = ({
   const [isMinimized, setIsMinimized] = useState(false);
   const [wakeLockActive, setWakeLockActive] = useState(wakeLockManager.isActive());
   const [wakeLockSupported] = useState(wakeLockManager.isWakeLockSupported());
-  const [currentSetInfo, setCurrentSetInfo] = useState({ setNumber: 1, totalSets: setsPerSuperset });
 
   useEffect(() => {
     // Setup visibility change handler for wake lock
@@ -44,11 +43,6 @@ const WorkoutScreenModal = ({
       const success = await wakeLockManager.requestWakeLock();
       setWakeLockActive(success);
     }
-  };
-
-  // Callback to receive current set info from WorkoutScreen
-  const handleSetInfoUpdate = (setNumber, totalSets) => {
-    setCurrentSetInfo({ setNumber, totalSets });
   };
 
   return (
@@ -100,7 +94,7 @@ const WorkoutScreenModal = ({
           }
         }}
       >
-        {/* Modal header with centered badge and wake screen button */}
+        {/* Modal header with wake screen button */}
         <Box
           sx={{
             position: 'relative',
@@ -112,24 +106,12 @@ const WorkoutScreenModal = ({
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            p: 1,
+            py: 1.5,
+            px: 1,
             gap: 1,
+            minHeight: '56px',
           }}
         >
-          {/* Centered badge */}
-          <Chip 
-            label={`Set ${currentSetInfo.setNumber} of ${currentSetInfo.totalSets}`}
-            color="primary"
-            size="medium"
-            sx={{ 
-              fontWeight: 600,
-              fontSize: { xs: '0.75rem', sm: '0.875rem' },
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%)',
-            }}
-          />
-          
           {/* Wake lock button on the right */}
           {wakeLockSupported && (
             <Box sx={{ 
@@ -162,7 +144,6 @@ const WorkoutScreenModal = ({
             onExit={onExit}
             supersetConfig={supersetConfig}
             setsPerSuperset={setsPerSuperset}
-            onSetInfoUpdate={handleSetInfoUpdate}
           />
         </DialogContent>
       </Dialog>

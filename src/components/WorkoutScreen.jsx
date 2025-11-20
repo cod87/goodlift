@@ -13,7 +13,7 @@ import { getDemoImagePath } from '../utils/exerciseDemoImages';
  * WorkoutScreen component manages the active workout session
  * Displays exercises in superset format, tracks time, and collects set data
  */
-const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, onSetInfoUpdate }) => {
+const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -163,16 +163,11 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       // Reset suggestion when changing exercises
       setProgressiveOverloadSuggestion(null);
       setShowSuggestion(false);
-      
-      // Notify parent of current set info
-      if (onSetInfoUpdate) {
-        onSetInfoUpdate(step.setNumber, setsPerSuperset);
-      }
     }
     
     // Scroll to top when exercise changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentStepIndex, initialTargets, workoutSequence, updatedWeights, onSetInfoUpdate, setsPerSuperset]);
+  }, [currentStepIndex, initialTargets, workoutSequence, updatedWeights]);
 
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
@@ -742,7 +737,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 flexDirection: 'column',
               }}
             >
-              {/* Top Controls - Help and Skip icons on left, End Workout Controls on right */}
+              {/* Top Controls - Help, Skip, and Set Indicator on left, End Workout Controls on right */}
               <Box sx={{ 
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -750,8 +745,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 gap: 1,
                 mb: 2
               }}>
-                {/* Left: Help and Skip Icons */}
-                <Box sx={{ display: 'flex', gap: 1 }}>
+                {/* Left: Help, Skip Icons and Set Indicator */}
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <IconButton
                     component="a"
                     href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
@@ -789,6 +784,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   >
                     <SkipNext sx={{ fontSize: { xs: 20, sm: 24 } }} />
                   </IconButton>
+                  
+                  {/* Set indicator */}
+                  <Chip 
+                    label={`Set ${currentStep.setNumber} of ${setsPerSuperset}`}
+                    color="primary"
+                    size="medium"
+                    sx={{ 
+                      fontWeight: 600,
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    }}
+                  />
                 </Box>
                 
                 {/* End Workout Controls - Right side */}
@@ -1145,7 +1151,6 @@ WorkoutScreen.propTypes = {
   onExit: PropTypes.func.isRequired,
   supersetConfig: PropTypes.arrayOf(PropTypes.number),
   setsPerSuperset: PropTypes.number,
-  onSetInfoUpdate: PropTypes.func,
 };
 
 export default WorkoutScreen;

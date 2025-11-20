@@ -112,7 +112,6 @@ const SavedWorkoutsList = memo(({
       {savedWorkouts.length === 0 ? (
         <Card elevation={2} sx={{ borderRadius: 3 }}>
           <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <FitnessCenter sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
               No saved workouts yet. Create your first workout!
             </Typography>

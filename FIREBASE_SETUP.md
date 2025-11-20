@@ -106,6 +106,8 @@ The following data types are automatically synced to Firebase for authenticated 
 - Volume settings
 - Favorite exercises list (UI preference)
 - Pinned exercises (UI preference)
+- Unlocked achievements (calculated locally)
+- Total PRs and volume (derived from workout history)
 
 ## Benefits
 

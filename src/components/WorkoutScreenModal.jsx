@@ -137,7 +137,12 @@ const WorkoutScreenModal = ({
           )}
         </Box>
 
-        <DialogContent sx={{ p: 0, overflow: 'auto' }}>
+        <DialogContent sx={{ 
+          p: 0, 
+          overflow: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          maxHeight: '100vh',
+        }}>
           <WorkoutScreen
             workoutPlan={workoutPlan}
             onComplete={onComplete}

@@ -838,7 +838,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
               {/* Exercise name - responsive text that wraps and scales to fit */}
               <Box sx={{ 
-                mb: 3,
+                mb: 1.5,
                 mt: 2,
                 px: { xs: 2, sm: 4 },
                 display: 'flex',
@@ -877,8 +877,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               {demoImageSrc && (
                 <Box 
                   sx={{ 
-                    mb: 2,
-                    mt: 1,
+                    mb: 1.5,
+                    mt: 0,
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',

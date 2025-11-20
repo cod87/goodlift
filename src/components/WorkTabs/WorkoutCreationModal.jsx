@@ -139,15 +139,19 @@ const SortableExerciseItem = ({
       sx={{
         position: 'relative',
         cursor: isReorderMode ? 'grab' : 'pointer',
+        border: '1px solid',
+        borderColor: 'divider',
         borderLeft: '4px solid',
-        borderColor: isInSuperset 
+        borderLeftColor: isInSuperset 
           ? supersetColor?.main 
-          : (isHighlighted ? highlightColor?.main : 'transparent'),
+          : (isHighlighted ? highlightColor?.main : 'divider'),
         backgroundColor: isInSuperset 
           ? supersetColor?.light 
           : (isHighlighted ? highlightColor?.light : 'background.paper'),
-        transition: 'background-color 0.2s ease, border-color 0.2s ease, opacity 0.15s ease',
+        transition: 'background-color 0.2s ease, border-color 0.2s ease, opacity 0.15s ease, margin-left 0.3s ease, padding-left 0.3s ease',
         opacity: isDragging ? 0.5 : 1,
+        marginLeft: isHighlighted ? 2 : 0,
+        paddingLeft: isHighlighted ? 1 : 0,
         '&:hover': {
           opacity: 0.9,
         },
@@ -198,20 +202,40 @@ const SortableExerciseItem = ({
         
         {/* Exercise Configuration */}
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-          <TextField
-            label="Sets"
-            type="number"
-            size="small"
-            value={exercise.sets}
-            onChange={(e) => {
-              e.stopPropagation();
-              const updated = [...myWorkout];
-              updated[index].sets = parseInt(e.target.value) || 3;
-              setMyWorkout(updated);
-            }}
-            onClick={(e) => e.stopPropagation()}
-            sx={{ width: 80 }}
-          />
+          <FormControl size="small" sx={{ width: 80 }}>
+            <InputLabel>Sets</InputLabel>
+            <Select
+              label="Sets"
+              value={exercise.sets}
+              onChange={(e) => {
+                e.stopPropagation();
+                const newSets = parseInt(e.target.value);
+                const updated = [...myWorkout];
+                
+                // Check if this exercise is in a superset group
+                const supersetGroupId = exercise.supersetGroup;
+                if (supersetGroupId !== null && supersetGroupId !== undefined) {
+                  // Update all exercises in the same superset group
+                  updated.forEach((ex, i) => {
+                    if (ex.supersetGroup === supersetGroupId) {
+                      updated[i].sets = newSets;
+                    }
+                  });
+                } else {
+                  // Only update this exercise
+                  updated[index].sets = newSets;
+                }
+                
+                setMyWorkout(updated);
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MenuItem value={1}>1</MenuItem>
+              <MenuItem value={2}>2</MenuItem>
+              <MenuItem value={3}>3</MenuItem>
+              <MenuItem value={4}>4</MenuItem>
+            </Select>
+          </FormControl>
           <TextField
             label="Reps"
             type="number"
@@ -225,20 +249,6 @@ const SortableExerciseItem = ({
             }}
             onClick={(e) => e.stopPropagation()}
             sx={{ width: 80 }}
-          />
-          <TextField
-            label="Rest (s)"
-            type="number"
-            size="small"
-            value={exercise.restTime}
-            onChange={(e) => {
-              e.stopPropagation();
-              const updated = [...myWorkout];
-              updated[index].restTime = parseInt(e.target.value) || 60;
-              setMyWorkout(updated);
-            }}
-            onClick={(e) => e.stopPropagation()}
-            sx={{ width: 100 }}
           />
         </Stack>
       </CardContent>
@@ -382,10 +392,16 @@ const WorkoutCreationModal = ({
   const handleLockInSuperset = () => {
     if (highlightedExercises.size === 0) return;
 
-    // Update all highlighted exercises with the current superset number
+    // Find the greatest sets value among highlighted exercises
+    const highlightedSetsValues = myWorkout
+      .filter(exercise => highlightedExercises.has(exercise['Exercise Name']))
+      .map(exercise => exercise.sets);
+    const maxSets = Math.max(...highlightedSetsValues);
+
+    // Update all highlighted exercises with the current superset number and max sets value
     const updated = myWorkout.map(exercise => {
       if (highlightedExercises.has(exercise['Exercise Name'])) {
-        return { ...exercise, supersetGroup: currentSupersetNumber };
+        return { ...exercise, supersetGroup: currentSupersetNumber, sets: maxSets };
       }
       return exercise;
     });

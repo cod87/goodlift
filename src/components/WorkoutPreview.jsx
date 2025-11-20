@@ -24,6 +24,9 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [currentWorkout, setCurrentWorkout] = useState(workout);
   const [setsPerSuperset, setSetsPerSuperset] = useState(initialSetsPerSuperset);
   const [focusedExerciseIndex, setFocusedExerciseIndex] = useState(null); // Track focused exercise for animation
+  
+  // Check if exercises have individual sets configured (from builder)
+  const hasIndividualSets = currentWorkout.some(ex => ex !== null && typeof ex.sets === 'number');
 
   // Load all exercises data - includes full library for comprehensive autocomplete
   useEffect(() => {
@@ -396,60 +399,63 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           {isCustomizeMode ? 'Customize Your Workout' : `Your ${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`}
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-          {supersets.length} Supersets • {currentWorkout.filter(ex => ex !== null).length} Exercises • {setsPerSuperset} Sets Each
+          {supersets.length} Supersets • {currentWorkout.filter(ex => ex !== null).length} Exercises
+          {!hasIndividualSets && ` • ${setsPerSuperset} Sets Each`}
         </Typography>
-        {/* Sets per superset control */}
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          gap: 1,
-          mb: 1
-        }}>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-            Sets per superset:
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <IconButton
-              size="small"
-              onClick={() => setSetsPerSuperset(prev => Math.max(1, prev - 1))}
-              disabled={setsPerSuperset <= 1}
-              sx={{ 
-                minWidth: '32px',
-                minHeight: '32px',
-                bgcolor: 'action.hover',
-                '&:hover': { bgcolor: 'action.selected' }
-              }}
-            >
-              <Remove fontSize="small" />
-            </IconButton>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 700,
-                color: 'primary.main',
-                minWidth: '32px',
-                textAlign: 'center',
-                fontSize: { xs: '1rem', sm: '1.25rem' }
-              }}
-            >
-              {setsPerSuperset}
+        {/* Sets per superset control - only show if exercises don't have individual sets */}
+        {!hasIndividualSets && (
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            gap: 1,
+            mb: 1
+          }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+              Sets per superset:
             </Typography>
-            <IconButton
-              size="small"
-              onClick={() => setSetsPerSuperset(prev => Math.min(10, prev + 1))}
-              disabled={setsPerSuperset >= 10}
-              sx={{ 
-                minWidth: '32px',
-                minHeight: '32px',
-                bgcolor: 'action.hover',
-                '&:hover': { bgcolor: 'action.selected' }
-              }}
-            >
-              <Add fontSize="small" />
-            </IconButton>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <IconButton
+                size="small"
+                onClick={() => setSetsPerSuperset(prev => Math.max(1, prev - 1))}
+                disabled={setsPerSuperset <= 1}
+                sx={{ 
+                  minWidth: '32px',
+                  minHeight: '32px',
+                  bgcolor: 'action.hover',
+                  '&:hover': { bgcolor: 'action.selected' }
+                }}
+              >
+                <Remove fontSize="small" />
+              </IconButton>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 700,
+                  color: 'primary.main',
+                  minWidth: '32px',
+                  textAlign: 'center',
+                  fontSize: { xs: '1rem', sm: '1.25rem' }
+                }}
+              >
+                {setsPerSuperset}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => setSetsPerSuperset(prev => Math.min(10, prev + 1))}
+                disabled={setsPerSuperset >= 10}
+                sx={{ 
+                  minWidth: '32px',
+                  minHeight: '32px',
+                  bgcolor: 'action.hover',
+                  '&:hover': { bgcolor: 'action.selected' }
+                }}
+              >
+                <Add fontSize="small" />
+              </IconButton>
+            </Box>
           </Box>
-        </Box>
+        )}
         <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
           {isCustomizeMode ? 'Select exercises and set your target weight and reps for each' : 'Set your starting target weight and target reps for each exercise'}
         </Typography>
@@ -660,6 +666,18 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               fontSize: { xs: '0.65rem', sm: '0.75rem' }
                             }}
                           />
+                          {typeof exercise.sets === 'number' && (
+                            <Chip 
+                              label={`${exercise.sets} Set${exercise.sets !== 1 ? 's' : ''}`}
+                              size="small" 
+                              variant="filled"
+                              sx={{ 
+                                bgcolor: 'primary.main',
+                                color: 'white',
+                                fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                              }}
+                            />
+                          )}
                           {onRandomizeExercise && !isCustomizeMode && (
                             <IconButton
                               size="small"

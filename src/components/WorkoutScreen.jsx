@@ -52,6 +52,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
   // Generate workout sequence (supersets) - memoized to prevent recalculation
   // Now supports custom superset configurations like [2, 3, 2, 3]
+  // Each exercise can have its own number of sets, which is read from exercise.sets property
   const workoutSequence = useMemo(() => {
     const sequence = [];
     let exerciseIndex = 0;
@@ -70,10 +71,16 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       // Skip if no exercises in this superset
       if (supersetExercises.length === 0) continue;
       
+      // Find the maximum number of sets among exercises in this superset
+      // This ensures all exercises in a superset are done for the same number of sets
+      const maxSets = Math.max(
+        ...supersetExercises.map(ex => ex.sets || setsPerSuperset || 3)
+      );
+      
       // Add all sets for this superset
-      for (let set = 1; set <= setsPerSuperset; set++) {
+      for (let set = 1; set <= maxSets; set++) {
         for (const exercise of supersetExercises) {
-          sequence.push({ exercise, setNumber: set });
+          sequence.push({ exercise, setNumber: set, totalSets: maxSets });
         }
       }
     }
@@ -787,7 +794,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   
                   {/* Set indicator */}
                   <Chip 
-                    label={`Set ${currentStep.setNumber} of ${setsPerSuperset}`}
+                    label={`Set ${currentStep.setNumber} of ${currentStep.totalSets}`}
                     color="primary"
                     size="medium"
                     sx={{ 
@@ -838,7 +845,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
               {/* Exercise name - responsive text that wraps and scales to fit */}
               <Box sx={{ 
-                mb: 3,
+                mb: 1.5,
                 mt: 2,
                 px: { xs: 2, sm: 4 },
                 display: 'flex',
@@ -877,8 +884,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               {demoImageSrc && (
                 <Box 
                   sx={{ 
-                    mb: 2,
-                    mt: 1,
+                    mb: 1.5,
+                    mt: 0,
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',

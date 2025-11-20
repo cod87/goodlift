@@ -614,7 +614,13 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
 
 
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh', p: 3, bgcolor: 'background.default' }}>
+    <Box sx={{ 
+      width: '100%', 
+      p: { xs: 2, sm: 3 }, 
+      bgcolor: 'background.default',
+      maxWidth: '100vw',
+      overflow: 'hidden',
+    }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

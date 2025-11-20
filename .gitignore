@@ -25,4 +25,6 @@ dist-ssr
 
 # Temporary files
 tmp/
+*.backup
+*~
 # Build artifacts

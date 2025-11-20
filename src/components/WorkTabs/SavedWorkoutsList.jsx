@@ -42,6 +42,7 @@ const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'F
 const SavedWorkoutsList = memo(({ 
   onCreateWorkout,
   onStartWorkout,
+  onEditWorkout, // Add edit callback
 }) => {
   const { assignWorkoutToDay } = useWeekScheduling();
   const [savedWorkouts, setSavedWorkouts] = useState([]);
@@ -182,6 +183,14 @@ const SavedWorkoutsList = memo(({
     }
   };
 
+  const handleEditWorkout = () => {
+    if (selectedWorkoutIndex !== null && onEditWorkout) {
+      const workout = savedWorkouts[selectedWorkoutIndex];
+      onEditWorkout(workout, selectedWorkoutIndex);
+    }
+    handleMenuClose();
+  };
+
   return (
     <Box>
       {/* Header with Create Button - Minimalist Style */}
@@ -295,6 +304,7 @@ const SavedWorkoutsList = memo(({
         open={Boolean(menuAnchorEl)}
         onClose={handleMenuClose}
       >
+        <MenuItem onClick={handleEditWorkout}>Edit</MenuItem>
         <MenuItem onClick={() => handleOpenDayPicker(selectedWorkoutIndex)}>
           <CalendarMonth sx={{ mr: 1 }} fontSize="small" />
           Assign to Day
@@ -346,6 +356,7 @@ SavedWorkoutsList.displayName = 'SavedWorkoutsList';
 SavedWorkoutsList.propTypes = {
   onCreateWorkout: PropTypes.func,
   onStartWorkout: PropTypes.func,
+  onEditWorkout: PropTypes.func,
 };
 
 export default SavedWorkoutsList;

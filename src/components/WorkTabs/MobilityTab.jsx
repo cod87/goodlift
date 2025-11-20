@@ -3,10 +3,10 @@ import { Box } from '@mui/material';
 import UnifiedTimerScreen from '../../pages/UnifiedTimerScreen';
 
 /**
- * TimerTab - Wraps the UnifiedTimerScreen for use in the Work tabs
- * Provides timer functionality within the Work area
+ * MobilityTab - Wraps the UnifiedTimerScreen for use in the Work tabs
+ * Provides timer functionality for mobility workouts (cardio, yoga, etc.) within the Work area
  */
-const TimerTab = ({ onNavigate }) => {
+const MobilityTab = ({ onNavigate }) => {
   return (
     <Box>
       <UnifiedTimerScreen onNavigate={onNavigate} hideBackButton={true} />
@@ -14,8 +14,8 @@ const TimerTab = ({ onNavigate }) => {
   );
 };
 
-TimerTab.propTypes = {
+MobilityTab.propTypes = {
   onNavigate: PropTypes.func,
 };
 
-export default TimerTab;
+export default MobilityTab;

@@ -177,6 +177,8 @@ export const getAllGuestData = () => {
 export const shouldShowGuestSnackbar = () => {
   try {
     const dismissed = localStorage.getItem(GUEST_KEYS.SNACKBAR_DISMISSED);
+    // If dismissed is 'permanent', never show again
+    if (dismissed === 'permanent') return false;
     if (!dismissed) return true;
     
     const dismissedTime = parseInt(dismissed, 10);
@@ -191,11 +193,11 @@ export const shouldShowGuestSnackbar = () => {
 };
 
 /**
- * Dismiss guest snackbar for 24 hours
+ * Dismiss guest snackbar permanently
  */
 export const dismissGuestSnackbar = () => {
   try {
-    localStorage.setItem(GUEST_KEYS.SNACKBAR_DISMISSED, Date.now().toString());
+    localStorage.setItem(GUEST_KEYS.SNACKBAR_DISMISSED, 'permanent');
   } catch (error) {
     console.error('Error dismissing snackbar:', error);
     handleQuotaError(error);

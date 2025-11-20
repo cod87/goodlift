@@ -2,7 +2,7 @@ import { useState, useEffect, memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, Snackbar, Alert, IconButton } from '@mui/material';
-import { FitnessCenter, PlayArrow, Close, StarOutline, Star, Shuffle, Add, Remove } from '@mui/icons-material';
+import { PlayArrow, Close, StarOutline, Star, Shuffle, Add, Remove } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 import ExerciseAutocomplete from './ExerciseAutocomplete';
@@ -363,45 +363,43 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
         overflowX: 'hidden'
       }}
     >
-      <Box sx={{ mb: { xs: 2, sm: 4 }, textAlign: 'center', position: 'relative', px: { xs: 0.5, sm: 0 } }}>
+      {/* Compact Header - matching Progress screen style */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        py: 1,
+        px: 2,
+        borderBottom: '1px solid', 
+        borderColor: 'divider',
+        mb: 2,
+      }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 700 }}>
+            {isCustomizeMode ? 'Customize Workout' : 'Workout Preview'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+            {supersets.length} Supersets • {currentWorkout.filter(ex => ex !== null).length} Exercises
+            {!hasIndividualSets && ` • ${setsPerSuperset} Sets Each`}
+          </Typography>
+        </Box>
         <IconButton
           onClick={handleSaveToFavorites}
           disabled={savedToFavorites}
           size="small"
           sx={{
-            position: 'absolute',
-            top: 0,
-            right: { xs: 0, sm: 0 },
             color: savedToFavorites ? 'warning.main' : 'action.active',
-            minWidth: '44px',
-            minHeight: '44px',
             '&:hover': {
               color: 'warning.main',
             },
-            p: { xs: 0.5, sm: 1 }
           }}
           aria-label="Save to favorites"
         >
-          {savedToFavorites ? <Star sx={{ fontSize: { xs: 24, sm: 32 } }} /> : <StarOutline sx={{ fontSize: { xs: 24, sm: 32 } }} />}
+          {savedToFavorites ? <Star /> : <StarOutline />}
         </IconButton>
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-        >
-          <FitnessCenter sx={{ fontSize: { xs: 48, sm: 60 }, color: 'primary.main', mb: { xs: 1, sm: 2 } }} />
-        </motion.div>
-        <Typography variant="h3" component="h1" gutterBottom sx={{ 
-          fontWeight: 700,
-          color: 'primary.main',
-          fontSize: { xs: '1.5rem', sm: '3rem' }
-        }}>
-          {isCustomizeMode ? 'Customize Your Workout' : `Your ${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)} Body Workout`}
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-          {supersets.length} Supersets • {currentWorkout.filter(ex => ex !== null).length} Exercises
-          {!hasIndividualSets && ` • ${setsPerSuperset} Sets Each`}
-        </Typography>
+      </Box>
+      
+      <Box sx={{ mb: { xs: 2, sm: 3 }, px: { xs: 0.5, sm: 0 } }}>
         {/* Sets per superset control - only show if exercises don't have individual sets */}
         {!hasIndividualSets && (
           <Box sx={{ 

@@ -1872,3 +1872,38 @@ export const deleteSavedWorkout = async (index) => {
     throw error;
   }
 };
+
+/**
+ * Update a saved workout by index
+ * @param {number} index - Index of the workout to update
+ * @param {Object} updatedWorkout - Updated workout object
+ * @returns {Promise<Array>} Updated list of saved workouts
+ */
+export const updateSavedWorkout = async (index, updatedWorkout) => {
+  try {
+    const workouts = await getSavedWorkouts();
+    
+    if (index >= 0 && index < workouts.length) {
+      workouts[index] = {
+        ...workouts[index],
+        ...updatedWorkout,
+      };
+      
+      if (isGuestMode()) {
+        setGuestData('saved_workouts', workouts);
+      } else {
+        localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(workouts));
+        
+        // Sync to Firebase if authenticated
+        if (currentUserId) {
+          await saveSavedWorkoutsToFirebase(currentUserId, workouts);
+        }
+      }
+    }
+    
+    return workouts;
+  } catch (error) {
+    console.error('Error updating saved workout:', error);
+    throw error;
+  }
+};

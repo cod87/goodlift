@@ -150,7 +150,6 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
 
   return (
     <Card 
-      elevation={2}
       sx={{ 
         mb: 3,
         borderRadius: 3,

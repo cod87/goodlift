@@ -1105,26 +1105,22 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               
               <div className="workout-nav-buttons">
                 {currentStepIndex > 0 && (
-                  <motion.button
+                  <button
                     type="button"
                     className="back-btn"
                     onClick={handleBack}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                     style={{ minHeight: '44px' }}
                   >
                     <ArrowBack sx={{ fontSize: 18, mr: 0.5 }} /> Back
-                  </motion.button>
+                  </button>
                 )}
-                <motion.button
+                <button
                   type="submit"
                   className="next-btn"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   style={{ minHeight: '44px' }}
                 >
                   Next <ArrowForward sx={{ fontSize: 18, ml: 0.5 }} />
-                </motion.button>
+                </button>
               </div>
             </motion.div>
           </motion.form>

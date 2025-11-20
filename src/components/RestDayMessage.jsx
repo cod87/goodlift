@@ -45,7 +45,6 @@ const RestDayMessage = ({ onClose }) => {
         }}
       >
         <Paper
-          elevation={8}
           sx={{
             p: 4,
             maxWidth: 400,
@@ -91,29 +90,28 @@ const RestDayMessage = ({ onClose }) => {
             {randomMessage.text}
           </Typography>
           
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Box
+            sx={{
+              display: 'inline-block',
+              px: 3,
+              py: 1,
+              borderRadius: 2,
+              bgcolor: 'primary.main',
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'background-color 0.2s ease, opacity 0.15s ease',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+              },
+              '&:active': {
+                opacity: 0.8,
+              },
+            }}
+            onClick={onClose}
           >
-            <Box
-              sx={{
-                display: 'inline-block',
-                px: 3,
-                py: 1,
-                borderRadius: 2,
-                bgcolor: 'primary.main',
-                color: 'white',
-                cursor: 'pointer',
-                fontWeight: 600,
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                },
-              }}
-              onClick={onClose}
-            >
-              Got it!
-            </Box>
-          </motion.div>
+            Got it!
+          </Box>
         </Paper>
       </motion.div>
     </Box>

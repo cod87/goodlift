@@ -154,7 +154,6 @@ const HomeScreen = memo(({
 
       {/* Main Workout Card */}
       <Card 
-        elevation={2}
         sx={{ 
           mb: 3,
           borderRadius: 3,
@@ -386,7 +385,6 @@ const HomeScreen = memo(({
       {/* Weekly Overview */}
       {currentPlan && currentPlan.sessions && (
         <Card 
-          elevation={2}
           sx={{ 
             borderRadius: 3,
           }}

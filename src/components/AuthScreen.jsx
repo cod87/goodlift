@@ -114,35 +114,32 @@ const AuthScreen = () => {
                 sx={{ mb: 3 }}
               />
 
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  size="large"
-                  disabled={loading}
-                  sx={{
-                    py: 1.5,
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    bgcolor: 'primary.main',
-                    '&:hover': {
-                      bgcolor: 'primary.dark',
-                    },
-                  }}
-                >
-                  {loading ? 'Please wait...' : isLogin ? 'Log In' : 'Sign Up'}
-                </Button>
-              </motion.div>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                disabled={loading}
+                sx={{
+                  py: 1.5,
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  bgcolor: 'primary.main',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  },
+                }}
+              >
+                {loading ? 'Please wait...' : isLogin ? 'Log In' : 'Sign Up'}
+              </Button>
 
               <Divider sx={{ my: 2 }}>OR</Divider>
 
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  size="large"
-                  disabled={loading}
+              <Button
+                fullWidth
+                variant="outlined"
+                size="large"
+                disabled={loading}
                   onClick={continueAsGuest}
                   sx={{
                     py: 1.5,
@@ -158,7 +155,6 @@ const AuthScreen = () => {
                 >
                   Continue as Guest
                 </Button>
-              </motion.div>
 
               <Box
                 sx={{

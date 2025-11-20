@@ -117,7 +117,7 @@ const MonthCalendarView = ({
   const today = new Date();
 
   return (
-    <Card elevation={2} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+    <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
       <CardContent sx={{ 
         p: { xs: 2, sm: 3 },
         width: '100%',

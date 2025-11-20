@@ -53,6 +53,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 
 /**
  * Superset color palette - cycling through distinct colors
@@ -336,7 +337,7 @@ const WorkoutCreationModal = ({
   const muscleGroups = ['all', ...new Set(exercises.map(e => e['Primary Muscle']))];
 
   // Handle exercise selection/deselection
-  const handleExerciseToggle = (exercise) => {
+  const handleExerciseToggle = async (exercise) => {
     const newSelected = new Set(selectedExercises);
     const exerciseName = exercise['Exercise Name'];
     
@@ -346,12 +347,19 @@ const WorkoutCreationModal = ({
       setMyWorkout(myWorkout.filter(e => e['Exercise Name'] !== exerciseName));
     } else {
       newSelected.add(exerciseName);
-      // Add to myWorkout without superset group initially
+      
+      // Load saved target weight and reps for this exercise
+      const [savedWeight, savedReps] = await Promise.all([
+        getExerciseWeight(exerciseName),
+        getExerciseTargetReps(exerciseName)
+      ]);
+      
+      // Add to myWorkout without superset group initially, using saved values if available
       setMyWorkout([...myWorkout, {
         ...exercise,
         sets: 3,
-        reps: 10,
-        weight: 0,
+        reps: savedReps ?? 10, // Use saved reps or default to 10
+        weight: savedWeight ?? 0, // Use saved weight or default to 0
         restTime: 60,
         supersetGroup: null, // No superset group initially
       }]);

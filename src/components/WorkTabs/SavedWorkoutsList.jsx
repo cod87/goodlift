@@ -18,7 +18,6 @@ import {
 } from '@mui/material';
 import { 
   Add,
-  FitnessCenter,
   MoreVert,
 } from '@mui/icons-material';
 import { getSavedWorkouts, deleteSavedWorkout } from '../../utils/storage';
@@ -87,13 +86,15 @@ const SavedWorkoutsList = memo(({
 
   return (
     <Box>
-      {/* Header with Create Button */}
+      {/* Header with Create Button - Minimalist Style */}
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <FitnessCenter sx={{ color: 'primary.main' }} />
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
               My Workouts
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+              Create and manage your custom workouts
             </Typography>
           </Box>
           <Button
@@ -111,7 +112,6 @@ const SavedWorkoutsList = memo(({
       {savedWorkouts.length === 0 ? (
         <Card elevation={2} sx={{ borderRadius: 3 }}>
           <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <FitnessCenter sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
               No saved workouts yet. Create your first workout!
             </Typography>

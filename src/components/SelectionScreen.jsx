@@ -140,7 +140,7 @@ const SelectionScreen = memo(({
   };
 
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh' }}>
+    <Box sx={{ width: '100%' }}>
       <CompactHeader title="Workouts" icon="⚡" />
       
       <motion.div
@@ -153,9 +153,7 @@ const SelectionScreen = memo(({
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: 'calc(100vh - 4rem)',
           padding: '1rem',
-          paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))',
           overflow: 'auto',
         }}
       >

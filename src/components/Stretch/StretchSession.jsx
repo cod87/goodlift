@@ -146,10 +146,8 @@ const StretchSession = ({ stretches, onComplete, onExit }) => {
   return (
     <Box
       sx={{
-        padding: { xs: '0.5rem', sm: '1rem', md: '2rem' },
         maxWidth: '900px',
         margin: '0 auto',
-        minHeight: 'calc(100vh - 60px)',
         width: '100%',
         boxSizing: 'border-box',
       }}

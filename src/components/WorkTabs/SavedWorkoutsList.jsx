@@ -191,18 +191,20 @@ const SavedWorkoutsList = memo(({
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
               My Workouts
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-              Create and manage your custom workouts
-            </Typography>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
+          <IconButton
+            color="primary"
             onClick={onCreateWorkout}
-            sx={{ fontWeight: 600 }}
+            sx={{ 
+              bgcolor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+              },
+            }}
           >
-            Create Workout
-          </Button>
+            <Add />
+          </IconButton>
         </Stack>
       </Box>
 
@@ -210,17 +212,9 @@ const SavedWorkoutsList = memo(({
       {savedWorkouts.length === 0 ? (
         <Card sx={{ borderRadius: 3 }}>
           <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-              No saved workouts yet. Create your first workout!
+            <Typography variant="body1" color="text.secondary">
+              No saved workouts.
             </Typography>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={onCreateWorkout}
-              size="large"
-            >
-              Create Your First Workout
-            </Button>
           </CardContent>
         </Card>
       ) : (

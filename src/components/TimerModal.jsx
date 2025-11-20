@@ -10,7 +10,6 @@ import wakeLockManager from '../utils/wakeLock';
  */
 const TimerModal = ({ 
   open, 
-  mode,
   currentInfo,
   children,
   onExit,
@@ -60,8 +59,10 @@ const TimerModal = ({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          p: 1,
+          py: 1.5,
+          px: 1,
           gap: 1,
+          minHeight: '56px',
         }}
       >
         {/* Centered badge */}
@@ -112,7 +113,6 @@ const TimerModal = ({
 
 TimerModal.propTypes = {
   open: PropTypes.bool.isRequired,
-  mode: PropTypes.string.isRequired,
   currentInfo: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
   onExit: PropTypes.func.isRequired,

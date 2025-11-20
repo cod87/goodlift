@@ -12,6 +12,9 @@ import {
   saveHiitPresetsToFirebase,
   saveYogaPresetsToFirebase,
   saveSavedWorkoutsToFirebase,
+  savePlansToFirebase,
+  savePlanDaysToFirebase,
+  savePlanExercisesToFirebase,
   loadUserDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
@@ -42,6 +45,9 @@ const KEYS = {
   YOGA_PRESETS: 'goodlift_yoga_presets',
   HIIT_PRESETS: 'goodlift_hiit_presets',
   SAVED_WORKOUTS: 'goodlift_saved_workouts',
+  PLANS: 'goodlift_plans',
+  PLAN_DAYS: 'goodlift_plan_days',
+  PLAN_EXERCISES: 'goodlift_plan_exercises',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -551,6 +557,34 @@ export const loadUserDataFromCloud = async (userId) => {
       if (firebaseData.savedWorkouts) {
         localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(firebaseData.savedWorkouts));
       }
+      
+      // Sync favorite workouts
+      if (firebaseData.favoriteWorkouts) {
+        localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(firebaseData.favoriteWorkouts));
+      }
+      
+      // Sync HIIT presets
+      if (firebaseData.hiitPresets) {
+        localStorage.setItem(KEYS.HIIT_PRESETS, JSON.stringify(firebaseData.hiitPresets));
+      }
+      
+      // Sync Yoga presets
+      if (firebaseData.yogaPresets) {
+        localStorage.setItem(KEYS.YOGA_PRESETS, JSON.stringify(firebaseData.yogaPresets));
+      }
+      
+      // Sync simplified plans data model
+      if (firebaseData.plans) {
+        localStorage.setItem(KEYS.PLANS, JSON.stringify(firebaseData.plans));
+      }
+      
+      if (firebaseData.planDays) {
+        localStorage.setItem(KEYS.PLAN_DAYS, JSON.stringify(firebaseData.planDays));
+      }
+      
+      if (firebaseData.planExercises) {
+        localStorage.setItem(KEYS.PLAN_EXERCISES, JSON.stringify(firebaseData.planExercises));
+      }
     } else {
       // No data in Firebase, sync current localStorage data to Firebase
       const localHistory = await getWorkoutHistory();
@@ -567,6 +601,18 @@ export const loadUserDataFromCloud = async (userId) => {
       const localActivePlanId = localStorage.getItem(KEYS.ACTIVE_PLAN);
       const localSavedWorkouts = localStorage.getItem(KEYS.SAVED_WORKOUTS);
       const savedWorkoutsArray = localSavedWorkouts ? JSON.parse(localSavedWorkouts) : [];
+      const localFavoriteWorkouts = localStorage.getItem(KEYS.FAVORITE_WORKOUTS);
+      const favoriteWorkoutsArray = localFavoriteWorkouts ? JSON.parse(localFavoriteWorkouts) : [];
+      const localHiitPresets = localStorage.getItem(KEYS.HIIT_PRESETS);
+      const hiitPresetsArray = localHiitPresets ? JSON.parse(localHiitPresets) : [];
+      const localYogaPresets = localStorage.getItem(KEYS.YOGA_PRESETS);
+      const yogaPresetsArray = localYogaPresets ? JSON.parse(localYogaPresets) : [];
+      const localSimplifiedPlans = localStorage.getItem(KEYS.PLANS);
+      const simplifiedPlansArray = localSimplifiedPlans ? JSON.parse(localSimplifiedPlans) : [];
+      const localPlanDays = localStorage.getItem(KEYS.PLAN_DAYS);
+      const planDaysArray = localPlanDays ? JSON.parse(localPlanDays) : [];
+      const localPlanExercises = localStorage.getItem(KEYS.PLAN_EXERCISES);
+      const planExercisesArray = localPlanExercises ? JSON.parse(localPlanExercises) : [];
       
       // If user has local data, sync it to Firebase
       if (localHistory.length > 0 || localStats?.totalWorkouts > 0 || 
@@ -574,7 +620,13 @@ export const loadUserDataFromCloud = async (userId) => {
           localHiit.length > 0 || localCardio.length > 0 || 
           localStretch.length > 0 ||
           plansArray.length > 0 || localActivePlanId ||
-          savedWorkoutsArray.length > 0) {
+          savedWorkoutsArray.length > 0 ||
+          favoriteWorkoutsArray.length > 0 ||
+          hiitPresetsArray.length > 0 ||
+          yogaPresetsArray.length > 0 ||
+          simplifiedPlansArray.length > 0 ||
+          planDaysArray.length > 0 ||
+          planExercisesArray.length > 0) {
         await Promise.all([
           saveWorkoutHistoryToFirebase(userId, localHistory),
           saveUserStatsToFirebase(userId, localStats),
@@ -585,7 +637,13 @@ export const loadUserDataFromCloud = async (userId) => {
           saveStretchSessionsToFirebase(userId, localStretch),
           saveWorkoutPlansToFirebase(userId, plansArray),
           saveActivePlanToFirebase(userId, localActivePlanId),
-          saveSavedWorkoutsToFirebase(userId, savedWorkoutsArray)
+          saveSavedWorkoutsToFirebase(userId, savedWorkoutsArray),
+          saveFavoriteWorkoutsToFirebase(userId, favoriteWorkoutsArray),
+          saveHiitPresetsToFirebase(userId, hiitPresetsArray),
+          saveYogaPresetsToFirebase(userId, yogaPresetsArray),
+          savePlansToFirebase(userId, simplifiedPlansArray),
+          savePlanDaysToFirebase(userId, planDaysArray),
+          savePlanExercisesToFirebase(userId, planExercisesArray)
         ]);
       }
     }

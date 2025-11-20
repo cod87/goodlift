@@ -155,8 +155,49 @@ The app includes 100+ strength training exercises categorized by:
 
 ## Data Storage
 
-- **LocalStorage**: All workout data, progress, and personal records are stored locally in your browser
-- **Firebase**: Cloud sync available for authenticated users
+### Storage Architecture
+
+GoodLift uses a hybrid storage approach combining localStorage with Firebase Cloud Firestore:
+
+- **LocalStorage**: Provides fast, offline-first data access for all workout data
+- **Firebase Cloud Firestore**: Enables cross-device synchronization for authenticated users
+- **Guest Mode**: Uses localStorage only, with optional data migration to account on signup
+
+### Synced Data Types
+
+When authenticated, the following data automatically syncs across all your devices:
+
+**Workout Data:**
+- Complete workout history with all exercises, sets, reps, and weights
+- User statistics (total workouts, time spent, current/longest streaks, PRs, volume)
+- Exercise target weights and target rep counts
+
+**Session Data:**
+- HIIT workout sessions
+- Cardio sessions
+- Stretching/mobility sessions
+
+**Plans & Templates:**
+- Custom workout plans and schedules
+- Active workout plan selection
+- Saved workout templates
+- Favorite workouts
+- Custom HIIT presets
+- Custom Yoga presets
+
+**Local-Only Data (Not Synced):**
+- UI preferences (theme, volume)
+- Favorite exercises list
+- Pinned exercises for dashboard
+
+### How Sync Works
+
+1. **On Login**: Cloud data automatically downloads and merges with local data
+2. **On Data Change**: Updates save locally first, then sync to cloud in the background
+3. **On Logout**: Returns to guest mode using only local storage
+4. **Offline**: App works fully offline, syncing when connection returns
+
+See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for technical details.
 
 ## Technologies Used
 

@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Dialog, DialogContent, IconButton, Box } from '@mui/material';
-import { Minimize, Maximize, Close } from '@mui/icons-material';
+import { Dialog, DialogContent, IconButton, Box, Tooltip, Chip } from '@mui/material';
+import { Maximize } from '@mui/icons-material';
+import { MdScreenLockPortrait, MdScreenLockRotation } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 import WorkoutScreen from './WorkoutScreen';
+import wakeLockManager from '../utils/wakeLock';
 
 /**
  * WorkoutScreenModal - Modal wrapper for WorkoutScreen component
@@ -18,19 +20,35 @@ const WorkoutScreenModal = ({
   setsPerSuperset 
 }) => {
   const [isMinimized, setIsMinimized] = useState(false);
+  const [wakeLockActive, setWakeLockActive] = useState(wakeLockManager.isActive());
+  const [wakeLockSupported] = useState(wakeLockManager.isWakeLockSupported());
+  const [currentSetInfo, setCurrentSetInfo] = useState({ setNumber: 1, totalSets: setsPerSuperset });
 
-  const handleMinimize = () => {
-    setIsMinimized(true);
-  };
+  useEffect(() => {
+    // Setup visibility change handler for wake lock
+    const cleanup = wakeLockManager.reacquireOnVisibilityChange();
+    return () => {
+      if (cleanup) cleanup.then(fn => fn && fn());
+    };
+  }, []);
 
   const handleRestore = () => {
     setIsMinimized(false);
   };
 
-  const handleClose = () => {
-    if (window.confirm('Are you sure you want to exit? Your progress will not be saved.')) {
-      onExit();
+  const handleToggleWakeLock = async () => {
+    if (wakeLockActive) {
+      await wakeLockManager.releaseWakeLock();
+      setWakeLockActive(false);
+    } else {
+      const success = await wakeLockManager.requestWakeLock();
+      setWakeLockActive(success);
     }
+  };
+
+  // Callback to receive current set info from WorkoutScreen
+  const handleSetInfoUpdate = (setNumber, totalSets) => {
+    setCurrentSetInfo({ setNumber, totalSets });
   };
 
   return (
@@ -82,44 +100,59 @@ const WorkoutScreenModal = ({
           }
         }}
       >
-        {/* Modal header with minimize and close buttons */}
+        {/* Modal header with centered badge and wake screen button */}
         <Box
           sx={{
-            position: 'sticky',
+            position: 'relative',
             top: 0,
             zIndex: 1100,
             bgcolor: 'background.paper',
             borderBottom: '1px solid',
             borderColor: 'divider',
             display: 'flex',
-            justifyContent: 'flex-end',
+            justifyContent: 'center',
             alignItems: 'center',
             p: 1,
             gap: 1,
           }}
         >
-          <IconButton
-            onClick={handleMinimize}
-            size="small"
-            sx={{
-              color: 'text.secondary',
-              '&:hover': { bgcolor: 'action.hover' },
+          {/* Centered badge */}
+          <Chip 
+            label={`Set ${currentSetInfo.setNumber} of ${currentSetInfo.totalSets}`}
+            color="primary"
+            size="medium"
+            sx={{ 
+              fontWeight: 600,
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
             }}
-            aria-label="Minimize workout"
-          >
-            <Minimize />
-          </IconButton>
-          <IconButton
-            onClick={handleClose}
-            size="small"
-            sx={{
-              color: 'error.main',
-              '&:hover': { bgcolor: 'error.light', color: 'error.contrastText' },
-            }}
-            aria-label="Close workout"
-          >
-            <Close />
-          </IconButton>
+          />
+          
+          {/* Wake lock button on the right */}
+          {wakeLockSupported && (
+            <Box sx={{ 
+              position: 'absolute',
+              right: '8px',
+            }}>
+              <Tooltip title={wakeLockActive ? 'Screen kept awake' : 'Allow screen sleep'}>
+                <IconButton
+                  onClick={handleToggleWakeLock}
+                  size="small"
+                  sx={{
+                    color: wakeLockActive ? 'secondary.main' : 'text.secondary',
+                    '&:hover': { 
+                      bgcolor: wakeLockActive ? 'rgba(255, 140, 0, 0.08)' : 'action.hover' 
+                    },
+                  }}
+                  aria-label={wakeLockActive ? 'Release wake lock' : 'Keep screen awake'}
+                >
+                  {wakeLockActive ? <MdScreenLockRotation size={20} /> : <MdScreenLockPortrait size={20} />}
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
         </Box>
 
         <DialogContent sx={{ p: 0, overflow: 'auto' }}>
@@ -129,6 +162,7 @@ const WorkoutScreenModal = ({
             onExit={onExit}
             supersetConfig={supersetConfig}
             setsPerSuperset={setsPerSuperset}
+            onSetInfoUpdate={handleSetInfoUpdate}
           />
         </DialogContent>
       </Dialog>

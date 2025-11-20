@@ -13,7 +13,16 @@ import { getDemoImagePath } from '../utils/exerciseDemoImages';
  * WorkoutScreen component manages the active workout session
  * Displays exercises in superset format, tracks time, and collects set data
  */
-const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3 }) => {
+const WorkoutScreen = ({ 
+  workoutPlan, 
+  onComplete, 
+  onExit, 
+  supersetConfig = [2, 2, 2, 2], 
+  setsPerSuperset = 3,
+  updateWorkoutState,
+  registerHandlers,
+  getStopHandler,
+}) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -140,6 +149,37 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       }
     };
   }, [workoutPlan]);
+
+  // Register handlers for external control (when used in modal)
+  useEffect(() => {
+    if (registerHandlers) {
+      registerHandlers({
+        exit: () => {
+          if (window.confirm('Are you sure you want to exit? Your progress will not be saved.')) {
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+            }
+            onExit();
+          }
+        },
+      });
+    }
+  }, [registerHandlers, onExit]);
+
+  // Update external workout state (when used in modal)
+  useEffect(() => {
+    if (updateWorkoutState && currentPhase === 'exercise' && currentStep) {
+      const progress = (currentStepIndex / workoutSequence.length) * 100;
+      const exerciseName = currentStep.exercise['Exercise Name'];
+      const statusText = `Set ${currentStep.setNumber}/${setsPerSuperset} - ${exerciseName}`;
+
+      updateWorkoutState({
+        timeDisplay: formatTime(elapsedTime),
+        progress,
+        statusText,
+      });
+    }
+  }, [updateWorkoutState, currentPhase, currentStep, currentStepIndex, workoutSequence, setsPerSuperset, elapsedTime]);
 
   // Load initial target values for current exercise when step changes
   useEffect(() => {
@@ -1167,6 +1207,9 @@ WorkoutScreen.propTypes = {
   onExit: PropTypes.func.isRequired,
   supersetConfig: PropTypes.arrayOf(PropTypes.number),
   setsPerSuperset: PropTypes.number,
+  updateWorkoutState: PropTypes.func,
+  registerHandlers: PropTypes.func,
+  getStopHandler: PropTypes.func,
 };
 
 export default WorkoutScreen;

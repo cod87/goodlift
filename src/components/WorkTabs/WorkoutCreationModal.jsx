@@ -65,9 +65,8 @@ const SortableExerciseItem = ({
   setMyWorkout, 
   selectedExercises, 
   setSelectedExercises,
-  onToggleSupersetGroup,
-  availableSupersetGroups,
-  onChangeSupersetGroup,
+  highlightedExercises,
+  onToggleHighlight,
 }) => {
   const {
     attributes,
@@ -88,20 +87,39 @@ const SortableExerciseItem = ({
   const supersetGroupId = exercise.supersetGroup;
   const isInSuperset = supersetGroupId !== null && supersetGroupId !== undefined;
 
+  // Check if this exercise is highlighted
+  const isHighlighted = highlightedExercises.has(exercise['Exercise Name']);
+
   return (
     <Card
       ref={setNodeRef}
       style={style}
-      elevation={isDragging ? 4 : 1}
+      elevation={isDragging ? 4 : (isHighlighted ? 3 : 1)}
       sx={{
-        borderLeft: isInSuperset ? 4 : 0,
-        borderColor: isInSuperset ? 'primary.main' : 'transparent',
+        borderLeft: isInSuperset ? '4px solid' : (isHighlighted ? '4px solid' : '4px solid transparent'),
+        borderColor: isInSuperset ? 'primary.main' : (isHighlighted ? 'success.main' : 'transparent'),
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: isHighlighted ? 'translateY(-4px)' : 'translateY(0)',
+        '&:hover': {
+          transform: isHighlighted ? 'translateY(-4px)' : 'translateY(-2px)',
+        },
       }}
     >
       <CardContent>
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Box {...attributes} {...listeners} sx={{ cursor: 'grab', '&:active': { cursor: 'grabbing' } }}>
-            <DragIndicator sx={{ color: 'text.secondary' }} />
+          <Box 
+            {...attributes} 
+            {...listeners} 
+            sx={{ cursor: 'grab', '&:active': { cursor: 'grabbing' } }}
+            onClick={(e) => {
+              // Allow clicking the drag handle to highlight/unhighlight
+              if (!isInSuperset) {
+                e.stopPropagation();
+                onToggleHighlight(exercise['Exercise Name']);
+              }
+            }}
+          >
+            <DragIndicator sx={{ color: isHighlighted ? 'success.main' : 'text.secondary' }} />
           </Box>
           <Box sx={{ flex: 1 }}>
             <Stack direction="row" alignItems="center" spacing={1}>
@@ -116,40 +134,19 @@ const SortableExerciseItem = ({
                   variant="outlined"
                 />
               )}
+              {isHighlighted && !isInSuperset && (
+                <Chip 
+                  label="Selected" 
+                  size="small" 
+                  color="success"
+                  variant="outlined"
+                />
+              )}
             </Stack>
             <Typography variant="caption" color="text.secondary">
               {exercise['Primary Muscle']} • {exercise.Equipment}
             </Typography>
           </Box>
-          {/* Superset Group Selector */}
-          {availableSupersetGroups.length > 0 || isInSuperset ? (
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Superset</InputLabel>
-              <Select
-                value={isInSuperset ? supersetGroupId : 'none'}
-                label="Superset"
-                onChange={(e) => onChangeSupersetGroup(index, e.target.value)}
-              >
-                <MenuItem value="none">None</MenuItem>
-                {availableSupersetGroups.map(groupId => (
-                  <MenuItem key={groupId} value={groupId}>
-                    Superset {groupId}
-                  </MenuItem>
-                ))}
-                <MenuItem value="new">+ New Superset</MenuItem>
-              </Select>
-            </FormControl>
-          ) : (
-            <Tooltip title="Add to superset">
-              <IconButton
-                size="small"
-                onClick={() => onToggleSupersetGroup(index)}
-                color="default"
-              >
-                <ViewStream />
-              </IconButton>
-            </Tooltip>
-          )}
           <IconButton
             size="small"
             onClick={() => {
@@ -216,9 +213,8 @@ SortableExerciseItem.propTypes = {
   setMyWorkout: PropTypes.func.isRequired,
   selectedExercises: PropTypes.instanceOf(Set).isRequired,
   setSelectedExercises: PropTypes.func.isRequired,
-  onToggleSupersetGroup: PropTypes.func.isRequired,
-  availableSupersetGroups: PropTypes.array.isRequired,
-  onChangeSupersetGroup: PropTypes.func.isRequired,
+  highlightedExercises: PropTypes.instanceOf(Set).isRequired,
+  onToggleHighlight: PropTypes.func.isRequired,
 };
 
 /**
@@ -243,6 +239,7 @@ const WorkoutCreationModal = ({
   const [myWorkout, setMyWorkout] = useState([]);
   const [workoutName, setWorkoutName] = useState('');
   const [workoutType, setWorkoutType] = useState('full');
+  const [highlightedExercises, setHighlightedExercises] = useState(new Set());
 
   // DnD sensors
   const sensors = useSensors(
@@ -263,6 +260,7 @@ const WorkoutCreationModal = ({
       setMyWorkout([]);
       setWorkoutName('');
       setWorkoutType('full');
+      setHighlightedExercises(new Set());
     }
   }, [open]);
 
@@ -312,52 +310,49 @@ const WorkoutCreationModal = ({
     setSelectedExercises(newSelected);
   };
 
-  // Toggle superset group for an exercise (creates new superset or removes from superset)
-  const handleToggleSupersetGroup = (index) => {
-    const updated = [...myWorkout];
-    const exercise = updated[index];
-    
-    if (exercise.supersetGroup !== null && exercise.supersetGroup !== undefined) {
-      // Remove from superset
-      exercise.supersetGroup = null;
-    } else {
-      // Create a new superset group
-      const newGroupId = Math.max(0, ...updated.map(e => e.supersetGroup || 0)) + 1;
-      exercise.supersetGroup = newGroupId;
+  // Toggle highlight for an exercise
+  const handleToggleHighlight = (exerciseName) => {
+    const exercise = myWorkout.find(e => e['Exercise Name'] === exerciseName);
+    // Don't allow highlighting if already in a superset
+    if (exercise && (exercise.supersetGroup !== null && exercise.supersetGroup !== undefined)) {
+      return;
     }
     
-    setMyWorkout(updated);
-  };
-
-  // Change superset group for an exercise
-  const handleChangeSupersetGroup = (index, groupValue) => {
-    const updated = [...myWorkout];
-    const exercise = updated[index];
-    
-    if (groupValue === 'none') {
-      // Remove from superset
-      exercise.supersetGroup = null;
-    } else if (groupValue === 'new') {
-      // Create a new superset group
-      const newGroupId = Math.max(0, ...updated.map(e => e.supersetGroup || 0)) + 1;
-      exercise.supersetGroup = newGroupId;
+    const newHighlighted = new Set(highlightedExercises);
+    if (newHighlighted.has(exerciseName)) {
+      newHighlighted.delete(exerciseName);
     } else {
-      // Join existing superset group
-      exercise.supersetGroup = parseInt(groupValue);
+      newHighlighted.add(exerciseName);
     }
-    
-    setMyWorkout(updated);
+    setHighlightedExercises(newHighlighted);
   };
 
-  // Get available superset groups
-  const getAvailableSupersetGroups = () => {
-    const groups = new Set();
-    myWorkout.forEach(exercise => {
-      if (exercise.supersetGroup !== null && exercise.supersetGroup !== undefined) {
-        groups.add(exercise.supersetGroup);
+  // Create a new superset from all highlighted exercises
+  const handleAddToSuperset = () => {
+    if (highlightedExercises.size === 0) {
+      return;
+    }
+
+    const updated = [...myWorkout];
+    
+    // Find the next available superset group ID
+    const existingGroups = updated
+      .map(e => e.supersetGroup)
+      .filter(g => g !== null && g !== undefined);
+    const newGroupId = existingGroups.length > 0 
+      ? Math.max(...existingGroups) + 1 
+      : 1;
+
+    // Assign all highlighted exercises to the new superset group
+    updated.forEach(exercise => {
+      if (highlightedExercises.has(exercise['Exercise Name'])) {
+        exercise.supersetGroup = newGroupId;
       }
     });
-    return Array.from(groups).sort((a, b) => a - b);
+
+    setMyWorkout(updated);
+    // Clear highlights after creating superset
+    setHighlightedExercises(new Set());
   };
 
   // Handle drag and drop reordering
@@ -619,12 +614,27 @@ const WorkoutCreationModal = ({
             <Divider sx={{ my: 2 }} />
 
             {/* Exercise List with Drag and Drop */}
-            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-              Exercises ({myWorkout.length})
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Use the dropdown to assign exercises to superset groups. Multiple exercises can be in the same superset.
-            </Typography>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  Exercises ({myWorkout.length})
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Tap the drag handle to highlight exercises, then use the button below to create a superset.
+                </Typography>
+              </Box>
+              {highlightedExercises.size > 0 && (
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={<ViewStream />}
+                  onClick={handleAddToSuperset}
+                  size="small"
+                >
+                  Add to Superset ({highlightedExercises.size})
+                </Button>
+              )}
+            </Stack>
             
             {myWorkout.length > 0 ? (
               <DndContext
@@ -646,9 +656,8 @@ const WorkoutCreationModal = ({
                         setMyWorkout={setMyWorkout}
                         selectedExercises={selectedExercises}
                         setSelectedExercises={setSelectedExercises}
-                        onToggleSupersetGroup={handleToggleSupersetGroup}
-                        availableSupersetGroups={getAvailableSupersetGroups()}
-                        onChangeSupersetGroup={handleChangeSupersetGroup}
+                        highlightedExercises={highlightedExercises}
+                        onToggleHighlight={handleToggleHighlight}
                       />
                     ))}
                   </Stack>

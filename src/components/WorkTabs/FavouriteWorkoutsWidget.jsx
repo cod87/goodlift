@@ -25,6 +25,7 @@ import {
 } from '@mui/icons-material';
 import { getFavoriteWorkouts, deleteFavoriteWorkout } from '../../utils/storage';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
+import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
 
 /**
  * FavouriteWorkoutsWidget - Displays saved favourite workouts
@@ -202,7 +203,7 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
                 <Stack direction="row" spacing={0.5} flexWrap="wrap">
                   {workout.type && (
                     <Chip 
-                      label={workout.type.charAt(0).toUpperCase() + workout.type.slice(1)} 
+                      label={getWorkoutTypeShorthand(workout.type)} 
                       size="small" 
                       sx={{ 
                         fontSize: '0.65rem',

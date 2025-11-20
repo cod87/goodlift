@@ -57,6 +57,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 import { generateStandardWorkout } from '../../utils/workoutGenerator';
+import { getAllCategories, filterExercisesByCategory } from '../../utils/muscleCategories';
 
 /**
  * Superset color palette - cycling through distinct colors
@@ -373,17 +374,19 @@ const WorkoutCreationModal = ({
     const matchesEquipment = filterEquipment === 'all' || 
       exercise.Equipment.toLowerCase().includes(filterEquipment.toLowerCase());
     
-    const matchesMuscleGroup = filterMuscleGroup === 'all' || 
-      exercise['Primary Muscle'] === filterMuscleGroup;
-
-    return matchesSearch && matchesEquipment && matchesMuscleGroup;
+    return matchesSearch && matchesEquipment;
   });
+
+  // Apply muscle group filter using simplified categories
+  const categoryFilteredExercises = filterMuscleGroup === 'all' 
+    ? filteredExercises 
+    : filterExercisesByCategory(filteredExercises, filterMuscleGroup);
 
   // Get unique equipment types
   const equipmentTypes = ['all', ...new Set(exercises.map(e => e.Equipment))];
   
-  // Get unique muscle groups
-  const muscleGroups = ['all', ...new Set(exercises.map(e => e['Primary Muscle']))];
+  // Get simplified muscle group categories
+  const muscleGroups = ['all', ...getAllCategories().filter(cat => cat !== 'All')];
 
   // Handle exercise selection/deselection
   const handleExerciseToggle = async (exercise) => {
@@ -722,7 +725,7 @@ const WorkoutCreationModal = ({
 
             {/* Exercise List */}
             <Stack spacing={2}>
-              {filteredExercises.map((exercise) => {
+              {categoryFilteredExercises.map((exercise) => {
                 const exerciseName = exercise['Exercise Name'];
                 const isSelected = selectedExercises.has(exerciseName);
                 

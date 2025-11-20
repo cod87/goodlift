@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import { getSavedWorkouts, deleteSavedWorkout, updateSavedWorkout } from '../../utils/storage';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
+import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
 
 // Days of the week in order
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -276,7 +277,7 @@ const SavedWorkoutsList = memo(({
                           />
                           {workout.type && (
                             <Chip
-                              label={workout.type}
+                              label={getWorkoutTypeShorthand(workout.type)}
                               size="small"
                               variant="outlined"
                             />

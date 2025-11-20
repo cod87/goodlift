@@ -62,6 +62,16 @@ const WorkTabs = ({
               minHeight: 64,
               fontSize: { xs: '0.875rem', sm: '1rem' },
               fontWeight: 600,
+              transition: 'color 0.3s ease',
+              '&.Mui-selected': {
+                color: activeTab === 0 ? 'primary.main' : activeTab === 1 ? 'secondary.main' : 'success.main',
+              },
+            },
+            '& .MuiTabs-indicator': {
+              height: 3,
+              borderRadius: '3px 3px 0 0',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              backgroundColor: activeTab === 0 ? 'primary.main' : activeTab === 1 ? 'secondary.main' : 'success.main',
             },
           }}
         >

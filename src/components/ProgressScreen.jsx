@@ -476,7 +476,22 @@ const ProgressDashboard = () => {
             value={currentTab}
             onChange={(e, newValue) => setCurrentTab(newValue)}
             variant="fullWidth"
-            sx={{ maxWidth: { xs: '100%', sm: 600 }, margin: '0 auto' }}
+            sx={{ 
+              maxWidth: { xs: '100%', sm: 600 }, 
+              margin: '0 auto',
+              '& .MuiTab-root': {
+                transition: 'color 0.3s ease',
+                '&.Mui-selected': {
+                  color: currentTab === 0 ? 'primary.main' : 'warning.main',
+                },
+              },
+              '& .MuiTabs-indicator': {
+                height: 3,
+                borderRadius: '3px 3px 0 0',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                backgroundColor: currentTab === 0 ? 'primary.main' : 'warning.main',
+              },
+            }}
           >
             <Tab 
               icon={<Assessment />} 

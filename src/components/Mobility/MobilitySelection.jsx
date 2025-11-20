@@ -62,10 +62,8 @@ const MobilitySelection = ({ onStartStretchSession }) => {
   return (
     <Box
       sx={{
-        padding: { xs: '2rem 1rem', sm: '2rem', md: '3rem' },
         maxWidth: '1200px',
         margin: '0 auto',
-        minHeight: 'calc(100vh - 60px)',
       }}
     >
       <motion.div

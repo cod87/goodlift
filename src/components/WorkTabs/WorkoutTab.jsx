@@ -50,13 +50,7 @@ const WorkoutTab = memo(({
   };
 
   return (
-    <Box sx={{ 
-      padding: { xs: 2, sm: 2, md: 3 },
-      maxWidth: '1200px',
-      margin: '0 auto',
-      minHeight: 'calc(100vh - 60px)',
-      paddingBottom: { xs: '80px', md: '2rem' },
-    }}>
+    <Box>
       <SavedWorkoutsList 
         key={workoutListKey}
         onCreateWorkout={handleCreateWorkout}

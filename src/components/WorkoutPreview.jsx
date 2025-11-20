@@ -23,6 +23,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   const [availableExercises, setAvailableExercises] = useState([]);
   const [currentWorkout, setCurrentWorkout] = useState(workout);
   const [setsPerSuperset, setSetsPerSuperset] = useState(initialSetsPerSuperset);
+  const [focusedExerciseIndex, setFocusedExerciseIndex] = useState(null); // Track focused exercise for animation
 
   // Load all exercises data - includes full library for comprehensive autocomplete
   useEffect(() => {
@@ -514,11 +515,26 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                       <Box 
                         key={exerciseIdx}
                         sx={{ 
+                          position: 'relative',
                           p: { xs: 1, sm: 1.5 },
                           bgcolor: 'background.paper',
                           borderRadius: 2,
-                          transition: 'all 0.2s ease',
+                          transition: 'all 0.3s ease',
+                          transform: focusedExerciseIndex === globalIndex ? 'translateX(8px)' : 'translateX(0)',
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: '4px',
+                            borderRadius: '2px 0 0 2px',
+                            bgcolor: focusedExerciseIndex === globalIndex ? 'primary.main' : 'transparent',
+                            transition: 'all 0.3s ease',
+                          },
                         }}
+                        onFocus={() => setFocusedExerciseIndex(globalIndex)}
+                        onBlur={() => setFocusedExerciseIndex(null)}
                       >
                         <Box sx={{ 
                           display: 'flex',

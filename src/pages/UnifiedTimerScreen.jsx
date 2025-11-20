@@ -171,9 +171,9 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   };
 
   // Helper function to calculate total rounds needed for session length
-  const calculateRoundsForSession = (sessionMinutes, work, rest, warmup) => {
+  const calculateRoundsForSession = useCallback((sessionMinutes, work, rest, warmup, warmupMins) => {
     const totalSeconds = sessionMinutes * 60;
-    const warmupSeconds = warmup ? warmupDuration * 60 : 0;
+    const warmupSeconds = warmup ? warmupMins * 60 : 0;
     const availableHiitSeconds = totalSeconds - warmupSeconds;
     
     if (availableHiitSeconds <= 0) return 1; // Minimum 1 round
@@ -181,7 +181,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     const roundDuration = work + rest;
     const rounds = Math.ceil(availableHiitSeconds / roundDuration);
     return Math.max(1, rounds); // Ensure at least 1 round
-  };
+  }, []);
 
   // Save session length to localStorage when it changes
   useEffect(() => {
@@ -199,7 +199,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   // Update rounds when session length, work, rest, or warmup changes
   useEffect(() => {
     if (mode === TIMER_MODES.HIIT) {
-      const newRounds = calculateRoundsForSession(sessionLengthMinutes, workInterval, restInterval, warmupEnabled);
+      const newRounds = calculateRoundsForSession(sessionLengthMinutes, workInterval, restInterval, warmupEnabled, warmupDuration);
       setRoundsPerSet(newRounds);
       // Adjust workIntervalNames array to match new rounds
       setWorkIntervalNames(prev => {
@@ -210,7 +210,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         return newNames.slice(0, newRounds);
       });
     }
-  }, [mode, sessionLengthMinutes, workInterval, restInterval, warmupEnabled, warmupDuration]);
+  }, [mode, sessionLengthMinutes, workInterval, restInterval, warmupEnabled, warmupDuration, calculateRoundsForSession]);
 
   // Update preparation interval based on warmup settings
   useEffect(() => {
@@ -303,11 +303,14 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 return workInterval;
               } else if (isWorkPeriod) {
                 // Track elapsed HIIT time for extended rest calculation
-                setElapsedHiitTime(prev => prev + workInterval);
-                
-                // Check if we should trigger an extended rest (after every 8 minutes of HIIT)
-                const newElapsedTime = elapsedHiitTime + workInterval;
-                const shouldExtendRest = Math.floor(newElapsedTime / (8 * 60)) > Math.floor(elapsedHiitTime / (8 * 60));
+                // Use callback to get the updated value immediately
+                let shouldExtendRest = false;
+                setElapsedHiitTime(prev => {
+                  const newElapsedTime = prev + workInterval;
+                  // Check if we crossed an 8-minute threshold
+                  shouldExtendRest = Math.floor(newElapsedTime / (8 * 60)) > Math.floor(prev / (8 * 60));
+                  return newElapsedTime;
+                });
                 
                 // Switch to rest
                 setIsWorkPeriod(false);

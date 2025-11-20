@@ -43,12 +43,15 @@ import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/con
 import { shouldReduceWeight } from './utils/progressiveOverload';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
+import { SessionModalProvider } from './contexts/SessionModalContext';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Snackbar, Alert, Button } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 import { runDataMigration } from './migrations/simplifyDataStructure';
 import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achievements';
+import SessionManager from './components/SessionManager';
+import { useSessionModal } from './contexts/SessionModalContext';
 
 /**
  * Main app component wrapped with theme
@@ -71,6 +74,7 @@ function AppContent() {
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Track superset configuration
   const [setsPerSuperset, setSetsPerSuperset] = useState(3); // Track number of sets per superset
   const { currentUser, isGuest, hasGuestData } = useAuth();
+  const { openSession } = useSessionModal();
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
   const favoriteExercises = useFavoriteExercises();
@@ -253,6 +257,10 @@ function AppContent() {
 
   const handleBeginWorkout = (workout, workoutSupersetConfig, workoutSetsPerSuperset) => {
     // If workout is passed from WorkoutPreview, update it
+    const finalWorkout = workout || currentWorkout;
+    const finalSupersetConfig = workoutSupersetConfig || supersetConfig;
+    const finalSetsPerSuperset = workoutSetsPerSuperset !== undefined ? workoutSetsPerSuperset : setsPerSuperset;
+    
     if (workout) {
       setCurrentWorkout(workout);
     }
@@ -265,7 +273,14 @@ function AppContent() {
     }
     setShowPreview(false);
     setIsCustomizeMode(false);
-    setCurrentScreen('workout');
+    
+    // Open workout session in modal instead of navigating
+    openSession('workout', {
+      workoutPlan: finalWorkout,
+      supersetConfig: finalSupersetConfig,
+      setsPerSuperset: finalSetsPerSuperset,
+      onComplete: handleWorkoutComplete,
+    });
   };
 
   const handleCancelPreview = () => {
@@ -807,6 +822,9 @@ function AppContent() {
             {notification.message}
           </Alert>
         </Snackbar>
+        
+        {/* Session Modal Manager - Handles workout/timer sessions */}
+        <SessionManager onNavigate={handleNavigate} />
       </div>
     </MuiThemeProvider>
   );
@@ -815,7 +833,9 @@ function AppContent() {
 function App() {
   return (
     <CustomThemeProvider>
-      <AppContent />
+      <SessionModalProvider>
+        <AppContent />
+      </SessionModalProvider>
     </CustomThemeProvider>
   );
 }

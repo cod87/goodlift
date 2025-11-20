@@ -12,23 +12,24 @@
 export const getWorkoutTypeShorthand = (type) => {
   const shorthandLabels = {
     // Strength training types
-    push: 'P',
-    pull: 'PL',
-    legs: 'L',
-    upper: 'UP',
-    lower: 'LO',
-    full: 'FB',
+    push: 'Push',
+    pull: 'Pull',
+    legs: 'Legs',
+    upper: 'Upper',
+    lower: 'Lower',
+    full: 'Full',
     // Other workout types
-    stretch: 'ST',
-    hiit: 'HI',
-    rest: 'R',
-    cardio: 'C',
+    stretch: 'Stretch',
+    hiit: 'HIIT',
+    rest: 'Rest',
+    cardio: 'Cardio',
+    core: 'Core',
     // Day types (from session-based plans)
-    strength: 'STR',
-    hypertrophy: 'HYP',
-    active_recovery: 'AR',
+    strength: 'Strength',
+    hypertrophy: 'Hypertrophy',
+    active_recovery: 'Active Recovery',
   };
-  return shorthandLabels[type] || type.substring(0, 2).toUpperCase();
+  return shorthandLabels[type] || type.charAt(0).toUpperCase() + type.slice(1);
 };
 
 /**

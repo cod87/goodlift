@@ -57,6 +57,7 @@ import {
   Favorite,
   FavoriteBorder,
   MoreVert,
+  ExpandMore,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import audioService from '../utils/audioService';
@@ -125,7 +126,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [isRecoveryPeriod, setIsRecoveryPeriod] = useState(false);
   
   // New HIIT state for requirements
-  const [workRestRatio, setWorkRestRatio] = useState('2:1'); // Work:Rest ratio (1:1, 3:2, 2:1)
+  const [workRestRatio, setWorkRestRatio] = useState('1:1'); // Work:Rest ratio (1:1, 3:2, 2:1) - Default to 1:1
   const [sessionLengthMinutes, setSessionLengthMinutes] = useState(() => {
     // Load previous session length from localStorage, default to 10 minutes
     const saved = localStorage.getItem('goodlift_hiit_session_length');
@@ -135,6 +136,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [warmupDuration, setWarmupDuration] = useState(5); // minutes: off, 2, 5, 7, 10
   const [elapsedHiitTime, setElapsedHiitTime] = useState(0); // Track elapsed HIIT time for extended rest
   const [isExtendedRest, setIsExtendedRest] = useState(false); // Flag for 1-minute extended rest
+  const [exerciseNamesExpanded, setExerciseNamesExpanded] = useState(false); // State for collapsible exercise names
   
   // Flow mode state
   const [selectedPoses, setSelectedPoses] = useState([]);
@@ -746,9 +748,6 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         {isConfiguring && (
           <Card sx={{ borderRadius: 3, mb: 3 }}>
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 2, textAlign: 'center' }}>
-                Select Mode
-              </Typography>
               <ToggleButtonGroup
                 value={mode}
                 exclusive
@@ -756,23 +755,14 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 fullWidth
                 sx={{ mb: 3 }}
               >
-                <ToggleButton value={TIMER_MODES.HIIT} sx={{ py: 2 }}>
-                  <Stack alignItems="center" spacing={1}>
-                    <FitnessCenter />
-                    <Typography variant="body2">HIIT</Typography>
-                  </Stack>
+                <ToggleButton value={TIMER_MODES.HIIT} sx={{ py: 1 }}>
+                  <Typography variant="body2">HIIT</Typography>
                 </ToggleButton>
-                <ToggleButton value={TIMER_MODES.FLOW} sx={{ py: 2 }}>
-                  <Stack alignItems="center" spacing={1}>
-                    <SelfImprovement />
-                    <Typography variant="body2">Yoga</Typography>
-                  </Stack>
+                <ToggleButton value={TIMER_MODES.FLOW} sx={{ py: 1 }}>
+                  <Typography variant="body2">Yoga</Typography>
                 </ToggleButton>
-                <ToggleButton value={TIMER_MODES.CARDIO} sx={{ py: 2 }}>
-                  <Stack alignItems="center" spacing={1}>
-                    <DirectionsRun />
-                    <Typography variant="body2">Cardio</Typography>
-                  </Stack>
+                <ToggleButton value={TIMER_MODES.CARDIO} sx={{ py: 1 }}>
+                  <Typography variant="body2">Cardio</Typography>
                 </ToggleButton>
               </ToggleButtonGroup>
 
@@ -963,37 +953,49 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   
                   {/* Exercise Names for Each Round */}
                   <Box>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Exercise Names per Round (optional)
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Name exercises for each interval. Leave blank to use default names.
-                    </Typography>
-                    <Stack spacing={1.5}>
-                      {Array.from({ length: roundsPerSet || 0 }).map((_, index) => (
-                        <HiitExerciseAutocomplete
-                          key={index}
-                          label={`Round ${index + 1} Exercise`}
-                          value={workIntervalNames[index] || ''}
-                          onChange={(event, newValue) => {
-                            const newNames = [...workIntervalNames];
-                            // Handle both object (selected from list) and string (typed) values
-                            if (typeof newValue === 'string') {
-                              newNames[index] = newValue;
-                            } else if (newValue && newValue.name) {
-                              newNames[index] = newValue.name;
-                            } else {
-                              newNames[index] = '';
-                            }
-                            setWorkIntervalNames(newNames);
+                    <Button
+                      onClick={() => setExerciseNamesExpanded(!exerciseNamesExpanded)}
+                      endIcon={
+                        <ExpandMore
+                          sx={{
+                            transform: exerciseNamesExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.3s',
                           }}
-                          availableExercises={hiitExercises}
-                          placeholder="e.g., push-ups, burpees, jumping jacks"
-                          size="small"
-                          fullWidth
                         />
-                      ))}
-                    </Stack>
+                      }
+                      sx={{ mb: 1, justifyContent: 'space-between', width: '100%', textAlign: 'left' }}
+                    >
+                      <Typography variant="subtitle2">
+                        Exercises
+                      </Typography>
+                    </Button>
+                    <Collapse in={exerciseNamesExpanded}>
+                      <Stack spacing={1.5}>
+                        {Array.from({ length: roundsPerSet || 0 }).map((_, index) => (
+                          <HiitExerciseAutocomplete
+                            key={index}
+                            label={`Round ${index + 1}`}
+                            value={workIntervalNames[index] || ''}
+                            onChange={(event, newValue) => {
+                              const newNames = [...workIntervalNames];
+                              // Handle both object (selected from list) and string (typed) values
+                              if (typeof newValue === 'string') {
+                                newNames[index] = newValue;
+                              } else if (newValue && newValue.name) {
+                                newNames[index] = newValue.name;
+                              } else {
+                                newNames[index] = '';
+                              }
+                              setWorkIntervalNames(newNames);
+                            }}
+                            availableExercises={hiitExercises}
+                            placeholder="e.g., push-ups, burpees"
+                            size="small"
+                            fullWidth
+                          />
+                        ))}
+                      </Stack>
+                    </Collapse>
                   </Box>
                   
                   <Typography variant="body2" color="text.secondary">

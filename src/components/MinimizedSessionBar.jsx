@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
  * - Quick pause/resume controls
  * - Restore button to reopen full modal
  * - Stop button to end session
+ * - Accessible keyboard navigation and ARIA labels
  */
 const MinimizedSessionBar = ({ 
   sessionType, 
@@ -36,6 +37,8 @@ const MinimizedSessionBar = ({
         right: 0,
         zIndex: 1300, // Below modal but above content
       }}
+      role="region"
+      aria-label="Minimized session bar"
     >
       <Box
         sx={{
@@ -58,6 +61,7 @@ const MinimizedSessionBar = ({
             fontWeight: 600,
             fontSize: { xs: '0.7rem', sm: '0.8rem' },
           }}
+          aria-label={`Session type: ${sessionType}`}
         />
 
         {/* Session Status */}
@@ -69,6 +73,8 @@ const MinimizedSessionBar = ({
               fontSize: { xs: '1rem', sm: '1.25rem' },
               fontFamily: 'monospace',
             }}
+            aria-live="polite"
+            aria-atomic="true"
           >
             {timeDisplay || '0:00'}
           </Typography>
@@ -83,6 +89,7 @@ const MinimizedSessionBar = ({
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
               }}
+              aria-live="polite"
             >
               {statusText}
             </Typography>
@@ -96,12 +103,17 @@ const MinimizedSessionBar = ({
                 height: 4,
                 borderRadius: 2,
               }}
+              aria-label={`Session progress: ${Math.round(progress)}%`}
             />
           )}
         </Box>
 
         {/* Controls */}
-        <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, alignItems: 'center' }}>
+        <Box 
+          sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, alignItems: 'center' }}
+          role="toolbar"
+          aria-label="Session quick controls"
+        >
           {/* Pause/Resume Button */}
           {onPause && (
             <IconButton
@@ -115,6 +127,7 @@ const MinimizedSessionBar = ({
                 minHeight: 36,
               }}
               aria-label={isPaused ? 'Resume session' : 'Pause session'}
+              title={isPaused ? 'Resume' : 'Pause'}
             >
               {isPaused ? <PlayArrow /> : <Pause />}
             </IconButton>
@@ -132,7 +145,8 @@ const MinimizedSessionBar = ({
                 minWidth: 36,
                 minHeight: 36,
               }}
-              aria-label="Stop session"
+              aria-label="Stop and end session"
+              title="Stop"
             >
               <Stop />
             </IconButton>
@@ -150,6 +164,7 @@ const MinimizedSessionBar = ({
               minHeight: 36,
             }}
             aria-label="Restore session to full screen"
+            title="Restore to full screen"
           >
             <OpenInFull />
           </IconButton>

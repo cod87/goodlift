@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog, IconButton, Box } from '@mui/material';
 import { Minimize, Close } from '@mui/icons-material';
@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from 'framer-motion';
  * - Blocks background interactions when open
  * - Focus trap for accessibility
  * - Keyboard navigation support (ESC to minimize)
+ * - ARIA labels for screen readers
  */
 const SessionModal = ({ 
   open, 
@@ -24,24 +25,37 @@ const SessionModal = ({
   hideClose = false,
 }) => {
   const modalRef = useRef(null);
+  const firstFocusableRef = useRef(null);
+
+  // Focus management - focus first control when modal opens
+  useEffect(() => {
+    if (open && firstFocusableRef.current) {
+      // Small delay to ensure DOM is ready
+      const timeoutId = setTimeout(() => {
+        firstFocusableRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open]);
+
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Escape') {
+      // ESC minimizes instead of closing
+      if (onMinimize && !hideMinimize) {
+        e.preventDefault();
+        onMinimize();
+      }
+    }
+  }, [onMinimize, hideMinimize]);
 
   // Focus trap - keep focus within modal when open
   useEffect(() => {
     if (!open) return;
 
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        // ESC minimizes instead of closing
-        if (onMinimize && !hideMinimize) {
-          e.preventDefault();
-          onMinimize();
-        }
-      }
-    };
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [open, onMinimize, hideMinimize]);
+  }, [open, handleKeyDown]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -72,6 +86,8 @@ const SessionModal = ({
       ref={modalRef}
       aria-labelledby="session-modal-title"
       aria-describedby="session-modal-description"
+      aria-modal="true"
+      role="dialog"
       sx={{
         zIndex: 1400, // Above everything except minimized bar
         '& .MuiDialog-paper': {
@@ -112,10 +128,13 @@ const SessionModal = ({
                 display: 'flex',
                 gap: 1,
               }}
+              role="toolbar"
+              aria-label="Session controls"
             >
               {/* Minimize Button */}
               {!hideMinimize && onMinimize && (
                 <IconButton
+                  ref={firstFocusableRef}
                   onClick={onMinimize}
                   sx={{
                     backgroundColor: 'background.paper',
@@ -126,7 +145,8 @@ const SessionModal = ({
                       backgroundColor: 'action.hover',
                     },
                   }}
-                  aria-label="Minimize session"
+                  aria-label="Minimize session to bottom bar"
+                  title="Minimize (ESC)"
                 >
                   <Minimize />
                 </IconButton>
@@ -146,7 +166,8 @@ const SessionModal = ({
                       color: 'error.contrastText',
                     },
                   }}
-                  aria-label="Close session"
+                  aria-label="Close session and exit"
+                  title="Close session"
                 >
                   <Close />
                 </IconButton>
@@ -161,6 +182,8 @@ const SessionModal = ({
                 pt: { xs: 7, sm: 9 }, // Space for controls
                 pb: 2,
               }}
+              role="main"
+              aria-label="Session content"
             >
               {children}
             </Box>

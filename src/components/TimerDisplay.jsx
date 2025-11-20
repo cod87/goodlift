@@ -34,6 +34,7 @@ const TimerDisplay = ({
   isWorkPeriod,
   isPrepPeriod,
   isRecoveryPeriod,
+  isExtendedRest,
   currentRound,
   currentSet,
   roundsPerSet,
@@ -123,6 +124,8 @@ const TimerDisplay = ({
                 ? intervalNames.recovery 
                 : isWorkPeriod 
                 ? (workIntervalNames[currentRound - 1] || 'Work')
+                : isExtendedRest
+                ? 'Extended Rest'
                 : 'Rest'}
             </Typography>
             {isPrepPeriod && (
@@ -262,6 +265,7 @@ TimerDisplay.propTypes = {
   isWorkPeriod: PropTypes.bool,
   isPrepPeriod: PropTypes.bool,
   isRecoveryPeriod: PropTypes.bool,
+  isExtendedRest: PropTypes.bool,
   currentRound: PropTypes.number,
   currentSet: PropTypes.number,
   roundsPerSet: PropTypes.number,

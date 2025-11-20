@@ -124,6 +124,18 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [isPrepPeriod, setIsPrepPeriod] = useState(false);
   const [isRecoveryPeriod, setIsRecoveryPeriod] = useState(false);
   
+  // New HIIT state for requirements
+  const [workRestRatio, setWorkRestRatio] = useState('2:1'); // Work:Rest ratio (1:1, 3:2, 2:1)
+  const [sessionLengthMinutes, setSessionLengthMinutes] = useState(() => {
+    // Load previous session length from localStorage, default to 10 minutes
+    const saved = localStorage.getItem('goodlift_hiit_session_length');
+    return saved ? parseFloat(saved) : 10;
+  });
+  const [warmupEnabled, setWarmupEnabled] = useState(true);
+  const [warmupDuration, setWarmupDuration] = useState(5); // minutes: off, 2, 5, 7, 10
+  const [elapsedHiitTime, setElapsedHiitTime] = useState(0); // Track elapsed HIIT time for extended rest
+  const [isExtendedRest, setIsExtendedRest] = useState(false); // Flag for 1-minute extended rest
+  
   // Flow mode state
   const [selectedPoses, setSelectedPoses] = useState([]);
   const [currentPoseIndex, setCurrentPoseIndex] = useState(0);
@@ -150,6 +162,66 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   
   const timerRef = useRef(null);
   const hasPlayedWarningRef = useRef(false);
+
+  // Helper function to calculate rest interval based on work interval and ratio
+  const calculateRestInterval = (work, ratio) => {
+    const [workPart, restPart] = ratio.split(':').map(Number);
+    const rest = Math.ceil((work * restPart) / workPart);
+    return rest;
+  };
+
+  // Helper function to calculate total rounds needed for session length
+  const calculateRoundsForSession = useCallback((sessionMinutes, work, rest, warmup, warmupMins) => {
+    const totalSeconds = sessionMinutes * 60;
+    const warmupSeconds = warmup ? warmupMins * 60 : 0;
+    const availableHiitSeconds = totalSeconds - warmupSeconds;
+    
+    if (availableHiitSeconds <= 0) return 1; // Minimum 1 round
+    
+    const roundDuration = work + rest;
+    const rounds = Math.ceil(availableHiitSeconds / roundDuration);
+    return Math.max(1, rounds); // Ensure at least 1 round
+  }, []);
+
+  // Save session length to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('goodlift_hiit_session_length', sessionLengthMinutes.toString());
+  }, [sessionLengthMinutes]);
+
+  // Update rest interval when work interval or ratio changes
+  useEffect(() => {
+    if (mode === TIMER_MODES.HIIT) {
+      const newRest = calculateRestInterval(workInterval, workRestRatio);
+      setRestInterval(newRest);
+    }
+  }, [workInterval, workRestRatio, mode]);
+
+  // Update rounds when session length, work, rest, or warmup changes
+  useEffect(() => {
+    if (mode === TIMER_MODES.HIIT) {
+      const newRounds = calculateRoundsForSession(sessionLengthMinutes, workInterval, restInterval, warmupEnabled, warmupDuration);
+      setRoundsPerSet(newRounds);
+      // Adjust workIntervalNames array to match new rounds
+      setWorkIntervalNames(prev => {
+        const newNames = [...prev];
+        while (newNames.length < newRounds) {
+          newNames.push('');
+        }
+        return newNames.slice(0, newRounds);
+      });
+    }
+  }, [mode, sessionLengthMinutes, workInterval, restInterval, warmupEnabled, warmupDuration, calculateRoundsForSession]);
+
+  // Update preparation interval based on warmup settings
+  useEffect(() => {
+    if (mode === TIMER_MODES.HIIT) {
+      if (warmupEnabled) {
+        setPreparationInterval(warmupDuration * 60); // Convert minutes to seconds
+      } else {
+        setPreparationInterval(0); // No warmup
+      }
+    }
+  }, [warmupEnabled, warmupDuration, mode]);
 
   // Load presets on mount
   useEffect(() => {
@@ -230,11 +302,24 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 hasPlayedWarningRef.current = false;
                 return workInterval;
               } else if (isWorkPeriod) {
+                // Track elapsed HIIT time for extended rest calculation
+                // Use callback to get the updated value immediately
+                let shouldExtendRest = false;
+                setElapsedHiitTime(prev => {
+                  const newElapsedTime = prev + workInterval;
+                  // Check if we crossed an 8-minute threshold
+                  shouldExtendRest = Math.floor(newElapsedTime / (8 * 60)) > Math.floor(prev / (8 * 60));
+                  return newElapsedTime;
+                });
+                
                 // Switch to rest
                 setIsWorkPeriod(false);
+                setIsExtendedRest(shouldExtendRest);
                 audioService.playLowBeep();
                 hasPlayedWarningRef.current = false;
-                return restInterval;
+                
+                // Use extended rest (rest + 60 seconds) or normal rest
+                return shouldExtendRest ? restInterval + 60 : restInterval;
               } else {
                 // End of rest
                 if (currentRound < roundsPerSet) {
@@ -301,12 +386,16 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, isPaused, mode, isWorkPeriod, isPrepPeriod, isRecoveryPeriod, currentRound, currentSet, roundsPerSet, numberOfSets, currentPoseIndex, selectedPoses, workInterval, restInterval, recoveryBetweenSets, handleTimerComplete]);
+  }, [isRunning, isPaused, mode, isWorkPeriod, isPrepPeriod, isRecoveryPeriod, currentRound, currentSet, roundsPerSet, numberOfSets, currentPoseIndex, selectedPoses, workInterval, restInterval, recoveryBetweenSets, elapsedHiitTime, handleTimerComplete]);
 
   const handleStart = () => {
     if (isConfiguring) {
       // Initialize based on mode
       if (mode === TIMER_MODES.HIIT) {
+        // Reset elapsed time and extended rest tracking
+        setElapsedHiitTime(0);
+        setIsExtendedRest(false);
+        
         // Calculate total time for all sets
         const timePerSet = roundsPerSet * (workInterval + restInterval);
         const totalSetBreaks = numberOfSets > 1 && recoveryBetweenSets > 0 
@@ -363,6 +452,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     setIsPrepPeriod(false);
     setIsRecoveryPeriod(false);
     setCurrentPoseIndex(0);
+    setElapsedHiitTime(0);
+    setIsExtendedRest(false);
   };
 
   const handleModeChange = (event, newMode) => {
@@ -491,6 +582,11 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           sessionName,
           workIntervalNames,
           intervalNames,
+          // New configuration options
+          workRestRatio,
+          sessionLengthMinutes,
+          warmupEnabled,
+          warmupDuration,
         };
         await saveHiitPreset(preset);
         const updatedPresets = await getHiitPresets();
@@ -512,6 +608,12 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
       setSelectedPoses(preset.poses || []);
       setPostDuration(preset.defaultDuration || 45);
     } else if (mode === TIMER_MODES.HIIT) {
+      // Load new configuration options if available
+      setWorkRestRatio(preset.workRestRatio || '2:1');
+      setSessionLengthMinutes(preset.sessionLengthMinutes || 10);
+      setWarmupEnabled(preset.warmupEnabled !== undefined ? preset.warmupEnabled : true);
+      setWarmupDuration(preset.warmupDuration || 5);
+      
       setWorkInterval(preset.workInterval || 30);
       setRestInterval(preset.restInterval || 15);
       // Handle backward compatibility: if preset has 'rounds', it's old format
@@ -756,210 +858,108 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     fullWidth
                     placeholder="e.g., Morning HIIT, Tabata Workout"
                   />
-                  
-                  {/* Time inputs in 2-column layout */}
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Prep"
-                        type="number"
-                        value={preparationInterval === null || preparationInterval === undefined ? '' : preparationInterval}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setPreparationInterval('');
-                          } else {
-                            const parsed = parseInt(val);
-                            setPreparationInterval(isNaN(parsed) ? '' : parsed);
-                          }
+
+                  {/* Warmup Selection */}
+                  <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Warmup
+                    </Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                      <Chip
+                        label="Off"
+                        onClick={() => {
+                          setWarmupEnabled(false);
+                          setWarmupDuration(0);
                         }}
-                        onBlur={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setPreparationInterval(10);
-                          } else {
-                            const parsed = parseInt(val);
-                            setPreparationInterval(Math.max(0, Math.min(60, isNaN(parsed) ? 10 : parsed)));
-                          }
-                        }}
-                        inputProps={{ min: 0, max: 60, inputMode: 'numeric' }}
-                        fullWidth
-                        helperText="seconds"
+                        color={!warmupEnabled ? 'primary' : 'default'}
+                        sx={{ cursor: 'pointer' }}
                       />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Break"
-                        type="number"
-                        value={recoveryBetweenSets === null || recoveryBetweenSets === undefined ? '' : recoveryBetweenSets}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setRecoveryBetweenSets('');
-                          } else {
-                            const parsed = parseInt(val);
-                            setRecoveryBetweenSets(isNaN(parsed) ? '' : parsed);
-                          }
-                        }}
-                        onBlur={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setRecoveryBetweenSets(0);
-                          } else {
-                            const parsed = parseInt(val);
-                            setRecoveryBetweenSets(Math.max(0, Math.min(99, isNaN(parsed) ? 0 : parsed)));
-                          }
-                        }}
-                        inputProps={{ min: 0, max: 99, inputMode: 'numeric' }}
-                        fullWidth
-                        helperText="between sets"
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Work"
-                        type="number"
-                        value={workInterval === null || workInterval === undefined ? '' : workInterval}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setWorkInterval('');
-                          } else {
-                            const parsed = parseInt(val);
-                            setWorkInterval(isNaN(parsed) ? '' : parsed);
-                          }
-                        }}
-                        onBlur={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setWorkInterval(30);
-                          } else {
-                            const parsed = parseInt(val);
-                            setWorkInterval(Math.max(5, Math.min(99, isNaN(parsed) ? 30 : parsed)));
-                          }
-                        }}
-                        inputProps={{ min: 5, max: 99, inputMode: 'numeric' }}
-                        fullWidth
-                        helperText="seconds"
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Rest"
-                        type="number"
-                        value={restInterval === null || restInterval === undefined ? '' : restInterval}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setRestInterval('');
-                          } else {
-                            const parsed = parseInt(val);
-                            setRestInterval(isNaN(parsed) ? '' : parsed);
-                          }
-                        }}
-                        onBlur={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setRestInterval(15);
-                          } else {
-                            const parsed = parseInt(val);
-                            setRestInterval(Math.max(5, Math.min(99, isNaN(parsed) ? 15 : parsed)));
-                          }
-                        }}
-                        inputProps={{ min: 5, max: 99, inputMode: 'numeric' }}
-                        fullWidth
-                        helperText="seconds"
-                      />
-                    </Grid>
-                  </Grid>
-                  
-                  {/* Rounds and Sets in 2-column layout */}
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Rounds"
-                        type="number"
-                        value={roundsPerSet === null || roundsPerSet === undefined ? '' : roundsPerSet}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setRoundsPerSet('');
-                          } else {
-                            const parsed = parseInt(val);
-                            const newRounds = isNaN(parsed) ? '' : parsed;
-                            setRoundsPerSet(newRounds);
-                            // Adjust workIntervalNames array to match new rounds count if valid
-                            if (newRounds !== '' && newRounds > 0) {
-                              setWorkIntervalNames(prev => {
-                                const newNames = [...prev];
-                                while (newNames.length < newRounds) {
-                                  newNames.push('');
-                                }
-                                return newNames.slice(0, newRounds);
-                              });
-                            }
-                          }
-                        }}
-                        onBlur={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setRoundsPerSet(8);
-                            // Adjust workIntervalNames array to 8 rounds
-                            setWorkIntervalNames(prev => {
-                              const newNames = [...prev];
-                              while (newNames.length < 8) {
-                                newNames.push('');
-                              }
-                              return newNames.slice(0, 8);
-                            });
-                          } else {
-                            const parsed = parseInt(val);
-                            const clamped = Math.max(1, Math.min(50, isNaN(parsed) ? 8 : parsed));
-                            setRoundsPerSet(clamped);
-                            // Adjust workIntervalNames array to match clamped rounds
-                            setWorkIntervalNames(prev => {
-                              const newNames = [...prev];
-                              while (newNames.length < clamped) {
-                                newNames.push('');
-                              }
-                              return newNames.slice(0, clamped);
-                            });
-                          }
-                        }}
-                        inputProps={{ min: 1, max: 50, inputMode: 'numeric' }}
-                        fullWidth
-                        helperText="per set"
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Sets"
-                        type="number"
-                        value={numberOfSets === null || numberOfSets === undefined ? '' : numberOfSets}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setNumberOfSets('');
-                          } else {
-                            const parsed = parseInt(val);
-                            setNumberOfSets(isNaN(parsed) ? '' : parsed);
-                          }
-                        }}
-                        onBlur={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || val === null) {
-                            setNumberOfSets(1);
-                          } else {
-                            const parsed = parseInt(val);
-                            setNumberOfSets(Math.max(1, Math.min(10, isNaN(parsed) ? 1 : parsed)));
-                          }
-                        }}
-                        inputProps={{ min: 1, max: 10, inputMode: 'numeric' }}
-                        fullWidth
-                        helperText="total"
-                      />
-                    </Grid>
-                  </Grid>
+                      {[2, 5, 7, 10].map((mins) => (
+                        <Chip
+                          key={mins}
+                          label={`${mins} min`}
+                          onClick={() => {
+                            setWarmupEnabled(true);
+                            setWarmupDuration(mins);
+                          }}
+                          color={warmupEnabled && warmupDuration === mins ? 'primary' : 'default'}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Session Length Selector */}
+                  <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Session Length
+                    </Typography>
+                    <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
+                      <IconButton
+                        onClick={() => setSessionLengthMinutes(prev => Math.max(10, prev - 2.5))}
+                        color="primary"
+                        disabled={sessionLengthMinutes <= 10}
+                      >
+                        <Remove />
+                      </IconButton>
+                      <Typography variant="h6" sx={{ minWidth: '80px', textAlign: 'center' }}>
+                        {sessionLengthMinutes} min
+                      </Typography>
+                      <IconButton
+                        onClick={() => setSessionLengthMinutes(prev => prev + 2.5)}
+                        color="primary"
+                      >
+                        <Add />
+                      </IconButton>
+                    </Stack>
+                  </Box>
+
+                  {/* Work:Rest Ratio Selector */}
+                  <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Work:Rest Ratio
+                    </Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                      {['1:1', '3:2', '2:1'].map((ratio) => (
+                        <Chip
+                          key={ratio}
+                          label={ratio}
+                          onClick={() => setWorkRestRatio(ratio)}
+                          color={workRestRatio === ratio ? 'primary' : 'default'}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  {/* Work Time Selection */}
+                  <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Work Time
+                    </Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                      {[
+                        { label: '20s', value: 20 },
+                        { label: '30s', value: 30 },
+                        { label: '45s', value: 45 },
+                        { label: '60s', value: 60 },
+                        { label: '90s', value: 90 },
+                        { label: '2m', value: 120 },
+                        { label: '4m', value: 240 },
+                      ].map((option) => (
+                        <Chip
+                          key={option.value}
+                          label={option.label}
+                          onClick={() => setWorkInterval(option.value)}
+                          color={workInterval === option.value ? 'primary' : 'default'}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                      ))}
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                      Rest time: {restInterval}s (auto-calculated from ratio)
+                    </Typography>
+                  </Box>
                   
                   {/* Exercise Names for Each Round */}
                   <Box>
@@ -967,7 +967,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       Exercise Names per Round (optional)
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Name each round&apos;s exercise. These will repeat for all sets. Leave blank to use &quot;work&quot; as default.
+                      Name exercises for each interval. Leave blank to use default names.
                     </Typography>
                     <Stack spacing={1.5}>
                       {Array.from({ length: roundsPerSet || 0 }).map((_, index) => (
@@ -997,7 +997,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   </Box>
                   
                   <Typography variant="body2" color="text.secondary">
-                    Total Duration: {Math.floor((preparationInterval + (numberOfSets * roundsPerSet) * (workInterval + restInterval) + (numberOfSets > 1 && recoveryBetweenSets > 0 ? (numberOfSets - 1) * recoveryBetweenSets : 0)) / 60)} minutes
+                    Total: ~{sessionLengthMinutes} min • {roundsPerSet} rounds • Extended rest after every 8 min of HIIT
                   </Typography>
                 </Stack>
               )}
@@ -1217,6 +1217,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
             isWorkPeriod={isWorkPeriod}
             isPrepPeriod={isPrepPeriod}
             isRecoveryPeriod={isRecoveryPeriod}
+            isExtendedRest={isExtendedRest}
             currentRound={currentRound}
             currentSet={currentSet}
             roundsPerSet={roundsPerSet}

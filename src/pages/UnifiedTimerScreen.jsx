@@ -73,6 +73,8 @@ import {
 } from '../utils/storage';
 import { HIIT_EXERCISES_DATA_PATH } from '../utils/constants';
 import HiitExerciseAutocomplete from '../components/HiitExerciseAutocomplete';
+import TimerModal from '../components/TimerModal';
+import TimerDisplay from '../components/TimerDisplay';
 
 const TIMER_MODES = {
   HIIT: 'hiit',
@@ -589,6 +591,24 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getModalHeaderInfo = () => {
+    if (mode === TIMER_MODES.HIIT) {
+      if (isPrepPeriod) {
+        return 'Get Ready';
+      } else if (isRecoveryPeriod) {
+        return `Set ${currentSet} of ${numberOfSets} - Break`;
+      } else if (numberOfSets > 1) {
+        return `Set ${currentSet} of ${numberOfSets} - Round ${currentRound} of ${roundsPerSet}`;
+      } else {
+        return `Round ${currentRound} of ${roundsPerSet}`;
+      }
+    } else if (mode === TIMER_MODES.FLOW) {
+      return `Pose ${currentPoseIndex + 1} of ${selectedPoses.length}`;
+    } else {
+      return 'Cardio Session';
+    }
   };
 
 
@@ -1161,197 +1181,39 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           </Card>
         )}
 
-        {/* Timer Display */}
-        {!isConfiguring && (
-          <Card sx={{ borderRadius: 3, mb: 3 }}>
-            <CardContent sx={{ p: 4 }}>
-              {/* Mode indicator */}
-              <Stack direction="row" justifyContent="center" sx={{ mb: 3 }}>
-                <Chip
-                  label={
-                    mode === TIMER_MODES.HIIT
-                      ? 'HIIT'
-                      : mode === TIMER_MODES.FLOW
-                      ? 'Yoga'
-                      : 'Cardio'
-                  }
-                  color="primary"
-                  size="medium"
-                />
-              </Stack>
-
-              {/* Timer Display */}
-              <Box sx={{ 
-                textAlign: 'center', 
-                mb: 3,
-                width: '100%',
-              }}>
-                <Typography
-                  variant="h1"
-                  sx={{
-                    fontSize: { xs: 'clamp(3rem, 15vw, 8rem)', sm: 'clamp(5rem, 20vw, 10rem)', md: '12rem' },
-                    fontWeight: 700,
-                    color:
-                      mode === TIMER_MODES.HIIT && isWorkPeriod
-                        ? 'success.main'
-                        : mode === TIMER_MODES.HIIT && (isPrepPeriod || isRecoveryPeriod)
-                        ? 'warning.main'
-                        : mode === TIMER_MODES.HIIT && !isWorkPeriod
-                        ? 'error.main'
-                        : 'primary.main',
-                    fontFamily: 'monospace',
-                    lineHeight: 1,
-                  }}
-                >
-                  {formatTime(timeRemaining)}
-                </Typography>
-                
-                {mode === TIMER_MODES.HIIT && (
-                  <>
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        mt: 2, 
-                        fontWeight: 600,
-                        fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
-                      }}
-                    >
-                      {isPrepPeriod 
-                        ? intervalNames.prep 
-                        : isRecoveryPeriod 
-                        ? intervalNames.recovery 
-                        : isWorkPeriod 
-                        ? (workIntervalNames[currentRound - 1] || 'work')
-                        : 'rest'}
-                    </Typography>
-                    {isPrepPeriod && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
-                        Up Next: {workIntervalNames[0] || 'work'}
-                      </Typography>
-                    )}
-                    {isRecoveryPeriod && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
-                        Up Next (Set {currentSet + 1}): {workIntervalNames[0] || 'work'}
-                      </Typography>
-                    )}
-                    {!isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound < roundsPerSet && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
-                        Up Next: {workIntervalNames[currentRound] || 'work'}
-                      </Typography>
-                    )}
-                    {!isPrepPeriod && !isRecoveryPeriod && (
-                      <>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}>
-                          Round {currentRound} / {roundsPerSet}
-                        </Typography>
-                        {numberOfSets > 1 && (
-                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}>
-                            Set {currentSet} / {numberOfSets}
-                          </Typography>
-                        )}
-                      </>
-                    )}
-                    {sessionName && (
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
-                        {sessionName}
-                      </Typography>
-                    )}
-                  </>
-                )}
-                
-                {mode === TIMER_MODES.FLOW && selectedPoses[currentPoseIndex] && (
-                  <>
-                    <Typography variant="h6" sx={{ mt: 2, fontWeight: 600 }}>
-                      {selectedPoses[currentPoseIndex].name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                      Pose {currentPoseIndex + 1} of {selectedPoses.length}
-                    </Typography>
-                  </>
-                )}
-              </Box>
-
-              {/* Controls */}
-              <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
-                {!isRunning ? (
-                  <Button
-                    variant="contained"
-                    size="large"
-                    startIcon={<PlayArrow />}
-                    onClick={handleStart}
-                    sx={{ px: 4, py: 1.5 }}
-                    disabled={mode === TIMER_MODES.FLOW && selectedPoses.length === 0}
-                  >
-                    Start
-                  </Button>
-                ) : (
-                  <>
-                    {/* Skip backward for HIIT and Yoga */}
-                    {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
-                      <IconButton
-                        size="large"
-                        onClick={handleSkipBackward}
-                        color="primary"
-                        sx={{ width: 56, height: 56 }}
-                        disabled={
-                          (mode === TIMER_MODES.HIIT && isPrepPeriod) ||
-                          (mode === TIMER_MODES.FLOW && currentPoseIndex === 0)
-                        }
-                      >
-                        <SkipPrevious sx={{ fontSize: 36 }} />
-                      </IconButton>
-                    )}
-                    
-                    <IconButton
-                      size="large"
-                      onClick={handlePause}
-                      color={isPaused ? 'success' : 'warning'}
-                      sx={{ width: 64, height: 64 }}
-                    >
-                      {isPaused ? (
-                        <PlayArrow sx={{ fontSize: 40 }} />
-                      ) : (
-                        <Pause sx={{ fontSize: 40 }} />
-                      )}
-                    </IconButton>
-                    <IconButton
-                      size="large"
-                      onClick={handleStop}
-                      color="error"
-                      sx={{ width: 64, height: 64 }}
-                    >
-                      <Stop sx={{ fontSize: 40 }} />
-                    </IconButton>
-                    <IconButton
-                      size="large"
-                      onClick={handleReset}
-                      color="primary"
-                      sx={{ width: 64, height: 64 }}
-                    >
-                      <Replay sx={{ fontSize: 40 }} />
-                    </IconButton>
-                    
-                    {/* Skip forward for HIIT and Yoga */}
-                    {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
-                      <IconButton
-                        size="large"
-                        onClick={handleSkipForward}
-                        color="primary"
-                        sx={{ width: 56, height: 56 }}
-                        disabled={
-                          (mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= roundsPerSet && currentSet >= numberOfSets) ||
-                          (mode === TIMER_MODES.FLOW && currentPoseIndex >= selectedPoses.length - 1)
-                        }
-                      >
-                        <SkipNext sx={{ fontSize: 36 }} />
-                      </IconButton>
-                    )}
-                  </>
-                )}
-              </Stack>
-            </CardContent>
-          </Card>
-        )}
+        {/* Timer Display Modal */}
+        <TimerModal
+          open={!isConfiguring}
+          mode={mode}
+          currentInfo={getModalHeaderInfo()}
+          onExit={handleStop}
+        >
+          <TimerDisplay
+            mode={mode}
+            isRunning={isRunning}
+            isPaused={isPaused}
+            timeRemaining={timeRemaining}
+            formatTime={formatTime}
+            isWorkPeriod={isWorkPeriod}
+            isPrepPeriod={isPrepPeriod}
+            isRecoveryPeriod={isRecoveryPeriod}
+            currentRound={currentRound}
+            currentSet={currentSet}
+            roundsPerSet={roundsPerSet}
+            numberOfSets={numberOfSets}
+            workIntervalNames={workIntervalNames}
+            intervalNames={intervalNames}
+            sessionName={sessionName}
+            currentPoseIndex={currentPoseIndex}
+            selectedPoses={selectedPoses}
+            handleStart={handleStart}
+            handlePause={handlePause}
+            handleStop={handleStop}
+            handleReset={handleReset}
+            handleSkipForward={handleSkipForward}
+            handleSkipBackward={handleSkipBackward}
+          />
+        </TimerModal>
 
         {/* Start Button for configuration */}
         {isConfiguring && (

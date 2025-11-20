@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SwapHoriz, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
 import { getDemoImagePath } from '../utils/exerciseDemoImages';
@@ -13,7 +13,7 @@ import { getDemoImagePath } from '../utils/exerciseDemoImages';
  * WorkoutScreen component manages the active workout session
  * Displays exercises in superset format, tracks time, and collects set data
  */
-const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3 }) => {
+const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, onSetInfoUpdate }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -163,11 +163,16 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       // Reset suggestion when changing exercises
       setProgressiveOverloadSuggestion(null);
       setShowSuggestion(false);
+      
+      // Notify parent of current set info
+      if (onSetInfoUpdate) {
+        onSetInfoUpdate(step.setNumber, setsPerSuperset);
+      }
     }
     
     // Scroll to top when exercise changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentStepIndex, initialTargets, workoutSequence, updatedWeights]);
+  }, [currentStepIndex, initialTargets, workoutSequence, updatedWeights, onSetInfoUpdate, setsPerSuperset]);
 
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
@@ -571,10 +576,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
     }
   };
 
-  const swapExercise = () => {
-    alert('Exercise swap feature coming soon! For now, you can skip this exercise and manually add a different one later.');
-  };
-
   if (!currentStep && currentPhase === 'exercise') {
     return null;
   }
@@ -688,12 +689,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
             {formatTime(elapsedTime)}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
-            <Chip 
-              label={`Set ${currentStep.setNumber} of ${setsPerSuperset}`}
-              color="primary"
-              size="small"
-              sx={{ fontWeight: 600, fontSize: { xs: '0.7rem', sm: '0.8rem' } }}
-            />
             <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
               {currentStepIndex + 1}/{workoutSequence.length}
             </Typography>
@@ -747,7 +742,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 flexDirection: 'column',
               }}
             >
-              {/* Top Controls - Help, Skip, Swap icons on left, End Workout Controls on right */}
+              {/* Top Controls - Help and Skip icons on left, End Workout Controls on right */}
               <Box sx={{ 
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -755,7 +750,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 gap: 1,
                 mb: 2
               }}>
-                {/* Left: Help, Skip, Swap Icons */}
+                {/* Left: Help and Skip Icons */}
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <IconButton
                     component="a"
@@ -793,23 +788,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                     aria-label="Skip exercise"
                   >
                     <SkipNext sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                  </IconButton>
-                  <IconButton
-                    onClick={swapExercise}
-                    sx={{
-                      minWidth: { xs: '36px', sm: '44px' },
-                      minHeight: { xs: '36px', sm: '44px' },
-                      color: 'primary.main',
-                      border: '2px solid',
-                      borderColor: 'primary.main',
-                      borderRadius: '8px',
-                      '&:hover': {
-                        backgroundColor: 'rgba(19, 70, 134, 0.08)',
-                      }
-                    }}
-                    aria-label="Swap exercise"
-                  >
-                    <SwapHoriz sx={{ fontSize: { xs: 20, sm: 24 } }} />
                   </IconButton>
                 </Box>
                 
@@ -1147,83 +1125,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
         </AnimatePresence>
       </div>
       
-      {/* Next Exercise Preview - Collapsed card at bottom */}
-      {currentStepIndex + 1 < workoutSequence.length && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-          style={{ 
-            marginTop: '1rem',
-            paddingBottom: '1rem'
-          }}
-        >
-          <Box
-            sx={{
-              bgcolor: 'background.paper',
-              borderRadius: 2,
-              p: 2,
-              border: '1px solid',
-              borderColor: 'divider',
-              cursor: 'default',
-            }}
-          >
-            <Typography 
-              variant="caption" 
-              color="text.secondary"
-              sx={{ 
-                display: 'block',
-                mb: 1,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}
-            >
-              Next Exercise
-            </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box sx={{ flex: 1 }}>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontWeight: 600,
-                    color: 'text.primary',
-                    fontSize: { xs: '1rem', sm: '1.25rem' }
-                  }}
-                >
-                  {workoutSequence[currentStepIndex + 1].exercise['Exercise Name']}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
-                  <Chip 
-                    label={`Set ${workoutSequence[currentStepIndex + 1].setNumber}`}
-                    size="small"
-                    sx={{ 
-                      bgcolor: 'primary.light',
-                      color: 'primary.contrastText',
-                      fontWeight: 600,
-                      fontSize: '0.7rem'
-                    }}
-                  />
-                  <Chip 
-                    label={workoutSequence[currentStepIndex + 1].exercise['Primary Muscle']}
-                    size="small"
-                    variant="outlined"
-                    sx={{ fontSize: '0.7rem' }}
-                  />
-                </Box>
-              </Box>
-              <ArrowForward 
-                sx={{ 
-                  color: 'primary.main',
-                  fontSize: { xs: 24, sm: 32 },
-                  ml: 2
-                }} 
-              />
-            </Box>
-          </Box>
-        </motion.div>
-      )}
-      
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -1244,6 +1145,7 @@ WorkoutScreen.propTypes = {
   onExit: PropTypes.func.isRequired,
   supersetConfig: PropTypes.arrayOf(PropTypes.number),
   setsPerSuperset: PropTypes.number,
+  onSetInfoUpdate: PropTypes.func,
 };
 
 export default WorkoutScreen;

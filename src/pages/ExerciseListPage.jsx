@@ -41,6 +41,7 @@ import {
   getExerciseTargetReps,
   setExerciseTargetReps,
 } from '../utils/storage';
+import { getMuscleCategory } from '../utils/muscleCategories';
 
 /**
  * ExerciseListPage component
@@ -96,8 +97,8 @@ const ExerciseListPage = () => {
   const categories = useMemo(() => {
     const cats = new Set();
     allExercises.forEach(ex => {
-      const primaryMuscle = ex['Primary Muscle'].split('(')[0].trim();
-      cats.add(primaryMuscle);
+      const category = getMuscleCategory(ex['Primary Muscle']);
+      cats.add(category);
     });
     return ['all', ...Array.from(cats).sort()];
   }, [allExercises]);
@@ -126,8 +127,8 @@ const ExerciseListPage = () => {
         exercise['Primary Muscle'].toLowerCase().includes(searchTerm.toLowerCase()) ||
         exercise['Equipment'].toLowerCase().includes(searchTerm.toLowerCase());
 
-      const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
-      const matchesCategory = selectedCategory === 'all' || primaryMuscle === selectedCategory;
+      const category = getMuscleCategory(exercise['Primary Muscle']);
+      const matchesCategory = selectedCategory === 'all' || category === selectedCategory;
       const matchesEquipment = selectedEquipment === 'all' || exercise['Equipment'] === selectedEquipment;
       const matchesType = selectedType === 'all' || exercise['Exercise Type'] === selectedType;
 

@@ -591,25 +591,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getProgress = () => {
-    if (mode === TIMER_MODES.HIIT) {
-      // Calculate progress based on sets and rounds
-      const totalRounds = numberOfSets * roundsPerSet;
-      const completedRounds = (currentSet - 1) * roundsPerSet + (currentRound - 1);
-      const roundProgress = (completedRounds / totalRounds) * 100;
-      const withinRoundProgress = isWorkPeriod
-        ? (workInterval - timeRemaining) / workInterval
-        : (restInterval - timeRemaining) / restInterval;
-      return roundProgress + (withinRoundProgress * (100 / totalRounds));
-    } else {
-      return ((totalTime - timeRemaining) / totalTime) * 100;
-    }
-  };
 
-  const progress = getProgress();
-  const radius = 120;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh', p: 3, bgcolor: 'background.default' }}>
@@ -1198,148 +1180,96 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 />
               </Stack>
 
-              {/* Circular Progress */}
+              {/* Timer Display */}
               <Box sx={{ 
                 textAlign: 'center', 
-                mb: 3, 
-                position: 'relative',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+                mb: 3,
                 width: '100%',
               }}>
-                {/* Show SVG ring only for Flow and Cardio modes */}
-                {mode !== TIMER_MODES.HIIT && (
-                  <svg
-                    width="280"
-                    height="280"
-                    style={{ transform: 'rotate(-90deg)' }}
-                  >
-                    {/* Background circle */}
-                    <circle
-                      cx="140"
-                      cy="140"
-                      r={radius}
-                      stroke="#e0e0e0"
-                      strokeWidth="12"
-                      fill="none"
-                    />
-                    {/* Progress circle */}
-                    <circle
-                      cx="140"
-                      cy="140"
-                      r={radius}
-                      stroke="#1976d2"
-                      strokeWidth="12"
-                      fill="none"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      strokeLinecap="round"
-                      style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-                    />
-                  </svg>
-                )}
-                
-                {/* Timer in center */}
-                <Box
+                <Typography
+                  variant="h1"
                   sx={{
-                    position: mode !== TIMER_MODES.HIIT ? 'absolute' : 'relative',
-                    top: mode !== TIMER_MODES.HIIT ? '50%' : 'auto',
-                    left: mode !== TIMER_MODES.HIIT ? '50%' : 'auto',
-                    transform: mode !== TIMER_MODES.HIIT ? 'translate(-50%, -50%)' : 'none',
-                    textAlign: 'center',
-                    width: '100%',
+                    fontSize: { xs: 'clamp(3rem, 15vw, 8rem)', sm: 'clamp(5rem, 20vw, 10rem)', md: '12rem' },
+                    fontWeight: 700,
+                    color:
+                      mode === TIMER_MODES.HIIT && isWorkPeriod
+                        ? 'success.main'
+                        : mode === TIMER_MODES.HIIT && (isPrepPeriod || isRecoveryPeriod)
+                        ? 'warning.main'
+                        : mode === TIMER_MODES.HIIT && !isWorkPeriod
+                        ? 'error.main'
+                        : 'primary.main',
+                    fontFamily: 'monospace',
+                    lineHeight: 1,
                   }}
                 >
-                  <Typography
-                    variant="h1"
-                    sx={{
-                      fontSize: mode === TIMER_MODES.HIIT ? { xs: 'clamp(3rem, 15vw, 8rem)', sm: 'clamp(5rem, 20vw, 10rem)', md: '12rem' } : '4rem',
-                      fontWeight: 700,
-                      color:
-                        mode === TIMER_MODES.HIIT && isWorkPeriod
-                          ? 'success.main'
-                          : mode === TIMER_MODES.HIIT && (isPrepPeriod || isRecoveryPeriod)
-                          ? 'warning.main'
-                          : mode === TIMER_MODES.HIIT && !isWorkPeriod
-                          ? 'error.main'
-                          : 'primary.main',
-                      fontFamily: 'monospace',
-                      lineHeight: 1,
-                    }}
-                  >
-                    {formatTime(timeRemaining)}
-                  </Typography>
-                  
-                  {mode === TIMER_MODES.HIIT && (
-                    <>
-                      <Typography 
-                        variant="h6" 
-                        sx={{ 
-                          mt: 2, 
-                          fontWeight: 600,
-                          fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
-                        }}
-                      >
-                        {isPrepPeriod 
-                          ? intervalNames.prep 
-                          : isRecoveryPeriod 
-                          ? intervalNames.recovery 
-                          : isWorkPeriod 
-                          ? (workIntervalNames[currentRound - 1] || 'work')
-                          : 'rest'}
+                  {formatTime(timeRemaining)}
+                </Typography>
+                
+                {mode === TIMER_MODES.HIIT && (
+                  <>
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        mt: 2, 
+                        fontWeight: 600,
+                        fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+                      }}
+                    >
+                      {isPrepPeriod 
+                        ? intervalNames.prep 
+                        : isRecoveryPeriod 
+                        ? intervalNames.recovery 
+                        : isWorkPeriod 
+                        ? (workIntervalNames[currentRound - 1] || 'work')
+                        : 'rest'}
+                    </Typography>
+                    {isPrepPeriod && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
+                        Up Next: {workIntervalNames[0] || 'work'}
                       </Typography>
-                      {isPrepPeriod && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
-                          Up Next: {workIntervalNames[0] || 'work'}
+                    )}
+                    {isRecoveryPeriod && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
+                        Up Next (Set {currentSet + 1}): {workIntervalNames[0] || 'work'}
+                      </Typography>
+                    )}
+                    {!isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound < roundsPerSet && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
+                        Up Next: {workIntervalNames[currentRound] || 'work'}
+                      </Typography>
+                    )}
+                    {!isPrepPeriod && !isRecoveryPeriod && (
+                      <>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}>
+                          Round {currentRound} / {roundsPerSet}
                         </Typography>
-                      )}
-                      {isRecoveryPeriod && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
-                          Up Next (Set {currentSet + 1}): {workIntervalNames[0] || 'work'}
-                        </Typography>
-                      )}
-                      {!isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound < roundsPerSet && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
-                          Up Next: {workIntervalNames[currentRound] || 'work'}
-                        </Typography>
-                      )}
-                      {!isPrepPeriod && !isRecoveryPeriod && (
-                        <>
+                        {numberOfSets > 1 && (
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}>
-                            Round {currentRound} / {roundsPerSet}
+                            Set {currentSet} / {numberOfSets}
                           </Typography>
-                          {numberOfSets > 1 && (
-                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}>
-                              Set {currentSet} / {numberOfSets}
-                            </Typography>
-                          )}
-                        </>
-                      )}
-                      {sessionName && (
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
-                          {sessionName}
-                        </Typography>
-                      )}
-                    </>
-                  )}
-                  
-                  {mode === TIMER_MODES.FLOW && selectedPoses[currentPoseIndex] && (
-                    <Typography variant="h6" sx={{ mt: 1, fontWeight: 600, maxWidth: '200px' }}>
+                        )}
+                      </>
+                    )}
+                    {sessionName && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+                        {sessionName}
+                      </Typography>
+                    )}
+                  </>
+                )}
+                
+                {mode === TIMER_MODES.FLOW && selectedPoses[currentPoseIndex] && (
+                  <>
+                    <Typography variant="h6" sx={{ mt: 2, fontWeight: 600 }}>
                       {selectedPoses[currentPoseIndex].name}
                     </Typography>
-                  )}
-                </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      Pose {currentPoseIndex + 1} of {selectedPoses.length}
+                    </Typography>
+                  </>
+                )}
               </Box>
-
-              {/* Flow mode pose info */}
-              {mode === TIMER_MODES.FLOW && selectedPoses[currentPoseIndex] && (
-                <Box sx={{ mb: 3, textAlign: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Pose {currentPoseIndex + 1} of {selectedPoses.length}
-                  </Typography>
-                </Box>
-              )}
 
               {/* Controls */}
               <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">

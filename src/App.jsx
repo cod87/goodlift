@@ -7,7 +7,7 @@ import TodayView from './components/TodayView/TodayView';
 import SelectionScreen from './components/SelectionScreen';
 // UnifiedWorkoutHub removed - using SelectionScreen instead
 // WorkoutPlanScreen removed - no longer using workout planning
-import WorkoutScreen from './components/WorkoutScreen';
+import WorkoutScreenModal from './components/WorkoutScreenModal';
 import WorkoutPreview from './components/WorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
@@ -691,7 +691,8 @@ function AppContent() {
           )}
           
           {currentScreen === 'workout' && currentWorkout.length > 0 && (
-            <WorkoutScreen
+            <WorkoutScreenModal
+              open={true}
               workoutPlan={currentWorkout}
               onComplete={handleWorkoutComplete}
               onExit={handleWorkoutExit}

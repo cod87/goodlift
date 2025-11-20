@@ -1147,6 +1147,83 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
         </AnimatePresence>
       </div>
       
+      {/* Next Exercise Preview - Collapsed card at bottom */}
+      {currentStepIndex + 1 < workoutSequence.length && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          style={{ 
+            marginTop: '1rem',
+            paddingBottom: '1rem'
+          }}
+        >
+          <Box
+            sx={{
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              p: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              cursor: 'default',
+            }}
+          >
+            <Typography 
+              variant="caption" 
+              color="text.secondary"
+              sx={{ 
+                display: 'block',
+                mb: 1,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}
+            >
+              Next Exercise
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    fontSize: { xs: '1rem', sm: '1.25rem' }
+                  }}
+                >
+                  {workoutSequence[currentStepIndex + 1].exercise['Exercise Name']}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
+                  <Chip 
+                    label={`Set ${workoutSequence[currentStepIndex + 1].setNumber}`}
+                    size="small"
+                    sx={{ 
+                      bgcolor: 'primary.light',
+                      color: 'primary.contrastText',
+                      fontWeight: 600,
+                      fontSize: '0.7rem'
+                    }}
+                  />
+                  <Chip 
+                    label={workoutSequence[currentStepIndex + 1].exercise['Primary Muscle']}
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: '0.7rem' }}
+                  />
+                </Box>
+              </Box>
+              <ArrowForward 
+                sx={{ 
+                  color: 'primary.main',
+                  fontSize: { xs: 24, sm: 32 },
+                  ml: 2
+                }} 
+              />
+            </Box>
+          </Box>
+        </motion.div>
+      )}
+      
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

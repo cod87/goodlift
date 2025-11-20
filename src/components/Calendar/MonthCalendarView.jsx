@@ -92,6 +92,9 @@ const MonthCalendarView = ({
       'push': 'PS',
       'pull': 'PL',
       'legs': 'LG',
+      'yoga': 'Y',
+      'hiit': 'H',
+      'cardio': 'C',
     };
     
     return labelMap[normalizedType] || 'X';

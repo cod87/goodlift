@@ -282,6 +282,7 @@ const WorkoutCreationModal = ({
   onClose, 
   onSave,
   exercises = [],
+  existingWorkout = null, // Add support for editing existing workout
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -307,22 +308,53 @@ const WorkoutCreationModal = ({
     })
   );
 
-  // Reset state when modal opens
+  // Reset state when modal opens or when existingWorkout changes
   useEffect(() => {
     if (open) {
-      setCurrentTab(0);
+      if (existingWorkout) {
+        // Load existing workout for editing
+        setCurrentTab(1); // Start on "My Workout" tab
+        setMyWorkout(existingWorkout.exercises || []);
+        setWorkoutName(existingWorkout.name || '');
+        setWorkoutType(existingWorkout.type || 'full');
+        
+        // Calculate highlighted exercises based on superset grouping
+        if (existingWorkout.exercises && existingWorkout.exercises.length > 0) {
+          const highlighted = new Set();
+          existingWorkout.exercises.forEach(exercise => {
+            if (exercise.supersetGroup) {
+              highlighted.add(exercise.id || exercise['Exercise Name']);
+            }
+          });
+          setHighlightedExercises(highlighted);
+          
+          // Set current superset number to the max + 1
+          const maxSuperset = Math.max(
+            0, 
+            ...existingWorkout.exercises
+              .filter(ex => ex.supersetGroup)
+              .map(ex => ex.supersetGroup)
+          );
+          setCurrentSupersetNumber(maxSuperset + 1);
+        }
+      } else {
+        // Creating new workout
+        setCurrentTab(0);
+        setMyWorkout([]);
+        setWorkoutName('');
+        setWorkoutType('full');
+        setHighlightedExercises(new Set());
+        setCurrentSupersetNumber(1);
+      }
+      
+      // Always reset these
       setSearchQuery('');
       setFilterEquipment('all');
       setFilterMuscleGroup('all');
       setSelectedExercises(new Set());
-      setMyWorkout([]);
-      setWorkoutName('');
-      setWorkoutType('full');
-      setHighlightedExercises(new Set());
-      setCurrentSupersetNumber(1);
       setIsReorderMode(false);
     }
-  }, [open]);
+  }, [open, existingWorkout]);
 
   // Filter exercises based on search and filters
   const filteredExercises = exercises.filter(exercise => {
@@ -540,7 +572,7 @@ const WorkoutCreationModal = ({
           Cancel
         </Button>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Create Workout
+          {existingWorkout ? 'Edit Workout' : 'Create Workout'}
         </Typography>
         <Button 
           onClick={handleSave} 
@@ -817,6 +849,7 @@ WorkoutCreationModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   exercises: PropTypes.array,
+  existingWorkout: PropTypes.object,
 };
 
 export default WorkoutCreationModal;

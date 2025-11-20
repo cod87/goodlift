@@ -7,17 +7,20 @@ import { saveSavedWorkout } from '../../utils/storage';
 import { EXERCISES_DATA_PATH } from '../../utils/constants';
 
 /**
- * WorkoutTab - Simplified workout tab showing only saved workouts list
+ * StrengthTab - Simplified strength workout tab showing only saved workouts list
  * Features:
  * - List of saved workouts
  * - Create new workout button
+ * - Edit existing workouts
  */
-const WorkoutTab = memo(({ 
+const StrengthTab = memo(({ 
   onStartWorkout,
 }) => {
   const [showWorkoutCreator, setShowWorkoutCreator] = useState(false);
   const [exercises, setExercises] = useState([]);
   const [workoutListKey, setWorkoutListKey] = useState(0);
+  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [editingIndex, setEditingIndex] = useState(null);
 
   // Load exercises data
   useEffect(() => {
@@ -36,17 +39,40 @@ const WorkoutTab = memo(({
   }, []);
 
   const handleCreateWorkout = () => {
+    setEditingWorkout(null);
+    setEditingIndex(null);
+    setShowWorkoutCreator(true);
+  };
+
+  const handleEditWorkout = (workout, index) => {
+    setEditingWorkout(workout);
+    setEditingIndex(index);
     setShowWorkoutCreator(true);
   };
 
   const handleSaveWorkout = async (workout) => {
     try {
-      await saveSavedWorkout(workout);
+      if (editingIndex !== null) {
+        // Update existing workout
+        const { updateSavedWorkout } = await import('../../utils/storage');
+        await updateSavedWorkout(editingIndex, workout);
+      } else {
+        // Create new workout
+        await saveSavedWorkout(workout);
+      }
       // Force refresh the workout list
       setWorkoutListKey(prev => prev + 1);
+      setEditingWorkout(null);
+      setEditingIndex(null);
     } catch (error) {
       console.error('Error saving workout:', error);
     }
+  };
+
+  const handleCloseModal = () => {
+    setShowWorkoutCreator(false);
+    setEditingWorkout(null);
+    setEditingIndex(null);
   };
 
   return (
@@ -55,22 +81,24 @@ const WorkoutTab = memo(({
         key={workoutListKey}
         onCreateWorkout={handleCreateWorkout}
         onStartWorkout={onStartWorkout}
+        onEditWorkout={handleEditWorkout}
       />
       
       <WorkoutCreationModal
         open={showWorkoutCreator}
-        onClose={() => setShowWorkoutCreator(false)}
+        onClose={handleCloseModal}
         onSave={handleSaveWorkout}
         exercises={exercises}
+        existingWorkout={editingWorkout}
       />
     </Box>
   );
 });
 
-WorkoutTab.displayName = 'WorkoutTab';
+StrengthTab.displayName = 'StrengthTab';
 
-WorkoutTab.propTypes = {
+StrengthTab.propTypes = {
   onStartWorkout: PropTypes.func,
 };
 
-export default WorkoutTab;
+export default StrengthTab;

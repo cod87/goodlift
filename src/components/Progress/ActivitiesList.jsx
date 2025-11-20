@@ -97,18 +97,26 @@ const ActivitiesList = memo(({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Typography 
-        variant="overline" 
-        sx={{ 
-          color: 'primary.main',
-          fontWeight: 600,
-          letterSpacing: 1,
-          mb: 1,
-          display: 'block',
-        }}
-      >
-        ACTIVITY HISTORY
-      </Typography>
+      {/* Compact Header - matching Progress screen style */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        py: 1,
+        px: 2,
+        borderBottom: '1px solid', 
+        borderColor: 'divider',
+        mb: 2,
+      }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 700 }}>
+            Activity Log
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+            Your workout history
+          </Typography>
+        </Box>
+      </Box>
 
       <List sx={{ p: 0 }}>
         {visibleActivities.map((activity, index) => {

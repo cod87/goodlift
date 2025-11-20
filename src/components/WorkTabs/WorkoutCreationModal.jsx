@@ -56,6 +56,28 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 /**
+ * Superset color palette - cycling through distinct colors
+ */
+const SUPERSET_COLORS = [
+  { main: '#4caf50', light: '#e8f5e9', dark: '#2e7d32' }, // Green
+  { main: '#2196f3', light: '#e3f2fd', dark: '#1565c0' }, // Blue
+  { main: '#ff9800', light: '#fff3e0', dark: '#ef6c00' }, // Orange
+  { main: '#9c27b0', light: '#f3e5f5', dark: '#6a1b9a' }, // Purple
+  { main: '#f44336', light: '#ffebee', dark: '#c62828' }, // Red
+  { main: '#00bcd4', light: '#e0f7fa', dark: '#00838f' }, // Cyan
+  { main: '#ffeb3b', light: '#fffde7', dark: '#f57f17' }, // Yellow
+  { main: '#795548', light: '#efebe9', dark: '#4e342e' }, // Brown
+];
+
+/**
+ * Get color for a superset group ID
+ */
+const getSupersetColor = (groupId) => {
+  if (groupId === null || groupId === undefined) return null;
+  return SUPERSET_COLORS[(groupId - 1) % SUPERSET_COLORS.length];
+};
+
+/**
  * SortableExerciseItem - Draggable exercise item in My Workout
  */
 const SortableExerciseItem = ({ 
@@ -67,6 +89,7 @@ const SortableExerciseItem = ({
   setSelectedExercises,
   highlightedExercises,
   onToggleHighlight,
+  onCycleSuperset,
 }) => {
   const {
     attributes,
@@ -86,62 +109,75 @@ const SortableExerciseItem = ({
   // Check if this exercise is in a superset group
   const supersetGroupId = exercise.supersetGroup;
   const isInSuperset = supersetGroupId !== null && supersetGroupId !== undefined;
+  const supersetColor = getSupersetColor(supersetGroupId);
 
   // Check if this exercise is highlighted
   const isHighlighted = highlightedExercises.has(exercise['Exercise Name']);
+
+  // Handle clicking on the card (outside inputs) to highlight
+  const handleCardClick = (e) => {
+    // Don't trigger if clicking on input fields, buttons, or drag handle
+    const target = e.target;
+    const isInput = target.tagName === 'INPUT' || target.closest('input');
+    const isButton = target.tagName === 'BUTTON' || target.closest('button');
+    const isDragHandle = target.closest('[data-drag-handle]');
+    
+    if (!isInput && !isButton && !isDragHandle) {
+      onToggleHighlight(exercise['Exercise Name']);
+    }
+  };
+
+  // Handle superset circle click
+  const handleSupersetClick = (e) => {
+    e.stopPropagation();
+    onCycleSuperset(exercise['Exercise Name']);
+  };
 
   return (
     <Card
       ref={setNodeRef}
       style={style}
-      elevation={isDragging ? 4 : (isHighlighted ? 3 : 1)}
+      elevation={isDragging ? 4 : (isHighlighted || isInSuperset ? 3 : 1)}
+      onClick={handleCardClick}
       sx={{
-        borderLeft: isInSuperset ? '4px solid' : (isHighlighted ? '4px solid' : '4px solid transparent'),
-        borderColor: isInSuperset ? 'primary.main' : (isHighlighted ? 'success.main' : 'transparent'),
+        position: 'relative',
+        cursor: 'pointer',
+        borderLeft: '4px solid',
+        borderColor: isInSuperset 
+          ? supersetColor?.main 
+          : (isHighlighted ? '#4caf50' : 'transparent'),
+        backgroundColor: isInSuperset 
+          ? supersetColor?.light 
+          : (isHighlighted ? '#e8f5e9' : 'background.paper'),
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        transform: isHighlighted ? 'translateY(-4px)' : 'translateY(0)',
+        transform: (isHighlighted || isInSuperset) ? 'translateY(-4px)' : 'translateY(0)',
         '&:hover': {
-          transform: isHighlighted ? 'translateY(-4px)' : 'translateY(-2px)',
+          transform: (isHighlighted || isInSuperset) ? 'translateY(-4px)' : 'translateY(-2px)',
+          boxShadow: 3,
         },
       }}
     >
-      <CardContent>
+      <CardContent sx={{ pb: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
           <Box 
             {...attributes} 
-            {...listeners} 
+            {...listeners}
+            data-drag-handle
             sx={{ cursor: 'grab', '&:active': { cursor: 'grabbing' } }}
-            onClick={(e) => {
-              // Allow clicking the drag handle to highlight/unhighlight
-              if (!isInSuperset) {
-                e.stopPropagation();
-                onToggleHighlight(exercise['Exercise Name']);
-              }
-            }}
           >
-            <DragIndicator sx={{ color: isHighlighted ? 'success.main' : 'text.secondary' }} />
+            <DragIndicator 
+              sx={{ 
+                color: isInSuperset 
+                  ? supersetColor?.main 
+                  : (isHighlighted ? '#4caf50' : 'text.secondary')
+              }} 
+            />
           </Box>
           <Box sx={{ flex: 1 }}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="body1" sx={{ fontWeight: 600 }}>
                 {exercise['Exercise Name']}
               </Typography>
-              {isInSuperset && (
-                <Chip 
-                  label={`Superset ${supersetGroupId}`} 
-                  size="small" 
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-              {isHighlighted && !isInSuperset && (
-                <Chip 
-                  label="Selected" 
-                  size="small" 
-                  color="success"
-                  variant="outlined"
-                />
-              )}
             </Stack>
             <Typography variant="caption" color="text.secondary">
               {exercise['Primary Muscle']} • {exercise.Equipment}
@@ -149,12 +185,13 @@ const SortableExerciseItem = ({
           </Box>
           <IconButton
             size="small"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               const newSelected = new Set(selectedExercises);
               newSelected.delete(exercise['Exercise Name']);
               setSelectedExercises(newSelected);
-              setMyWorkout(myWorkout.filter(e => 
-                e['Exercise Name'] !== exercise['Exercise Name']
+              setMyWorkout(myWorkout.filter(ex => 
+                ex['Exercise Name'] !== exercise['Exercise Name']
               ));
             }}
           >
@@ -170,10 +207,12 @@ const SortableExerciseItem = ({
             size="small"
             value={exercise.sets}
             onChange={(e) => {
+              e.stopPropagation();
               const updated = [...myWorkout];
               updated[index].sets = parseInt(e.target.value) || 3;
               setMyWorkout(updated);
             }}
+            onClick={(e) => e.stopPropagation()}
             sx={{ width: 80 }}
           />
           <TextField
@@ -182,10 +221,12 @@ const SortableExerciseItem = ({
             size="small"
             value={exercise.reps}
             onChange={(e) => {
+              e.stopPropagation();
               const updated = [...myWorkout];
               updated[index].reps = parseInt(e.target.value) || 10;
               setMyWorkout(updated);
             }}
+            onClick={(e) => e.stopPropagation()}
             sx={{ width: 80 }}
           />
           <TextField
@@ -194,14 +235,48 @@ const SortableExerciseItem = ({
             size="small"
             value={exercise.restTime}
             onChange={(e) => {
+              e.stopPropagation();
               const updated = [...myWorkout];
               updated[index].restTime = parseInt(e.target.value) || 60;
               setMyWorkout(updated);
             }}
+            onClick={(e) => e.stopPropagation()}
             sx={{ width: 100 }}
           />
         </Stack>
       </CardContent>
+      
+      {/* Floating Superset Circle Button */}
+      <Box
+        onClick={handleSupersetClick}
+        sx={{
+          position: 'absolute',
+          bottom: 16,
+          right: 16,
+          width: 40,
+          height: 40,
+          borderRadius: '50%',
+          backgroundColor: isInSuperset ? supersetColor?.main : '#4caf50',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: 'bold',
+          fontSize: '1rem',
+          cursor: 'pointer',
+          boxShadow: 2,
+          transition: 'all 0.2s',
+          '&:hover': {
+            transform: 'scale(1.1)',
+            boxShadow: 4,
+          },
+          '&:active': {
+            transform: 'scale(0.95)',
+          },
+        }}
+      >
+        {isInSuperset ? supersetGroupId : '1'}
+      </Box>
     </Card>
   );
 };
@@ -215,6 +290,7 @@ SortableExerciseItem.propTypes = {
   setSelectedExercises: PropTypes.func.isRequired,
   highlightedExercises: PropTypes.instanceOf(Set).isRequired,
   onToggleHighlight: PropTypes.func.isRequired,
+  onCycleSuperset: PropTypes.func.isRequired,
 };
 
 /**
@@ -241,9 +317,13 @@ const WorkoutCreationModal = ({
   const [workoutType, setWorkoutType] = useState('full');
   const [highlightedExercises, setHighlightedExercises] = useState(new Set());
 
-  // DnD sensors
+  // DnD sensors with improved activation constraints
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px movement before drag starts
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -312,12 +392,6 @@ const WorkoutCreationModal = ({
 
   // Toggle highlight for an exercise
   const handleToggleHighlight = (exerciseName) => {
-    const exercise = myWorkout.find(e => e['Exercise Name'] === exerciseName);
-    // Don't allow highlighting if already in a superset
-    if (exercise && (exercise.supersetGroup !== null && exercise.supersetGroup !== undefined)) {
-      return;
-    }
-    
     const newHighlighted = new Set(highlightedExercises);
     if (newHighlighted.has(exerciseName)) {
       newHighlighted.delete(exerciseName);
@@ -327,32 +401,36 @@ const WorkoutCreationModal = ({
     setHighlightedExercises(newHighlighted);
   };
 
-  // Create a new superset from all highlighted exercises
-  const handleAddToSuperset = () => {
-    if (highlightedExercises.size === 0) {
-      return;
-    }
-
+  // Cycle through superset numbers for an exercise
+  const handleCycleSuperset = (exerciseName) => {
     const updated = [...myWorkout];
+    const exerciseIndex = updated.findIndex(e => e['Exercise Name'] === exerciseName);
     
-    // Find the next available superset group ID
-    const existingGroups = updated
-      .map(e => e.supersetGroup)
-      .filter(g => g !== null && g !== undefined);
-    const newGroupId = existingGroups.length > 0 
-      ? Math.max(...existingGroups) + 1 
-      : 1;
-
-    // Assign all highlighted exercises to the new superset group
-    updated.forEach(exercise => {
-      if (highlightedExercises.has(exercise['Exercise Name'])) {
-        exercise.supersetGroup = newGroupId;
-      }
-    });
-
+    if (exerciseIndex === -1) return;
+    
+    const currentSuperset = updated[exerciseIndex].supersetGroup;
+    
+    let newSuperset;
+    if (currentSuperset === null || currentSuperset === undefined) {
+      // Not in a superset, assign to 1
+      newSuperset = 1;
+    } else if (currentSuperset >= SUPERSET_COLORS.length) {
+      // At max, remove from superset
+      newSuperset = null;
+    } else {
+      // Increment superset number
+      newSuperset = currentSuperset + 1;
+    }
+    
+    updated[exerciseIndex].supersetGroup = newSuperset;
     setMyWorkout(updated);
-    // Clear highlights after creating superset
-    setHighlightedExercises(new Set());
+    
+    // Remove from highlighted when added to superset
+    if (newSuperset !== null) {
+      const newHighlighted = new Set(highlightedExercises);
+      newHighlighted.delete(exerciseName);
+      setHighlightedExercises(newHighlighted);
+    }
   };
 
   // Handle drag and drop reordering
@@ -614,27 +692,14 @@ const WorkoutCreationModal = ({
             <Divider sx={{ my: 2 }} />
 
             {/* Exercise List with Drag and Drop */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Exercises ({myWorkout.length})
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Tap the drag handle to highlight exercises, then use the button below to create a superset.
-                </Typography>
-              </Box>
-              {highlightedExercises.size > 0 && (
-                <Button
-                  variant="contained"
-                  color="success"
-                  startIcon={<ViewStream />}
-                  onClick={handleAddToSuperset}
-                  size="small"
-                >
-                  Add to Superset ({highlightedExercises.size})
-                </Button>
-              )}
-            </Stack>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Exercises ({myWorkout.length})
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Tap anywhere on an exercise to highlight it. Use the drag handle to reorder. Tap the floating circle to add to a superset or cycle through superset numbers.
+              </Typography>
+            </Box>
             
             {myWorkout.length > 0 ? (
               <DndContext
@@ -658,6 +723,7 @@ const WorkoutCreationModal = ({
                         setSelectedExercises={setSelectedExercises}
                         highlightedExercises={highlightedExercises}
                         onToggleHighlight={handleToggleHighlight}
+                        onCycleSuperset={handleCycleSuperset}
                       />
                     ))}
                   </Stack>

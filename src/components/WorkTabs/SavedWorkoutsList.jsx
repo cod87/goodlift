@@ -110,7 +110,7 @@ const SavedWorkoutsList = memo(({
 
       {/* Saved Workouts List */}
       {savedWorkouts.length === 0 ? (
-        <Card elevation={2} sx={{ borderRadius: 3 }}>
+        <Card sx={{ borderRadius: 3 }}>
           <CardContent sx={{ textAlign: 'center', py: 4 }}>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
               No saved workouts yet. Create your first workout!
@@ -128,7 +128,7 @@ const SavedWorkoutsList = memo(({
       ) : (
         <List sx={{ p: 0 }}>
           {savedWorkouts.map((workout, index) => (
-            <Card key={index} elevation={2} sx={{ mb: 2, borderRadius: 3 }}>
+            <Card key={index} sx={{ mb: 2, borderRadius: 3 }}>
               <ListItem
                 disablePadding
                 secondaryAction={

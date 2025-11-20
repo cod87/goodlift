@@ -106,21 +106,22 @@ const MobilitySelection = ({ onStartStretchSession }) => {
           >
             <Grid container spacing={3} sx={{ marginTop: 2 }}>
               <Grid item xs={12} md={6}>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Card
-                    onClick={handleSelectFullBodyStretch}
-                    sx={{
-                      cursor: 'pointer',
-                      height: '100%',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        boxShadow: 6,
-                        borderColor: 'primary.main',
-                      },
-                      border: '2px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
+                <Card
+                  onClick={handleSelectFullBodyStretch}
+                  sx={{
+                    cursor: 'pointer',
+                    height: '100%',
+                    transition: 'border-color 0.2s ease, opacity 0.15s ease',
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                    },
+                    '&:active': {
+                      opacity: 0.8,
+                    },
+                    border: '2px solid',
+                    borderColor: 'divider',
+                  }}
+                >
                     <CardContent sx={{ padding: 4 }}>
                       <Box
                         sx={{
@@ -172,21 +173,21 @@ const MobilitySelection = ({ onStartStretchSession }) => {
                       </Box>
                     </CardContent>
                   </Card>
-                </motion.div>
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Card
-                    onClick={handleSelectCustomStretch}
-                    sx={{
-                      cursor: 'pointer',
-                      height: '100%',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        boxShadow: 6,
-                        borderColor: 'info.main',
-                      },
+                <Card
+                  onClick={handleSelectCustomStretch}
+                  sx={{
+                    cursor: 'pointer',
+                    height: '100%',
+                    transition: 'border-color 0.2s ease, opacity 0.15s ease',
+                    '&:hover': {
+                      borderColor: 'info.main',
+                    },
+                    '&:active': {
+                      opacity: 0.8,
+                    },
                       border: '2px solid',
                       borderColor: 'divider',
                     }}
@@ -242,7 +243,6 @@ const MobilitySelection = ({ onStartStretchSession }) => {
                       </Box>
                     </CardContent>
                   </Card>
-                </motion.div>
               </Grid>
             </Grid>
           </motion.div>

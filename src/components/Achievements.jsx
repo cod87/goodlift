@@ -48,8 +48,6 @@ const AchievementBadge = ({ achievement, unlocked, onClick }) => {
   
   return (
     <motion.div
-      whileHover={{ scale: unlocked ? 1.05 : 1.02 }}
-      whileTap={{ scale: 0.98 }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -62,10 +60,12 @@ const AchievementBadge = ({ achievement, unlocked, onClick }) => {
           position: 'relative',
           background: unlocked ? tier.gradient : 'linear-gradient(135deg, #424242 0%, #303030 100%)',
           color: unlocked ? tier.textColor : '#888',
-          transition: 'all 0.3s ease',
+          transition: 'opacity 0.15s ease',
           '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: unlocked ? 6 : 2,
+            opacity: 0.9,
+          },
+          '&:active': {
+            opacity: 0.8,
           },
         }}
       >

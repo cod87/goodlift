@@ -108,7 +108,6 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
           <motion.button
             key={item.id}
             onClick={() => handleNavClick(item.id)}
-            whileTap={{ scale: 0.9 }}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -121,11 +120,12 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
               border: 'none',
               cursor: 'pointer',
               color: active ? item.activeColor : theme.palette.text.secondary,
-              transition: 'color 0.2s ease',
+              transition: 'color 0.2s ease, opacity 0.15s ease',
               padding: '8px 4px',
             }}
             aria-label={item.label}
             aria-current={active ? 'page' : undefined}
+            whilePressed={{ opacity: 0.7 }}
           >
             {/* Icon */}
             <div style={{

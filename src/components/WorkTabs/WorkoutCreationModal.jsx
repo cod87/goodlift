@@ -134,7 +134,6 @@ const SortableExerciseItem = ({
     <Card
       ref={setNodeRef}
       style={style}
-      elevation={isDragging ? 4 : (isHighlighted || isInSuperset ? 3 : 1)}
       onClick={handleCardClick}
       {...(isReorderMode ? { ...attributes, ...listeners } : {})}
       sx={{
@@ -147,14 +146,14 @@ const SortableExerciseItem = ({
         backgroundColor: isInSuperset 
           ? supersetColor?.light 
           : (isHighlighted ? highlightColor?.light : 'background.paper'),
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        transform: (isHighlighted || isInSuperset) ? 'translateY(-4px)' : 'translateY(0)',
+        transition: 'background-color 0.2s ease, border-color 0.2s ease, opacity 0.15s ease',
+        opacity: isDragging ? 0.5 : 1,
         '&:hover': {
-          transform: (isHighlighted || isInSuperset) ? 'translateY(-4px)' : 'translateY(-2px)',
-          boxShadow: 3,
+          opacity: 0.9,
         },
         '&:active': {
           cursor: isReorderMode ? 'grabbing' : 'pointer',
+          opacity: 0.8,
         },
       }}
     >
@@ -609,19 +608,17 @@ const WorkoutCreationModal = ({
                 return (
                   <Card
                     key={exerciseName}
-                    elevation={1}
                     sx={{
                       cursor: 'pointer',
                       position: 'relative',
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transition: 'border-color 0.2s ease, opacity 0.15s ease',
                       borderLeft: isSelected ? '4px solid' : '4px solid transparent',
                       borderLeftColor: isSelected ? 'success.main' : 'transparent',
                       '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: 3,
+                        borderLeftColor: isSelected ? 'success.dark' : 'primary.light',
                       },
                       '&:active': {
-                        transform: 'translateY(-2px)',
+                        opacity: 0.8,
                       },
                     }}
                     onClick={() => handleExerciseToggle(exercise)}

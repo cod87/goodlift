@@ -139,6 +139,9 @@ export const ThemeProvider = ({ children }) => {
                 backgroundImage: 'none',
               },
             },
+            defaultProps: {
+              elevation: 0,
+            },
           },
           MuiPaper: {
             styleOverrides: {
@@ -146,13 +149,28 @@ export const ThemeProvider = ({ children }) => {
                 backgroundImage: 'none',
               },
             },
+            defaultProps: {
+              elevation: 0,
+            },
           },
           MuiButton: {
             styleOverrides: {
+              root: {
+                boxShadow: 'none',
+                '&:hover': {
+                  boxShadow: 'none',
+                },
+                '&:active': {
+                  boxShadow: 'none',
+                },
+              },
               containedPrimary: mode === 'dark' ? {
                 backgroundColor: '#1db584',
                 '&:hover': {
                   backgroundColor: '#18a071',
+                },
+                '&:active': {
+                  backgroundColor: '#0f7a55',
                 },
               } : {
                 backgroundColor: '#18a071',
@@ -160,11 +178,17 @@ export const ThemeProvider = ({ children }) => {
                 '&:hover': {
                   backgroundColor: '#0f7a55',
                 },
+                '&:active': {
+                  backgroundColor: '#0c5f42',
+                },
               },
               containedSecondary: mode === 'dark' ? {
                 backgroundColor: '#ff8c00',
                 '&:hover': {
                   backgroundColor: '#cc7000',
+                },
+                '&:active': {
+                  backgroundColor: '#a65900',
                 },
               } : {
                 backgroundColor: '#ff8c00',
@@ -172,6 +196,37 @@ export const ThemeProvider = ({ children }) => {
                 '&:hover': {
                   backgroundColor: '#cc7000',
                 },
+                '&:active': {
+                  backgroundColor: '#a65900',
+                },
+              },
+            },
+            defaultProps: {
+              disableElevation: true,
+              disableRipple: true,
+            },
+          },
+          MuiIconButton: {
+            defaultProps: {
+              disableRipple: true,
+            },
+          },
+          MuiTab: {
+            styleOverrides: {
+              root: {
+                '&.Mui-selected': {
+                  // Keep color change for selected state
+                },
+              },
+            },
+            defaultProps: {
+              disableRipple: true,
+            },
+          },
+          MuiTabs: {
+            styleOverrides: {
+              root: {
+                // Keep the indicator animation
               },
             },
           },

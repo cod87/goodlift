@@ -253,7 +253,8 @@ const ProgressDashboard = () => {
       const adherencePercent = calculateAdherence(allSessions, null, 30);
       setAdherence(adherencePercent);
 
-      const pinned = await progressiveOverloadService.getPinnedExercises();
+      // Load pinned exercises and sync with latest performance from workout history
+      const pinned = await progressiveOverloadService.syncPinnedExercisesWithHistory(loadedHistory);
       setPinnedExercisesState(pinned);
 
       try {
@@ -568,7 +569,9 @@ const ProgressDashboard = () => {
                       );
 
                       const startingWeight = progression.length > 0 ? progression[0].value : 0;
-                      const currentWeight = progression.length > 0 ? progression[progression.length - 1].value : 0;
+                      // Use stored latest performance if available, otherwise fall back to progression data
+                      const currentWeight = pinned.lastWeight !== undefined ? pinned.lastWeight : 
+                                          (progression.length > 0 ? progression[progression.length - 1].value : 0);
                       const progressionDirection = currentWeight > startingWeight ? 'up' : 
                                                    currentWeight < startingWeight ? 'down' : 'same';
 
@@ -596,7 +599,7 @@ const ProgressDashboard = () => {
                             </IconButton>
                           </Stack>
 
-                          {progression.length > 0 ? (
+                          {(progression.length > 0 || pinned.lastWeight !== undefined) ? (
                             <Stack 
                               direction="row" 
                               alignItems="center" 

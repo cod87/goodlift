@@ -19,6 +19,7 @@ import {
   Star,
   PlayArrow,
   Delete,
+  FitnessCenter,
   CalendarMonth,
   CheckCircle,
 } from '@mui/icons-material';
@@ -39,9 +40,6 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
   const { assignWorkoutToDay, weeklySchedule } = useWeekScheduling();
-
-  // Get base URL for work-icon.svg
-  const baseUrl = import.meta.env.BASE_URL || '/';
 
   const daysOfWeek = [
     'Monday',
@@ -188,12 +186,7 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
                 gap: 1,
               }}
             >
-              <Box
-                component="img"
-                src={`${baseUrl}work-icon.svg`}
-                alt="Workout"
-                sx={{ width: 20, height: 20 }}
-              />
+              <FitnessCenter sx={{ color: 'text.secondary', fontSize: 20 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography 
                   variant="subtitle2" 

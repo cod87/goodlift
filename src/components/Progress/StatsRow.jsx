@@ -10,6 +10,7 @@ import {
   useMediaQuery
 } from '@mui/material';
 import { 
+  FitnessCenter, 
   Timer, 
   TrendingUp, 
   Whatshot 
@@ -23,9 +24,6 @@ const StatsRow = memo(({ stats = {} }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Get base URL for work-icon.svg
-  const baseUrl = import.meta.env.BASE_URL || '/';
-
   const {
     workoutsThisWeek = 0,
     totalVolume = 0,
@@ -35,14 +33,7 @@ const StatsRow = memo(({ stats = {} }) => {
 
   const statItems = [
     {
-      icon: (
-        <Box
-          component="img"
-          src={`${baseUrl}work-icon.svg`}
-          alt="Workouts"
-          sx={{ width: 24, height: 24 }}
-        />
-      ),
+      icon: <FitnessCenter />,
       value: workoutsThisWeek,
       label: 'Workouts this week',
       color: 'primary.main',

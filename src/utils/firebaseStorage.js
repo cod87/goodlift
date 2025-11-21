@@ -450,7 +450,7 @@ export const loadSavedWorkoutsFromFirebase = async (userId) => {
 /**
  * Save pinned exercises to Firebase
  * @param {string} userId - The authenticated user's UID
- * @param {array} pinnedExercises - The pinned exercises array
+ * @param {Array} pinnedExercises - The pinned exercises array
  */
 export const savePinnedExercisesToFirebase = async (userId, pinnedExercises) => {
   if (!userId) return;
@@ -465,7 +465,7 @@ export const savePinnedExercisesToFirebase = async (userId, pinnedExercises) => 
 /**
  * Load pinned exercises from Firebase
  * @param {string} userId - The authenticated user's UID
- * @returns {array|null} - The pinned exercises array or null if not found
+ * @returns {Array|null} - The pinned exercises array or null if not found
  */
 export const loadPinnedExercisesFromFirebase = async (userId) => {
   if (!userId) return null;

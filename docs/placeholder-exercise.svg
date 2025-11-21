@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
-  <rect width="400" height="400" fill="#2a3647"/>
-  <text x="200" y="180" font-family="Arial, sans-serif" font-size="24" fill="#a0a8b3" text-anchor="middle">Exercise Demo</text>
-  <text x="200" y="220" font-family="Arial, sans-serif" font-size="18" fill="#a0a8b3" text-anchor="middle">Not Available</text>
-  <circle cx="200" cy="280" r="40" fill="none" stroke="#1db584" stroke-width="3"/>
-  <path d="M 180 280 L 190 290 L 220 260" fill="none" stroke="#1db584" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>

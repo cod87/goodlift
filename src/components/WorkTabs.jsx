@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Tabs, Tab } from '@mui/material';
-import { 
-  FitnessCenter,
-  DirectionsRun,
-  EditNote,
-} from '@mui/icons-material';
 import StrengthTab from './WorkTabs/StrengthTab';
 import MobilityTab from './WorkTabs/MobilityTab';
 import LogActivityTab from './WorkTabs/LogActivityTab';
@@ -40,6 +35,25 @@ const WorkTabs = ({
   const changeTab = (tabIndex) => {
     setActiveTab(tabIndex);
   };
+
+  // Get base URL for work-icon.svg
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  
+  // Create icon component for work-icon.svg with consistent sizing
+  const WorkIcon = ({ sx = {} }) => (
+    <Box
+      component="img"
+      src={`${baseUrl}work-icon.svg`}
+      alt="Work"
+      sx={{
+        width: 24,
+        height: 24,
+        display: 'inline-block',
+        verticalAlign: 'middle',
+        ...sx,
+      }}
+    />
+  );
 
   return (
     <Box 
@@ -76,17 +90,17 @@ const WorkTabs = ({
           }}
         >
           <Tab 
-            icon={<FitnessCenter />} 
+            icon={<WorkIcon />} 
             label="Strength" 
             iconPosition="start"
           />
           <Tab 
-            icon={<DirectionsRun />} 
+            icon={<WorkIcon />} 
             label="Mobility" 
             iconPosition="start"
           />
           <Tab 
-            icon={<EditNote />} 
+            icon={<WorkIcon />} 
             label="Activity" 
             iconPosition="start"
           />

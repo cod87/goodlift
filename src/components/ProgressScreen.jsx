@@ -58,6 +58,8 @@ import EditActivityDialog from './EditActivityDialog';
 import {
   getWorkoutHistory,
   getStretchSessions,
+  getHiitSessions,
+  getCardioSessions,
   getUserStats,
   deleteWorkout,
   updateWorkout,
@@ -70,21 +72,21 @@ import { useUserProfile } from '../contexts/UserProfileContext';
 /**
  * Calculate current workout streak in days with improved logic
  * Allows one unlogged rest day per week (as long as missed days are not within 7 days of each other)
- * @param {Array} workoutHistory - Array of completed workout objects with date
+ * @param {Array} allSessions - Array of all completed sessions (strength, cardio, HIIT, yoga/stretch) with date
  * @returns {Object} { currentStreak: number, longestStreak: number }
  */
-const calculateStreakWithRestDays = (workoutHistory = []) => {
-  if (!workoutHistory || workoutHistory.length === 0) {
+const calculateStreakWithRestDays = (allSessions = []) => {
+  if (!allSessions || allSessions.length === 0) {
     return { currentStreak: 0, longestStreak: 0 };
   }
 
-  // Sort workouts by date (newest first)
-  const sortedWorkouts = [...workoutHistory].sort((a, b) => 
+  // Sort sessions by date (newest first)
+  const sortedSessions = [...allSessions].sort((a, b) => 
     new Date(b.date) - new Date(a.date)
   );
 
-  // Get unique workout dates (in case multiple workouts on same day)
-  const workoutDates = new Set(sortedWorkouts.map(w => {
+  // Get unique session dates (in case multiple sessions on same day)
+  const sessionDates = new Set(sortedSessions.map(w => {
     const d = new Date(w.date);
     d.setHours(0, 0, 0, 0);
     return d.getTime();
@@ -111,16 +113,16 @@ const calculateStreakWithRestDays = (workoutHistory = []) => {
       missedDaysInCurrentWeek = 0;
     }
     
-    if (workoutDates.has(checkTime)) {
-      // Found a workout on this day
+    if (sessionDates.has(checkTime)) {
+      // Found a session on this day
       streakCount++;
       if (currentStreak === 0 && i < 2) {
-        // Only count as current streak if workout was within last 2 days
+        // Only count as current streak if session was within last 2 days
         currentStreak = streakCount;
       }
       longestStreak = Math.max(longestStreak, streakCount);
     } else {
-      // No workout on this day
+      // No session on this day
       missedDaysInCurrentWeek++;
       
       // Check if this breaks the streak
@@ -129,8 +131,8 @@ const calculateStreakWithRestDays = (workoutHistory = []) => {
         // Check if we have 2 consecutive missed days (within 7 days)
         const nextDate = new Date(checkDate);
         nextDate.setDate(nextDate.getDate() - 1);
-        if (!workoutDates.has(nextDate.getTime()) && i > 0) {
-          // Two consecutive days without workout - break streak
+        if (!sessionDates.has(nextDate.getTime()) && i > 0) {
+          // Two consecutive days without session - break streak
           if (currentStreak === 0 && streakCount > 0) {
             break; // Current streak already ended
           }
@@ -149,23 +151,23 @@ const calculateStreakWithRestDays = (workoutHistory = []) => {
 /**
  * Calculate adherence percentage based on 6 days per week standard
  * Allows one rest day per week under the condition that missed days are not within 7 days of each other
- * @param {Array} workoutHistory - Array of completed workout objects
+ * @param {Array} allSessions - Array of all completed sessions (strength, cardio, HIIT, yoga/stretch)
  * @param {number} days - Number of days to calculate adherence for (default 30)
  * @returns {number} Adherence percentage (0-100)
  */
-const calculateAdherenceWith6DayWeek = (workoutHistory = [], days = 30) => {
+const calculateAdherenceWith6DayWeek = (allSessions = [], days = 30) => {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
   cutoffDate.setHours(0, 0, 0, 0);
 
-  // Count completed workouts in time period
-  const completedWorkouts = workoutHistory.filter(w => {
-    const workoutDate = new Date(w.date);
-    workoutDate.setHours(0, 0, 0, 0);
-    return workoutDate >= cutoffDate;
+  // Count completed sessions in time period
+  const completedSessions = allSessions.filter(s => {
+    const sessionDate = new Date(s.date);
+    sessionDate.setHours(0, 0, 0, 0);
+    return sessionDate >= cutoffDate;
   });
 
-  const completedCount = completedWorkouts.length;
+  const completedCount = completedSessions.length;
 
   // Calculate planned workouts based on 6 days per week (allowing 1 rest day per week)
   // Standard: 6 workouts per week
@@ -334,19 +336,30 @@ const ProgressDashboard = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [loadedHistory, , loadedStats] = await Promise.all([
+      const [loadedHistory, loadedStretchSessions, loadedHiitSessions, loadedCardioSessions, loadedStats] = await Promise.all([
         getWorkoutHistory(),
         getStretchSessions(),
+        getHiitSessions(),
+        getCardioSessions(),
         getUserStats()
       ]);
-      setHistory(loadedHistory);
+      
+      // Merge all session types for unified history display and calculations
+      const allSessions = [
+        ...loadedHistory,
+        ...loadedStretchSessions,
+        ...loadedHiitSessions,
+        ...loadedCardioSessions
+      ];
+      
+      setHistory(allSessions);
       setUserStats(loadedStats);
 
-      // Calculate tracking metrics using new improved functions
-      const streak = calculateStreakWithRestDays(loadedHistory);
+      // Calculate tracking metrics using new improved functions with all session types
+      const streak = calculateStreakWithRestDays(allSessions);
       setStreakData(streak);
 
-      const adherencePercent = calculateAdherenceWith6DayWeek(loadedHistory, 30);
+      const adherencePercent = calculateAdherenceWith6DayWeek(allSessions, 30);
       setAdherence(adherencePercent);
 
       const pinned = progressiveOverloadService.getPinnedExercises();

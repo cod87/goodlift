@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { 
   Box, 
@@ -9,6 +9,8 @@ import {
   Stack,
   IconButton,
   useTheme,
+  useMediaQuery,
+  Avatar,
 } from '@mui/material';
 import { 
   CheckCircle,
@@ -24,6 +26,8 @@ import {
   ArrowForward,
 } from '@mui/icons-material';
 import ExerciseInputs from './ExerciseInputs';
+import { useUserProfile } from '../../contexts/UserProfileContext';
+import { getPresetAvatarColor, getDoggoAvatarUrl, DOGGO_AVATARS } from '../../utils/avatarUtils';
 
 /**
  * ExerciseCard - Enhanced exercise display with improved layout
@@ -59,12 +63,18 @@ const ExerciseCard = memo(({
   showPartialComplete = false,
 }) => {
   const theme = useTheme();
+  const { profile, getInitials } = useUserProfile();
   const [weight, setWeight] = useState(lastWeight || '');
   const [reps, setReps] = useState(lastReps || '');
   const [setLogged, setSetLogged] = useState(false);
   const [suggestionAccepted, setSuggestionAccepted] = useState(false);
   const [imageSrc, setImageSrc] = useState(demoImage);
   const [imageError, setImageError] = useState(false);
+  
+  // Detect landscape orientation on tablets (sm breakpoint and up)
+  const isTabletOrLarger = useMediaQuery(theme.breakpoints.up('sm'));
+  const isLandscape = useMediaQuery('(orientation: landscape)');
+  const shouldUseTwoColumns = isTabletOrLarger && isLandscape;
 
   // Update image source when demoImage prop changes
   useEffect(() => {
@@ -75,10 +85,118 @@ const ExerciseCard = memo(({
   const handleImageError = () => {
     if (!imageError) {
       setImageError(true);
-      // Fall back to placeholder if image fails to load
-      const baseUrl = import.meta.env.BASE_URL || '/';
-      setImageSrc(`${baseUrl}placeholder-exercise.svg`);
+      // Instead of falling back to placeholder, we'll use null to trigger avatar display
+      setImageSrc(null);
     }
+  };
+  
+  // Get random doggo avatar for guest users - memoized and seeded by exercise name for consistency
+  const randomDoggoAvatar = useMemo(() => {
+    // Use exercise name to seed a consistent "random" avatar for this exercise
+    let hash = 0;
+    for (let i = 0; i < exerciseName.length; i++) {
+      hash = ((hash << 5) - hash) + exerciseName.charCodeAt(i);
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    const index = Math.abs(hash) % DOGGO_AVATARS.length;
+    return DOGGO_AVATARS[index].url;
+  }, [exerciseName]); // Recalculate only when exercise name changes
+  
+  // Render user avatar or random avatar as fallback
+  const renderAvatarFallback = () => {
+    let avatarContent = null;
+    
+    if (profile.avatar) {
+      // User has a custom avatar
+      if (profile.avatar.startsWith('preset-')) {
+        // Preset color avatar with initials
+        const color = getPresetAvatarColor(profile.avatar);
+        avatarContent = (
+          <Avatar
+            sx={{
+              width: '100%',
+              height: '100%',
+              maxWidth: 300,
+              maxHeight: 300,
+              bgcolor: color,
+              fontSize: { xs: '3rem', sm: '5rem', md: '6rem' },
+              fontWeight: 700,
+            }}
+          >
+            {getInitials()}
+          </Avatar>
+        );
+      } else if (profile.avatar.startsWith('doggo-')) {
+        // Doggo avatar
+        const avatarUrl = getDoggoAvatarUrl(profile.avatar);
+        avatarContent = (
+          <Avatar
+            src={avatarUrl}
+            alt="User avatar"
+            sx={{
+              width: '100%',
+              height: '100%',
+              maxWidth: 300,
+              maxHeight: 300,
+            }}
+          />
+        );
+      } else {
+        // Legacy custom URL
+        avatarContent = (
+          <Avatar
+            src={profile.avatar}
+            alt="User avatar"
+            sx={{
+              width: '100%',
+              height: '100%',
+              maxWidth: 300,
+              maxHeight: 300,
+            }}
+          />
+        );
+      }
+    } else {
+      // Guest user - show random doggo avatar
+      avatarContent = (
+        <Avatar
+          src={randomDoggoAvatar}
+          alt="Guest avatar"
+          sx={{
+            width: '100%',
+            height: '100%',
+            maxWidth: 300,
+            maxHeight: 300,
+          }}
+        />
+      );
+    }
+    
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+          gap: 1,
+        }}
+      >
+        {avatarContent}
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+            fontSize: { xs: '0.7rem', sm: '0.8rem' },
+            fontStyle: 'italic',
+          }}
+        >
+          no demo image available
+        </Typography>
+      </Box>
+    );
   };
 
   const handleSubmit = (e) => {
@@ -170,119 +288,186 @@ const ExerciseCard = memo(({
         </Box>
       </Box>
 
-      {/* Exercise Name - Custom Typography with Maximum Control */}
-      <Box sx={{ mb: 0.3, flexShrink: 0 }}>
-        <Typography 
-          component="div"
-          sx={{ 
-            fontWeight: '700 !important',
-            color: 'primary.main',
-            textAlign: 'center',
-            lineHeight: '1.2 !important',
-            fontFamily: "'Montserrat', sans-serif !important",
-            // Responsive font sizing - smaller on mobile to ensure 2-line display
-            fontSize: {
-              xs: '1.25rem !important', // 20px on mobile
-              sm: '1.75rem !important', // 28px on tablet
-              md: '2.5rem !important',  // 40px on desktop
-            },
-            // Limit to max 2 lines with ellipsis
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            wordBreak: 'break-word',
-          }}
-        >
-          {exerciseName}
-        </Typography>
-      </Box>
-
-      {/* Demo Image or Video - Fills all available space */}
+      {/* Main Content Area - Two Column Layout in Landscape, Single Column in Portrait */}
       <Box sx={{ 
         flexGrow: 1, 
-        flexShrink: 1, 
-        position: 'relative', 
-        mb: 0.3, 
-        minHeight: 0, // Critical for flexbox child to shrink
-        display: 'flex', // Enable flex for better space utilization
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexShrink: 1,
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: shouldUseTwoColumns ? 'row' : 'column',
+        gap: shouldUseTwoColumns ? 2 : 0.3,
+        mb: 0.3,
       }}>
-        {imageSrc ? (
-          <Box
-            component="img"
-            src={imageSrc}
-            alt={`${exerciseName} demonstration`}
-            onError={handleImageError}
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              borderRadius: 2,
-              objectFit: 'contain',
-            }}
-            loading="lazy"
-          />
-        ) : videoUrl && (
-          <iframe
-            src={videoUrl}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              border: 'none',
-              borderRadius: '8px',
-            }}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title={`${exerciseName} video`}
-          />
+        {/* Left Column (or top in portrait): Exercise Name and Image */}
+        <Box sx={{ 
+          flex: shouldUseTwoColumns ? '1 1 50%' : '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+          gap: 0.3,
+        }}>
+          {/* Exercise Name */}
+          <Box sx={{ flexShrink: 0 }}>
+            <Typography 
+              component="div"
+              sx={{ 
+                fontWeight: '700 !important',
+                color: 'primary.main',
+                textAlign: shouldUseTwoColumns ? 'left' : 'center',
+                lineHeight: '1.2 !important',
+                fontFamily: "'Montserrat', sans-serif !important",
+                // Responsive font sizing
+                fontSize: shouldUseTwoColumns ? {
+                  sm: '1.5rem !important', // Smaller in landscape to fit
+                  md: '2rem !important',
+                } : {
+                  xs: '1.25rem !important', // 20px on mobile
+                  sm: '1.75rem !important', // 28px on tablet
+                  md: '2.5rem !important',  // 40px on desktop
+                },
+                // Limit to max 2 lines with ellipsis
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                wordBreak: 'break-word',
+              }}
+            >
+              {exerciseName}
+            </Typography>
+          </Box>
+
+          {/* Demo Image or Video or Avatar Fallback */}
+          <Box sx={{ 
+            flexGrow: 1, 
+            flexShrink: 1, 
+            position: 'relative',
+            minHeight: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            {imageSrc ? (
+              <Box
+                component="img"
+                src={imageSrc}
+                alt={`${exerciseName} demonstration`}
+                onError={handleImageError}
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 2,
+                  objectFit: 'contain',
+                }}
+                loading="lazy"
+              />
+            ) : videoUrl ? (
+              <iframe
+                src={videoUrl}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  borderRadius: '8px',
+                }}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={`${exerciseName} video`}
+              />
+            ) : (
+              renderAvatarFallback()
+            )}
+          </Box>
+        </Box>
+
+        {/* Right Column (or bottom in portrait): Alerts and Inputs - Only show if NOT in two-column mode */}
+        {!shouldUseTwoColumns && (
+          <Box sx={{ flexShrink: 0 }}>
+            {/* Alerts */}
+            {setLogged && (
+              <Alert icon={<CheckCircle />} severity="success" sx={{ mb: 0.3 }}>
+                Set logged! Moving to next...
+              </Alert>
+            )}
+            {shouldShowSuggestion() && (
+              <Alert icon={<TrendingUp />} severity="info" sx={{ mb: 0.3, '& .MuiAlert-message': { width: '100%' } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                  <Typography variant="body2" sx={{ mr: 1, flexGrow: 1 }}>
+                    💡 Try: {suggestedWeight} lbs × {suggestedReps} reps
+                    {lastWeight != null && suggestedWeight > lastWeight && ' (↑w)'}
+                    {lastWeight != null && suggestedWeight === lastWeight && suggestedReps > lastReps && ' (↑r)'}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
+                    <Button size="small" onClick={handleAcceptSuggestion} variant="contained">Accept</Button>
+                    <Button size="small" onClick={() => setSuggestionAccepted(true)} variant="outlined">Skip</Button>
+                  </Box>
+                </Box>
+              </Alert>
+            )}
+            
+            {/* Input Form */}
+            <Box component="form" onSubmit={handleSubmit}>
+              <Box sx={{ mb: 2 }}>
+                <ExerciseInputs weight={weight} reps={reps} lastWeight={lastWeight} lastReps={lastReps} onWeightChange={setWeight} onRepsChange={setReps} disabled={setLogged} />
+              </Box>
+              <Stack direction="row" spacing={2}>
+                {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '44px' }}>Back</Button>}
+                <Button type="submit" variant="contained" fullWidth={!showBack} disabled={setLogged} endIcon={<ArrowForward />} sx={{ minHeight: '44px' }}>
+                  {setLogged ? 'Logging...' : 'Next'}
+                </Button>
+              </Stack>
+            </Box>
+          </Box>
         )}
       </Box>
 
-      {/* Alerts */}
-      <Box sx={{ flexShrink: 0, mb: 0.3 }}>
-        {setLogged && (
-          <Alert icon={<CheckCircle />} severity="success">
-            Set logged! Moving to next...
-          </Alert>
-        )}
-        {shouldShowSuggestion() && (
-          <Alert icon={<TrendingUp />} severity="info" sx={{ '& .MuiAlert-message': { width: '100%' } }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-              <Typography variant="body2" sx={{ mr: 1, flexGrow: 1 }}>
-                💡 Try: {suggestedWeight} lbs × {suggestedReps} reps
-                {lastWeight != null && suggestedWeight > lastWeight && ' (↑w)'}
-                {lastWeight != null && suggestedWeight === lastWeight && suggestedReps > lastReps && ' (↑r)'}
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
-                <Button size="small" onClick={handleAcceptSuggestion} variant="contained">Accept</Button>
-                <Button size="small" onClick={() => setSuggestionAccepted(true)} variant="outlined">Skip</Button>
+      {/* Alerts and Inputs in Landscape Mode - Displayed below the two columns */}
+      {shouldUseTwoColumns && (
+        <Box sx={{ flexShrink: 0 }}>
+          {/* Alerts */}
+          {setLogged && (
+            <Alert icon={<CheckCircle />} severity="success" sx={{ mb: 0.3 }}>
+              Set logged! Moving to next...
+            </Alert>
+          )}
+          {shouldShowSuggestion() && (
+            <Alert icon={<TrendingUp />} severity="info" sx={{ mb: 0.3, '& .MuiAlert-message': { width: '100%' } }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <Typography variant="body2" sx={{ mr: 1, flexGrow: 1 }}>
+                  💡 Try: {suggestedWeight} lbs × {suggestedReps} reps
+                  {lastWeight != null && suggestedWeight > lastWeight && ' (↑w)'}
+                  {lastWeight != null && suggestedWeight === lastWeight && suggestedReps > lastReps && ' (↑r)'}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
+                  <Button size="small" onClick={handleAcceptSuggestion} variant="contained">Accept</Button>
+                  <Button size="small" onClick={() => setSuggestionAccepted(true)} variant="outlined">Skip</Button>
+                </Box>
               </Box>
+            </Alert>
+          )}
+          
+          {/* Input Form */}
+          <Box component="form" onSubmit={handleSubmit}>
+            <Box sx={{ mb: 2 }}>
+              <ExerciseInputs weight={weight} reps={reps} lastWeight={lastWeight} lastReps={lastReps} onWeightChange={setWeight} onRepsChange={setReps} disabled={setLogged} />
             </Box>
-          </Alert>
-        )}
-      </Box>
-      
-      {/* Input Form */}
-      <Box component="form" onSubmit={handleSubmit} sx={{ flexShrink: 0 }}>
-        <Box sx={{ mb: 2 }}>
-          <ExerciseInputs weight={weight} reps={reps} lastWeight={lastWeight} lastRps={lastReps} onWeightChange={setWeight} onRepsChange={setReps} disabled={setLogged} />
+            <Stack direction="row" spacing={2}>
+              {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '44px' }}>Back</Button>}
+              <Button type="submit" variant="contained" fullWidth={!showBack} disabled={setLogged} endIcon={<ArrowForward />} sx={{ minHeight: '44px' }}>
+                {setLogged ? 'Logging...' : 'Next'}
+              </Button>
+            </Stack>
+          </Box>
         </Box>
-        <Stack direction="row" spacing={2}>
-          {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '44px' }}>Back</Button>}
-          <Button type="submit" variant="contained" fullWidth={!showBack} disabled={setLogged} endIcon={<ArrowForward />} sx={{ minHeight: '44px' }}>
-            {setLogged ? 'Logging...' : 'Next'}
-          </Button>
-        </Stack>
-      </Box>
+      )}
     </Box>
   );
 });

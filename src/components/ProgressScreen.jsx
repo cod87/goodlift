@@ -249,6 +249,7 @@ const ProgressDashboard = () => {
       const streak = calculateStreak(allSessions);
       setStreakData(streak);
 
+      // Calculate adherence for last 30 days (activePlan is null since we removed planning features)
       const adherencePercent = calculateAdherence(allSessions, null, 30);
       setAdherence(adherencePercent);
 
@@ -949,7 +950,7 @@ const ProgressDashboard = () => {
                   <Box component="ul" sx={{ mt: 0.5, mb: 0, pl: 2 }}>
                     <li><strong>At least 3 strength training sessions</strong> per week</li>
                   </Box>
-                  Incomplete weeks (partial weeks at start/end of streak) don't have this requirement.
+                  Incomplete weeks (weeks where your streak doesn't cover all 7 days from Sunday to Saturday) don't have this strength training requirement.
                 </Typography>
               </Box>
 

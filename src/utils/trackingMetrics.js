@@ -9,10 +9,10 @@
  */
 
 /**
- * Calculate current workout streak in days
- * Includes rest days - only breaks if user misses planned workout
+ * Calculate current workout streak in days with calendar week-based logic
+ * Uses Sunday-Saturday as fixed week boundaries. Allows one missed day per calendar week.
+ * Week with 6 or 7 sessions counts as a full 7-day week in the streak.
  * @param {Array} workoutHistory - Array of completed workout objects with date
- * @param {Object} activePlan - Optional active plan with scheduled sessions
  * @returns {Object} { currentStreak: number, longestStreak: number }
  */
 export const calculateStreak = (workoutHistory = []) => {
@@ -63,7 +63,6 @@ export const calculateStreak = (workoutHistory = []) => {
   
   for (let weekOffset = 0; weekOffset < 52; weekOffset++) { // Check up to 52 weeks
     const weekStart = currentWeekStart - (weekOffset * 7 * 24 * 60 * 60 * 1000);
-    const weekEnd = weekStart + (6 * 24 * 60 * 60 * 1000); // Saturday
     
     // Count sessions in this week
     let sessionsInWeek = 0;

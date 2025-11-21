@@ -70,8 +70,9 @@ import { StreakDisplay, AdherenceDisplay, VolumeTrendDisplay } from './Progress/
 import { useUserProfile } from '../contexts/UserProfileContext';
 
 /**
- * Calculate current workout streak in days with improved logic
- * Allows one missed day per calendar week (Sunday-Saturday blocks)
+ * Calculate current workout streak in days with calendar week-based logic
+ * Uses Sunday-Saturday as fixed week boundaries. Allows one missed day per calendar week.
+ * Week with 6 or 7 sessions counts as a full 7-day week in the streak.
  * @param {Array} allSessions - Array of all completed sessions (strength, cardio, HIIT, yoga/stretch) with date
  * @returns {Object} { currentStreak: number, longestStreak: number }
  */
@@ -123,7 +124,6 @@ const calculateStreakWithRestDays = (allSessions = []) => {
   
   for (let weekOffset = 0; weekOffset < 52; weekOffset++) { // Check up to 52 weeks
     const weekStart = currentWeekStart - (weekOffset * 7 * 24 * 60 * 60 * 1000);
-    const weekEnd = weekStart + (6 * 24 * 60 * 60 * 1000); // Saturday
     
     // Count sessions in this week
     let sessionsInWeek = 0;

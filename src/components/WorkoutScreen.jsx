@@ -412,7 +412,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
     setCurrentPhase('complete');
   };
 
-  const handleWorkoutComplete = async () => {
+  const handleWorkoutComplete = () => {
     const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -437,17 +437,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       }
       finalData.exercises[exName].sets.push({ set: setNumber, weight: w, reps: r });
     });
-    
-    // Sync pinned exercises with latest performance after workout completion
-    try {
-      // Get current workout history and add this workout to it for syncing
-      const currentHistory = await getWorkoutHistory();
-      const updatedHistory = [finalData, ...currentHistory];
-      await progressiveOverloadService.syncPinnedExercisesWithHistory(updatedHistory);
-    } catch (error) {
-      console.error('Error syncing pinned exercises after workout:', error);
-      // Continue anyway - workout data is saved
-    }
     
     onComplete(finalData);
   };
@@ -551,16 +540,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
         }
         finalData.exercises[exName].sets.push({ set: setNumber, weight: w, reps: r });
       });
-      
-      // Sync pinned exercises with latest performance after partial workout completion
-      try {
-        const currentHistory = await getWorkoutHistory();
-        const updatedHistory = [finalData, ...currentHistory];
-        await progressiveOverloadService.syncPinnedExercisesWithHistory(updatedHistory);
-      } catch (error) {
-        console.error('Error syncing pinned exercises after partial workout:', error);
-        // Continue anyway - workout data is saved
-      }
       
       onComplete(finalData);
     }

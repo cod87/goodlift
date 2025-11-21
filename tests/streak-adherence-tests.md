@@ -2,6 +2,23 @@
 
 This document describes the expected behavior of the streak and adherence tracking logic.
 
+## Week 0 Concept
+
+**Week 0** is a special designation for the partial week when a user's first-ever session occurs on Wednesday-Saturday:
+
+- **Creation**: If the first session in the app occurs on Wed, Thu, Fri, or Sat, that partial period (up to the Saturday before the next Sunday) is designated as "Week 0"
+- **Week 1 Start**: Week 1 begins on the Sunday after Week 0
+- **Streak Counting**: Week 0 sessions count toward streak calculation (consecutive days)
+- **Adherence**: Week 0 sessions do NOT count toward adherence metrics
+- **Workout Assignment**: Week 0 does NOT trigger automatic workout assignments
+- **No Week 0**: If the first session occurs on Sun, Mon, or Tue, there is no Week 0, and Week 1 starts immediately from the most recent Sunday
+
+Example:
+- User's first session is on Wednesday, Nov 12
+- Sessions on Wed, Thu, Fri, Sat (Nov 12-15) are Week 0
+- Week 1 starts on Sunday, Nov 16
+- Week 0 sessions count for streak but not adherence
+
 ## Streak Calculation
 
 ### Business Rules
@@ -115,6 +132,29 @@ This document describes the expected behavior of the streak and adherence tracki
 - Mon-Wed is an incomplete week (3 days), no strength requirement
 - Streak continues as long as days are consecutive
 
+#### Test 14: Week 0 Streak (New Test)
+**Setup**: First session on Wednesday, continues through Saturday
+**Expected**:
+- 4-day streak (Wed-Sat)
+- Week 0 sessions count toward streak
+- Week 0 is incomplete, exempt from 3-strength requirement
+
+#### Test 15: Week 0 to Week 1 Transition (New Test)
+**Setup**: First session on Thursday, continues daily through next Tuesday
+**Expected**:
+- Streak counts all consecutive days from Thu through Tue
+- Thu-Sat = Week 0 (3 days)
+- Sun-Tue = partial Week 1 (3 days)
+- Total streak = 6 days
+- Both partial weeks are incomplete, exempt from strength requirement
+
+#### Test 16: Week Reset Does Not Break Streak (New Test)
+**Setup**: 6-day streak Sat-Thu, user resets week counter on Sunday
+**Expected**:
+- Streak remains 6 days
+- Week reset is metadata only, doesn't affect date-based streak calculation
+- Each day with a session still counts
+
 ## Adherence Calculation
 
 ### Business Rules
@@ -122,6 +162,7 @@ This document describes the expected behavior of the streak and adherence tracki
 2. **Established Users**: If first session >= 30 days ago, calculate adherence based on last 30 days
 3. **Calculation**: Percentage = (Days with any session) / (Total days in period) × 100
 4. **All Session Types**: Counts strength, cardio, HIIT, yoga/stretch sessions equally
+5. **Week 0 Exclusion**: Week 0 sessions (first sessions Wed-Sat before first Sunday) are excluded from adherence calculation
 
 ### Test Cases
 
@@ -158,6 +199,21 @@ This document describes the expected behavior of the streak and adherence tracki
 #### Test 7: No Sessions
 **Setup**: Empty session history
 **Expected**: 0% adherence
+
+#### Test 8: Week 0 Adherence (New Test)
+**Setup**: User's first session on Wednesday, continues Thu-Sat (Week 0 period)
+**Expected**: 0% adherence while in Week 0
+**Reason**: Week 0 sessions don't count toward adherence
+
+#### Test 9: Week 0 to Week 1 Adherence (New Test)
+**Setup**: Week 0 sessions (Wed-Sat), then Week 1 sessions (Sun-Tue)
+**Expected**: Adherence calculated only from Week 1 start (Sunday)
+**Reason**: Week 0 sessions excluded, only Week 1+ sessions count
+
+#### Test 10: No Week 0 (First Session Sunday-Tuesday)
+**Setup**: First session on Monday, continues Tue-Wed
+**Expected**: Normal adherence calculation from first session
+**Reason**: No Week 0 since first session was Mon (not Wed-Sat)
 
 ## UI Features
 

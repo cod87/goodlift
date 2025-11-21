@@ -330,7 +330,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       setImageError(true);
       // Fall back to placeholder if image fails to load
       const baseUrl = import.meta.env.BASE_URL || '/';
-      setDemoImageSrc(`${baseUrl}placeholder-exercise.svg`);
+      setDemoImageSrc(`${baseUrl}work-icon.svg`);
     }
   };
 

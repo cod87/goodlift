@@ -69,53 +69,46 @@ This document describes the expected behavior of the streak and adherence tracki
 - Date normalization ensures these are treated as separate days
 - This is correct behavior: crossing midnight creates a new calendar day
 
-#### Test 6: Late-Night Workout Edge Case
-**Setup**: Workout at 11:30 PM one day, then workout at 12:05 AM the next day
-**Expected**:
-- Should count as 2 consecutive days (different calendar days)
-- Date normalization ensures these are treated as separate days
-- This is correct behavior: crossing midnight creates a new calendar day
-
 #### Test 7: Last Workout 2 Days Ago
 **Setup**: User's last session was 2 days ago
 **Expected**: 
 - Current Streak: 0 (too long ago to be current)
 - Longest Streak: [previous value]
 
-#### Test 7: First Session Today
+#### Test 8: First Session Today
 **Setup**: User just logged their first session today
 **Expected**: 
 - Current Streak: 1
 - Longest Streak: 1
 
-#### Test 8: Gap in Sessions Breaks Streak
+#### Test 9: Gap in Sessions Breaks Streak
 **Setup**: Sessions for 5 consecutive days, then 1 day gap, then 3 more consecutive days
 **Expected**: 
 - Two separate streaks (5 days and 3 days)
 - Longest streak: 5 days
 - Current streak: 3 days (if recent)
 
-#### Test 9: No Sessions
+#### Test 10: No Sessions
 **Setup**: Empty session history
 **Expected**: 
 - Current Streak: 0
 - Longest Streak: 0
 
-#### Test 10: Mixed Session Types
+#### Test 11: Mixed Session Types
 **Setup**: Consecutive days with strength, cardio, HIIT, and yoga/stretch
 **Expected**: 
 - All session types count toward consecutive days
 - Only strength sessions count toward the weekly strength requirement (3 per complete week)
 - Each complete week in the streak must have at least 3 strength sessions
 
-#### Test 11: Incomplete Week at Start (New Test)
+#### Test 12: Incomplete Week at Start (New Test)
 **Setup**: Streak starts on Wednesday with cardio only, continues through Sunday with strength sessions
 **Expected**:
 - Wed-Sat is an incomplete week (4 days), no strength requirement
 - If the streak continues into the next week and that week is complete (Sun-Sat), it needs 3+ strength sessions
 - Incomplete weeks are exempt from the 3-strength-session rule
 
-#### Test 12: Incomplete Week at End (New Test)
+#### Test 13: Incomplete Week at End (New Test)
 **Setup**: Complete week (Sun-Sat) with 3+ strength sessions, streak continues Mon-Wed
 **Expected**:
 - First week is complete and meets requirement (3+ strength)

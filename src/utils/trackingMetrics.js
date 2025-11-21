@@ -11,7 +11,8 @@
 /**
  * Calculate current workout streak in days based on consecutive days with sessions
  * Counts individual consecutive days with sessions, crossing week boundaries seamlessly.
- * Streak is "alive" only if each week in the streak has at least 1 strength training session.
+ * Streak is "alive" only if each COMPLETE week (Sun-Sat) in the streak has at least 3 strength training sessions.
+ * Incomplete weeks (partial weeks at start/end of streak) are exempt from the strength requirement.
  * 
  * Date handling: All dates are normalized to local midnight (00:00:00) for consistency.
  * This ensures workouts at different times of day (e.g., 11:30 PM vs 12:05 AM) are 
@@ -149,6 +150,9 @@ export const calculateStreak = (workoutHistory = []) => {
       // Check if all complete weeks (from original) in this prefix meet requirement
       let allCompleteWeeksValid = true;
       for (const [weekStart, info] of fullStreakWeeks.entries()) {
+        // Check if this complete week is fully included in the prefix
+        // len is 1-indexed count (e.g., len=7 means indices 0-6)
+        // lastDayIndex is 0-indexed, so lastDayIndex < len means last day is included
         if (completeWeeks.has(weekStart) && info.lastDayIndex < len) {
           // This complete week is fully included in the prefix
           const strengthCount = weekToInfo.get(weekStart)?.strengthCount || 0;

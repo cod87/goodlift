@@ -189,10 +189,35 @@ const SavedWorkoutsList = memo(({
   };
 
   const handleWorkoutClick = (workout) => {
-    if (onStartWorkout && workout.exercises) {
+    // Prevent click if no exercises or invalid workout
+    if (!workout || !workout.exercises || workout.exercises.length === 0) {
+      console.warn('Cannot start workout: no exercises found in workout');
+      return;
+    }
+
+    // Only start workout if callback is provided
+    if (!onStartWorkout) {
+      console.warn('No onStartWorkout callback provided');
+      return;
+    }
+
+    try {
+      // Validate that exercises have required fields
+      const validExercises = workout.exercises.every(ex => 
+        ex && (ex['Exercise Name'] || ex.exerciseName || ex.name)
+      );
+      
+      if (!validExercises) {
+        console.error('Invalid exercise data in workout');
+        return;
+      }
+
       // Start the saved workout with superset config (or default if not defined)
       const config = workout.supersetConfig || [2, 2, 2, 2];
       onStartWorkout(workout.type || 'full', 'all', workout.exercises, config);
+    } catch (error) {
+      console.error('Error starting workout:', error);
+      // Prevent blank screen by not changing navigation state
     }
   };
 

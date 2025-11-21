@@ -26,10 +26,11 @@ export const calculateStreak = (workoutHistory = []) => {
   );
 
   // Get unique workout dates (in case multiple workouts on same day)
-  const workoutDates = [...new Set(sortedWorkouts.map(w => {
+  const workoutDates = new Set(sortedWorkouts.map(w => {
     const d = new Date(w.date);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }))];
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  }));
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -38,38 +39,54 @@ export const calculateStreak = (workoutHistory = []) => {
   let longestStreak = 0;
   let streakCount = 0;
   let checkDate = new Date(today);
+  let missedDaysInCurrentWeek = 0;
+  let isCurrentStreakActive = false;
+  
+  // First check if there's a session within the last 2 days to start the current streak
+  const lastSessionDate = new Date(sortedWorkouts[0].date);
+  lastSessionDate.setHours(0, 0, 0, 0);
+  const daysSinceLastSession = Math.floor((today - lastSessionDate) / (1000 * 60 * 60 * 24));
+  if (daysSinceLastSession <= 1) {
+    isCurrentStreakActive = true; // User has worked out today or yesterday
+  }
 
   // Calculate current streak
-  // A streak continues if there's a workout within the last 2 days (allowing rest days)
-  for (let i = 0; i < 90; i++) { // Check up to 90 days
-    const dateStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+  // Allow one unlogged rest day per week (as long as missed days are not within 7 days of each other)
+  for (let i = 0; i < 365; i++) { // Check up to 365 days
+    const checkTime = checkDate.getTime();
     
-    if (workoutDates.includes(dateStr)) {
+    // Track week boundaries (every 7 days from today)
+    const daysSinceWeekStart = Math.floor((today.getTime() - checkDate.getTime()) / (1000 * 60 * 60 * 24)) % 7;
+    if (daysSinceWeekStart === 0 && i > 0) {
+      // Reset missed days counter for new week
+      missedDaysInCurrentWeek = 0;
+    }
+    
+    if (workoutDates.has(checkTime)) {
+      // Found a session on this day
       streakCount++;
-      if (currentStreak === 0) {
-        // Only count as current streak if workout was within last 2 days
-        const lastWorkoutDate = new Date(sortedWorkouts[0].date);
-        lastWorkoutDate.setHours(0, 0, 0, 0);
-        const daysSinceLastWorkout = Math.floor((today - lastWorkoutDate) / (1000 * 60 * 60 * 24));
-        
-        if (daysSinceLastWorkout <= 2) {
-          currentStreak = streakCount;
-        }
+      // Update current streak if it's still active
+      if (isCurrentStreakActive) {
+        currentStreak = streakCount;
       }
       longestStreak = Math.max(longestStreak, streakCount);
     } else {
-      // Allow 1 rest day in streak
-      if (i > 0 && streakCount > 0) {
+      // No session on this day
+      missedDaysInCurrentWeek++;
+      
+      // Check if this breaks the streak
+      // Streak breaks if: more than 1 missed day per week, OR 2+ consecutive missed days
+      if (missedDaysInCurrentWeek > 1) {
+        // Check if we have 2 consecutive missed days (within 7 days)
         const nextDate = new Date(checkDate);
         nextDate.setDate(nextDate.getDate() - 1);
-        const nextDateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
-        
-        if (!workoutDates.includes(nextDateStr)) {
-          // Two days in a row without workout - break streak
-          if (currentStreak === 0) {
-            break; // Current streak already calculated
+        if (!workoutDates.has(nextDate.getTime()) && i > 0) {
+          // Two consecutive days without session - break streak
+          if (isCurrentStreakActive && streakCount > 0) {
+            isCurrentStreakActive = false; // Current streak has ended
           }
           streakCount = 0;
+          missedDaysInCurrentWeek = 0;
         }
       }
     }
@@ -82,43 +99,51 @@ export const calculateStreak = (workoutHistory = []) => {
 
 /**
  * Calculate adherence percentage
- * Ratio of completed workouts to planned workouts
+ * If user's first session was less than 30 days ago, calculates adherence based on 
+ * days since first session. Otherwise uses the last 30 days.
  * @param {Array} workoutHistory - Array of completed workout objects
- * @param {Object} activePlan - Active plan with scheduled sessions
+ * @param {Object} activePlan - Active plan with scheduled sessions (optional)
  * @param {number} days - Number of days to calculate adherence for (default 30)
  * @returns {number} Adherence percentage (0-100)
  */
 export const calculateAdherence = (workoutHistory = [], activePlan = null, days = 30) => {
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - days);
+  if (!workoutHistory || workoutHistory.length === 0) {
+    return 0;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Find the date of the first session
+  const firstSessionDate = new Date(Math.min(...workoutHistory.map(w => new Date(w.date).getTime())));
+  firstSessionDate.setHours(0, 0, 0, 0);
+
+  // Calculate days since first session
+  const daysSinceFirstSession = Math.floor((today - firstSessionDate) / (1000 * 60 * 60 * 24)) + 1;
+
+  // Use the smaller of: days parameter or days since first session
+  const effectiveDays = daysSinceFirstSession < days ? daysSinceFirstSession : days;
+
+  const cutoffDate = new Date(today);
+  cutoffDate.setDate(cutoffDate.getDate() - effectiveDays + 1); // +1 to include today
   cutoffDate.setHours(0, 0, 0, 0);
 
-  // Count completed workouts in time period
-  const completedCount = workoutHistory.filter(w => {
+  // Get unique session dates in the effective period
+  const uniqueSessionDates = new Set();
+  workoutHistory.forEach(w => {
     const workoutDate = new Date(w.date);
     workoutDate.setHours(0, 0, 0, 0);
-    return workoutDate >= cutoffDate;
-  }).length;
+    if (workoutDate >= cutoffDate && workoutDate <= today) {
+      uniqueSessionDates.add(workoutDate.toDateString());
+    }
+  });
 
-  // Count planned workouts in time period
-  let plannedCount = 0;
-  if (activePlan && activePlan.sessions) {
-    plannedCount = activePlan.sessions.filter(s => {
-      const sessionDate = new Date(s.date);
-      sessionDate.setHours(0, 0, 0, 0);
-      return sessionDate >= cutoffDate && sessionDate <= new Date();
-    }).length;
-  }
+  const daysWithSessions = uniqueSessionDates.size;
 
-  // If no plan, assume 3 workouts per week as baseline
-  if (plannedCount === 0) {
-    const weeks = days / 7;
-    plannedCount = Math.ceil(weeks * 3);
-  }
-
-  if (plannedCount === 0) return 0;
+  // Calculate adherence as percentage of days with any session
+  if (effectiveDays === 0) return 0;
   
-  return Math.min(100, Math.round((completedCount / plannedCount) * 100));
+  return Math.min(100, Math.round((daysWithSessions / effectiveDays) * 100));
 };
 
 /**

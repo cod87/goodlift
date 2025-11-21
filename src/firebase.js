@@ -34,7 +34,7 @@ export async function getMessagingInstance() {
   }
   
   if (messagingPromise) {
-    return messagingPromise;
+    return await messagingPromise;
   }
   
   messagingPromise = (async () => {
@@ -59,7 +59,7 @@ export async function getMessagingInstance() {
     }
   })();
   
-  return messagingPromise;
+  return await messagingPromise;
 }
 
 export { db, auth, storage };

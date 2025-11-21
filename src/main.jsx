@@ -20,14 +20,14 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
         import('./utils/pushNotificationInit').then(({ initializePushNotifications }) => {
           initializePushNotifications();
         });
-      }, { timeout: 3000 }); // Fallback to 3s if browser stays busy
+      }, { timeout: 5000 }); // Fallback to 5s if browser stays busy (increased from 3s)
     } else {
       // Fallback for browsers without requestIdleCallback (Safari)
       setTimeout(() => {
         import('./utils/pushNotificationInit').then(({ initializePushNotifications }) => {
           initializePushNotifications();
         });
-      }, 2000); // Delay 2s to allow app to load first
+      }, 3000); // Delay 3s to allow app to load first
     }
   };
   

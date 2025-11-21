@@ -43,7 +43,7 @@ import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Snackbar, Alert, Button } from '@mui/material';
+import { Snackbar, Alert, Button, Box, CircularProgress } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 import { runDataMigration } from './migrations/simplifyDataStructure';
 import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achievements';
@@ -646,7 +646,18 @@ function AppContent() {
           marginTop: '60px',
           paddingBottom: '80px', // Space for bottom nav
         }}>
-          <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>Loading...</div>}>
+          <Suspense fallback={
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                minHeight: '50vh' 
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          }>
             {currentScreen === 'home' && (
               <WorkTabs
                 onNavigate={handleNavigate}

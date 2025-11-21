@@ -174,10 +174,10 @@ class ProgressiveOverloadService {
 
   /**
    * Get all pinned exercises
-   * @returns {Array} Array of pinned exercise configurations
+   * @returns {Promise<Array>} Array of pinned exercise configurations
    */
-  getPinnedExercises() {
-    return storagGetPinnedExercises();
+  async getPinnedExercises() {
+    return await storagGetPinnedExercises();
   }
 
   /**
@@ -185,25 +185,25 @@ class ProgressiveOverloadService {
    * @param {Array} pinnedExercises - Array of pinned exercise configurations
    * Each config: { exerciseName: string, trackingMode: 'weight' | 'reps' }
    */
-  setPinnedExercises(pinnedExercises) {
+  async setPinnedExercises(pinnedExercises) {
     if (!Array.isArray(pinnedExercises)) {
       throw new Error('Pinned exercises must be an array');
     }
 
     // Limit to max pinned exercises
     const limitedPinned = pinnedExercises.slice(0, this.maxPinnedExercises);
-    storageSetPinnedExercises(limitedPinned);
+    await storageSetPinnedExercises(limitedPinned);
   }
 
   /**
    * Add an exercise to pinned exercises
    * @param {string} exerciseName - Name of the exercise
    * @param {string} trackingMode - 'weight' or 'reps'
-   * @returns {boolean} True if added, false if already at limit or already pinned
+   * @returns {Promise<boolean>} True if added, false if already at limit or already pinned
    */
-  addPinnedExercise(exerciseName, trackingMode = 'weight') {
+  async addPinnedExercise(exerciseName, trackingMode = 'weight') {
     try {
-      const pinned = this.getPinnedExercises();
+      const pinned = await this.getPinnedExercises();
 
       // Check if already pinned
       if (pinned.some(p => p.exerciseName === exerciseName)) {
@@ -216,7 +216,7 @@ class ProgressiveOverloadService {
       }
 
       pinned.push({ exerciseName, trackingMode });
-      this.setPinnedExercises(pinned);
+      await this.setPinnedExercises(pinned);
       return true;
     } catch (error) {
       console.error('Error adding pinned exercise:', error);
@@ -228,11 +228,11 @@ class ProgressiveOverloadService {
    * Remove an exercise from pinned exercises
    * @param {string} exerciseName - Name of the exercise
    */
-  removePinnedExercise(exerciseName) {
+  async removePinnedExercise(exerciseName) {
     try {
-      const pinned = this.getPinnedExercises();
+      const pinned = await this.getPinnedExercises();
       const filtered = pinned.filter(p => p.exerciseName !== exerciseName);
-      this.setPinnedExercises(filtered);
+      await this.setPinnedExercises(filtered);
     } catch (error) {
       console.error('Error removing pinned exercise:', error);
       throw error;
@@ -244,15 +244,15 @@ class ProgressiveOverloadService {
    * @param {string} exerciseName - Name of the exercise
    * @param {string} trackingMode - 'weight' or 'reps'
    */
-  updatePinnedExerciseMode(exerciseName, trackingMode) {
+  async updatePinnedExerciseMode(exerciseName, trackingMode) {
     try {
-      const pinned = this.getPinnedExercises();
+      const pinned = await this.getPinnedExercises();
       const updated = pinned.map(p =>
         p.exerciseName === exerciseName
           ? { ...p, trackingMode }
           : p
       );
-      this.setPinnedExercises(updated);
+      await this.setPinnedExercises(updated);
     } catch (error) {
       console.error('Error updating pinned exercise mode:', error);
       throw error;
@@ -262,21 +262,21 @@ class ProgressiveOverloadService {
   /**
    * Check if an exercise is already pinned
    * @param {string} exerciseName - Name of the exercise
-   * @returns {boolean} True if pinned
+   * @returns {Promise<boolean>} True if pinned
    */
-  isExercisePinned(exerciseName) {
-    const pinned = this.getPinnedExercises();
+  async isExercisePinned(exerciseName) {
+    const pinned = await this.getPinnedExercises();
     return pinned.some(p => p.exerciseName === exerciseName);
   }
 
   /**
    * Get available exercises for pinning (not already pinned)
    * @param {Array} workoutHistory - Array of workout objects
-   * @returns {Array} Array of exercise names that can be pinned
+   * @returns {Promise<Array>} Array of exercise names that can be pinned
    */
-  getAvailableExercisesForPinning(workoutHistory) {
+  async getAvailableExercisesForPinning(workoutHistory) {
     const allExercises = this.getUniqueExercises(workoutHistory);
-    const pinned = this.getPinnedExercises();
+    const pinned = await this.getPinnedExercises();
     const pinnedNames = new Set(pinned.map(p => p.exerciseName));
     
     return allExercises.filter(ex => !pinnedNames.has(ex));

@@ -253,7 +253,7 @@ const ProgressDashboard = () => {
       const adherencePercent = calculateAdherence(allSessions, null, 30);
       setAdherence(adherencePercent);
 
-      const pinned = progressiveOverloadService.getPinnedExercises();
+      const pinned = await progressiveOverloadService.getPinnedExercises();
       setPinnedExercisesState(pinned);
 
       try {
@@ -287,13 +287,14 @@ const ProgressDashboard = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history, timeFrame, customStartDate, customEndDate]);
 
-  const handleRemovePinnedExercise = (exerciseName) => {
-    progressiveOverloadService.removePinnedExercise(exerciseName);
+  const handleRemovePinnedExercise = async (exerciseName) => {
+    await progressiveOverloadService.removePinnedExercise(exerciseName);
     setPinnedExercisesState(pinnedExercises.filter(p => p.exerciseName !== exerciseName));
   };
 
-  const handleAddPinnedExercise = (exerciseName) => {
-    if (progressiveOverloadService.addPinnedExercise(exerciseName, 'weight')) {
+  const handleAddPinnedExercise = async (exerciseName) => {
+    const success = await progressiveOverloadService.addPinnedExercise(exerciseName, 'weight');
+    if (success) {
       setPinnedExercisesState([...pinnedExercises, { exerciseName, trackingMode: 'weight' }]);
       setAddExerciseDialogOpen(false);
       setExerciseSearchQuery('');

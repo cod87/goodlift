@@ -446,3 +446,35 @@ export const loadSavedWorkoutsFromFirebase = async (userId) => {
     return null;
   }
 };
+
+/**
+ * Save pinned exercises to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {Array} pinnedExercises - The pinned exercises array
+ */
+export const savePinnedExercisesToFirebase = async (userId, pinnedExercises) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { pinnedExercises });
+  } catch (error) {
+    console.error('Error saving pinned exercises to Firebase:', error);
+  }
+};
+
+/**
+ * Load pinned exercises from Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @returns {Array|null} - The pinned exercises array or null if not found
+ */
+export const loadPinnedExercisesFromFirebase = async (userId) => {
+  if (!userId) return null;
+  
+  try {
+    const userData = await loadUserDataFromFirebase(userId);
+    return userData?.pinnedExercises || null;
+  } catch (error) {
+    console.error('Error loading pinned exercises from Firebase:', error);
+    return null;
+  }
+};

@@ -40,6 +40,16 @@ import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /**
+ * Utility function to get exercise name from various formats
+ * @param {Object} exercise - Exercise object
+ * @returns {string|null} Exercise name or null if not found
+ */
+const getExerciseName = (exercise) => {
+  if (!exercise) return null;
+  return exercise['Exercise Name'] || exercise.exerciseName || exercise.name || null;
+};
+
+/**
  * SavedWorkoutsList - Display list of saved workouts
  * Features:
  * - List of saved workouts with basic info
@@ -189,10 +199,33 @@ const SavedWorkoutsList = memo(({
   };
 
   const handleWorkoutClick = (workout) => {
-    if (onStartWorkout && workout.exercises) {
+    // Prevent click if no exercises or invalid workout
+    if (!workout || !workout.exercises || workout.exercises.length === 0) {
+      console.warn('Cannot start workout: no exercises found in workout');
+      return;
+    }
+
+    // Only start workout if callback is provided
+    if (!onStartWorkout) {
+      console.warn('No onStartWorkout callback provided');
+      return;
+    }
+
+    try {
+      // Validate that exercises have required fields
+      const validExercises = workout.exercises.every(ex => getExerciseName(ex) !== null);
+      
+      if (!validExercises) {
+        console.error('Invalid exercise data in workout');
+        return;
+      }
+
       // Start the saved workout with superset config (or default if not defined)
       const config = workout.supersetConfig || [2, 2, 2, 2];
       onStartWorkout(workout.type || 'full', 'all', workout.exercises, config);
+    } catch (error) {
+      console.error('Error starting workout:', error);
+      // Prevent blank screen by not changing navigation state
     }
   };
 

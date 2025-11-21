@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import {
@@ -19,7 +19,6 @@ import {
   InputLabel,
   Snackbar,
   Alert,
-  Divider,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -28,19 +27,17 @@ import {
 } from '@mui/material';
 import {
   ArrowBack,
-  Add,
-  Remove,
-  Delete,
   Save,
   HotelOutlined,
   Timer,
+  Edit,
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
-import { EXERCISES_DATA_PATH } from '../utils/constants';
-import ExerciseAutocomplete from '../components/ExerciseAutocomplete';
 import SessionTypeQuickToggle from '../components/SessionTypeQuickToggle';
-import { getExerciseWeight, getExerciseTargetReps, getSavedWorkouts } from '../utils/storage';
+import { getSavedWorkouts, updateSavedWorkout } from '../utils/storage';
 import { getDefaultSessionData } from '../utils/sessionTemplates';
+import WorkoutCreationModal from '../components/WorkTabs/WorkoutCreationModal';
+import { EXERCISES_DATA_PATH } from '../utils/constants';
 
 // Days of the week constant - Sunday through Saturday
 const DAYS_OF_WEEK = [
@@ -62,119 +59,35 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   const [selectedDay, setSelectedDay] = useState('Sunday');
   const [dayWorkouts, setDayWorkouts] = useState({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState({});
-  const [availableExercises, setAvailableExercises] = useState([]);
   const [savedWorkouts, setSavedWorkouts] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [pendingDayChange, setPendingDayChange] = useState(null);
+  
+  // Workout editor modal state
+  const [showWorkoutEditor, setShowWorkoutEditor] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [editingWorkoutIndex, setEditingWorkoutIndex] = useState(null);
+  const [availableExercises, setAvailableExercises] = useState([]);
 
-  // Load exercises data and saved workouts
+  // Load saved workouts and exercises
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [exercisesResponse, workouts] = await Promise.all([
-          fetch(EXERCISES_DATA_PATH),
+        const [workouts, exercisesResponse] = await Promise.all([
           getSavedWorkouts(),
+          fetch(EXERCISES_DATA_PATH),
         ]);
         const exercisesData = await exercisesResponse.json();
-        setAvailableExercises(exercisesData);
         setSavedWorkouts(workouts || []);
+        setAvailableExercises(exercisesData);
       } catch (error) {
         console.error('Error loading data:', error);
-        setAvailableExercises([]);
         setSavedWorkouts([]);
+        setAvailableExercises([]);
       }
     };
     loadData();
-  }, []);
-
-  // Transform raw exercises from saved workouts to the format expected by this editor
-  const transformExercisesToEditorFormat = useCallback(async (exercises, supersetConfig = [2, 2, 2, 2]) => {
-    if (!exercises || exercises.length === 0) return [];
-    
-    const transformed = [];
-    let exerciseIndex = 0;
-    let supersetGroup = 0;
-    
-    // Group exercises based on superset configuration
-    for (const supersetSize of supersetConfig) {
-      for (let i = 0; i < supersetSize && exerciseIndex < exercises.length; i++) {
-        const exercise = exercises[exerciseIndex];
-        
-        // Check if exercise already has the editor format (has id and supersetGroup)
-        if (exercise.id && exercise.supersetGroup !== undefined && exercise.sets) {
-          transformed.push(exercise);
-          exerciseIndex++;
-          continue;
-        }
-        
-        // Transform raw exercise to editor format
-        const exerciseName = exercise['Exercise Name'] || exercise.exerciseName || exercise.name;
-        
-        // Load saved weight and reps for this exercise
-        const [weight, targetReps] = await Promise.all([
-          getExerciseWeight(exerciseName),
-          getExerciseTargetReps(exerciseName),
-        ]);
-        
-        const transformedExercise = {
-          id: exercise.id || `ex_${Date.now()}_${exerciseIndex}_${Math.random().toString(36).substring(2, 9)}`,
-          name: exerciseName,
-          exerciseName: exerciseName,
-          supersetGroup: supersetGroup,
-          muscleGroup: exercise['Primary Muscle'] || exercise.muscleGroup || exercise.category,
-          equipment: exercise.Equipment || exercise.equipment,
-          category: exercise['Primary Muscle'] || exercise.muscleGroup || exercise.category,
-          sets: exercise.sets || [
-            { weight: weight || 0, reps: targetReps || 10 },
-            { weight: weight || 0, reps: targetReps || 10 },
-            { weight: weight || 0, reps: targetReps || 10 },
-          ],
-        };
-        
-        transformed.push(transformedExercise);
-        exerciseIndex++;
-      }
-      supersetGroup++;
-    }
-    
-    // Handle any remaining exercises that don't fit the superset config
-    while (exerciseIndex < exercises.length) {
-      const exercise = exercises[exerciseIndex];
-      
-      if (exercise.id && exercise.supersetGroup !== undefined && exercise.sets) {
-        transformed.push(exercise);
-        exerciseIndex++;
-        continue;
-      }
-      
-      const exerciseName = exercise['Exercise Name'] || exercise.exerciseName || exercise.name;
-      const [weight, targetReps] = await Promise.all([
-        getExerciseWeight(exerciseName),
-        getExerciseTargetReps(exerciseName),
-      ]);
-      
-      const transformedExercise = {
-        id: exercise.id || `ex_${Date.now()}_${exerciseIndex}_${Math.random().toString(36).substring(2, 9)}`,
-        name: exerciseName,
-        exerciseName: exerciseName,
-        supersetGroup: supersetGroup,
-        muscleGroup: exercise['Primary Muscle'] || exercise.muscleGroup || exercise.category,
-        equipment: exercise.Equipment || exercise.equipment,
-        category: exercise['Primary Muscle'] || exercise.muscleGroup || exercise.category,
-        sets: exercise.sets || [
-          { weight: weight || 0, reps: targetReps || 10 },
-          { weight: weight || 0, reps: targetReps || 10 },
-          { weight: weight || 0, reps: targetReps || 10 },
-        ],
-      };
-      
-      transformed.push(transformedExercise);
-      exerciseIndex++;
-      supersetGroup++;
-    }
-    
-    return transformed;
   }, []);
 
   // Initialize day workouts from context
@@ -182,30 +95,18 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
     // Don't initialize while context is still loading
     if (loading) return;
     
-    const initializeWorkouts = async () => {
-      const initialWorkouts = {};
-      
-      for (const day of DAYS_OF_WEEK) {
-        if (weeklySchedule[day]) {
-          const dayData = JSON.parse(JSON.stringify(weeklySchedule[day]));
-          
-          // Transform exercises if this is a strength workout
-          if (dayData.exercises && Array.isArray(dayData.exercises) && dayData.exercises.length > 0) {
-            const supersetConfig = dayData.supersetConfig || [2, 2, 2, 2];
-            dayData.exercises = await transformExercisesToEditorFormat(dayData.exercises, supersetConfig);
-          }
-          
-          initialWorkouts[day] = dayData;
-        } else {
-          initialWorkouts[day] = null;
-        }
-      }
-      
-      setDayWorkouts(initialWorkouts);
-    };
+    const initialWorkouts = {};
     
-    initializeWorkouts();
-  }, [weeklySchedule, loading, transformExercisesToEditorFormat]);
+    for (const day of DAYS_OF_WEEK) {
+      if (weeklySchedule[day]) {
+        initialWorkouts[day] = JSON.parse(JSON.stringify(weeklySchedule[day]));
+      } else {
+        initialWorkouts[day] = null;
+      }
+    }
+    
+    setDayWorkouts(initialWorkouts);
+  }, [weeklySchedule, loading]);
 
   // Get workout type from session data
   const getWorkoutType = (sessionData) => {
@@ -259,180 +160,6 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   };
 
   // Add a new superset to the current day
-  const handleAddSuperset = () => {
-    const currentWorkout = dayWorkouts[selectedDay];
-    if (!currentWorkout || !isStrengthWorkout(getWorkoutType(currentWorkout))) return;
-
-    const exercises = currentWorkout.exercises || [];
-    const maxGroup = exercises.length > 0 
-      ? Math.max(...exercises.map(ex => ex.supersetGroup || 0))
-      : -1;
-
-    // Add two empty exercise slots for the new superset
-    const newExercises = [
-      ...exercises,
-      {
-        id: `ex_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        name: null,
-        exerciseName: null,
-        supersetGroup: maxGroup + 1,
-        sets: [{ weight: 0, reps: 10 }, { weight: 0, reps: 10 }, { weight: 0, reps: 10 }],
-      },
-      {
-        id: `ex_${Date.now() + 1}_${Math.random().toString(36).substring(2, 9)}`,
-        name: null,
-        exerciseName: null,
-        supersetGroup: maxGroup + 1,
-        sets: [{ weight: 0, reps: 10 }, { weight: 0, reps: 10 }, { weight: 0, reps: 10 }],
-      },
-    ];
-
-    setDayWorkouts(prev => ({
-      ...prev,
-      [selectedDay]: {
-        ...currentWorkout,
-        exercises: newExercises,
-      },
-    }));
-    setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
-  };
-
-  // Remove a superset
-  const handleRemoveSuperset = (supersetGroup) => {
-    const currentWorkout = dayWorkouts[selectedDay];
-    if (!currentWorkout) return;
-
-    const updatedExercises = currentWorkout.exercises.filter(
-      ex => ex.supersetGroup !== supersetGroup
-    );
-
-    setDayWorkouts(prev => ({
-      ...prev,
-      [selectedDay]: {
-        ...currentWorkout,
-        exercises: updatedExercises,
-      },
-    }));
-    setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
-  };
-
-  // Add exercise to a superset
-  const handleAddExerciseToSuperset = (supersetGroup) => {
-    const currentWorkout = dayWorkouts[selectedDay];
-    if (!currentWorkout) return;
-
-    const newExercise = {
-      id: `ex_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      name: null,
-      exerciseName: null,
-      supersetGroup: supersetGroup,
-      sets: [{ weight: 0, reps: 10 }, { weight: 0, reps: 10 }, { weight: 0, reps: 10 }],
-    };
-
-    setDayWorkouts(prev => ({
-      ...prev,
-      [selectedDay]: {
-        ...currentWorkout,
-        exercises: [...currentWorkout.exercises, newExercise],
-      },
-    }));
-    setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
-  };
-
-  // Remove exercise from superset
-  const handleRemoveExercise = (exerciseId) => {
-    const currentWorkout = dayWorkouts[selectedDay];
-    if (!currentWorkout) return;
-
-    const updatedExercises = currentWorkout.exercises.filter(ex => ex.id !== exerciseId);
-
-    setDayWorkouts(prev => ({
-      ...prev,
-      [selectedDay]: {
-        ...currentWorkout,
-        exercises: updatedExercises,
-      },
-    }));
-    setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
-  };
-
-  // Handle exercise selection
-  const handleExerciseSelect = useCallback(async (exerciseId, selectedExercise) => {
-    const currentWorkout = dayWorkouts[selectedDay];
-    if (!currentWorkout || !selectedExercise) return;
-
-    const updatedExercises = currentWorkout.exercises.map(ex => {
-      if (ex.id === exerciseId) {
-        return {
-          ...ex,
-          name: selectedExercise['Exercise Name'],
-          exerciseName: selectedExercise['Exercise Name'],
-          muscleGroup: selectedExercise['Primary Muscle'] || selectedExercise['Muscle Group'],
-          equipment: selectedExercise['Equipment'],
-          category: selectedExercise['Primary Muscle'] || selectedExercise['Muscle Group'],
-        };
-      }
-      return ex;
-    });
-
-    // Load default weight and reps for the selected exercise
-    const exerciseName = selectedExercise['Exercise Name'];
-    const [weight, targetReps] = await Promise.all([
-      getExerciseWeight(exerciseName),
-      getExerciseTargetReps(exerciseName),
-    ]);
-
-    // Update sets with loaded defaults
-    const finalExercises = updatedExercises.map(ex => {
-      if (ex.id === exerciseId) {
-        return {
-          ...ex,
-          sets: ex.sets.map(set => ({
-            weight: weight ?? set.weight,
-            reps: targetReps ?? set.reps,
-          })),
-        };
-      }
-      return ex;
-    });
-
-    setDayWorkouts(prev => ({
-      ...prev,
-      [selectedDay]: {
-        ...currentWorkout,
-        exercises: finalExercises,
-      },
-    }));
-    setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
-  }, [dayWorkouts, selectedDay]);
-
-  // Update exercise set values
-  const handleUpdateSet = (exerciseId, setIndex, field, value) => {
-    const currentWorkout = dayWorkouts[selectedDay];
-    if (!currentWorkout) return;
-
-    const updatedExercises = currentWorkout.exercises.map(ex => {
-      if (ex.id === exerciseId) {
-        const updatedSets = [...ex.sets];
-        updatedSets[setIndex] = {
-          ...updatedSets[setIndex],
-          [field]: parseFloat(value) || 0,
-        };
-        return { ...ex, sets: updatedSets };
-      }
-      return ex;
-    });
-
-    setDayWorkouts(prev => ({
-      ...prev,
-      [selectedDay]: {
-        ...currentWorkout,
-        exercises: updatedExercises,
-      },
-    }));
-    setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
-  };
-
   // Update timer configuration
   const handleUpdateTimer = (field, value) => {
     const currentWorkout = dayWorkouts[selectedDay];
@@ -521,17 +248,11 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
     const currentWorkout = dayWorkouts[selectedDay];
     const currentType = getWorkoutType(currentWorkout);
 
-    // Transform the saved workout exercises to editor format
-    const transformedExercises = await transformExercisesToEditorFormat(
-      workout.exercises,
-      workout.supersetConfig || [2, 2, 2, 2]
-    );
-
     // Create updated workout data with the selected workout's exercises
     const updatedWorkout = {
       sessionType: currentType || workout.type || 'full',
       sessionName: workout.name || `${(currentType || workout.type || 'full').charAt(0).toUpperCase() + (currentType || workout.type || 'full').slice(1)} Body Workout`,
-      exercises: transformedExercises,
+      exercises: workout.exercises,
       supersetConfig: workout.supersetConfig || [2, 2, 2, 2],
     };
 
@@ -548,9 +269,115 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
     });
   };
 
+  // Handle editing the currently assigned workout for the selected day
+  const handleEditCurrentWorkout = () => {
+    const currentWorkout = dayWorkouts[selectedDay];
+    if (!currentWorkout || !currentWorkout.exercises) return;
+
+    // Find the workout in savedWorkouts by matching exercises
+    const workoutIndex = savedWorkouts.findIndex(sw => 
+      sw.exercises === currentWorkout.exercises ||
+      JSON.stringify(sw.exercises) === JSON.stringify(currentWorkout.exercises)
+    );
+
+    if (workoutIndex >= 0) {
+      setEditingWorkout(savedWorkouts[workoutIndex]);
+      setEditingWorkoutIndex(workoutIndex);
+      setShowWorkoutEditor(true);
+    } else {
+      // If not found in saved workouts, create a temporary workout object to edit
+      setEditingWorkout({
+        name: currentWorkout.sessionName || 'Custom Workout',
+        type: currentWorkout.sessionType || 'full',
+        exercises: currentWorkout.exercises,
+        supersetConfig: currentWorkout.supersetConfig || [2, 2, 2, 2],
+      });
+      setEditingWorkoutIndex(null); // null means it's not saved yet
+      setShowWorkoutEditor(true);
+    }
+  };
+
+  // Handle saving edited workout
+  const handleSaveEditedWorkout = async (workout) => {
+    try {
+      if (editingWorkoutIndex !== null) {
+        // Update existing saved workout
+        await updateSavedWorkout(editingWorkoutIndex, workout);
+        
+        // Refresh saved workouts list
+        const workouts = await getSavedWorkouts();
+        setSavedWorkouts(workouts || []);
+        
+        // Update the day's workout with the edited version
+        const currentWorkout = dayWorkouts[selectedDay];
+        if (currentWorkout) {
+          setDayWorkouts(prev => ({
+            ...prev,
+            [selectedDay]: {
+              ...currentWorkout,
+              exercises: workout.exercises,
+              supersetConfig: workout.supersetConfig || [2, 2, 2, 2],
+              sessionName: workout.name,
+            },
+          }));
+          setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
+        }
+        
+        setSnackbar({
+          open: true,
+          message: 'Workout updated successfully',
+          severity: 'success',
+        });
+      }
+      
+      setShowWorkoutEditor(false);
+      setEditingWorkout(null);
+      setEditingWorkoutIndex(null);
+    } catch (error) {
+      console.error('Error saving workout:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to save workout changes',
+        severity: 'error',
+      });
+    }
+  };
+
+  // Handle closing workout editor
+  const handleCloseWorkoutEditor = () => {
+    setShowWorkoutEditor(false);
+    setEditingWorkout(null);
+    setEditingWorkoutIndex(null);
+  };
+
   // Save all changes
   const handleSaveAll = async () => {
     try {
+      // Validate that all strength workouts have exercises assigned
+      const invalidDays = [];
+      for (const day of DAYS_OF_WEEK) {
+        const workout = dayWorkouts[day];
+        if (workout) {
+          const type = getWorkoutType(workout);
+          if (isStrengthWorkout(type)) {
+            // Check if workout has exercises
+            if (!workout.exercises || workout.exercises.length === 0) {
+              invalidDays.push(day);
+            }
+          }
+        }
+      }
+
+      // If there are invalid days, show error and return
+      if (invalidDays.length > 0) {
+        setSnackbar({
+          open: true,
+          message: `Please select a saved workout for strength sessions on: ${invalidDays.join(', ')}`,
+          severity: 'error',
+        });
+        return;
+      }
+
       // Save all days with unsaved changes
       for (const day of DAYS_OF_WEEK) {
         if (hasUnsavedChanges[day]) {
@@ -609,22 +436,6 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
       message: 'All changes discarded',
       severity: 'info',
     });
-  };
-
-  // Group exercises by superset
-  const groupExercisesBySuperset = (exercises) => {
-    if (!exercises || exercises.length === 0) return [];
-    
-    const groups = {};
-    exercises.forEach(ex => {
-      const group = ex.supersetGroup ?? 0;
-      if (!groups[group]) {
-        groups[group] = [];
-      }
-      groups[group].push(ex);
-    });
-
-    return Object.entries(groups).sort(([a], [b]) => parseInt(a) - parseInt(b));
   };
 
   const currentWorkout = dayWorkouts[selectedDay];
@@ -754,12 +565,15 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
             <Card sx={{ mb: 3 }}>
               <CardContent>
                 <FormControl fullWidth>
-                  <InputLabel>Select Saved Workout</InputLabel>
+                  <InputLabel shrink sx={{ backgroundColor: (theme) => theme.palette.background.paper, px: 1 }}>
+                    Select Saved Workout
+                  </InputLabel>
                   <Select
                     value=""
                     label="Select Saved Workout"
                     onChange={(e) => handleSelectSavedWorkout(e.target.value)}
                     displayEmpty
+                    notched
                   >
                     <MenuItem value="" disabled>
                       Choose a workout to load exercises...
@@ -876,149 +690,76 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
             </Card>
           )}
 
-          {/* Strength Workouts */}
+          {/* Strength Workouts - Exercise List (Read-only) */}
           {isStrength && (
             <Stack spacing={3}>
-              {/* Add Superset Button */}
+              {/* Exercise List Header with Edit Button */}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Supersets
-                </Typography>
-                <Button
-                  variant="outlined"
-                  startIcon={<Add />}
-                  onClick={handleAddSuperset}
-                  size="small"
-                >
-                  Add Superset
-                </Button>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Exercises
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    Exercises from the selected saved workout
+                  </Typography>
+                </Box>
+                {currentWorkout.exercises && currentWorkout.exercises.length > 0 && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<Edit />}
+                    onClick={handleEditCurrentWorkout}
+                    size="small"
+                  >
+                    Edit Workout
+                  </Button>
+                )}
               </Box>
 
-              {/* Superset List */}
-              {groupExercisesBySuperset(currentWorkout.exercises).map(([groupId, exercises], idx) => (
-                <Card key={groupId} sx={{ borderLeft: 3, borderColor: 'primary.main' }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Chip
-                        label={`Superset ${idx + 1}`}
-                        color="primary"
-                        size="small"
-                      />
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => handleAddExerciseToSuperset(parseInt(groupId))}
-                          title="Add exercise to this superset"
+              {/* Exercise List */}
+              {currentWorkout.exercises && currentWorkout.exercises.length > 0 ? (
+                currentWorkout.exercises.map((exercise, idx) => (
+                  <Card key={exercise.id || idx} sx={{ borderLeft: 3, borderColor: 'primary.main' }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                        <Typography
+                          sx={{
+                            fontSize: '1.25rem',
+                            color: 'primary.main',
+                            fontWeight: 700,
+                            minWidth: '32px',
+                            textAlign: 'center',
+                          }}
                         >
-                          <Add fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleRemoveSuperset(parseInt(groupId))}
-                          title="Remove this superset"
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </Box>
-
-                    <Stack spacing={2}>
-                      {exercises.map((exercise, exIdx) => (
-                        <Box key={exercise.id}>
-                          {exIdx > 0 && <Divider sx={{ my: 1 }} />}
-                          <Box>
-                            {/* Exercise Selection */}
-                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
-                              <Typography
-                                sx={{
-                                  fontSize: '1.5rem',
-                                  color: 'primary.main',
-                                  fontWeight: 700,
-                                  width: '32px',
-                                  textAlign: 'center',
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {String.fromCharCode(65 + exIdx)}
-                              </Typography>
-                              <Box sx={{ flex: 1 }}>
-                                <ExerciseAutocomplete
-                                  value={exercise.name ? availableExercises.find(ex => ex['Exercise Name'] === exercise.name) : null}
-                                  onChange={(event, newValue) => handleExerciseSelect(exercise.id, newValue)}
-                                  availableExercises={availableExercises}
-                                  label="Exercise"
-                                  placeholder="Select exercise..."
-                                  disabled={availableExercises.length === 0}
-                                />
-                              </Box>
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => handleRemoveExercise(exercise.id)}
-                                sx={{ mt: 0.5 }}
-                              >
-                                <Remove fontSize="small" />
-                              </IconButton>
-                            </Box>
-
-                            {/* Sets - Only show if exercise is selected */}
-                            {exercise.name && (
-                              <Box sx={{ pl: 5 }}>
-                                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                                  Sets
-                                </Typography>
-                                <Stack spacing={1}>
-                                  {exercise.sets?.map((set, setIdx) => (
-                                    <Box
-                                      key={setIdx}
-                                      sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1,
-                                      }}
-                                    >
-                                      <Typography
-                                        variant="body2"
-                                        sx={{ minWidth: 50, fontWeight: 500 }}
-                                      >
-                                        Set {setIdx + 1}
-                                      </Typography>
-                                      <TextField
-                                        type="number"
-                                        label="Weight (lbs)"
-                                        value={set.weight}
-                                        onChange={(e) => handleUpdateSet(exercise.id, setIdx, 'weight', e.target.value)}
-                                        size="small"
-                                        sx={{ width: 120 }}
-                                        disabled={exercise.equipment?.toLowerCase() === 'bodyweight'}
-                                      />
-                                      <TextField
-                                        type="number"
-                                        label="Reps"
-                                        value={set.reps}
-                                        onChange={(e) => handleUpdateSet(exercise.id, setIdx, 'reps', e.target.value)}
-                                        size="small"
-                                        sx={{ width: 100 }}
-                                      />
-                                    </Box>
-                                  ))}
-                                </Stack>
-                              </Box>
-                            )}
-                          </Box>
+                          {idx + 1}
+                        </Typography>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {exercise.name || exercise.exerciseName || 'Unnamed Exercise'}
+                          </Typography>
+                          {exercise.muscleGroup && (
+                            <Typography variant="body2" color="text.secondary">
+                              {exercise.muscleGroup}
+                            </Typography>
+                          )}
                         </Box>
-                      ))}
-                    </Stack>
-                  </CardContent>
-                </Card>
-              ))}
+                      </Box>
 
-              {(!currentWorkout.exercises || currentWorkout.exercises.length === 0) && (
+                      {/* Sets Display */}
+                      {exercise.sets && exercise.sets.length > 0 && (
+                        <Box sx={{ pl: 5, mt: 2 }}>
+                          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                            Sets: {exercise.sets.length} × {exercise.sets[0]?.reps || 0} reps 
+                            {exercise.sets[0]?.weight > 0 ? ` @ ${exercise.sets[0].weight} lbs` : ''}
+                          </Typography>
+                        </Box>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
                 <Card sx={{ p: 4, textAlign: 'center' }}>
                   <Typography variant="body1" color="text.secondary">
-                    No exercises in this workout. Click &quot;Add Superset&quot; to get started.
+                    No exercises in this workout. Select a saved workout above to assign exercises.
                   </Typography>
                 </Card>
               )}
@@ -1080,6 +821,15 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Workout Editor Modal */}
+      <WorkoutCreationModal
+        open={showWorkoutEditor}
+        onClose={handleCloseWorkoutEditor}
+        onSave={handleSaveEditedWorkout}
+        exercises={availableExercises}
+        existingWorkout={editingWorkout}
+      />
     </Box>
   );
 };

@@ -3,16 +3,6 @@
  * 
  * Defines standardized data structures for all workout sessions, plans, and activities
  * to ensure proper interconnectivity between planning, execution, and progress tracking.
- * 
- * Week 0 Concept:
- * When a user's first-ever session in the app occurs on Wednesday, Thursday, Friday, or Saturday,
- * that partial period (Wed-Sat) is designated as "Week 0". This partial week:
- * - Counts toward streak calculation (consecutive days)
- * - Does NOT count toward adherence metrics
- * - Does NOT trigger automatic workout assignments
- * - Week 1 begins on the next Sunday after Week 0
- * 
- * If the first session occurs on Sun-Tue, there is no Week 0, and Week 1 starts immediately.
  */
 
 /**

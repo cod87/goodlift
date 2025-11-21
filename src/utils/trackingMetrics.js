@@ -20,6 +20,14 @@ export const calculateStreak = (workoutHistory = []) => {
     return { currentStreak: 0, longestStreak: 0 };
   }
 
+  // Constants
+  const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+  // Helper function to calculate days between dates
+  const daysBetween = (date1, date2) => {
+    return Math.floor((date2 - date1) / MS_PER_DAY);
+  };
+
   // Sort workouts by date (oldest first for forward iteration)
   const sortedWorkouts = [...workoutHistory].sort((a, b) => 
     new Date(a.date) - new Date(b.date)
@@ -55,10 +63,11 @@ export const calculateStreak = (workoutHistory = []) => {
     
     // Try progressively shorter prefixes, starting from the full streak
     for (let len = streakDates.length; len > 0; len--) {
-      const prefix = streakDates.slice(0, len);
       const weekToHasStrength = new Map();
       
-      prefix.forEach(dateTime => {
+      // Check only the first 'len' dates
+      for (let i = 0; i < len; i++) {
+        const dateTime = streakDates[i];
         const weekStart = getWeekStart(dateTime);
         const sessions = dateToSessions.get(dateTime) || [];
         
@@ -70,16 +79,10 @@ export const calculateStreak = (workoutHistory = []) => {
         if (hasStrength) {
           weekToHasStrength.set(weekStart, true);
         }
-      });
-      
-      // Check if all weeks have strength
-      let allWeeksHaveStrength = true;
-      for (const hasStrength of weekToHasStrength.values()) {
-        if (!hasStrength) {
-          allWeeksHaveStrength = false;
-          break;
-        }
       }
+      
+      // Check if all weeks have strength using Array.every()
+      const allWeeksHaveStrength = Array.from(weekToHasStrength.values()).every(hasStr => hasStr);
       
       if (allWeeksHaveStrength) {
         return len;
@@ -127,7 +130,7 @@ export const calculateStreak = (workoutHistory = []) => {
       tempStreakDates = [currentDate];
       lastDateInStreak = currentDate;
     } else {
-      const daysDiff = Math.floor((currentDate - lastDateInStreak) / (1000 * 60 * 60 * 24));
+      const daysDiff = daysBetween(lastDateInStreak, currentDate);
       
       if (daysDiff === 1) {
         // Consecutive day - add to streak
@@ -141,8 +144,8 @@ export const calculateStreak = (workoutHistory = []) => {
           
           // Check if this was the current streak
           const streakEndDate = tempStreakDates[validStreakLen - 1];
-          const daysSinceLastSession = Math.floor((todayTime - streakEndDate) / (1000 * 60 * 60 * 24));
-          if (daysSinceLastSession <= 1) {
+          const daysSince = daysBetween(streakEndDate, todayTime);
+          if (daysSince <= 1) {
             currentStreak = validStreakLen;
           }
         }
@@ -162,8 +165,8 @@ export const calculateStreak = (workoutHistory = []) => {
       
       // Check if this is the current streak
       const streakEndDate = tempStreakDates[validStreakLen - 1];
-      const daysSinceLastSession = Math.floor((todayTime - streakEndDate) / (1000 * 60 * 60 * 24));
-      if (daysSinceLastSession <= 1) {
+      const daysSince = daysBetween(streakEndDate, todayTime);
+      if (daysSince <= 1) {
         currentStreak = validStreakLen;
       }
     }

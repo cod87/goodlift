@@ -792,7 +792,7 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
               <Alert severity="info" sx={{ mb: 3, textAlign: 'left' }}>
                 <Typography variant="body2">
                   💡 <strong>Note:</strong> Selecting a workout type sets the suggested type for the day. 
-                  For strength workouts, you&apos;ll need to select a saved workout to assign specific exercises.
+                  For strength workouts, you'll need to select a saved workout to assign specific exercises.
                 </Typography>
               </Alert>
               <Box sx={{ mt: 3, maxWidth: 600, mx: 'auto' }}>

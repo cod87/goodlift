@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Collapse,
 } from '@mui/material';
 import { 
   Add,
@@ -26,6 +27,10 @@ import {
   CalendarMonth,
   Edit,
   Delete,
+  Archive,
+  Unarchive,
+  ExpandMore,
+  ExpandLess,
 } from '@mui/icons-material';
 import { getSavedWorkouts, deleteSavedWorkout, updateSavedWorkout } from '../../utils/storage';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
@@ -53,6 +58,7 @@ const SavedWorkoutsList = memo(({
   const [selectedWorkoutIndex, setSelectedWorkoutIndex] = useState(null);
   const [dayPickerOpen, setDayPickerOpen] = useState(false);
   const [selectedWorkoutForDay, setSelectedWorkoutForDay] = useState(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   // Load saved workouts
   useEffect(() => {
@@ -88,6 +94,10 @@ const SavedWorkoutsList = memo(({
     // Neither assigned - maintain original order
     return 0;
   });
+
+  // Separate active and archived workouts
+  const activeWorkouts = sortedWorkouts.filter(w => !w.archived);
+  const archivedWorkouts = sortedWorkouts.filter(w => w.archived);
 
   const handleMenuOpen = (event, index) => {
     event.stopPropagation();
@@ -194,6 +204,101 @@ const SavedWorkoutsList = memo(({
     handleMenuClose();
   };
 
+  const handleArchiveWorkout = async () => {
+    if (selectedWorkoutIndex !== null) {
+      try {
+        const workout = savedWorkouts[selectedWorkoutIndex];
+        const updatedWorkout = {
+          ...workout,
+          archived: !workout.archived, // Toggle archived status
+        };
+        await updateSavedWorkout(selectedWorkoutIndex, updatedWorkout);
+        const workouts = await getSavedWorkouts();
+        setSavedWorkouts(workouts || []);
+      } catch (error) {
+        console.error('Error archiving/unarchiving workout:', error);
+      }
+    }
+    handleMenuClose();
+  };
+
+  // Helper to render workout list
+  const renderWorkoutList = (workouts) => {
+    if (workouts.length === 0) return null;
+
+    return (
+      <List sx={{ p: 0 }}>
+        {workouts.map((workout) => {
+          // Find the original index in savedWorkouts array
+          const originalIndex = savedWorkouts.findIndex(w => w.id === workout.id || (w.createdAt === workout.createdAt && w.name === workout.name));
+          
+          return (
+            <Card key={workout.id || originalIndex} sx={{ mb: 2, borderRadius: 3 }}>
+              <ListItem
+                disablePadding
+                secondaryAction={
+                  <IconButton
+                    edge="end"
+                    onClick={(e) => handleMenuOpen(e, originalIndex)}
+                    sx={{ mr: 1 }}
+                  >
+                    <MoreVert />
+                  </IconButton>
+                }
+              >
+                <ListItemButton onClick={() => handleWorkoutClick(workout)}>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                          {workout.name || `${workout.type || 'Custom'} Workout`}
+                        </Typography>
+                        {workout.assignedDay && (
+                          <Chip
+                            icon={<CalendarMonth />}
+                            label={workout.assignedDay.substring(0, 3)}
+                            size="small"
+                            color="primary"
+                            sx={{ fontWeight: 600 }}
+                          />
+                        )}
+                      </Box>
+                    }
+                    secondary={
+                      <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap">
+                        <Chip
+                          label={`${workout.exercises?.length || 0} exercises`}
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                        />
+                        {workout.type && (
+                          <Chip
+                            label={getWorkoutTypeShorthand(workout.type)}
+                            size="small"
+                            variant="outlined"
+                          />
+                        )}
+                        {workout.supersetConfig && workout.supersetConfig.length > 0 && (
+                          <Chip
+                            label={`${workout.supersetConfig.filter(count => count > 1).length} supersets`}
+                            size="small"
+                            color="secondary"
+                            variant="outlined"
+                          />
+                        )}
+                      </Stack>
+                    }
+                  />
+                </ListItemButton>
+              </ListItem>
+            </Card>
+          );
+        })}
+      </List>
+    );
+  };
+
   return (
     <Box>
       {/* Header with Create Button - Minimalist Style */}
@@ -221,7 +326,7 @@ const SavedWorkoutsList = memo(({
       </Box>
 
       {/* Saved Workouts List */}
-      {savedWorkouts.length === 0 ? (
+      {activeWorkouts.length === 0 && archivedWorkouts.length === 0 ? (
         <Card sx={{ borderRadius: 3 }}>
           <CardContent sx={{ textAlign: 'center', py: 4 }}>
             <Typography variant="body1" color="text.secondary">
@@ -230,75 +335,50 @@ const SavedWorkoutsList = memo(({
           </CardContent>
         </Card>
       ) : (
-        <List sx={{ p: 0 }}>
-          {sortedWorkouts.map((workout) => {
-            // Find the original index in savedWorkouts array
-            const originalIndex = savedWorkouts.findIndex(w => w.id === workout.id || (w.createdAt === workout.createdAt && w.name === workout.name));
-            
-            return (
-              <Card key={workout.id || originalIndex} sx={{ mb: 2, borderRadius: 3 }}>
-                <ListItem
-                  disablePadding
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      onClick={(e) => handleMenuOpen(e, originalIndex)}
-                      sx={{ mr: 1 }}
-                    >
-                      <MoreVert />
-                    </IconButton>
-                  }
-                >
-                  <ListItemButton onClick={() => handleWorkoutClick(workout)}>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {workout.name || `${workout.type || 'Custom'} Workout`}
-                          </Typography>
-                          {workout.assignedDay && (
-                            <Chip
-                              icon={<CalendarMonth />}
-                              label={workout.assignedDay.substring(0, 3)}
-                              size="small"
-                              color="primary"
-                              sx={{ fontWeight: 600 }}
-                            />
-                          )}
-                        </Box>
-                      }
-                      secondary={
-                        <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap">
-                          <Chip
-                            label={`${workout.exercises?.length || 0} exercises`}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                          />
-                          {workout.type && (
-                            <Chip
-                              label={getWorkoutTypeShorthand(workout.type)}
-                              size="small"
-                              variant="outlined"
-                            />
-                          )}
-                          {workout.supersetConfig && workout.supersetConfig.length > 0 && (
-                            <Chip
-                              label={`${workout.supersetConfig.filter(count => count > 1).length} supersets`}
-                              size="small"
-                              color="secondary"
-                              variant="outlined"
-                            />
-                          )}
-                        </Stack>
-                      }
-                    />
-                  </ListItemButton>
-                </ListItem>
-              </Card>
-            );
-          })}
-        </List>
+        <>
+          {/* Active Workouts */}
+          {activeWorkouts.length === 0 ? (
+            <Card sx={{ borderRadius: 3, mb: 2 }}>
+              <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                <Typography variant="body2" color="text.secondary">
+                  No active workouts. All workouts are archived.
+                </Typography>
+              </CardContent>
+            </Card>
+          ) : (
+            renderWorkoutList(activeWorkouts)
+          )}
+
+          {/* Archived Workouts Section */}
+          {archivedWorkouts.length > 0 && (
+            <Box sx={{ mt: 3 }}>
+              <Button
+                fullWidth
+                onClick={() => setShowArchived(!showArchived)}
+                sx={{
+                  justifyContent: 'space-between',
+                  textTransform: 'none',
+                  mb: 2,
+                  py: 1.5,
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+                endIcon={showArchived ? <ExpandLess /> : <ExpandMore />}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Archive fontSize="small" />
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    Archived Workouts ({archivedWorkouts.length})
+                  </Typography>
+                </Box>
+              </Button>
+              <Collapse in={showArchived}>
+                {renderWorkoutList(archivedWorkouts)}
+              </Collapse>
+            </Box>
+          )}
+        </>
       )}
 
       {/* Menu for workout options */}
@@ -314,6 +394,19 @@ const SavedWorkoutsList = memo(({
         <MenuItem onClick={() => handleOpenDayPicker(selectedWorkoutIndex)}>
           <CalendarMonth sx={{ mr: 1 }} fontSize="small" />
           Assign to Day
+        </MenuItem>
+        <MenuItem onClick={handleArchiveWorkout}>
+          {selectedWorkoutIndex !== null && savedWorkouts[selectedWorkoutIndex]?.archived ? (
+            <>
+              <Unarchive sx={{ mr: 1 }} fontSize="small" />
+              Unarchive
+            </>
+          ) : (
+            <>
+              <Archive sx={{ mr: 1 }} fontSize="small" />
+              Archive
+            </>
+          )}
         </MenuItem>
         <MenuItem onClick={handleDeleteWorkout}>
           <Delete sx={{ mr: 1 }} fontSize="small" />

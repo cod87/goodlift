@@ -111,7 +111,7 @@ export const normalizeExerciseName = (exerciseName) => {
  * @returns {string|null} Path to the demo image, placeholder, or null if not found
  */
 export const getDemoImagePath = (exerciseName, usePlaceholder = true) => {
-  if (!exerciseName) return usePlaceholder ? `${getBaseUrl()}placeholder-exercise.svg` : null;
+  if (!exerciseName) return usePlaceholder ? `${getBaseUrl()}work-icon.svg` : null;
   
   const normalized = normalizeExerciseName(exerciseName);
   
@@ -135,7 +135,7 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true) => {
   }
   
   // Return placeholder if enabled, otherwise null
-  return usePlaceholder ? `${getBaseUrl()}placeholder-exercise.svg` : null;
+  return usePlaceholder ? `${getBaseUrl()}work-icon.svg` : null;
 };
 
 /**

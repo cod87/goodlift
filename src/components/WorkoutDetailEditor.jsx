@@ -132,7 +132,7 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
     
     exercise.sets[setIndex] = {
       ...exercise.sets[setIndex],
-      [field]: parseFloat(value) || 0,
+      [field]: value === '' ? '' : (parseFloat(value) || 0),
     };
     
     setExercises(updated);
@@ -353,7 +353,7 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
                                 <TextField
                                   label="Weight"
                                   type="number"
-                                  value={set.weight}
+                                  value={set.weight === '' ? '' : set.weight}
                                   onChange={(e) => handleUpdateSet(exIdx, setIdx, 'weight', e.target.value)}
                                   size="small"
                                   sx={{ flex: 1 }}
@@ -365,7 +365,7 @@ const WorkoutDetailEditor = ({ open, onClose, workout, dayOfWeek, onSave }) => {
                                 <TextField
                                   label="Reps"
                                   type="number"
-                                  value={set.reps}
+                                  value={set.reps === '' ? '' : set.reps}
                                   onChange={(e) => handleUpdateSet(exIdx, setIdx, 'reps', e.target.value)}
                                   size="small"
                                   sx={{ flex: 1 }}

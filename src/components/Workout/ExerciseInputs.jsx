@@ -84,7 +84,7 @@ const ExerciseInputs = memo(forwardRef(({
           </IconButton>
           <TextField 
             type="number" 
-            value={weight}
+            value={weight === '' ? '' : weight}
             onChange={(e) => onWeightChange(e.target.value)}
             disabled={disabled}
             inputMode="decimal"
@@ -145,7 +145,7 @@ const ExerciseInputs = memo(forwardRef(({
           </IconButton>
           <TextField 
             type="number" 
-            value={reps}
+            value={reps === '' ? '' : reps}
             onChange={(e) => onRepsChange(e.target.value)}
             disabled={disabled}
             inputMode="numeric"

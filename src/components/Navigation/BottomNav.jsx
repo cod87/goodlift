@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
 import { 
-  FitnessCenter,
-  FitnessCenterOutlined,
   TrendingUp,
   TrendingUpOutlined,
   Settings,
@@ -31,8 +29,9 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
     {
       id: 'home',
       label: 'Work',
-      iconActive: FitnessCenter,
-      iconInactive: FitnessCenterOutlined,
+      iconActive: null, // Use custom SVG
+      iconInactive: null, // Use custom SVG
+      customIcon: 'work-icon.svg',
       activeColor: '#1db584', // Green
       screens: [
         'home', 
@@ -103,6 +102,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       {navItems.map((item) => {
         const active = isActive(item);
         const Icon = active ? item.iconActive : item.iconInactive;
+        const baseUrl = import.meta.env.BASE_URL || '/';
         
         return (
           <motion.button
@@ -136,7 +136,23 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-              <Icon sx={{ fontSize: '1.5rem' }} />
+              {item.customIcon ? (
+                <img 
+                  src={`${baseUrl}${item.customIcon}`} 
+                  alt={item.label}
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    filter: active 
+                      ? 'none' 
+                      : theme.palette.mode === 'dark'
+                        ? 'brightness(0.6)'
+                        : 'brightness(0.5)',
+                  }}
+                />
+              ) : (
+                <Icon sx={{ fontSize: '1.5rem' }} />
+              )}
             </div>
             
             {/* Label */}

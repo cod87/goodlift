@@ -244,11 +244,12 @@ const SortableExerciseItem = ({
             label="Reps"
             type="number"
             size="small"
-            value={exercise.reps}
+            value={exercise.reps === '' ? '' : exercise.reps}
             onChange={(e) => {
               e.stopPropagation();
               const updated = [...myWorkout];
-              updated[index].reps = parseInt(e.target.value) || 10;
+              const value = e.target.value;
+              updated[index].reps = value === '' ? '' : (parseInt(value) || 0);
               setMyWorkout(updated);
             }}
             onClick={(e) => e.stopPropagation()}

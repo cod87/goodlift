@@ -317,15 +317,16 @@ const RecurringSessionEditor = ({
                                 size="small"
                                 label="Sets"
                                 type="number"
-                                value={exercise.sets || 3}
-                                onChange={(e) => handleExerciseChange(index, 'sets', parseInt(e.target.value))}
+                                value={(exercise.sets === '' || exercise.sets === undefined) ? '' : exercise.sets}
+                                onChange={(e) => handleExerciseChange(index, 'sets', e.target.value === '' ? '' : parseInt(e.target.value))}
                                 sx={{ width: 80 }}
                                 inputProps={{ min: 1 }}
                               />
                               <TextField
                                 size="small"
                                 label="Reps"
-                                value={exercise.reps || '10'}
+                                type="number"
+                                value={exercise.reps === '' ? '' : exercise.reps}
                                 onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
                                 sx={{ width: 100 }}
                               />
@@ -333,8 +334,8 @@ const RecurringSessionEditor = ({
                                 size="small"
                                 label="Rest (s)"
                                 type="number"
-                                value={exercise.restTime || 90}
-                                onChange={(e) => handleExerciseChange(index, 'restTime', parseInt(e.target.value))}
+                                value={(exercise.restTime === '' || exercise.restTime === undefined) ? '' : exercise.restTime}
+                                onChange={(e) => handleExerciseChange(index, 'restTime', e.target.value === '' ? '' : parseInt(e.target.value))}
                                 sx={{ width: 100 }}
                                 inputProps={{ min: 0 }}
                               />

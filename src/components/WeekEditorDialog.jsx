@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -32,6 +32,9 @@ import {
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 import WorkoutDetailEditor from './WorkoutDetailEditor';
+import WorkoutCreationModal from './WorkTabs/WorkoutCreationModal';
+import { updateSavedWorkout, getSavedWorkouts } from '../utils/storage';
+import { EXERCISES_DATA_PATH } from '../utils/constants';
 
 /**
  * WeekEditorDialog - Dialog for editing weekly workout assignments
@@ -44,6 +47,30 @@ const WeekEditorDialog = ({ open, onClose }) => {
   const [hasChanges, setHasChanges] = useState(false);
   const [detailEditorOpen, setDetailEditorOpen] = useState(false);
   const [detailEditorDay, setDetailEditorDay] = useState(null);
+  
+  // Workout Creation Modal state
+  const [workoutCreationOpen, setWorkoutCreationOpen] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [editingWorkoutDay, setEditingWorkoutDay] = useState(null);
+  const [exercises, setExercises] = useState([]);
+
+  // Load exercises data for WorkoutCreationModal
+  useEffect(() => {
+    const loadExercises = async () => {
+      try {
+        const response = await fetch(EXERCISES_DATA_PATH);
+        const data = await response.json();
+        setExercises(data);
+      } catch (error) {
+        console.error('Error loading exercises:', error);
+        setExercises([]);
+      }
+    };
+    
+    if (open) {
+      loadExercises();
+    }
+  }, [open]);
 
   const daysOfWeek = [
     'Sunday',
@@ -158,6 +185,66 @@ const WeekEditorDialog = ({ open, onClose }) => {
       await assignWorkoutToDay(detailEditorDay, updatedWorkout);
       setHasChanges(true);
       handleCloseDetailEditor();
+    }
+  };
+
+  // Helper to check if a session type is strength training
+  const isStrengthWorkout = (sessionType) => {
+    if (!sessionType) return false;
+    const type = sessionType.toLowerCase();
+    const strengthTypes = ['full', 'upper', 'lower', 'push', 'pull', 'legs', 'core'];
+    return strengthTypes.includes(type);
+  };
+
+  // Handle clicking on a strength workout to edit it
+  const handleWorkoutClick = (day, session) => {
+    // Only open workout creation modal for strength workouts with exercises
+    if (session && isStrengthWorkout(session.sessionType) && session.exercises && session.exercises.length > 0) {
+      setEditingWorkout({
+        name: session.sessionName,
+        type: session.sessionType,
+        exercises: session.exercises,
+        supersetConfig: session.supersetConfig,
+      });
+      setEditingWorkoutDay(day);
+      setWorkoutCreationOpen(true);
+    }
+  };
+
+  const handleCloseWorkoutCreation = () => {
+    setWorkoutCreationOpen(false);
+    setEditingWorkout(null);
+    setEditingWorkoutDay(null);
+  };
+
+  const handleSaveWorkoutCreation = async (workout) => {
+    if (editingWorkoutDay) {
+      // Update the workout in the weekly schedule
+      await assignWorkoutToDay(editingWorkoutDay, {
+        sessionType: workout.type || 'full',
+        sessionName: workout.name,
+        exercises: workout.exercises,
+        supersetConfig: workout.supersetConfig,
+        lastModified: new Date().toISOString(),
+      });
+      
+      // Also update in saved workouts if it exists there
+      try {
+        const savedWorkouts = await getSavedWorkouts();
+        const workoutIndex = savedWorkouts.findIndex(w => 
+          w.assignedDay === editingWorkoutDay && 
+          w.name === editingWorkout.name
+        );
+        
+        if (workoutIndex !== -1) {
+          await updateSavedWorkout(workoutIndex, workout);
+        }
+      } catch (error) {
+        console.error('Error updating saved workout:', error);
+      }
+      
+      setHasChanges(true);
+      handleCloseWorkoutCreation();
     }
   };
 
@@ -320,7 +407,21 @@ const WeekEditorDialog = ({ open, onClose }) => {
                           gap: 1,
                           width: '100%',
                         }}>
-                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Box 
+                            sx={{ 
+                              flex: 1, 
+                              minWidth: 0,
+                              cursor: session && isStrengthWorkout(session.sessionType) && session.exercises && session.exercises.length > 0 ? 'pointer' : 'default',
+                              '&:hover': session && isStrengthWorkout(session.sessionType) && session.exercises && session.exercises.length > 0 ? {
+                                bgcolor: 'action.hover',
+                                borderRadius: 1,
+                              } : {},
+                              p: 0.5,
+                              mx: -0.5,
+                              transition: 'background-color 0.2s',
+                            }}
+                            onClick={() => session && handleWorkoutClick(day, session)}
+                          >
                             {session ? (
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                                 {getSessionIcon(session.sessionType)}
@@ -348,6 +449,15 @@ const WeekEditorDialog = ({ open, onClose }) => {
                                     label="Suggested"
                                     size="small"
                                     color="default"
+                                    variant="outlined"
+                                    sx={{ fontSize: '0.7rem', height: 20 }}
+                                  />
+                                )}
+                                {session && isStrengthWorkout(session.sessionType) && session.exercises && session.exercises.length > 0 && (
+                                  <Chip
+                                    label="Click to edit"
+                                    size="small"
+                                    color="primary"
                                     variant="outlined"
                                     sx={{ fontSize: '0.7rem', height: 20 }}
                                   />
@@ -438,6 +548,15 @@ const WeekEditorDialog = ({ open, onClose }) => {
           onSave={handleSaveWorkoutDetails}
         />
       )}
+
+      {/* Workout Creation Modal - for editing strength workouts */}
+      <WorkoutCreationModal
+        open={workoutCreationOpen}
+        onClose={handleCloseWorkoutCreation}
+        onSave={handleSaveWorkoutCreation}
+        exercises={exercises}
+        existingWorkout={editingWorkout}
+      />
     </Dialog>
   );
 };

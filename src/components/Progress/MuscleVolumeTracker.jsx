@@ -6,7 +6,6 @@ import {
   CardContent,
   Typography,
   Stack,
-  Grid,
   LinearProgress,
 } from '@mui/material';
 import { FitnessCenter } from '@mui/icons-material';
@@ -116,14 +115,11 @@ const MuscleVolumeTracker = ({ workoutHistory = [], days = 7 }) => {
     [workoutHistory, exercisesDB, days]
   );
 
-  // Filter out categories with no volume
-  const categoriesWithVolume = Object.entries(volumeData)
-    .filter(([, data]) => data.primary > 0 || data.secondary > 0)
-    .sort((a, b) => {
-      const totalA = a[1].primary + a[1].secondary;
-      const totalB = b[1].primary + b[1].secondary;
-      return totalB - totalA;
-    });
+  // Get categories in the specified order, filter out those with no volume
+  const orderedCategories = getAllCategories();
+  const categoriesWithVolume = orderedCategories
+    .map(category => [category, volumeData[category]])
+    .filter(([, data]) => data && (data.primary > 0 || data.secondary > 0));
 
   // Calculate max values for scaling
   const maxPrimary = Math.max(
@@ -138,14 +134,14 @@ const MuscleVolumeTracker = ({ workoutHistory = [], days = 7 }) => {
   if (loading) {
     return (
       <Card sx={{ bgcolor: 'background.paper' }}>
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: 2 }}>
           <Typography
             variant="h6"
-            sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
+            sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
           >
             <FitnessCenter /> Muscle Volume Tracker
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 1 }}>
             Loading...
           </Typography>
         </CardContent>
@@ -156,14 +152,14 @@ const MuscleVolumeTracker = ({ workoutHistory = [], days = 7 }) => {
   if (categoriesWithVolume.length === 0) {
     return (
       <Card sx={{ bgcolor: 'background.paper' }}>
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: 2 }}>
           <Typography
             variant="h6"
-            sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
+            sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
           >
             <FitnessCenter /> Muscle Volume Tracker
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 1 }}>
             No workout data for the past {days} days. Start logging workouts to see your muscle volume breakdown!
           </Typography>
         </CardContent>
@@ -173,8 +169,8 @@ const MuscleVolumeTracker = ({ workoutHistory = [], days = 7 }) => {
 
   return (
     <Card sx={{ bgcolor: 'background.paper' }}>
-      <CardContent sx={{ p: 3 }}>
-        <Stack spacing={2}>
+      <CardContent sx={{ p: 2 }}>
+        <Stack spacing={1.5}>
           <Box>
             <Typography
               variant="h6"
@@ -183,124 +179,107 @@ const MuscleVolumeTracker = ({ workoutHistory = [], days = 7 }) => {
               <FitnessCenter /> Muscle Volume Tracker
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Sets completed per muscle group (past {days} days)
+              Sets per muscle (past {days} days)
             </Typography>
           </Box>
 
-          <Grid container spacing={2}>
+          <Stack spacing={1}>
             {categoriesWithVolume.map(([category, data]) => {
               const total = data.primary + data.secondary;
               const primaryPercent = maxPrimary > 0 ? (data.primary / maxPrimary) * 100 : 0;
               const secondaryPercent = maxSecondary > 0 ? (data.secondary / maxSecondary) * 100 : 0;
 
               return (
-                <Grid item xs={12} sm={6} md={4} key={category}>
-                  <Box
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      bgcolor: 'background.default',
-                      height: '100%',
-                    }}
-                  >
+                <Box
+                  key={category}
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: 'background.default',
+                  }}
+                >
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    {/* Muscle name - fixed width */}
                     <Typography
-                      variant="subtitle2"
-                      sx={{ fontWeight: 600, mb: 1.5, textAlign: 'center' }}
+                      variant="body2"
+                      sx={{ fontWeight: 600, minWidth: 90 }}
                     >
                       {category}
                     </Typography>
 
-                    <Stack spacing={1.5}>
-                      {/* Primary Sets */}
-                      <Box>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            mb: 0.5,
-                          }}
-                        >
-                          <Typography variant="caption" color="text.secondary">
-                            Primary
+                    {/* Progress bars - flex to fill space */}
+                    <Box sx={{ flex: 1 }}>
+                      <Stack spacing={0.5}>
+                        {/* Primary bar */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 28 }}>
+                            Pri
                           </Typography>
+                          <LinearProgress
+                            variant="determinate"
+                            value={primaryPercent}
+                            sx={{
+                              flex: 1,
+                              height: 6,
+                              borderRadius: 3,
+                              bgcolor: 'action.hover',
+                              '& .MuiLinearProgress-bar': {
+                                borderRadius: 3,
+                                background: 'linear-gradient(90deg, #2196F3 0%, #21CBF3 100%)',
+                              },
+                            }}
+                          />
                           <Typography
                             variant="caption"
-                            sx={{ fontWeight: 700, color: 'primary.main' }}
+                            sx={{ fontWeight: 600, color: 'primary.main', minWidth: 30, textAlign: 'right' }}
                           >
-                            {data.primary} sets
+                            {data.primary}
                           </Typography>
                         </Box>
-                        <LinearProgress
-                          variant="determinate"
-                          value={primaryPercent}
-                          sx={{
-                            height: 8,
-                            borderRadius: 4,
-                            bgcolor: 'action.hover',
-                            '& .MuiLinearProgress-bar': {
-                              borderRadius: 4,
-                              background: 'linear-gradient(90deg, #2196F3 0%, #21CBF3 100%)',
-                            },
-                          }}
-                        />
-                      </Box>
 
-                      {/* Secondary Sets */}
-                      <Box>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            mb: 0.5,
-                          }}
-                        >
-                          <Typography variant="caption" color="text.secondary">
-                            Secondary
+                        {/* Secondary bar */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 28 }}>
+                            Sec
                           </Typography>
+                          <LinearProgress
+                            variant="determinate"
+                            value={secondaryPercent}
+                            sx={{
+                              flex: 1,
+                              height: 6,
+                              borderRadius: 3,
+                              bgcolor: 'action.hover',
+                              '& .MuiLinearProgress-bar': {
+                                borderRadius: 3,
+                                background: 'linear-gradient(90deg, #9C27B0 0%, #E91E63 100%)',
+                              },
+                            }}
+                          />
                           <Typography
                             variant="caption"
-                            sx={{ fontWeight: 700, color: 'secondary.main' }}
+                            sx={{ fontWeight: 600, color: 'secondary.main', minWidth: 30, textAlign: 'right' }}
                           >
-                            {data.secondary} sets
+                            {data.secondary}
                           </Typography>
                         </Box>
-                        <LinearProgress
-                          variant="determinate"
-                          value={secondaryPercent}
-                          sx={{
-                            height: 8,
-                            borderRadius: 4,
-                            bgcolor: 'action.hover',
-                            '& .MuiLinearProgress-bar': {
-                              borderRadius: 4,
-                              background: 'linear-gradient(90deg, #9C27B0 0%, #E91E63 100%)',
-                            },
-                          }}
-                        />
-                      </Box>
+                      </Stack>
+                    </Box>
 
-                      {/* Total */}
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          textAlign: 'center',
-                          fontWeight: 600,
-                          color: 'text.primary',
-                          pt: 0.5,
-                        }}
-                      >
-                        Total: {total} sets
-                      </Typography>
-                    </Stack>
-                  </Box>
-                </Grid>
+                    {/* Total - fixed width */}
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 700, minWidth: 45, textAlign: 'right' }}
+                    >
+                      {total}
+                    </Typography>
+                  </Stack>
+                </Box>
               );
             })}
-          </Grid>
+          </Stack>
         </Stack>
       </CardContent>
     </Card>

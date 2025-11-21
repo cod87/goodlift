@@ -267,12 +267,17 @@ export const calculateStreak = (workoutHistory = []) => {
  * Calculate adherence percentage
  * If user's first session was less than 30 days ago, calculates adherence based on 
  * days since first session. Otherwise uses the last 30 days.
+ * Week 0 sessions (first sessions on Wed-Sat before first Sunday) are excluded from adherence.
+ * 
  * @param {Array} workoutHistory - Array of completed workout objects
- * @param {Object} activePlan - Active plan with scheduled sessions (optional)
+ * @param {Object} activePlan - Active plan with scheduled sessions (optional, currently unused but kept for API compatibility)
  * @param {number} days - Number of days to calculate adherence for (default 30)
+ * @param {Object} weekScheduling - Week scheduling context with Week 0 info (optional)
  * @returns {number} Adherence percentage (0-100)
  */
-export const calculateAdherence = (workoutHistory = [], activePlan = null, days = 30) => {
+export const calculateAdherence = (workoutHistory = [], activePlan = null, days = 30, weekScheduling = null) => {
+  // activePlan parameter is kept for API compatibility but currently unused
+  void activePlan;
   if (!workoutHistory || workoutHistory.length === 0) {
     return 0;
   }
@@ -285,21 +290,56 @@ export const calculateAdherence = (workoutHistory = [], activePlan = null, days 
   const firstSessionDate = new Date(Math.min(...timestamps));
   firstSessionDate.setHours(0, 0, 0, 0);
 
-  // Calculate days since first session
-  const daysSinceFirstSession = Math.floor((today - firstSessionDate) / (1000 * 60 * 60 * 24)) + 1;
+  // Determine the start date for adherence calculation
+  // If Week 0 exists, start from the beginning of Week 1 (exclude Week 0)
+  let adherenceStartDate = firstSessionDate;
+  if (weekScheduling?.isWeekZero && weekScheduling?.cycleStartDate) {
+    const week1Start = new Date(weekScheduling.cycleStartDate);
+    week1Start.setHours(0, 0, 0, 0);
+    
+    // If Week 1 has started, use that as the start date
+    // Otherwise, if we're still in Week 0, adherence is 0
+    if (today >= week1Start) {
+      adherenceStartDate = week1Start;
+    } else {
+      // Still in Week 0, no adherence yet
+      return 0;
+    }
+  } else if (weekScheduling?.weekZeroStartDate && weekScheduling?.cycleStartDate) {
+    // Week 0 existed in the past but we've moved to Week 1+
+    const week1Start = new Date(weekScheduling.cycleStartDate);
+    week1Start.setHours(0, 0, 0, 0);
+    adherenceStartDate = week1Start;
+  }
 
-  // Use the smaller of: days parameter or days since first session
-  const effectiveDays = daysSinceFirstSession < days ? daysSinceFirstSession : days;
+  // Calculate days since adherence start
+  const daysSinceStart = Math.floor((today - adherenceStartDate) / (1000 * 60 * 60 * 24)) + 1;
+
+  // Use the smaller of: days parameter or days since adherence start
+  const effectiveDays = daysSinceStart < days ? daysSinceStart : days;
 
   const cutoffDate = new Date(today);
   cutoffDate.setDate(cutoffDate.getDate() - effectiveDays + 1); // +1 to include today
   cutoffDate.setHours(0, 0, 0, 0);
 
-  // Get unique session dates in the effective period
+  // Filter out Week 0 sessions and get unique session dates in the effective period
   const uniqueSessionDates = new Set();
   workoutHistory.forEach(w => {
     const workoutDate = new Date(w.date);
     workoutDate.setHours(0, 0, 0, 0);
+    
+    // Skip if this session is in Week 0
+    if (weekScheduling?.weekZeroStartDate && weekScheduling?.cycleStartDate) {
+      const weekZeroStart = new Date(weekScheduling.weekZeroStartDate);
+      const week1Start = new Date(weekScheduling.cycleStartDate);
+      weekZeroStart.setHours(0, 0, 0, 0);
+      week1Start.setHours(0, 0, 0, 0);
+      
+      if (workoutDate >= weekZeroStart && workoutDate < week1Start) {
+        return; // Skip Week 0 sessions
+      }
+    }
+    
     if (workoutDate >= cutoffDate && workoutDate <= today) {
       uniqueSessionDates.add(workoutDate.toDateString());
     }

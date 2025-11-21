@@ -1,27 +1,25 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import './App.css';
 import Header from './components/Header';
 import BottomNav from './components/Navigation/BottomNav';
 import WorkTabs from './components/WorkTabs';
-import TodayView from './components/TodayView/TodayView';
-import SelectionScreen from './components/SelectionScreen';
-// UnifiedWorkoutHub removed - using SelectionScreen instead
-// WorkoutPlanScreen removed - no longer using workout planning
-import WorkoutScreenModal from './components/WorkoutScreenModal';
-import WorkoutPreview from './components/WorkoutPreview';
-import CompletionScreen from './components/CompletionScreen';
-import ProgressScreen from './components/ProgressScreen';
 import AuthScreen from './components/AuthScreen';
-import MobilityScreen from './components/Mobility/MobilityScreen';
-import UnifiedTimerScreen from './pages/UnifiedTimerScreen';
-import UnifiedLogActivityScreen from './pages/UnifiedLogActivityScreen';
-import ExerciseListPage from './pages/ExerciseListPage';
-import SettingsScreen from './pages/SettingsScreen';
-import UserProfileScreen from './pages/UserProfileScreen';
-import EditWeeklyScheduleScreen from './pages/EditWeeklyScheduleScreen';
-import ExerciseCardDemo from './pages/ExerciseCardDemo';
-import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
-import AchievementUnlockedDialog from './components/AchievementUnlockedDialog';
+// Lazy load heavy components to reduce initial bundle size
+const WorkoutScreenModal = lazy(() => import('./components/WorkoutScreenModal'));
+const WorkoutPreview = lazy(() => import('./components/WorkoutPreview'));
+const CompletionScreen = lazy(() => import('./components/CompletionScreen'));
+const ProgressScreen = lazy(() => import('./components/ProgressScreen'));
+const SelectionScreen = lazy(() => import('./components/SelectionScreen'));
+const MobilityScreen = lazy(() => import('./components/Mobility/MobilityScreen'));
+const UnifiedTimerScreen = lazy(() => import('./pages/UnifiedTimerScreen'));
+const UnifiedLogActivityScreen = lazy(() => import('./pages/UnifiedLogActivityScreen'));
+const ExerciseListPage = lazy(() => import('./pages/ExerciseListPage'));
+const SettingsScreen = lazy(() => import('./pages/SettingsScreen'));
+const UserProfileScreen = lazy(() => import('./pages/UserProfileScreen'));
+const EditWeeklyScheduleScreen = lazy(() => import('./pages/EditWeeklyScheduleScreen'));
+const ExerciseCardDemo = lazy(() => import('./pages/ExerciseCardDemo'));
+const GuestDataMigrationDialog = lazy(() => import('./components/GuestDataMigrationDialog'));
+const AchievementUnlockedDialog = lazy(() => import('./components/AchievementUnlockedDialog'));
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
 import { useFavoriteExercises } from './hooks/useFavoriteExercises';
 // usePlanIntegration hook removed - no longer using workout planning
@@ -648,89 +646,91 @@ function AppContent() {
           marginTop: '60px',
           paddingBottom: '80px', // Space for bottom nav
         }}>
-          {currentScreen === 'home' && (
-            <WorkTabs
-              onNavigate={handleNavigate}
-              loading={loading}
-              workoutType={workoutType}
-              selectedEquipment={selectedEquipment}
-              equipmentOptions={equipmentOptions}
-              onWorkoutTypeChange={handleWorkoutTypeChange}
-              onEquipmentChange={handleEquipmentChange}
-              onStartWorkout={handleStartWorkout}
-              onCustomize={handleCustomize}
-            />
-          )}
+          <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>Loading...</div>}>
+            {currentScreen === 'home' && (
+              <WorkTabs
+                onNavigate={handleNavigate}
+                loading={loading}
+                workoutType={workoutType}
+                selectedEquipment={selectedEquipment}
+                equipmentOptions={equipmentOptions}
+                onWorkoutTypeChange={handleWorkoutTypeChange}
+                onEquipmentChange={handleEquipmentChange}
+                onStartWorkout={handleStartWorkout}
+                onCustomize={handleCustomize}
+              />
+            )}
 
-          {/* SelectionScreen kept for backward compatibility but no longer in main workflow */}
-          {currentScreen === 'selection' && (
-            <SelectionScreen
-              workoutType={workoutType}
-              selectedEquipment={selectedEquipment}
-              equipmentOptions={equipmentOptions}
-              onWorkoutTypeChange={handleWorkoutTypeChange}
-              onEquipmentChange={handleEquipmentChange}
-              onStartWorkout={handleStartWorkout}
-              onCustomize={handleCustomize}
-              loading={loading}
-            />
-          )}
-          
-          {currentScreen === 'preview' && showPreview && (
-            <WorkoutPreview
-              workout={currentWorkout}
-              workoutType={workoutType}
-              onStart={handleBeginWorkout}
-              onCancel={handleCancelPreview}
-              onRandomizeExercise={handleRandomizeExercise}
-              equipmentFilter={Array.from(selectedEquipment)}
-              isCustomizeMode={isCustomizeMode}
-              supersetConfig={supersetConfig}
-              setsPerSuperset={setsPerSuperset}
-            />
-          )}
-          
-          {currentScreen === 'workout' && currentWorkout.length > 0 && (
-            <WorkoutScreenModal
-              open={true}
-              workoutPlan={currentWorkout}
-              onComplete={handleWorkoutComplete}
-              onExit={handleWorkoutExit}
-              supersetConfig={supersetConfig}
-              setsPerSuperset={setsPerSuperset}
-            />
-          )}
-          
-          {currentScreen === 'completion' && completedWorkoutData && (
-            <CompletionScreen
-              workoutData={completedWorkoutData}
-              workoutPlan={currentWorkout}
-              onFinish={handleFinish}
-              onExportCSV={handleExportCSV}
-            />
-          )}
-          
-          {currentScreen === 'progress' && <ProgressScreen onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />}
+            {/* SelectionScreen kept for backward compatibility but no longer in main workflow */}
+            {currentScreen === 'selection' && (
+              <SelectionScreen
+                workoutType={workoutType}
+                selectedEquipment={selectedEquipment}
+                equipmentOptions={equipmentOptions}
+                onWorkoutTypeChange={handleWorkoutTypeChange}
+                onEquipmentChange={handleEquipmentChange}
+                onStartWorkout={handleStartWorkout}
+                onCustomize={handleCustomize}
+                loading={loading}
+              />
+            )}
+            
+            {currentScreen === 'preview' && showPreview && (
+              <WorkoutPreview
+                workout={currentWorkout}
+                workoutType={workoutType}
+                onStart={handleBeginWorkout}
+                onCancel={handleCancelPreview}
+                onRandomizeExercise={handleRandomizeExercise}
+                equipmentFilter={Array.from(selectedEquipment)}
+                isCustomizeMode={isCustomizeMode}
+                supersetConfig={supersetConfig}
+                setsPerSuperset={setsPerSuperset}
+              />
+            )}
+            
+            {currentScreen === 'workout' && currentWorkout.length > 0 && (
+              <WorkoutScreenModal
+                open={true}
+                workoutPlan={currentWorkout}
+                onComplete={handleWorkoutComplete}
+                onExit={handleWorkoutExit}
+                supersetConfig={supersetConfig}
+                setsPerSuperset={setsPerSuperset}
+              />
+            )}
+            
+            {currentScreen === 'completion' && completedWorkoutData && (
+              <CompletionScreen
+                workoutData={completedWorkoutData}
+                workoutPlan={currentWorkout}
+                onFinish={handleFinish}
+                onExportCSV={handleExportCSV}
+              />
+            )}
+            
+            {currentScreen === 'progress' && <ProgressScreen onNavigate={handleNavigate} onStartWorkout={handleStartWorkout} />}
 
-          {/* Workout planning screen removed - no longer using workout planning */}
+            {/* Workout planning screen removed - no longer using workout planning */}
 
-          {(currentScreen === 'cardio' || currentScreen === 'hiit' || currentScreen === 'timer') && (
-            <UnifiedTimerScreen onNavigate={handleNavigate} />
-          )}
+            {(currentScreen === 'cardio' || currentScreen === 'hiit' || currentScreen === 'timer') && (
+              <UnifiedTimerScreen onNavigate={handleNavigate} />
+            )}
 
-          {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} />}
+            {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} />}
 
-          {(currentScreen === 'stretch' || currentScreen === 'mobility') && <MobilityScreen />}
+            {(currentScreen === 'stretch' || currentScreen === 'mobility') && <MobilityScreen />}
 
-          {currentScreen === 'exercise-list' && <ExerciseListPage />}
+            {currentScreen === 'exercise-list' && <ExerciseListPage />}
 
-          {currentScreen === 'settings' && <SettingsScreen onNavigate={handleNavigate} />}
+            {currentScreen === 'settings' && <SettingsScreen onNavigate={handleNavigate} />}
 
-          {currentScreen === 'profile' && <UserProfileScreen />}
+            {currentScreen === 'profile' && <UserProfileScreen />}
 
-          {currentScreen === 'edit-weekly-schedule' && <EditWeeklyScheduleScreen onNavigate={handleNavigate} />}
-          
-          {currentScreen === 'exercise-card-demo' && <ExerciseCardDemo />}
+            {currentScreen === 'edit-weekly-schedule' && <EditWeeklyScheduleScreen onNavigate={handleNavigate} />}
+            
+            {currentScreen === 'exercise-card-demo' && <ExerciseCardDemo />}
+          </Suspense>
         </div>
         
         {/* Bottom Navigation - Always visible */}
@@ -740,21 +740,29 @@ function AppContent() {
         />
         
         {/* Guest Data Migration Dialog */}
-        <GuestDataMigrationDialog
-          open={showMigrationDialog}
-          onClose={handleMigrationClose}
-          userId={currentUser?.uid}
-        />
+        <Suspense fallback={null}>
+          {showMigrationDialog && (
+            <GuestDataMigrationDialog
+              open={showMigrationDialog}
+              onClose={handleMigrationClose}
+              userId={currentUser?.uid}
+            />
+          )}
+        </Suspense>
         
         {/* Achievement Unlocked Dialog */}
-        <AchievementUnlockedDialog
-          open={showAchievementDialog}
-          onClose={() => {
-            setShowAchievementDialog(false);
-            setNewAchievement(null);
-          }}
-          achievement={newAchievement}
-        />
+        <Suspense fallback={null}>
+          {showAchievementDialog && (
+            <AchievementUnlockedDialog
+              open={showAchievementDialog}
+              onClose={() => {
+                setShowAchievementDialog(false);
+                setNewAchievement(null);
+              }}
+              achievement={newAchievement}
+            />
+          )}
+        </Suspense>
         
         {/* Guest Mode Snackbar */}
         <Snackbar

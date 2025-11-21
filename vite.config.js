@@ -29,7 +29,7 @@ export default defineConfig({
             'chart.js',
             'react-chartjs-2',
           ],
-          // Split Firebase
+          // Split Firebase (core only, messaging loaded lazily)
           firebase: [
             'firebase/app',
             'firebase/auth',
@@ -41,6 +41,8 @@ export default defineConfig({
     },
     // Increase chunk size warning limit since we're splitting properly
     chunkSizeWarningLimit: 600,
+    // Use esbuild for faster minification (default)
+    minify: 'esbuild',
   },
   // Note: Vite automatically copies everything from public/ folder to build output root
   // This includes manifest.json, service-worker.js, and icons for PWA functionality

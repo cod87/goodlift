@@ -5,9 +5,7 @@
  * Uses Firebase Cloud Messaging for push notifications
  */
 
-import { messaging } from '../firebase';
-import { onMessage, getToken } from 'firebase/messaging';
-import { getTodaysWellnessTask } from '../utils/wellnessTaskService';
+import { getMessagingInstance } from '../firebase';
 
 // VAPID public key from vapid-key.env
 // This key is also configured in Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
@@ -42,6 +40,7 @@ export const requestNotificationPermission = async () => {
       return false;
     }
 
+    const messaging = await getMessagingInstance();
     if (!messaging) {
       console.warn('[Notification Permission] ⚠️  Firebase Messaging not supported in this browser');
       console.warn('[Notification Permission] Will still request permission for native notifications');
@@ -84,6 +83,7 @@ export const getFCMToken = async () => {
   try {
     console.log('[FCM] Starting FCM token retrieval...');
     
+    const messaging = await getMessagingInstance();
     if (!messaging) {
       console.warn('[FCM] ⚠️  Firebase Messaging not available in this browser');
       console.warn('[FCM] This is expected on Safari/iOS which does not support FCM');
@@ -115,6 +115,9 @@ export const getFCMToken = async () => {
 
     console.log('[FCM] Requesting FCM token with VAPID key...');
     console.log('[FCM] VAPID key (first 20 chars):', VAPID_KEY.substring(0, 20) + '...');
+    
+    // Dynamically import getToken to avoid loading it until needed
+    const { getToken } = await import('firebase/messaging');
     
     // Get FCM token using the VAPID key
     const token = await getToken(messaging, {
@@ -327,9 +330,10 @@ export const shouldSendNotification = (preferences, type) => {
 /**
  * Setup message listener for foreground notifications
  */
-export const setupMessageListener = (callback) => {
+export const setupMessageListener = async (callback) => {
   console.log('[FCM Listener] Setting up foreground message listener...');
   
+  const messaging = await getMessagingInstance();
   if (!messaging) {
     console.warn('[FCM Listener] ⚠️  Firebase Messaging not available - cannot setup listener');
     console.warn('[FCM Listener] This is expected on Safari/iOS');
@@ -337,6 +341,7 @@ export const setupMessageListener = (callback) => {
   }
 
   try {
+    const { onMessage } = await import('firebase/messaging');
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log('[FCM Listener] ✅ Received foreground message from Firebase');
       console.log('[FCM Listener] Message payload:', {
@@ -385,7 +390,8 @@ export const setupMessageListener = (callback) => {
  * Send test notification
  * @param {Object} preferences - User preferences
  */
-export const sendTestNotification = (preferences) => {
+export const sendTestNotification = async (preferences) => {
+  const { getTodaysWellnessTask } = await import('../utils/wellnessTaskService');
   const wellnessTask = getTodaysWellnessTask(preferences.wellness || {});
   const notification = generateMorningNotification('Full Body Strength', wellnessTask);
   

@@ -26,12 +26,17 @@ export const MUSCLE_CATEGORY_MAP = {
 /**
  * Mapping of simplified muscle categories for secondary muscles
  * Each muscle is only assigned once (no duplicates between categories)
+ * 
+ * Note: This mapping differs from MUSCLE_CATEGORY_MAP in some cases to better
+ * reflect how muscles function as secondary movers in compound exercises.
+ * For example, Hip Flexors are categorized under 'Quads' for secondary muscles
+ * (as they assist in leg exercises) but under 'Core' for primary muscles.
  */
 export const SECONDARY_MUSCLE_CATEGORY_MAP = {
   'Chest': ['Chest'],
   'Back': ['Back', 'Lats', 'Lower Back', 'Rhomboids', 'Traps', 'Upper Back'],
   'Biceps': ['Biceps', 'Forearms'],
-  'Triceps': [],
+  'Triceps': [], // Triceps rarely appear as secondary muscles in exercises
   'Shoulders': ['Delts', 'Front Delts', 'Rear Delts', 'Shoulders'],
   'Core': ['Core', 'Obliques'],
   'Quads': ['Hip Flexors', 'Quads'],

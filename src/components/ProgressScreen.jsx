@@ -45,6 +45,7 @@ import {
   Close,
   Whatshot,
   FilterList,
+  HelpOutline,
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -73,6 +74,7 @@ import { useUserProfile } from '../contexts/UserProfileContext';
  * Calculate current workout streak in days with calendar week-based logic
  * Uses Sunday-Saturday as fixed week boundaries. Allows one missed day per calendar week.
  * Week with 6 or 7 sessions counts as a full 7-day week in the streak.
+ * Requires at least 3 strength training sessions per week to maintain streak.
  * @param {Array} allSessions - Array of all completed sessions (strength, cardio, HIIT, yoga/stretch) with date
  * @returns {Object} { currentStreak: number, longestStreak: number }
  */
@@ -85,6 +87,20 @@ const calculateStreakWithRestDays = (allSessions = []) => {
   const sortedSessions = [...allSessions].sort((a, b) => 
     new Date(b.date) - new Date(a.date)
   );
+
+  // Helper function to check if a session is strength training
+  const isStrengthSession = (session) => {
+    if (session.type === 'strength' || session.type === 'full' || session.type === 'upper' || 
+        session.type === 'lower' || session.type === 'push' || session.type === 'pull' || 
+        session.type === 'legs') {
+      return true;
+    }
+    // If it has exercises, assume it's a strength session
+    if (session.exercises && Object.keys(session.exercises).length > 0) {
+      return true;
+    }
+    return false;
+  };
 
   // Get unique session dates (in case multiple sessions on same day)
   const sessionDates = new Set(sortedSessions.map(w => {
@@ -127,15 +143,26 @@ const calculateStreakWithRestDays = (allSessions = []) => {
     
     // Count sessions in this week
     let sessionsInWeek = 0;
+    let strengthSessionsInWeek = 0;
+    
     for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
       const dayTime = weekStart + (dayOffset * 24 * 60 * 60 * 1000);
       if (sessionDates.has(dayTime)) {
         sessionsInWeek++;
+        // Check if any session on this day is a strength session
+        const sessionsOnDay = sortedSessions.filter(s => {
+          const sessionDate = new Date(s.date);
+          sessionDate.setHours(0, 0, 0, 0);
+          return sessionDate.getTime() === dayTime;
+        });
+        if (sessionsOnDay.some(s => isStrengthSession(s))) {
+          strengthSessionsInWeek++;
+        }
       }
     }
     
-    // Week is valid if it has at least 6 sessions (allowing 1 missed day)
-    const weekValid = sessionsInWeek >= 6;
+    // Week is valid if it has at least 6 sessions (allowing 1 missed day) AND at least 3 strength sessions
+    const weekValid = sessionsInWeek >= 6 && strengthSessionsInWeek >= 3;
     
     if (weekValid && previousWeekValid) {
       // Add 7 days to the streak (full week counts even if 1 day missed)
@@ -247,6 +274,7 @@ const ProgressDashboard = () => {
   const [exerciseSearchQuery, setExerciseSearchQuery] = useState('');
   const [currentTab, setCurrentTab] = useState(0);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [streakInfoOpen, setStreakInfoOpen] = useState(false);
   
   // Time frame filter state
   const [timeFrame, setTimeFrame] = useState('all'); // '7days', '30days', '3months', 'year', 'custom', 'all'
@@ -614,9 +642,22 @@ const ProgressDashboard = () => {
                       <Typography variant="h2" sx={{ fontWeight: 700, color: '#FF6B35', lineHeight: 1 }}>
                         {streakData.currentStreak}
                       </Typography>
-                      <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
-                        Day Streak
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
+                          Day Streak
+                        </Typography>
+                        <IconButton 
+                          size="small" 
+                          onClick={() => setStreakInfoOpen(true)}
+                          sx={{ 
+                            padding: 0.5, 
+                            color: 'text.secondary',
+                            '&:hover': { color: 'primary.main' }
+                          }}
+                        >
+                          <HelpOutline sx={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Box>
                     </Box>
                   </Box>
                   <Box sx={{ textAlign: 'right' }}>
@@ -1057,6 +1098,87 @@ const ProgressDashboard = () => {
             </Button>
             <Button onClick={confirmDelete} color="error" variant="contained">
               Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Streak Info Dialog */}
+        <Dialog
+          open={streakInfoOpen}
+          onClose={() => setStreakInfoOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Whatshot sx={{ color: '#FF6B35' }} />
+            How Streaks Work
+          </DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  📅 Week-Based System
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Streaks are calculated using Sunday-Saturday week blocks. To maintain your streak, each week must meet certain requirements.
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  ✅ Weekly Requirements
+                </Typography>
+                <Typography variant="body2" color="text.secondary" component="div">
+                  To keep your streak alive, each week (Sun-Sat) needs:
+                  <Box component="ul" sx={{ mt: 0.5, mb: 0, pl: 2 }}>
+                    <li><strong>At least 6 sessions</strong> (any type - allows 1 rest day)</li>
+                    <li><strong>At least 3 strength training sessions</strong></li>
+                  </Box>
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  💪 What Counts as Strength Training?
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Full body, upper body, lower body, push, pull, legs, or any workout with resistance exercises.
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  📊 How Streaks Are Counted
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  When a week meets the requirements (6+ sessions, 3+ strength), it adds 7 days to your streak - even if you took a rest day!
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  ⚠️ When Streaks Break
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Your streak breaks if you:
+                  <Box component="ul" sx={{ mt: 0.5, mb: 0, pl: 2 }}>
+                    <li>Complete fewer than 6 sessions in a week</li>
+                    <li>Complete fewer than 3 strength sessions in a week</li>
+                    <li>Miss more than 1 day of workouts in a week</li>
+                  </Box>
+                </Typography>
+              </Box>
+
+              <Box sx={{ p: 1.5, bgcolor: 'info.light', borderRadius: 1 }}>
+                <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                  <strong>Tip:</strong> Your streak is active if you worked out today or yesterday. Keep it going!
+                </Typography>
+              </Box>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setStreakInfoOpen(false)} variant="contained">
+              Got it
             </Button>
           </DialogActions>
         </Dialog>

@@ -12,6 +12,7 @@
  * Calculate current workout streak in days with calendar week-based logic
  * Uses Sunday-Saturday as fixed week boundaries. Allows one missed day per calendar week.
  * Week with 6 or 7 sessions counts as a full 7-day week in the streak.
+ * Requires at least 3 strength training sessions per week to maintain streak.
  * @param {Array} workoutHistory - Array of completed workout objects with date
  * @returns {Object} { currentStreak: number, longestStreak: number }
  */
@@ -24,6 +25,20 @@ export const calculateStreak = (workoutHistory = []) => {
   const sortedWorkouts = [...workoutHistory].sort((a, b) => 
     new Date(b.date) - new Date(a.date)
   );
+
+  // Helper function to check if a session is strength training
+  const isStrengthSession = (session) => {
+    if (session.type === 'strength' || session.type === 'full' || session.type === 'upper' || 
+        session.type === 'lower' || session.type === 'push' || session.type === 'pull' || 
+        session.type === 'legs') {
+      return true;
+    }
+    // If it has exercises, assume it's a strength session
+    if (session.exercises && Object.keys(session.exercises).length > 0) {
+      return true;
+    }
+    return false;
+  };
 
   // Get unique workout dates (in case multiple workouts on same day)
   const workoutDates = new Set(sortedWorkouts.map(w => {
@@ -66,15 +81,26 @@ export const calculateStreak = (workoutHistory = []) => {
     
     // Count sessions in this week
     let sessionsInWeek = 0;
+    let strengthSessionsInWeek = 0;
+    
     for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
       const dayTime = weekStart + (dayOffset * 24 * 60 * 60 * 1000);
       if (workoutDates.has(dayTime)) {
         sessionsInWeek++;
+        // Check if any session on this day is a strength session
+        const sessionsOnDay = sortedWorkouts.filter(s => {
+          const sessionDate = new Date(s.date);
+          sessionDate.setHours(0, 0, 0, 0);
+          return sessionDate.getTime() === dayTime;
+        });
+        if (sessionsOnDay.some(s => isStrengthSession(s))) {
+          strengthSessionsInWeek++;
+        }
       }
     }
     
-    // Week is valid if it has at least 6 sessions (allowing 1 missed day)
-    const weekValid = sessionsInWeek >= 6;
+    // Week is valid if it has at least 6 sessions (allowing 1 missed day) AND at least 3 strength sessions
+    const weekValid = sessionsInWeek >= 6 && strengthSessionsInWeek >= 3;
     
     if (weekValid && previousWeekValid) {
       // Add 7 days to the streak (full week counts even if 1 day missed)

@@ -122,6 +122,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
               color: active ? item.activeColor : theme.palette.text.secondary,
               transition: 'color 0.2s ease, opacity 0.15s ease',
               padding: '8px 4px',
+              position: 'relative',
             }}
             aria-label={item.label}
             aria-current={active ? 'page' : undefined}
@@ -156,9 +157,8 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
                 style={{
                   position: 'absolute',
                   top: 0,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '60%',
+                  left: 0,
+                  width: '100%',
                   height: '3px',
                   backgroundColor: item.activeColor,
                   borderRadius: '0 0 3px 3px',

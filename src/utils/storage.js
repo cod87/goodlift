@@ -15,6 +15,8 @@ import {
   savePlansToFirebase,
   savePlanDaysToFirebase,
   savePlanExercisesToFirebase,
+  savePinnedExercisesToFirebase,
+  loadPinnedExercisesFromFirebase,
   loadUserDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
@@ -1164,15 +1166,34 @@ export const isFavoriteExercise = (exerciseName) => {
 
 /**
  * Get pinned exercises for progress tracking
- * @returns {Array} Array of pinned exercise configurations
+ * Loads from Firebase if user is authenticated, otherwise from localStorage
+ * @returns {Promise<Array>} Array of pinned exercise configurations
  */
-export const getPinnedExercises = () => {
+export const getPinnedExercises = async () => {
   try {
     if (isGuestMode()) {
       const guestPinned = getGuestData('pinned_exercises');
       return guestPinned || [];
     }
     
+    // Try to get current user ID
+    const currentUserId = getCurrentUserId();
+    
+    if (currentUserId) {
+      try {
+        // Try to load from Firebase first
+        const firebasePinned = await loadPinnedExercisesFromFirebase(currentUserId);
+        if (firebasePinned && Array.isArray(firebasePinned)) {
+          // Update localStorage with Firebase data
+          localStorage.setItem(KEYS.PINNED_EXERCISES, JSON.stringify(firebasePinned));
+          return firebasePinned;
+        }
+      } catch (error) {
+        console.warn('Could not load pinned exercises from Firebase, using localStorage:', error);
+      }
+    }
+    
+    // Fallback to localStorage
     const pinned = localStorage.getItem(KEYS.PINNED_EXERCISES);
     return pinned ? JSON.parse(pinned) : [];
   } catch (error) {
@@ -1183,10 +1204,11 @@ export const getPinnedExercises = () => {
 
 /**
  * Save pinned exercises for progress tracking
+ * Syncs to Firebase if user is authenticated
  * @param {Array} pinnedExercises - Array of pinned exercise configurations
  * Each config: { exerciseName: string, trackingMode: 'weight' | 'reps' }
  */
-export const setPinnedExercises = (pinnedExercises) => {
+export const setPinnedExercises = async (pinnedExercises) => {
   try {
     if (!Array.isArray(pinnedExercises)) {
       throw new Error('Pinned exercises must be an array');
@@ -1198,7 +1220,19 @@ export const setPinnedExercises = (pinnedExercises) => {
     if (isGuestMode()) {
       setGuestData('pinned_exercises', limitedPinned);
     } else {
+      // Save to localStorage
       localStorage.setItem(KEYS.PINNED_EXERCISES, JSON.stringify(limitedPinned));
+      
+      // Sync to Firebase if user is authenticated
+      const currentUserId = getCurrentUserId();
+      if (currentUserId) {
+        try {
+          await savePinnedExercisesToFirebase(currentUserId, limitedPinned);
+        } catch (error) {
+          console.warn('Could not sync pinned exercises to Firebase:', error);
+          // Continue - localStorage save was successful
+        }
+      }
     }
   } catch (error) {
     console.error('Error saving pinned exercises:', error);

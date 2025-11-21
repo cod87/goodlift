@@ -2,12 +2,13 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
-import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
+import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout, getWorkoutHistory } from '../utils/storage';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip } from '@mui/material';
 import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
 import { getDemoImagePath } from '../utils/exerciseDemoImages';
+import progressiveOverloadService from '../services/ProgressiveOverloadService';
 
 /**
  * WorkoutScreen component manages the active workout session
@@ -23,6 +24,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   // Store initial target values for each exercise at workout start
   const [initialTargets, setInitialTargets] = useState({});
+  // Store last performance data for each exercise
+  const [lastPerformance, setLastPerformance] = useState({});
   // Progressive overload suggestion state
   const [progressiveOverloadSuggestion, setProgressiveOverloadSuggestion] = useState(null);
   const [showSuggestion, setShowSuggestion] = useState(false);
@@ -118,10 +121,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       setElapsedTime(elapsed);
     }, 1000);
 
-    // Load initial target values for all exercises at workout start
-    const loadInitialTargets = async () => {
+    // Load initial target values and last performance for all exercises at workout start
+    const loadInitialData = async () => {
       const targets = {};
+      const lastPerf = {};
       const uniqueExercises = [...new Set(workoutPlan.map(ex => ex['Exercise Name']))];
+      
+      // Load workout history to get last performance
+      const history = await getWorkoutHistory();
       
       await Promise.all(
         uniqueExercises.map(async (exerciseName) => {
@@ -133,13 +140,36 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
             weight: weight ?? null,
             reps: reps ?? null
           };
+          
+          // Get last performance from history
+          const progression = progressiveOverloadService.getExerciseProgression(
+            history,
+            exerciseName,
+            'weight'
+          );
+          
+          if (progression.length > 0) {
+            const lastWorkout = progression[progression.length - 1];
+            // Get the sets from the last workout for this exercise
+            const lastWorkoutExerciseData = lastWorkout.workout?.exercises?.[exerciseName];
+            if (lastWorkoutExerciseData?.sets && lastWorkoutExerciseData.sets.length > 0) {
+              // Get max weight and reps from last workout
+              const maxWeight = Math.max(...lastWorkoutExerciseData.sets.map(s => s.weight || 0));
+              const maxReps = Math.max(...lastWorkoutExerciseData.sets.map(s => s.reps || 0));
+              lastPerf[exerciseName] = {
+                weight: maxWeight,
+                reps: maxReps
+              };
+            }
+          }
         })
       );
       
       setInitialTargets(targets);
+      setLastPerformance(lastPerf);
     };
     
-    loadInitialTargets();
+    loadInitialData();
 
     return () => {
       if (timerRef.current) {
@@ -914,16 +944,48 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 </Box>
               )}
               
-              {(prevWeight !== null || targetReps !== null) && (
-                <motion.p
-                  className="prev-weight"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  style={{ marginBottom: '1rem', marginTop: '0.5rem', textAlign: 'center' }}
-                >
-                  Target: {prevWeight ?? '–'} lbs • {targetReps ?? '–'} reps
-                </motion.p>
+              {/* Display Target and Last Performance */}
+              {(prevWeight !== null || targetReps !== null || lastPerformance[exerciseName]) && (
+                <Box sx={{ mb: 2, mt: 1, px: 2 }}>
+                  {(prevWeight !== null || targetReps !== null) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{ 
+                          textAlign: 'center',
+                          color: 'text.secondary',
+                          fontWeight: 500
+                        }}
+                      >
+                        Target: {prevWeight ?? '–'} lbs • {targetReps ?? '–'} reps
+                      </Typography>
+                    </motion.div>
+                  )}
+                  
+                  {lastPerformance[exerciseName] && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{ 
+                          textAlign: 'center',
+                          color: 'primary.main',
+                          fontWeight: 600,
+                          mt: 0.5
+                        }}
+                      >
+                        Last: {lastPerformance[exerciseName].weight} lbs • {lastPerformance[exerciseName].reps} reps
+                      </Typography>
+                    </motion.div>
+                  )}
+                </Box>
               )}
               
               {/* Progressive Overload Suggestion */}

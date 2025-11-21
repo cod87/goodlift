@@ -2,9 +2,13 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import PropTypes from 'prop-types';
 import { useAuth } from './AuthContext';
 import { saveUserDataToFirebase, loadUserDataFromFirebase } from '../utils/firebaseStorage';
-import { startOfWeek, addWeeks, isAfter } from 'date-fns';
+import { startOfWeek, isAfter } from 'date-fns';
 
 const WeekSchedulingContext = createContext({});
+
+// Week 0 constants: Days of week when first session creates Week 0
+const WEDNESDAY_DAY_INDEX = 3;
+const SATURDAY_DAY_INDEX = 6;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useWeekScheduling = () => {
@@ -15,6 +19,8 @@ const DEFAULT_STATE = {
   currentWeek: 1,
   cycleStartDate: null, // Will be set to most recent Sunday
   deloadWeekActive: false,
+  isWeekZero: false, // True if user started mid-week (Wed-Sat) and hasn't reached first Sunday yet
+  weekZeroStartDate: null, // Date of first session if it created Week 0
   weeklySchedule: {
     Monday: null,
     Tuesday: null,
@@ -40,26 +46,143 @@ export const WeekSchedulingProvider = ({ children }) => {
     return sunday.toISOString();
   }, []);
 
+  /**
+   * Check if a session date falls in the Week 0 period (Wed-Sat before first Sunday)
+   * Week 0: If user's first session occurs on Wed, Thu, Fri, or Sat, that partial period
+   * is designated as Week 0. Week 1 starts on the next Sunday.
+   * 
+   * @param {string} sessionDate - ISO date string of the session
+   * @param {string} firstSessionDate - ISO date string of the very first session
+   * @returns {boolean} True if this session is in Week 0
+   */
+  const isSessionInWeekZero = useCallback((sessionDate, firstSessionDate) => {
+    if (!firstSessionDate || !sessionDate) return false;
+    
+    const session = new Date(sessionDate);
+    const firstSession = new Date(firstSessionDate);
+    
+    session.setHours(0, 0, 0, 0);
+    firstSession.setHours(0, 0, 0, 0);
+    
+    // Check if first session was on Wed-Sat (days 3-6)
+    const firstSessionDay = firstSession.getDay();
+    if (firstSessionDay < WEDNESDAY_DAY_INDEX) {
+      // First session was Sun-Tue, no Week 0
+      return false;
+    }
+    
+    // Get the Sunday after the first session (start of Week 1)
+    const firstSunday = new Date(firstSession);
+    const daysUntilSunday = 7 - firstSessionDay; // Days until next Sunday
+    firstSunday.setDate(firstSunday.getDate() + daysUntilSunday);
+    firstSunday.setHours(0, 0, 0, 0);
+    
+    // Session is in Week 0 if it's on or after first session but before first Sunday
+    return session >= firstSession && session < firstSunday;
+  }, []);
+
+  /**
+   * Initialize Week 0 state based on first session date
+   * Should be called when detecting the first-ever session
+   * 
+   * @param {string} firstSessionDate - ISO date string of first session
+   * @returns {Object} Updated state with Week 0 info if applicable
+   */
+  const initializeWeekZeroIfNeeded = useCallback((firstSessionDate) => {
+    const firstSession = new Date(firstSessionDate);
+    firstSession.setHours(0, 0, 0, 0);
+    
+    const firstSessionDay = firstSession.getDay(); // 0=Sun, 6=Sat
+    
+    // If first session is Wed-Sat (days 3-6), it's Week 0
+    if (firstSessionDay >= WEDNESDAY_DAY_INDEX && firstSessionDay <= SATURDAY_DAY_INDEX) {
+      // Calculate when Week 1 starts (next Sunday)
+      const daysUntilSunday = 7 - firstSessionDay;
+      const week1Start = new Date(firstSession);
+      week1Start.setDate(week1Start.getDate() + daysUntilSunday);
+      week1Start.setHours(0, 0, 0, 0);
+      
+      return {
+        currentWeek: 0,
+        isWeekZero: true,
+        weekZeroStartDate: firstSessionDate,
+        cycleStartDate: week1Start.toISOString(), // Week 1 starts on next Sunday
+      };
+    }
+    
+    // First session is Sun-Tue, no Week 0 needed
+    // Start Week 1 from most recent Sunday before/on the first session
+    const sunday = startOfWeek(firstSession, { weekStartsOn: 0 });
+    sunday.setHours(0, 0, 0, 0);
+    
+    return {
+      currentWeek: 1,
+      isWeekZero: false,
+      weekZeroStartDate: null,
+      cycleStartDate: sunday.toISOString(),
+    };
+  }, []);
+
   // Calculate current week number based on cycle start date
-  const calculateCurrentWeek = useCallback((cycleStartDate) => {
+  const calculateCurrentWeek = useCallback((cycleStartDate, isWeekZero, weekZeroStartDate) => {
     if (!cycleStartDate) return 1;
     
+    // If we're still in Week 0 period
+    if (isWeekZero && weekZeroStartDate) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const cycleStart = new Date(cycleStartDate); // This is the Week 1 start date
+      cycleStart.setHours(0, 0, 0, 0);
+      
+      // If we haven't reached Week 1 start date yet, we're still in Week 0
+      if (now < cycleStart) {
+        return 0;
+      }
+    }
+    
     const startDate = new Date(cycleStartDate);
-    const now = new Date();
     const mostRecentSunday = new Date(getMostRecentSunday());
     
-    // Calculate weeks elapsed
+    // Calculate weeks elapsed since Week 1 started
     const weeksElapsed = Math.floor((mostRecentSunday - startDate) / (7 * 24 * 60 * 60 * 1000));
     return weeksElapsed + 1;
   }, [getMostRecentSunday]);
 
-  // Check if week needs to increment
+  /**
+   * Check if week needs to increment
+   * Handles transition from Week 0 to Week 1 and normal week increments
+   * 
+   * @param {Object} currentState - Current week state
+   * @returns {Object} { updated: boolean, wasDeloadActive: boolean, transitionedFromWeekZero?: boolean }
+   */
   const checkAndIncrementWeek = useCallback(async (currentState) => {
     const mostRecentSunday = getMostRecentSunday();
     
+    // If we're in Week 0 and have passed the Week 1 start date, transition to Week 1
+    if (currentState.isWeekZero && currentState.cycleStartDate) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const week1Start = new Date(currentState.cycleStartDate);
+      week1Start.setHours(0, 0, 0, 0);
+      
+      if (now >= week1Start) {
+        // Transition from Week 0 to Week 1
+        const updatedState = {
+          ...currentState,
+          currentWeek: 1,
+          isWeekZero: false,
+        };
+        
+        setWeekState(updatedState);
+        await saveWeekState(updatedState);
+        
+        return { updated: true, wasDeloadActive: false, transitionedFromWeekZero: true };
+      }
+    }
+    
     // If we've passed a Sunday boundary, recalculate week
     if (currentState.cycleStartDate && isAfter(new Date(mostRecentSunday), new Date(currentState.cycleStartDate))) {
-      const newWeek = calculateCurrentWeek(currentState.cycleStartDate);
+      const newWeek = calculateCurrentWeek(currentState.cycleStartDate, currentState.isWeekZero, currentState.weekZeroStartDate);
       
       if (newWeek !== currentState.currentWeek) {
         // Week has incremented, check if we're ending a deload week
@@ -78,7 +201,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     }
     
     return { updated: false, wasDeloadActive: false };
-  }, [getMostRecentSunday, calculateCurrentWeek]);
+  }, [getMostRecentSunday, calculateCurrentWeek, saveWeekState]);
 
   // Load week state from storage
   useEffect(() => {
@@ -138,10 +261,10 @@ export const WeekSchedulingProvider = ({ children }) => {
     if (currentUser !== undefined) {
       loadWeekState();
     }
-  }, [currentUser, isGuest, getMostRecentSunday, checkAndIncrementWeek]);
+  }, [currentUser, isGuest, getMostRecentSunday, checkAndIncrementWeek, saveWeekState]);
 
   // Save week state
-  const saveWeekState = async (state) => {
+  const saveWeekState = useCallback(async (state) => {
     try {
       if (currentUser && !isGuest) {
         // Save to Firebase
@@ -154,7 +277,7 @@ export const WeekSchedulingProvider = ({ children }) => {
       console.error('Error saving week state:', error);
       throw error;
     }
-  };
+  }, [currentUser, isGuest]);
 
   // Reset week cycle (manual reset from settings)
   const resetWeekCycle = useCallback(async () => {
@@ -163,13 +286,15 @@ export const WeekSchedulingProvider = ({ children }) => {
       currentWeek: 1,
       cycleStartDate: getMostRecentSunday(),
       deloadWeekActive: false,
+      isWeekZero: false, // Clear Week 0 state on reset
+      weekZeroStartDate: null,
     };
     
     setWeekState(resetState);
     await saveWeekState(resetState);
     
     return resetState;
-  }, [weekState, getMostRecentSunday]);
+  }, [weekState, getMostRecentSunday, saveWeekState]);
 
   // Trigger deload week (only available from week 4+)
   const triggerDeloadWeek = useCallback(async () => {
@@ -196,13 +321,13 @@ export const WeekSchedulingProvider = ({ children }) => {
     await saveWeekState(updatedState);
     
     return updatedState;
-  }, [weekState]);
+  }, [weekState, saveWeekState]);
 
   // Check if current week should auto-assign workouts
   const isAutoAssignWeek = useCallback(() => {
-    // Week 1 or first week after deload
-    return weekState.currentWeek === 1;
-  }, [weekState.currentWeek]);
+    // Week 1 only (NOT Week 0 - Week 0 sessions should not trigger auto-assignment)
+    return weekState.currentWeek === 1 && !weekState.isWeekZero;
+  }, [weekState.currentWeek, weekState.isWeekZero]);
 
   // Assign workout to a day of the week
   const assignWorkoutToDay = useCallback(async (dayOfWeek, sessionData) => {
@@ -220,7 +345,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     await saveWeekState(updatedState);
     
     return updatedState;
-  }, [weekState]);
+  }, [weekState, saveWeekState]);
 
   // Add workout to favorites
   const addToFavorites = useCallback(async (workout) => {
@@ -241,7 +366,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     await saveWeekState(updatedState);
     
     return workoutWithId;
-  }, [weekState]);
+  }, [weekState, saveWeekState]);
 
   // Remove workout from favorites
   const removeFromFavorites = useCallback(async (favoriteId) => {
@@ -256,7 +381,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     await saveWeekState(updatedState);
     
     return updatedState;
-  }, [weekState]);
+  }, [weekState, saveWeekState]);
 
   // Get workout suggestion for a day (from previous week same day)
   const getWorkoutSuggestion = useCallback((dayOfWeek, workoutHistory = []) => {
@@ -297,6 +422,8 @@ export const WeekSchedulingProvider = ({ children }) => {
     currentWeek: weekState.currentWeek,
     cycleStartDate: weekState.cycleStartDate,
     deloadWeekActive: weekState.deloadWeekActive,
+    isWeekZero: weekState.isWeekZero,
+    weekZeroStartDate: weekState.weekZeroStartDate,
     weeklySchedule: weekState.weeklySchedule,
     favorites: weekState.favorites,
     resetWeekCycle,
@@ -307,6 +434,8 @@ export const WeekSchedulingProvider = ({ children }) => {
     removeFromFavorites,
     getWorkoutSuggestion,
     checkAndIncrementWeek: () => checkAndIncrementWeek(weekState),
+    isSessionInWeekZero,
+    initializeWeekZeroIfNeeded,
   };
 
   return (

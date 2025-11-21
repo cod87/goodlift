@@ -275,9 +275,7 @@ export const calculateStreak = (workoutHistory = []) => {
  * @param {Object} weekScheduling - Week scheduling context with Week 0 info (optional)
  * @returns {number} Adherence percentage (0-100)
  */
-export const calculateAdherence = (workoutHistory = [], activePlan = null, days = 30, weekScheduling = null) => {
-  // activePlan parameter is kept for API compatibility but currently unused
-  void activePlan;
+export const calculateAdherence = (workoutHistory = [], activePlan = null, days = 30, weekScheduling = null) => { // eslint-disable-line no-unused-vars
   if (!workoutHistory || workoutHistory.length === 0) {
     return 0;
   }

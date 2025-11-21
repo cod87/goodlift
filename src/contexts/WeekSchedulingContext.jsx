@@ -6,6 +6,10 @@ import { startOfWeek, isAfter } from 'date-fns';
 
 const WeekSchedulingContext = createContext({});
 
+// Week 0 constants: Days of week when first session creates Week 0
+const WEDNESDAY_DAY_INDEX = 3;
+const SATURDAY_DAY_INDEX = 6;
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const useWeekScheduling = () => {
   return useContext(WeekSchedulingContext);
@@ -60,9 +64,9 @@ export const WeekSchedulingProvider = ({ children }) => {
     session.setHours(0, 0, 0, 0);
     firstSession.setHours(0, 0, 0, 0);
     
-    // Check if first session was on Wed-Sat (day 3-6)
+    // Check if first session was on Wed-Sat (days 3-6)
     const firstSessionDay = firstSession.getDay();
-    if (firstSessionDay < 3) {
+    if (firstSessionDay < WEDNESDAY_DAY_INDEX) {
       // First session was Sun-Tue, no Week 0
       return false;
     }
@@ -91,7 +95,7 @@ export const WeekSchedulingProvider = ({ children }) => {
     const firstSessionDay = firstSession.getDay(); // 0=Sun, 6=Sat
     
     // If first session is Wed-Sat (days 3-6), it's Week 0
-    if (firstSessionDay >= 3) {
+    if (firstSessionDay >= WEDNESDAY_DAY_INDEX && firstSessionDay <= SATURDAY_DAY_INDEX) {
       // Calculate when Week 1 starts (next Sunday)
       const daysUntilSunday = 7 - firstSessionDay;
       const week1Start = new Date(firstSession);
@@ -144,7 +148,13 @@ export const WeekSchedulingProvider = ({ children }) => {
     return weeksElapsed + 1;
   }, [getMostRecentSunday]);
 
-  // Check if week needs to increment
+  /**
+   * Check if week needs to increment
+   * Handles transition from Week 0 to Week 1 and normal week increments
+   * 
+   * @param {Object} currentState - Current week state
+   * @returns {Object} { updated: boolean, wasDeloadActive: boolean, transitionedFromWeekZero?: boolean }
+   */
   const checkAndIncrementWeek = useCallback(async (currentState) => {
     const mostRecentSunday = getMostRecentSunday();
     

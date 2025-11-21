@@ -91,9 +91,6 @@ const WorkoutScreenModal = ({
           sx: {
             bgcolor: 'background.default',
             backgroundImage: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden', // Prevent scrolling at modal level
           }
         }}
       >
@@ -101,7 +98,7 @@ const WorkoutScreenModal = ({
         <Box
           sx={{
             position: 'relative',
-            flexShrink: 0,
+            top: 0,
             zIndex: 1100,
             bgcolor: 'background.paper',
             borderBottom: '1px solid',
@@ -142,11 +139,9 @@ const WorkoutScreenModal = ({
 
         <DialogContent sx={{ 
           p: 0, 
-          overflow: 'hidden', // Prevent overflow scrolling
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          height: 0, // Allow flex child to calculate height properly
+          overflow: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          maxHeight: '100vh',
         }}>
           <WorkoutScreen
             workoutPlan={workoutPlan}

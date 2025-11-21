@@ -286,15 +286,15 @@ const SessionBuilderDialog = ({
                           size="small"
                           label="Sets"
                           type="number"
-                          value={exercise.sets || 3}
-                          onChange={(e) => handleExerciseChange(index, 'sets', parseInt(e.target.value) || 3)}
+                          value={(exercise.sets === '' || exercise.sets === undefined) ? '' : exercise.sets}
+                          onChange={(e) => handleExerciseChange(index, 'sets', e.target.value === '' ? '' : (parseInt(e.target.value) || 0))}
                           sx={{ width: '80px' }}
                           inputProps={{ min: 1, max: 10 }}
                         />
                         <TextField
                           size="small"
                           label="Reps"
-                          value={exercise.reps || '10'}
+                          value={exercise.reps === '' ? '' : exercise.reps}
                           onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
                           sx={{ width: '100px' }}
                           placeholder="e.g., 10 or 8-12"
@@ -303,8 +303,8 @@ const SessionBuilderDialog = ({
                           size="small"
                           label="Rest (sec)"
                           type="number"
-                          value={exercise.restSeconds || 90}
-                          onChange={(e) => handleExerciseChange(index, 'restSeconds', parseInt(e.target.value) || 90)}
+                          value={(exercise.restSeconds === '' || exercise.restSeconds === undefined) ? '' : exercise.restSeconds}
+                          onChange={(e) => handleExerciseChange(index, 'restSeconds', e.target.value === '' ? '' : (parseInt(e.target.value) || 0))}
                           sx={{ width: '100px' }}
                           inputProps={{ min: 0, max: 300 }}
                         />

@@ -203,7 +203,7 @@ const WeightTracker = ({
               <TextField
                 label="Weight"
                 type="number"
-                value={newWeight}
+                value={newWeight === '' ? '' : newWeight}
                 onChange={(e) => {
                   setNewWeight(e.target.value);
                   setError(null);

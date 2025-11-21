@@ -166,7 +166,7 @@ const EditActivityDialog = ({ open, onClose, activity, onSave }) => {
                 type="number"
                 label="Duration (minutes)"
                 placeholder="e.g., 45"
-                value={formData.duration}
+                value={formData.duration === '' ? '' : formData.duration}
                 onChange={(e) => handleChange('duration', e.target.value)}
                 variant="outlined"
                 inputProps={{ min: 0, step: 1 }}
@@ -181,7 +181,7 @@ const EditActivityDialog = ({ open, onClose, activity, onSave }) => {
                   type="number"
                   label="Number of Exercises"
                   placeholder="e.g., 6"
-                  value={formData.numExercises}
+                  value={formData.numExercises === '' ? '' : formData.numExercises}
                   onChange={(e) => handleChange('numExercises', e.target.value)}
                   variant="outlined"
                   inputProps={{ min: 1, step: 1 }}
@@ -192,7 +192,7 @@ const EditActivityDialog = ({ open, onClose, activity, onSave }) => {
                   type="number"
                   label="Sets per Exercise"
                   placeholder="e.g., 3"
-                  value={formData.setsPerExercise}
+                  value={formData.setsPerExercise === '' ? '' : formData.setsPerExercise}
                   onChange={(e) => handleChange('setsPerExercise', e.target.value)}
                   variant="outlined"
                   inputProps={{ min: 1, step: 1 }}

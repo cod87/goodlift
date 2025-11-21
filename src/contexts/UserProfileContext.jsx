@@ -2,8 +2,8 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import PropTypes from 'prop-types';
 import { useAuth } from './AuthContext';
 import { saveUserDataToFirebase, loadUserDataFromFirebase } from '../utils/firebaseStorage';
-import { getWorkoutHistory } from '../utils/storage';
-import progressiveOverloadService from '../services/ProgressiveOverloadService';
+import { getWorkoutHistory, getStretchSessions, getHiitSessions, getCardioSessions } from '../utils/storage';
+import { calculateStreak } from '../utils/trackingMetrics';
 
 const UserProfileContext = createContext({});
 
@@ -42,63 +42,55 @@ export const UserProfileProvider = ({ children }) => {
   // Calculate stats from workout history
   const calculateStats = useCallback(async () => {
     try {
-      const workoutHistory = await getWorkoutHistory();
+      // Load ALL session types for accurate counting
+      const [workoutHistory, stretchSessions, hiitSessions, cardioSessions] = await Promise.all([
+        getWorkoutHistory(),
+        getStretchSessions(),
+        getHiitSessions(),
+        getCardioSessions()
+      ]);
       
-      // Total workouts
-      const totalWorkouts = workoutHistory.length;
+      // Merge all session types
+      const allSessions = [
+        ...workoutHistory,
+        ...stretchSessions,
+        ...hiitSessions,
+        ...cardioSessions
+      ];
       
-      // Current streak
-      const currentStreak = progressiveOverloadService.calculateStreak(workoutHistory);
+      // Total workouts (all session types)
+      const totalWorkouts = allSessions.length;
       
-      // Longest streak
-      let longestStreak = 0;
-      let tempStreak = 0;
-      const sortedHistory = [...workoutHistory].sort((a, b) => 
-        new Date(a.date) - new Date(b.date)
-      );
+      // Current streak using canonical function from trackingMetrics
+      const streakData = calculateStreak(allSessions);
+      const currentStreak = streakData.currentStreak;
+      const longestStreak = streakData.longestStreak;
       
-      for (let i = 0; i < sortedHistory.length; i++) {
-        if (i === 0) {
-          tempStreak = 1;
-        } else {
-          const prevDate = new Date(sortedHistory[i - 1].date);
-          const currDate = new Date(sortedHistory[i].date);
-          const daysDiff = Math.floor((currDate - prevDate) / (1000 * 60 * 60 * 24));
-          
-          if (daysDiff === 1) {
-            tempStreak++;
-          } else {
-            longestStreak = Math.max(longestStreak, tempStreak);
-            tempStreak = 1;
-          }
-        }
-      }
-      longestStreak = Math.max(longestStreak, tempStreak);
-      
-      // Favorite exercise - most frequently performed
+      // Favorite exercise - most frequently performed (only from strength workouts)
       const exerciseCount = {};
       workoutHistory.forEach(workout => {
-        workout.exercises?.forEach(exercise => {
-          const name = exercise.name || exercise.exerciseName;
-          if (name) {
-            exerciseCount[name] = (exerciseCount[name] || 0) + 1;
-          }
-        });
+        if (workout.exercises) {
+          Object.keys(workout.exercises).forEach(exerciseName => {
+            exerciseCount[exerciseName] = (exerciseCount[exerciseName] || 0) + 1;
+          });
+        }
       });
       
       const favoriteExercise = Object.entries(exerciseCount)
         .sort((a, b) => b[1] - a[1])[0]?.[0] || '';
       
-      // Total volume (in pounds - will be converted in UI)
+      // Total volume (in pounds - will be converted in UI) - only from strength workouts
       let totalVolume = 0;
       workoutHistory.forEach(workout => {
-        workout.exercises?.forEach(exercise => {
-          exercise.sets?.forEach(set => {
-            if (set.weight && set.reps) {
-              totalVolume += set.weight * set.reps;
-            }
+        if (workout.exercises) {
+          Object.values(workout.exercises).forEach(exerciseData => {
+            exerciseData.sets?.forEach(set => {
+              if (set.weight && set.reps) {
+                totalVolume += set.weight * set.reps;
+              }
+            });
           });
-        });
+        }
       });
       
       // Total PRs - stored separately

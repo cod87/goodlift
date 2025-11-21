@@ -30,11 +30,14 @@ import {
   Save,
   HotelOutlined,
   Timer,
+  Edit,
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 import SessionTypeQuickToggle from '../components/SessionTypeQuickToggle';
-import { getSavedWorkouts } from '../utils/storage';
+import { getSavedWorkouts, updateSavedWorkout } from '../utils/storage';
 import { getDefaultSessionData } from '../utils/sessionTemplates';
+import WorkoutCreationModal from '../components/WorkTabs/WorkoutCreationModal';
+import { EXERCISES_DATA_PATH } from '../utils/constants';
 
 // Days of the week constant - Sunday through Saturday
 const DAYS_OF_WEEK = [
@@ -60,16 +63,28 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [pendingDayChange, setPendingDayChange] = useState(null);
+  
+  // Workout editor modal state
+  const [showWorkoutEditor, setShowWorkoutEditor] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [editingWorkoutIndex, setEditingWorkoutIndex] = useState(null);
+  const [availableExercises, setAvailableExercises] = useState([]);
 
-  // Load saved workouts
+  // Load saved workouts and exercises
   useEffect(() => {
     const loadData = async () => {
       try {
-        const workouts = await getSavedWorkouts();
+        const [workouts, exercisesResponse] = await Promise.all([
+          getSavedWorkouts(),
+          fetch(EXERCISES_DATA_PATH),
+        ]);
+        const exercisesData = await exercisesResponse.json();
         setSavedWorkouts(workouts || []);
+        setAvailableExercises(exercisesData);
       } catch (error) {
         console.error('Error loading data:', error);
         setSavedWorkouts([]);
+        setAvailableExercises([]);
       }
     };
     loadData();
@@ -252,6 +267,87 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
       message: `Loaded workout: ${workout.name}`,
       severity: 'success',
     });
+  };
+
+  // Handle editing the currently assigned workout for the selected day
+  const handleEditCurrentWorkout = () => {
+    const currentWorkout = dayWorkouts[selectedDay];
+    if (!currentWorkout || !currentWorkout.exercises) return;
+
+    // Find the workout in savedWorkouts by matching exercises
+    const workoutIndex = savedWorkouts.findIndex(sw => 
+      sw.exercises === currentWorkout.exercises ||
+      JSON.stringify(sw.exercises) === JSON.stringify(currentWorkout.exercises)
+    );
+
+    if (workoutIndex >= 0) {
+      setEditingWorkout(savedWorkouts[workoutIndex]);
+      setEditingWorkoutIndex(workoutIndex);
+      setShowWorkoutEditor(true);
+    } else {
+      // If not found in saved workouts, create a temporary workout object to edit
+      setEditingWorkout({
+        name: currentWorkout.sessionName || 'Custom Workout',
+        type: currentWorkout.sessionType || 'full',
+        exercises: currentWorkout.exercises,
+        supersetConfig: currentWorkout.supersetConfig || [2, 2, 2, 2],
+      });
+      setEditingWorkoutIndex(null); // null means it's not saved yet
+      setShowWorkoutEditor(true);
+    }
+  };
+
+  // Handle saving edited workout
+  const handleSaveEditedWorkout = async (workout) => {
+    try {
+      if (editingWorkoutIndex !== null) {
+        // Update existing saved workout
+        await updateSavedWorkout(editingWorkoutIndex, workout);
+        
+        // Refresh saved workouts list
+        const workouts = await getSavedWorkouts();
+        setSavedWorkouts(workouts || []);
+        
+        // Update the day's workout with the edited version
+        const currentWorkout = dayWorkouts[selectedDay];
+        if (currentWorkout) {
+          setDayWorkouts(prev => ({
+            ...prev,
+            [selectedDay]: {
+              ...currentWorkout,
+              exercises: workout.exercises,
+              supersetConfig: workout.supersetConfig || [2, 2, 2, 2],
+              sessionName: workout.name,
+            },
+          }));
+          setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
+        }
+        
+        setSnackbar({
+          open: true,
+          message: 'Workout updated successfully',
+          severity: 'success',
+        });
+      }
+      
+      setShowWorkoutEditor(false);
+      setEditingWorkout(null);
+      setEditingWorkoutIndex(null);
+    } catch (error) {
+      console.error('Error saving workout:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to save workout changes',
+        severity: 'error',
+      });
+    }
+  };
+
+  // Handle closing workout editor
+  const handleCloseWorkoutEditor = () => {
+    setShowWorkoutEditor(false);
+    setEditingWorkout(null);
+    setEditingWorkoutIndex(null);
   };
 
   // Save all changes
@@ -597,14 +693,26 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
           {/* Strength Workouts - Exercise List (Read-only) */}
           {isStrength && (
             <Stack spacing={3}>
-              {/* Exercise List Header */}
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Exercises
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  Exercises from the selected saved workout
-                </Typography>
+              {/* Exercise List Header with Edit Button */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Exercises
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    Exercises from the selected saved workout
+                  </Typography>
+                </Box>
+                {currentWorkout.exercises && currentWorkout.exercises.length > 0 && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<Edit />}
+                    onClick={handleEditCurrentWorkout}
+                    size="small"
+                  >
+                    Edit Workout
+                  </Button>
+                )}
               </Box>
 
               {/* Exercise List */}
@@ -713,6 +821,15 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Workout Editor Modal */}
+      <WorkoutCreationModal
+        open={showWorkoutEditor}
+        onClose={handleCloseWorkoutEditor}
+        onSave={handleSaveEditedWorkout}
+        exercises={availableExercises}
+        existingWorkout={editingWorkout}
+      />
     </Box>
   );
 };

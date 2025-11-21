@@ -28,7 +28,7 @@ import {
   sanitizeText,
   formatLongDate 
 } from '../utils/profileUtils';
-import { isPresetAvatar, isDoggoAvatar, getPresetAvatarColor, getDoggoAvatarUrl } from '../utils/avatarUtils';
+import { isDoggoAvatar, getDoggoAvatarUrl } from '../utils/avatarUtils';
 
 const UserProfileScreen = () => {
   const { 
@@ -37,7 +37,6 @@ const UserProfileScreen = () => {
     loading: profileLoading,
     saveProfile,
     updateProfile,
-    getInitials,
     getProfileCompletion,
   } = useUserProfile();
 

@@ -12,7 +12,7 @@ import {
 import { Edit } from '@mui/icons-material';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import { usePreferences } from '../contexts/PreferencesContext';
-import { isPresetAvatar, isDoggoAvatar, getPresetAvatarColor, getDoggoAvatarUrl } from '../utils/avatarUtils';
+import { isDoggoAvatar, getDoggoAvatarUrl } from '../utils/avatarUtils';
 import { formatWeight } from '../utils/weightUtils';
 
 const ProfileWidget = memo(({ onNavigateToProfile }) => {

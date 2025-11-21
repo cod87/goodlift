@@ -40,6 +40,16 @@ import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /**
+ * Utility function to get exercise name from various formats
+ * @param {Object} exercise - Exercise object
+ * @returns {string|null} Exercise name or null if not found
+ */
+const getExerciseName = (exercise) => {
+  if (!exercise) return null;
+  return exercise['Exercise Name'] || exercise.exerciseName || exercise.name || null;
+};
+
+/**
  * SavedWorkoutsList - Display list of saved workouts
  * Features:
  * - List of saved workouts with basic info
@@ -203,9 +213,7 @@ const SavedWorkoutsList = memo(({
 
     try {
       // Validate that exercises have required fields
-      const validExercises = workout.exercises.every(ex => 
-        ex && (ex['Exercise Name'] || ex.exerciseName || ex.name)
-      );
+      const validExercises = workout.exercises.every(ex => getExerciseName(ex) !== null);
       
       if (!validExercises) {
         console.error('Invalid exercise data in workout');

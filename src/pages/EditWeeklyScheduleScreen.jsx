@@ -565,7 +565,7 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
             <Card sx={{ mb: 3 }}>
               <CardContent>
                 <FormControl fullWidth>
-                  <InputLabel shrink sx={{ backgroundColor: 'background.paper', px: 1 }}>
+                  <InputLabel shrink sx={{ backgroundColor: (theme) => theme.palette.background.paper, px: 1 }}>
                     Select Saved Workout
                   </InputLabel>
                   <Select

@@ -156,9 +156,8 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
                 style={{
                   position: 'absolute',
                   top: 0,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '60%',
+                  left: 0,
+                  width: '100%',
                   height: '3px',
                   backgroundColor: item.activeColor,
                   borderRadius: '0 0 3px 3px',

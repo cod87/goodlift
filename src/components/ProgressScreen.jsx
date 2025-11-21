@@ -69,191 +69,7 @@ import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 import { StreakDisplay, AdherenceDisplay, VolumeTrendDisplay } from './Progress/TrackingCards';
 import { useUserProfile } from '../contexts/UserProfileContext';
-
-/**
- * Calculate current workout streak in days with calendar week-based logic
- * Uses Sunday-Saturday as fixed week boundaries. Allows one missed day per calendar week.
- * Week with 6 or 7 sessions counts as a full 7-day week in the streak.
- * Requires at least 3 strength training sessions per week to maintain streak.
- * @param {Array} allSessions - Array of all completed sessions (strength, cardio, HIIT, yoga/stretch) with date
- * @returns {Object} { currentStreak: number, longestStreak: number }
- */
-const calculateStreakWithRestDays = (allSessions = []) => {
-  if (!allSessions || allSessions.length === 0) {
-    return { currentStreak: 0, longestStreak: 0 };
-  }
-
-  // Sort sessions by date (newest first)
-  const sortedSessions = [...allSessions].sort((a, b) => 
-    new Date(b.date) - new Date(a.date)
-  );
-
-  // Helper function to check if a session is strength training
-  const isStrengthSession = (session) => {
-    if (session.type === 'strength' || session.type === 'full' || session.type === 'upper' || 
-        session.type === 'lower' || session.type === 'push' || session.type === 'pull' || 
-        session.type === 'legs') {
-      return true;
-    }
-    // If it has exercises, assume it's a strength session
-    if (session.exercises && Object.keys(session.exercises).length > 0) {
-      return true;
-    }
-    return false;
-  };
-
-  // Get unique session dates (in case multiple sessions on same day)
-  const sessionDates = new Set(sortedSessions.map(w => {
-    const d = new Date(w.date);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
-  }));
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  let currentStreak = 0;
-  let longestStreak = 0;
-  let streakCount = 0;
-  let isCurrentStreakActive = false;
-  
-  // First check if there's a session within the last 2 days to start the current streak
-  const lastSessionDate = new Date(sortedSessions[0].date);
-  lastSessionDate.setHours(0, 0, 0, 0);
-  const daysSinceLastSession = Math.floor((today - lastSessionDate) / (1000 * 60 * 60 * 24));
-  if (daysSinceLastSession <= 1) {
-    isCurrentStreakActive = true;
-  }
-  
-  // Helper function to get the Sunday (start) of a week for any date
-  const getWeekStart = (date) => {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    const day = d.getDay(); // 0 = Sunday, 6 = Saturday
-    d.setDate(d.getDate() - day); // Go back to Sunday
-    return d.getTime();
-  };
-  
-  // Process weeks from most recent to oldest
-  let currentWeekStart = getWeekStart(today);
-  let previousWeekValid = true; // Track if previous week maintained the streak
-  
-  for (let weekOffset = 0; weekOffset < 52; weekOffset++) { // Check up to 52 weeks
-    const weekStart = currentWeekStart - (weekOffset * 7 * 24 * 60 * 60 * 1000);
-    
-    // Count sessions in this week
-    let sessionsInWeek = 0;
-    let strengthSessionsInWeek = 0;
-    
-    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
-      const dayTime = weekStart + (dayOffset * 24 * 60 * 60 * 1000);
-      if (sessionDates.has(dayTime)) {
-        sessionsInWeek++;
-        // Check if any session on this day is a strength session
-        const sessionsOnDay = sortedSessions.filter(s => {
-          const sessionDate = new Date(s.date);
-          sessionDate.setHours(0, 0, 0, 0);
-          return sessionDate.getTime() === dayTime;
-        });
-        if (sessionsOnDay.some(s => isStrengthSession(s))) {
-          strengthSessionsInWeek++;
-        }
-      }
-    }
-    
-    // Week is valid if it has at least 6 sessions (allowing 1 missed day) AND at least 3 strength sessions
-    const weekValid = sessionsInWeek >= 6 && strengthSessionsInWeek >= 3;
-    
-    if (weekValid && previousWeekValid) {
-      // Add 7 days to the streak (full week counts even if 1 day missed)
-      streakCount += 7;
-      
-      if (isCurrentStreakActive) {
-        currentStreak = streakCount;
-      }
-      longestStreak = Math.max(longestStreak, streakCount);
-    } else if (sessionsInWeek > 0 && previousWeekValid) {
-      // Partial week - add only the actual session days before breaking
-      streakCount += sessionsInWeek;
-      
-      if (isCurrentStreakActive) {
-        currentStreak = streakCount;
-      }
-      longestStreak = Math.max(longestStreak, streakCount);
-      
-      // Break the streak
-      previousWeekValid = false;
-      if (isCurrentStreakActive) {
-        isCurrentStreakActive = false;
-      }
-      streakCount = 0;
-    } else if (!previousWeekValid) {
-      // Streak already broken, don't continue
-      break;
-    } else {
-      // Week not valid and previous was valid - break streak
-      previousWeekValid = false;
-      if (isCurrentStreakActive) {
-        isCurrentStreakActive = false;
-      }
-      streakCount = 0;
-      break;
-    }
-  }
-
-  return { currentStreak, longestStreak };
-};
-
-/**
- * Calculate adherence percentage based on 6 days per week standard
- * If user's first session was less than 30 days ago, calculates adherence based on 
- * days since first session. Otherwise uses the last 30 days.
- * @param {Array} allSessions - Array of all completed sessions (strength, cardio, HIIT, yoga/stretch)
- * @param {number} days - Number of days to calculate adherence for (default 30)
- * @returns {number} Adherence percentage (0-100)
- */
-const calculateAdherenceWith6DayWeek = (allSessions = [], days = 30) => {
-  if (!allSessions || allSessions.length === 0) {
-    return 0;
-  }
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // Find the date of the first session (optimized to create Date objects only once)
-  const timestamps = allSessions.map(s => new Date(s.date).getTime());
-  const firstSessionDate = new Date(Math.min(...timestamps));
-  firstSessionDate.setHours(0, 0, 0, 0);
-
-  // Calculate days since first session
-  const daysSinceFirstSession = Math.floor((today - firstSessionDate) / (1000 * 60 * 60 * 24)) + 1;
-
-  // Use the smaller of: days parameter or days since first session (minimum 30)
-  const effectiveDays = daysSinceFirstSession < days ? daysSinceFirstSession : days;
-
-  const cutoffDate = new Date(today);
-  cutoffDate.setDate(cutoffDate.getDate() - effectiveDays + 1); // +1 to include today
-  cutoffDate.setHours(0, 0, 0, 0);
-
-  // Get unique session dates in the effective period
-  const uniqueSessionDates = new Set();
-  allSessions.forEach(s => {
-    const sessionDate = new Date(s.date);
-    sessionDate.setHours(0, 0, 0, 0);
-    if (sessionDate >= cutoffDate && sessionDate <= today) {
-      uniqueSessionDates.add(sessionDate.toDateString());
-    }
-  });
-
-  const daysWithSessions = uniqueSessionDates.size;
-
-  // Calculate adherence as percentage of days with any session
-  if (effectiveDays === 0) return 0;
-  
-  const adherencePercent = Math.min(100, Math.round((daysWithSessions / effectiveDays) * 100));
-  
-  return adherencePercent;
-};
+import { calculateStreak, calculateAdherence } from '../utils/trackingMetrics';
 
 /**
  * ProgressDashboard - Complete progress tracking dashboard
@@ -429,11 +245,12 @@ const ProgressDashboard = () => {
       setHistory(allSessions);
       setUserStats(loadedStats);
 
-      // Calculate tracking metrics using new improved functions with all session types
-      const streak = calculateStreakWithRestDays(allSessions);
+      // Calculate tracking metrics using canonical functions from trackingMetrics.js
+      const streak = calculateStreak(allSessions);
       setStreakData(streak);
 
-      const adherencePercent = calculateAdherenceWith6DayWeek(allSessions, 30);
+      // Calculate adherence for last 30 days (activePlan is null since we removed planning features)
+      const adherencePercent = calculateAdherence(allSessions, null, 30);
       setAdherence(adherencePercent);
 
       const pinned = progressiveOverloadService.getPinnedExercises();
@@ -1117,23 +934,23 @@ const ProgressDashboard = () => {
             <Stack spacing={2} sx={{ mt: 1 }}>
               <Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                  📅 Week-Based System
+                  📅 Consecutive Days
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Streaks are calculated using Sunday-Saturday week blocks. To maintain your streak, each week must meet certain requirements.
+                  Your streak counts consecutive calendar days where you logged at least one session (any type - strength, cardio, yoga, etc.).
                 </Typography>
               </Box>
 
               <Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                  ✅ Weekly Requirements
+                  ✅ Rest Day Logic
                 </Typography>
                 <Typography variant="body2" color="text.secondary" component="div">
-                  To keep your streak alive, each week (Sun-Sat) needs:
+                  To maintain your streak, complete weeks (Sun-Sat) need:
                   <Box component="ul" sx={{ mt: 0.5, mb: 0, pl: 2 }}>
-                    <li><strong>At least 6 sessions</strong> (any type - allows 1 rest day)</li>
-                    <li><strong>At least 3 strength training sessions</strong></li>
+                    <li><strong>At least 3 strength training sessions</strong> per week</li>
                   </Box>
+                  Incomplete weeks (weeks where your streak doesn't cover all 7 days from Sunday to Saturday) don't have this strength training requirement.
                 </Typography>
               </Box>
 
@@ -1151,7 +968,7 @@ const ProgressDashboard = () => {
                   📊 How Streaks Are Counted
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  When a week meets the requirements (6+ sessions, 3+ strength), it adds 7 days to your streak - even if you took a rest day!
+                  Each consecutive day with logged sessions adds 1 to your streak. The calendar shows all logged sessions that contribute to your streak.
                 </Typography>
               </Box>
 
@@ -1162,9 +979,8 @@ const ProgressDashboard = () => {
                 <Typography variant="body2" color="text.secondary">
                   Your streak breaks if you:
                   <Box component="ul" sx={{ mt: 0.5, mb: 0, pl: 2 }}>
-                    <li>Complete fewer than 6 sessions in a week</li>
-                    <li>Complete fewer than 3 strength sessions in a week</li>
-                    <li>Miss more than 1 day of workouts in a week</li>
+                    <li>Miss a full day without logging any session</li>
+                    <li>Have a complete week (Sun-Sat) with fewer than 3 strength sessions</li>
                   </Box>
                 </Typography>
               </Box>

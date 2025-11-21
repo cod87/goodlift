@@ -438,9 +438,10 @@ class ProgressiveOverloadService {
    * Get the latest performed set for an exercise from workout history
    * @param {Array} workoutHistory - Array of workout objects
    * @param {string} exerciseName - Name of the exercise
+   * @param {string} trackingMode - 'weight' or 'reps' - determines which metric to prioritize
    * @returns {Object|null} Object with { weight, reps, date } or null if not found
    */
-  getLatestPerformance(workoutHistory, exerciseName) {
+  getLatestPerformance(workoutHistory, exerciseName, trackingMode = 'weight') {
     if (!workoutHistory || !Array.isArray(workoutHistory) || workoutHistory.length === 0) {
       return null;
     }
@@ -455,12 +456,23 @@ class ProgressiveOverloadService {
       if (workout.exercises && workout.exercises[exerciseName]) {
         const exerciseData = workout.exercises[exerciseName];
         if (exerciseData.sets && exerciseData.sets.length > 0) {
-          // Find the set with the highest weight (best performance in that workout)
-          const bestSet = exerciseData.sets.reduce((best, current) => {
-            const currentWeight = current.weight || 0;
-            const bestWeight = best.weight || 0;
-            return currentWeight > bestWeight ? current : best;
-          }, exerciseData.sets[0]);
+          // Find the best set based on tracking mode
+          let bestSet;
+          if (trackingMode === 'reps') {
+            // For reps tracking, find set with highest reps
+            bestSet = exerciseData.sets.reduce((best, current) => {
+              const currentReps = current.reps || 0;
+              const bestReps = best.reps || 0;
+              return currentReps > bestReps ? current : best;
+            }, exerciseData.sets[0]);
+          } else {
+            // For weight tracking, find set with highest weight
+            bestSet = exerciseData.sets.reduce((best, current) => {
+              const currentWeight = current.weight || 0;
+              const bestWeight = best.weight || 0;
+              return currentWeight > bestWeight ? current : best;
+            }, exerciseData.sets[0]);
+          }
 
           return {
             weight: bestSet.weight || 0,
@@ -482,11 +494,15 @@ class ProgressiveOverloadService {
    */
   updatePinnedExercisesWithLatestPerformance(pinnedExercises, workoutHistory) {
     if (!Array.isArray(pinnedExercises) || pinnedExercises.length === 0) {
-      return pinnedExercises;
+      return [];
     }
 
     return pinnedExercises.map(pinned => {
-      const latestPerf = this.getLatestPerformance(workoutHistory, pinned.exerciseName);
+      const latestPerf = this.getLatestPerformance(
+        workoutHistory, 
+        pinned.exerciseName, 
+        pinned.trackingMode || 'weight'
+      );
       
       if (latestPerf) {
         return {

@@ -100,6 +100,15 @@ const calculateStreakWithRestDays = (allSessions = []) => {
   let streakCount = 0;
   let checkDate = new Date(today);
   let missedDaysInCurrentWeek = 0;
+  let isCurrentStreakActive = false; // Track if we're still counting the current streak
+  
+  // First check if there's a session within the last 2 days to start the current streak
+  const lastSessionDate = new Date(sortedSessions[0].date);
+  lastSessionDate.setHours(0, 0, 0, 0);
+  const daysSinceLastSession = Math.floor((today - lastSessionDate) / (1000 * 60 * 60 * 24));
+  if (daysSinceLastSession <= 1) {
+    isCurrentStreakActive = true; // User has worked out today or yesterday
+  }
   
   // Calculate current streak
   // Allow one unlogged rest day per week (as long as missed days are not within 7 days of each other)
@@ -116,8 +125,8 @@ const calculateStreakWithRestDays = (allSessions = []) => {
     if (sessionDates.has(checkTime)) {
       // Found a session on this day
       streakCount++;
-      if (currentStreak === 0 && i < 2) {
-        // Only count as current streak if session was within last 2 days
+      // Update current streak if it's still active
+      if (isCurrentStreakActive) {
         currentStreak = streakCount;
       }
       longestStreak = Math.max(longestStreak, streakCount);
@@ -133,8 +142,8 @@ const calculateStreakWithRestDays = (allSessions = []) => {
         nextDate.setDate(nextDate.getDate() - 1);
         if (!sessionDates.has(nextDate.getTime()) && i > 0) {
           // Two consecutive days without session - break streak
-          if (currentStreak === 0 && streakCount > 0) {
-            break; // Current streak already ended
+          if (isCurrentStreakActive && streakCount > 0) {
+            isCurrentStreakActive = false; // Current streak has ended
           }
           streakCount = 0;
           missedDaysInCurrentWeek = 0;
@@ -150,34 +159,50 @@ const calculateStreakWithRestDays = (allSessions = []) => {
 
 /**
  * Calculate adherence percentage based on 6 days per week standard
- * Allows one rest day per week under the condition that missed days are not within 7 days of each other
+ * If user's first session was less than 30 days ago, calculates adherence based on 
+ * days since first session. Otherwise uses the last 30 days.
  * @param {Array} allSessions - Array of all completed sessions (strength, cardio, HIIT, yoga/stretch)
  * @param {number} days - Number of days to calculate adherence for (default 30)
  * @returns {number} Adherence percentage (0-100)
  */
 const calculateAdherenceWith6DayWeek = (allSessions = [], days = 30) => {
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - days);
+  if (!allSessions || allSessions.length === 0) {
+    return 0;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Find the date of the first session
+  const firstSessionDate = new Date(Math.min(...allSessions.map(s => new Date(s.date).getTime())));
+  firstSessionDate.setHours(0, 0, 0, 0);
+
+  // Calculate days since first session
+  const daysSinceFirstSession = Math.floor((today - firstSessionDate) / (1000 * 60 * 60 * 24)) + 1;
+
+  // Use the smaller of: days parameter or days since first session (minimum 30)
+  const effectiveDays = daysSinceFirstSession < days ? daysSinceFirstSession : days;
+
+  const cutoffDate = new Date(today);
+  cutoffDate.setDate(cutoffDate.getDate() - effectiveDays + 1); // +1 to include today
   cutoffDate.setHours(0, 0, 0, 0);
 
-  // Count completed sessions in time period
-  const completedSessions = allSessions.filter(s => {
+  // Get unique session dates in the effective period
+  const uniqueSessionDates = new Set();
+  allSessions.forEach(s => {
     const sessionDate = new Date(s.date);
     sessionDate.setHours(0, 0, 0, 0);
-    return sessionDate >= cutoffDate;
+    if (sessionDate >= cutoffDate && sessionDate <= today) {
+      uniqueSessionDates.add(sessionDate.toDateString());
+    }
   });
 
-  const completedCount = completedSessions.length;
+  const daysWithSessions = uniqueSessionDates.size;
 
-  // Calculate planned workouts based on 6 days per week (allowing 1 rest day per week)
-  // Standard: 6 workouts per week
-  const weeks = days / 7;
-  const plannedCount = Math.ceil(weeks * 6);
-
-  if (plannedCount === 0) return 0;
+  // Calculate adherence as percentage of days with any session
+  if (effectiveDays === 0) return 0;
   
-  // Calculate adherence percentage
-  const adherencePercent = Math.min(100, Math.round((completedCount / plannedCount) * 100));
+  const adherencePercent = Math.min(100, Math.round((daysWithSessions / effectiveDays) * 100));
   
   return adherencePercent;
 };
@@ -614,7 +639,7 @@ const ProgressDashboard = () => {
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    Last 30 days • 6 workouts/week target
+                    Days with sessions (last 30 days or since first session)
                   </Typography>
                 </Stack>
               </CardContent>

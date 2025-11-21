@@ -12,11 +12,11 @@ import {
 import { Edit } from '@mui/icons-material';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import { usePreferences } from '../contexts/PreferencesContext';
-import { isPresetAvatar, isDoggoAvatar, getPresetAvatarColor, getDoggoAvatarUrl, getInitialsAvatarStyle } from '../utils/avatarUtils';
+import { isPresetAvatar, isDoggoAvatar, getPresetAvatarColor, getDoggoAvatarUrl } from '../utils/avatarUtils';
 import { formatWeight } from '../utils/weightUtils';
 
 const ProfileWidget = memo(({ onNavigateToProfile }) => {
-  const { profile, loading, getInitials } = useUserProfile();
+  const { profile, loading } = useUserProfile();
   const { getDisplayUnit } = usePreferences();
 
   if (loading) {
@@ -24,54 +24,26 @@ const ProfileWidget = memo(({ onNavigateToProfile }) => {
   }
 
   const renderAvatar = () => {
-    const initials = getInitials();
     const size = 60;
 
-    if (profile.avatar) {
-      if (isDoggoAvatar(profile.avatar)) {
-        const url = getDoggoAvatarUrl(profile.avatar);
-        return (
-          <Avatar
-            src={url}
-            sx={{ width: size, height: size }}
-          />
-        );
-      } else if (isPresetAvatar(profile.avatar)) {
-        const color = getPresetAvatarColor(profile.avatar);
-        return (
-          <Avatar
-            sx={{
-              width: size,
-              height: size,
-              ...getInitialsAvatarStyle(initials, color),
-              fontSize: '1.5rem',
-            }}
-          >
-            {initials}
-          </Avatar>
-        );
-      } else {
-        // Legacy custom avatar URL - display as-is but won't be selectable
-        return (
-          <Avatar
-            src={profile.avatar}
-            sx={{ width: size, height: size }}
-          />
-        );
-      }
+    // Only show dog avatars - if user has a doggo avatar, show it
+    if (profile.avatar && isDoggoAvatar(profile.avatar)) {
+      const url = getDoggoAvatarUrl(profile.avatar);
+      return (
+        <Avatar
+          src={url}
+          sx={{ width: size, height: size }}
+        />
+      );
     }
 
+    // Default to first dog avatar if none selected
+    const defaultDogUrl = getDoggoAvatarUrl('doggo-1');
     return (
       <Avatar
-        sx={{
-          width: size,
-          height: size,
-          ...getInitialsAvatarStyle(initials),
-          fontSize: '1.5rem',
-        }}
-      >
-        {initials}
-      </Avatar>
+        src={defaultDogUrl}
+        sx={{ width: size, height: size }}
+      />
     );
   };
 

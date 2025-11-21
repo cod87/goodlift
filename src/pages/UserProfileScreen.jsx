@@ -28,7 +28,7 @@ import {
   sanitizeText,
   formatLongDate 
 } from '../utils/profileUtils';
-import { isPresetAvatar, isDoggoAvatar, getPresetAvatarColor, getDoggoAvatarUrl, getInitialsAvatarStyle } from '../utils/avatarUtils';
+import { isPresetAvatar, isDoggoAvatar, getPresetAvatarColor, getDoggoAvatarUrl } from '../utils/avatarUtils';
 
 const UserProfileScreen = () => {
   const { 
@@ -127,54 +127,26 @@ const UserProfileScreen = () => {
   };
 
   const renderAvatar = () => {
-    const initials = getInitials();
     const size = 100;
 
-    if (profile.avatar) {
-      if (isDoggoAvatar(profile.avatar)) {
-        const url = getDoggoAvatarUrl(profile.avatar);
-        return (
-          <Avatar
-            src={url}
-            sx={{ width: size, height: size }}
-          />
-        );
-      } else if (isPresetAvatar(profile.avatar)) {
-        const color = getPresetAvatarColor(profile.avatar);
-        return (
-          <Avatar
-            sx={{
-              width: size,
-              height: size,
-              ...getInitialsAvatarStyle(initials, color),
-              fontSize: '2.5rem',
-            }}
-          >
-            {initials}
-          </Avatar>
-        );
-      } else {
-        // Legacy custom avatar URL - display as-is but won't be selectable
-        return (
-          <Avatar
-            src={profile.avatar}
-            sx={{ width: size, height: size }}
-          />
-        );
-      }
+    // Only show dog avatars - if user has a doggo avatar, show it
+    if (profile.avatar && isDoggoAvatar(profile.avatar)) {
+      const url = getDoggoAvatarUrl(profile.avatar);
+      return (
+        <Avatar
+          src={url}
+          sx={{ width: size, height: size }}
+        />
+      );
     }
 
+    // Default to first dog avatar if none selected
+    const defaultDogUrl = getDoggoAvatarUrl('doggo-1');
     return (
       <Avatar
-        sx={{
-          width: size,
-          height: size,
-          ...getInitialsAvatarStyle(initials),
-          fontSize: '2.5rem',
-        }}
-      >
-        {initials}
-      </Avatar>
+        src={defaultDogUrl}
+        sx={{ width: size, height: size }}
+      />
     );
   };
 
@@ -510,7 +482,6 @@ const UserProfileScreen = () => {
         onClose={() => setShowAvatarSelector(false)}
         onSelect={handleAvatarSelect}
         currentAvatar={profile.avatar}
-        initials={getInitials()}
       />
     </Box>
   );

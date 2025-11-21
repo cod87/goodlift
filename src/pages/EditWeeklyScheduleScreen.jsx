@@ -39,7 +39,7 @@ import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 import ExerciseAutocomplete from '../components/ExerciseAutocomplete';
 import SessionTypeQuickToggle from '../components/SessionTypeQuickToggle';
-import { getExerciseWeight, getExerciseTargetReps } from '../utils/storage';
+import { getExerciseWeight, getExerciseTargetReps, getSavedWorkouts } from '../utils/storage';
 import { getDefaultSessionData } from '../utils/sessionTemplates';
 
 // Days of the week constant - Sunday through Saturday
@@ -63,23 +63,29 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   const [dayWorkouts, setDayWorkouts] = useState({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState({});
   const [availableExercises, setAvailableExercises] = useState([]);
+  const [savedWorkouts, setSavedWorkouts] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [pendingDayChange, setPendingDayChange] = useState(null);
 
-  // Load exercises data
+  // Load exercises data and saved workouts
   useEffect(() => {
-    const loadExercises = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch(EXERCISES_DATA_PATH);
-        const data = await response.json();
-        setAvailableExercises(data);
+        const [exercisesResponse, workouts] = await Promise.all([
+          fetch(EXERCISES_DATA_PATH),
+          getSavedWorkouts(),
+        ]);
+        const exercisesData = await exercisesResponse.json();
+        setAvailableExercises(exercisesData);
+        setSavedWorkouts(workouts || []);
       } catch (error) {
-        console.error('Error loading exercises:', error);
+        console.error('Error loading data:', error);
         setAvailableExercises([]);
+        setSavedWorkouts([]);
       }
     };
-    loadExercises();
+    loadData();
   }, []);
 
   // Transform raw exercises from saved workouts to the format expected by this editor
@@ -448,26 +454,50 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   // Handle session type change via quick toggle
   const handleSessionTypeChange = (newType) => {
     const currentWorkout = dayWorkouts[selectedDay];
-    if (!currentWorkout) {
-      // Create new session if no workout exists for this day
-      const newSessionData = getDefaultSessionData(newType);
-      setDayWorkouts(prev => ({
-        ...prev,
-        [selectedDay]: newSessionData,
-      }));
-      setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
-      setSnackbar({
-        open: true,
-        message: `Session type changed to ${newSessionData.sessionName}`,
-        severity: 'success',
-      });
+    
+    // For strength workouts, just set the type and let user select from saved workouts
+    if (isStrengthWorkout(newType)) {
+      if (!currentWorkout) {
+        // Create placeholder for strength workout - user must select from saved workouts
+        const newSessionData = {
+          sessionType: newType,
+          sessionName: `${newType.charAt(0).toUpperCase() + newType.slice(1)} Body Workout`,
+          exercises: [],
+          supersetConfig: [2, 2, 2, 2],
+        };
+        setDayWorkouts(prev => ({
+          ...prev,
+          [selectedDay]: newSessionData,
+        }));
+        setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
+        setSnackbar({
+          open: true,
+          message: `Workout type set to ${newType}. Select a saved workout below to assign exercises.`,
+          severity: 'info',
+        });
+      } else {
+        // Update existing workout type but keep exercises if they exist
+        setDayWorkouts(prev => ({
+          ...prev,
+          [selectedDay]: {
+            ...currentWorkout,
+            sessionType: newType,
+            sessionName: `${newType.charAt(0).toUpperCase() + newType.slice(1)} Body Workout`,
+          },
+        }));
+        setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
+        setSnackbar({
+          open: true,
+          message: `Workout type changed to ${newType}`,
+          severity: 'success',
+        });
+      }
       return;
     }
 
-    // Get default data for the new session type
+    // For non-strength workouts (timer-based, rest), use default data
     const newSessionData = getDefaultSessionData(newType);
     
-    // Replace the current workout with the new session data
     setDayWorkouts(prev => ({
       ...prev,
       [selectedDay]: newSessionData,
@@ -476,8 +506,45 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
     
     setSnackbar({
       open: true,
-      message: `Session type changed to ${newSessionData.sessionName}. Previous data has been replaced.`,
-      severity: 'info',
+      message: `Session type changed to ${newSessionData.sessionName}`,
+      severity: 'success',
+    });
+  };
+
+  // Handle selecting a saved workout
+  const handleSelectSavedWorkout = async (workoutIndex) => {
+    if (workoutIndex === null || workoutIndex === undefined || workoutIndex === '') return;
+    
+    const workout = savedWorkouts[workoutIndex];
+    if (!workout) return;
+
+    const currentWorkout = dayWorkouts[selectedDay];
+    const currentType = getWorkoutType(currentWorkout);
+
+    // Transform the saved workout exercises to editor format
+    const transformedExercises = await transformExercisesToEditorFormat(
+      workout.exercises,
+      workout.supersetConfig || [2, 2, 2, 2]
+    );
+
+    // Create updated workout data with the selected workout's exercises
+    const updatedWorkout = {
+      sessionType: currentType || workout.type || 'full',
+      sessionName: workout.name || `${(currentType || workout.type || 'full').charAt(0).toUpperCase() + (currentType || workout.type || 'full').slice(1)} Body Workout`,
+      exercises: transformedExercises,
+      supersetConfig: workout.supersetConfig || [2, 2, 2, 2],
+    };
+
+    setDayWorkouts(prev => ({
+      ...prev,
+      [selectedDay]: updatedWorkout,
+    }));
+    setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
+    
+    setSnackbar({
+      open: true,
+      message: `Loaded workout: ${workout.name}`,
+      severity: 'success',
     });
   };
 
@@ -669,6 +736,10 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
           {currentWorkout && (
             <Card sx={{ mb: 3 }}>
               <CardContent>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  💡 This sets the <strong>suggested workout type</strong> for the day. 
+                  {isStrength && ' For strength workouts, select a saved workout below to assign exercises.'}
+                </Typography>
                 <SessionTypeQuickToggle
                   currentType={workoutType || 'full'}
                   onChange={handleSessionTypeChange}
@@ -678,14 +749,52 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
             </Card>
           )}
 
+          {/* Saved Workout Selector - shown for strength workouts */}
+          {currentWorkout && isStrength && (
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <FormControl fullWidth>
+                  <InputLabel>Select Saved Workout</InputLabel>
+                  <Select
+                    value=""
+                    label="Select Saved Workout"
+                    onChange={(e) => handleSelectSavedWorkout(e.target.value)}
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      Choose a workout to load exercises...
+                    </MenuItem>
+                    {savedWorkouts.map((workout, index) => (
+                      <MenuItem key={index} value={index}>
+                        {workout.name || `${workout.type || 'Custom'} Workout`} 
+                        {' '}({workout.exercises?.length || 0} exercises)
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {savedWorkouts.length === 0 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    No saved workouts available. Create one from the Work tab.
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {!currentWorkout && (
             <Card sx={{ p: 4, textAlign: 'center' }}>
               <Typography variant="h6" color="text.secondary">
                 No workout assigned for {selectedDay}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Use the quick toggle below to assign a workout type
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+                Select a workout type below to get started
               </Typography>
+              <Alert severity="info" sx={{ mb: 3, textAlign: 'left' }}>
+                <Typography variant="body2">
+                  💡 <strong>Note:</strong> Selecting a workout type sets the suggested type for the day. 
+                  For strength workouts, you&apos;ll need to select a saved workout to assign specific exercises.
+                </Typography>
+              </Alert>
               <Box sx={{ mt: 3, maxWidth: 600, mx: 'auto' }}>
                 <SessionTypeQuickToggle
                   currentType="full"

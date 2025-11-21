@@ -173,8 +173,9 @@ const calculateAdherenceWith6DayWeek = (allSessions = [], days = 30) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Find the date of the first session
-  const firstSessionDate = new Date(Math.min(...allSessions.map(s => new Date(s.date).getTime())));
+  // Find the date of the first session (optimized to create Date objects only once)
+  const timestamps = allSessions.map(s => new Date(s.date).getTime());
+  const firstSessionDate = new Date(Math.min(...timestamps));
   firstSessionDate.setHours(0, 0, 0, 0);
 
   // Calculate days since first session

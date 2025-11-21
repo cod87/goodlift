@@ -114,8 +114,9 @@ export const calculateAdherence = (workoutHistory = [], activePlan = null, days 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Find the date of the first session
-  const firstSessionDate = new Date(Math.min(...workoutHistory.map(w => new Date(w.date).getTime())));
+  // Find the date of the first session (optimized to create Date objects only once)
+  const timestamps = workoutHistory.map(w => new Date(w.date).getTime());
+  const firstSessionDate = new Date(Math.min(...timestamps));
   firstSessionDate.setHours(0, 0, 0, 0);
 
   // Calculate days since first session

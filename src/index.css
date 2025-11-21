@@ -11,12 +11,6 @@
   --protein-color: #9c5a6e;
   --carbs-color: #9d9e7e;
   --fat-color: #6b8a9d;
-  
-  /* Safe area inset variables for mobile devices */
-  --safe-area-inset-top: env(safe-area-inset-top, 0px);
-  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-area-inset-left: env(safe-area-inset-left, 0px);
-  --safe-area-inset-right: env(safe-area-inset-right, 0px);
 }
 
 body {
@@ -25,10 +19,7 @@ body {
   min-height: 100vh;
   /* Background color is handled by MUI theme via CssBaseline */
   /* Safe area support for mobile devices with notches and bottom bars */
-  padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
 }
 
 #root {

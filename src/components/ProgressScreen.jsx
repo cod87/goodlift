@@ -68,6 +68,7 @@ import {
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 import { StreakDisplay, AdherenceDisplay, VolumeTrendDisplay } from './Progress/TrackingCards';
+import MuscleVolumeTracker from './Progress/MuscleVolumeTracker';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import { calculateStreak, calculateAdherence } from '../utils/trackingMetrics';
 
@@ -525,6 +526,11 @@ const ProgressDashboard = () => {
                 </Stack>
               </CardContent>
             </Card>
+
+            {/* Muscle Volume Tracker */}
+            {history.length > 0 && (
+              <MuscleVolumeTracker workoutHistory={history} days={7} />
+            )}
 
             {/* Progressive Overload Section - Moved here, below adherence */}
           {history.length > 0 && (

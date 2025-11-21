@@ -24,6 +24,24 @@ export const MUSCLE_CATEGORY_MAP = {
 };
 
 /**
+ * Mapping of simplified muscle categories for secondary muscles
+ * Each muscle is only assigned once (no duplicates between categories)
+ */
+export const SECONDARY_MUSCLE_CATEGORY_MAP = {
+  'Chest': ['Chest'],
+  'Back': ['Back', 'Lats', 'Lower Back', 'Rhomboids', 'Traps', 'Upper Back'],
+  'Biceps': ['Biceps', 'Forearms'],
+  'Triceps': [],
+  'Shoulders': ['Delts', 'Front Delts', 'Rear Delts', 'Shoulders'],
+  'Core': ['Core', 'Obliques'],
+  'Quads': ['Hip Flexors', 'Quads'],
+  'Hamstrings': ['Hamstrings'],
+  'Calves': ['Calves'],
+  'Glutes': ['Adductors', 'Glutes'],
+  'All': ['All'],
+};
+
+/**
  * Reverse mapping: detailed muscle name to simplified category
  * Auto-generated from MUSCLE_CATEGORY_MAP for efficient lookups
  */
@@ -83,4 +101,59 @@ export function filterExercisesByCategory(exercises, category) {
     const exerciseCategory = getMuscleCategory(exercise['Primary Muscle']);
     return exerciseCategory === category;
   });
+}
+
+/**
+ * Reverse mapping: secondary muscle name to simplified category
+ * Auto-generated from SECONDARY_MUSCLE_CATEGORY_MAP for efficient lookups
+ */
+export const SECONDARY_MUSCLE_TO_CATEGORY = Object.entries(SECONDARY_MUSCLE_CATEGORY_MAP).reduce((acc, [category, muscles]) => {
+  muscles.forEach(muscle => {
+    acc[muscle] = category;
+  });
+  return acc;
+}, {});
+
+/**
+ * Parse secondary muscles from comma-separated string
+ * @param {string} secondaryMuscles - Comma-separated list of secondary muscles
+ * @returns {Array<string>} Array of trimmed muscle names
+ */
+export function parseSecondaryMuscles(secondaryMuscles) {
+  if (!secondaryMuscles || typeof secondaryMuscles !== 'string') {
+    return [];
+  }
+  return secondaryMuscles
+    .split(',')
+    .map(muscle => muscle.trim())
+    .filter(muscle => muscle.length > 0);
+}
+
+/**
+ * Get the simplified category for a given secondary muscle
+ * @param {string} secondaryMuscle - The detailed secondary muscle name from exercise data
+ * @returns {string|null} The simplified muscle category, or null if no mapping exists
+ */
+export function getSecondaryMuscleCategory(secondaryMuscle) {
+  const cleanMuscle = secondaryMuscle.split('(')[0].trim();
+  return SECONDARY_MUSCLE_TO_CATEGORY[cleanMuscle] || null;
+}
+
+/**
+ * Get all unique simplified categories from secondary muscles
+ * @param {string} secondaryMusclesString - Comma-separated list of secondary muscles
+ * @returns {Array<string>} Array of unique simplified categories
+ */
+export function categorizeSecondaryMuscles(secondaryMusclesString) {
+  const muscles = parseSecondaryMuscles(secondaryMusclesString);
+  const categories = new Set();
+  
+  muscles.forEach(muscle => {
+    const category = getSecondaryMuscleCategory(muscle);
+    if (category) {
+      categories.add(category);
+    }
+  });
+  
+  return Array.from(categories);
 }

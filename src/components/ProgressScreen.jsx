@@ -253,7 +253,8 @@ const ProgressDashboard = () => {
       const adherencePercent = calculateAdherence(allSessions, null, 30);
       setAdherence(adherencePercent);
 
-      const pinned = await progressiveOverloadService.getPinnedExercises();
+      // Load pinned exercises and sync with latest performance from workout history
+      const pinned = await progressiveOverloadService.syncPinnedExercisesWithHistory(loadedHistory);
       setPinnedExercisesState(pinned);
 
       try {
@@ -561,16 +562,24 @@ const ProgressDashboard = () => {
                 ) : (
                   <Stack spacing={2}>
                     {pinnedExercises.map((pinned) => {
+                      // Use tracking mode from pinned exercise, default to weight
+                      const trackingMode = pinned.trackingMode || 'weight';
                       const progression = progressiveOverloadService.getExerciseProgression(
                         history,
                         pinned.exerciseName,
-                        'weight'
+                        trackingMode
                       );
 
-                      const startingWeight = progression.length > 0 ? progression[0].value : 0;
-                      const currentWeight = progression.length > 0 ? progression[progression.length - 1].value : 0;
-                      const progressionDirection = currentWeight > startingWeight ? 'up' : 
-                                                   currentWeight < startingWeight ? 'down' : 'same';
+                      const startingValue = progression.length > 0 ? progression[0].value : 0;
+                      // Use stored latest performance if available, otherwise fall back to progression data
+                      const currentValue = trackingMode === 'reps' 
+                        ? (pinned.lastReps !== undefined ? pinned.lastReps : 
+                           (progression.length > 0 ? progression[progression.length - 1].value : 0))
+                        : (pinned.lastWeight !== undefined ? pinned.lastWeight : 
+                           (progression.length > 0 ? progression[progression.length - 1].value : 0));
+                      const progressionDirection = currentValue > startingValue ? 'up' : 
+                                                   currentValue < startingValue ? 'down' : 'same';
+                      const unit = trackingMode === 'reps' ? 'reps' : 'lbs';
 
                       return (
                         <Box 
@@ -596,7 +605,7 @@ const ProgressDashboard = () => {
                             </IconButton>
                           </Stack>
 
-                          {progression.length > 0 ? (
+                          {(progression.length > 0 || pinned.lastWeight !== undefined || pinned.lastReps !== undefined) ? (
                             <Stack 
                               direction="row" 
                               alignItems="center" 
@@ -608,7 +617,7 @@ const ProgressDashboard = () => {
                                   Starting
                                 </Typography>
                                 <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                                  {startingWeight} lbs
+                                  {startingValue} {unit}
                                 </Typography>
                               </Box>
                               
@@ -629,7 +638,7 @@ const ProgressDashboard = () => {
                                   Current
                                 </Typography>
                                 <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                                  {currentWeight} lbs
+                                  {currentValue} {unit}
                                 </Typography>
                               </Box>
                             </Stack>

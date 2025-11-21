@@ -433,6 +433,106 @@ class ProgressiveOverloadService {
       improvement: Math.round(improvement),
     };
   }
+
+  /**
+   * Get the latest performed set for an exercise from workout history
+   * @param {Array} workoutHistory - Array of workout objects
+   * @param {string} exerciseName - Name of the exercise
+   * @param {string} trackingMode - 'weight' or 'reps' - determines which metric to prioritize
+   * @returns {Object|null} Object with { weight, reps, date } or null if not found
+   */
+  getLatestPerformance(workoutHistory, exerciseName, trackingMode = 'weight') {
+    if (!workoutHistory || !Array.isArray(workoutHistory) || workoutHistory.length === 0) {
+      return null;
+    }
+
+    // Sort workouts by date (newest first)
+    const sortedWorkouts = [...workoutHistory].sort((a, b) => 
+      new Date(b.date) - new Date(a.date)
+    );
+
+    // Find the most recent workout that includes this exercise
+    for (const workout of sortedWorkouts) {
+      if (workout.exercises && workout.exercises[exerciseName]) {
+        const exerciseData = workout.exercises[exerciseName];
+        if (exerciseData.sets && exerciseData.sets.length > 0) {
+          // Find the best set based on tracking mode
+          let bestSet;
+          if (trackingMode === 'reps') {
+            // For reps tracking, find set with highest reps
+            bestSet = exerciseData.sets.reduce((best, current) => {
+              const currentReps = current.reps || 0;
+              const bestReps = best.reps || 0;
+              return currentReps > bestReps ? current : best;
+            }, exerciseData.sets[0]);
+          } else {
+            // For weight tracking, find set with highest weight
+            bestSet = exerciseData.sets.reduce((best, current) => {
+              const currentWeight = current.weight || 0;
+              const bestWeight = best.weight || 0;
+              return currentWeight > bestWeight ? current : best;
+            }, exerciseData.sets[0]);
+          }
+
+          return {
+            weight: bestSet.weight || 0,
+            reps: bestSet.reps || 0,
+            date: workout.date,
+          };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Update pinned exercises with latest performance data from workout history
+   * @param {Array} pinnedExercises - Array of pinned exercise configurations
+   * @param {Array} workoutHistory - Array of workout objects
+   * @returns {Array} Updated pinned exercises with latest performance data
+   */
+  updatePinnedExercisesWithLatestPerformance(pinnedExercises, workoutHistory) {
+    if (!Array.isArray(pinnedExercises) || pinnedExercises.length === 0) {
+      return [];
+    }
+
+    return pinnedExercises.map(pinned => {
+      const latestPerf = this.getLatestPerformance(
+        workoutHistory, 
+        pinned.exerciseName, 
+        pinned.trackingMode || 'weight'
+      );
+      
+      if (latestPerf) {
+        return {
+          ...pinned,
+          lastWeight: latestPerf.weight,
+          lastReps: latestPerf.reps,
+          lastDate: latestPerf.date,
+        };
+      }
+      
+      return pinned;
+    });
+  }
+
+  /**
+   * Sync pinned exercises with latest performance and save
+   * @param {Array} workoutHistory - Array of workout objects
+   * @returns {Promise<Array>} Updated pinned exercises
+   */
+  async syncPinnedExercisesWithHistory(workoutHistory) {
+    try {
+      const pinned = await this.getPinnedExercises();
+      const updated = this.updatePinnedExercisesWithLatestPerformance(pinned, workoutHistory);
+      await this.setPinnedExercises(updated);
+      return updated;
+    } catch (error) {
+      console.error('Error syncing pinned exercises with history:', error);
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance

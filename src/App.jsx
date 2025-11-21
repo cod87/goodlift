@@ -38,6 +38,7 @@ import {
   addToTotalVolume,
   getWorkoutHistory
 } from './utils/storage';
+import progressiveOverloadService from './services/ProgressiveOverloadService';
 import { cleanupExpiredBackups } from './utils/dataResetService';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
 import { shouldReduceWeight } from './utils/progressiveOverload';
@@ -575,6 +576,14 @@ function AppContent() {
         // Show the first achievement (can be enhanced to queue multiple)
         setNewAchievement(newAchievements[0]);
         setShowAchievementDialog(true);
+      }
+      
+      // Sync pinned exercises with latest performance after workout is saved
+      try {
+        await progressiveOverloadService.syncPinnedExercisesWithHistory(workoutHistory);
+      } catch (error) {
+        console.error('Error syncing pinned exercises after workout:', error);
+        // Continue anyway - workout data is already saved
       }
     } catch (error) {
       console.error('Error checking achievements:', error);

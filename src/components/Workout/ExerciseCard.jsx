@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { 
   Box, 
@@ -90,11 +90,17 @@ const ExerciseCard = memo(({
     }
   };
   
-  // Get random doggo avatar for guest users
-  const getRandomDoggoAvatar = () => {
-    const randomIndex = Math.floor(Math.random() * DOGGO_AVATARS.length);
-    return DOGGO_AVATARS[randomIndex].url;
-  };
+  // Get random doggo avatar for guest users - memoized and seeded by exercise name for consistency
+  const randomDoggoAvatar = useMemo(() => {
+    // Use exercise name to seed a consistent "random" avatar for this exercise
+    let hash = 0;
+    for (let i = 0; i < exerciseName.length; i++) {
+      hash = ((hash << 5) - hash) + exerciseName.charCodeAt(i);
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    const index = Math.abs(hash) % DOGGO_AVATARS.length;
+    return DOGGO_AVATARS[index].url;
+  }, [exerciseName]); // Recalculate only when exercise name changes
   
   // Render user avatar or random avatar as fallback
   const renderAvatarFallback = () => {
@@ -154,7 +160,7 @@ const ExerciseCard = memo(({
       // Guest user - show random doggo avatar
       avatarContent = (
         <Avatar
-          src={getRandomDoggoAvatar()}
+          src={randomDoggoAvatar}
           alt="Guest avatar"
           sx={{
             width: '100%',
@@ -410,7 +416,7 @@ const ExerciseCard = memo(({
             {/* Input Form */}
             <Box component="form" onSubmit={handleSubmit}>
               <Box sx={{ mb: 2 }}>
-                <ExerciseInputs weight={weight} reps={reps} lastWeight={lastWeight} lastRps={lastReps} onWeightChange={setWeight} onRepsChange={setReps} disabled={setLogged} />
+                <ExerciseInputs weight={weight} reps={reps} lastWeight={lastWeight} lastReps={lastReps} onWeightChange={setWeight} onRepsChange={setReps} disabled={setLogged} />
               </Box>
               <Stack direction="row" spacing={2}>
                 {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '44px' }}>Back</Button>}
@@ -451,7 +457,7 @@ const ExerciseCard = memo(({
           {/* Input Form */}
           <Box component="form" onSubmit={handleSubmit}>
             <Box sx={{ mb: 2 }}>
-              <ExerciseInputs weight={weight} reps={reps} lastWeight={lastWeight} lastRps={lastReps} onWeightChange={setWeight} onRepsChange={setReps} disabled={setLogged} />
+              <ExerciseInputs weight={weight} reps={reps} lastWeight={lastWeight} lastReps={lastReps} onWeightChange={setWeight} onRepsChange={setReps} disabled={setLogged} />
             </Box>
             <Stack direction="row" spacing={2}>
               {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '44px' }}>Back</Button>}

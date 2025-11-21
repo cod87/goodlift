@@ -71,7 +71,7 @@ import { useUserProfile } from '../contexts/UserProfileContext';
 
 /**
  * Calculate current workout streak in days with improved logic
- * Allows one unlogged rest day per week (as long as missed days are not within 7 days of each other)
+ * Allows one missed day per calendar week (Sunday-Saturday blocks)
  * @param {Array} allSessions - Array of all completed sessions (strength, cardio, HIIT, yoga/stretch) with date
  * @returns {Object} { currentStreak: number, longestStreak: number }
  */
@@ -98,60 +98,80 @@ const calculateStreakWithRestDays = (allSessions = []) => {
   let currentStreak = 0;
   let longestStreak = 0;
   let streakCount = 0;
-  let checkDate = new Date(today);
-  let missedDaysInCurrentWeek = 0;
-  let isCurrentStreakActive = false; // Track if we're still counting the current streak
+  let isCurrentStreakActive = false;
   
   // First check if there's a session within the last 2 days to start the current streak
   const lastSessionDate = new Date(sortedSessions[0].date);
   lastSessionDate.setHours(0, 0, 0, 0);
   const daysSinceLastSession = Math.floor((today - lastSessionDate) / (1000 * 60 * 60 * 24));
   if (daysSinceLastSession <= 1) {
-    isCurrentStreakActive = true; // User has worked out today or yesterday
+    isCurrentStreakActive = true;
   }
   
-  // Calculate current streak
-  // Allow one unlogged rest day per week (as long as missed days are not within 7 days of each other)
-  for (let i = 0; i < 365; i++) { // Check up to 365 days
-    const checkTime = checkDate.getTime();
+  // Helper function to get the Sunday (start) of a week for any date
+  const getWeekStart = (date) => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const day = d.getDay(); // 0 = Sunday, 6 = Saturday
+    d.setDate(d.getDate() - day); // Go back to Sunday
+    return d.getTime();
+  };
+  
+  // Process weeks from most recent to oldest
+  let currentWeekStart = getWeekStart(today);
+  let previousWeekValid = true; // Track if previous week maintained the streak
+  
+  for (let weekOffset = 0; weekOffset < 52; weekOffset++) { // Check up to 52 weeks
+    const weekStart = currentWeekStart - (weekOffset * 7 * 24 * 60 * 60 * 1000);
+    const weekEnd = weekStart + (6 * 24 * 60 * 60 * 1000); // Saturday
     
-    // Track week boundaries (every 7 days from today)
-    const daysSinceWeekStart = Math.floor((today.getTime() - checkDate.getTime()) / (1000 * 60 * 60 * 24)) % 7;
-    if (daysSinceWeekStart === 0 && i > 0) {
-      // Reset missed days counter for new week
-      missedDaysInCurrentWeek = 0;
+    // Count sessions in this week
+    let sessionsInWeek = 0;
+    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+      const dayTime = weekStart + (dayOffset * 24 * 60 * 60 * 1000);
+      if (sessionDates.has(dayTime)) {
+        sessionsInWeek++;
+      }
     }
     
-    if (sessionDates.has(checkTime)) {
-      // Found a session on this day
-      streakCount++;
-      // Update current streak if it's still active
+    // Week is valid if it has at least 6 sessions (allowing 1 missed day)
+    const weekValid = sessionsInWeek >= 6;
+    
+    if (weekValid && previousWeekValid) {
+      // Add 7 days to the streak (full week counts even if 1 day missed)
+      streakCount += 7;
+      
       if (isCurrentStreakActive) {
         currentStreak = streakCount;
       }
       longestStreak = Math.max(longestStreak, streakCount);
-    } else {
-      // No session on this day
-      missedDaysInCurrentWeek++;
+    } else if (sessionsInWeek > 0 && previousWeekValid) {
+      // Partial week - add only the actual session days before breaking
+      streakCount += sessionsInWeek;
       
-      // Check if this breaks the streak
-      // Streak breaks if: more than 1 missed day per week, OR 2+ consecutive missed days
-      if (missedDaysInCurrentWeek > 1) {
-        // Check if we have 2 consecutive missed days (within 7 days)
-        const nextDate = new Date(checkDate);
-        nextDate.setDate(nextDate.getDate() - 1);
-        if (!sessionDates.has(nextDate.getTime()) && i > 0) {
-          // Two consecutive days without session - break streak
-          if (isCurrentStreakActive && streakCount > 0) {
-            isCurrentStreakActive = false; // Current streak has ended
-          }
-          streakCount = 0;
-          missedDaysInCurrentWeek = 0;
-        }
+      if (isCurrentStreakActive) {
+        currentStreak = streakCount;
       }
+      longestStreak = Math.max(longestStreak, streakCount);
+      
+      // Break the streak
+      previousWeekValid = false;
+      if (isCurrentStreakActive) {
+        isCurrentStreakActive = false;
+      }
+      streakCount = 0;
+    } else if (!previousWeekValid) {
+      // Streak already broken, don't continue
+      break;
+    } else {
+      // Week not valid and previous was valid - break streak
+      previousWeekValid = false;
+      if (isCurrentStreakActive) {
+        isCurrentStreakActive = false;
+      }
+      streakCount = 0;
+      break;
     }
-    
-    checkDate.setDate(checkDate.getDate() - 1);
   }
 
   return { currentStreak, longestStreak };

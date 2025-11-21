@@ -48,6 +48,47 @@ export const calculateStreak = (workoutHistory = []) => {
     return d.getTime();
   };
 
+  // Helper function to find longest valid streak prefix
+  // A streak is valid if all weeks it spans have at least 1 strength session
+  const findLongestValidStreak = (streakDates, dateToSessions) => {
+    if (streakDates.length === 0) return 0;
+    
+    // Try progressively shorter prefixes, starting from the full streak
+    for (let len = streakDates.length; len > 0; len--) {
+      const prefix = streakDates.slice(0, len);
+      const weekToHasStrength = new Map();
+      
+      prefix.forEach(dateTime => {
+        const weekStart = getWeekStart(dateTime);
+        const sessions = dateToSessions.get(dateTime) || [];
+        
+        if (!weekToHasStrength.has(weekStart)) {
+          weekToHasStrength.set(weekStart, false);
+        }
+        
+        const hasStrength = sessions.some(s => isStrengthSession(s));
+        if (hasStrength) {
+          weekToHasStrength.set(weekStart, true);
+        }
+      });
+      
+      // Check if all weeks have strength
+      let allWeeksHaveStrength = true;
+      for (const hasStrength of weekToHasStrength.values()) {
+        if (!hasStrength) {
+          allWeeksHaveStrength = false;
+          break;
+        }
+      }
+      
+      if (allWeeksHaveStrength) {
+        return len;
+      }
+    }
+    
+    return 0;
+  };
+
   // Get unique workout dates sorted (oldest to newest)
   const uniqueDatesArray = Array.from(new Set(sortedWorkouts.map(w => {
     const d = new Date(w.date);
@@ -73,7 +114,6 @@ export const calculateStreak = (workoutHistory = []) => {
   
   let longestStreak = 0;
   let currentStreak = 0;
-  let tempStreak = 0;
   let tempStreakDates = [];
   let lastDateInStreak = null;
 
@@ -84,26 +124,30 @@ export const calculateStreak = (workoutHistory = []) => {
     // Check if this date continues the streak
     if (lastDateInStreak === null) {
       // Start of a new streak
-      tempStreak = 1;
       tempStreakDates = [currentDate];
       lastDateInStreak = currentDate;
     } else {
       const daysDiff = Math.floor((currentDate - lastDateInStreak) / (1000 * 60 * 60 * 24));
       
       if (daysDiff === 1) {
-        // Consecutive day - continue streak
-        tempStreak++;
+        // Consecutive day - add to streak
         tempStreakDates.push(currentDate);
         lastDateInStreak = currentDate;
       } else {
-        // Gap found - check if previous streak is valid (all weeks have strength)
-        const streakValid = isStreakAlive(tempStreakDates, dateToSessions, getWeekStart, isStrengthSession);
-        if (streakValid) {
-          longestStreak = Math.max(longestStreak, tempStreak);
+        // Gap found - find longest valid streak from the accumulated dates
+        const validStreakLen = findLongestValidStreak(tempStreakDates, dateToSessions);
+        if (validStreakLen > 0) {
+          longestStreak = Math.max(longestStreak, validStreakLen);
+          
+          // Check if this was the current streak
+          const streakEndDate = tempStreakDates[validStreakLen - 1];
+          const daysSinceLastSession = Math.floor((todayTime - streakEndDate) / (1000 * 60 * 60 * 24));
+          if (daysSinceLastSession <= 1) {
+            currentStreak = validStreakLen;
+          }
         }
         
         // Start new streak
-        tempStreak = 1;
         tempStreakDates = [currentDate];
         lastDateInStreak = currentDate;
       }
@@ -111,59 +155,21 @@ export const calculateStreak = (workoutHistory = []) => {
   }
 
   // Check final streak
-  if (tempStreak > 0) {
-    const streakValid = isStreakAlive(tempStreakDates, dateToSessions, getWeekStart, isStrengthSession);
-    if (streakValid) {
-      longestStreak = Math.max(longestStreak, tempStreak);
+  if (tempStreakDates.length > 0) {
+    const validStreakLen = findLongestValidStreak(tempStreakDates, dateToSessions);
+    if (validStreakLen > 0) {
+      longestStreak = Math.max(longestStreak, validStreakLen);
       
-      // Check if this is the current streak (last session within 1 day of today)
-      const daysSinceLastSession = Math.floor((todayTime - lastDateInStreak) / (1000 * 60 * 60 * 24));
+      // Check if this is the current streak
+      const streakEndDate = tempStreakDates[validStreakLen - 1];
+      const daysSinceLastSession = Math.floor((todayTime - streakEndDate) / (1000 * 60 * 60 * 24));
       if (daysSinceLastSession <= 1) {
-        currentStreak = tempStreak;
+        currentStreak = validStreakLen;
       }
     }
   }
 
   return { currentStreak, longestStreak };
-};
-
-/**
- * Check if a streak is "alive" by ensuring each week has at least one strength session
- * @param {Array} streakDates - Array of date timestamps in the streak
- * @param {Map} dateToSessions - Map of date to sessions array
- * @param {Function} getWeekStart - Function to get week start date
- * @param {Function} isStrengthSession - Function to check if session is strength
- * @returns {boolean} True if streak is alive
- */
-const isStreakAlive = (streakDates, dateToSessions, getWeekStart, isStrengthSession) => {
-  if (streakDates.length === 0) return false;
-  
-  // Group dates by week
-  const weekToStrengthCount = new Map();
-  
-  streakDates.forEach(dateTime => {
-    const weekStart = getWeekStart(dateTime);
-    const sessions = dateToSessions.get(dateTime) || [];
-    
-    if (!weekToStrengthCount.has(weekStart)) {
-      weekToStrengthCount.set(weekStart, 0);
-    }
-    
-    // Check if any session on this day is strength
-    const hasStrength = sessions.some(s => isStrengthSession(s));
-    if (hasStrength) {
-      weekToStrengthCount.set(weekStart, weekToStrengthCount.get(weekStart) + 1);
-    }
-  });
-  
-  // All weeks must have at least 1 strength session
-  for (const count of weekToStrengthCount.values()) {
-    if (count < 1) {
-      return false;
-    }
-  }
-  
-  return true;
 };
 
 /**

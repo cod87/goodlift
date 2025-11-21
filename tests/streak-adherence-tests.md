@@ -9,64 +9,78 @@ This document describes the expected behavior of the streak and adherence tracki
 2. **Streak Activation**: A streak is considered "current" only if the last session was today or yesterday (within 1 day)
 3. **Calendar Week Blocks**: Uses Sunday-Saturday as fixed week boundaries
 4. **Rest Days**: Allows **one missed day per calendar week** (Sunday-Saturday block)
-5. **Week Counting**: A week with 6 or 7 sessions counts as a full 7-day week in the streak
-6. **Longest Streak**: Tracks the maximum consecutive days ever achieved
+5. **Strength Training Requirement**: Each week must have **at least 3 strength training sessions** to maintain the streak
+6. **Week Counting**: A week with 6+ total sessions AND 3+ strength sessions counts as a full 7-day week in the streak
+7. **Longest Streak**: Tracks the maximum consecutive days ever achieved
+
+### What Counts as Strength Training?
+- Full body workouts
+- Upper body, lower body workouts
+- Push, pull, legs workouts
+- Any workout with resistance exercises (if it has exercises field, it's considered strength)
 
 ### Test Cases
 
-#### Test 1: Full Week with One Missed Day
-**Setup**: User has 6 sessions in a complete week (Sun-Sat), missing one day
+#### Test 1: Full Week with Requirements Met
+**Setup**: User has 6+ sessions in a complete week (Sun-Sat), including 3+ strength sessions
 **Expected**: 
 - Current Streak: 7 (counts as full week)
-- Example: Mon, Tue, Thu, Fri, Sat, Sun (Wed skipped) = 7-day streak
+- Example: Mon (strength), Tue (strength), Thu (cardio), Fri (strength), Sat (cardio), Sun (cardio), Wed skipped = 7-day streak
 
-#### Test 2: Two Weeks with One Missed Day Each
-**Setup**: Two consecutive weeks, each with 6 sessions
+#### Test 2: Week with Insufficient Strength Sessions
+**Setup**: Week has 6 total sessions but only 2 strength sessions
+**Expected**: 
+- Current Streak: 6 (only actual sessions count, streak breaks)
+- Week does not meet the 3 strength session requirement
+
+#### Test 3: Two Consecutive Weeks with Requirements Met
+**Setup**: Two consecutive weeks, each with 6+ sessions and 3+ strength sessions
 **Expected**: 
 - Current Streak: 14 (7 + 7)
 - Each week allows one missed day
 
-#### Test 3: Week with Two Missed Days
-**Setup**: Only 5 sessions in a week
+#### Test 4: Week with Too Many Missed Days
+**Setup**: Only 5 sessions in a week (even if 3+ are strength)
 **Expected**: 
 - Current Streak: 5 (only actual sessions count, streak breaks)
 - More than one missed day breaks the streak
 
-#### Test 4: Partial Week (In Progress)
-**Setup**: Current week has 5 sessions, but week not complete yet
+#### Test 5: Partial Week (In Progress)
+**Setup**: Current week has 5 sessions so far, 3 are strength, but week not complete yet
 **Expected**: 
 - Current Streak: 5 (actual sessions so far)
-- Once week completes with 6+ total, will count as 7
+- Once week completes with 6+ total and 3+ strength, will count as 7
 
-#### Test 5: Last Workout 2 Days Ago
+#### Test 6: Last Workout 2 Days Ago
 **Setup**: User's last session was 2 days ago
 **Expected**: 
 - Current Streak: 0 (too long ago to be current)
 - Longest Streak: [previous value]
 
-#### Test 6: First Session Today
+#### Test 7: First Session Today
 **Setup**: User just logged their first session today
 **Expected**: 
 - Current Streak: 1
 - Longest Streak: 1
 
-#### Test 7: Multiple Sessions Same Day
-**Setup**: 2 sessions today, 1 session yesterday
+#### Test 8: Multiple Sessions Same Day
+**Setup**: 2 sessions today (1 strength, 1 cardio), 1 session yesterday
 **Expected**: 
 - Counts unique days only (2 days)
 - Continues with normal week rules
 
-#### Test 8: No Sessions
+#### Test 9: No Sessions
 **Setup**: Empty session history
 **Expected**: 
 - Current Streak: 0
 - Longest Streak: 0
 
-#### Test 9: Mixed Session Types
-**Setup**: Week with mixed types (strength, cardio, hiit, yoga)
+#### Test 10: Mixed Session Types with Requirements
+**Setup**: Week with strength, cardio, HIIT, and yoga (6+ total, 3+ strength)
 **Expected**: 
-- All session types count equally
-- Week rules apply regardless of type
+- All session types count toward the 6+ requirement
+- Only strength sessions count toward the 3+ strength requirement
+- Week counts as 7 days if requirements met
 
 ## Adherence Calculation
 
@@ -112,10 +126,23 @@ This document describes the expected behavior of the streak and adherence tracki
 **Setup**: Empty session history
 **Expected**: 0% adherence
 
+## UI Features
+
+### Streak Info Icon
+- Small help icon (?) appears next to "Day Streak" label
+- Clicking opens a dialog explaining streak rules
+- Dialog covers:
+  - Week-based system (Sunday-Saturday blocks)
+  - 6+ sessions per week requirement (allows 1 rest day)
+  - 3+ strength sessions per week requirement
+  - What counts as strength training
+  - How streaks are counted (full 7 days when requirements met)
+  - When streaks break
+
 ## Implementation Notes
 
 - Streak calculation uses **calendar week boundaries** (Sunday = week start)
-- Weeks with 6 or 7 sessions count as **full 7-day weeks** in the streak
+- Weeks with 6+ sessions AND 3+ strength sessions count as **full 7-day weeks** in the streak
 - Week boundaries are fixed, not rolling
 - Functions handle multiple sessions per day correctly (count as one day)
 - All calculations are timezone-safe (set hours to 0, 0, 0, 0)

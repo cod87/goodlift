@@ -142,6 +142,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
           };
           
           // Get last performance from history
+          // Always track by weight since that's what the workout screen uses for input
           const progression = progressiveOverloadService.getExerciseProgression(
             history,
             exerciseName,
@@ -153,12 +154,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
             // Get the sets from the last workout for this exercise
             const lastWorkoutExerciseData = lastWorkout.workout?.exercises?.[exerciseName];
             if (lastWorkoutExerciseData?.sets && lastWorkoutExerciseData.sets.length > 0) {
-              // Get max weight and reps from last workout
-              const maxWeight = Math.max(...lastWorkoutExerciseData.sets.map(s => s.weight || 0));
-              const maxReps = Math.max(...lastWorkoutExerciseData.sets.map(s => s.reps || 0));
+              // Find the set with the highest weight (best performance)
+              // This ensures we show weight and reps from the same actual set
+              const bestSet = lastWorkoutExerciseData.sets.reduce((best, current) => {
+                const currentWeight = current.weight || 0;
+                const bestWeight = best.weight || 0;
+                return currentWeight > bestWeight ? current : best;
+              }, lastWorkoutExerciseData.sets[0]);
+              
               lastPerf[exerciseName] = {
-                weight: maxWeight,
-                reps: maxReps
+                weight: bestSet.weight || 0,
+                reps: bestSet.reps || 0
               };
             }
           }

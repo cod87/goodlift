@@ -771,13 +771,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
               {/* Exercise Name and Demo Image Section - Two columns on mobile landscape and tablet landscape */}
               <Box sx={{ 
                 display: 'grid',
-                // Two-column layout on mobile landscape (portrait is single column)
-                // Also two-column on tablet landscape for better space usage
-                gridTemplateColumns: {
-                  xs: 'minmax(0, 1fr)', // Mobile portrait: single column
-                  sm: 'minmax(0, 1fr)', // Tablet portrait: single column
-                  md: 'minmax(0, 1fr)', // Desktop: single column
-                },
+                // Two-column layout on landscape orientations only
+                gridTemplateColumns: 'minmax(0, 1fr)',
                 // Use media query for landscape detection
                 '@media (max-width: 900px) and (orientation: landscape)': {
                   gridTemplateColumns: demoImageSrc ? '1fr 1fr' : '1fr',
@@ -796,7 +791,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   overflow: 'hidden'
                 }}>
                   <Typography 
-                    variant="h3" 
+                    variant="h2" 
                     component="h2"
                     sx={{ 
                       fontWeight: 600,

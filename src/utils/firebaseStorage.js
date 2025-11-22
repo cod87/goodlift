@@ -510,9 +510,24 @@ export const saveNutritionGoalsToFirebase = async (userId, nutritionGoals) => {
 };
 
 /**
+ * Save nutrition recipes to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} nutritionRecipes - The nutrition recipes array
+ */
+export const saveNutritionRecipesToFirebase = async (userId, nutritionRecipes) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { nutritionRecipes });
+  } catch (error) {
+    console.error('Error saving nutrition recipes to Firebase:', error);
+  }
+};
+
+/**
  * Load nutrition data from Firebase
  * @param {string} userId - The authenticated user's UID
- * @returns {object|null} - Object with nutritionEntries and nutritionGoals or null if not found
+ * @returns {object|null} - Object with nutritionEntries, nutritionGoals, and nutritionRecipes or null if not found
  */
 export const loadNutritionDataFromFirebase = async (userId) => {
   if (!userId) return null;
@@ -521,7 +536,8 @@ export const loadNutritionDataFromFirebase = async (userId) => {
     const userData = await loadUserDataFromFirebase(userId);
     return {
       nutritionEntries: userData?.nutritionEntries || null,
-      nutritionGoals: userData?.nutritionGoals || null
+      nutritionGoals: userData?.nutritionGoals || null,
+      nutritionRecipes: userData?.nutritionRecipes || null
     };
   } catch (error) {
     console.error('Error loading nutrition data from Firebase:', error);

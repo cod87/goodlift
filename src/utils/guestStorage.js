@@ -33,6 +33,7 @@ const GUEST_KEYS = {
   SAVED_WORKOUTS: 'goodlift_guest_saved_workouts',
   NUTRITION_ENTRIES: 'goodlift_guest_nutrition_entries',
   NUTRITION_GOALS: 'goodlift_guest_nutrition_goals',
+  NUTRITION_RECIPES: 'goodlift_guest_nutrition_recipes',
 };
 
 /**

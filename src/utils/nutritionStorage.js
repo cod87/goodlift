@@ -1,13 +1,14 @@
 import {
   saveNutritionEntriesToFirebase,
   saveNutritionGoalsToFirebase,
+  saveNutritionRecipesToFirebase,
   loadNutritionDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
 
 /**
  * Storage module for managing nutrition data in localStorage and Firebase
- * Provides functions for persisting and retrieving nutrition entries and goals
+ * Provides functions for persisting and retrieving nutrition entries, goals, and recipes
  * Automatically syncs with Firebase when user is authenticated
  */
 
@@ -15,6 +16,7 @@ import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
 const KEYS = {
   NUTRITION_ENTRIES: 'goodlift_nutrition_entries',
   NUTRITION_GOALS: 'goodlift_nutrition_goals',
+  NUTRITION_RECIPES: 'goodlift_nutrition_recipes',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -190,9 +192,106 @@ export const loadUserNutritionData = async (userId) => {
       if (firebaseData.nutritionGoals) {
         localStorage.setItem(KEYS.NUTRITION_GOALS, JSON.stringify(firebaseData.nutritionGoals));
       }
+      if (firebaseData.nutritionRecipes) {
+        localStorage.setItem(KEYS.NUTRITION_RECIPES, JSON.stringify(firebaseData.nutritionRecipes));
+      }
     }
   } catch (error) {
     console.error('Error loading user nutrition data:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get saved recipes from localStorage or guest storage
+ * @returns {Array} Array of recipe objects
+ */
+export const getRecipes = () => {
+  try {
+    // Check if in guest mode first
+    if (isGuestMode()) {
+      const guestData = getGuestData('nutrition_recipes');
+      return guestData || [];
+    }
+
+    // Try localStorage
+    const stored = localStorage.getItem(KEYS.NUTRITION_RECIPES);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Error getting recipes:', error);
+    return [];
+  }
+};
+
+/**
+ * Save a recipe to localStorage and Firebase
+ * @param {Object} recipe - Recipe object with foods and nutrition data
+ * @returns {Promise<void>}
+ */
+export const saveRecipe = async (recipe) => {
+  try {
+    const recipes = getRecipes();
+    
+    // Add or update recipe
+    const existingIndex = recipes.findIndex(r => r.id === recipe.id);
+    if (existingIndex >= 0) {
+      recipes[existingIndex] = recipe;
+    } else {
+      recipes.push(recipe);
+    }
+
+    // Save to guest mode if applicable
+    if (isGuestMode()) {
+      setGuestData('nutrition_recipes', recipes);
+      return;
+    }
+
+    // Save to localStorage
+    localStorage.setItem(KEYS.NUTRITION_RECIPES, JSON.stringify(recipes));
+
+    // Save to Firebase if user is authenticated
+    if (currentUserId) {
+      try {
+        await saveNutritionRecipesToFirebase(currentUserId, recipes);
+      } catch (error) {
+        console.error('Error syncing recipes to Firebase:', error);
+      }
+    }
+  } catch (error) {
+    console.error('Error saving recipe:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a recipe from localStorage and Firebase
+ * @param {string} recipeId - Recipe ID to delete
+ * @returns {Promise<void>}
+ */
+export const deleteRecipe = async (recipeId) => {
+  try {
+    const recipes = getRecipes();
+    const filteredRecipes = recipes.filter(r => r.id !== recipeId);
+
+    // Save to guest mode if applicable
+    if (isGuestMode()) {
+      setGuestData('nutrition_recipes', filteredRecipes);
+      return;
+    }
+
+    // Save to localStorage
+    localStorage.setItem(KEYS.NUTRITION_RECIPES, JSON.stringify(filteredRecipes));
+
+    // Save to Firebase if user is authenticated
+    if (currentUserId) {
+      try {
+        await saveNutritionRecipesToFirebase(currentUserId, filteredRecipes);
+      } catch (error) {
+        console.error('Error syncing recipes to Firebase:', error);
+      }
+    }
+  } catch (error) {
+    console.error('Error deleting recipe:', error);
     throw error;
   }
 };

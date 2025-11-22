@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { loadUserDataFromCloud, setCurrentUserId } from '../utils/storage';
+import { setCurrentUserId as setNutritionUserId, loadUserNutritionData } from '../utils/nutritionStorage';
 import { isGuestMode, enableGuestMode, disableGuestMode, getAllGuestData } from '../utils/guestStorage';
 
 const AuthContext = createContext({});
@@ -81,6 +82,9 @@ export const AuthProvider = ({ children }) => {
     if (!hadGuestData) {
       try {
         await loadUserDataFromCloud(user.uid);
+        // Also load nutrition data (recipes, entries, goals)
+        setNutritionUserId(user.uid);
+        await loadUserNutritionData(user.uid);
       } catch (error) {
         console.error('Error loading user data:', error);
       }
@@ -111,6 +115,7 @@ export const AuthProvider = ({ children }) => {
         setHasGuestData(false);
         setCurrentUser(null);
         setCurrentUserId(null);
+        setNutritionUserId(null);
       }
       
       setLoading(false);

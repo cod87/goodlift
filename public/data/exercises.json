@@ -1,17 +1,5 @@
 [
-  {
-    "Exercise Name": "Archer Push-Up",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Lats, Triceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
+  
   {
     "Exercise Name": "Back Lever",
     "Primary Muscle": "Core",
@@ -90,32 +78,8 @@
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
-  {
-    "Exercise Name": "Barbell Box Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Barbell Clean",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Delts, Core, Traps",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
-    "Workout Type": "Full Body Strength",
-    "Progression": "Progressive Overload"
-  },
+
+ 
   {
     "Exercise Name": "Barbell Close Grip Bench Press",
     "Primary Muscle": "Triceps",
@@ -142,19 +106,7 @@
     "Workout Type": "Full Body Strength, Lower Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
-  {
-    "Exercise Name": "Barbell Decline Bench Press",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
+
   {
     "Exercise Name": "Barbell Front Squat",
     "Primary Muscle": "Quads",
@@ -727,6 +679,19 @@
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
+  {
+    "Exercise Name": "Dumbbell Close Grip Bench Press",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Chest, Front Delts",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Difficulty": "Intermediate",
+    "Movement Pattern": "Upper Push",
+    "Rep Range": "",
+    "Superset Type": "Agonist-Antagonist",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  }
   {
     "Exercise Name": "Dumbbell Deadlift",
     "Primary Muscle": "Hamstrings",

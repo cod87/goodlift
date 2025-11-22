@@ -44,8 +44,6 @@ function convertToJSON(csvData) {
       "Secondary Muscles": row['Secondary Muscles']?.trim() || '',
       "Exercise Type": row['Exercise Type']?.trim() || '',
       "Equipment": row['Equipment']?.trim() || '',
-      "Difficulty": row['Difficulty']?.trim() || '',
-      "Movement Pattern": row['Movement Pattern']?.trim() || '',
       "Workout Type": row['Workout Type']?.trim() || '',
       "Progression": row['Progression']?.trim() || ''
     };

@@ -153,8 +153,6 @@ function runTests() {
       'Secondary Muscles',
       'Exercise Type',
       'Equipment',
-      'Difficulty',
-      'Movement Pattern',
       'Workout Type',
       'Progression'
     ];

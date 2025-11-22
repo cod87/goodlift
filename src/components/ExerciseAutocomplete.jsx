@@ -25,12 +25,7 @@ const ExerciseAutocomplete = ({
     return availableExercises.filter(ex => {
       const searchableText = [
         ex['Exercise Name'],
-        ex['Primary Muscle'],
-        ex['Secondary Muscles'],
-        ex['Equipment'],
-        ex['Movement Pattern'],
-        ex['Difficulty'],
-        ex['Workout Type']
+        ex['Primary Muscle']
       ].join(' ').toLowerCase();
       
       // All search terms must match

@@ -5,8 +5,6 @@
     "Secondary Muscles": "Back, Shoulders",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -16,8 +14,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Full Body Strength, Lower Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -27,8 +23,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -38,8 +32,6 @@
     "Secondary Muscles": "Front Delts, Triceps",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Full Body Strength, Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -49,8 +41,6 @@
     "Secondary Muscles": "Biceps, Lower Back, Core",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Full Body Strength, Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -60,8 +50,6 @@
     "Secondary Muscles": "Front Delts, Forearms",
     "Exercise Type": "Isolation",
     "Equipment": "Barbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Arm",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -71,8 +59,6 @@
     "Secondary Muscles": "Chest, Front Delts",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -82,8 +68,6 @@
     "Secondary Muscles": "Glutes, Lower Back, Quads",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Full Body Strength, Lower Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -93,8 +77,6 @@
     "Secondary Muscles": "Core, Glutes, Upper Back",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -104,8 +86,6 @@
     "Secondary Muscles": "Hamstrings, Lower Back, Core",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Back",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -115,8 +95,6 @@
     "Secondary Muscles": "Glutes, Hamstrings",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -126,8 +104,6 @@
     "Secondary Muscles": "Delts, Hamstrings",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -137,8 +113,6 @@
     "Secondary Muscles": "Front Delts, Triceps",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -148,8 +122,6 @@
     "Secondary Muscles": "Triceps, Chest, Core",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -159,8 +131,6 @@
     "Secondary Muscles": "Front Delts, Triceps",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -170,8 +140,6 @@
     "Secondary Muscles": "Glutes, Hamstrings",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -181,8 +149,6 @@
     "Secondary Muscles": "Triceps, Chest, Core",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -192,8 +158,6 @@
     "Secondary Muscles": "Glutes, Lower Back",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Back",
     "Workout Type": "Lower Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -203,8 +167,6 @@
     "Secondary Muscles": "Upper Back",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Back",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -214,8 +176,6 @@
     "Secondary Muscles": "Glutes, Delts, Core, Traps",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -225,8 +185,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core, Upper Back",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -236,8 +194,6 @@
     "Secondary Muscles": "Glutes, Quads, Lower Back, Adductors",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -247,8 +203,6 @@
     "Secondary Muscles": "Glutes, Delts, Triceps, Core",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -258,8 +212,6 @@
     "Secondary Muscles": "Glutes, Quads, Lower Back",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -269,8 +221,6 @@
     "Secondary Muscles": "Delts, Biceps",
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -280,8 +230,6 @@
     "Secondary Muscles": "Triceps, Core, Quads",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -291,8 +239,6 @@
     "Secondary Muscles": "Chest, Front Delts",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -302,8 +248,6 @@
     "Secondary Muscles": "Obliques, Hip Flexors",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -313,8 +257,6 @@
     "Secondary Muscles": "Glutes, Lower Back",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -324,8 +266,6 @@
     "Secondary Muscles": "Glutes, Calves",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -335,8 +275,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -346,8 +284,6 @@
     "Secondary Muscles": "Triceps, Quads, Glutes, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
     "Progression": "Power Development"
   },
@@ -357,8 +293,6 @@
     "Secondary Muscles": "All",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
     "Progression": "Power Development"
   },
@@ -368,8 +302,6 @@
     "Secondary Muscles": "Glutes, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Cardio",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -379,8 +311,6 @@
     "Secondary Muscles": "Biceps, Rear Delts, Core",
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -390,8 +320,6 @@
     "Secondary Muscles": "Front Delts, Chest",
     "Exercise Type": "Isolation",
     "Equipment": "Cable Machine",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Arm",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -401,8 +329,6 @@
     "Secondary Muscles": "Front Delts, Chest",
     "Exercise Type": "Isolation",
     "Equipment": "Cable Machine",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Arm",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -412,8 +338,6 @@
     "Secondary Muscles": "Core",
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -423,8 +347,6 @@
     "Secondary Muscles": "Lats, Core, Delts",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -434,8 +356,6 @@
     "Secondary Muscles": "Biceps, Rhomboids, Traps",
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -445,8 +365,6 @@
     "Secondary Muscles": "Shoulders, Core, Glutes",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -456,8 +374,6 @@
     "Secondary Muscles": "Hip Flexors",
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -467,8 +383,6 @@
     "Secondary Muscles": "Hip Flexors",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -478,8 +392,6 @@
     "Secondary Muscles": "Front Delts, Triceps",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -489,8 +401,6 @@
     "Secondary Muscles": "Chest, Front Delts",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -500,8 +410,6 @@
     "Secondary Muscles": "Chest, Front Delts",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -511,8 +419,6 @@
     "Secondary Muscles": "Chest, Shoulders",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -522,8 +428,6 @@
     "Secondary Muscles": "Triceps, Chest",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -533,8 +437,6 @@
     "Secondary Muscles": "Front Delts, Triceps",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -544,8 +446,6 @@
     "Secondary Muscles": "Biceps, Core",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -555,8 +455,6 @@
     "Secondary Muscles": "Front Delts, Forearms",
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Arm",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -566,8 +464,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -577,8 +473,6 @@
     "Secondary Muscles": "Chest, Front Delts",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -588,8 +482,6 @@
     "Secondary Muscles": "Glutes, Quads, Lower Back",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -599,8 +491,6 @@
     "Secondary Muscles": "Front Delts, Triceps",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -610,8 +500,6 @@
     "Secondary Muscles": "Traps, Forearms",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -621,8 +509,6 @@
     "Secondary Muscles": "Front Delts",
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -632,8 +518,6 @@
     "Secondary Muscles": "Chest",
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Shoulder",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -643,8 +527,6 @@
     "Secondary Muscles": "Glutes, Core, Upper Back",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -654,8 +536,6 @@
     "Secondary Muscles": "Glutes, Core",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -665,8 +545,6 @@
     "Secondary Muscles": "Forearms",
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Arm",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -676,8 +554,6 @@
     "Secondary Muscles": "Front Delts, Triceps",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -687,8 +563,6 @@
     "Secondary Muscles": "Front Delts",
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Arm",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -698,8 +572,6 @@
     "Secondary Muscles": "Glutes, Core, Calves",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -709,8 +581,6 @@
     "Secondary Muscles": "Shoulders",
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Arm",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -720,8 +590,6 @@
     "Secondary Muscles": "Traps",
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Shoulder",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -731,8 +599,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -742,8 +608,6 @@
     "Secondary Muscles": "Shoulders, Chest",
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Arm",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -753,8 +617,6 @@
     "Secondary Muscles": "Biceps, Core",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -764,8 +626,6 @@
     "Secondary Muscles": "Lats, Triceps",
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -775,8 +635,6 @@
     "Secondary Muscles": "Lats, Triceps, Shoulders",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -786,8 +644,6 @@
     "Secondary Muscles": "Upper Back",
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Back",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -797,8 +653,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -808,8 +662,6 @@
     "Secondary Muscles": "Glutes, Lower Back",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Back",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -819,8 +671,6 @@
     "Secondary Muscles": "Triceps, Chest, Core",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -830,8 +680,6 @@
     "Secondary Muscles": "Biceps, Core, Obliques",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -841,8 +689,6 @@
     "Secondary Muscles": "Triceps, Core, Obliques",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -852,8 +698,6 @@
     "Secondary Muscles": "Glutes, Core, Balance",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -863,8 +707,6 @@
     "Secondary Muscles": "Glutes, Hamstrings",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -874,8 +716,6 @@
     "Secondary Muscles": "Obliques, Lower Back, Glutes",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -885,8 +725,6 @@
     "Secondary Muscles": "Glutes, Delts, Triceps, Core",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -896,8 +734,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -907,8 +743,6 @@
     "Secondary Muscles": "Hip Flexors",
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -918,8 +752,6 @@
     "Secondary Muscles": "Chest, Shoulders, Lats",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -929,8 +761,6 @@
     "Secondary Muscles": "Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Back",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -940,8 +770,6 @@
     "Secondary Muscles": "Core, Chest, Triceps",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -951,8 +779,6 @@
     "Secondary Muscles": "Triceps, Core, Chest",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -962,8 +788,6 @@
     "Secondary Muscles": "Hip Flexors, Chest",
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -973,8 +797,6 @@
     "Secondary Muscles": "Quads, Core, Glutes",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Cardio",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -984,8 +806,6 @@
     "Secondary Muscles": "Shoulders, Back",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -995,8 +815,6 @@
     "Secondary Muscles": "Chest, Shoulders, Hamstrings",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1006,8 +824,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1017,8 +833,6 @@
     "Secondary Muscles": "Glutes, Core, Calves",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1028,8 +842,6 @@
     "Secondary Muscles": "Quads, Chest, Shoulders",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Cardio",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1039,8 +851,6 @@
     "Secondary Muscles": "Glutes, Delts, Core",
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1050,8 +860,6 @@
     "Secondary Muscles": "Glutes, Core, Upper Back",
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1061,8 +869,6 @@
     "Secondary Muscles": "Glutes, Core",
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1072,8 +878,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1083,8 +887,6 @@
     "Secondary Muscles": "Triceps, Chest, Core",
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1094,8 +896,6 @@
     "Secondary Muscles": "Biceps, Core, Obliques",
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1105,8 +905,6 @@
     "Secondary Muscles": "Glutes, Delts, Core",
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1116,8 +914,6 @@
     "Secondary Muscles": "Glutes, Core, Upper Back",
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Back",
     "Workout Type": "Lower Body Strength, Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1127,8 +923,6 @@
     "Secondary Muscles": "Glutes, Delts, Triceps, Core",
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1138,8 +932,6 @@
     "Secondary Muscles": "Shoulders, Chest, Triceps, Glutes",
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1149,8 +941,6 @@
     "Secondary Muscles": "Shoulders, Triceps, Hip Flexors",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1160,8 +950,6 @@
     "Secondary Muscles": "Glutes, Lower Back, Quads",
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1171,8 +959,6 @@
     "Secondary Muscles": "Triceps, Chest, Core",
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1182,8 +968,6 @@
     "Secondary Muscles": "Obliques, Shoulders",
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Core",
     "Workout Type": "Core, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1193,8 +977,6 @@
     "Secondary Muscles": "Biceps, Core",
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1204,8 +986,6 @@
     "Secondary Muscles": "Glutes, Core, Upper Back",
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1215,8 +995,6 @@
     "Secondary Muscles": "Biceps, Rear Delts, Traps",
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -1226,8 +1004,6 @@
     "Secondary Muscles": "Adductors, Abductors, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Cardio",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1237,8 +1013,6 @@
     "Secondary Muscles": "Adductors, Abductors, Glutes",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1248,8 +1022,6 @@
     "Secondary Muscles": "Hip Flexors",
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1259,8 +1031,6 @@
     "Secondary Muscles": "Triceps, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1270,8 +1040,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1281,8 +1049,6 @@
     "Secondary Muscles": "Shoulders, Hip Flexors, Quads",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1292,8 +1058,6 @@
     "Secondary Muscles": "Triceps, Core, Chest",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1303,8 +1067,6 @@
     "Secondary Muscles": "Core",
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1314,8 +1076,6 @@
     "Secondary Muscles": "Triceps, Core, Chest",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1325,8 +1085,6 @@
     "Secondary Muscles": "Glutes, Core, Hip Flexors",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1336,8 +1094,6 @@
     "Secondary Muscles": "Shoulders, Chest, Triceps",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1347,8 +1103,6 @@
     "Secondary Muscles": "Shoulders, Quads, Glutes",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Core",
     "Workout Type": "Core, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1358,8 +1112,6 @@
     "Secondary Muscles": "Triceps, Front Delts",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1369,8 +1121,6 @@
     "Secondary Muscles": "Quads, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Cardio",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1380,8 +1130,6 @@
     "Secondary Muscles": "Biceps, Core, Delts",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1391,8 +1139,6 @@
     "Secondary Muscles": "Triceps, Front Delts",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1402,8 +1148,6 @@
     "Secondary Muscles": "Obliques",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1413,8 +1157,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1424,8 +1166,6 @@
     "Secondary Muscles": "Grip, Core, Hamstrings",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1435,8 +1175,6 @@
     "Secondary Muscles": "Chest, Front Delts",
     "Exercise Type": "Isolation",
     "Equipment": "Cable Machine",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Arm",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1446,8 +1184,6 @@
     "Secondary Muscles": "Obliques, Hip Flexors",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1457,8 +1193,6 @@
     "Secondary Muscles": "Hip Flexors",
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1468,8 +1202,6 @@
     "Secondary Muscles": "Traps, Rhomboids, Biceps, Rear Delts",
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -1479,8 +1211,6 @@
     "Secondary Muscles": "Core, Shoulders",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1490,8 +1220,6 @@
     "Secondary Muscles": "Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Back",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1501,8 +1229,6 @@
     "Secondary Muscles": "Glutes, Calves, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Cardio",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1512,8 +1238,6 @@
     "Secondary Muscles": "Hip Flexors",
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1523,8 +1247,6 @@
     "Secondary Muscles": "Adductors, Abductors, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Cardio",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1534,8 +1256,6 @@
     "Secondary Muscles": "Triceps, Delts",
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
     "Workout Type": "Upper Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1545,8 +1265,6 @@
     "Secondary Muscles": "Obliques, Delts, Hamstrings",
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Core, HIIT, Cardio",
     "Progression": "Power Development"
   },
@@ -1556,8 +1274,6 @@
     "Secondary Muscles": "Delts, Hamstrings, Glutes",
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Full Body",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
     "Progression": "Power Development"
   },
@@ -1567,8 +1283,6 @@
     "Secondary Muscles": "Glutes, Core",
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1578,8 +1292,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1589,8 +1301,6 @@
     "Secondary Muscles": "Glutes, Hamstrings",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1600,8 +1310,6 @@
     "Secondary Muscles": "Glutes, Rear Delts",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Back",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1611,8 +1319,6 @@
     "Secondary Muscles": "Glutes, Hip Flexors, Calves",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1622,8 +1328,6 @@
     "Secondary Muscles": "Traps, Rhomboids, Biceps, Rear Delts",
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Upper Pull",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -1633,8 +1337,6 @@
     "Secondary Muscles": "Hip Flexors, Chest",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1644,8 +1346,6 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1655,8 +1355,6 @@
     "Secondary Muscles": "Glutes, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Beginner",
-    "Movement Pattern": "Lower Leg",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1666,8 +1364,6 @@
     "Secondary Muscles": "Obliques, Delts",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Core",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   }

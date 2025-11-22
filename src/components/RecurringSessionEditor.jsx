@@ -289,8 +289,6 @@ const RecurringSessionEditor = ({
                                     handleExerciseChange(index, 'Primary Muscle', newValue['Primary Muscle']);
                                     handleExerciseChange(index, 'Secondary Muscles', newValue['Secondary Muscles']);
                                     handleExerciseChange(index, 'Equipment', newValue['Equipment']);
-                                    handleExerciseChange(index, 'Movement Pattern', newValue['Movement Pattern']);
-                                    handleExerciseChange(index, 'Difficulty', newValue['Difficulty']);
                                     handleExerciseChange(index, 'Workout Type', newValue['Workout Type']);
                                   }
                                 }}

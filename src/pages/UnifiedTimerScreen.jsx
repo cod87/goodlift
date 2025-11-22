@@ -84,6 +84,10 @@ const TIMER_MODES = {
   CARDIO: 'cardio',
 };
 
+// Extended rest configuration constants
+const EXTENDED_REST_DURATION_SECONDS = 60; // Additional seconds added to rest period
+const TIME_COMPARISON_TOLERANCE = 0.5; // Tolerance in seconds for comparing elapsed time to target
+
 const YOGA_POSES = [
   { name: 'Mountain Pose (Tadasana)', defaultDuration: 30 },
   { name: 'Downward Dog (Adho Mukha Svanasana)', defaultDuration: 60 },
@@ -135,6 +139,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   });
   const [warmupEnabled, setWarmupEnabled] = useState(true);
   const [warmupDuration, setWarmupDuration] = useState(5); // minutes: off, 2, 5, 7, 10
+  // Note: elapsedHiitTime is used via its setter function (setElapsedHiitTime) throughout the timer logic
+  // eslint-disable-next-line no-unused-vars
   const [elapsedHiitTime, setElapsedHiitTime] = useState(0); // Track elapsed HIIT time for extended rest
   const [isExtendedRest, setIsExtendedRest] = useState(false); // Flag for 1-minute extended rest
   const [extendedRestIntervalMinutes, setExtendedRestIntervalMinutes] = useState(() => {
@@ -191,6 +197,38 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     const rounds = Math.ceil(availableHiitSeconds / roundDuration);
     return Math.max(1, rounds); // Ensure at least 1 round
   }, []);
+
+  // Helper function to calculate elapsed HIIT time based on current position
+  const calculateElapsedTimeFromPosition = useCallback((set, round, isWork, isPrepPeriod, isRecoveryPeriod) => {
+    // Don't count preparation or recovery periods in elapsed HIIT time
+    if (isPrepPeriod || isRecoveryPeriod) {
+      // Calculate elapsed time up to the current position
+      const completedSets = set - 1;
+      const completedRoundsInCurrentSet = round - 1;
+      const timeFromCompletedSets = completedSets * roundsPerSet * (workInterval + restInterval);
+      const timeFromCompletedRounds = completedRoundsInCurrentSet * (workInterval + restInterval);
+      return timeFromCompletedSets + timeFromCompletedRounds;
+    }
+    
+    // Calculate elapsed time
+    const completedSets = set - 1;
+    const completedRoundsInCurrentSet = round - 1;
+    
+    let elapsed = 0;
+    
+    // Time from completed sets
+    elapsed += completedSets * roundsPerSet * (workInterval + restInterval);
+    
+    // Time from completed rounds in current set
+    elapsed += completedRoundsInCurrentSet * (workInterval + restInterval);
+    
+    // If we're in rest period of current round, add work interval
+    if (!isWork) {
+      elapsed += workInterval;
+    }
+    
+    return elapsed;
+  }, [workInterval, restInterval, roundsPerSet]);
 
   // Helper function to calculate when extended rests should occur
   // Returns the time (in seconds from start of HIIT) when the nearest rest period begins
@@ -385,7 +423,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   
                   // Calculate if this rest period should be extended
                   // Use a small tolerance for float comparison to avoid precision issues
-                  if (nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < 0.5) {
+                  if (nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE) {
                     shouldExtendRest = true;
                   }
                   
@@ -409,8 +447,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   setNextExtendedRestTime(nextTime);
                 }
                 
-                // Use extended rest (rest + 60 seconds) or normal rest
-                return shouldExtendRest ? restInterval + 60 : restInterval;
+                // Use extended rest (additional seconds added to normal rest interval)
+                return shouldExtendRest ? restInterval + EXTENDED_REST_DURATION_SECONDS : restInterval;
               } else {
                 // End of rest
                 if (currentRound < roundsPerSet) {
@@ -580,30 +618,65 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setIsPrepPeriod(false);
         setIsWorkPeriod(true);
         setTimeRemaining(workInterval);
+        // Elapsed time remains 0 as we're just starting HIIT
+        setElapsedHiitTime(0);
+        // Recalculate next extended rest from start
+        const nextTime = calculateNextExtendedRestTime(0, extendedRestIntervalMinutes, workInterval, restInterval);
+        setNextExtendedRestTime(nextTime);
+        setIsExtendedRest(false);
       } else if (isWorkPeriod) {
+        // Skipping from work to rest
+        const newElapsedTime = calculateElapsedTimeFromPosition(currentSet, currentRound, false, false, false);
+        setElapsedHiitTime(newElapsedTime);
+        
+        // Check if this rest should be extended
+        const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
+        setIsExtendedRest(shouldExtend);
+        
+        // If extended, recalculate next extended rest time
+        if (shouldExtend) {
+          const nextTime = calculateNextExtendedRestTime(newElapsedTime, extendedRestIntervalMinutes, workInterval, restInterval);
+          setNextExtendedRestTime(nextTime);
+          setTimeRemaining(restInterval + EXTENDED_REST_DURATION_SECONDS);
+        } else {
+          setTimeRemaining(restInterval);
+        }
+        
         setIsWorkPeriod(false);
-        setTimeRemaining(restInterval);
       } else if (isRecoveryPeriod) {
         setIsRecoveryPeriod(false);
         setCurrentSet(currentSet + 1);
         setCurrentRound(1);
         setIsWorkPeriod(true);
         setTimeRemaining(workInterval);
+        // Update elapsed time for new set
+        const newElapsedTime = calculateElapsedTimeFromPosition(currentSet + 1, 1, true, false, false);
+        setElapsedHiitTime(newElapsedTime);
+        setIsExtendedRest(false);
       } else {
-        // End of rest
+        // End of rest - skip to next work period
         if (currentRound < roundsPerSet) {
           setCurrentRound(currentRound + 1);
           setIsWorkPeriod(true);
           setTimeRemaining(workInterval);
+          // Update elapsed time for next round
+          const newElapsedTime = calculateElapsedTimeFromPosition(currentSet, currentRound + 1, true, false, false);
+          setElapsedHiitTime(newElapsedTime);
+          setIsExtendedRest(false);
         } else if (currentSet < numberOfSets) {
           if (recoveryBetweenSets > 0) {
             setIsRecoveryPeriod(true);
             setTimeRemaining(recoveryBetweenSets);
+            // Elapsed time stays the same during recovery
           } else {
             setCurrentSet(currentSet + 1);
             setCurrentRound(1);
             setIsWorkPeriod(true);
             setTimeRemaining(workInterval);
+            // Update elapsed time for new set
+            const newElapsedTime = calculateElapsedTimeFromPosition(currentSet + 1, 1, true, false, false);
+            setElapsedHiitTime(newElapsedTime);
+            setIsExtendedRest(false);
           }
         }
       }
@@ -620,9 +693,18 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     if (mode === TIMER_MODES.HIIT) {
       // Skip to previous phase in HIIT
       if (isWorkPeriod && currentRound > 1) {
+        // Go back to previous round's rest
         setIsWorkPeriod(false);
         setCurrentRound(currentRound - 1);
-        setTimeRemaining(restInterval);
+        
+        // Calculate elapsed time for previous round's rest
+        const newElapsedTime = calculateElapsedTimeFromPosition(currentSet, currentRound - 1, false, false, false);
+        setElapsedHiitTime(newElapsedTime);
+        
+        // Check if this rest should be extended
+        const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
+        setIsExtendedRest(shouldExtend);
+        setTimeRemaining(shouldExtend ? restInterval + EXTENDED_REST_DURATION_SECONDS : restInterval);
       } else if (isWorkPeriod && currentRound === 1 && currentSet > 1) {
         // Go back to previous set
         if (recoveryBetweenSets > 0) {
@@ -630,19 +712,46 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           setCurrentSet(currentSet - 1);
           setCurrentRound(roundsPerSet);
           setTimeRemaining(recoveryBetweenSets);
+          // Elapsed time for end of previous set
+          const newElapsedTime = calculateElapsedTimeFromPosition(currentSet - 1, roundsPerSet, false, false, true);
+          setElapsedHiitTime(newElapsedTime);
+          setIsExtendedRest(false);
         } else {
           setCurrentSet(currentSet - 1);
           setCurrentRound(roundsPerSet);
           setIsWorkPeriod(false);
-          setTimeRemaining(restInterval);
+          
+          // Calculate elapsed time for previous set's last rest
+          const newElapsedTime = calculateElapsedTimeFromPosition(currentSet - 1, roundsPerSet, false, false, false);
+          setElapsedHiitTime(newElapsedTime);
+          
+          // Check if this rest should be extended
+          const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
+          setIsExtendedRest(shouldExtend);
+          setTimeRemaining(shouldExtend ? restInterval + EXTENDED_REST_DURATION_SECONDS : restInterval);
         }
       } else if (!isWorkPeriod && !isPrepPeriod && !isRecoveryPeriod) {
+        // Go back from rest to work in same round
         setIsWorkPeriod(true);
         setTimeRemaining(workInterval);
+        
+        // Calculate elapsed time for current round's work
+        const newElapsedTime = calculateElapsedTimeFromPosition(currentSet, currentRound, true, false, false);
+        setElapsedHiitTime(newElapsedTime);
+        setIsExtendedRest(false);
       } else if (isRecoveryPeriod) {
+        // Go back from recovery to previous set's rest
         setIsRecoveryPeriod(false);
         setIsWorkPeriod(false);
-        setTimeRemaining(restInterval);
+        
+        // Calculate elapsed time for previous set's last rest
+        const newElapsedTime = calculateElapsedTimeFromPosition(currentSet, roundsPerSet, false, false, false);
+        setElapsedHiitTime(newElapsedTime);
+        
+        // Check if this rest should be extended
+        const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
+        setIsExtendedRest(shouldExtend);
+        setTimeRemaining(shouldExtend ? restInterval + EXTENDED_REST_DURATION_SECONDS : restInterval);
       }
       audioService.playTransitionBeep();
     } else if (mode === TIMER_MODES.FLOW && currentPoseIndex > 0) {
@@ -1045,7 +1154,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     useArrows={true}
                   />
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mb: 2 }}>
-                    Adds 60s to rest nearest each interval mark
+                    Adds {EXTENDED_REST_DURATION_SECONDS}s to rest nearest each interval mark
                   </Typography>
                   
                   {/* Exercise Names for Each Round */}

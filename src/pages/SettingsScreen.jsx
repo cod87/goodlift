@@ -536,6 +536,31 @@ const SettingsScreen = ({ onNavigate }) => {
                 </ListItem>
                 <Divider component="li" />
 
+                {/* Barbell Weight */}
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 0.5 }}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>
+                      <FitnessCenter sx={{ color: 'primary.main' }} />
+                    </ListItemIcon>
+                    <Typography variant="body2" fontWeight={500}>
+                      Barbell Weight
+                    </Typography>
+                  </Box>
+                  <FormControl size="small" sx={{ ml: 5, minWidth: 160 }}>
+                    <Select
+                      value={preferences.barbellWeight || 45}
+                      onChange={(e) => updatePreference('barbellWeight', e.target.value)}
+                    >
+                      {Array.from({ length: 5 }, (_, i) => 25 + i * 5).map((weight) => (
+                        <MenuItem key={weight} value={weight}>
+                          {weight} lbs
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </ListItem>
+                <Divider component="li" />
+
                 {/* Theme */}
                 <ListItem sx={{ py: 1 }}>
                   <ListItemIcon sx={{ minWidth: 40 }}>

@@ -6,6 +6,8 @@ import { PlayArrow, Close, StarOutline, Star, Shuffle, Add, Remove } from '@mui/
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 import ExerciseAutocomplete from './ExerciseAutocomplete';
+import { calculateBarbellPerSide } from '../utils/weightUtils';
+import { usePreferences } from '../contexts/PreferencesContext';
 
 /**
  * WorkoutPreview component displays a preview of the generated workout
@@ -13,6 +15,7 @@ import ExerciseAutocomplete from './ExerciseAutocomplete';
  * Memoized to prevent unnecessary re-renders
  */
 const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandomizeExercise, isCustomizeMode = false, supersetConfig = [2, 2, 2, 2], setsPerSuperset: initialSetsPerSuperset = 3 }) => {
+  const { preferences } = usePreferences();
   const [exerciseSettings, setExerciseSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [isStarting, setIsStarting] = useState(false); // New: prevent multiple rapid starts
@@ -636,6 +639,25 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             }}
                           />
                         </Stack>
+                        {/* Display per-side weight for barbell exercises */}
+                        {exercise['Equipment']?.toLowerCase() === 'barbell' && settings.weight && settings.weight > 0 && (
+                          <Typography 
+                            variant="caption" 
+                            color="text.secondary" 
+                            sx={{ 
+                              pl: { xs: 3.5, sm: 5.5 },
+                              fontStyle: 'italic',
+                              fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            }}
+                          >
+                            {(() => {
+                              const perSide = calculateBarbellPerSide(settings.weight, preferences.barbellWeight || 45);
+                              return perSide !== null && perSide >= 0
+                                ? `${perSide} lbs per side`
+                                : '';
+                            })()}
+                          </Typography>
+                        )}
                         {/* Muscle, Equipment indicators and Randomize button - Below weight/reps */}
                         <Box sx={{ 
                           pl: { xs: 3.5, sm: 5.5 },

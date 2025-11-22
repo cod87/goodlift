@@ -176,82 +176,159 @@ const TimerDisplay = ({
       </Box>
 
       {/* Controls */}
-      <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
-        {!isRunning ? (
-          <IconButton
-            size="large"
-            onClick={handleStart}
-            color="primary"
-            sx={{ width: 64, height: 64 }}
-            disabled={mode === TIMER_MODES.FLOW && selectedPoses.length === 0}
-          >
-            <PlayArrow sx={{ fontSize: 48 }} />
-          </IconButton>
-        ) : (
-          <>
-            {/* Skip backward for HIIT and Yoga */}
-            {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
-              <IconButton
-                size="large"
-                onClick={handleSkipBackward}
-                color="primary"
-                sx={{ width: 56, height: 56 }}
-                disabled={
-                  (mode === TIMER_MODES.HIIT && isPrepPeriod) ||
-                  (mode === TIMER_MODES.FLOW && currentPoseIndex === 0)
-                }
-              >
-                <SkipPrevious sx={{ fontSize: 36 }} />
-              </IconButton>
-            )}
-            
+      <Box 
+        sx={{ 
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(255, 255, 255, 0.15)',
+          backdropFilter: 'blur(8px)',
+          borderRadius: 3,
+          padding: { xs: 1.5, sm: 2 },
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+        }}
+      >
+        <Stack 
+          direction="row" 
+          spacing={{ xs: 1, sm: 2 }} 
+          justifyContent="center"
+          alignItems="center"
+          sx={{
+            flexWrap: 'nowrap', // Prevent wrapping to ensure single row
+            overflowX: 'auto', // Allow horizontal scroll if needed on very small screens
+            width: '100%',
+          }}
+        >
+          {!isRunning ? (
             <IconButton
               size="large"
-              onClick={handlePause}
-              color={isPaused ? 'success' : 'warning'}
-              sx={{ width: 64, height: 64 }}
+              onClick={handleStart}
+              sx={{ 
+                width: { xs: 56, sm: 64 }, 
+                height: { xs: 56, sm: 64 },
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                color: 'primary.main',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 1)',
+                },
+                flexShrink: 0, // Prevent button from shrinking
+              }}
+              disabled={mode === TIMER_MODES.FLOW && selectedPoses.length === 0}
             >
-              {isPaused ? (
-                <PlayArrow sx={{ fontSize: 40 }} />
-              ) : (
-                <Pause sx={{ fontSize: 40 }} />
+              <PlayArrow sx={{ fontSize: { xs: 40, sm: 48 } }} />
+            </IconButton>
+          ) : (
+            <>
+              {/* Skip backward for HIIT and Yoga */}
+              {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
+                <IconButton
+                  size="large"
+                  onClick={handleSkipBackward}
+                  sx={{ 
+                    width: { xs: 48, sm: 56 }, 
+                    height: { xs: 48, sm: 56 },
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    color: 'primary.main',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 1)',
+                    },
+                    '&.Mui-disabled': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                    },
+                    flexShrink: 0,
+                  }}
+                  disabled={
+                    (mode === TIMER_MODES.HIIT && isPrepPeriod) ||
+                    (mode === TIMER_MODES.FLOW && currentPoseIndex === 0)
+                  }
+                >
+                  <SkipPrevious sx={{ fontSize: { xs: 28, sm: 36 } }} />
+                </IconButton>
               )}
-            </IconButton>
-            <IconButton
-              size="large"
-              onClick={handleStop}
-              color="error"
-              sx={{ width: 64, height: 64 }}
-            >
-              <Stop sx={{ fontSize: 40 }} />
-            </IconButton>
-            <IconButton
-              size="large"
-              onClick={handleReset}
-              color="primary"
-              sx={{ width: 64, height: 64 }}
-            >
-              <Replay sx={{ fontSize: 40 }} />
-            </IconButton>
-            
-            {/* Skip forward for HIIT and Yoga */}
-            {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
+              
               <IconButton
                 size="large"
-                onClick={handleSkipForward}
-                color="primary"
-                sx={{ width: 56, height: 56 }}
-                disabled={
-                  (mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= roundsPerSet && currentSet >= numberOfSets) ||
-                  (mode === TIMER_MODES.FLOW && currentPoseIndex >= selectedPoses.length - 1)
-                }
+                onClick={handlePause}
+                sx={{ 
+                  width: { xs: 56, sm: 64 }, 
+                  height: { xs: 56, sm: 64 },
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  color: isPaused ? 'success.main' : 'warning.main',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 1)',
+                  },
+                  flexShrink: 0,
+                }}
               >
-                <SkipNext sx={{ fontSize: 36 }} />
+                {isPaused ? (
+                  <PlayArrow sx={{ fontSize: { xs: 36, sm: 40 } }} />
+                ) : (
+                  <Pause sx={{ fontSize: { xs: 36, sm: 40 } }} />
+                )}
               </IconButton>
-            )}
-          </>
-        )}
-      </Stack>
+              <IconButton
+                size="large"
+                onClick={handleStop}
+                sx={{ 
+                  width: { xs: 56, sm: 64 }, 
+                  height: { xs: 56, sm: 64 },
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  color: 'error.main',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 1)',
+                  },
+                  flexShrink: 0,
+                }}
+              >
+                <Stop sx={{ fontSize: { xs: 36, sm: 40 } }} />
+              </IconButton>
+              <IconButton
+                size="large"
+                onClick={handleReset}
+                sx={{ 
+                  width: { xs: 56, sm: 64 }, 
+                  height: { xs: 56, sm: 64 },
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  color: 'primary.main',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 1)',
+                  },
+                  flexShrink: 0,
+                }}
+              >
+                <Replay sx={{ fontSize: { xs: 36, sm: 40 } }} />
+              </IconButton>
+              
+              {/* Skip forward for HIIT and Yoga */}
+              {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
+                <IconButton
+                  size="large"
+                  onClick={handleSkipForward}
+                  sx={{ 
+                    width: { xs: 48, sm: 56 }, 
+                    height: { xs: 48, sm: 56 },
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    color: 'primary.main',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 1)',
+                    },
+                    '&.Mui-disabled': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                    },
+                    flexShrink: 0,
+                  }}
+                  disabled={
+                    (mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= roundsPerSet && currentSet >= numberOfSets) ||
+                    (mode === TIMER_MODES.FLOW && currentPoseIndex >= selectedPoses.length - 1)
+                  }
+                >
+                  <SkipNext sx={{ fontSize: { xs: 28, sm: 36 } }} />
+                </IconButton>
+              )}
+            </>
+          )}
+        </Stack>
+      </Box>
     </Box>
   );
 };

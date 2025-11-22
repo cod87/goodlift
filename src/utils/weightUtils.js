@@ -175,3 +175,28 @@ export const getWeightStats = (weightHistory, targetUnit = 'lbs') => {
     entries: weights.length,
   };
 };
+
+/**
+ * Calculate weight per side for barbell exercises
+ * Formula: (Target Weight - Barbell Weight) / 2
+ * @param {number} targetWeight - Total target weight for the exercise
+ * @param {number} barbellWeight - Weight of the barbell (default 45 lbs)
+ * @returns {number|null} Weight per side in lbs, or null if calculation not possible
+ */
+export const calculateBarbellPerSide = (targetWeight, barbellWeight = 45) => {
+  // Validate inputs
+  if (!targetWeight || targetWeight <= 0 || !barbellWeight || barbellWeight <= 0) {
+    return null;
+  }
+  
+  // If target weight is less than or equal to barbell weight, return 0
+  if (targetWeight <= barbellWeight) {
+    return 0;
+  }
+  
+  // Calculate per-side weight: (Target - Barbell) / 2
+  const perSide = (targetWeight - barbellWeight) / 2;
+  
+  // Round to nearest 2.5 lbs (standard plate increment)
+  return Math.round(perSide / 2.5) * 2.5;
+};

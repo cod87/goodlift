@@ -27,7 +27,17 @@ import {
 } from '@mui/icons-material';
 import ExerciseInputs from './ExerciseInputs';
 import { useUserProfile } from '../../contexts/UserProfileContext';
+import { usePreferences } from '../../contexts/PreferencesContext';
 import { getPresetAvatarColor, getDoggoAvatarUrl, DOGGO_AVATARS } from '../../utils/avatarUtils';
+
+/**
+ * Helper function to check if equipment is barbell
+ * @param {string} equipment - Equipment type
+ * @returns {boolean} True if equipment is barbell
+ */
+const isBarbell = (equipment) => {
+  return equipment?.toLowerCase() === 'barbell';
+};
 
 /**
  * ExerciseCard - Enhanced exercise display with improved layout
@@ -61,9 +71,11 @@ const ExerciseCard = memo(({
   onPartialComplete = null,
   onExit = null,
   showPartialComplete = false,
+  equipment = null, // Equipment type (e.g., 'Barbell', 'Dumbbell')
 }) => {
   const theme = useTheme();
   const { profile, getInitials } = useUserProfile();
+  const { preferences } = usePreferences();
   const [weight, setWeight] = useState(lastWeight || '');
   const [reps, setReps] = useState(lastReps || '');
   const [setLogged, setSetLogged] = useState(false);
@@ -416,7 +428,17 @@ const ExerciseCard = memo(({
             {/* Input Form */}
             <Box component="form" onSubmit={handleSubmit}>
               <Box sx={{ mb: 2 }}>
-                <ExerciseInputs weight={weight} reps={reps} lastWeight={lastWeight} lastReps={lastReps} onWeightChange={setWeight} onRepsChange={setReps} disabled={setLogged} />
+                <ExerciseInputs 
+                  weight={weight} 
+                  reps={reps} 
+                  lastWeight={lastWeight} 
+                  lastReps={lastReps} 
+                  onWeightChange={setWeight} 
+                  onRepsChange={setReps} 
+                  disabled={setLogged}
+                  isBarbell={isBarbell(equipment)}
+                  barbellWeight={preferences.barbellWeight || 45}
+                />
               </Box>
               <Stack direction="row" spacing={2}>
                 {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '44px' }}>Back</Button>}
@@ -457,7 +479,17 @@ const ExerciseCard = memo(({
           {/* Input Form */}
           <Box component="form" onSubmit={handleSubmit}>
             <Box sx={{ mb: 2 }}>
-              <ExerciseInputs weight={weight} reps={reps} lastWeight={lastWeight} lastReps={lastReps} onWeightChange={setWeight} onRepsChange={setReps} disabled={setLogged} />
+              <ExerciseInputs 
+                weight={weight} 
+                reps={reps} 
+                lastWeight={lastWeight} 
+                lastReps={lastReps} 
+                onWeightChange={setWeight} 
+                onRepsChange={setReps} 
+                disabled={setLogged}
+                isBarbell={isBarbell(equipment)}
+                barbellWeight={preferences.barbellWeight || 45}
+              />
             </Box>
             <Stack direction="row" spacing={2}>
               {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '44px' }}>Back</Button>}
@@ -498,6 +530,7 @@ ExerciseCard.propTypes = {
   onPartialComplete: PropTypes.func,
   onExit: PropTypes.func,
   showPartialComplete: PropTypes.bool,
+  equipment: PropTypes.string,
 };
 
 export default ExerciseCard;

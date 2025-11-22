@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -452,7 +452,7 @@ const WorkoutCreationModal = ({
   };
 
   // Toggle highlight for an exercise
-  const handleToggleHighlight = (exerciseName) => {
+  const handleToggleHighlight = useCallback((exerciseName) => {
     const newHighlighted = new Set(highlightedExercises);
     if (newHighlighted.has(exerciseName)) {
       newHighlighted.delete(exerciseName);
@@ -460,10 +460,10 @@ const WorkoutCreationModal = ({
       newHighlighted.add(exerciseName);
     }
     setHighlightedExercises(newHighlighted);
-  };
+  }, [highlightedExercises]);
 
   // Deselect exercise from superset (remove superset group)
-  const handleDeselectFromSuperset = (exerciseName) => {
+  const handleDeselectFromSuperset = useCallback((exerciseName) => {
     const updated = myWorkout.map(exercise => {
       if (exercise['Exercise Name'] === exerciseName) {
         return { ...exercise, supersetGroup: null };
@@ -471,7 +471,7 @@ const WorkoutCreationModal = ({
       return exercise;
     });
     setMyWorkout(updated);
-  };
+  }, [myWorkout]);
 
   // Lock in superset - assign highlighted exercises to current superset group
   const handleLockInSuperset = () => {
@@ -556,18 +556,24 @@ const WorkoutCreationModal = ({
     return groups;
   };
 
-  // Move a group (superset or single exercise) up
-  const moveGroupUp = (exerciseIndex) => {
-    const groups = getExerciseGroups(myWorkout);
-    
-    // Find which group this exercise belongs to
-    let currentGroupIndex = -1;
-    for (let i = 0; i < groups.length; i++) {
-      if (groups[i].some(ex => ex['Exercise Name'] === myWorkout[exerciseIndex]['Exercise Name'])) {
-        currentGroupIndex = i;
-        break;
+  // Get the group index for an exercise at a given index
+  const getGroupIndexForExercise = (exerciseIndex, groups) => {
+    let currentIndex = 0;
+    for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+      for (let i = 0; i < groups[groupIndex].length; i++) {
+        if (currentIndex === exerciseIndex) {
+          return groupIndex;
+        }
+        currentIndex++;
       }
     }
+    return -1;
+  };
+
+  // Move a group (superset or single exercise) up
+  const moveGroupUp = useCallback((exerciseIndex) => {
+    const groups = getExerciseGroups(myWorkout);
+    const currentGroupIndex = getGroupIndexForExercise(exerciseIndex, groups);
 
     if (currentGroupIndex <= 0) return; // Can't move up if it's the first group
 
@@ -581,20 +587,12 @@ const WorkoutCreationModal = ({
     
     // Renumber supersets based on their new order
     setMyWorkout(renumberSupersets(newExercises));
-  };
+  }, [myWorkout]);
 
   // Move a group (superset or single exercise) down
-  const moveGroupDown = (exerciseIndex) => {
+  const moveGroupDown = useCallback((exerciseIndex) => {
     const groups = getExerciseGroups(myWorkout);
-    
-    // Find which group this exercise belongs to
-    let currentGroupIndex = -1;
-    for (let i = 0; i < groups.length; i++) {
-      if (groups[i].some(ex => ex['Exercise Name'] === myWorkout[exerciseIndex]['Exercise Name'])) {
-        currentGroupIndex = i;
-        break;
-      }
-    }
+    const currentGroupIndex = getGroupIndexForExercise(exerciseIndex, groups);
 
     if (currentGroupIndex < 0 || currentGroupIndex >= groups.length - 1) return; // Can't move down if it's the last group
 
@@ -608,7 +606,7 @@ const WorkoutCreationModal = ({
     
     // Renumber supersets based on their new order
     setMyWorkout(renumberSupersets(newExercises));
-  };
+  }, [myWorkout]);
 
   // Renumber supersets to reflect their order in the list
   const renumberSupersets = (exercises) => {
@@ -757,6 +755,42 @@ const WorkoutCreationModal = ({
     setCurrentTab(1);
     setGenerateCountDialogOpen(false);
   };
+
+  // Memoize the rendered exercise items for better performance
+  const renderedExercises = useMemo(() => {
+    const groups = getExerciseGroups(myWorkout);
+    let exerciseIndex = 0;
+    
+    return groups.flatMap((group, groupIndex) => 
+      group.map((exercise, indexInGroup) => {
+        const currentExerciseIndex = exerciseIndex++;
+        const isFirstInGroup = indexInGroup === 0;
+        const canMoveUp = groupIndex > 0;
+        const canMoveDown = groupIndex < groups.length - 1;
+        
+        return (
+          <ExerciseItem
+            key={exercise['Exercise Name']}
+            exercise={exercise}
+            index={currentExerciseIndex}
+            myWorkout={myWorkout}
+            setMyWorkout={setMyWorkout}
+            selectedExercises={selectedExercises}
+            setSelectedExercises={setSelectedExercises}
+            highlightedExercises={highlightedExercises}
+            onToggleHighlight={handleToggleHighlight}
+            currentSupersetNumber={currentSupersetNumber}
+            onDeselectFromSuperset={handleDeselectFromSuperset}
+            onMoveUp={() => moveGroupUp(currentExerciseIndex)}
+            onMoveDown={() => moveGroupDown(currentExerciseIndex)}
+            canMoveUp={canMoveUp}
+            canMoveDown={canMoveDown}
+            isFirstInGroup={isFirstInGroup}
+          />
+        );
+      })
+    );
+  }, [myWorkout, selectedExercises, highlightedExercises, currentSupersetNumber, handleToggleHighlight, handleDeselectFromSuperset, moveGroupUp, moveGroupDown]);
 
   return (
     <Dialog
@@ -973,40 +1007,7 @@ const WorkoutCreationModal = ({
             
             {myWorkout.length > 0 ? (
               <Stack spacing={2}>
-                {(() => {
-                  const groups = getExerciseGroups(myWorkout);
-                  let exerciseIndex = 0;
-                  
-                  return groups.map((group, groupIndex) => (
-                    group.map((exercise, indexInGroup) => {
-                      const currentExerciseIndex = exerciseIndex++;
-                      const isFirstInGroup = indexInGroup === 0;
-                      const canMoveUp = groupIndex > 0;
-                      const canMoveDown = groupIndex < groups.length - 1;
-                      
-                      return (
-                        <ExerciseItem
-                          key={exercise['Exercise Name']}
-                          exercise={exercise}
-                          index={currentExerciseIndex}
-                          myWorkout={myWorkout}
-                          setMyWorkout={setMyWorkout}
-                          selectedExercises={selectedExercises}
-                          setSelectedExercises={setSelectedExercises}
-                          highlightedExercises={highlightedExercises}
-                          onToggleHighlight={handleToggleHighlight}
-                          currentSupersetNumber={currentSupersetNumber}
-                          onDeselectFromSuperset={handleDeselectFromSuperset}
-                          onMoveUp={() => moveGroupUp(currentExerciseIndex)}
-                          onMoveDown={() => moveGroupDown(currentExerciseIndex)}
-                          canMoveUp={canMoveUp}
-                          canMoveDown={canMoveDown}
-                          isFirstInGroup={isFirstInGroup}
-                        />
-                      );
-                    })
-                  ));
-                })()}
+                {renderedExercises}
               </Stack>
             ) : (
               <Box sx={{ textAlign: 'center', py: 4 }}>

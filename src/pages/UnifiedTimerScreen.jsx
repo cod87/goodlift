@@ -76,6 +76,7 @@ import { HIIT_EXERCISES_DATA_PATH } from '../utils/constants';
 import HiitExerciseAutocomplete from '../components/HiitExerciseAutocomplete';
 import TimerModal from '../components/TimerModal';
 import TimerDisplay from '../components/TimerDisplay';
+import DialPicker from '../components/Common/DialPicker';
 
 const TIMER_MODES = {
   HIIT: 'hiit',
@@ -850,34 +851,26 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   />
 
                   {/* Warmup Selection */}
-                  <Box>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Warmup
-                    </Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                      <Chip
-                        label="Off"
-                        onClick={() => {
-                          setWarmupEnabled(false);
-                          setWarmupDuration(0);
-                        }}
-                        color={!warmupEnabled ? 'primary' : 'default'}
-                        sx={{ cursor: 'pointer' }}
-                      />
-                      {[2, 5, 7, 10].map((mins) => (
-                        <Chip
-                          key={mins}
-                          label={`${mins} min`}
-                          onClick={() => {
-                            setWarmupEnabled(true);
-                            setWarmupDuration(mins);
-                          }}
-                          color={warmupEnabled && warmupDuration === mins ? 'primary' : 'default'}
-                          sx={{ cursor: 'pointer' }}
-                        />
-                      ))}
-                    </Stack>
-                  </Box>
+                  <DialPicker
+                    label="Warmup"
+                    value={warmupEnabled ? warmupDuration : 0}
+                    options={[
+                      { label: 'Off', value: 0 },
+                      { label: '2 min', value: 2 },
+                      { label: '5 min', value: 5 },
+                      { label: '7 min', value: 7 },
+                      { label: '10 min', value: 10 },
+                    ]}
+                    onChange={(newValue) => {
+                      if (newValue === 0) {
+                        setWarmupEnabled(false);
+                        setWarmupDuration(0);
+                      } else {
+                        setWarmupEnabled(true);
+                        setWarmupDuration(newValue);
+                      }
+                    }}
+                  />
 
                   {/* Session Length Selector */}
                   <Box>
@@ -905,51 +898,37 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   </Box>
 
                   {/* Work:Rest Ratio Selector */}
-                  <Box>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Work:Rest Ratio
-                    </Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                      {['1:1', '3:2', '2:1'].map((ratio) => (
-                        <Chip
-                          key={ratio}
-                          label={ratio}
-                          onClick={() => setWorkRestRatio(ratio)}
-                          color={workRestRatio === ratio ? 'primary' : 'default'}
-                          sx={{ cursor: 'pointer' }}
-                        />
-                      ))}
-                    </Stack>
-                  </Box>
+                  <DialPicker
+                    label="Work:Rest Ratio"
+                    value={workRestRatio}
+                    options={[
+                      { label: '1:1', value: '1:1' },
+                      { label: '3:2', value: '3:2' },
+                      { label: '2:1', value: '2:1' },
+                    ]}
+                    onChange={setWorkRestRatio}
+                    useArrows={true}
+                  />
 
                   {/* Work Time Selection */}
-                  <Box>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Work Time
-                    </Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                      {[
-                        { label: '20s', value: 20 },
-                        { label: '30s', value: 30 },
-                        { label: '45s', value: 45 },
-                        { label: '60s', value: 60 },
-                        { label: '90s', value: 90 },
-                        { label: '2m', value: 120 },
-                        { label: '4m', value: 240 },
-                      ].map((option) => (
-                        <Chip
-                          key={option.value}
-                          label={option.label}
-                          onClick={() => setWorkInterval(option.value)}
-                          color={workInterval === option.value ? 'primary' : 'default'}
-                          sx={{ cursor: 'pointer' }}
-                        />
-                      ))}
-                    </Stack>
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                      Rest time: {restInterval}s (auto-calculated from ratio)
-                    </Typography>
-                  </Box>
+                  <DialPicker
+                    label="Work Time"
+                    value={workInterval}
+                    options={[
+                      { label: '20s', value: 20 },
+                      { label: '30s', value: 30 },
+                      { label: '45s', value: 45 },
+                      { label: '60s', value: 60 },
+                      { label: '90s', value: 90 },
+                      { label: '2m', value: 120 },
+                      { label: '4m', value: 240 },
+                    ]}
+                    onChange={setWorkInterval}
+                    sx={{ mb: 1 }}
+                  />
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
+                    Rest time: {restInterval}s (auto-calculated from ratio)
+                  </Typography>
                   
                   {/* Exercise Names for Each Round */}
                   <Box>

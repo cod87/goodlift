@@ -22,14 +22,19 @@ import {
   Alert,
   Divider,
   Autocomplete,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import {
   Add,
   Delete,
   Restaurant,
   TrendingUp,
+  MenuBook,
 } from '@mui/icons-material';
-import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals } from '../../utils/nutritionStorage';
+import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes } from '../../utils/nutritionStorage';
+import RecipeBuilder from './RecipeBuilder';
+import SavedRecipes from './SavedRecipes';
 
 // USDA FoodData Central API configuration
 const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
@@ -51,8 +56,11 @@ const NUTRIENT_IDS = {
  * - Log consumed foods with portion sizes
  * - View daily nutrition summary
  * - Set and track nutrition goals
+ * - Create and save custom recipes
+ * - Log recipes with custom portion sizes
  */
 const NutritionTab = () => {
+  const [activeSubTab, setActiveSubTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -70,12 +78,21 @@ const NutritionTab = () => {
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const [error, setError] = useState('');
   const [autocompleteOpen, setAutocompleteOpen] = useState(false);
+  const [recipes, setRecipes] = useState([]);
+  const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState(null);
 
-  // Load today's entries and goals on mount
+  // Load today's entries, goals, and recipes on mount
   useEffect(() => {
     loadTodayEntries();
     loadGoals();
+    loadRecipes();
   }, []);
+
+  const loadRecipes = () => {
+    const savedRecipes = getRecipes();
+    setRecipes(savedRecipes);
+  };
 
   const loadTodayEntries = () => {
     const entries = getNutritionEntries();
@@ -192,6 +209,27 @@ const NutritionTab = () => {
     setShowGoalsDialog(false);
   };
 
+  const handleCreateRecipe = () => {
+    setEditingRecipe(null);
+    setShowRecipeBuilder(true);
+  };
+
+  const handleEditRecipe = (recipe) => {
+    setEditingRecipe(recipe);
+    setShowRecipeBuilder(true);
+  };
+
+  const handleRecipeSaved = () => {
+    loadRecipes();
+  };
+
+  const handleAddRecipeToLog = (entry) => {
+    saveNutritionEntry(entry);
+    loadTodayEntries();
+    // Switch to diary tab to show the added entry
+    setActiveSubTab(0);
+  };
+
   const getTodayTotals = () => {
     return todayEntries.reduce(
       (totals, entry) => ({
@@ -240,13 +278,42 @@ const NutritionTab = () => {
 
   return (
     <Box>
-      {/* Minimalist Search Section with Autocomplete */}
-      <Card sx={{ mb: 2 }}>
-        <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <Restaurant fontSize="small" /> Add Food
-          </Typography>
-          <Autocomplete
+      {/* Sub-tabs for Diary and Recipes */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+        <Tabs 
+          value={activeSubTab} 
+          onChange={(e, newValue) => setActiveSubTab(newValue)}
+          sx={{
+            '& .MuiTab-root': {
+              minHeight: 48,
+              fontSize: '0.875rem',
+              fontWeight: 600,
+            },
+          }}
+        >
+          <Tab 
+            icon={<Restaurant fontSize="small" />} 
+            label="Food Diary"
+            iconPosition="start"
+          />
+          <Tab 
+            icon={<MenuBook fontSize="small" />} 
+            label="My Recipes"
+            iconPosition="start"
+          />
+        </Tabs>
+      </Box>
+
+      {/* Food Diary Tab */}
+      {activeSubTab === 0 && (
+        <>
+          {/* Minimalist Search Section with Autocomplete */}
+          <Card sx={{ mb: 2 }}>
+            <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <Restaurant fontSize="small" /> Add Food
+              </Typography>
+              <Autocomplete
             fullWidth
             open={autocompleteOpen && searchResults.length > 0}
             onOpen={() => setAutocompleteOpen(true)}
@@ -527,6 +594,41 @@ const NutritionTab = () => {
           </Button>
         </DialogActions>
       </Dialog>
+        </>
+      )}
+
+      {/* Recipes Tab */}
+      {activeSubTab === 1 && (
+        <>
+          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handleCreateRecipe}
+              size="small"
+            >
+              Create New Recipe
+            </Button>
+          </Box>
+          
+          <SavedRecipes
+            recipes={recipes}
+            onEdit={handleEditRecipe}
+            onRecipesUpdate={loadRecipes}
+            onAddToLog={handleAddRecipeToLog}
+          />
+
+          <RecipeBuilder
+            open={showRecipeBuilder}
+            onClose={() => {
+              setShowRecipeBuilder(false);
+              setEditingRecipe(null);
+            }}
+            editRecipe={editingRecipe}
+            onSave={handleRecipeSaved}
+          />
+        </>
+      )}
     </Box>
   );
 };

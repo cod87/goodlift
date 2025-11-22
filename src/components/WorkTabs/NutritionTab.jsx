@@ -122,14 +122,16 @@ const NutritionTab = () => {
 
   // Debounce search input
   useEffect(() => {
-    if (searchQuery.trim().length >= 2) {
-      const timer = setTimeout(() => {
-        searchFoods(searchQuery);
-      }, 500); // 500ms debounce
-      return () => clearTimeout(timer);
-    } else {
+    if (searchQuery.trim().length < 2) {
       setSearchResults([]);
+      return;
     }
+
+    const timer = setTimeout(() => {
+      searchFoods(searchQuery);
+    }, 500); // 500ms debounce
+    
+    return () => clearTimeout(timer);
   }, [searchQuery, searchFoods]);
 
   const handleSelectFood = (food) => {
@@ -165,7 +167,7 @@ const NutritionTab = () => {
 
     const nutrition = calculateNutrition(selectedFood, portionGrams);
     const entry = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Unique ID with timestamp + random string
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`, // Unique ID with timestamp + random string
       date: new Date().toISOString(),
       foodName: selectedFood.description,
       grams: portionGrams,

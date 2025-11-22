@@ -267,11 +267,16 @@ export const calculateStreak = (workoutHistory = []) => {
  * Calculate adherence percentage
  * If user's first session was less than 30 days ago, calculates adherence based on 
  * days since first session. Otherwise uses the last 30 days.
+ * 
+ * IMPORTANT: The current day is treated as neutral/null until a session is logged.
+ * Only completed days (yesterday and before) count towards adherence unless today has a session.
+ * 
  * @param {Array} workoutHistory - Array of completed workout objects
- * @param {Object} activePlan - Active plan with scheduled sessions (optional)
+ * @param {Object} activePlan - Active plan with scheduled sessions (optional, unused)
  * @param {number} days - Number of days to calculate adherence for (default 30)
  * @returns {number} Adherence percentage (0-100)
  */
+// eslint-disable-next-line no-unused-vars
 export const calculateAdherence = (workoutHistory = [], activePlan = null, days = 30) => {
   if (!workoutHistory || workoutHistory.length === 0) {
     return 0;
@@ -280,19 +285,40 @@ export const calculateAdherence = (workoutHistory = [], activePlan = null, days 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Check if there's a session logged today
+  const hasSessionToday = workoutHistory.some(w => {
+    const workoutDate = new Date(w.date);
+    workoutDate.setHours(0, 0, 0, 0);
+    return workoutDate.getTime() === today.getTime();
+  });
+
   // Find the date of the first session (optimized to create Date objects only once)
   const timestamps = workoutHistory.map(w => new Date(w.date).getTime());
   const firstSessionDate = new Date(Math.min(...timestamps));
   firstSessionDate.setHours(0, 0, 0, 0);
 
-  // Calculate days since first session
-  const daysSinceFirstSession = Math.floor((today - firstSessionDate) / (1000 * 60 * 60 * 24)) + 1;
+  // Determine the end date for calculation
+  // If no session today, use yesterday as the end date (exclude current day)
+  // If session today, use today as the end date (include current day)
+  const endDate = new Date(today);
+  if (!hasSessionToday) {
+    endDate.setDate(endDate.getDate() - 1); // Use yesterday as end date
+  }
+  endDate.setHours(0, 0, 0, 0);
+
+  // If end date is before first session date, return 0
+  if (endDate < firstSessionDate) {
+    return 0;
+  }
+
+  // Calculate days since first session (up to endDate)
+  const daysSinceFirstSession = Math.floor((endDate - firstSessionDate) / (1000 * 60 * 60 * 24)) + 1;
 
   // Use the smaller of: days parameter or days since first session
   const effectiveDays = daysSinceFirstSession < days ? daysSinceFirstSession : days;
 
-  const cutoffDate = new Date(today);
-  cutoffDate.setDate(cutoffDate.getDate() - effectiveDays + 1); // +1 to include today
+  const cutoffDate = new Date(endDate);
+  cutoffDate.setDate(cutoffDate.getDate() - effectiveDays + 1);
   cutoffDate.setHours(0, 0, 0, 0);
 
   // Get unique session dates in the effective period
@@ -300,7 +326,7 @@ export const calculateAdherence = (workoutHistory = [], activePlan = null, days 
   workoutHistory.forEach(w => {
     const workoutDate = new Date(w.date);
     workoutDate.setHours(0, 0, 0, 0);
-    if (workoutDate >= cutoffDate && workoutDate <= today) {
+    if (workoutDate >= cutoffDate && workoutDate <= endDate) {
       uniqueSessionDates.add(workoutDate.toDateString());
     }
   });

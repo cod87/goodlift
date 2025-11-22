@@ -31,6 +31,8 @@ const GUEST_KEYS = {
   YOGA_PRESETS: 'goodlift_guest_yoga_presets',
   HIIT_PRESETS: 'goodlift_guest_hiit_presets',
   SAVED_WORKOUTS: 'goodlift_guest_saved_workouts',
+  NUTRITION_ENTRIES: 'goodlift_guest_nutrition_entries',
+  NUTRITION_GOALS: 'goodlift_guest_nutrition_goals',
 };
 
 /**

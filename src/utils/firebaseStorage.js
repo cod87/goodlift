@@ -478,3 +478,53 @@ export const loadPinnedExercisesFromFirebase = async (userId) => {
     return null;
   }
 };
+
+/**
+ * Save nutrition entries to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {array} nutritionEntries - The nutrition entries array
+ */
+export const saveNutritionEntriesToFirebase = async (userId, nutritionEntries) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { nutritionEntries });
+  } catch (error) {
+    console.error('Error saving nutrition entries to Firebase:', error);
+  }
+};
+
+/**
+ * Save nutrition goals to Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @param {object} nutritionGoals - The nutrition goals object
+ */
+export const saveNutritionGoalsToFirebase = async (userId, nutritionGoals) => {
+  if (!userId) return;
+  
+  try {
+    await saveUserDataToFirebase(userId, { nutritionGoals });
+  } catch (error) {
+    console.error('Error saving nutrition goals to Firebase:', error);
+  }
+};
+
+/**
+ * Load nutrition data from Firebase
+ * @param {string} userId - The authenticated user's UID
+ * @returns {object|null} - Object with nutritionEntries and nutritionGoals or null if not found
+ */
+export const loadNutritionDataFromFirebase = async (userId) => {
+  if (!userId) return null;
+  
+  try {
+    const userData = await loadUserDataFromFirebase(userId);
+    return {
+      nutritionEntries: userData?.nutritionEntries || null,
+      nutritionGoals: userData?.nutritionGoals || null
+    };
+  } catch (error) {
+    console.error('Error loading nutrition data from Firebase:', error);
+    return null;
+  }
+};

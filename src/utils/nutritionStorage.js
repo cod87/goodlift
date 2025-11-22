@@ -1,0 +1,198 @@
+import {
+  saveNutritionEntriesToFirebase,
+  saveNutritionGoalsToFirebase,
+  loadNutritionDataFromFirebase
+} from './firebaseStorage';
+import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
+
+/**
+ * Storage module for managing nutrition data in localStorage and Firebase
+ * Provides functions for persisting and retrieving nutrition entries and goals
+ * Automatically syncs with Firebase when user is authenticated
+ */
+
+/** Storage keys for localStorage */
+const KEYS = {
+  NUTRITION_ENTRIES: 'goodlift_nutrition_entries',
+  NUTRITION_GOALS: 'goodlift_nutrition_goals',
+};
+
+/** Current authenticated user ID for Firebase sync */
+let currentUserId = null;
+
+/**
+ * Set the current user ID for Firebase synchronization
+ * @param {string} userId - Firebase user ID
+ */
+export const setCurrentUserId = (userId) => {
+  currentUserId = userId;
+};
+
+/**
+ * Get the current user ID
+ * @returns {string|null} Current user ID or null if not authenticated
+ */
+export const getCurrentUserId = () => {
+  return currentUserId;
+};
+
+/**
+ * Get nutrition entries from Firebase (if authenticated) or localStorage
+ * @returns {Array} Array of nutrition entry objects
+ */
+export const getNutritionEntries = () => {
+  try {
+    // Check if in guest mode first
+    if (isGuestMode()) {
+      const guestData = getGuestData('nutrition_entries');
+      return guestData || [];
+    }
+
+    // Try localStorage
+    const stored = localStorage.getItem(KEYS.NUTRITION_ENTRIES);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Error getting nutrition entries:', error);
+    return [];
+  }
+};
+
+/**
+ * Save nutrition entry to localStorage and Firebase
+ * @param {Object} entry - Nutrition entry object
+ * @returns {Promise<void>}
+ */
+export const saveNutritionEntry = async (entry) => {
+  try {
+    const entries = getNutritionEntries();
+    entries.push(entry);
+
+    // Save to guest mode if applicable
+    if (isGuestMode()) {
+      setGuestData('nutrition_entries', entries);
+      return;
+    }
+
+    // Save to localStorage
+    localStorage.setItem(KEYS.NUTRITION_ENTRIES, JSON.stringify(entries));
+
+    // Save to Firebase if user is authenticated
+    if (currentUserId) {
+      try {
+        await saveNutritionEntriesToFirebase(currentUserId, entries);
+      } catch (error) {
+        console.error('Error syncing nutrition entries to Firebase:', error);
+      }
+    }
+  } catch (error) {
+    console.error('Error saving nutrition entry:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete nutrition entry from localStorage and Firebase
+ * @param {number} entryId - Entry ID to delete
+ * @returns {Promise<void>}
+ */
+export const deleteNutritionEntry = async (entryId) => {
+  try {
+    const entries = getNutritionEntries();
+    const filteredEntries = entries.filter(e => e.id !== entryId);
+
+    // Save to guest mode if applicable
+    if (isGuestMode()) {
+      setGuestData('nutrition_entries', filteredEntries);
+      return;
+    }
+
+    // Save to localStorage
+    localStorage.setItem(KEYS.NUTRITION_ENTRIES, JSON.stringify(filteredEntries));
+
+    // Save to Firebase if user is authenticated
+    if (currentUserId) {
+      try {
+        await saveNutritionEntriesToFirebase(currentUserId, filteredEntries);
+      } catch (error) {
+        console.error('Error syncing nutrition entries to Firebase:', error);
+      }
+    }
+  } catch (error) {
+    console.error('Error deleting nutrition entry:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get nutrition goals from Firebase (if authenticated) or localStorage
+ * @returns {Object|null} Nutrition goals object or null if not set
+ */
+export const getNutritionGoals = () => {
+  try {
+    // Check if in guest mode first
+    if (isGuestMode()) {
+      const guestData = getGuestData('nutrition_goals');
+      return guestData || null;
+    }
+
+    // Try localStorage
+    const stored = localStorage.getItem(KEYS.NUTRITION_GOALS);
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.error('Error getting nutrition goals:', error);
+    return null;
+  }
+};
+
+/**
+ * Save nutrition goals to localStorage and Firebase
+ * @param {Object} goals - Nutrition goals object
+ * @returns {Promise<void>}
+ */
+export const saveNutritionGoals = async (goals) => {
+  try {
+    // Save to guest mode if applicable
+    if (isGuestMode()) {
+      setGuestData('nutrition_goals', goals);
+      return;
+    }
+
+    // Save to localStorage
+    localStorage.setItem(KEYS.NUTRITION_GOALS, JSON.stringify(goals));
+
+    // Save to Firebase if user is authenticated
+    if (currentUserId) {
+      try {
+        await saveNutritionGoalsToFirebase(currentUserId, goals);
+      } catch (error) {
+        console.error('Error syncing nutrition goals to Firebase:', error);
+      }
+    }
+  } catch (error) {
+    console.error('Error saving nutrition goals:', error);
+    throw error;
+  }
+};
+
+/**
+ * Load nutrition data from Firebase
+ * @param {string} userId - Firebase user ID
+ * @returns {Promise<void>}
+ */
+export const loadUserNutritionData = async (userId) => {
+  try {
+    const firebaseData = await loadNutritionDataFromFirebase(userId);
+    
+    if (firebaseData) {
+      if (firebaseData.nutritionEntries) {
+        localStorage.setItem(KEYS.NUTRITION_ENTRIES, JSON.stringify(firebaseData.nutritionEntries));
+      }
+      if (firebaseData.nutritionGoals) {
+        localStorage.setItem(KEYS.NUTRITION_GOALS, JSON.stringify(firebaseData.nutritionGoals));
+      }
+    }
+  } catch (error) {
+    console.error('Error loading user nutrition data:', error);
+    throw error;
+  }
+};

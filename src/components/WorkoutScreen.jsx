@@ -215,6 +215,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
   const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
+  const webpFile = currentStep?.exercise?.['Webp File'];
 
   // Calculate responsive font size for exercise name
   // Ensures text is large and readable but always fits within available space
@@ -320,7 +321,6 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   useEffect(() => {
     if (exerciseName) {
       // Use 'Webp File' property from exercise data if available, otherwise fallback to getDemoImagePath
-      const webpFile = currentStep?.exercise?.['Webp File'];
       let imagePath;
       
       if (webpFile) {
@@ -335,7 +335,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       setDemoImageSrc(imagePath);
       setImageError(false);
     }
-  }, [exerciseName, currentStep]);
+  }, [exerciseName, webpFile]);
 
   const handleImageError = () => {
     if (!imageError) {

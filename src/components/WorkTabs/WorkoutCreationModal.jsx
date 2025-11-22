@@ -95,6 +95,7 @@ const SortableExerciseItem = ({
   onToggleHighlight,
   currentSupersetNumber,
   isReorderMode,
+  onDeselectFromSuperset,
 }) => {
   const {
     attributes,
@@ -176,10 +177,20 @@ const SortableExerciseItem = ({
                 <Chip
                   label={`Set ${supersetGroupId}`}
                   size="small"
+                  onDelete={(e) => {
+                    e.stopPropagation();
+                    onDeselectFromSuperset(exercise['Exercise Name']);
+                  }}
                   sx={{
                     backgroundColor: supersetColor?.main,
                     color: 'white',
                     fontWeight: 'bold',
+                    '& .MuiChip-deleteIcon': {
+                      color: 'white',
+                      '&:hover': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                    },
                   }}
                 />
               )}
@@ -272,6 +283,7 @@ SortableExerciseItem.propTypes = {
   onToggleHighlight: PropTypes.func.isRequired,
   currentSupersetNumber: PropTypes.number.isRequired,
   isReorderMode: PropTypes.bool.isRequired,
+  onDeselectFromSuperset: PropTypes.func.isRequired,
 };
 
 /**
@@ -305,6 +317,35 @@ const WorkoutCreationModal = ({
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
   const [generateCountDialogOpen, setGenerateCountDialogOpen] = useState(false);
   const [exerciseCount, setExerciseCount] = useState(8);
+
+  // Update currentSupersetNumber whenever myWorkout changes
+  useEffect(() => {
+    // Get the lowest available superset number (filling gaps)
+    const getLowestAvailableSupersetNumber = () => {
+      // Get all current superset IDs
+      const supersetIds = myWorkout
+        .filter(ex => ex.supersetGroup !== null && ex.supersetGroup !== undefined)
+        .map(ex => ex.supersetGroup);
+      
+      if (supersetIds.length === 0) return 1;
+      
+      // Find the lowest available number (gaps or next number)
+      const uniqueIds = [...new Set(supersetIds)].sort((a, b) => a - b);
+      
+      // Check for gaps in the sequence
+      for (let i = 1; i <= uniqueIds[uniqueIds.length - 1]; i++) {
+        if (!uniqueIds.includes(i)) {
+          return i;
+        }
+      }
+      
+      // No gaps found, return next number
+      return uniqueIds[uniqueIds.length - 1] + 1;
+    };
+
+    const lowestAvailable = getLowestAvailableSupersetNumber();
+    setCurrentSupersetNumber(lowestAvailable);
+  }, [myWorkout]);
 
   // DnD sensors with improved activation constraints
   const sensors = useSensors(
@@ -432,6 +473,17 @@ const WorkoutCreationModal = ({
     setHighlightedExercises(newHighlighted);
   };
 
+  // Deselect exercise from superset (remove superset group)
+  const handleDeselectFromSuperset = (exerciseName) => {
+    const updated = myWorkout.map(exercise => {
+      if (exercise['Exercise Name'] === exerciseName) {
+        return { ...exercise, supersetGroup: null };
+      }
+      return exercise;
+    });
+    setMyWorkout(updated);
+  };
+
   // Lock in superset - assign highlighted exercises to current superset group
   const handleLockInSuperset = () => {
     if (highlightedExercises.size === 0) return;
@@ -454,9 +506,8 @@ const WorkoutCreationModal = ({
     const reordered = reorderBySupersets(updated);
     setMyWorkout(reordered);
     
-    // Clear highlights and increment superset number
+    // Clear highlights (superset number will be auto-updated by useEffect)
     setHighlightedExercises(new Set());
-    setCurrentSupersetNumber(prev => prev + 1);
   };
 
   // Reorder exercises to group by superset
@@ -498,9 +549,79 @@ const WorkoutCreationModal = ({
       setMyWorkout((items) => {
         const oldIndex = items.findIndex(item => item['Exercise Name'] === active.id);
         const newIndex = items.findIndex(item => item['Exercise Name'] === over.id);
-        return arrayMove(items, oldIndex, newIndex);
+        
+        const draggedExercise = items[oldIndex];
+        const targetExercise = items[newIndex];
+        
+        // Check if the dragged exercise is in a superset
+        const draggedSupersetId = draggedExercise.supersetGroup;
+        
+        if (draggedSupersetId !== null && draggedSupersetId !== undefined) {
+          // Dragging a superset group - move all exercises in that group
+          const supersetExercises = items.filter(ex => ex.supersetGroup === draggedSupersetId);
+          const otherExercises = items.filter(ex => ex.supersetGroup !== draggedSupersetId);
+          
+          // Find where to insert the superset group
+          let insertIndex;
+          if (targetExercise.supersetGroup !== null && targetExercise.supersetGroup !== undefined) {
+            // Target is in a superset - insert before that superset's first exercise
+            const targetSupersetExercises = items.filter(ex => ex.supersetGroup === targetExercise.supersetGroup);
+            const firstTargetExerciseIndex = otherExercises.findIndex(ex => 
+              ex['Exercise Name'] === targetSupersetExercises[0]['Exercise Name']
+            );
+            insertIndex = firstTargetExerciseIndex >= 0 ? firstTargetExerciseIndex : newIndex;
+          } else {
+            // Target is a standalone exercise
+            insertIndex = otherExercises.findIndex(ex => ex['Exercise Name'] === targetExercise['Exercise Name']);
+            insertIndex = insertIndex >= 0 ? insertIndex : newIndex;
+          }
+          
+          // Insert the superset group at the new position
+          const reordered = [
+            ...otherExercises.slice(0, insertIndex),
+            ...supersetExercises,
+            ...otherExercises.slice(insertIndex)
+          ];
+          
+          // Renumber supersets based on their new order
+          return renumberSupersets(reordered);
+        } else {
+          // Regular single exercise drag
+          return arrayMove(items, oldIndex, newIndex);
+        }
       });
     }
+  };
+
+  // Renumber supersets to reflect their order in the list
+  const renumberSupersets = (exercises) => {
+    const supersetGroups = new Map();
+    const newSupersetMapping = new Map();
+    let newSupersetId = 1;
+    
+    // First pass: identify unique superset groups in order
+    exercises.forEach(exercise => {
+      const oldSupersetId = exercise.supersetGroup;
+      if (oldSupersetId !== null && oldSupersetId !== undefined) {
+        if (!supersetGroups.has(oldSupersetId)) {
+          supersetGroups.set(oldSupersetId, newSupersetId);
+          newSupersetMapping.set(oldSupersetId, newSupersetId);
+          newSupersetId++;
+        }
+      }
+    });
+    
+    // Second pass: apply new superset IDs
+    return exercises.map(exercise => {
+      const oldSupersetId = exercise.supersetGroup;
+      if (oldSupersetId !== null && oldSupersetId !== undefined) {
+        return {
+          ...exercise,
+          supersetGroup: newSupersetMapping.get(oldSupersetId)
+        };
+      }
+      return exercise;
+    });
   };
 
   // Calculate superset configuration
@@ -847,7 +968,7 @@ const WorkoutCreationModal = ({
               <Typography variant="body2" color="text.secondary">
                 {isReorderMode 
                   ? "Drag exercises anywhere to reorder them."
-                  : "Tap exercises to highlight them in the current superset color, then press the floating button to group them."
+                  : "Tap exercises to highlight them in the current superset color, then press the floating button to group them. Click the X on a superset chip to remove an exercise from that superset."
                 }
               </Typography>
             </Box>
@@ -876,6 +997,7 @@ const WorkoutCreationModal = ({
                         onToggleHighlight={handleToggleHighlight}
                         currentSupersetNumber={currentSupersetNumber}
                         isReorderMode={isReorderMode}
+                        onDeselectFromSuperset={handleDeselectFromSuperset}
                       />
                     ))}
                   </Stack>

@@ -84,6 +84,10 @@ const TIMER_MODES = {
   CARDIO: 'cardio',
 };
 
+// Extended rest configuration constants
+const EXTENDED_REST_DURATION_SECONDS = 60; // Additional seconds added to rest period
+const TIME_COMPARISON_TOLERANCE = 0.5; // Tolerance in seconds for comparing elapsed time to target
+
 const YOGA_POSES = [
   { name: 'Mountain Pose (Tadasana)', defaultDuration: 30 },
   { name: 'Downward Dog (Adho Mukha Svanasana)', defaultDuration: 60 },
@@ -135,6 +139,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   });
   const [warmupEnabled, setWarmupEnabled] = useState(true);
   const [warmupDuration, setWarmupDuration] = useState(5); // minutes: off, 2, 5, 7, 10
+  // Note: elapsedHiitTime is used via its setter function (setElapsedHiitTime) throughout the timer logic
   // eslint-disable-next-line no-unused-vars
   const [elapsedHiitTime, setElapsedHiitTime] = useState(0); // Track elapsed HIIT time for extended rest
   const [isExtendedRest, setIsExtendedRest] = useState(false); // Flag for 1-minute extended rest
@@ -418,7 +423,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   
                   // Calculate if this rest period should be extended
                   // Use a small tolerance for float comparison to avoid precision issues
-                  if (nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < 0.5) {
+                  if (nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE) {
                     shouldExtendRest = true;
                   }
                   
@@ -442,8 +447,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   setNextExtendedRestTime(nextTime);
                 }
                 
-                // Use extended rest (rest + 60 seconds) or normal rest
-                return shouldExtendRest ? restInterval + 60 : restInterval;
+                // Use extended rest (additional seconds added to normal rest interval)
+                return shouldExtendRest ? restInterval + EXTENDED_REST_DURATION_SECONDS : restInterval;
               } else {
                 // End of rest
                 if (currentRound < roundsPerSet) {
@@ -625,14 +630,14 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setElapsedHiitTime(newElapsedTime);
         
         // Check if this rest should be extended
-        const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < 0.5;
+        const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
         setIsExtendedRest(shouldExtend);
         
         // If extended, recalculate next extended rest time
         if (shouldExtend) {
           const nextTime = calculateNextExtendedRestTime(newElapsedTime, extendedRestIntervalMinutes, workInterval, restInterval);
           setNextExtendedRestTime(nextTime);
-          setTimeRemaining(restInterval + 60);
+          setTimeRemaining(restInterval + EXTENDED_REST_DURATION_SECONDS);
         } else {
           setTimeRemaining(restInterval);
         }
@@ -697,9 +702,9 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setElapsedHiitTime(newElapsedTime);
         
         // Check if this rest should be extended
-        const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < 0.5;
+        const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
         setIsExtendedRest(shouldExtend);
-        setTimeRemaining(shouldExtend ? restInterval + 60 : restInterval);
+        setTimeRemaining(shouldExtend ? restInterval + EXTENDED_REST_DURATION_SECONDS : restInterval);
       } else if (isWorkPeriod && currentRound === 1 && currentSet > 1) {
         // Go back to previous set
         if (recoveryBetweenSets > 0) {
@@ -721,9 +726,9 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           setElapsedHiitTime(newElapsedTime);
           
           // Check if this rest should be extended
-          const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < 0.5;
+          const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
           setIsExtendedRest(shouldExtend);
-          setTimeRemaining(shouldExtend ? restInterval + 60 : restInterval);
+          setTimeRemaining(shouldExtend ? restInterval + EXTENDED_REST_DURATION_SECONDS : restInterval);
         }
       } else if (!isWorkPeriod && !isPrepPeriod && !isRecoveryPeriod) {
         // Go back from rest to work in same round
@@ -744,9 +749,9 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setElapsedHiitTime(newElapsedTime);
         
         // Check if this rest should be extended
-        const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < 0.5;
+        const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
         setIsExtendedRest(shouldExtend);
-        setTimeRemaining(shouldExtend ? restInterval + 60 : restInterval);
+        setTimeRemaining(shouldExtend ? restInterval + EXTENDED_REST_DURATION_SECONDS : restInterval);
       }
       audioService.playTransitionBeep();
     } else if (mode === TIMER_MODES.FLOW && currentPoseIndex > 0) {
@@ -1149,7 +1154,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                     useArrows={true}
                   />
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mb: 2 }}>
-                    Adds 60s to rest nearest each interval mark
+                    Adds {EXTENDED_REST_DURATION_SECONDS}s to rest nearest each interval mark
                   </Typography>
                   
                   {/* Exercise Names for Each Round */}

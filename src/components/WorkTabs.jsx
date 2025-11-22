@@ -5,18 +5,21 @@ import {
   FitnessCenter,
   DirectionsRun,
   EditNote,
+  Restaurant,
 } from '@mui/icons-material';
 import StrengthTab from './WorkTabs/StrengthTab';
 import MobilityTab from './WorkTabs/MobilityTab';
 import LogActivityTab from './WorkTabs/LogActivityTab';
+import NutritionTab from './WorkTabs/NutritionTab';
 
 /**
- * WorkTabs - Main Work area component with three sub-tabs
+ * WorkTabs - Main Work area component with four sub-tabs
  * 
  * Tabs:
  * 1. Strength - Shows integrated workout configuration and quick start
  * 2. Mobility - Timer functionality for mobility workouts (cardio, yoga)
  * 3. Activity - Manual activity logging
+ * 4. Nutrition - Food tracking with USDA FoodData Central API
  */
 const WorkTabs = ({ 
   onNavigate,
@@ -64,30 +67,35 @@ const WorkTabs = ({
               fontWeight: 600,
               transition: 'color 0.3s ease',
               '&.Mui-selected': {
-                color: activeTab === 0 ? 'primary.main' : activeTab === 1 ? 'secondary.main' : 'success.main',
+                color: activeTab === 0 ? 'primary.main' : activeTab === 1 ? 'secondary.main' : activeTab === 2 ? 'success.main' : 'warning.main',
               },
             },
             '& .MuiTabs-indicator': {
               height: 3,
               borderRadius: '3px 3px 0 0',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              backgroundColor: activeTab === 0 ? 'primary.main' : activeTab === 1 ? 'secondary.main' : 'success.main',
+              backgroundColor: activeTab === 0 ? 'primary.main' : activeTab === 1 ? 'secondary.main' : activeTab === 2 ? 'success.main' : 'warning.main',
             },
           }}
         >
           <Tab 
             icon={<FitnessCenter />} 
-            label="Strength" 
+            label={<Box sx={{ display: { xs: 'none', sm: 'block' } }}>Strength</Box>}
             iconPosition="start"
           />
           <Tab 
             icon={<DirectionsRun />} 
-            label="Mobility" 
+            label={<Box sx={{ display: { xs: 'none', sm: 'block' } }}>Mobility</Box>}
             iconPosition="start"
           />
           <Tab 
             icon={<EditNote />} 
-            label="Activity" 
+            label={<Box sx={{ display: { xs: 'none', sm: 'block' } }}>Activity</Box>}
+            iconPosition="start"
+          />
+          <Tab 
+            icon={<Restaurant />} 
+            label={<Box sx={{ display: { xs: 'none', sm: 'block' } }}>Nutrition</Box>}
             iconPosition="start"
           />
         </Tabs>
@@ -114,6 +122,9 @@ const WorkTabs = ({
         )}
         {activeTab === 2 && (
           <LogActivityTab onNavigate={onNavigate} />
+        )}
+        {activeTab === 3 && (
+          <NutritionTab onNavigate={onNavigate} />
         )}
       </Box>
     </Box>

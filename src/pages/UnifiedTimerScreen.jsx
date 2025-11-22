@@ -101,7 +101,7 @@ const YOGA_POSES = [
 
 const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   // Mode and configuration
-  const [mode, setMode] = useState(TIMER_MODES.CARDIO);
+  const [mode, setMode] = useState(TIMER_MODES.HIIT);
   const [isConfiguring, setIsConfiguring] = useState(true);
   
   // Timer state
@@ -137,6 +137,12 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [warmupDuration, setWarmupDuration] = useState(5); // minutes: off, 2, 5, 7, 10
   const [elapsedHiitTime, setElapsedHiitTime] = useState(0); // Track elapsed HIIT time for extended rest
   const [isExtendedRest, setIsExtendedRest] = useState(false); // Flag for 1-minute extended rest
+  const [extendedRestIntervalMinutes, setExtendedRestIntervalMinutes] = useState(() => {
+    // Load previous extended rest interval from localStorage, default to 8 minutes
+    const saved = localStorage.getItem('goodlift_hiit_extended_rest_interval');
+    return saved ? parseFloat(saved) : 8;
+  });
+  const [nextExtendedRestTime, setNextExtendedRestTime] = useState(null); // Time in seconds when next extended rest should occur
   const [exerciseNamesExpanded, setExerciseNamesExpanded] = useState(false); // State for collapsible exercise names
   
   // Flow mode state
@@ -186,10 +192,59 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     return Math.max(1, rounds); // Ensure at least 1 round
   }, []);
 
+  // Helper function to calculate when extended rests should occur
+  // Returns the time (in seconds from start of HIIT) when the nearest rest period begins
+  const calculateNextExtendedRestTime = useCallback((currentElapsedTime, extendedRestInterval, work, rest) => {
+    const intervalSeconds = extendedRestInterval * 60;
+    const roundDuration = work + rest;
+    
+    // Calculate the target time (next multiple of extendedRestInterval)
+    const currentIntervalIndex = Math.floor(currentElapsedTime / intervalSeconds);
+    const targetTime = (currentIntervalIndex + 1) * intervalSeconds;
+    
+    // Find all rest period start times
+    const restPeriods = [];
+    let timeAccumulated = 0;
+    let roundIndex = 0;
+    
+    // Calculate rest periods up to twice the target time to ensure we find candidates
+    while (timeAccumulated < targetTime * 2) {
+      timeAccumulated += work; // Work period
+      restPeriods.push(timeAccumulated); // Rest starts after work
+      timeAccumulated += rest; // Rest period
+      roundIndex++;
+      
+      // Safety check to prevent infinite loop
+      if (roundIndex > 1000) break;
+    }
+    
+    // Find the rest period closest to targetTime
+    let closestRestTime = restPeriods[0];
+    let minDistance = Math.abs(restPeriods[0] - targetTime);
+    
+    for (const restTime of restPeriods) {
+      const distance = Math.abs(restTime - targetTime);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestRestTime = restTime;
+      } else if (distance === minDistance) {
+        // In case of exact difference, pick the greater number
+        closestRestTime = Math.max(closestRestTime, restTime);
+      }
+    }
+    
+    return closestRestTime;
+  }, []);
+
   // Save session length to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('goodlift_hiit_session_length', sessionLengthMinutes.toString());
   }, [sessionLengthMinutes]);
+
+  // Save extended rest interval to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('goodlift_hiit_extended_rest_interval', extendedRestIntervalMinutes.toString());
+  }, [extendedRestIntervalMinutes]);
 
   // Update rest interval when work interval or ratio changes
   useEffect(() => {
@@ -306,12 +361,18 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 return workInterval;
               } else if (isWorkPeriod) {
                 // Track elapsed HIIT time for extended rest calculation
-                // Use callback to get the updated value immediately
                 let shouldExtendRest = false;
+                let newElapsedTime = 0;
+                
                 setElapsedHiitTime(prev => {
-                  const newElapsedTime = prev + workInterval;
-                  // Check if we crossed an 8-minute threshold
-                  shouldExtendRest = Math.floor(newElapsedTime / (8 * 60)) > Math.floor(prev / (8 * 60));
+                  newElapsedTime = prev + workInterval;
+                  
+                  // Calculate if this rest period should be extended
+                  // A rest period should be extended if it's the closest to the next extended rest target time
+                  if (nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < (workInterval + restInterval) / 2) {
+                    shouldExtendRest = true;
+                  }
+                  
                   return newElapsedTime;
                 });
                 
@@ -320,6 +381,17 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 setIsExtendedRest(shouldExtendRest);
                 audioService.playLowBeep();
                 hasPlayedWarningRef.current = false;
+                
+                // If this is an extended rest, calculate the next one
+                if (shouldExtendRest) {
+                  const nextTime = calculateNextExtendedRestTime(
+                    newElapsedTime,
+                    extendedRestIntervalMinutes,
+                    workInterval,
+                    restInterval
+                  );
+                  setNextExtendedRestTime(nextTime);
+                }
                 
                 // Use extended rest (rest + 60 seconds) or normal rest
                 return shouldExtendRest ? restInterval + 60 : restInterval;
@@ -389,7 +461,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, isPaused, mode, isWorkPeriod, isPrepPeriod, isRecoveryPeriod, currentRound, currentSet, roundsPerSet, numberOfSets, currentPoseIndex, selectedPoses, workInterval, restInterval, recoveryBetweenSets, elapsedHiitTime, handleTimerComplete]);
+  }, [isRunning, isPaused, mode, isWorkPeriod, isPrepPeriod, isRecoveryPeriod, currentRound, currentSet, roundsPerSet, numberOfSets, currentPoseIndex, selectedPoses, workInterval, restInterval, recoveryBetweenSets, nextExtendedRestTime, extendedRestIntervalMinutes, calculateNextExtendedRestTime, handleTimerComplete]);
 
   const handleStart = () => {
     if (isConfiguring) {
@@ -398,6 +470,15 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         // Reset elapsed time and extended rest tracking
         setElapsedHiitTime(0);
         setIsExtendedRest(false);
+        
+        // Calculate the first extended rest time
+        const firstExtendedRestTime = calculateNextExtendedRestTime(
+          0,
+          extendedRestIntervalMinutes,
+          workInterval,
+          restInterval
+        );
+        setNextExtendedRestTime(firstExtendedRestTime);
         
         // Calculate total time for all sets
         const timePerSet = roundsPerSet * (workInterval + restInterval);
@@ -457,6 +538,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     setCurrentPoseIndex(0);
     setElapsedHiitTime(0);
     setIsExtendedRest(false);
+    setNextExtendedRestTime(null);
   };
 
   const handleModeChange = (event, newMode) => {
@@ -590,6 +672,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           sessionLengthMinutes,
           warmupEnabled,
           warmupDuration,
+          extendedRestIntervalMinutes,
         };
         await saveHiitPreset(preset);
         const updatedPresets = await getHiitPresets();
@@ -616,6 +699,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
       setSessionLengthMinutes(preset.sessionLengthMinutes || 10);
       setWarmupEnabled(preset.warmupEnabled !== undefined ? preset.warmupEnabled : true);
       setWarmupDuration(preset.warmupDuration || 5);
+      setExtendedRestIntervalMinutes(preset.extendedRestIntervalMinutes || 8);
       
       setWorkInterval(preset.workInterval || 30);
       setRestInterval(preset.restInterval || 15);
@@ -929,6 +1013,24 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
                     Rest time: {restInterval}s (auto-calculated from ratio)
                   </Typography>
+
+                  {/* Extended Rest Interval Selector */}
+                  <DialPicker
+                    label="Extended Rest Every"
+                    value={extendedRestIntervalMinutes}
+                    options={[
+                      { label: '4 min', value: 4 },
+                      { label: '6 min', value: 6 },
+                      { label: '8 min', value: 8 },
+                      { label: '10 min', value: 10 },
+                      { label: '12 min', value: 12 },
+                    ]}
+                    onChange={setExtendedRestIntervalMinutes}
+                    useArrows={true}
+                  />
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mb: 2 }}>
+                    Adds 60s to rest nearest each interval mark
+                  </Typography>
                   
                   {/* Exercise Names for Each Round */}
                   <Box>
@@ -978,7 +1080,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   </Box>
                   
                   <Typography variant="body2" color="text.secondary">
-                    Total: ~{sessionLengthMinutes} min • {roundsPerSet} rounds • Extended rest after every 8 min of HIIT
+                    Total: ~{sessionLengthMinutes} min • {roundsPerSet} rounds • Extended rest every {extendedRestIntervalMinutes} min
                   </Typography>
                 </Stack>
               )}

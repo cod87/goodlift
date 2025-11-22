@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -21,9 +21,9 @@ import {
   LinearProgress,
   Alert,
   Divider,
+  Autocomplete,
 } from '@mui/material';
 import {
-  Search,
   Add,
   Delete,
   Restaurant,
@@ -69,6 +69,7 @@ const NutritionTab = () => {
   });
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const [error, setError] = useState('');
+  const [autocompleteOpen, setAutocompleteOpen] = useState(false);
 
   // Load today's entries and goals on mount
   useEffect(() => {
@@ -90,9 +91,9 @@ const NutritionTab = () => {
     }
   };
 
-  const searchFoods = async () => {
-    if (!searchQuery.trim()) {
-      setError('Please enter a search term');
+  const searchFoods = useCallback(async (query) => {
+    if (!query || query.trim().length < 2) {
+      setSearchResults([]);
       return;
     }
 
@@ -101,7 +102,7 @@ const NutritionTab = () => {
 
     try {
       const response = await fetch(
-        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(searchQuery)}&pageSize=10`
+        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5&dataType=Foundation`
       );
 
       if (!response.ok) {
@@ -113,15 +114,34 @@ const NutritionTab = () => {
     } catch (err) {
       console.error('Error searching foods:', err);
       setError('Failed to search foods. Please try again.');
+      setSearchResults([]);
     } finally {
       setSearching(false);
     }
-  };
+  }, []);
+
+  // Debounce search input
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      searchFoods(searchQuery);
+    }, 500); // 500ms debounce
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchFoods]);
 
   const handleSelectFood = (food) => {
+    if (!food) return;
     setSelectedFood(food);
     setPortionGrams(100);
     setShowAddDialog(true);
+    setSearchQuery('');
+    setSearchResults([]);
+    setAutocompleteOpen(false);
   };
 
   const getNutrient = (food, nutrientId) => {
@@ -147,7 +167,7 @@ const NutritionTab = () => {
 
     const nutrition = calculateNutrition(selectedFood, portionGrams);
     const entry = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Unique ID with timestamp + random string
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`, // Unique ID: timestamp + random 9-char string
       date: new Date().toISOString(),
       foodName: selectedFood.description,
       grams: portionGrams,
@@ -191,12 +211,12 @@ const NutritionTab = () => {
     const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
     
     return (
-      <Box sx={{ mb: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant="body2" color="text.secondary">
+      <Box sx={{ mb: 0 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
             {label}
           </Typography>
-          <Typography variant="body2" fontWeight="bold">
+          <Typography variant="body2" fontWeight="bold" sx={{ fontSize: '0.85rem' }}>
             {current.toFixed(1)} / {goal} {unit}
           </Typography>
         </Box>
@@ -204,7 +224,7 @@ const NutritionTab = () => {
           variant="determinate" 
           value={percentage} 
           color={color}
-          sx={{ height: 8, borderRadius: 1 }}
+          sx={{ height: 6, borderRadius: 1 }}
         />
       </Box>
     );
@@ -220,88 +240,84 @@ const NutritionTab = () => {
 
   return (
     <Box>
-      {/* Search Section */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Restaurant /> Search Foods
+      {/* Minimalist Search Section with Autocomplete */}
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Restaurant fontSize="small" /> Add Food
           </Typography>
-          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-            <TextField
-              fullWidth
-              placeholder="Search for foods (e.g., chicken breast, apple)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && searchFoods()}
-            />
-            <Button
-              variant="contained"
-              startIcon={searching ? <CircularProgress size={20} color="inherit" /> : <Search />}
-              onClick={searchFoods}
-              disabled={searching}
-              sx={{ minWidth: 120 }}
-            >
-              Search
-            </Button>
-          </Box>
+          <Autocomplete
+            fullWidth
+            open={autocompleteOpen && searchResults.length > 0}
+            onOpen={() => setAutocompleteOpen(true)}
+            onClose={() => setAutocompleteOpen(false)}
+            options={searchResults}
+            loading={searching}
+            getOptionLabel={(option) => option.description || ''}
+            filterOptions={(x) => x} // Disable built-in filtering since we're using API search
+            isOptionEqualToValue={(option, value) => option.fdcId === value.fdcId}
+            onChange={(event, value) => {
+              if (value) {
+                handleSelectFood(value);
+              }
+            }}
+            inputValue={searchQuery}
+            onInputChange={(event, newInputValue, reason) => {
+              if (reason === 'input') {
+                setSearchQuery(newInputValue);
+              }
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Type to search foods (e.g., chicken breast)..."
+                size="small"
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {searching ? <CircularProgress color="inherit" size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+            renderOption={(props, food) => {
+              const nutrition = calculateNutrition(food, 100);
+              return (
+                <li {...props} key={food.fdcId}>
+                  <Box sx={{ width: '100%' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {food.description}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                      <Chip label={`${nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
+                      <Chip label={`P: ${nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                      <Chip label={`C: ${nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                      <Chip label={`F: ${nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                    </Box>
+                  </Box>
+                </li>
+              );
+            }}
+            noOptionsText={searchQuery.length < 2 ? "Type at least 2 characters" : "No foods found"}
+          />
           
           {error && (
-            <Alert severity="error" sx={{ mt: 2 }} onClose={() => setError('')}>
+            <Alert severity="error" sx={{ mt: 1 }} onClose={() => setError('')}>
               {error}
             </Alert>
-          )}
-
-          {/* Search Results */}
-          {searchResults.length > 0 && (
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Search Results (per 100g):
-              </Typography>
-              <List>
-                {searchResults.map((food) => {
-                  const nutrition = calculateNutrition(food, 100);
-                  return (
-                    <ListItem
-                      key={food.fdcId}
-                      secondaryAction={
-                        <IconButton edge="end" onClick={() => handleSelectFood(food)} color="primary">
-                          <Add />
-                        </IconButton>
-                      }
-                      sx={{ 
-                        border: 1, 
-                        borderColor: 'divider', 
-                        borderRadius: 1, 
-                        mb: 1,
-                        '&:hover': { bgcolor: 'action.hover' }
-                      }}
-                    >
-                      <ListItemText
-                        primary={food.description}
-                        secondary={
-                          <Box component="span" sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
-                            <Chip label={`${nutrition.calories.toFixed(0)} cal`} size="small" />
-                            <Chip label={`P: ${nutrition.protein.toFixed(1)}g`} size="small" color="primary" />
-                            <Chip label={`C: ${nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" />
-                            <Chip label={`F: ${nutrition.fat.toFixed(1)}g`} size="small" color="warning" />
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </Box>
           )}
         </CardContent>
       </Card>
 
-      {/* Daily Summary */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      {/* Daily Summary - More Compact */}
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
             <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <TrendingUp /> Today&apos;s Summary
+              <TrendingUp fontSize="small" /> Today&apos;s Progress
             </Typography>
             <Button
               variant="outlined"
@@ -312,7 +328,7 @@ const NutritionTab = () => {
             </Button>
           </Box>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={1.5}>
             <Grid item xs={12}>
               <NutrientProgress
                 label="Calories"
@@ -358,40 +374,41 @@ const NutritionTab = () => {
         </CardContent>
       </Card>
 
-      {/* Today's Entries */}
+      {/* Today's Entries - More Compact */}
       <Card>
-        <CardContent>
+        <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
           <Typography variant="h6" gutterBottom>
             Today&apos;s Entries
           </Typography>
           {todayEntries.length === 0 ? (
-            <Typography color="text.secondary" align="center" sx={{ py: 3 }}>
-              No entries yet today. Search for foods to get started!
+            <Typography color="text.secondary" align="center" sx={{ py: 2, fontSize: '0.9rem' }}>
+              No entries yet. Type in the search box above to add foods.
             </Typography>
           ) : (
-            <List>
+            <List disablePadding>
               {todayEntries.map((entry, index) => (
                 <Box key={entry.id}>
-                  {index > 0 && <Divider sx={{ my: 1 }} />}
+                  {index > 0 && <Divider sx={{ my: 0.5 }} />}
                   <ListItem
+                    sx={{ px: 0, py: 1 }}
                     secondaryAction={
-                      <IconButton edge="end" onClick={() => handleDeleteEntry(entry.id)} color="error">
-                        <Delete />
+                      <IconButton edge="end" onClick={() => handleDeleteEntry(entry.id)} color="error" size="small">
+                        <Delete fontSize="small" />
                       </IconButton>
                     }
                   >
                     <ListItemText
                       primary={
-                        <Typography variant="subtitle1">
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
                           {entry.foodName} ({entry.grams}g)
                         </Typography>
                       }
                       secondary={
-                        <Box component="span" sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
-                          <Chip label={`${entry.nutrition.calories.toFixed(0)} cal`} size="small" />
-                          <Chip label={`P: ${entry.nutrition.protein.toFixed(1)}g`} size="small" color="primary" />
-                          <Chip label={`C: ${entry.nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" />
-                          <Chip label={`F: ${entry.nutrition.fat.toFixed(1)}g`} size="small" color="warning" />
+                        <Box component="span" sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+                          <Chip label={`${entry.nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
+                          <Chip label={`P: ${entry.nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                          <Chip label={`C: ${entry.nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                          <Chip label={`F: ${entry.nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
                         </Box>
                       }
                     />
@@ -403,37 +420,39 @@ const NutritionTab = () => {
         </CardContent>
       </Card>
 
-      {/* Add Entry Dialog */}
+      {/* Add Entry Dialog - Compact */}
       <Dialog open={showAddDialog} onClose={() => setShowAddDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Food Entry</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{ pb: 1 }}>Add Food Entry</DialogTitle>
+        <DialogContent sx={{ py: 2 }}>
           {selectedFood && (
             <Box>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 500 }}>
                 {selectedFood.description}
               </Typography>
               <TextField
                 fullWidth
                 type="number"
-                label="Portion Size (grams)"
+                label="Amount (grams)"
                 value={portionGrams}
                 onChange={(e) => setPortionGrams(Math.max(1, parseFloat(e.target.value) || 0))}
                 sx={{ mb: 2 }}
                 inputProps={{ min: 1, step: 1 }}
+                helperText="Enter the amount in grams you consumed"
+                size="small"
               />
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 1 }}>
                 Nutrition for {portionGrams}g:
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                 {(() => {
                   const nutrition = calculateNutrition(selectedFood, portionGrams);
                   return (
                     <>
-                      <Chip label={`${nutrition.calories.toFixed(0)} calories`} />
-                      <Chip label={`Protein: ${nutrition.protein.toFixed(1)}g`} color="primary" />
-                      <Chip label={`Carbs: ${nutrition.carbs.toFixed(1)}g`} color="secondary" />
-                      <Chip label={`Fat: ${nutrition.fat.toFixed(1)}g`} color="warning" />
-                      <Chip label={`Fiber: ${nutrition.fiber.toFixed(1)}g`} color="success" />
+                      <Chip label={`${nutrition.calories.toFixed(0)} cal`} size="small" />
+                      <Chip label={`Protein: ${nutrition.protein.toFixed(1)}g`} color="primary" size="small" />
+                      <Chip label={`Carbs: ${nutrition.carbs.toFixed(1)}g`} color="secondary" size="small" />
+                      <Chip label={`Fat: ${nutrition.fat.toFixed(1)}g`} color="warning" size="small" />
+                      <Chip label={`Fiber: ${nutrition.fiber.toFixed(1)}g`} color="success" size="small" />
                     </>
                   );
                 })()}
@@ -441,19 +460,19 @@ const NutritionTab = () => {
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowAddDialog(false)}>Cancel</Button>
-          <Button onClick={handleAddEntry} variant="contained">
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setShowAddDialog(false)} size="small">Cancel</Button>
+          <Button onClick={handleAddEntry} variant="contained" size="small">
             Add Entry
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Goals Dialog */}
+      {/* Goals Dialog - Compact */}
       <Dialog open={showGoalsDialog} onClose={() => setShowGoalsDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Set Daily Goals</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+        <DialogTitle sx={{ pb: 1 }}>Set Daily Goals</DialogTitle>
+        <DialogContent sx={{ py: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1 }}>
             <TextField
               fullWidth
               type="number"
@@ -461,6 +480,7 @@ const NutritionTab = () => {
               value={goals.calories}
               onChange={(e) => setGoals({ ...goals, calories: Math.max(0, parseFloat(e.target.value) || 0) })}
               inputProps={{ min: 0, step: 50 }}
+              size="small"
             />
             <TextField
               fullWidth
@@ -469,6 +489,7 @@ const NutritionTab = () => {
               value={goals.protein}
               onChange={(e) => setGoals({ ...goals, protein: Math.max(0, parseFloat(e.target.value) || 0) })}
               inputProps={{ min: 0, step: 5 }}
+              size="small"
             />
             <TextField
               fullWidth
@@ -477,6 +498,7 @@ const NutritionTab = () => {
               value={goals.carbs}
               onChange={(e) => setGoals({ ...goals, carbs: Math.max(0, parseFloat(e.target.value) || 0) })}
               inputProps={{ min: 0, step: 5 }}
+              size="small"
             />
             <TextField
               fullWidth
@@ -485,6 +507,7 @@ const NutritionTab = () => {
               value={goals.fat}
               onChange={(e) => setGoals({ ...goals, fat: Math.max(0, parseFloat(e.target.value) || 0) })}
               inputProps={{ min: 0, step: 5 }}
+              size="small"
             />
             <TextField
               fullWidth
@@ -493,12 +516,13 @@ const NutritionTab = () => {
               value={goals.fiber}
               onChange={(e) => setGoals({ ...goals, fiber: Math.max(0, parseFloat(e.target.value) || 0) })}
               inputProps={{ min: 0, step: 5 }}
+              size="small"
             />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowGoalsDialog(false)}>Cancel</Button>
-          <Button onClick={handleSaveGoals} variant="contained">
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setShowGoalsDialog(false)} size="small">Cancel</Button>
+          <Button onClick={handleSaveGoals} variant="contained" size="small">
             Save Goals
           </Button>
         </DialogActions>

@@ -551,7 +551,7 @@ const SettingsScreen = ({ onNavigate }) => {
                       value={preferences.barbellWeight || 45}
                       onChange={(e) => updatePreference('barbellWeight', e.target.value)}
                     >
-                      {Array.from({ length: 16 }, (_, i) => 25 + i * 5).map((weight) => (
+                      {Array.from({ length: 5 }, (_, i) => 25 + i * 5).map((weight) => (
                         <MenuItem key={weight} value={weight}>
                           {weight} lbs
                         </MenuItem>

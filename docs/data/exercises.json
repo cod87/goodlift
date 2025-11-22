@@ -1,18 +1,5 @@
 [
   {
-    "Exercise Name": "Archer Push-Up",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Lats, Triceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Bodyweight",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
     "Exercise Name": "Back Lever",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Back, Shoulders",
@@ -20,8 +7,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -33,8 +18,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength, Lower Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -46,8 +29,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -59,8 +40,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength, Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -72,8 +51,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength, Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -85,35 +62,7 @@
     "Equipment": "Barbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Arm",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Barbell Box Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Barbell Clean",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Delts, Core, Traps",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Difficulty": "Advanced",
-    "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
-    "Workout Type": "Full Body Strength",
     "Progression": "Progressive Overload"
   },
   {
@@ -124,8 +73,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -137,22 +84,7 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength, Lower Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Barbell Decline Bench Press",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Difficulty": "Intermediate",
-    "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
-    "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
   {
@@ -163,8 +95,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Advanced",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -176,8 +106,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Back",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -189,8 +117,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -202,8 +128,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Advanced",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -215,8 +139,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -228,8 +150,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -241,8 +161,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -254,8 +172,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -267,8 +183,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -280,8 +194,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Back",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -293,8 +205,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Back",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -306,8 +216,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Advanced",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -319,8 +227,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -332,8 +238,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -345,8 +249,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Advanced",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -358,8 +260,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -371,8 +271,6 @@
     "Equipment": "Barbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -384,8 +282,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -397,8 +293,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -410,8 +304,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -423,8 +315,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -436,8 +326,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -449,8 +337,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -462,8 +348,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
     "Progression": "Power Development"
   },
@@ -475,8 +359,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
     "Progression": "Power Development"
   },
@@ -488,8 +370,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Cardio",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -501,8 +381,6 @@
     "Equipment": "Cable Machine",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -514,8 +392,6 @@
     "Equipment": "Cable Machine",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Arm",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -527,8 +403,6 @@
     "Equipment": "Cable Machine",
     "Difficulty": "Beginner",
     "Movement Pattern": "Arm",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -540,8 +414,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -553,8 +425,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -566,8 +436,6 @@
     "Equipment": "Cable Machine",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -579,8 +447,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -592,8 +458,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -605,8 +469,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -618,8 +480,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -631,8 +491,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -644,8 +502,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -657,8 +513,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -670,8 +524,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -683,8 +535,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -696,8 +546,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -709,8 +557,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Arm",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -722,9 +568,18 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Dumbbell Close Grip Bench Press",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Chest, Front Delts",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Difficulty": "Intermediate",
+    "Movement Pattern": "Upper Push",
+    "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
   {
@@ -735,8 +590,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -748,8 +601,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -761,8 +612,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -774,8 +623,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -787,8 +634,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Shoulder",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -800,8 +645,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -813,8 +656,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -826,8 +667,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Arm",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -839,8 +678,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -852,8 +689,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Arm",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -865,8 +700,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Advanced",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -878,8 +711,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Arm",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -891,8 +722,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Shoulder",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -904,8 +733,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -917,8 +744,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Arm",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -930,8 +755,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -943,8 +766,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -956,8 +777,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Advanced",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -969,8 +788,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Back",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -982,8 +799,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -995,8 +810,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Back",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1008,8 +821,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1021,8 +832,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1034,8 +843,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1047,8 +854,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1060,8 +865,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1073,8 +876,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1086,8 +887,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1099,8 +898,6 @@
     "Equipment": "Dumbbell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1112,8 +909,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1125,8 +920,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1138,8 +931,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Back",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1151,8 +942,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1164,8 +953,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1177,8 +964,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1190,8 +975,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Cardio",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1203,8 +986,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1216,8 +997,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1229,8 +1008,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1242,8 +1019,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1255,8 +1030,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Cardio",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1268,8 +1041,6 @@
     "Equipment": "Kettlebell",
     "Difficulty": "Advanced",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1281,8 +1052,6 @@
     "Equipment": "Kettlebell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1294,8 +1063,6 @@
     "Equipment": "Kettlebell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1307,8 +1074,6 @@
     "Equipment": "Kettlebell",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1320,8 +1085,6 @@
     "Equipment": "Kettlebell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1333,8 +1096,6 @@
     "Equipment": "Kettlebell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1346,8 +1107,6 @@
     "Equipment": "Kettlebell",
     "Difficulty": "Advanced",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1359,8 +1118,6 @@
     "Equipment": "Kettlebell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Back",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1372,8 +1129,6 @@
     "Equipment": "Kettlebell",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1385,8 +1140,6 @@
     "Equipment": "Kettlebell",
     "Difficulty": "Advanced",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1398,8 +1151,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1411,8 +1162,6 @@
     "Equipment": "Landmine",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1424,8 +1173,6 @@
     "Equipment": "Landmine",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1437,8 +1184,6 @@
     "Equipment": "Landmine",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1450,8 +1195,6 @@
     "Equipment": "Landmine",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1463,8 +1206,6 @@
     "Equipment": "Landmine",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1476,8 +1217,6 @@
     "Equipment": "Cable Machine",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -1489,8 +1228,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Cardio",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1502,8 +1239,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1515,8 +1250,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1528,8 +1261,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1541,8 +1272,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1554,8 +1283,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1567,8 +1294,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1580,8 +1305,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1593,8 +1316,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1606,8 +1327,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1619,8 +1338,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1632,8 +1349,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1645,8 +1360,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1658,8 +1371,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Cardio",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1671,8 +1382,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1684,8 +1393,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1697,8 +1404,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1710,8 +1415,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1723,8 +1426,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Full Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1736,8 +1437,6 @@
     "Equipment": "Cable Machine",
     "Difficulty": "Beginner",
     "Movement Pattern": "Arm",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1749,8 +1448,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1762,8 +1459,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1775,8 +1470,6 @@
     "Equipment": "Cable Machine",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -1788,8 +1481,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1801,8 +1492,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Lower Back",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1814,8 +1503,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Cardio",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1827,8 +1514,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1840,8 +1525,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Cardio",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
@@ -1853,8 +1536,6 @@
     "Equipment": "Slam Ball",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Upper Push",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1866,8 +1547,6 @@
     "Equipment": "Slam Ball",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core, HIIT, Cardio",
     "Progression": "Power Development"
   },
@@ -1879,8 +1558,6 @@
     "Equipment": "Slam Ball",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Full Body",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
     "Progression": "Power Development"
   },
@@ -1892,8 +1569,6 @@
     "Equipment": "Slam Ball",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1905,8 +1580,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1918,8 +1591,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1931,8 +1602,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Back",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1944,8 +1613,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Power Development"
   },
@@ -1957,8 +1624,6 @@
     "Equipment": "Cable Machine",
     "Difficulty": "Beginner",
     "Movement Pattern": "Upper Pull",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
@@ -1970,8 +1635,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Advanced",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
@@ -1983,8 +1646,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
@@ -1996,8 +1657,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Beginner",
     "Movement Pattern": "Lower Leg",
-    "Rep Range": "",
-    "Superset Type": "Agonist-Antagonist",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -2009,8 +1668,6 @@
     "Equipment": "Bodyweight",
     "Difficulty": "Intermediate",
     "Movement Pattern": "Core",
-    "Rep Range": "",
-    "Superset Type": "Same Muscle",
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   }

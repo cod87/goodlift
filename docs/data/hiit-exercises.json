@@ -8,12 +8,32 @@
     "muscleGroup": "Lower Body"
   },
   {
+    "name": "Back Lever",
+    "muscleGroup": "Core"
+  },
+  {
     "name": "Bear Crawl",
     "muscleGroup": "Full Body"
   },
   {
+    "name": "Bench Dip",
+    "muscleGroup": "Triceps"
+  },
+  {
+    "name": "Bicycle Crunch",
+    "muscleGroup": "Core"
+  },
+  {
     "name": "Bicycle Crunches",
     "muscleGroup": "Core"
+  },
+  {
+    "name": "Bird Dog",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "Box Jump",
+    "muscleGroup": "Quads"
   },
   {
     "name": "Box Jump to Step",
@@ -24,28 +44,96 @@
     "muscleGroup": "Lower Body"
   },
   {
+    "name": "Bulgarian Split Squat",
+    "muscleGroup": "Quads"
+  },
+  {
+    "name": "Burpee",
+    "muscleGroup": "Chest"
+  },
+  {
+    "name": "Burpee to Box Jump",
+    "muscleGroup": "Full Body"
+  },
+  {
     "name": "Burpees",
     "muscleGroup": "Full Body"
+  },
+  {
+    "name": "Butt Kicks",
+    "muscleGroup": "Hamstrings"
+  },
+  {
+    "name": "Calf Raise",
+    "muscleGroup": "Calves"
+  },
+  {
+    "name": "Chin-Up",
+    "muscleGroup": "Biceps"
+  },
+  {
+    "name": "Crab Walk",
+    "muscleGroup": "Triceps"
   },
   {
     "name": "Crocodile Crawl",
     "muscleGroup": "Full Body"
   },
   {
+    "name": "Crunch",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "Dead Bug",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "Decline Push-Up",
+    "muscleGroup": "Chest"
+  },
+  {
     "name": "Depth Jumps",
     "muscleGroup": "Lower Body"
+  },
+  {
+    "name": "Diamond Push-Up",
+    "muscleGroup": "Triceps"
+  },
+  {
+    "name": "Dip",
+    "muscleGroup": "Triceps"
   },
   {
     "name": "Dolphin Kick",
     "muscleGroup": "Back"
   },
   {
+    "name": "Dragon Flag",
+    "muscleGroup": "Core"
+  },
+  {
     "name": "Flutter Kicks",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "Front Lever",
     "muscleGroup": "Core"
   },
   {
     "name": "Glute Bridge",
     "muscleGroup": "Lower Body"
+  },
+  {
+    "name": "Handstand Hold",
+    "muscleGroup": "Shoulders"
+  },
+  {
+    "name": "Handstand Push-Up",
+    "muscleGroup": "Delts"
+  },
+  {
+    "name": "Hanging Knee Raise",
+    "muscleGroup": "Core"
   },
   {
     "name": "High Knees",
@@ -64,12 +152,76 @@
     "muscleGroup": "Lower Body"
   },
   {
+    "name": "Inchworm",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "Jump Lunge",
+    "muscleGroup": "Quads"
+  },
+  {
+    "name": "Jump Squat",
+    "muscleGroup": "Quads"
+  },
+  {
     "name": "Jump Squats",
     "muscleGroup": "Lower Body"
   },
   {
+    "name": "Jumping Jacks",
+    "muscleGroup": "Glutes"
+  },
+  {
+    "name": "Kettlebell Clean",
+    "muscleGroup": "Hamstrings"
+  },
+  {
+    "name": "Kettlebell Front Squat",
+    "muscleGroup": "Quads"
+  },
+  {
+    "name": "Kettlebell Goblet Squat",
+    "muscleGroup": "Quads"
+  },
+  {
+    "name": "Kettlebell Lunge",
+    "muscleGroup": "Quads"
+  },
+  {
+    "name": "Kettlebell Overhead Press",
+    "muscleGroup": "Delts"
+  },
+  {
+    "name": "Kettlebell Single-Arm Row",
+    "muscleGroup": "Lats"
+  },
+  {
+    "name": "Kettlebell Snatch",
+    "muscleGroup": "Hamstrings"
+  },
+  {
+    "name": "Kettlebell Swing",
+    "muscleGroup": "Hamstrings"
+  },
+  {
     "name": "Kettlebell Swings",
     "muscleGroup": "Lower Body"
+  },
+  {
+    "name": "Kettlebell Thruster",
+    "muscleGroup": "Quads"
+  },
+  {
+    "name": "Kettlebell Turkish Get-Up",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "L-Sit",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "Lateral Bound",
+    "muscleGroup": "Glutes"
   },
   {
     "name": "Lateral Box Step-Up",
@@ -80,8 +232,16 @@
     "muscleGroup": "Lower Body"
   },
   {
+    "name": "Lateral Lunge",
+    "muscleGroup": "Quads"
+  },
+  {
     "name": "Lateral Lunges",
     "muscleGroup": "Lower Body"
+  },
+  {
+    "name": "Leg Raise",
+    "muscleGroup": "Core"
   },
   {
     "name": "Leg Raises",
@@ -100,16 +260,60 @@
     "muscleGroup": "Lower Body"
   },
   {
+    "name": "Mountain Climber",
+    "muscleGroup": "Core"
+  },
+  {
     "name": "Mountain Climbers",
     "muscleGroup": "Upper Body/Core"
+  },
+  {
+    "name": "Muscle-Up",
+    "muscleGroup": "Lats"
+  },
+  {
+    "name": "Oblique Crunch",
+    "muscleGroup": "Obliques"
+  },
+  {
+    "name": "Pike Push-Up",
+    "muscleGroup": "Delts"
+  },
+  {
+    "name": "Pistol Squat",
+    "muscleGroup": "Quads"
   },
   {
     "name": "Plank",
     "muscleGroup": "Core"
   },
   {
+    "name": "Plank Jack",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "Plyometric Push-Up",
+    "muscleGroup": "Chest"
+  },
+  {
+    "name": "Pogo Hop",
+    "muscleGroup": "Calves"
+  },
+  {
+    "name": "Pull-Up",
+    "muscleGroup": "Lats"
+  },
+  {
+    "name": "Push-Up",
+    "muscleGroup": "Chest"
+  },
+  {
     "name": "Push-Up Variations",
     "muscleGroup": "Upper Body"
+  },
+  {
+    "name": "Rainbow Crunches",
+    "muscleGroup": "Core"
   },
   {
     "name": "Rainbows",
@@ -120,12 +324,40 @@
     "muscleGroup": "Lower Body"
   },
   {
+    "name": "Rope Climb",
+    "muscleGroup": "Lats"
+  },
+  {
+    "name": "Russian Twist",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "Scissor Kicks",
+    "muscleGroup": "Core"
+  },
+  {
     "name": "Side Plank",
     "muscleGroup": "Core"
   },
   {
     "name": "Single Leg Hops",
     "muscleGroup": "Lower Body"
+  },
+  {
+    "name": "Single-Leg Glute Bridge",
+    "muscleGroup": "Glutes"
+  },
+  {
+    "name": "Single-Leg Hop",
+    "muscleGroup": "Quads"
+  },
+  {
+    "name": "Sit-Up",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "Skater Hops",
+    "muscleGroup": "Glutes"
   },
   {
     "name": "Slamball Burpee",
@@ -140,12 +372,24 @@
     "muscleGroup": "Lower Body"
   },
   {
+    "name": "Squat",
+    "muscleGroup": "Quads"
+  },
+  {
     "name": "Squat Pulses",
     "muscleGroup": "Lower Body"
   },
   {
+    "name": "Step-Up",
+    "muscleGroup": "Quads"
+  },
+  {
     "name": "Sumo Squats",
     "muscleGroup": "Lower Body"
+  },
+  {
+    "name": "Superman",
+    "muscleGroup": "Erector Spinae"
   },
   {
     "name": "Swimmer",
@@ -168,6 +412,14 @@
     "muscleGroup": "Core"
   },
   {
+    "name": "V-Up",
+    "muscleGroup": "Core"
+  },
+  {
+    "name": "Walking Lunge",
+    "muscleGroup": "Quads"
+  },
+  {
     "name": "Walking Lunges",
     "muscleGroup": "Lower Body"
   },
@@ -178,5 +430,9 @@
   {
     "name": "Windmill Side Lunge",
     "muscleGroup": "Lower Body"
+  },
+  {
+    "name": "Woodchopper",
+    "muscleGroup": "Core"
   }
 ]

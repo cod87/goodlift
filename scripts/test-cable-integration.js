@@ -155,7 +155,6 @@ function runTests() {
       'Equipment',
       'Difficulty',
       'Movement Pattern',
-      'Superset Type',
       'Workout Type',
       'Progression'
     ];

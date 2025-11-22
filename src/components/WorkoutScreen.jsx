@@ -319,11 +319,23 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   // Update demo image when exercise changes
   useEffect(() => {
     if (exerciseName) {
-      const imagePath = getDemoImagePath(exerciseName);
+      // Use 'Webp File' property from exercise data if available, otherwise fallback to getDemoImagePath
+      const webpFile = currentStep?.exercise?.['Webp File'];
+      let imagePath;
+      
+      if (webpFile) {
+        // Directly use the Webp File property from exercises.json
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        imagePath = `${baseUrl}demos/${webpFile}`;
+      } else {
+        // Fallback to the old method for exercises without Webp File property
+        imagePath = getDemoImagePath(exerciseName);
+      }
+      
       setDemoImageSrc(imagePath);
       setImageError(false);
     }
-  }, [exerciseName]);
+  }, [exerciseName, currentStep]);
 
   const handleImageError = () => {
     if (!imageError) {

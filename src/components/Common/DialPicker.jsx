@@ -18,53 +18,58 @@ const DialPicker = ({
   onChange, 
   disabled = false,
   formatValue,
+  minValueWidth = '100px',
   sx = {},
 }) => {
   const currentIndex = options.findIndex(opt => 
     typeof opt === 'object' ? opt.value === value : opt === value
   );
 
+  // Helper to extract value from option
+  const getValueFromOption = (option) => {
+    return typeof option === 'object' ? option.value : option;
+  };
+
   const handlePrevious = () => {
     if (disabled) return;
     // If current value not found, default to last option
     if (currentIndex === -1) {
-      const newValue = typeof options[options.length - 1] === 'object' 
-        ? options[options.length - 1].value 
-        : options[options.length - 1];
-      onChange(newValue);
+      onChange(getValueFromOption(options[options.length - 1]));
       return;
     }
     const newIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
-    const newValue = typeof options[newIndex] === 'object' 
-      ? options[newIndex].value 
-      : options[newIndex];
-    onChange(newValue);
+    onChange(getValueFromOption(options[newIndex]));
   };
 
   const handleNext = () => {
     if (disabled) return;
     // If current value not found, default to first option
     if (currentIndex === -1) {
-      const newValue = typeof options[0] === 'object' 
-        ? options[0].value 
-        : options[0];
-      onChange(newValue);
+      onChange(getValueFromOption(options[0]));
       return;
     }
     const newIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
-    const newValue = typeof options[newIndex] === 'object' 
-      ? options[newIndex].value 
-      : options[newIndex];
-    onChange(newValue);
+    onChange(getValueFromOption(options[newIndex]));
   };
 
-  const displayValue = currentIndex === -1 
-    ? (formatValue ? formatValue(value) : String(value))
-    : (formatValue 
-      ? formatValue(value) 
-      : (typeof options[currentIndex] === 'object' 
-        ? options[currentIndex]?.label 
-        : options[currentIndex]));
+  // Get display value
+  const getDisplayValue = () => {
+    // If value not found in options, use formatValue or string conversion
+    if (currentIndex === -1) {
+      return formatValue ? formatValue(value) : String(value);
+    }
+    
+    // If formatValue provided, use it
+    if (formatValue) {
+      return formatValue(value);
+    }
+    
+    // Otherwise get label from option
+    const option = options[currentIndex];
+    return typeof option === 'object' ? option.label : option;
+  };
+
+  const displayValue = getDisplayValue();
 
   return (
     <Box sx={{ ...sx }}>
@@ -113,7 +118,7 @@ const DialPicker = ({
         <Typography
           variant="h6"
           sx={{
-            minWidth: '100px',
+            minWidth: minValueWidth,
             textAlign: 'center',
             fontWeight: 500,
             color: disabled ? 'text.disabled' : 'text.primary',
@@ -164,6 +169,7 @@ DialPicker.propTypes = {
   onChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   formatValue: PropTypes.func,
+  minValueWidth: PropTypes.string,
   sx: PropTypes.object,
 };
 

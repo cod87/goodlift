@@ -282,6 +282,9 @@ export const calculateAdherence = (workoutHistory = [], activePlan = null, days 
     return 0;
   }
 
+  // Constants
+  const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -312,7 +315,7 @@ export const calculateAdherence = (workoutHistory = [], activePlan = null, days 
   }
 
   // Calculate days since first session (up to endDate)
-  const daysSinceFirstSession = Math.floor((endDate - firstSessionDate) / (1000 * 60 * 60 * 24)) + 1;
+  const daysSinceFirstSession = Math.floor((endDate - firstSessionDate) / MS_PER_DAY) + 1;
 
   // Use the smaller of: days parameter or days since first session
   const effectiveDays = daysSinceFirstSession < days ? daysSinceFirstSession : days;

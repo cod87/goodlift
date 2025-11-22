@@ -31,6 +31,15 @@ import { usePreferences } from '../../contexts/PreferencesContext';
 import { getPresetAvatarColor, getDoggoAvatarUrl, DOGGO_AVATARS } from '../../utils/avatarUtils';
 
 /**
+ * Helper function to check if equipment is barbell
+ * @param {string} equipment - Equipment type
+ * @returns {boolean} True if equipment is barbell
+ */
+const isBarbell = (equipment) => {
+  return equipment?.toLowerCase() === 'barbell';
+};
+
+/**
  * ExerciseCard - Enhanced exercise display with improved layout
  * - Header bar with timer, step counter, set indicator, and favorite star
  * - Skip/swap/help icons in top left corner
@@ -427,7 +436,7 @@ const ExerciseCard = memo(({
                   onWeightChange={setWeight} 
                   onRepsChange={setReps} 
                   disabled={setLogged}
-                  isBarbell={equipment?.toLowerCase() === 'barbell'}
+                  isBarbell={isBarbell(equipment)}
                   barbellWeight={preferences.barbellWeight || 45}
                 />
               </Box>
@@ -478,7 +487,7 @@ const ExerciseCard = memo(({
                 onWeightChange={setWeight} 
                 onRepsChange={setReps} 
                 disabled={setLogged}
-                isBarbell={equipment?.toLowerCase() === 'barbell'}
+                isBarbell={isBarbell(equipment)}
                 barbellWeight={preferences.barbellWeight || 45}
               />
             </Box>

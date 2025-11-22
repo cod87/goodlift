@@ -26,6 +26,14 @@ const DialPicker = ({
 
   const handlePrevious = () => {
     if (disabled) return;
+    // If current value not found, default to last option
+    if (currentIndex === -1) {
+      const newValue = typeof options[options.length - 1] === 'object' 
+        ? options[options.length - 1].value 
+        : options[options.length - 1];
+      onChange(newValue);
+      return;
+    }
     const newIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
     const newValue = typeof options[newIndex] === 'object' 
       ? options[newIndex].value 
@@ -35,6 +43,14 @@ const DialPicker = ({
 
   const handleNext = () => {
     if (disabled) return;
+    // If current value not found, default to first option
+    if (currentIndex === -1) {
+      const newValue = typeof options[0] === 'object' 
+        ? options[0].value 
+        : options[0];
+      onChange(newValue);
+      return;
+    }
     const newIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
     const newValue = typeof options[newIndex] === 'object' 
       ? options[newIndex].value 
@@ -42,11 +58,13 @@ const DialPicker = ({
     onChange(newValue);
   };
 
-  const displayValue = formatValue 
-    ? formatValue(value) 
-    : (typeof options[currentIndex] === 'object' 
-      ? options[currentIndex]?.label 
-      : options[currentIndex]);
+  const displayValue = currentIndex === -1 
+    ? (formatValue ? formatValue(value) : String(value))
+    : (formatValue 
+      ? formatValue(value) 
+      : (typeof options[currentIndex] === 'object' 
+        ? options[currentIndex]?.label 
+        : options[currentIndex]));
 
   return (
     <Box sx={{ ...sx }}>

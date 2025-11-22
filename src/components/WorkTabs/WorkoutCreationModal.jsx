@@ -35,26 +35,10 @@ import {
   Close,
   Search,
   FitnessCenter,
-  DragIndicator,
-  Reorder,
   AutoAwesome,
+  ArrowUpward,
+  ArrowDownward,
 } from '@mui/icons-material';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 import { generateStandardWorkout } from '../../utils/workoutGenerator';
 import { getAllCategories, filterExercisesByCategory } from '../../utils/muscleCategories';
@@ -82,9 +66,9 @@ const getSupersetColor = (groupId) => {
 };
 
 /**
- * SortableExerciseItem - Draggable exercise item in My Workout
+ * ExerciseItem - Exercise item in My Workout with arrow controls
  */
-const SortableExerciseItem = ({ 
+const ExerciseItem = ({ 
   exercise, 
   index, 
   myWorkout, 
@@ -94,24 +78,13 @@ const SortableExerciseItem = ({
   highlightedExercises,
   onToggleHighlight,
   currentSupersetNumber,
-  isReorderMode,
   onDeselectFromSuperset,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp,
+  canMoveDown,
+  isFirstInGroup,
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: exercise['Exercise Name'] });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   // Check if this exercise is in a superset group
   const supersetGroupId = exercise.supersetGroup;
   const isInSuperset = supersetGroupId !== null && supersetGroupId !== undefined;
@@ -121,10 +94,8 @@ const SortableExerciseItem = ({
   const isHighlighted = highlightedExercises.has(exercise['Exercise Name']);
   const highlightColor = getSupersetColor(currentSupersetNumber);
 
-  // Handle clicking on the card to highlight (only when not in reorder mode)
+  // Handle clicking on the card to highlight
   const handleCardClick = (e) => {
-    if (isReorderMode) return; // Don't toggle highlight in reorder mode
-    
     // Don't trigger if clicking on input fields or buttons
     const target = e.target;
     const isInput = target.tagName === 'INPUT' || target.closest('input');
@@ -137,13 +108,10 @@ const SortableExerciseItem = ({
 
   return (
     <Card
-      ref={setNodeRef}
-      style={style}
       onClick={handleCardClick}
-      {...(isReorderMode ? { ...attributes, ...listeners } : {})}
       sx={{
         position: 'relative',
-        cursor: isReorderMode ? 'grab' : 'pointer',
+        cursor: 'pointer',
         border: '1px solid',
         borderColor: 'divider',
         borderLeft: '4px solid',
@@ -154,20 +122,51 @@ const SortableExerciseItem = ({
           ? supersetColor?.light 
           : (isHighlighted ? highlightColor?.light : 'background.paper'),
         transition: 'background-color 0.2s ease, border-color 0.2s ease, opacity 0.15s ease, margin-left 0.3s ease, padding-left 0.3s ease',
-        opacity: isDragging ? 0.5 : 1,
         marginLeft: isHighlighted ? 3 : 0,
         paddingLeft: isHighlighted ? 1 : 0,
         '&:hover': {
           opacity: 0.9,
         },
         '&:active': {
-          cursor: isReorderMode ? 'grabbing' : 'pointer',
           opacity: 0.8,
         },
       }}
     >
       <CardContent sx={{ pb: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
+          {/* Arrow buttons - only show for the first exercise in a group or standalone exercises */}
+          {isFirstInGroup && (
+            <Stack direction="column" spacing={0.5}>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveUp();
+                }}
+                disabled={!canMoveUp}
+                sx={{ 
+                  padding: 0.5,
+                  '&:disabled': { opacity: 0.3 }
+                }}
+              >
+                <ArrowUpward fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveDown();
+                }}
+                disabled={!canMoveDown}
+                sx={{ 
+                  padding: 0.5,
+                  '&:disabled': { opacity: 0.3 }
+                }}
+              >
+                <ArrowDownward fontSize="small" />
+              </IconButton>
+            </Stack>
+          )}
           <Box sx={{ flex: 1 }}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="body1" sx={{ fontWeight: 600 }}>
@@ -272,7 +271,7 @@ const SortableExerciseItem = ({
   );
 };
 
-SortableExerciseItem.propTypes = {
+ExerciseItem.propTypes = {
   exercise: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   myWorkout: PropTypes.array.isRequired,
@@ -282,8 +281,12 @@ SortableExerciseItem.propTypes = {
   highlightedExercises: PropTypes.instanceOf(Set).isRequired,
   onToggleHighlight: PropTypes.func.isRequired,
   currentSupersetNumber: PropTypes.number.isRequired,
-  isReorderMode: PropTypes.bool.isRequired,
   onDeselectFromSuperset: PropTypes.func.isRequired,
+  onMoveUp: PropTypes.func.isRequired,
+  onMoveDown: PropTypes.func.isRequired,
+  canMoveUp: PropTypes.bool.isRequired,
+  canMoveDown: PropTypes.bool.isRequired,
+  isFirstInGroup: PropTypes.bool.isRequired,
 };
 
 /**
@@ -311,7 +314,6 @@ const WorkoutCreationModal = ({
   const [workoutType, setWorkoutType] = useState('full');
   const [highlightedExercises, setHighlightedExercises] = useState(new Set());
   const [currentSupersetNumber, setCurrentSupersetNumber] = useState(1);
-  const [isReorderMode, setIsReorderMode] = useState(false);
   
   // Generate workout state
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
@@ -346,18 +348,6 @@ const WorkoutCreationModal = ({
     const lowestAvailable = getLowestAvailableSupersetNumber();
     setCurrentSupersetNumber(lowestAvailable);
   }, [myWorkout]);
-
-  // DnD sensors with improved activation constraints
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: isReorderMode ? 0 : 8, // Immediate drag in reorder mode, otherwise require 8px
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
 
   // Reset state when modal opens or when existingWorkout changes
   useEffect(() => {
@@ -403,7 +393,6 @@ const WorkoutCreationModal = ({
       setFilterEquipment('all');
       setFilterMuscleGroup('all');
       setSelectedExercises(new Set());
-      setIsReorderMode(false);
     }
   }, [open, existingWorkout]);
 
@@ -541,60 +530,84 @@ const WorkoutCreationModal = ({
     return reorderedExercises;
   };
 
-  // Handle drag and drop reordering
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
+  // Get groups from exercises (a group can be a superset or a single exercise)
+  const getExerciseGroups = (exercises) => {
+    const groups = [];
+    const processedExercises = new Set();
 
-    if (over && active.id !== over.id) {
-      setMyWorkout((items) => {
-        const oldIndex = items.findIndex(item => item['Exercise Name'] === active.id);
-        const newIndex = items.findIndex(item => item['Exercise Name'] === over.id);
-        
-        const draggedExercise = items[oldIndex];
-        const targetExercise = items[newIndex];
-        
-        // Check if the dragged exercise is in a superset
-        const draggedSupersetId = draggedExercise.supersetGroup;
-        
-        if (draggedSupersetId !== null && draggedSupersetId !== undefined) {
-          // Dragging a superset group - move all exercises in that group
-          const supersetExercises = items.filter(ex => ex.supersetGroup === draggedSupersetId);
-          const otherExercises = items.filter(ex => ex.supersetGroup !== draggedSupersetId);
-          
-          // Find where to insert the superset group
-          let insertIndex;
-          if (targetExercise.supersetGroup !== null && targetExercise.supersetGroup !== undefined) {
-            // Target is in a superset - insert before that superset's first exercise
-            const targetSupersetExercises = items.filter(ex => ex.supersetGroup === targetExercise.supersetGroup);
-            if (targetSupersetExercises.length > 0) {
-              const firstTargetExerciseIndex = otherExercises.findIndex(ex => 
-                ex['Exercise Name'] === targetSupersetExercises[0]['Exercise Name']
-              );
-              insertIndex = firstTargetExerciseIndex >= 0 ? firstTargetExerciseIndex : newIndex;
-            } else {
-              insertIndex = newIndex;
-            }
-          } else {
-            // Target is a standalone exercise
-            insertIndex = otherExercises.findIndex(ex => ex['Exercise Name'] === targetExercise['Exercise Name']);
-            insertIndex = insertIndex >= 0 ? insertIndex : newIndex;
-          }
-          
-          // Insert the superset group at the new position
-          const reordered = [
-            ...otherExercises.slice(0, insertIndex),
-            ...supersetExercises,
-            ...otherExercises.slice(insertIndex)
-          ];
-          
-          // Renumber supersets based on their new order
-          return renumberSupersets(reordered);
-        } else {
-          // Regular single exercise drag
-          return arrayMove(items, oldIndex, newIndex);
-        }
-      });
+    exercises.forEach((exercise) => {
+      const exerciseName = exercise['Exercise Name'];
+      if (processedExercises.has(exerciseName)) return;
+
+      if (exercise.supersetGroup !== null && exercise.supersetGroup !== undefined) {
+        // Find all exercises in this superset group
+        const groupExercises = exercises.filter(
+          ex => ex.supersetGroup === exercise.supersetGroup
+        );
+        groups.push(groupExercises);
+        groupExercises.forEach(ex => processedExercises.add(ex['Exercise Name']));
+      } else {
+        // Single exercise (not in a superset)
+        groups.push([exercise]);
+        processedExercises.add(exerciseName);
+      }
+    });
+
+    return groups;
+  };
+
+  // Move a group (superset or single exercise) up
+  const moveGroupUp = (exerciseIndex) => {
+    const groups = getExerciseGroups(myWorkout);
+    
+    // Find which group this exercise belongs to
+    let currentGroupIndex = -1;
+    for (let i = 0; i < groups.length; i++) {
+      if (groups[i].some(ex => ex['Exercise Name'] === myWorkout[exerciseIndex]['Exercise Name'])) {
+        currentGroupIndex = i;
+        break;
+      }
     }
+
+    if (currentGroupIndex <= 0) return; // Can't move up if it's the first group
+
+    // Swap with the previous group
+    const newGroups = [...groups];
+    [newGroups[currentGroupIndex - 1], newGroups[currentGroupIndex]] = 
+      [newGroups[currentGroupIndex], newGroups[currentGroupIndex - 1]];
+
+    // Flatten back to exercises array
+    const newExercises = newGroups.flat();
+    
+    // Renumber supersets based on their new order
+    setMyWorkout(renumberSupersets(newExercises));
+  };
+
+  // Move a group (superset or single exercise) down
+  const moveGroupDown = (exerciseIndex) => {
+    const groups = getExerciseGroups(myWorkout);
+    
+    // Find which group this exercise belongs to
+    let currentGroupIndex = -1;
+    for (let i = 0; i < groups.length; i++) {
+      if (groups[i].some(ex => ex['Exercise Name'] === myWorkout[exerciseIndex]['Exercise Name'])) {
+        currentGroupIndex = i;
+        break;
+      }
+    }
+
+    if (currentGroupIndex < 0 || currentGroupIndex >= groups.length - 1) return; // Can't move down if it's the last group
+
+    // Swap with the next group
+    const newGroups = [...groups];
+    [newGroups[currentGroupIndex], newGroups[currentGroupIndex + 1]] = 
+      [newGroups[currentGroupIndex + 1], newGroups[currentGroupIndex]];
+
+    // Flatten back to exercises array
+    const newExercises = newGroups.flat();
+    
+    // Renumber supersets based on their new order
+    setMyWorkout(renumberSupersets(newExercises));
   };
 
   // Renumber supersets to reflect their order in the list
@@ -936,7 +949,7 @@ const WorkoutCreationModal = ({
 
             <Divider sx={{ my: 2 }} />
 
-            {/* Exercise List with Drag and Drop */}
+            {/* Exercise List with Arrow Controls */}
             <Box sx={{ mb: 2 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -951,60 +964,50 @@ const WorkoutCreationModal = ({
                   >
                     Generate
                   </Button>
-                  <Button
-                    variant={isReorderMode ? "contained" : "outlined"}
-                    size="small"
-                    startIcon={<Reorder />}
-                    onClick={() => {
-                      setIsReorderMode(!isReorderMode);
-                      // Clear highlights when entering reorder mode
-                      if (!isReorderMode) {
-                        setHighlightedExercises(new Set());
-                      }
-                    }}
-                  >
-                    {isReorderMode ? "Done Reordering" : "Reorder"}
-                  </Button>
                 </Stack>
               </Stack>
               <Typography variant="body2" color="text.secondary">
-                {isReorderMode 
-                  ? "Drag exercises anywhere to reorder them."
-                  : "Tap exercises to highlight them in the current superset color, then press the floating button to group them. Click the X on a superset chip to remove an exercise from that superset."
-                }
+                Tap exercises to highlight them in the current superset color, then press the floating button to group them. Use arrow buttons to reorder groups. Click the X on a superset chip to remove an exercise from that superset.
               </Typography>
             </Box>
             
             {myWorkout.length > 0 ? (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={myWorkout.map(e => e['Exercise Name'])}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <Stack spacing={2}>
-                    {myWorkout.map((exercise, index) => (
-                      <SortableExerciseItem
-                        key={exercise['Exercise Name']}
-                        exercise={exercise}
-                        index={index}
-                        myWorkout={myWorkout}
-                        setMyWorkout={setMyWorkout}
-                        selectedExercises={selectedExercises}
-                        setSelectedExercises={setSelectedExercises}
-                        highlightedExercises={highlightedExercises}
-                        onToggleHighlight={handleToggleHighlight}
-                        currentSupersetNumber={currentSupersetNumber}
-                        isReorderMode={isReorderMode}
-                        onDeselectFromSuperset={handleDeselectFromSuperset}
-                      />
-                    ))}
-                  </Stack>
-                </SortableContext>
-              </DndContext>
+              <Stack spacing={2}>
+                {(() => {
+                  const groups = getExerciseGroups(myWorkout);
+                  let exerciseIndex = 0;
+                  
+                  return groups.map((group, groupIndex) => (
+                    group.map((exercise, indexInGroup) => {
+                      const currentExerciseIndex = exerciseIndex++;
+                      const isFirstInGroup = indexInGroup === 0;
+                      const canMoveUp = groupIndex > 0;
+                      const canMoveDown = groupIndex < groups.length - 1;
+                      
+                      return (
+                        <ExerciseItem
+                          key={exercise['Exercise Name']}
+                          exercise={exercise}
+                          index={currentExerciseIndex}
+                          myWorkout={myWorkout}
+                          setMyWorkout={setMyWorkout}
+                          selectedExercises={selectedExercises}
+                          setSelectedExercises={setSelectedExercises}
+                          highlightedExercises={highlightedExercises}
+                          onToggleHighlight={handleToggleHighlight}
+                          currentSupersetNumber={currentSupersetNumber}
+                          onDeselectFromSuperset={handleDeselectFromSuperset}
+                          onMoveUp={() => moveGroupUp(currentExerciseIndex)}
+                          onMoveDown={() => moveGroupDown(currentExerciseIndex)}
+                          canMoveUp={canMoveUp}
+                          canMoveDown={canMoveDown}
+                          isFirstInGroup={isFirstInGroup}
+                        />
+                      );
+                    })
+                  ));
+                })()}
+              </Stack>
             ) : (
               <Box sx={{ textAlign: 'center', py: 4 }}>
                 <FitnessCenter sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
@@ -1014,8 +1017,8 @@ const WorkoutCreationModal = ({
               </Box>
             )}
             
-            {/* Sticky Floating Superset Button - only show when not in reorder mode and has highlighted exercises */}
-            {!isReorderMode && highlightedExercises.size > 0 && (
+            {/* Sticky Floating Superset Button - show when has highlighted exercises */}
+            {highlightedExercises.size > 0 && (
               <Tooltip title={`Create Superset ${currentSupersetNumber}`} placement="left">
                 <Box
                   onClick={handleLockInSuperset}

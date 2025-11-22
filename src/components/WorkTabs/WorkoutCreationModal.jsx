@@ -566,10 +566,14 @@ const WorkoutCreationModal = ({
           if (targetExercise.supersetGroup !== null && targetExercise.supersetGroup !== undefined) {
             // Target is in a superset - insert before that superset's first exercise
             const targetSupersetExercises = items.filter(ex => ex.supersetGroup === targetExercise.supersetGroup);
-            const firstTargetExerciseIndex = otherExercises.findIndex(ex => 
-              ex['Exercise Name'] === targetSupersetExercises[0]['Exercise Name']
-            );
-            insertIndex = firstTargetExerciseIndex >= 0 ? firstTargetExerciseIndex : newIndex;
+            if (targetSupersetExercises.length > 0) {
+              const firstTargetExerciseIndex = otherExercises.findIndex(ex => 
+                ex['Exercise Name'] === targetSupersetExercises[0]['Exercise Name']
+              );
+              insertIndex = firstTargetExerciseIndex >= 0 ? firstTargetExerciseIndex : newIndex;
+            } else {
+              insertIndex = newIndex;
+            }
           } else {
             // Target is a standalone exercise
             insertIndex = otherExercises.findIndex(ex => ex['Exercise Name'] === targetExercise['Exercise Name']);
@@ -595,7 +599,6 @@ const WorkoutCreationModal = ({
 
   // Renumber supersets to reflect their order in the list
   const renumberSupersets = (exercises) => {
-    const supersetGroups = new Map();
     const newSupersetMapping = new Map();
     let newSupersetId = 1;
     
@@ -603,8 +606,7 @@ const WorkoutCreationModal = ({
     exercises.forEach(exercise => {
       const oldSupersetId = exercise.supersetGroup;
       if (oldSupersetId !== null && oldSupersetId !== undefined) {
-        if (!supersetGroups.has(oldSupersetId)) {
-          supersetGroups.set(oldSupersetId, newSupersetId);
+        if (!newSupersetMapping.has(oldSupersetId)) {
           newSupersetMapping.set(oldSupersetId, newSupersetId);
           newSupersetId++;
         }

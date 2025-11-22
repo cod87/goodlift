@@ -202,20 +202,36 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     const currentIntervalIndex = Math.floor(currentElapsedTime / intervalSeconds);
     const targetTime = (currentIntervalIndex + 1) * intervalSeconds;
     
-    // Find all rest period start times
+    // Calculate which rounds are near the target time
+    // We only need to check rounds within one full round duration of the target
+    const searchRadius = roundDuration * 2;
+    const minTime = Math.max(0, targetTime - searchRadius);
+    const maxTime = targetTime + searchRadius;
+    
+    // Find rest period start times near the target
     const restPeriods = [];
     let timeAccumulated = 0;
     let roundIndex = 0;
     
-    // Calculate rest periods up to twice the target time to ensure we find candidates
-    while (timeAccumulated < targetTime * 2) {
+    // Calculate rest periods only in the relevant range
+    while (timeAccumulated <= maxTime) {
       timeAccumulated += work; // Work period
-      restPeriods.push(timeAccumulated); // Rest starts after work
+      
+      if (timeAccumulated >= minTime) {
+        restPeriods.push(timeAccumulated); // Rest starts after work
+      }
+      
       timeAccumulated += rest; // Rest period
       roundIndex++;
       
       // Safety check to prevent infinite loop
       if (roundIndex > 1000) break;
+    }
+    
+    // Handle edge case: no rest periods found
+    if (restPeriods.length === 0) {
+      // Return the target time as a fallback
+      return targetTime;
     }
     
     // Find the rest period closest to targetTime
@@ -368,8 +384,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   newElapsedTime = prev + workInterval;
                   
                   // Calculate if this rest period should be extended
-                  // A rest period should be extended if it's the closest to the next extended rest target time
-                  if (nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < (workInterval + restInterval) / 2) {
+                  // Use a small tolerance for float comparison to avoid precision issues
+                  if (nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < 0.5) {
                     shouldExtendRest = true;
                   }
                   

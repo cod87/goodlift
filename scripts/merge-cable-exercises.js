@@ -44,10 +44,6 @@ function convertCableCSVToJSON(csvData) {
       "Secondary Muscles": row['Secondary Muscles']?.trim() || '',
       "Exercise Type": row['Exercise Type']?.trim() || '',
       "Equipment": row['Equipment']?.trim() || '',
-      "Difficulty": row['Difficulty']?.trim() || '',
-      "Movement Pattern": row['Movement Pattern']?.trim() || '',
-      "Rep Range": '', // Not in cable CSV, but present in exercises.json
-      "Superset Type": row['Superset Type']?.trim() || '',
       "Workout Type": row['Workout Type']?.trim() || '',
       "Progression": row['Progression']?.trim() || ''
     };

@@ -28,6 +28,8 @@ const DEFAULT_PREFERENCES = {
   morningNotificationTime: { hour: 8, minute: 0 }, // Time for morning notifications
   followupNotificationTime: { hour: 21, minute: 0 }, // Time for follow-up notifications
   enableFollowupNotifications: true, // Enable/disable follow-up notifications
+  // Barbell weight preference
+  barbellWeight: 45, // Default barbell weight in lbs (standard Olympic barbell)
 };
 
 export const PreferencesProvider = ({ children }) => {

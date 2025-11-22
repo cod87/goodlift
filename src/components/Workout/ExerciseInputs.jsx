@@ -8,6 +8,7 @@ import {
   Stack
 } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
+import { calculateBarbellPerSide } from '../../utils/weightUtils';
 
 /**
  * ExerciseInputs - Compact horizontal weight/reps input layout
@@ -24,6 +25,8 @@ const ExerciseInputs = memo(forwardRef(({
   weightIncrement = 2.5,
   repsIncrement = 1,
   disabled = false,
+  isBarbell = false,
+  barbellWeight = 45,
 }, ref) => {
   const handleWeightIncrement = (delta) => {
     const currentWeight = parseFloat(weight) || 0;
@@ -196,6 +199,26 @@ const ExerciseInputs = memo(forwardRef(({
           )}
         </Typography>
       )}
+
+      {/* Per-side weight for barbell exercises */}
+      {isBarbell && weight && parseFloat(weight) > 0 && (
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            color: 'text.secondary',
+            fontStyle: 'italic',
+            display: 'block',
+            mt: 0.5,
+          }}
+        >
+          {(() => {
+            const perSide = calculateBarbellPerSide(parseFloat(weight), barbellWeight);
+            return perSide !== null && perSide >= 0
+              ? `${perSide} lbs per side`
+              : '';
+          })()}
+        </Typography>
+      )}
     </Box>
   );
 }));
@@ -212,6 +235,8 @@ ExerciseInputs.propTypes = {
   weightIncrement: PropTypes.number,
   repsIncrement: PropTypes.number,
   disabled: PropTypes.bool,
+  isBarbell: PropTypes.bool,
+  barbellWeight: PropTypes.number,
 };
 
 export default ExerciseInputs;

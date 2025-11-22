@@ -337,7 +337,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                                 description: food.name,
                                 foodNutrients: Object.keys(NUTRIENT_IDS).map(key => ({
                                   nutrientId: NUTRIENT_IDS[key],
-                                  value: food.nutrition[key.toLowerCase()] / (food.grams / 100)
+                                  value: food.grams > 0 ? food.nutrition[key.toLowerCase()] / (food.grams / 100) : 0
                                 }))
                               })}
                               size="small"

@@ -4,7 +4,7 @@
  * Features:
  * - Add exercises one at a time using autocomplete search
  * - Configure sets, reps, weight for each exercise
- * - Reorder exercises via drag and drop
+ * - Reorder exercises via arrow buttons
  * - Remove exercises
  * - Save session for use in workout plans
  */
@@ -29,13 +29,15 @@ import {
   MenuItem,
   Chip,
   Paper,
-  Divider
+  Divider,
+  Stack
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
   Add as AddIcon,
-  DragIndicator as DragIcon,
-  FitnessCenter as ExerciseIcon
+  FitnessCenter as ExerciseIcon,
+  ArrowUpward as ArrowUpIcon,
+  ArrowDownward as ArrowDownIcon
 } from '@mui/icons-material';
 import ExerciseAutocomplete from './ExerciseAutocomplete';
 
@@ -150,16 +152,16 @@ const SessionBuilderDialog = ({
     onClose();
   };
 
-  // Future enhancement: drag and drop reordering
-  // const moveExercise = (fromIndex, direction) => {
-  //   const newExercises = [...exercises];
-  //   const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
-  //   
-  //   if (toIndex < 0 || toIndex >= exercises.length) return;
-  //   
-  //   [newExercises[fromIndex], newExercises[toIndex]] = [newExercises[toIndex], newExercises[fromIndex]];
-  //   setExercises(newExercises);
-  // };
+  // Move exercise up
+  const moveExercise = (fromIndex, direction) => {
+    const newExercises = [...exercises];
+    const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+    
+    if (toIndex < 0 || toIndex >= exercises.length) return;
+    
+    [newExercises[fromIndex], newExercises[toIndex]] = [newExercises[toIndex], newExercises[fromIndex]];
+    setExercises(newExercises);
+  };
 
   return (
     <Dialog 
@@ -261,7 +263,31 @@ const SessionBuilderDialog = ({
                       {/* Exercise Header */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <DragIcon sx={{ color: 'text.disabled', cursor: 'grab' }} />
+                          {/* Arrow buttons for reordering */}
+                          <Stack direction="column" spacing={0.5}>
+                            <IconButton
+                              size="small"
+                              onClick={() => moveExercise(index, 'up')}
+                              disabled={index === 0}
+                              sx={{ 
+                                padding: 0.5,
+                                '&:disabled': { opacity: 0.3 }
+                              }}
+                            >
+                              <ArrowUpIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => moveExercise(index, 'down')}
+                              disabled={index === exercises.length - 1}
+                              sx={{ 
+                                padding: 0.5,
+                                '&:disabled': { opacity: 0.3 }
+                              }}
+                            >
+                              <ArrowDownIcon fontSize="small" />
+                            </IconButton>
+                          </Stack>
                           <Box>
                             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                               {index + 1}. {exercise.name || exercise['Exercise Name']}

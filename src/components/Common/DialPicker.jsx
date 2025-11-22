@@ -97,20 +97,7 @@ const DialPicker = ({
         <IconButton
           onClick={handlePrevious}
           disabled={disabled}
-          size="medium"
-          sx={{
-            color: 'primary.main',
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 1,
-            '&:hover': {
-              bgcolor: 'action.hover',
-            },
-            '&.Mui-disabled': {
-              color: 'action.disabled',
-              borderColor: 'action.disabledBackground',
-            },
-          }}
+          color="primary"
         >
           <ChevronLeft />
         </IconButton>
@@ -130,20 +117,7 @@ const DialPicker = ({
         <IconButton
           onClick={handleNext}
           disabled={disabled}
-          size="medium"
-          sx={{
-            color: 'primary.main',
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 1,
-            '&:hover': {
-              bgcolor: 'action.hover',
-            },
-            '&.Mui-disabled': {
-              color: 'action.disabled',
-              borderColor: 'action.disabledBackground',
-            },
-          }}
+          color="primary"
         >
           <ChevronRight />
         </IconButton>

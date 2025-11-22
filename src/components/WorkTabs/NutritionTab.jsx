@@ -167,7 +167,7 @@ const NutritionTab = () => {
 
     const nutrition = calculateNutrition(selectedFood, portionGrams);
     const entry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`, // Unique ID with timestamp + random string
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`, // Unique ID: timestamp + random 9-char string
       date: new Date().toISOString(),
       foodName: selectedFood.description,
       grams: portionGrams,

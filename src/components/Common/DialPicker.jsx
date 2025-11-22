@@ -18,7 +18,7 @@ const DialPicker = ({
   onChange, 
   disabled = false,
   formatValue,
-  minValueWidth = '100px',
+  minValueWidth = '80px',
   useArrows = false,
   sx = {},
 }) => {

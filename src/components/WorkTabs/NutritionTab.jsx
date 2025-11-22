@@ -35,6 +35,15 @@ import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutri
 const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
 const USDA_API_BASE_URL = 'https://api.nal.usda.gov/fdc/v1';
 
+// USDA Nutrient IDs (FoodData Central standard nutrient identifiers)
+const NUTRIENT_IDS = {
+  CALORIES: 1008,  // Energy (kcal)
+  PROTEIN: 1003,   // Protein (g)
+  CARBS: 1005,     // Carbohydrate, by difference (g)
+  FAT: 1004,       // Total lipid (fat) (g)
+  FIBER: 1079,     // Fiber, total dietary (g)
+};
+
 /**
  * NutritionTab - Component for tracking nutrition using USDA FoodData Central API
  * Features:
@@ -123,11 +132,11 @@ const NutritionTab = () => {
   const calculateNutrition = (food, grams) => {
     const multiplier = grams / 100;
     return {
-      calories: getNutrient(food, 1008) * multiplier,
-      protein: getNutrient(food, 1003) * multiplier,
-      carbs: getNutrient(food, 1005) * multiplier,
-      fat: getNutrient(food, 1004) * multiplier,
-      fiber: getNutrient(food, 1079) * multiplier,
+      calories: getNutrient(food, NUTRIENT_IDS.CALORIES) * multiplier,
+      protein: getNutrient(food, NUTRIENT_IDS.PROTEIN) * multiplier,
+      carbs: getNutrient(food, NUTRIENT_IDS.CARBS) * multiplier,
+      fat: getNutrient(food, NUTRIENT_IDS.FAT) * multiplier,
+      fiber: getNutrient(food, NUTRIENT_IDS.FIBER) * multiplier,
     };
   };
 
@@ -138,7 +147,7 @@ const NutritionTab = () => {
 
     const nutrition = calculateNutrition(selectedFood, portionGrams);
     const entry = {
-      id: Date.now(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Unique ID with timestamp + random string
       date: new Date().toISOString(),
       foodName: selectedFood.description,
       grams: portionGrams,

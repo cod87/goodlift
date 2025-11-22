@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { Box, Typography, IconButton } from '@mui/material';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight, Add, Remove } from '@mui/icons-material';
 
 /**
  * DialPicker - A minimalist left/right picker control with arrows
@@ -19,6 +19,7 @@ const DialPicker = ({
   disabled = false,
   formatValue,
   minValueWidth = '100px',
+  useArrows = false,
   sx = {},
 }) => {
   const currentIndex = options.findIndex(opt => 
@@ -99,7 +100,7 @@ const DialPicker = ({
           disabled={disabled}
           color="primary"
         >
-          <ChevronLeft />
+          {useArrows ? <ChevronLeft /> : <Remove />}
         </IconButton>
         
         <Typography
@@ -119,7 +120,7 @@ const DialPicker = ({
           disabled={disabled}
           color="primary"
         >
-          <ChevronRight />
+          {useArrows ? <ChevronRight /> : <Add />}
         </IconButton>
       </Box>
     </Box>
@@ -144,6 +145,7 @@ DialPicker.propTypes = {
   disabled: PropTypes.bool,
   formatValue: PropTypes.func,
   minValueWidth: PropTypes.string,
+  useArrows: PropTypes.bool,
   sx: PropTypes.object,
 };
 

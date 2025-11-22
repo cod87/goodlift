@@ -907,6 +907,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       { label: '2:1', value: '2:1' },
                     ]}
                     onChange={setWorkRestRatio}
+                    useArrows={true}
                   />
 
                   {/* Work Time Selection */}

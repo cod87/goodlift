@@ -7,7 +7,6 @@ import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, C
 import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
-import { getDemoImagePath } from '../utils/exerciseDemoImages';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 
 /**
@@ -320,16 +319,16 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   // Update demo image when exercise changes
   useEffect(() => {
     if (exerciseName) {
-      // Use 'Webp File' property from exercise data if available, otherwise fallback to getDemoImagePath
+      // Use 'Webp File' property from exercise data if available, otherwise use placeholder
+      const baseUrl = import.meta.env.BASE_URL || '/';
       let imagePath;
       
       if (webpFile) {
         // Directly use the Webp File property from exercises.json
-        const baseUrl = import.meta.env.BASE_URL || '/';
         imagePath = `${baseUrl}demos/${webpFile}`;
       } else {
-        // Fallback to the old method for exercises without Webp File property
-        imagePath = getDemoImagePath(exerciseName);
+        // Use placeholder SVG for exercises without Webp File property
+        imagePath = `${baseUrl}work-icon.svg`;
       }
       
       setDemoImageSrc(imagePath);

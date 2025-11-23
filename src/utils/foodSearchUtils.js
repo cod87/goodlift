@@ -49,3 +49,27 @@ export const hasAllowedDataType = (food) => {
   const dataType = food.dataType || '';
   return ALLOWED_DATA_TYPES.includes(dataType);
 };
+
+/**
+ * Filter foods to include only Foundation dataType
+ * Used for initial search results to show highest quality foods first
+ * 
+ * @param {Object} food - Food object from USDA API
+ * @returns {boolean} - True if food has Foundation dataType
+ */
+export const isFoundationFood = (food) => {
+  const dataType = food.dataType || '';
+  return dataType === 'Foundation';
+};
+
+/**
+ * Filter foods to include only SR Legacy dataType
+ * Used for extended search results
+ * 
+ * @param {Object} food - Food object from USDA API
+ * @returns {boolean} - True if food has SR Legacy dataType
+ */
+export const isSRLegacyFood = (food) => {
+  const dataType = food.dataType || '';
+  return dataType === 'SR Legacy';
+};

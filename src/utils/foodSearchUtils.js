@@ -9,6 +9,9 @@ export const FOOD_SEARCH_CONFIG = {
   MAX_RESULTS: 5,     // Maximum number of results to display to user
 };
 
+// Allowed USDA dataTypes for nutrition search
+export const ALLOWED_DATA_TYPES = ['Foundation', 'SR Legacy'];
+
 /**
  * Flexible keyword-based food matching helper
  * Splits the query into keywords and checks if a food description contains all keywords
@@ -33,4 +36,16 @@ export const matchesAllKeywords = (foodDescription, keywords) => {
  */
 export const parseSearchKeywords = (query) => {
   return query.trim().split(/\s+/).filter(k => k.length > 0);
+};
+
+/**
+ * Filter foods by dataType to include only Foundation and SR Legacy
+ * This ensures that only high-quality, non-branded USDA foods are shown
+ * 
+ * @param {Object} food - Food object from USDA API
+ * @returns {boolean} - True if food has an allowed dataType (Foundation or SR Legacy)
+ */
+export const hasAllowedDataType = (food) => {
+  const dataType = food.dataType || '';
+  return ALLOWED_DATA_TYPES.includes(dataType);
 };

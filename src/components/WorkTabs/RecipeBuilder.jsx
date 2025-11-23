@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import { Delete, Add, Search } from '@mui/icons-material';
 import { saveRecipe } from '../../utils/nutritionStorage';
-import { matchesAllKeywords, parseSearchKeywords, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
+import { matchesAllKeywords, parseSearchKeywords, hasAllowedDataType, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
 
 // USDA FoodData Central API configuration
 const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
@@ -99,11 +99,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
       // 2. Filter foods that contain all keywords in any order
       // 3. Limit to configured maximum results
       const filteredFoods = allFoods
-        .filter(food => {
-          // Ensure only Foundation and SR Legacy dataTypes
-          const dataType = food.dataType || '';
-          return dataType === 'Foundation' || dataType === 'SR Legacy';
-        })
+        .filter(hasAllowedDataType)
         .filter(food => matchesAllKeywords(food.description, keywords))
         .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       

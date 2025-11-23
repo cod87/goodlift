@@ -22,35 +22,23 @@ import {
 } from '@mui/material';
 import { Delete, Add, Search } from '@mui/icons-material';
 import { saveRecipe } from '../../utils/nutritionStorage';
-import { matchesAllKeywords, parseSearchKeywords, hasAllowedDataType, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
+import { FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
 
-// USDA FoodData Central API configuration
-const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
-const USDA_API_BASE_URL = 'https://api.nal.usda.gov/fdc/v1';
+// Open Food Facts API configuration
+const OFF_API_BASE_URL = 'https://world.openfoodfacts.org/cgi/search.pl';
+const OFF_USER_AGENT = 'GoodLift-NutritionTracker/1.0';
 
-// USDA Nutrient IDs
-const NUTRIENT_IDS = {
-  CALORIES: 1008,
-  PROTEIN: 1003,
-  CARBS: 1005,
-  FAT: 1004,
-  FIBER: 1079,
-};
+// Cache for API responses
+const apiCache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
  * RecipeBuilder - Dialog component for creating and editing custom recipes
  * Allows users to:
- * - Add multiple foods with their weights using flexible keyword search
- * - Prioritizes SR Legacy foods first (most comprehensive), then Foundation foods
- * - Fuzzy/partial matching: handles out-of-order keywords, partial words, variations
- * - Only shows USDA foods with dataType 'Foundation' and 'SR Legacy' (excludes Branded)
- * - Calculate total nutrition
+ * - Add multiple foods with their weights using Open Food Facts search
+ * - Search for products with brand, name, and nutrition information
+ * - Calculate total nutrition from multiple ingredients
  * - Save recipe for later use
- * 
- * Search Strategy:
- * - Shows SR Legacy results first (more comprehensive food database)
- * - Falls back to Foundation foods for additional results
- * - Client-side filtering with fuzzy matching for better result coverage
  */
 const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
   const [recipeName, setRecipeName] = useState('');
@@ -81,50 +69,60 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
       return;
     }
 
+    // Check cache first
+    const cacheKey = `recipe_search_${query.toLowerCase()}`;
+    const cachedData = apiCache.get(cacheKey);
+    if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+      setSearchResults(cachedData.results);
+      return;
+    }
+
     setSearching(true);
     setError('');
 
     try {
-      // Split query into keywords for flexible matching
-      // This allows 'chickpeas canned' to match 'canned chickpeas', etc.
-      // Also enables partial matching: 'chick' matches 'chickpeas'
-      const keywords = parseSearchKeywords(query);
-      
-      // Request more results from API to allow for client-side filtering
-      // Increased page size for better result coverage with fuzzy matching
-      const response = await fetch(
-        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=${FOOD_SEARCH_CONFIG.API_PAGE_SIZE}&dataType=Foundation,SR%20Legacy`
-      );
+      const params = new URLSearchParams({
+        search_terms: query,
+        search_simple: '1',
+        action: 'process',
+        json: '1',
+        page_size: '20',
+        fields: 'code,product_name,brands,nutriments,image_url,image_small_url'
+      });
+
+      const response = await fetch(`${OFF_API_BASE_URL}?${params.toString()}`, {
+        headers: {
+          'User-Agent': OFF_USER_AGENT,
+        },
+      });
 
       if (!response.ok) {
         throw new Error('Failed to search foods');
       }
 
       const data = await response.json();
-      const allFoods = data.foods || [];
+      const products = data.products || [];
       
-      // Apply client-side filtering:
-      // 1. Filter by dataType to ensure only Foundation and SR Legacy foods (defense-in-depth)
-      // 2. Filter foods that contain all keywords in any order (supports partial/fuzzy matching)
-      // 3. Limit to configured maximum results
-      const keywordFilteredFoods = allFoods
-        .filter(hasAllowedDataType)
-        .filter(food => matchesAllKeywords(food.description, keywords));
+      // Process and normalize products
+      const processedProducts = products
+        .filter(product => product.product_name && product.product_name.trim() !== '')
+        .map(product => ({
+          ...product,
+          id: product.code,
+          name: product.product_name,
+          brand: product.brands || '',
+          image: product.image_small_url || product.image_url || '',
+          nutriments: product.nutriments || {},
+        }))
+        .slice(0, 15); // Limit to 15 results for recipes
       
-      // PRIORITIZATION STRATEGY: Show SR Legacy first, then Foundation
-      // SR Legacy has the most comprehensive food database, so we prioritize it
-      const srLegacyFoods = keywordFilteredFoods
-        .filter(food => food.dataType === 'SR Legacy')
-        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
-      
-      const foundationFoods = keywordFilteredFoods
-        .filter(food => food.dataType === 'Foundation')
-        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
-      
-      // Combine with SR Legacy first for prioritization
-      const combinedResults = [...srLegacyFoods, ...foundationFoods];
-      
-      setSearchResults(combinedResults);
+      // Cache the results
+      apiCache.set(cacheKey, {
+        results: processedProducts,
+        timestamp: Date.now(),
+      });
+
+      setSearchResults(processedProducts);
     } catch (err) {
       console.error('Error searching foods:', err);
       setError('Failed to search foods. Please try again.');
@@ -134,19 +132,34 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
     }
   }, []);
 
-  const getNutrient = (food, nutrientId) => {
-    const nutrient = food.foodNutrients?.find(n => n.nutrientId === nutrientId);
-    return nutrient?.value || 0;
+  /**
+   * Get nutrition value from Open Food Facts nutriments object
+   */
+  const getNutrient = (nutriments, key, defaultValue = 0) => {
+    const value = nutriments[`${key}_100g`] || nutriments[key] || defaultValue;
+    return typeof value === 'number' ? value : defaultValue;
   };
 
+  /**
+   * Calculate nutrition values based on portion size
+   */
   const calculateNutrition = (food, grams) => {
+    const nutriments = food.nutriments || {};
     const multiplier = grams / 100;
+    
+    // Energy handling
+    let calories = getNutrient(nutriments, 'energy-kcal', 0);
+    if (calories === 0) {
+      const energy = getNutrient(nutriments, 'energy', 0);
+      calories = energy < 1000 ? energy : energy / 4.184;
+    }
+    
     return {
-      calories: getNutrient(food, NUTRIENT_IDS.CALORIES) * multiplier,
-      protein: getNutrient(food, NUTRIENT_IDS.PROTEIN) * multiplier,
-      carbs: getNutrient(food, NUTRIENT_IDS.CARBS) * multiplier,
-      fat: getNutrient(food, NUTRIENT_IDS.FAT) * multiplier,
-      fiber: getNutrient(food, NUTRIENT_IDS.FIBER) * multiplier,
+      calories: calories * multiplier,
+      protein: getNutrient(nutriments, 'proteins', 0) * multiplier,
+      carbs: getNutrient(nutriments, 'carbohydrates', 0) * multiplier,
+      fat: getNutrient(nutriments, 'fat', 0) * multiplier,
+      fiber: getNutrient(nutriments, 'fiber', 0) * multiplier,
     };
   };
 
@@ -154,10 +167,13 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
     const nutrition = calculateNutrition(food, grams);
     const newFood = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-      fdcId: food.fdcId,
-      name: food.description,
+      code: food.id || food.code,
+      name: food.name || food.product_name,
+      brand: food.brand || food.brands || '',
       grams,
       nutrition,
+      // Store the nutriments data for recalculation
+      nutriments: food.nutriments || {},
     };
 
     setFoods([...foods, newFood]);
@@ -169,12 +185,12 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
     setFoods(foods.filter(f => f.id !== foodId));
   };
 
-  const handleUpdateGrams = (foodId, newGrams, foodData) => {
+  const handleUpdateGrams = (foodId, newGrams) => {
     const grams = Math.max(1, parseFloat(newGrams) || 0);
     setFoods(foods.map(f => {
       if (f.id === foodId) {
-        // Recalculate nutrition with new grams
-        const nutrition = calculateNutrition(foodData, grams);
+        // Recalculate nutrition with new grams using stored nutriments
+        const nutrition = calculateNutrition({ nutriments: f.nutriments }, grams);
         return { ...f, grams, nutrition };
       }
       return f;
@@ -321,9 +337,9 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                 <List disablePadding>
                   {searchResults.map((food, index) => {
                     const nutrition = calculateNutrition(food, 100);
-                    const dataType = food.dataType || '';
+                    const brand = food.brand || food.brands || '';
                     return (
-                      <Box key={food.fdcId}>
+                      <Box key={food.id || food.code || index}>
                         {index > 0 && <Divider />}
                         <ListItem
                           button
@@ -334,20 +350,22 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                             primary={
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                                 <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
-                                  {food.description}
+                                  {food.name || food.product_name}
                                 </Typography>
-                                <Chip 
-                                  label={dataType} 
-                                  size="small" 
-                                  color={dataType === 'SR Legacy' ? 'info' : 'default'}
-                                  sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
-                                />
+                                {brand && (
+                                  <Chip 
+                                    label={brand} 
+                                    size="small" 
+                                    color="default"
+                                    sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                                  />
+                                )}
                               </Box>
                             }
                             secondary={
                               <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
-                                <Chip label={`${nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                <Chip label={`P: ${nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                <Chip label={nutrition.calories > 0 ? `${nutrition.calories.toFixed(0)} cal` : 'N/A'} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                {nutrition.protein > 0 && <Chip label={`P: ${nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />}
                               </Box>
                             }
                           />
@@ -386,14 +404,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                             <TextField
                               type="number"
                               value={food.grams}
-                              onChange={(e) => handleUpdateGrams(food.id, e.target.value, { 
-                                fdcId: food.fdcId, 
-                                description: food.name,
-                                foodNutrients: Object.keys(NUTRIENT_IDS).map(key => ({
-                                  nutrientId: NUTRIENT_IDS[key],
-                                  value: food.grams > 0 ? food.nutrition[key.toLowerCase()] / (food.grams / 100) : 0
-                                }))
-                              })}
+                              onChange={(e) => handleUpdateGrams(food.id, e.target.value)}
                               size="small"
                               sx={{ width: 80 }}
                               InputProps={{

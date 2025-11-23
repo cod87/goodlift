@@ -19,7 +19,7 @@ import NutritionTab from './WorkTabs/NutritionTab';
  * 1. Strength - Shows integrated workout configuration and quick start
  * 2. Mobility - Timer functionality for mobility workouts (cardio, yoga)
  * 3. Activity - Manual activity logging
- * 4. Nutrition - Food tracking with USDA FoodData Central API
+ * 4. Nutrition - Food tracking with Open Food Facts API
  */
 const WorkTabs = ({ 
   onNavigate,

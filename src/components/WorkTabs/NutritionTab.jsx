@@ -35,10 +35,11 @@ import {
   MenuBook,
   Search,
 } from '@mui/icons-material';
-import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes } from '../../utils/nutritionStorage';
+import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes, getFavoriteFoods } from '../../utils/nutritionStorage';
 import { matchesAllKeywords, parseSearchKeywords, hasAllowedDataType, isFoundationFood, isSRLegacyFood, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
 import RecipeBuilder from './RecipeBuilder';
 import SavedRecipes from './SavedRecipes';
+import LogMealModal from '../LogMealModal';
 
 // USDA FoodData Central API configuration
 const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
@@ -96,18 +97,26 @@ const NutritionTab = () => {
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [showFoundation, setShowFoundation] = useState(false);
   const [foundationResults, setFoundationResults] = useState([]);
+  const [showLogMealModal, setShowLogMealModal] = useState(false);
+  const [favoriteFoods, setFavoriteFoods] = useState([]);
   const debounceTimer = useRef(null);
 
-  // Load today's entries, goals, and recipes on mount
+  // Load today's entries, goals, recipes, and favorites on mount
   useEffect(() => {
     loadTodayEntries();
     loadGoals();
     loadRecipes();
+    loadFavorites();
   }, []);
 
   const loadRecipes = () => {
     const savedRecipes = getRecipes();
     setRecipes(savedRecipes);
+  };
+
+  const loadFavorites = () => {
+    const savedFavorites = getFavoriteFoods();
+    setFavoriteFoods(savedFavorites);
   };
 
   const loadTodayEntries = () => {
@@ -315,6 +324,45 @@ const NutritionTab = () => {
     setActiveSubTab(0);
   };
 
+  const handleLogMealModalSave = (entry) => {
+    saveNutritionEntry(entry);
+    loadTodayEntries();
+  };
+
+  const getRecentFoods = () => {
+    // Get unique foods from recent entries (last 30 days)
+    const allEntries = getNutritionEntries();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentEntries = allEntries.filter(entry => 
+      new Date(entry.date) >= thirtyDaysAgo
+    );
+    
+    // Create a map to track unique foods by name
+    const foodMap = new Map();
+    recentEntries.forEach(entry => {
+      if (!foodMap.has(entry.foodName)) {
+        foodMap.set(entry.foodName, {
+          description: entry.foodName,
+          foodName: entry.foodName,
+          grams: entry.grams,
+          nutrition: entry.nutrition,
+          // Reconstruct food nutrients for consistency with search results
+          foodNutrients: [
+            { nutrientId: 1008, value: (entry.nutrition.calories / entry.grams) * 100 },
+            { nutrientId: 1003, value: (entry.nutrition.protein / entry.grams) * 100 },
+            { nutrientId: 1005, value: (entry.nutrition.carbs / entry.grams) * 100 },
+            { nutrientId: 1004, value: (entry.nutrition.fat / entry.grams) * 100 },
+            { nutrientId: 1079, value: (entry.nutrition.fiber / entry.grams) * 100 },
+          ]
+        });
+      }
+    });
+    
+    return Array.from(foodMap.values()).slice(0, 20);
+  };
+
   const getTodayTotals = () => {
     return todayEntries.reduce(
       (totals, entry) => ({
@@ -365,6 +413,28 @@ const NutritionTab = () => {
 
   return (
     <Box>
+      {/* Log Meal Button - Prominent at top */}
+      <Box sx={{ mb: 2 }}>
+        <Button
+          variant="contained"
+          size="large"
+          fullWidth
+          startIcon={<Add />}
+          onClick={() => setShowLogMealModal(true)}
+          sx={{
+            py: 1.5,
+            fontWeight: 600,
+            fontSize: '1rem',
+            boxShadow: 2,
+            '&:hover': {
+              boxShadow: 4,
+            },
+          }}
+        >
+          Log a Meal
+        </Button>
+      </Box>
+
       {/* Sub-tabs for Diary and Recipes */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs 
@@ -1243,6 +1313,16 @@ const NutritionTab = () => {
           />
         </>
       )}
+
+      {/* Log Meal Modal */}
+      <LogMealModal
+        open={showLogMealModal}
+        onClose={() => setShowLogMealModal(false)}
+        onSave={handleLogMealModalSave}
+        recentFoods={getRecentFoods()}
+        favoriteFoods={favoriteFoods}
+        onFavoritesChange={loadFavorites}
+      />
     </Box>
   );
 };

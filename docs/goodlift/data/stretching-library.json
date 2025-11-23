@@ -1,0 +1,286 @@
+{
+  "dynamic": [
+    {
+      "name": "Arm Circles",
+      "description": "Rotate arms in circular motions forward and backward to warm up shoulders",
+      "primaryMuscles": "Delts",
+      "secondaryMuscles": "Upper Back, Chest",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=Ue_PRcVBdm8"
+    },
+    {
+      "name": "Neck Rotation",
+      "description": "Gently rotate neck in circular motions to warm up neck muscles",
+      "primaryMuscles": "Neck",
+      "secondaryMuscles": "Traps",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=xfGKhRo5bpI"
+    },
+    {
+      "name": "Cat-Cow Stretch",
+      "description": "Alternate between arching and rounding your back on hands and knees",
+      "primaryMuscles": "Back, Core",
+      "secondaryMuscles": "Abs",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=kqnua4rHVVA"
+    },
+    {
+      "name": "Leg Swings - Front to Back",
+      "description": "Swing one leg forward and backward while holding onto support",
+      "primaryMuscles": "Hip Flexors, Hamstrings",
+      "secondaryMuscles": "Glutes, Quads",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=4aoEuyPKA8s"
+    },
+    {
+      "name": "Leg Swings - Side to Side",
+      "description": "Swing one leg side to side across your body while holding support",
+      "primaryMuscles": "Hip Flexors, Inner Thighs",
+      "secondaryMuscles": "Glutes, Groin",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=En9wNNj7-8E"
+    },
+    {
+      "name": "World's Greatest Stretch",
+      "description": "Dynamic lunge with rotation and arm reach for full body mobility",
+      "primaryMuscles": "Hip Flexors, Hamstrings",
+      "secondaryMuscles": "Back, Chest, Delts",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=X0qC1k0Zi6k"
+    },
+    {
+      "name": "Walking Lunges",
+      "description": "Step forward into lunges, alternating legs to warm up lower body",
+      "primaryMuscles": "Quads, Glutes",
+      "secondaryMuscles": "Hamstrings, Hip Flexors",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=L8fvypPrzzs"
+    },
+    {
+      "name": "High Knees",
+      "description": "Run in place while bringing knees up to hip height",
+      "primaryMuscles": "Hip Flexors, Quads",
+      "secondaryMuscles": "Core, Calves",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=8opcQdC-V-U"
+    },
+    {
+      "name": "Butt Kicks",
+      "description": "Jog in place while kicking heels up towards glutes",
+      "primaryMuscles": "Hamstrings, Quads",
+      "secondaryMuscles": "Calves, Glutes",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=2btngJznuzM"
+    },
+    {
+      "name": "Torso Twists",
+      "description": "Rotate upper body side to side with arms extended",
+      "primaryMuscles": "Obliques, Back",
+      "secondaryMuscles": "Core, Delts",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=bW3SRtxHZhc"
+    },
+    {
+      "name": "Standing Calf Raises",
+      "description": "Rise up on toes and lower back down repeatedly",
+      "primaryMuscles": "Calves",
+      "secondaryMuscles": "",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=V3E_fFrLZmE"
+    },
+    {
+      "name": "Shoulder Rolls",
+      "description": "Roll shoulders in circular motions forward and backward",
+      "primaryMuscles": "Delts, Traps",
+      "secondaryMuscles": "Upper Back",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=kRHQDSuhYKE"
+    },
+    {
+      "name": "Hip Circles",
+      "description": "Rotate hips in circular motions with hands on hips",
+      "primaryMuscles": "Hip Flexors, Glutes",
+      "secondaryMuscles": "Core, Lower Back",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=m6VYbWGv2Eo"
+    },
+    {
+      "name": "Arm Crossovers",
+      "description": "Swing arms across chest, alternating high and low",
+      "primaryMuscles": "Chest, Delts",
+      "secondaryMuscles": "Upper Back",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=mvh5zHB-xkc"
+    },
+    {
+      "name": "Inchworms",
+      "description": "Walk hands out to plank, then walk feet towards hands",
+      "primaryMuscles": "Hamstrings, Core",
+      "secondaryMuscles": "Delts, Back",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=_L9w7Fkrbfk"
+    },
+    {
+      "name": "Spiderman Lunges",
+      "description": "Lunge forward and bring elbow to inside of foot for deep hip stretch",
+      "primaryMuscles": "Hip Flexors, Groin",
+      "secondaryMuscles": "Hamstrings, Quads",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=MJqW87jt-Zg"
+    },
+    {
+      "name": "Jumping Jacks",
+      "description": "Jump while spreading legs and raising arms overhead",
+      "primaryMuscles": "Full Body",
+      "secondaryMuscles": "Calves, Delts",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=iSSAk4XCsRA"
+    },
+    {
+      "name": "Frankenstein Walks",
+      "description": "Walk forward while kicking straight legs up to touch outstretched hands",
+      "primaryMuscles": "Hamstrings",
+      "secondaryMuscles": "Hip Flexors, Calves",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=Ytj5S8FGPpk"
+    },
+    {
+      "name": "Lateral Lunges",
+      "description": "Step to the side into a deep lunge, alternating sides",
+      "primaryMuscles": "Inner Thighs, Glutes",
+      "secondaryMuscles": "Quads, Hip Flexors",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=9zJeEHuRFcw"
+    },
+    {
+      "name": "Plank to Downward Dog",
+      "description": "Transition from plank position to downward dog and back",
+      "primaryMuscles": "Core, Hamstrings",
+      "secondaryMuscles": "Delts, Calves, Back",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=gZJWYonQKxY"
+    }
+  ],
+  "static": [
+    {
+      "name": "Child's Pose",
+      "description": "Kneel and sit back on heels with arms extended forward for lower back relaxation",
+      "primaryMuscles": "Lower Back",
+      "secondaryMuscles": "Lats, Glutes",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=2MTIlxJ82vY"
+    },
+    {
+      "name": "Standing Quad Stretch",
+      "description": "Pull one foot behind you towards glutes while standing",
+      "primaryMuscles": "Quads",
+      "secondaryMuscles": "Hip Flexors",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=kRHQDSuhYKE"
+    },
+    {
+      "name": "Standing Hamstring Stretch",
+      "description": "Extend one leg forward with heel on ground, lean forward",
+      "primaryMuscles": "Hamstrings",
+      "secondaryMuscles": "Lower Back, Calves",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=BPmv-3EQk2c"
+    },
+    {
+      "name": "Hip Flexor Stretch (Lunge)",
+      "description": "Kneel in lunge position and push hips forward",
+      "primaryMuscles": "Hip Flexors",
+      "secondaryMuscles": "Quads",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=hdW4IXXCzKE"
+    },
+    {
+      "name": "Doorway Chest Stretch",
+      "description": "Place forearm on doorway and rotate body away to stretch chest",
+      "primaryMuscles": "Chest",
+      "secondaryMuscles": "Front Delts",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=qGJABe9R2zQ"
+    },
+    {
+      "name": "Seated Spinal Twist",
+      "description": "Sit with one leg crossed, twist torso towards that side",
+      "primaryMuscles": "Back, Obliques",
+      "secondaryMuscles": "Lower Back, Glutes",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=DGd7kJyPZjU"
+    },
+    {
+      "name": "Pigeon Pose",
+      "description": "Fold one leg under body with back leg extended for deep hip stretch",
+      "primaryMuscles": "Glutes, Hip Flexors",
+      "secondaryMuscles": "Lower Back",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=0_zDd6kQ"
+    },
+    {
+      "name": "Butterfly Stretch",
+      "description": "Sit with soles of feet together and gently press knees down",
+      "primaryMuscles": "Inner Thighs, Groin",
+      "secondaryMuscles": "Hip Flexors",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=mJiSzM1X7m0"
+    },
+    {
+      "name": "Overhead Triceps Stretch",
+      "description": "Reach one arm overhead and bend at elbow, pull with other hand",
+      "primaryMuscles": "Triceps",
+      "secondaryMuscles": "Delts, Lats",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=EQO_8NRkljo"
+    },
+    {
+      "name": "Shoulder Cross-Body Stretch",
+      "description": "Pull one arm across body at shoulder height",
+      "primaryMuscles": "Delts, Rear Delts",
+      "secondaryMuscles": "Upper Back",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=b6H9SHC0H9Y"
+    },
+    {
+      "name": "Cobra Stretch",
+      "description": "Lie face down and push upper body up with arms while keeping hips down",
+      "primaryMuscles": "Abs",
+      "secondaryMuscles": "Chest, Hip Flexors",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=z21NlZwpUzE"
+    },
+    {
+      "name": "Figure 4 Stretch",
+      "description": "Lie on back, cross one ankle over opposite knee, pull leg towards chest",
+      "primaryMuscles": "Glutes",
+      "secondaryMuscles": "Lower Back, Hip Flexors",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=JbyjNymZP8M"
+    },
+    {
+      "name": "Seated Forward Fold",
+      "description": "Sit with legs extended, reach forward towards toes",
+      "primaryMuscles": "Hamstrings, Lower Back",
+      "secondaryMuscles": "Calves",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=U21floGmwDs"
+    },
+    {
+      "name": "Wall Calf Stretch",
+      "description": "Place hands on wall, step one leg back and press heel down",
+      "primaryMuscles": "Calves",
+      "secondaryMuscles": "Hamstrings",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=hjCRc2jYKyY"
+    },
+    {
+      "name": "Neck Side Stretch",
+      "description": "Gently tilt head to one side, pulling with hand if needed",
+      "primaryMuscles": "Neck",
+      "secondaryMuscles": "Upper Back, Traps",
+      "duration": 30,
+      "youtubeLink": "https://www.youtube.com/watch?v=v5I0J_6w6jw"
+    }
+  ]
+}

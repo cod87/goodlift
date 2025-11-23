@@ -1,0 +1,24 @@
+{
+  "name": "GoodLift",
+  "short_name": "GoodLift",
+  "description": "Strength training and workout tracking designed for progress.",
+  "start_url": "/goodlift/",
+  "display": "standalone",
+  "background_color": "#1e2939",
+  "theme_color": "#2a3647",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/goodlift/icons/goodlift-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/goodlift/icons/goodlift-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

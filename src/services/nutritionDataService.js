@@ -26,7 +26,10 @@ export const loadNutritionDatabase = async () => {
   }
 
   try {
-    const response = await fetch('data/nutrition-700.json');
+    // Use base URL for proper path resolution in both dev and production
+    const basePath = import.meta.env.BASE_URL || '/';
+    const dataPath = `${basePath}data/nutrition-700.json`;
+    const response = await fetch(dataPath);
     if (!response.ok) {
       throw new Error('Failed to load nutrition database');
     }

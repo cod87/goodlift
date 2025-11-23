@@ -123,69 +123,6 @@ const calculateMuscleVolumeForWeek = (workoutHistory, exercisesDB, weekStart, we
 };
 
 /**
- * Calculate muscle volume (sets per category) from workout history
- * Legacy function for backward compatibility with days parameter - kept for reference
- * @param {Array} workoutHistory - Array of workout objects
- * @param {Object} exercisesDB - Exercise metadata lookup
- * @param {number} days - Number of days to look back (default: 7)
- * @returns {Object} Object with categories as keys, containing primary and secondary set counts
- */
-const _calculateMuscleVolume = (workoutHistory, exercisesDB, days = 7) => {
-  // Get workouts from the past N days
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - days);
-  cutoffDate.setHours(0, 0, 0, 0);
-
-  const recentWorkouts = workoutHistory.filter(workout => {
-    const workoutDate = new Date(workout.date);
-    workoutDate.setHours(0, 0, 0, 0);
-    return workoutDate >= cutoffDate;
-  });
-
-  // Initialize category counts
-  const categories = getAllCategories();
-  const volumeData = {};
-  categories.forEach(category => {
-    volumeData[category] = { primary: 0, secondary: 0 };
-  });
-
-  // Process each workout
-  recentWorkouts.forEach(workout => {
-    if (!workout.exercises) return;
-
-    Object.entries(workout.exercises).forEach(([exerciseName, exerciseData]) => {
-      if (!exerciseData.sets || exerciseData.sets.length === 0) return;
-
-      const setCount = exerciseData.sets.length;
-      
-      // Look up exercise metadata from the database
-      const exerciseMetadata = exercisesDB[exerciseName];
-      if (!exerciseMetadata) return;
-
-      const primaryMuscle = exerciseMetadata['Primary Muscle'] || '';
-      const secondaryMuscles = exerciseMetadata['Secondary Muscles'] || '';
-
-      // Categorize primary muscle
-      const primaryCategory = getMuscleCategory(primaryMuscle);
-      if (volumeData[primaryCategory]) {
-        volumeData[primaryCategory].primary += setCount;
-      }
-
-      // Categorize secondary muscles
-      const secondaryCategories = categorizeSecondaryMuscles(secondaryMuscles);
-      secondaryCategories.forEach(category => {
-        // Don't count as secondary if it's the same as primary category
-        if (category !== primaryCategory && volumeData[category]) {
-          volumeData[category].secondary += setCount;
-        }
-      });
-    });
-  });
-
-  return volumeData;
-};
-
-/**
  * MuscleVolumeTracker Component
  * Displays sets completed per muscle category (primary and secondary) for a week block (Sun-Sat)
  * Supports navigation to previous weeks

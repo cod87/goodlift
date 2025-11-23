@@ -176,10 +176,6 @@ const LogMealModal = ({
     onClose();
   };
 
-  const handleClose = () => {
-    onClose();
-  };
-
   const handleToggleFavorite = async (food, event) => {
     // Stop event propagation to prevent selecting the food
     if (event) {
@@ -270,7 +266,7 @@ const LogMealModal = ({
   return (
     <Dialog 
       open={open} 
-      onClose={handleClose} 
+      onClose={onClose} 
       fullScreen
       PaperProps={{
         sx: {
@@ -295,7 +291,7 @@ const LogMealModal = ({
             Log a Meal
           </Typography>
         </Box>
-        <IconButton onClick={handleClose} edge="end">
+        <IconButton onClick={onClose} edge="end">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -518,7 +514,7 @@ const LogMealModal = ({
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-          <Button onClick={handleClose} variant="outlined">
+          <Button onClick={onClose} variant="outlined">
             Cancel
           </Button>
           <Button 

@@ -223,7 +223,7 @@ const LogMealModal = ({
     const nutrition = calculateNutrition(food, 100);
     return (
       <ListItem
-        button
+        component="button"
         onClick={onClick}
         sx={{ 
           py: 2,
@@ -232,6 +232,7 @@ const LogMealModal = ({
             backgroundColor: 'action.hover',
           },
           transition: 'background-color 0.2s',
+          cursor: 'pointer',
         }}
       >
         <ListItemText

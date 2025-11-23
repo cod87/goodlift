@@ -117,6 +117,18 @@ const VEGETABLE_FRUIT_KEYWORDS = [
 const COOKING_METHODS = ['cooked', 'roasted', 'boiled', 'steamed', 'baked', 'grilled', 'sautéed'];
 
 /**
+ * Relevance scoring constants
+ */
+const RELEVANCE_SCORE = {
+  EXACT_MATCH_BONUS: 100,
+  STARTS_WITH_BONUS: 50,
+  COOKING_METHOD_BONUS: 30,
+  RAW_PENALTY: -50,
+  LONG_DESCRIPTION_WORD_THRESHOLD: 8,
+  LONG_DESCRIPTION_PENALTY: -10,
+};
+
+/**
  * Detect if a search query is for meat or seafood
  * @param {string} query - The search query
  * @returns {boolean} - True if query contains meat/seafood keywords
@@ -207,32 +219,32 @@ export const scoreFoodRelevance = (food, query) => {
   
   // Exact match bonus
   if (desc === lowerQuery) {
-    score += 100;
+    score += RELEVANCE_SCORE.EXACT_MATCH_BONUS;
   }
   
   // Starts with query bonus
   if (desc.startsWith(lowerQuery)) {
-    score += 50;
+    score += RELEVANCE_SCORE.STARTS_WITH_BONUS;
   }
   
   // For meats, bonus for cooked forms
   if (isMeatOrSeafood(query)) {
     COOKING_METHODS.forEach(method => {
       if (desc.includes(method)) {
-        score += 30;
+        score += RELEVANCE_SCORE.COOKING_METHOD_BONUS;
       }
     });
     
     // Penalty for raw forms
     if (desc.includes('raw') || desc.includes('uncooked')) {
-      score -= 50;
+      score += RELEVANCE_SCORE.RAW_PENALTY;
     }
   }
   
   // Penalty for overly complex descriptions
   const wordCount = desc.split(/\s+/).length;
-  if (wordCount > 8) {
-    score -= 10;
+  if (wordCount > RELEVANCE_SCORE.LONG_DESCRIPTION_WORD_THRESHOLD) {
+    score += RELEVANCE_SCORE.LONG_DESCRIPTION_PENALTY;
   }
   
   return score;

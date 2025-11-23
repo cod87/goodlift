@@ -35,6 +35,7 @@ import {
   Search,
 } from '@mui/icons-material';
 import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes } from '../../utils/nutritionStorage';
+import { matchesAllKeywords, parseSearchKeywords, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
 import RecipeBuilder from './RecipeBuilder';
 import SavedRecipes from './SavedRecipes';
 
@@ -54,7 +55,7 @@ const NUTRIENT_IDS = {
 /**
  * NutritionTab - Component for tracking nutrition using USDA FoodData Central API
  * Features:
- * - Search foods from USDA database
+ * - Search foods from USDA database with flexible keyword matching
  * - Log consumed foods with portion sizes
  * - View daily nutrition summary
  * - Set and track nutrition goals
@@ -119,8 +120,13 @@ const NutritionTab = () => {
     setError('');
 
     try {
+      // Split query into keywords for flexible matching
+      // This allows 'chickpeas canned' to match 'canned chickpeas', etc.
+      const keywords = parseSearchKeywords(query);
+      
+      // Request more results from API to allow for client-side filtering
       const response = await fetch(
-        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5&dataType=Foundation,SR%20Legacy`
+        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=${FOOD_SEARCH_CONFIG.API_PAGE_SIZE}&dataType=Foundation,SR%20Legacy`
       );
 
       if (!response.ok) {
@@ -128,7 +134,15 @@ const NutritionTab = () => {
       }
 
       const data = await response.json();
-      setSearchResults(data.foods || []);
+      const allFoods = data.foods || [];
+      
+      // Apply flexible keyword matching on the client side
+      // Filter foods that contain all keywords in any order, then limit to configured max
+      const filteredFoods = allFoods
+        .filter(food => matchesAllKeywords(food.description, keywords))
+        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
+      
+      setSearchResults(filteredFoods);
     } catch (err) {
       console.error('Error searching foods:', err);
       setError('Failed to search foods. Please try again.');

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -25,6 +25,7 @@ import {
   Tab,
   Paper,
   InputAdornment,
+  Autocomplete,
 } from '@mui/material';
 import {
   Add,
@@ -67,6 +68,7 @@ const NutritionTab = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [autocompleteOpen, setAutocompleteOpen] = useState(false);
   const [todayEntries, setTodayEntries] = useState([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
@@ -83,6 +85,7 @@ const NutritionTab = () => {
   const [recipes, setRecipes] = useState([]);
   const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
+  const debounceTimer = useRef(null);
 
   // Load today's entries, goals, and recipes on mount
   useEffect(() => {
@@ -110,16 +113,21 @@ const NutritionTab = () => {
     }
   };
 
-  const searchFoods = useCallback(async (query) => {
+  const searchFoods = useCallback(async (query, isAutocomplete = false) => {
     if (!query || query.trim().length < 2) {
-      setError('Please enter at least 2 characters to search for foods');
+      if (!isAutocomplete) {
+        setError('Please enter at least 2 characters to search for foods');
+      }
       setSearchResults([]);
+      setAutocompleteOpen(false);
       return;
     }
 
     setSearching(true);
     setError('');
-    setSearchResults([]); // Clear previous results
+    if (!isAutocomplete) {
+      setSearchResults([]); // Clear previous results only for manual search
+    }
 
     try {
       // Split query into keywords for flexible matching
@@ -145,14 +153,47 @@ const NutritionTab = () => {
         .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       
       setSearchResults(filteredFoods);
+      if (isAutocomplete) {
+        setAutocompleteOpen(filteredFoods.length > 0);
+      }
     } catch (err) {
       console.error('Error searching foods:', err);
-      setError('Unable to connect to the food database. Please check your internet connection and try again.');
+      if (!isAutocomplete) {
+        setError('Unable to connect to the food database. Please check your internet connection and try again.');
+      }
       setSearchResults([]);
+      setAutocompleteOpen(false);
     } finally {
       setSearching(false);
     }
   }, []);
+
+  // Debounced autocomplete search effect
+  useEffect(() => {
+    // Clear existing timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    // Don't search if query is too short
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      setAutocompleteOpen(false);
+      return;
+    }
+
+    // Set new timer for debounced search (500ms delay)
+    debounceTimer.current = setTimeout(() => {
+      searchFoods(searchQuery, true); // true flag indicates autocomplete search
+    }, 500);
+
+    // Cleanup function
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [searchQuery, searchFoods]);
 
   const handleSelectFood = (food) => {
     if (!food) return;
@@ -161,6 +202,7 @@ const NutritionTab = () => {
     setShowAddDialog(true);
     setSearchQuery('');
     setSearchResults([]);
+    setAutocompleteOpen(false);
   };
 
   const getNutrient = (food, nutrientId) => {
@@ -334,47 +376,114 @@ const NutritionTab = () => {
                 <Restaurant fontSize="small" /> Search & Add Food
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, mb: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
-                <TextField
+                <Autocomplete
                   fullWidth
-                  placeholder="Search for foods (e.g., 'chicken breast', 'brown rice', 'apple')..."
-                  size="medium"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      searchFoods(searchQuery);
+                  freeSolo
+                  open={autocompleteOpen}
+                  onOpen={() => setAutocompleteOpen(true)}
+                  onClose={() => setAutocompleteOpen(false)}
+                  options={searchResults}
+                  getOptionLabel={(option) => {
+                    // Handle both string input and food objects
+                    if (typeof option === 'string') return option;
+                    return option.description || '';
+                  }}
+                  inputValue={searchQuery}
+                  onInputChange={(event, newValue) => {
+                    setSearchQuery(newValue);
+                  }}
+                  onChange={(event, newValue) => {
+                    // Handle selection from autocomplete
+                    if (newValue && typeof newValue === 'object') {
+                      handleSelectFood(newValue);
                     }
                   }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Search color="primary" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      backgroundColor: 'background.paper',
-                      '&:hover': {
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: 'primary.main',
-                          borderWidth: 2,
+                  loading={searching}
+                  filterOptions={(x) => x} // Disable local filtering since we filter on server
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Search for foods (e.g., 'chicken breast', 'brown rice', 'apple')..."
+                      size="medium"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && searchQuery.trim().length >= 2) {
+                          searchFoods(searchQuery, false);
+                        }
+                      }}
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <>
+                            <InputAdornment position="start">
+                              <Search color="primary" />
+                            </InputAdornment>
+                            {params.InputProps.startAdornment}
+                          </>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: 'background.paper',
+                          '&:hover': {
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'primary.main',
+                              borderWidth: 2,
+                            },
+                          },
+                          '&.Mui-focused': {
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'primary.main',
+                              borderWidth: 2,
+                            },
+                          },
                         },
-                      },
-                      '&.Mui-focused': {
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: 'primary.main',
-                          borderWidth: 2,
-                        },
-                      },
-                    },
+                      }}
+                      helperText={isQueryTooShort ? "Enter at least 2 characters to search" : " "}
+                      error={isQueryTooShort}
+                    />
+                  )}
+                  renderOption={(props, option) => {
+                    const nutrition = calculateNutrition(option, 100);
+                    return (
+                      <Box component="li" {...props} key={option.fdcId}>
+                        <Box sx={{ width: '100%', py: 0.5 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                            {option.description}
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                            <Chip 
+                              label={`${nutrition.calories.toFixed(0)} cal`} 
+                              size="small" 
+                              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                            />
+                            <Chip 
+                              label={`P: ${nutrition.protein.toFixed(1)}g`} 
+                              size="small" 
+                              color="primary" 
+                              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                            />
+                            <Chip 
+                              label={`C: ${nutrition.carbs.toFixed(1)}g`} 
+                              size="small" 
+                              color="secondary" 
+                              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                            />
+                            <Chip 
+                              label={`F: ${nutrition.fat.toFixed(1)}g`} 
+                              size="small" 
+                              color="warning" 
+                              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                            />
+                          </Box>
+                        </Box>
+                      </Box>
+                    );
                   }}
-                  helperText={isQueryTooShort ? "Enter at least 2 characters to search" : " "}
-                  error={isQueryTooShort}
+                  sx={{ flexGrow: 1 }}
                 />
                 <Button
                   variant="contained"
-                  onClick={() => searchFoods(searchQuery)}
+                  onClick={() => searchFoods(searchQuery, false)}
                   disabled={searching || trimmedQueryLength < 2}
                   sx={{ 
                     minWidth: { xs: '100%', sm: 120 },
@@ -401,26 +510,8 @@ const NutritionTab = () => {
             </Alert>
           )}
 
-          {/* Loading State */}
-          {searching && (
-            <Paper 
-              variant="outlined" 
-              sx={{ 
-                p: 4, 
-                textAlign: 'center',
-                borderRadius: 2,
-                mb: 2,
-              }}
-            >
-              <CircularProgress size={40} sx={{ mb: 2 }} />
-              <Typography variant="body1" color="text.secondary">
-                Searching USDA Food Database...
-              </Typography>
-            </Paper>
-          )}
-
-          {/* Search Results */}
-          {!searching && searchResults.length > 0 && (
+          {/* Search Results - only show when not using autocomplete */}
+          {!searching && !autocompleteOpen && searchResults.length > 0 && (
             <>
               <Typography 
                 variant="body2" 
@@ -522,7 +613,7 @@ const NutritionTab = () => {
             </>
           )}
 
-          {!searching && searchResults.length === 0 && trimmedQueryLength >= 2 && !error && (
+          {!searching && !autocompleteOpen && searchResults.length === 0 && trimmedQueryLength >= 2 && !error && (
             <Alert 
               severity="info" 
               sx={{ 

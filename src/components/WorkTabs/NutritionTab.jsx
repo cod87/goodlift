@@ -487,41 +487,41 @@ const NutritionTab = () => {
                     const dataType = option.dataType || '';
                     return (
                       <Box component="li" {...props} key={option.fdcId}>
-                        <Box sx={{ width: '100%', py: 0.5 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                            <Typography variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
+                        <Box sx={{ width: '100%', py: 0.25 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500, flex: 1, fontSize: '0.875rem' }}>
                               {option.description}
                             </Typography>
                             <Chip 
                               label={dataType} 
                               size="small" 
                               color={dataType === 'SR Legacy' ? 'info' : 'default'}
-                              sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }} 
+                              sx={{ height: 18, fontSize: '0.6rem', fontWeight: 600 }} 
                             />
                           </Box>
-                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                          <Box sx={{ display: 'flex', gap: 0.4, flexWrap: 'wrap' }}>
                             <Chip 
                               label={`${nutrition.calories.toFixed(0)} cal`} 
                               size="small" 
-                              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                              sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} 
                             />
                             <Chip 
                               label={`P: ${nutrition.protein.toFixed(1)}g`} 
                               size="small" 
                               color="primary" 
-                              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                              sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} 
                             />
                             <Chip 
                               label={`C: ${nutrition.carbs.toFixed(1)}g`} 
                               size="small" 
                               color="secondary" 
-                              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                              sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} 
                             />
                             <Chip 
                               label={`F: ${nutrition.fat.toFixed(1)}g`} 
                               size="small" 
                               color="warning" 
-                              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                              sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} 
                             />
                           </Box>
                         </Box>
@@ -737,8 +737,8 @@ const NutritionTab = () => {
                               button
                               onClick={() => handleSelectFood(food)}
                               sx={{ 
-                                py: 2,
-                                px: 2,
+                                py: 1,
+                                px: 1.5,
                                 '&:hover': {
                                   backgroundColor: 'action.hover',
                                 },
@@ -747,13 +747,14 @@ const NutritionTab = () => {
                             >
                               <ListItemText
                                 primary={
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
                                     <Typography 
-                                      variant="body1" 
+                                      variant="body2" 
                                       sx={{ 
-                                        fontWeight: 600,
+                                        fontWeight: 500,
                                         color: 'text.primary',
                                         flex: 1,
+                                        fontSize: '0.875rem',
                                       }}
                                     >
                                       {food.description}
@@ -763,21 +764,21 @@ const NutritionTab = () => {
                                       size="small" 
                                       color="default"
                                       sx={{ 
-                                        height: 22, 
-                                        fontSize: '0.7rem',
+                                        height: 18, 
+                                        fontSize: '0.6rem',
                                         fontWeight: 600,
                                       }} 
                                     />
                                   </Box>
                                 }
                                 secondary={
-                                  <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
+                                  <Box component="span" sx={{ display: 'flex', gap: 0.4, mt: 0.5, flexWrap: 'wrap' }}>
                                     <Chip 
                                       label={`${nutrition.calories.toFixed(0)} cal`} 
                                       size="small" 
                                       sx={{ 
-                                        height: 24, 
-                                        fontSize: '0.75rem',
+                                        height: 18, 
+                                        fontSize: '0.65rem',
                                         fontWeight: 600,
                                       }} 
                                     />
@@ -786,8 +787,8 @@ const NutritionTab = () => {
                                       size="small" 
                                       color="primary" 
                                       sx={{ 
-                                        height: 24, 
-                                        fontSize: '0.75rem',
+                                        height: 18, 
+                                        fontSize: '0.65rem',
                                         fontWeight: 600,
                                       }} 
                                     />
@@ -796,8 +797,8 @@ const NutritionTab = () => {
                                       size="small" 
                                       color="secondary" 
                                       sx={{ 
-                                        height: 24, 
-                                        fontSize: '0.75rem',
+                                        height: 18, 
+                                        fontSize: '0.65rem',
                                         fontWeight: 600,
                                       }} 
                                     />
@@ -806,8 +807,8 @@ const NutritionTab = () => {
                                       size="small" 
                                       color="warning" 
                                       sx={{ 
-                                        height: 24, 
-                                        fontSize: '0.75rem',
+                                        height: 18, 
+                                        fontSize: '0.65rem',
                                         fontWeight: 600,
                                       }} 
                                     />
@@ -869,8 +870,8 @@ const NutritionTab = () => {
                           button
                           onClick={() => handleSelectFood(food)}
                           sx={{ 
-                            py: 2,
-                            px: 2,
+                            py: 1,
+                            px: 1.5,
                             '&:hover': {
                               backgroundColor: 'action.hover',
                             },
@@ -879,13 +880,14 @@ const NutritionTab = () => {
                         >
                           <ListItemText
                             primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
                                 <Typography 
-                                  variant="body1" 
+                                  variant="body2" 
                                   sx={{ 
-                                    fontWeight: 600,
+                                    fontWeight: 500,
                                     color: 'text.primary',
                                     flex: 1,
+                                    fontSize: '0.875rem',
                                   }}
                                 >
                                   {food.description}
@@ -895,21 +897,21 @@ const NutritionTab = () => {
                                   size="small" 
                                   color="default"
                                   sx={{ 
-                                    height: 22, 
-                                    fontSize: '0.7rem',
+                                    height: 18, 
+                                    fontSize: '0.6rem',
                                     fontWeight: 600,
                                   }} 
                                 />
                               </Box>
                             }
                             secondary={
-                              <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
+                              <Box component="span" sx={{ display: 'flex', gap: 0.4, mt: 0.5, flexWrap: 'wrap' }}>
                                 <Chip 
                                   label={`${nutrition.calories.toFixed(0)} cal`} 
                                   size="small" 
                                   sx={{ 
-                                    height: 24, 
-                                    fontSize: '0.75rem',
+                                    height: 18, 
+                                    fontSize: '0.65rem',
                                     fontWeight: 600,
                                   }} 
                                 />
@@ -918,8 +920,8 @@ const NutritionTab = () => {
                                   size="small" 
                                   color="primary" 
                                   sx={{ 
-                                    height: 24, 
-                                    fontSize: '0.75rem',
+                                    height: 18, 
+                                    fontSize: '0.65rem',
                                     fontWeight: 600,
                                   }} 
                                 />
@@ -928,8 +930,8 @@ const NutritionTab = () => {
                                   size="small" 
                                   color="secondary" 
                                   sx={{ 
-                                    height: 24, 
-                                    fontSize: '0.75rem',
+                                    height: 18, 
+                                    fontSize: '0.65rem',
                                     fontWeight: 600,
                                   }} 
                                 />
@@ -938,8 +940,8 @@ const NutritionTab = () => {
                                   size="small" 
                                   color="warning" 
                                   sx={{ 
-                                    height: 24, 
-                                    fontSize: '0.75rem',
+                                    height: 18, 
+                                    fontSize: '0.65rem',
                                     fontWeight: 600,
                                   }} 
                                 />

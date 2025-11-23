@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import { Delete, Add, Search } from '@mui/icons-material';
 import { saveRecipe } from '../../utils/nutritionStorage';
-import { matchesAllKeywords, parseSearchKeywords, hasAllowedDataType, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
+import { matchesAllKeywords, parseSearchKeywords, hasAllowedDataType, isFoundationFood, isSRLegacyFood, sortByRelevance, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
 
 // USDA FoodData Central API configuration
 const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
@@ -41,16 +41,19 @@ const NUTRIENT_IDS = {
  * RecipeBuilder - Dialog component for creating and editing custom recipes
  * Allows users to:
  * - Add multiple foods with their weights using flexible keyword search
- * - Prioritizes SR Legacy foods first (most comprehensive), then Foundation foods
+ * - Prioritizes Foundation foods first (highest quality baseline), then SR Legacy foods
+ * - Within each group, prioritizes items whose description begins with the search term
  * - Fuzzy/partial matching: handles out-of-order keywords, partial words, variations
  * - Only shows USDA foods with dataType 'Foundation' and 'SR Legacy' (excludes Branded)
  * - Calculate total nutrition
  * - Save recipe for later use
  * 
  * Search Strategy:
- * - Shows SR Legacy results first (more comprehensive food database)
- * - Falls back to Foundation foods for additional results
+ * - Explicit search action required (Enter key or Search button click)
+ * - Shows Foundation results first (highest quality baseline)
+ * - Expands to SR Legacy foods for additional results
  * - Client-side filtering with fuzzy matching for better result coverage
+ * - Prefix matching prioritization within each food type group
  */
 const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
   const [recipeName, setRecipeName] = useState('');
@@ -111,18 +114,21 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
         .filter(hasAllowedDataType)
         .filter(food => matchesAllKeywords(food.description, keywords));
       
-      // PRIORITIZATION STRATEGY: Show SR Legacy first, then Foundation
-      // SR Legacy has the most comprehensive food database, so we prioritize it
-      const srLegacyFoods = keywordFilteredFoods
-        .filter(food => food.dataType === 'SR Legacy')
-        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
+      // PRIORITIZATION STRATEGY: Show Foundation first, then SR Legacy
+      // Foundation has the highest quality baseline, so we prioritize it
+      // Within each group, items whose description begins with the search term are shown first
+      const foundationFoods = sortByRelevance(
+        keywordFilteredFoods.filter(isFoundationFood),
+        query
+      ).slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       
-      const foundationFoods = keywordFilteredFoods
-        .filter(food => food.dataType === 'Foundation')
-        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
+      const srLegacyFoods = sortByRelevance(
+        keywordFilteredFoods.filter(isSRLegacyFood),
+        query
+      ).slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       
-      // Combine with SR Legacy first for prioritization
-      const combinedResults = [...srLegacyFoods, ...foundationFoods];
+      // Combine with Foundation first for prioritization
+      const combinedResults = [...foundationFoods, ...srLegacyFoods];
       
       setSearchResults(combinedResults);
     } catch (err) {
@@ -361,7 +367,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
 
             {!searching && searchResults.length === 0 && searchQuery.trim().length >= 2 && !error && (
               <Alert severity="info" sx={{ mb: 2 }}>
-                No foods found. Try a different search term.
+                No foods found.
               </Alert>
             )}
           </Box>

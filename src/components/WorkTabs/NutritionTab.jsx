@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -25,7 +25,6 @@ import {
   Tab,
   Paper,
   InputAdornment,
-  Autocomplete,
 } from '@mui/material';
 import {
   Add,
@@ -36,7 +35,7 @@ import {
   Search,
 } from '@mui/icons-material';
 import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes, getFavoriteFoods } from '../../utils/nutritionStorage';
-import { matchesAllKeywords, parseSearchKeywords, hasAllowedDataType, isFoundationFood, isSRLegacyFood, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
+import { matchesAllKeywords, parseSearchKeywords, hasAllowedDataType, isFoundationFood, isSRLegacyFood, sortByRelevance, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
 import RecipeBuilder from './RecipeBuilder';
 import SavedRecipes from './SavedRecipes';
 import LogMealModal from '../LogMealModal';
@@ -58,7 +57,8 @@ const NUTRIENT_IDS = {
  * NutritionTab - Component for tracking nutrition using USDA FoodData Central API
  * Features:
  * - Search foods from USDA database with flexible keyword matching
- * - Prioritizes SR Legacy foods first (most comprehensive), then Foundation foods
+ * - Prioritizes Foundation foods first (highest quality baseline), then SR Legacy foods
+ * - Within each group, prioritizes items whose description begins with the search term
  * - Fuzzy/partial matching: handles out-of-order keywords, partial words, variations
  * - Only shows USDA foods with dataType 'Foundation' and 'SR Legacy' (excludes Branded)
  * - Log consumed foods with portion sizes
@@ -68,17 +68,17 @@ const NUTRIENT_IDS = {
  * - Log recipes with custom portion sizes
  * 
  * Search Strategy:
- * - Fast autocomplete with 300ms debounce for responsive UI
- * - Shows SR Legacy results first (more comprehensive food database)
- * - Falls back to Foundation foods if SR Legacy results are insufficient
+ * - Explicit search action required (Enter key or Search button click)
+ * - Shows Foundation results first (highest quality baseline)
+ * - Expands to SR Legacy foods if needed for more results
  * - Client-side filtering with fuzzy matching for better result coverage
+ * - Prefix matching prioritization within each food type group
  */
 const NutritionTab = () => {
   const [activeSubTab, setActiveSubTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
-  const [autocompleteOpen, setAutocompleteOpen] = useState(false);
   const [todayEntries, setTodayEntries] = useState([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
@@ -96,10 +96,9 @@ const NutritionTab = () => {
   const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [showFoundation, setShowFoundation] = useState(false);
-  const [foundationResults, setFoundationResults] = useState([]);
+  const [srLegacyResults, setSRLegacyResults] = useState([]);
   const [showLogMealModal, setShowLogMealModal] = useState(false);
   const [favoriteFoods, setFavoriteFoods] = useState([]);
-  const debounceTimer = useRef(null);
 
   // Load today's entries, goals, recipes, and favorites on mount
   useEffect(() => {
@@ -133,25 +132,20 @@ const NutritionTab = () => {
     }
   };
 
-  const searchFoods = useCallback(async (query, isAutocomplete = false) => {
+  const searchFoods = useCallback(async (query) => {
     if (!query || query.trim().length < 2) {
-      if (!isAutocomplete) {
-        setError('Please enter at least 2 characters to search for foods');
-      }
+      setError('Please enter at least 2 characters to search for foods');
       setSearchResults([]);
-      setFoundationResults([]);
+      setSRLegacyResults([]);
       setShowFoundation(false);
-      setAutocompleteOpen(false);
       return;
     }
 
     setSearching(true);
     setError('');
-    if (!isAutocomplete) {
-      setSearchResults([]); // Clear previous results only for manual search
-      setFoundationResults([]);
-      setShowFoundation(false);
-    }
+    setSearchResults([]); // Clear previous results
+    setSRLegacyResults([]);
+    setShowFoundation(false);
 
     try {
       // Split query into keywords for flexible matching
@@ -179,65 +173,32 @@ const NutritionTab = () => {
         .filter(hasAllowedDataType)
         .filter(food => matchesAllKeywords(food.description, keywords));
       
-      // PRIORITIZATION STRATEGY: Show SR Legacy first, then Foundation
-      // SR Legacy has the most comprehensive food database, so we prioritize it
-      // This ensures users see the most likely matches first
-      const srLegacyFoods = keywordFilteredFoods
-        .filter(isSRLegacyFood)
-        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
+      // PRIORITIZATION STRATEGY: Show Foundation first, then SR Legacy
+      // Foundation has the highest quality baseline, so we prioritize it
+      // Within each group, items whose description begins with the search term are shown first
+      const foundationFoods = sortByRelevance(
+        keywordFilteredFoods.filter(isFoundationFood),
+        query
+      ).slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       
-      const foundationFoods = keywordFilteredFoods
-        .filter(isFoundationFood)
-        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
+      const srLegacyFoods = sortByRelevance(
+        keywordFilteredFoods.filter(isSRLegacyFood),
+        query
+      ).slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       
-      // Show SR Legacy foods initially (primary results)
-      setSearchResults(srLegacyFoods);
-      setFoundationResults(foundationFoods);
-      
-      if (isAutocomplete) {
-        setAutocompleteOpen(srLegacyFoods.length > 0);
-      }
+      // Show Foundation foods initially (primary results)
+      setSearchResults(foundationFoods);
+      setSRLegacyResults(srLegacyFoods);
     } catch (err) {
       console.error('Error searching foods:', err);
-      if (!isAutocomplete) {
-        setError('Unable to connect to the food database. Please check your internet connection and try again.');
-      }
+      setError('Unable to connect to the food database. Please check your internet connection and try again.');
       setSearchResults([]);
-      setFoundationResults([]);
+      setSRLegacyResults([]);
       setShowFoundation(false);
-      setAutocompleteOpen(false);
     } finally {
       setSearching(false);
     }
   }, []);
-
-  // Debounced autocomplete search effect with faster response time
-  useEffect(() => {
-    // Clear existing timer
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-
-    // Don't search if query is too short
-    if (!searchQuery || searchQuery.trim().length < 2) {
-      setSearchResults([]);
-      setAutocompleteOpen(false);
-      return;
-    }
-
-    // Set new timer for debounced search (300ms delay for responsive UI)
-    debounceTimer.current = setTimeout(() => {
-      searchFoods(searchQuery, true); // true flag indicates autocomplete search
-    }, FOOD_SEARCH_CONFIG.DEBOUNCE_MS);
-
-    // Cleanup function
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-        debounceTimer.current = null;
-      }
-    };
-  }, [searchQuery, searchFoods]);
 
   const handleSelectFood = (food) => {
     if (!food) return;
@@ -246,9 +207,8 @@ const NutritionTab = () => {
     setShowAddDialog(true);
     setSearchQuery('');
     setSearchResults([]);
-    setFoundationResults([]);
+    setSRLegacyResults([]);
     setShowFoundation(false);
-    setAutocompleteOpen(false);
   };
 
   const handleShowMoreResults = () => {
@@ -487,122 +447,47 @@ const NutritionTab = () => {
                 <Restaurant fontSize="small" /> Search & Add Food
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, mb: 2, flexDirection: 'row', alignItems: 'flex-start' }}>
-                <Autocomplete
+                <TextField
                   fullWidth
-                  freeSolo
-                  open={autocompleteOpen}
-                  onOpen={() => setAutocompleteOpen(true)}
-                  onClose={() => setAutocompleteOpen(false)}
-                  options={searchResults}
-                  getOptionLabel={(option) => {
-                    // Handle both string input and food objects
-                    if (typeof option === 'string') return option;
-                    return option.description || '';
-                  }}
-                  inputValue={searchQuery}
-                  onInputChange={(event, newValue) => {
-                    setSearchQuery(newValue);
-                  }}
-                  onChange={(event, newValue) => {
-                    // Handle selection from autocomplete
-                    if (newValue && typeof newValue === 'object') {
-                      handleSelectFood(newValue);
+                  placeholder="Search for foods (e.g., 'chicken breast', 'brown rice', 'apple')..."
+                  size="medium"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && searchQuery.trim().length >= 2) {
+                      searchFoods(searchQuery);
                     }
                   }}
-                  loading={searching}
-                  filterOptions={(x) => x} // Disable local filtering since we filter in the search function
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder="Search for foods (e.g., 'chicken breast', 'brown rice', 'apple')..."
-                      size="medium"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && searchQuery.trim().length >= 2) {
-                          searchFoods(searchQuery, false);
-                        }
-                      }}
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <>
-                            <InputAdornment position="start">
-                              <Search color="primary" />
-                            </InputAdornment>
-                          </>
-                        ),
-                      }}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          backgroundColor: 'background.paper',
-                          '&:hover': {
-                            '& .MuiOutlinedInput-notchedOutline': {
-                              borderColor: 'primary.main',
-                              borderWidth: 2,
-                            },
-                          },
-                          '&.Mui-focused': {
-                            '& .MuiOutlinedInput-notchedOutline': {
-                              borderColor: 'primary.main',
-                              borderWidth: 2,
-                            },
-                          },
-                        },
-                      }}
-                      helperText={isQueryTooShort ? "Enter at least 2 characters to search" : " "}
-                      error={isQueryTooShort}
-                    />
-                  )}
-                  renderOption={(props, option) => {
-                    const nutrition = calculateNutrition(option, 100);
-                    const dataType = option.dataType || '';
-                    return (
-                      <Box component="li" {...props} key={option.fdcId}>
-                        <Box sx={{ width: '100%', py: 0.25 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 500, flex: 1, fontSize: '0.875rem' }}>
-                              {option.description}
-                            </Typography>
-                            <Chip 
-                              label={dataType} 
-                              size="small" 
-                              color={dataType === 'SR Legacy' ? 'info' : 'default'}
-                              sx={{ height: 18, fontSize: '0.6rem', fontWeight: 600 }} 
-                            />
-                          </Box>
-                          <Box sx={{ display: 'flex', gap: 0.4, flexWrap: 'wrap' }}>
-                            <Chip 
-                              label={`${nutrition.calories.toFixed(0)} cal`} 
-                              size="small" 
-                              sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} 
-                            />
-                            <Chip 
-                              label={`P: ${nutrition.protein.toFixed(1)}g`} 
-                              size="small" 
-                              color="primary" 
-                              sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} 
-                            />
-                            <Chip 
-                              label={`C: ${nutrition.carbs.toFixed(1)}g`} 
-                              size="small" 
-                              color="secondary" 
-                              sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} 
-                            />
-                            <Chip 
-                              label={`F: ${nutrition.fat.toFixed(1)}g`} 
-                              size="small" 
-                              color="warning" 
-                              sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} 
-                            />
-                          </Box>
-                        </Box>
-                      </Box>
-                    );
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Search color="primary" />
+                      </InputAdornment>
+                    ),
                   }}
-                  sx={{ flexGrow: 1 }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'background.paper',
+                      '&:hover': {
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.main',
+                          borderWidth: 2,
+                        },
+                      },
+                      '&.Mui-focused': {
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.main',
+                          borderWidth: 2,
+                        },
+                      },
+                    },
+                  }}
+                  helperText={isQueryTooShort ? "Enter at least 2 characters to search" : " "}
+                  error={isQueryTooShort}
                 />
                 <Button
                   variant="contained"
-                  onClick={() => searchFoods(searchQuery, false)}
+                  onClick={() => searchFoods(searchQuery)}
                   disabled={searching || trimmedQueryLength < 2}
                   sx={{ 
                     minWidth: { xs: 'auto', sm: 120 },
@@ -640,15 +525,15 @@ const NutritionTab = () => {
             </Alert>
           )}
 
-          {/* Search Results - only show when not using autocomplete */}
-          {!searching && !autocompleteOpen && searchResults.length > 0 && (
+          {/* Search Results - show after explicit search action */}
+          {!searching && searchResults.length > 0 && (
             <>
               <Typography 
                 variant="body2" 
                 color="text.secondary" 
                 sx={{ mb: 1, fontWeight: 500 }}
               >
-                Found {searchResults.length} SR Legacy result{searchResults.length !== 1 ? 's' : ''} - Click to add
+                Found {searchResults.length} Foundation result{searchResults.length !== 1 ? 's' : ''} - Click to add
               </Typography>
               <Paper 
                 variant="outlined" 
@@ -691,9 +576,9 @@ const NutritionTab = () => {
                                   {food.description}
                                 </Typography>
                                 <Chip 
-                                  label="SR Legacy" 
+                                  label="Foundation" 
                                   size="small" 
-                                  color="info"
+                                  color="default"
                                   sx={{ 
                                     height: 22, 
                                     fontSize: '0.7rem',
@@ -751,8 +636,8 @@ const NutritionTab = () => {
                     );
                   })}
                   
-                  {/* Show "See more results" button if Foundation results exist and not already shown */}
-                  {!showFoundation && foundationResults.length > 0 && (
+                  {/* Show "See more results" button if SR Legacy results exist and not already shown */}
+                  {!showFoundation && srLegacyResults.length > 0 && (
                     <>
                       <Divider />
                       <ListItem
@@ -776,14 +661,14 @@ const NutritionTab = () => {
                             textAlign: 'center',
                           }}
                         >
-                          See more results ({foundationResults.length} from Foundation)
+                          See more results ({srLegacyResults.length} from SR Legacy)
                         </Typography>
                       </ListItem>
                     </>
                   )}
                   
-                  {/* Show Foundation results when expanded */}
-                  {showFoundation && foundationResults.length > 0 && (
+                  {/* Show SR Legacy results when expanded */}
+                  {showFoundation && srLegacyResults.length > 0 && (
                     <>
                       <Divider sx={{ my: 1, borderWidth: 2, borderColor: 'primary.light' }} />
                       <Box sx={{ px: 2, py: 1, backgroundColor: 'primary.50' }}>
@@ -795,10 +680,10 @@ const NutritionTab = () => {
                             textTransform: 'uppercase',
                           }}
                         >
-                          Foundation Results
+                          SR Legacy Results
                         </Typography>
                       </Box>
-                      {foundationResults.map((food) => {
+                      {srLegacyResults.map((food) => {
                         const nutrition = calculateNutrition(food, 100);
                         return (
                           <Box key={food.fdcId}>
@@ -830,9 +715,9 @@ const NutritionTab = () => {
                                       {food.description}
                                     </Typography>
                                     <Chip 
-                                      label="Foundation" 
+                                      label="SR Legacy" 
                                       size="small" 
-                                      color="default"
+                                      color="info"
                                       sx={{ 
                                         height: 18, 
                                         fontSize: '0.6rem',
@@ -896,8 +781,8 @@ const NutritionTab = () => {
             </>
           )}
 
-          {/* Show message when no SR Legacy foods but Foundation foods exist */}
-          {!searching && !autocompleteOpen && searchResults.length === 0 && foundationResults.length > 0 && trimmedQueryLength >= 2 && !error && (
+          {/* Show message when no Foundation foods but SR Legacy foods exist */}
+          {!searching && searchResults.length === 0 && srLegacyResults.length > 0 && trimmedQueryLength >= 2 && !error && (
             <Box sx={{ mt: 2 }}>
               <Alert 
                 severity="info" 
@@ -907,10 +792,10 @@ const NutritionTab = () => {
                 }}
               >
                 <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
-                  No SR Legacy foods found for "{searchQuery}"
+                  No Foundation foods found for "{searchQuery}"
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  However, {foundationResults.length} Foundation result{foundationResults.length !== 1 ? 's are' : ' is'} available below.
+                  However, {srLegacyResults.length} SR Legacy result{srLegacyResults.length !== 1 ? 's are' : ' is'} available below.
                 </Typography>
               </Alert>
               
@@ -919,7 +804,7 @@ const NutritionTab = () => {
                 color="text.secondary" 
                 sx={{ mb: 1, fontWeight: 500 }}
               >
-                Found {foundationResults.length} Foundation result{foundationResults.length !== 1 ? 's' : ''} - Click to add
+                Found {srLegacyResults.length} SR Legacy result{srLegacyResults.length !== 1 ? 's' : ''} - Click to add
               </Typography>
               <Paper 
                 variant="outlined" 
@@ -931,7 +816,7 @@ const NutritionTab = () => {
                 }}
               >
                 <List disablePadding>
-                  {foundationResults.map((food, index) => {
+                  {srLegacyResults.map((food, index) => {
                     const nutrition = calculateNutrition(food, 100);
                     return (
                       <Box key={food.fdcId}>
@@ -963,9 +848,9 @@ const NutritionTab = () => {
                                   {food.description}
                                 </Typography>
                                 <Chip 
-                                  label="Foundation" 
+                                  label="SR Legacy" 
                                   size="small" 
-                                  color="default"
+                                  color="info"
                                   sx={{ 
                                     height: 18, 
                                     fontSize: '0.6rem',
@@ -1027,7 +912,7 @@ const NutritionTab = () => {
             </Box>
           )}
 
-          {!searching && !autocompleteOpen && searchResults.length === 0 && foundationResults.length === 0 && trimmedQueryLength >= 2 && !error && (
+          {!searching && searchResults.length === 0 && srLegacyResults.length === 0 && trimmedQueryLength >= 2 && !error && (
             <Alert 
               severity="info" 
               sx={{ 
@@ -1035,29 +920,9 @@ const NutritionTab = () => {
                 borderRadius: 2,
               }}
             >
-              <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
-                No foods found for "{searchQuery}"
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                No foods found.
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Try these tips:
-              </Typography>
-              <Box component="ul" sx={{ mt: 0.5, mb: 0, pl: 2 }}>
-                <li>
-                  <Typography variant="body2" color="text.secondary">
-                    Use simpler terms (e.g., "chicken" instead of "grilled chicken breast")
-                  </Typography>
-                </li>
-                <li>
-                  <Typography variant="body2" color="text.secondary">
-                    Check for spelling mistakes
-                  </Typography>
-                </li>
-                <li>
-                  <Typography variant="body2" color="text.secondary">
-                    Try searching for the main ingredient
-                  </Typography>
-                </li>
-              </Box>
             </Alert>
           )}
         </CardContent>

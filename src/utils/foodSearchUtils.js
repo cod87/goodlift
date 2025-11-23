@@ -3,10 +3,11 @@
  * These utilities help improve search results by matching foods regardless of word order
  * 
  * Search Strategy:
- * 1. Prioritize SR Legacy foods first (most comprehensive database)
- * 2. Fall back to Foundation foods for additional results
- * 3. Use fuzzy/partial matching to increase result coverage
- * 4. Support out-of-order keyword matching
+ * 1. Prioritize Foundation foods first (highest quality baseline)
+ * 2. Expand to SR Legacy foods for additional results
+ * 3. Within each group, prioritize items whose description begins with the search term
+ * 4. Use fuzzy/partial matching to increase result coverage
+ * 5. Support out-of-order keyword matching
  */
 
 // Configuration constants for food search
@@ -326,16 +327,27 @@ export const scoreFoodRelevance = (food, query) => {
 };
 
 /**
- * Sort foods by relevance
+ * Sort foods by relevance with prefix matching priority
+ * Items whose description begins with the search term are shown first
  * @param {Array} foods - Array of food objects
  * @param {string} query - Original search query
  * @returns {Array} - Sorted array of food objects
  */
 export const sortByRelevance = (foods, query) => {
+  const lowerQuery = query.toLowerCase().trim();
+  
   return foods
     .map(food => ({
       ...food,
       relevanceScore: scoreFoodRelevance(food, query),
+      startsWithQuery: food.description.toLowerCase().startsWith(lowerQuery),
     }))
-    .sort((a, b) => b.relevanceScore - a.relevanceScore);
+    .sort((a, b) => {
+      // First priority: items that start with the search term
+      if (a.startsWithQuery && !b.startsWithQuery) return -1;
+      if (!a.startsWithQuery && b.startsWithQuery) return 1;
+      
+      // Second priority: relevance score
+      return b.relevanceScore - a.relevanceScore;
+    });
 };

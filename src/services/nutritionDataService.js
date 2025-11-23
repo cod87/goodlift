@@ -279,12 +279,19 @@ export const searchMultipleFoods = async (searchString, options = {}) => {
 
 /**
  * Calculate nutrition for a given amount
+ * 
+ * CRITICAL: All nutrition values in the database are per standard portion (portion_grams),
+ * NOT per 100g. For example, chicken breast has 165 cal per 174g (standard portion).
+ * 
+ * Formula: multiplier = user_grams / standard_portion_grams
+ * 
  * @param {Object} food - Food item
  * @param {number} grams - Amount in grams
  * @returns {Object} Nutrition values
  */
 export const calculateNutrition = (food, grams) => {
-  const multiplier = grams / 100;
+  // Calculate multiplier based on standard portion, not 100g
+  const multiplier = grams / food.portion_grams;
   return {
     calories: food.calories * multiplier,
     protein: food.protein * multiplier,

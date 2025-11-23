@@ -15,10 +15,12 @@ import {
   IconButton,
   Chip,
   CircularProgress,
-  Autocomplete,
   Divider,
+  Paper,
+  Alert,
+  InputAdornment,
 } from '@mui/material';
-import { Delete, Add } from '@mui/icons-material';
+import { Delete, Add, Search } from '@mui/icons-material';
 import { saveRecipe } from '../../utils/nutritionStorage';
 
 // USDA FoodData Central API configuration
@@ -48,7 +50,6 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
-  const [autocompleteOpen, setAutocompleteOpen] = useState(false);
   const [error, setError] = useState('');
 
   // Load recipe data if editing
@@ -67,7 +68,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
 
   const searchFoods = useCallback(async (query) => {
     if (!query || query.trim().length < 2) {
-      setSearchResults([]);
+      setError('Please enter at least 2 characters to search');
       return;
     }
 
@@ -93,20 +94,6 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
       setSearching(false);
     }
   }, []);
-
-  // Debounce search input
-  useEffect(() => {
-    if (searchQuery.trim().length < 2) {
-      setSearchResults([]);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      searchFoods(searchQuery);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [searchQuery, searchFoods]);
 
   const getNutrient = (food, nutrientId) => {
     const nutrient = food.foodNutrients?.find(n => n.nutrientId === nutrientId);
@@ -137,7 +124,6 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
     setFoods([...foods, newFood]);
     setSearchQuery('');
     setSearchResults([]);
-    setAutocompleteOpen(false);
   };
 
   const handleRemoveFood = (foodId) => {
@@ -254,62 +240,82 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
             <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
               Add Foods
             </Typography>
-            <Autocomplete
-              fullWidth
-              open={autocompleteOpen && searchResults.length > 0}
-              onOpen={() => setAutocompleteOpen(true)}
-              onClose={() => setAutocompleteOpen(false)}
-              options={searchResults}
-              loading={searching}
-              getOptionLabel={(option) => option.description || ''}
-              filterOptions={(x) => x}
-              isOptionEqualToValue={(option, value) => option.fdcId === value.fdcId}
-              onChange={(event, value) => {
-                if (value) {
-                  handleAddFood(value);
-                }
-              }}
-              inputValue={searchQuery}
-              onInputChange={(event, newInputValue, reason) => {
-                if (reason === 'input') {
-                  setSearchQuery(newInputValue);
-                }
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Search for foods to add..."
-                  size="small"
-                  InputProps={{
-                    ...params.InputProps,
-                    startAdornment: <Add fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />,
-                    endAdornment: (
-                      <>
-                        {searching ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              renderOption={(props, food) => {
-                const nutrition = calculateNutrition(food, 100);
-                return (
-                  <li {...props} key={food.fdcId}>
-                    <Box sx={{ width: '100%' }}>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {food.description}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
-                        <Chip label={`${nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
-                        <Chip label={`P: ${nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+              <TextField
+                fullWidth
+                placeholder="Enter food name to search..."
+                size="small"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    searchFoods(searchQuery);
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search fontSize="small" color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Button
+                variant="contained"
+                onClick={() => searchFoods(searchQuery)}
+                disabled={searching || searchQuery.trim().length < 2}
+                sx={{ minWidth: 100 }}
+              >
+                {searching ? <CircularProgress size={20} color="inherit" /> : 'Search'}
+              </Button>
+            </Box>
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+                {error}
+              </Alert>
+            )}
+
+            {/* Search Results */}
+            {searchResults.length > 0 && (
+              <Paper variant="outlined" sx={{ maxHeight: 250, overflow: 'auto', mb: 2 }}>
+                <List disablePadding>
+                  {searchResults.map((food, index) => {
+                    const nutrition = calculateNutrition(food, 100);
+                    return (
+                      <Box key={food.fdcId}>
+                        {index > 0 && <Divider />}
+                        <ListItem
+                          button
+                          onClick={() => handleAddFood(food)}
+                          sx={{ py: 1.5 }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                {food.description}
+                              </Typography>
+                            }
+                            secondary={
+                              <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                                <Chip label={`${nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                <Chip label={`P: ${nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                              </Box>
+                            }
+                          />
+                        </ListItem>
                       </Box>
-                    </Box>
-                  </li>
-                );
-              }}
-              noOptionsText={searchQuery.length < 2 ? "Type at least 2 characters" : "No foods found"}
-            />
+                    );
+                  })}
+                </List>
+              </Paper>
+            )}
+
+            {!searching && searchResults.length === 0 && searchQuery.trim().length >= 2 && !error && (
+              <Alert severity="info" sx={{ mb: 2 }}>
+                No foods found. Try a different search term.
+              </Alert>
+            )}
           </Box>
 
           {/* Added Foods List */}

@@ -376,11 +376,11 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                 {foods.map((food, index) => (
                   <Box key={food.id}>
                     {index > 0 && <Divider />}
-                    <ListItem sx={{ py: 1.5 }}>
+                    <ListItem sx={{ py: 1 }}>
                       <ListItemText
                         primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500, flex: 1, fontSize: '0.875rem' }}>
                               {food.name}
                             </Typography>
                             <TextField
@@ -407,11 +407,11 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                           </Box>
                         }
                         secondary={
-                          <Box component="span" sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
-                            <Chip label={`${food.nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
-                            <Chip label={`P: ${food.nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                            <Chip label={`C: ${food.nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                            <Chip label={`F: ${food.nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                          <Box component="span" sx={{ display: 'flex', gap: 0.4, flexWrap: 'wrap', mt: 0.5 }}>
+                            <Chip label={`${food.nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                            <Chip label={`P: ${food.nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 18, fontSize: '0.65rem' }} />
+                            <Chip label={`C: ${food.nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 18, fontSize: '0.65rem' }} />
+                            <Chip label={`F: ${food.nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 18, fontSize: '0.65rem' }} />
                           </Box>
                         }
                       />

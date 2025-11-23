@@ -376,7 +376,7 @@ const NutritionTab = () => {
               >
                 <Restaurant fontSize="small" /> Search & Add Food
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1, mb: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+              <Box sx={{ display: 'flex', gap: 1, mb: 2, flexDirection: 'row', alignItems: 'flex-start' }}>
                 <Autocomplete
                   fullWidth
                   freeSolo
@@ -486,17 +486,28 @@ const NutritionTab = () => {
                   onClick={() => searchFoods(searchQuery, false)}
                   disabled={searching || trimmedQueryLength < 2}
                   sx={{ 
-                    minWidth: { xs: '100%', sm: 120 },
-                    height: { xs: 48, sm: 56 },
+                    minWidth: { xs: 'auto', sm: 120 },
+                    width: { xs: 56, sm: 'auto' },
+                    height: { xs: 56, sm: 56 },
                     fontWeight: 600,
                     boxShadow: 2,
+                    px: { xs: 0, sm: 2 },
                     '&:hover': {
                       boxShadow: 4,
+                    },
+                    '& .MuiButton-startIcon': {
+                      margin: { xs: 0, sm: '0 8px 0 -4px' },
                     },
                   }}
                   startIcon={searching ? null : <Search />}
                 >
-                  {searching ? <CircularProgress size={24} color="inherit" /> : 'Search'}
+                  {searching ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                      Search
+                    </Box>
+                  )}
                 </Button>
               </Box>
           

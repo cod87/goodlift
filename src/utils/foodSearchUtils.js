@@ -3,6 +3,12 @@
  * These utilities help improve search results by matching foods regardless of word order
  */
 
+// Configuration constants for food search
+export const FOOD_SEARCH_CONFIG = {
+  API_PAGE_SIZE: 25,  // Number of results to fetch from API for client-side filtering
+  MAX_RESULTS: 5,     // Maximum number of results to display to user
+};
+
 /**
  * Flexible keyword-based food matching helper
  * Splits the query into keywords and checks if a food description contains all keywords

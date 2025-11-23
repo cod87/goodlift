@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import { Delete, Add, Search } from '@mui/icons-material';
 import { saveRecipe } from '../../utils/nutritionStorage';
-import { matchesAllKeywords, parseSearchKeywords } from '../../utils/foodSearchUtils';
+import { matchesAllKeywords, parseSearchKeywords, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
 
 // USDA FoodData Central API configuration
 const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
@@ -83,7 +83,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
       
       // Request more results from API to allow for client-side filtering
       const response = await fetch(
-        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=25&dataType=Foundation,SR%20Legacy`
+        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=${FOOD_SEARCH_CONFIG.API_PAGE_SIZE}&dataType=Foundation,SR%20Legacy`
       );
 
       if (!response.ok) {
@@ -94,10 +94,10 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
       const allFoods = data.foods || [];
       
       // Apply flexible keyword matching on the client side
-      // Filter foods that contain all keywords in any order, then limit to top 5
+      // Filter foods that contain all keywords in any order, then limit to configured max
       const filteredFoods = allFoods
         .filter(food => matchesAllKeywords(food.description, keywords))
-        .slice(0, 5);
+        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       
       setSearchResults(filteredFoods);
     } catch (err) {

@@ -57,6 +57,7 @@ const NUTRIENT_IDS = {
  * NutritionTab - Component for tracking nutrition using USDA FoodData Central API
  * Features:
  * - Search foods from USDA database with flexible keyword matching
+ * - Only shows USDA foods with dataType 'Foundation' and 'SR Legacy' (excludes Branded)
  * - Log consumed foods with portion sizes
  * - View daily nutrition summary
  * - Set and track nutrition goals
@@ -146,9 +147,16 @@ const NutritionTab = () => {
       const data = await response.json();
       const allFoods = data.foods || [];
       
-      // Apply flexible keyword matching on the client side
-      // Filter foods that contain all keywords in any order, then limit to configured max
+      // Apply client-side filtering:
+      // 1. Filter by dataType to ensure only Foundation and SR Legacy foods (defense-in-depth)
+      // 2. Filter foods that contain all keywords in any order
+      // 3. Limit to configured maximum results
       const filteredFoods = allFoods
+        .filter(food => {
+          // Ensure only Foundation and SR Legacy dataTypes
+          const dataType = food.dataType || '';
+          return dataType === 'Foundation' || dataType === 'SR Legacy';
+        })
         .filter(food => matchesAllKeywords(food.description, keywords))
         .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       

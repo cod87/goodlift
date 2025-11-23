@@ -41,6 +41,7 @@ const NUTRIENT_IDS = {
  * RecipeBuilder - Dialog component for creating and editing custom recipes
  * Allows users to:
  * - Add multiple foods with their weights using flexible keyword search
+ * - Only shows USDA foods with dataType 'Foundation' and 'SR Legacy' (excludes Branded)
  * - Calculate total nutrition
  * - Save recipe for later use
  */
@@ -93,9 +94,16 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
       const data = await response.json();
       const allFoods = data.foods || [];
       
-      // Apply flexible keyword matching on the client side
-      // Filter foods that contain all keywords in any order, then limit to configured max
+      // Apply client-side filtering:
+      // 1. Filter by dataType to ensure only Foundation and SR Legacy foods (defense-in-depth)
+      // 2. Filter foods that contain all keywords in any order
+      // 3. Limit to configured maximum results
       const filteredFoods = allFoods
+        .filter(food => {
+          // Ensure only Foundation and SR Legacy dataTypes
+          const dataType = food.dataType || '';
+          return dataType === 'Foundation' || dataType === 'SR Legacy';
+        })
         .filter(food => matchesAllKeywords(food.description, keywords))
         .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       

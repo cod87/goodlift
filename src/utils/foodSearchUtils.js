@@ -20,6 +20,53 @@ export const FOOD_SEARCH_CONFIG = {
 export const ALLOWED_DATA_TYPES = ['Foundation', 'SR Legacy'];
 
 /**
+ * Simple pluralization rules for common English patterns
+ * Generates both singular and plural forms of a word
+ * 
+ * @param {string} word - The word to pluralize/singularize
+ * @returns {string[]} - Array of word variations (including original)
+ */
+export const getWordVariations = (word) => {
+  const lower = word.toLowerCase();
+  const variations = new Set([lower]); // Include original
+  
+  // Common plural patterns (converting plural to singular)
+  if (lower.endsWith('ies') && lower.length > 3) {
+    // berries -> berry
+    variations.add(lower.slice(0, -3) + 'y');
+  } else if (lower.endsWith('oes') && lower.length > 3) {
+    // potatoes -> potato, tomatoes -> tomato
+    variations.add(lower.slice(0, -2));
+  } else if (lower.endsWith('ses') && lower.length > 3) {
+    // glasses -> glass (but not 'ses' -> 's')
+    variations.add(lower.slice(0, -2));
+  } else if (lower.endsWith('ches') || lower.endsWith('shes') || lower.endsWith('xes') || lower.endsWith('zes')) {
+    // peaches -> peach, brushes -> brush, boxes -> box
+    variations.add(lower.slice(0, -2));
+  } else if (lower.endsWith('s') && !lower.endsWith('ss') && !lower.endsWith('us') && lower.length > 1) {
+    // apples -> apple, carrots -> carrot
+    variations.add(lower.slice(0, -1));
+  }
+  
+  // Generate plurals from singular
+  if (lower.endsWith('y') && lower.length > 2 && !'aeiou'.includes(lower[lower.length - 2])) {
+    // berry -> berries
+    variations.add(lower.slice(0, -1) + 'ies');
+  } else if (lower.endsWith('o') && lower.length > 2) {
+    // potato -> potatoes, tomato -> tomatoes
+    variations.add(lower + 'es');
+  } else if (lower.endsWith('ch') || lower.endsWith('sh') || lower.endsWith('x') || lower.endsWith('z') || lower.endsWith('s')) {
+    // peach -> peaches, glass -> glasses
+    variations.add(lower + 'es');
+  } else if (!lower.endsWith('s')) {
+    // apple -> apples, carrot -> carrots (default case)
+    variations.add(lower + 's');
+  }
+  
+  return Array.from(variations);
+};
+
+/**
  * Flexible keyword-based food matching helper with fuzzy/partial matching
  * Splits the query into keywords and checks if a food description contains all keywords
  * in any order (case-insensitive). 
@@ -28,6 +75,7 @@ export const ALLOWED_DATA_TYPES = ['Foundation', 'SR Legacy'];
  * - Out-of-order matching: 'chickpeas canned' matches 'canned chickpeas'
  * - Partial word matching: 'chick' matches 'chickpeas'
  * - Fuzzy matching: handles plurals, variations, and substrings
+ * - Singular/plural matching: 'potato' matches 'potatoes' and vice versa
  * 
  * @param {string} foodDescription - The food description to match against
  * @param {string[]} keywords - Array of search keywords
@@ -35,9 +83,20 @@ export const ALLOWED_DATA_TYPES = ['Foundation', 'SR Legacy'];
  */
 export const matchesAllKeywords = (foodDescription, keywords) => {
   const lowerDesc = foodDescription.toLowerCase();
-  // Each keyword must match somewhere in the description
-  // This provides partial/fuzzy matching naturally
-  return keywords.every(keyword => lowerDesc.includes(keyword.toLowerCase()));
+  
+  // Each keyword must match somewhere in the description (with variations)
+  return keywords.every(keyword => {
+    const keywordLower = keyword.toLowerCase();
+    
+    // Direct substring match (original behavior)
+    if (lowerDesc.includes(keywordLower)) {
+      return true;
+    }
+    
+    // Try word variations (singular/plural forms)
+    const variations = getWordVariations(keywordLower);
+    return variations.some(variation => lowerDesc.includes(variation));
+  });
 };
 
 /**
@@ -130,22 +189,38 @@ const RELEVANCE_SCORE = {
 
 /**
  * Detect if a search query is for meat or seafood
+ * Now includes singular/plural variation matching
  * @param {string} query - The search query
  * @returns {boolean} - True if query contains meat/seafood keywords
  */
 export const isMeatOrSeafood = (query) => {
   const lowerQuery = query.toLowerCase();
-  return MEAT_SEAFOOD_KEYWORDS.some(keyword => lowerQuery.includes(keyword));
+  return MEAT_SEAFOOD_KEYWORDS.some(keyword => {
+    if (lowerQuery.includes(keyword)) {
+      return true;
+    }
+    // Check variations (singular/plural)
+    const variations = getWordVariations(keyword);
+    return variations.some(variation => lowerQuery.includes(variation));
+  });
 };
 
 /**
  * Detect if a search query is for vegetables or fruits
+ * Now includes singular/plural variation matching
  * @param {string} query - The search query
  * @returns {boolean} - True if query contains vegetable/fruit keywords
  */
 export const isVegetableOrFruit = (query) => {
   const lowerQuery = query.toLowerCase();
-  return VEGETABLE_FRUIT_KEYWORDS.some(keyword => lowerQuery.includes(keyword));
+  return VEGETABLE_FRUIT_KEYWORDS.some(keyword => {
+    if (lowerQuery.includes(keyword)) {
+      return true;
+    }
+    // Check variations (singular/plural)
+    const variations = getWordVariations(keyword);
+    return variations.some(variation => lowerQuery.includes(variation));
+  });
 };
 
 /**

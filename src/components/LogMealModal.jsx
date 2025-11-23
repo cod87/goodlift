@@ -59,24 +59,25 @@ const LogMealModal = ({
   favoriteFoods = [],
   onFavoritesChange,
 }) => {
-  const [activeTab, setActiveTab] = useState(0); // 0: Search, 1: Recent, 2: Favorites
+  // 0: Search Food, 1: My Meal
+  const [activeTab, setActiveTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
-  const [selectedFood, setSelectedFood] = useState(null);
-  const [portionGrams, setPortionGrams] = useState(100);
   const [error, setError] = useState('');
   const debounceTimer = useRef(null);
+  
+  // My Meal items (foods selected for logging)
+  const [mealItems, setMealItems] = useState([]);
 
   // Reset state when modal opens
   useEffect(() => {
     if (open) {
       setSearchQuery('');
       setSearchResults([]);
-      setSelectedFood(null);
-      setPortionGrams(100);
       setError('');
       setActiveTab(0);
+      setMealItems([]);
     }
   }, [open]);
 
@@ -131,26 +132,46 @@ const LogMealModal = ({
   }, [searchQuery, searchFoodsLocal]);
 
   const handleSelectFood = (food) => {
-    setSelectedFood(food);
-    // Use standard portion as default
-    setPortionGrams(food.portion_grams || 100);
+    // Add food to meal items with default portion
+    const newMealItem = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+      food: food,
+      grams: food.portion_grams || 100,
+    };
+    setMealItems([...mealItems, newMealItem]);
+    
+    // Switch to "My Meal" tab to show the added item
+    setActiveTab(1);
   };
 
-  const handleAddEntry = () => {
-    if (!selectedFood || portionGrams <= 0) {
+  const handleRemoveMealItem = (itemId) => {
+    setMealItems(mealItems.filter(item => item.id !== itemId));
+  };
+
+  const handleUpdateMealItemGrams = (itemId, grams) => {
+    setMealItems(mealItems.map(item => 
+      item.id === itemId ? { ...item, grams: Math.max(1, grams) } : item
+    ));
+  };
+
+  const handleSaveMeal = () => {
+    if (mealItems.length === 0) {
       return;
     }
 
-    const nutrition = calculateNutritionForFood(selectedFood, portionGrams);
-    const entry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-      date: new Date().toISOString(),
-      foodName: selectedFood.name,
-      grams: portionGrams,
-      nutrition,
-    };
-
-    onSave(entry);
+    // Create entries for each meal item
+    mealItems.forEach(item => {
+      const nutrition = calculateNutritionForFood(item.food, item.grams);
+      const entry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+        date: new Date().toISOString(),
+        foodName: item.food.name,
+        grams: item.grams,
+        nutrition,
+      };
+      onSave(entry);
+    });
+    
     onClose();
   };
 
@@ -293,17 +314,12 @@ const LogMealModal = ({
           >
             <Tab 
               icon={<SearchIcon fontSize="small" />} 
-              label="Search Foods"
+              label="Search Food"
               iconPosition="start"
             />
             <Tab 
-              icon={<HistoryIcon fontSize="small" />} 
-              label="Recent"
-              iconPosition="start"
-            />
-            <Tab 
-              icon={<StarIcon fontSize="small" />} 
-              label="Favorites"
+              icon={<RestaurantIcon fontSize="small" />} 
+              label={`My Meal (${mealItems.length})`}
               iconPosition="start"
             />
           </Tabs>
@@ -311,7 +327,7 @@ const LogMealModal = ({
 
         {/* Content */}
         <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
-          {/* Search Tab */}
+          {/* Search Food Tab */}
           {activeTab === 0 && (
             <Box>
               {/* Search Input */}
@@ -341,24 +357,6 @@ const LogMealModal = ({
                 </Alert>
               )}
 
-              {/* Search hint for meat/seafood */}
-              {searchQuery && isMeatOrSeafood(searchQuery) && (
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  <Typography variant="body2">
-                    Searching for <strong>{searchQuery}</strong> - Showing cooked forms by default
-                  </Typography>
-                </Alert>
-              )}
-
-              {/* Search hint for vegetables/fruits */}
-              {searchQuery && isVegetableOrFruit(searchQuery) && (
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  <Typography variant="body2">
-                    Searching for <strong>{searchQuery}</strong> - Showing raw and cooked forms
-                  </Typography>
-                </Alert>
-              )}
-
               {/* Loading */}
               {searching && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
@@ -375,7 +373,7 @@ const LogMealModal = ({
                   <Paper variant="outlined" sx={{ borderRadius: 2 }}>
                     <List disablePadding>
                       {searchResults.map((food, index) => (
-                        <Box key={food.fdcId}>
+                        <Box key={food.id}>
                           {index > 0 && <Divider />}
                           {renderFoodItem(food, () => handleSelectFood(food))}
                         </Box>
@@ -399,128 +397,136 @@ const LogMealModal = ({
             </Box>
           )}
 
-          {/* Recent Tab */}
+          {/* My Meal Tab */}
           {activeTab === 1 && (
             <Box>
-              <Typography variant="h6" gutterBottom>
-                Recently Logged Foods
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                My Meal
               </Typography>
-              {recentFoods.length === 0 ? (
-                <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'background.default' }}>
+              
+              {mealItems.length === 0 ? (
+                <Paper sx={{ p: 4, textAlign: 'center', bgcolor: 'background.default', borderRadius: 2 }}>
+                  <RestaurantIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="body1" color="text.secondary" gutterBottom>
+                    No foods added yet
+                  </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    No recent foods. Start logging meals to see your history here.
+                    Search for foods in the "Search Food" tab and click to add them here
                   </Typography>
                 </Paper>
               ) : (
-                <Paper variant="outlined" sx={{ borderRadius: 2 }}>
-                  <List disablePadding>
-                    {recentFoods.slice(0, 20).map((food, index) => (
-                      <Box key={index}>
-                        {index > 0 && <Divider />}
-                        {renderFoodItem(food, () => handleSelectFood(food))}
-                      </Box>
-                    ))}
-                  </List>
-                </Paper>
-              )}
-            </Box>
-          )}
+                <>
+                  <Paper variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
+                    <List disablePadding>
+                      {mealItems.map((item, index) => (
+                        <Box key={item.id}>
+                          {index > 0 && <Divider />}
+                          <ListItem sx={{ py: 2, px: 2, alignItems: 'flex-start' }}>
+                            <ListItemText
+                              primary={
+                                <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+                                  {item.food.name}
+                                </Typography>
+                              }
+                              secondary={
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                  <TextField
+                                    type="number"
+                                    label="Amount (grams)"
+                                    value={item.grams}
+                                    onChange={(e) => handleUpdateMealItemGrams(item.id, parseFloat(e.target.value) || 0)}
+                                    size="small"
+                                    inputProps={{ min: 1, step: 1 }}
+                                    sx={{ maxWidth: 200 }}
+                                  />
+                                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+                                    {(() => {
+                                      const nutrition = calculateNutritionForFood(item.food, item.grams);
+                                      return (
+                                        <>
+                                          <Chip label={`${nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                          <Chip label={`P: ${nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                          <Chip label={`C: ${nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                          <Chip label={`F: ${nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                        </>
+                                      );
+                                    })()}
+                                  </Box>
+                                </Box>
+                              }
+                            />
+                            <IconButton
+                              edge="end"
+                              onClick={() => handleRemoveMealItem(item.id)}
+                              color="error"
+                              sx={{ ml: 1 }}
+                            >
+                              <CloseIcon fontSize="small" />
+                            </IconButton>
+                          </ListItem>
+                        </Box>
+                      ))}
+                    </List>
+                  </Paper>
 
-          {/* Favorites Tab */}
-          {activeTab === 2 && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Favorite Foods
-              </Typography>
-              {favoriteFoods.length === 0 ? (
-                <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'background.default' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    No favorite foods yet. Add foods you log frequently to favorites for quick access.
-                  </Typography>
-                </Paper>
-              ) : (
-                <Paper variant="outlined" sx={{ borderRadius: 2 }}>
-                  <List disablePadding>
-                    {favoriteFoods.map((food, index) => (
-                      <Box key={index}>
-                        {index > 0 && <Divider />}
-                        {renderFoodItem(food, () => handleSelectFood(food))}
-                      </Box>
-                    ))}
-                  </List>
-                </Paper>
+                  {/* Total Nutrition */}
+                  <Paper sx={{ p: 2, bgcolor: 'primary.50', borderRadius: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
+                      Total Nutrition
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                      {(() => {
+                        const totals = mealItems.reduce((acc, item) => {
+                          const nutrition = calculateNutritionForFood(item.food, item.grams);
+                          return {
+                            calories: acc.calories + nutrition.calories,
+                            protein: acc.protein + nutrition.protein,
+                            carbs: acc.carbs + nutrition.carbs,
+                            fat: acc.fat + nutrition.fat,
+                            fiber: acc.fiber + nutrition.fiber,
+                          };
+                        }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
+                        
+                        return (
+                          <>
+                            <Chip label={`${totals.calories.toFixed(0)} cal`} size="medium" sx={{ fontWeight: 600 }} />
+                            <Chip label={`P: ${totals.protein.toFixed(1)}g`} size="medium" color="primary" sx={{ fontWeight: 600 }} />
+                            <Chip label={`C: ${totals.carbs.toFixed(1)}g`} size="medium" color="secondary" sx={{ fontWeight: 600 }} />
+                            <Chip label={`F: ${totals.fat.toFixed(1)}g`} size="medium" color="warning" sx={{ fontWeight: 600 }} />
+                          </>
+                        );
+                      })()}
+                    </Box>
+                  </Paper>
+                </>
               )}
             </Box>
           )}
         </Box>
 
-        {/* Selected Food Section */}
-        {selectedFood && (
-          <Box sx={{ 
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            p: 3,
-            bgcolor: 'background.paper',
-          }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Add to Log
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {selectedFood.description || selectedFood.foodName}
-              </Typography>
-              <TextField
-                fullWidth
-                type="number"
-                label="Amount (grams)"
-                value={portionGrams}
-                onChange={(e) => setPortionGrams(Math.max(1, parseFloat(e.target.value) || 0))}
-                inputProps={{ min: 1, step: 1 }}
-                helperText="Enter the amount in grams you consumed"
-              />
-              <Box>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Nutrition for {portionGrams}g:
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', fontSize: '0.875rem', color: 'text.secondary' }}>
-                  {(() => {
-                    const nutrition = calculateNutrition(selectedFood, portionGrams);
-                    return (
-                      <>
-                        <span style={{ fontWeight: 600 }}>{nutrition.calories.toFixed(0)} cal</span>
-                        <span>•</span>
-                        <span>Protein: {nutrition.protein.toFixed(1)}g</span>
-                        <span>•</span>
-                        <span>Carbs: {nutrition.carbs.toFixed(1)}g</span>
-                        <span>•</span>
-                        <span>Fat: {nutrition.fat.toFixed(1)}g</span>
-                        <span>•</span>
-                        <span>Fiber: {nutrition.fiber.toFixed(1)}g</span>
-                      </>
-                    );
-                  })()}
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        )}
+        {/* Action Buttons */}
+        <Box sx={{ 
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          p: 2,
+          bgcolor: 'background.paper',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <Button onClick={handleClose} variant="outlined">
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSaveMeal} 
+            variant="contained" 
+            disabled={mealItems.length === 0}
+            startIcon={<AddIcon />}
+          >
+            Log Meal ({mealItems.length} item{mealItems.length !== 1 ? 's' : ''})
+          </Button>
+        </Box>
       </DialogContent>
-
-      {/* Footer Actions */}
-      <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-        <Button onClick={handleClose} size="large">
-          Cancel
-        </Button>
-        <Button 
-          onClick={handleAddEntry} 
-          variant="contained" 
-          size="large"
-          disabled={!selectedFood || portionGrams <= 0}
-          startIcon={<AddIcon />}
-        >
-          Add Entry
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

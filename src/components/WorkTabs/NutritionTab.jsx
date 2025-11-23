@@ -289,6 +289,68 @@ const NutritionTab = () => {
     color: PropTypes.string,
   };
 
+  // Circular Progress Ring Component
+  const CalorieProgressRing = ({ current, goal }) => {
+    const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
+    const remaining = Math.max(goal - current, 0);
+    
+    return (
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ py: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Box sx={{ position: 'relative', display: 'inline-flex', mb: 2 }}>
+            <CircularProgress
+              variant="determinate"
+              value={100}
+              size={120}
+              thickness={4}
+              sx={{
+                color: 'grey.200',
+                position: 'absolute',
+              }}
+            />
+            <CircularProgress
+              variant="determinate"
+              value={percentage}
+              size={120}
+              thickness={4}
+              sx={{
+                color: percentage < 80 ? 'primary.main' : percentage < 100 ? 'warning.main' : 'success.main',
+              }}
+            />
+            <Box
+              sx={{
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                position: 'absolute',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+              }}
+            >
+              <Typography variant="h5" component="div" sx={{ fontWeight: 700 }}>
+                {current.toFixed(0)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                of {goal} kcal
+              </Typography>
+            </Box>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            {remaining.toFixed(0)} kcal remaining
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  CalorieProgressRing.propTypes = {
+    current: PropTypes.number.isRequired,
+    goal: PropTypes.number.isRequired,
+  };
+
   return (
     <Box>
       {/* Log Meal Button - Prominent at top */}
@@ -342,6 +404,9 @@ const NutritionTab = () => {
       {/* Food Diary Tab */}
       {activeSubTab === 0 && (
         <>
+          {/* Calorie Progress Ring */}
+          <CalorieProgressRing current={totals.calories} goal={goals.calories} />
+
           {/* Manual Search Section with TextField and Button */}
           <Card 
             sx={{ 

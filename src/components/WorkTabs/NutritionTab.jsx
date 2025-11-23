@@ -246,6 +246,8 @@ const NutritionTab = () => {
   };
 
   const totals = getTodayTotals();
+  const trimmedQueryLength = searchQuery.trim().length;
+  const isQueryTooShort = trimmedQueryLength > 0 && trimmedQueryLength < 2;
 
   const NutrientProgress = ({ label, current, goal, unit = 'g', color = 'primary' }) => {
     const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
@@ -367,13 +369,13 @@ const NutritionTab = () => {
                       },
                     },
                   }}
-                  helperText={searchQuery.trim().length > 0 && searchQuery.trim().length < 2 ? "Enter at least 2 characters to search" : " "}
-                  error={searchQuery.trim().length > 0 && searchQuery.trim().length < 2}
+                  helperText={isQueryTooShort ? "Enter at least 2 characters to search" : " "}
+                  error={isQueryTooShort}
                 />
                 <Button
                   variant="contained"
                   onClick={() => searchFoods(searchQuery)}
-                  disabled={searching || searchQuery.trim().length < 2}
+                  disabled={searching || trimmedQueryLength < 2}
                   sx={{ 
                     minWidth: { xs: '100%', sm: 120 },
                     height: { xs: 48, sm: 56 },
@@ -520,7 +522,7 @@ const NutritionTab = () => {
             </>
           )}
 
-          {!searching && searchResults.length === 0 && searchQuery.trim().length >= 2 && !error && (
+          {!searching && searchResults.length === 0 && trimmedQueryLength >= 2 && !error && (
             <Alert 
               severity="info" 
               sx={{ 
@@ -529,7 +531,7 @@ const NutritionTab = () => {
               }}
             >
               <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
-                No foods found for &quot;{searchQuery}&quot;
+                No foods found for "{searchQuery}"
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Try these tips:
@@ -537,7 +539,7 @@ const NutritionTab = () => {
               <Box component="ul" sx={{ mt: 0.5, mb: 0, pl: 2 }}>
                 <li>
                   <Typography variant="body2" color="text.secondary">
-                    Use simpler terms (e.g., &quot;chicken&quot; instead of &quot;grilled chicken breast&quot;)
+                    Use simpler terms (e.g., "chicken" instead of "grilled chicken breast")
                   </Typography>
                 </li>
                 <li>

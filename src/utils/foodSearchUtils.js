@@ -30,22 +30,20 @@ export const getWordVariations = (word) => {
   const lower = word.toLowerCase();
   const variations = new Set([lower]); // Include original
   
-  // Common plural patterns
-  if (lower.endsWith('ies')) {
+  // Common plural patterns (converting plural to singular)
+  if (lower.endsWith('ies') && lower.length > 3) {
     // berries -> berry
     variations.add(lower.slice(0, -3) + 'y');
-  } else if (lower.endsWith('oes')) {
+  } else if (lower.endsWith('oes') && lower.length > 3) {
     // potatoes -> potato, tomatoes -> tomato
     variations.add(lower.slice(0, -2));
-  } else if (lower.endsWith('ses')) {
-    // lentils -> lentil (but also handles: glasses -> glass)
+  } else if (lower.endsWith('ses') && lower.length > 3) {
+    // glasses -> glass (but not 'ses' -> 's')
     variations.add(lower.slice(0, -2));
-  } else if (lower.endsWith('es') && !lower.endsWith('ies')) {
-    // peaches -> peach
+  } else if (lower.endsWith('ches') || lower.endsWith('shes') || lower.endsWith('xes') || lower.endsWith('zes')) {
+    // peaches -> peach, brushes -> brush, boxes -> box
     variations.add(lower.slice(0, -2));
-    // But also try removing just 's' (e.g., 'apples' variation)
-    variations.add(lower.slice(0, -1));
-  } else if (lower.endsWith('s') && !lower.endsWith('ss')) {
+  } else if (lower.endsWith('s') && !lower.endsWith('ss') && !lower.endsWith('us') && lower.length > 1) {
     // apples -> apple, carrots -> carrot
     variations.add(lower.slice(0, -1));
   }
@@ -54,20 +52,15 @@ export const getWordVariations = (word) => {
   if (lower.endsWith('y') && lower.length > 2 && !'aeiou'.includes(lower[lower.length - 2])) {
     // berry -> berries
     variations.add(lower.slice(0, -1) + 'ies');
-  }
-  if (lower.endsWith('o') && lower.length > 2) {
+  } else if (lower.endsWith('o') && lower.length > 2) {
     // potato -> potatoes, tomato -> tomatoes
     variations.add(lower + 'es');
-  }
-  if (!lower.endsWith('s') && !lower.endsWith('x') && !lower.endsWith('z') && 
-      !lower.endsWith('ch') && !lower.endsWith('sh')) {
-    // apple -> apples, carrot -> carrots
-    variations.add(lower + 's');
-  }
-  if (lower.endsWith('ch') || lower.endsWith('sh') || lower.endsWith('x') || 
-      lower.endsWith('z') || lower.endsWith('s')) {
+  } else if (lower.endsWith('ch') || lower.endsWith('sh') || lower.endsWith('x') || lower.endsWith('z') || lower.endsWith('s')) {
     // peach -> peaches, glass -> glasses
     variations.add(lower + 'es');
+  } else if (!lower.endsWith('s')) {
+    // apple -> apples, carrot -> carrots (default case)
+    variations.add(lower + 's');
   }
   
   return Array.from(variations);

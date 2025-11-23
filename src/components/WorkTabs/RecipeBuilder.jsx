@@ -340,7 +340,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                                   label={dataType} 
                                   size="small" 
                                   color={dataType === 'SR Legacy' ? 'info' : 'default'}
-                                  sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} 
+                                  sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
                                 />
                               </Box>
                             }

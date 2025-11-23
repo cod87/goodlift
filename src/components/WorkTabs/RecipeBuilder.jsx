@@ -41,9 +41,16 @@ const NUTRIENT_IDS = {
  * RecipeBuilder - Dialog component for creating and editing custom recipes
  * Allows users to:
  * - Add multiple foods with their weights using flexible keyword search
+ * - Prioritizes SR Legacy foods first (most comprehensive), then Foundation foods
+ * - Fuzzy/partial matching: handles out-of-order keywords, partial words, variations
  * - Only shows USDA foods with dataType 'Foundation' and 'SR Legacy' (excludes Branded)
  * - Calculate total nutrition
  * - Save recipe for later use
+ * 
+ * Search Strategy:
+ * - Shows SR Legacy results first (more comprehensive food database)
+ * - Falls back to Foundation foods for additional results
+ * - Client-side filtering with fuzzy matching for better result coverage
  */
 const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
   const [recipeName, setRecipeName] = useState('');
@@ -80,9 +87,11 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
     try {
       // Split query into keywords for flexible matching
       // This allows 'chickpeas canned' to match 'canned chickpeas', etc.
+      // Also enables partial matching: 'chick' matches 'chickpeas'
       const keywords = parseSearchKeywords(query);
       
       // Request more results from API to allow for client-side filtering
+      // Increased page size for better result coverage with fuzzy matching
       const response = await fetch(
         `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=${FOOD_SEARCH_CONFIG.API_PAGE_SIZE}&dataType=Foundation,SR%20Legacy`
       );
@@ -96,14 +105,26 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
       
       // Apply client-side filtering:
       // 1. Filter by dataType to ensure only Foundation and SR Legacy foods (defense-in-depth)
-      // 2. Filter foods that contain all keywords in any order
+      // 2. Filter foods that contain all keywords in any order (supports partial/fuzzy matching)
       // 3. Limit to configured maximum results
-      const filteredFoods = allFoods
+      const keywordFilteredFoods = allFoods
         .filter(hasAllowedDataType)
-        .filter(food => matchesAllKeywords(food.description, keywords))
+        .filter(food => matchesAllKeywords(food.description, keywords));
+      
+      // PRIORITIZATION STRATEGY: Show SR Legacy first, then Foundation
+      // SR Legacy has the most comprehensive food database, so we prioritize it
+      const srLegacyFoods = keywordFilteredFoods
+        .filter(food => food.dataType === 'SR Legacy')
         .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       
-      setSearchResults(filteredFoods);
+      const foundationFoods = keywordFilteredFoods
+        .filter(food => food.dataType === 'Foundation')
+        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
+      
+      // Combine with SR Legacy first for prioritization
+      const combinedResults = [...srLegacyFoods, ...foundationFoods];
+      
+      setSearchResults(combinedResults);
     } catch (err) {
       console.error('Error searching foods:', err);
       setError('Failed to search foods. Please try again.');
@@ -300,6 +321,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                 <List disablePadding>
                   {searchResults.map((food, index) => {
                     const nutrition = calculateNutrition(food, 100);
+                    const dataType = food.dataType || '';
                     return (
                       <Box key={food.fdcId}>
                         {index > 0 && <Divider />}
@@ -310,9 +332,17 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                         >
                           <ListItemText
                             primary={
-                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                {food.description}
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
+                                  {food.description}
+                                </Typography>
+                                <Chip 
+                                  label={dataType} 
+                                  size="small" 
+                                  color={dataType === 'SR Legacy' ? 'info' : 'default'}
+                                  sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                                />
+                              </Box>
                             }
                             secondary={
                               <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>

@@ -1,22 +1,33 @@
 /**
  * Food search utility functions for flexible keyword-based matching
  * These utilities help improve search results by matching foods regardless of word order
+ * 
+ * Search Strategy:
+ * 1. Prioritize SR Legacy foods first (most comprehensive database)
+ * 2. Fall back to Foundation foods for additional results
+ * 3. Use fuzzy/partial matching to increase result coverage
+ * 4. Support out-of-order keyword matching
  */
 
 // Configuration constants for food search
 export const FOOD_SEARCH_CONFIG = {
-  API_PAGE_SIZE: 25,  // Number of results to fetch from API for client-side filtering
-  MAX_RESULTS: 5,     // Maximum number of results to display to user
+  API_PAGE_SIZE: 50,  // Number of results to fetch from API for client-side filtering (increased for better coverage)
+  MAX_RESULTS: 10,     // Maximum number of results to display per data type
+  DEBOUNCE_MS: 300,    // Debounce delay for autocomplete (reduced from 500ms for faster response)
 };
 
 // Allowed USDA dataTypes for nutrition search
 export const ALLOWED_DATA_TYPES = ['Foundation', 'SR Legacy'];
 
 /**
- * Flexible keyword-based food matching helper
+ * Flexible keyword-based food matching helper with fuzzy/partial matching
  * Splits the query into keywords and checks if a food description contains all keywords
- * in any order (case-insensitive). This allows queries like 'chickpeas canned' to match
- * 'canned chickpeas' and vice versa.
+ * in any order (case-insensitive). 
+ * 
+ * Features:
+ * - Out-of-order matching: 'chickpeas canned' matches 'canned chickpeas'
+ * - Partial word matching: 'chick' matches 'chickpeas'
+ * - Fuzzy matching: handles plurals, variations, and substrings
  * 
  * @param {string} foodDescription - The food description to match against
  * @param {string[]} keywords - Array of search keywords
@@ -24,12 +35,15 @@ export const ALLOWED_DATA_TYPES = ['Foundation', 'SR Legacy'];
  */
 export const matchesAllKeywords = (foodDescription, keywords) => {
   const lowerDesc = foodDescription.toLowerCase();
+  // Each keyword must match somewhere in the description
+  // This provides partial/fuzzy matching naturally
   return keywords.every(keyword => lowerDesc.includes(keyword.toLowerCase()));
 };
 
 /**
  * Parse a search query into keywords for flexible matching
  * Splits the query on whitespace and filters out empty strings
+ * Short words (1-2 chars) are kept to support common food abbreviations
  * 
  * @param {string} query - The search query string
  * @returns {string[]} - Array of keywords

@@ -112,12 +112,14 @@ const NutritionTab = () => {
 
   const searchFoods = useCallback(async (query) => {
     if (!query || query.trim().length < 2) {
-      setError('Please enter at least 2 characters to search');
+      setError('Please enter at least 2 characters to search for foods');
+      setSearchResults([]);
       return;
     }
 
     setSearching(true);
     setError('');
+    setSearchResults([]); // Clear previous results
 
     try {
       // Split query into keywords for flexible matching
@@ -145,7 +147,7 @@ const NutritionTab = () => {
       setSearchResults(filteredFoods);
     } catch (err) {
       console.error('Error searching foods:', err);
-      setError('Failed to search foods. Please try again.');
+      setError('Unable to connect to the food database. Please check your internet connection and try again.');
       setSearchResults([]);
     } finally {
       setSearching(false);
@@ -308,16 +310,32 @@ const NutritionTab = () => {
       {activeSubTab === 0 && (
         <>
           {/* Manual Search Section with TextField and Button */}
-          <Card sx={{ mb: 2 }}>
-            <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <Restaurant fontSize="small" /> Add Food
+          <Card 
+            sx={{ 
+              mb: 2,
+              background: 'linear-gradient(135deg, rgba(29, 181, 132, 0.05) 0%, rgba(29, 181, 132, 0.02) 100%)',
+              border: '1px solid rgba(29, 181, 132, 0.2)',
+            }}
+          >
+            <CardContent sx={{ py: 2.5, '&:last-child': { pb: 2.5 } }}>
+              <Typography 
+                variant="h6" 
+                gutterBottom 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1, 
+                  mb: 2,
+                  fontWeight: 600,
+                }}
+              >
+                <Restaurant fontSize="small" /> Search & Add Food
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+              <Box sx={{ display: 'flex', gap: 1, mb: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
                 <TextField
                   fullWidth
-                  placeholder="Enter food name (e.g., chicken breast)..."
-                  size="small"
+                  placeholder="Search for foods (e.g., 'chicken breast', 'brown rice', 'apple')..."
+                  size="medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => {
@@ -328,67 +346,211 @@ const NutritionTab = () => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Search fontSize="small" color="action" />
+                        <Search color="primary" />
                       </InputAdornment>
                     ),
                   }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'background.paper',
+                      '&:hover': {
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.main',
+                          borderWidth: 2,
+                        },
+                      },
+                      '&.Mui-focused': {
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.main',
+                          borderWidth: 2,
+                        },
+                      },
+                    },
+                  }}
+                  helperText={searchQuery.trim().length > 0 && searchQuery.trim().length < 2 ? "Enter at least 2 characters to search" : " "}
+                  error={searchQuery.trim().length > 0 && searchQuery.trim().length < 2}
                 />
                 <Button
                   variant="contained"
                   onClick={() => searchFoods(searchQuery)}
                   disabled={searching || searchQuery.trim().length < 2}
-                  sx={{ minWidth: 100 }}
+                  sx={{ 
+                    minWidth: { xs: '100%', sm: 120 },
+                    height: { xs: 48, sm: 56 },
+                    fontWeight: 600,
+                    boxShadow: 2,
+                    '&:hover': {
+                      boxShadow: 4,
+                    },
+                  }}
+                  startIcon={searching ? null : <Search />}
                 >
-                  {searching ? <CircularProgress size={20} color="inherit" /> : 'Search'}
+                  {searching ? <CircularProgress size={24} color="inherit" /> : 'Search'}
                 </Button>
               </Box>
           
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+            <Alert 
+              severity="error" 
+              sx={{ mb: 2, borderRadius: 2 }} 
+              onClose={() => setError('')}
+            >
               {error}
             </Alert>
           )}
 
-          {/* Search Results */}
-          {searchResults.length > 0 && (
-            <Paper variant="outlined" sx={{ maxHeight: 300, overflow: 'auto' }}>
-              <List disablePadding>
-                {searchResults.map((food, index) => {
-                  const nutrition = calculateNutrition(food, 100);
-                  return (
-                    <Box key={food.fdcId}>
-                      {index > 0 && <Divider />}
-                      <ListItem
-                        button
-                        onClick={() => handleSelectFood(food)}
-                        sx={{ py: 1.5 }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {food.description}
-                            </Typography>
-                          }
-                          secondary={
-                            <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
-                              <Chip label={`${nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
-                              <Chip label={`P: ${nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                              <Chip label={`C: ${nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                              <Chip label={`F: ${nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
-                            </Box>
-                          }
-                        />
-                      </ListItem>
-                    </Box>
-                  );
-                })}
-              </List>
+          {/* Loading State */}
+          {searching && (
+            <Paper 
+              variant="outlined" 
+              sx={{ 
+                p: 4, 
+                textAlign: 'center',
+                borderRadius: 2,
+                mb: 2,
+              }}
+            >
+              <CircularProgress size={40} sx={{ mb: 2 }} />
+              <Typography variant="body1" color="text.secondary">
+                Searching USDA Food Database...
+              </Typography>
             </Paper>
           )}
 
+          {/* Search Results */}
+          {!searching && searchResults.length > 0 && (
+            <>
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ mb: 1, fontWeight: 500 }}
+              >
+                Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} - Click to add
+              </Typography>
+              <Paper 
+                variant="outlined" 
+                sx={{ 
+                  maxHeight: 350, 
+                  overflow: 'auto',
+                  borderRadius: 2,
+                  borderColor: 'divider',
+                }}
+              >
+                <List disablePadding>
+                  {searchResults.map((food, index) => {
+                    const nutrition = calculateNutrition(food, 100);
+                    return (
+                      <Box key={food.fdcId}>
+                        {index > 0 && <Divider />}
+                        <ListItem
+                          button
+                          onClick={() => handleSelectFood(food)}
+                          sx={{ 
+                            py: 2,
+                            px: 2,
+                            '&:hover': {
+                              backgroundColor: 'action.hover',
+                            },
+                            transition: 'background-color 0.2s',
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Typography 
+                                variant="body1" 
+                                sx={{ 
+                                  fontWeight: 600,
+                                  mb: 0.5,
+                                  color: 'text.primary',
+                                }}
+                              >
+                                {food.description}
+                              </Typography>
+                            }
+                            secondary={
+                              <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
+                                <Chip 
+                                  label={`${nutrition.calories.toFixed(0)} cal`} 
+                                  size="small" 
+                                  sx={{ 
+                                    height: 24, 
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                  }} 
+                                />
+                                <Chip 
+                                  label={`P: ${nutrition.protein.toFixed(1)}g`} 
+                                  size="small" 
+                                  color="primary" 
+                                  sx={{ 
+                                    height: 24, 
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                  }} 
+                                />
+                                <Chip 
+                                  label={`C: ${nutrition.carbs.toFixed(1)}g`} 
+                                  size="small" 
+                                  color="secondary" 
+                                  sx={{ 
+                                    height: 24, 
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                  }} 
+                                />
+                                <Chip 
+                                  label={`F: ${nutrition.fat.toFixed(1)}g`} 
+                                  size="small" 
+                                  color="warning" 
+                                  sx={{ 
+                                    height: 24, 
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                  }} 
+                                />
+                              </Box>
+                            }
+                          />
+                        </ListItem>
+                      </Box>
+                    );
+                  })}
+                </List>
+              </Paper>
+            </>
+          )}
+
           {!searching && searchResults.length === 0 && searchQuery.trim().length >= 2 && !error && (
-            <Alert severity="info" sx={{ mt: 2 }}>
-              No foods found. Try a different search term.
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mt: 2,
+                borderRadius: 2,
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                No foods found for &quot;{searchQuery}&quot;
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Try these tips:
+              </Typography>
+              <Box component="ul" sx={{ mt: 0.5, mb: 0, pl: 2 }}>
+                <li>
+                  <Typography variant="body2" color="text.secondary">
+                    Use simpler terms (e.g., &quot;chicken&quot; instead of &quot;grilled chicken breast&quot;)
+                  </Typography>
+                </li>
+                <li>
+                  <Typography variant="body2" color="text.secondary">
+                    Check for spelling mistakes
+                  </Typography>
+                </li>
+                <li>
+                  <Typography variant="body2" color="text.secondary">
+                    Try searching for the main ingredient
+                  </Typography>
+                </li>
+              </Box>
             </Alert>
           )}
         </CardContent>

@@ -3,9 +3,10 @@
  * 
  * Features:
  * - Full-screen modal using workout builder's visual style
- * - Search foods with intelligent USDA SR Legacy filtering
- * - Automatic detection of meat/seafood vs vegetables/fruits
- * - Prioritizes cooked forms for meats, allows raw/cooked for veggies
+ * - Search foods from local nutrition database
+ * - Ranking-based search (higher rank = more relevant)
+ * - Tag-based searching (tags not visible to users)
+ * - Support for multiple measurement units
  * - Shows previously logged foods and suggestions
  * - Favorites/commonly used foods for quick logging
  * - Clean, minimalist interface with clear sections
@@ -43,36 +44,12 @@ import {
   StarBorder as StarBorderIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
-import { 
-  matchesAllKeywords, 
-  parseSearchKeywords, 
-  hasAllowedDataType, 
-  isSRLegacyFood,
-  buildOptimizedQuery,
-  deduplicateFoods,
-  sortByRelevance,
-  isMeatOrSeafood,
-  isVegetableOrFruit,
-  FOOD_SEARCH_CONFIG 
-} from '../utils/foodSearchUtils';
+import { searchFoods, calculateNutrition } from '../services/nutritionDataService';
 import {
   addFavoriteFood,
   removeFavoriteFood,
   isFavoriteFood,
 } from '../utils/nutritionStorage';
-
-// USDA FoodData Central API configuration
-const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
-const USDA_API_BASE_URL = 'https://api.nal.usda.gov/fdc/v1';
-
-// USDA Nutrient IDs
-const NUTRIENT_IDS = {
-  CALORIES: 1008,
-  PROTEIN: 1003,
-  CARBS: 1005,
-  FAT: 1004,
-  FIBER: 1079,
-};
 
 const LogMealModal = ({ 
   open, 
@@ -103,23 +80,12 @@ const LogMealModal = ({
     }
   }, [open]);
 
-  const getNutrient = (food, nutrientId) => {
-    const nutrient = food.foodNutrients?.find(n => n.nutrientId === nutrientId);
-    return nutrient?.value || 0;
+  // Calculate nutrition for a food item
+  const calculateNutritionForFood = (food, grams) => {
+    return calculateNutrition(food, grams);
   };
 
-  const calculateNutrition = (food, grams) => {
-    const multiplier = grams / 100;
-    return {
-      calories: getNutrient(food, NUTRIENT_IDS.CALORIES) * multiplier,
-      protein: getNutrient(food, NUTRIENT_IDS.PROTEIN) * multiplier,
-      carbs: getNutrient(food, NUTRIENT_IDS.CARBS) * multiplier,
-      fat: getNutrient(food, NUTRIENT_IDS.FAT) * multiplier,
-      fiber: getNutrient(food, NUTRIENT_IDS.FIBER) * multiplier,
-    };
-  };
-
-  const searchFoods = useCallback(async (query) => {
+  const searchFoodsLocal = useCallback(async (query) => {
     if (!query || query.trim().length < 2) {
       setSearchResults([]);
       return;
@@ -129,45 +95,12 @@ const LogMealModal = ({
     setError('');
 
     try {
-      // Build optimized query based on food type
-      const optimizedQuery = buildOptimizedQuery(query);
-      
-      // Restrict to SR Legacy only as per requirements
-      const response = await fetch(
-        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(optimizedQuery)}&pageSize=${FOOD_SEARCH_CONFIG.API_PAGE_SIZE}&dataType=SR%20Legacy`
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to search foods');
-      }
-
-      const data = await response.json();
-      let foods = data.foods || [];
-      
-      // Additional client-side filtering
-      // Filter by dataType (defense-in-depth)
-      foods = foods.filter(hasAllowedDataType);
-      
-      // Only keep SR Legacy as per requirements
-      foods = foods.filter(isSRLegacyFood);
-      
-      // Apply keyword matching for flexible search
-      const keywords = parseSearchKeywords(query);
-      foods = foods.filter(food => matchesAllKeywords(food.description, keywords));
-      
-      // Deduplicate results
-      foods = deduplicateFoods(foods);
-      
-      // Sort by relevance
-      foods = sortByRelevance(foods, query);
-      
-      // Limit results
-      foods = foods.slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
-      
-      setSearchResults(foods);
+      // Use the new nutrition data service
+      const results = await searchFoods(query, { maxResults: 20 });
+      setSearchResults(results);
     } catch (err) {
       console.error('Error searching foods:', err);
-      setError('Unable to connect to the food database. Please check your internet connection and try again.');
+      setError('Unable to load the food database. Please try again.');
       setSearchResults([]);
     } finally {
       setSearching(false);
@@ -186,8 +119,8 @@ const LogMealModal = ({
     }
 
     debounceTimer.current = setTimeout(() => {
-      searchFoods(searchQuery);
-    }, FOOD_SEARCH_CONFIG.DEBOUNCE_MS);
+      searchFoodsLocal(searchQuery);
+    }, 300);
 
     return () => {
       if (debounceTimer.current) {
@@ -195,11 +128,12 @@ const LogMealModal = ({
         debounceTimer.current = null;
       }
     };
-  }, [searchQuery, searchFoods]);
+  }, [searchQuery, searchFoodsLocal]);
 
   const handleSelectFood = (food) => {
     setSelectedFood(food);
-    setPortionGrams(100);
+    // Use standard portion as default
+    setPortionGrams(food.portion_grams || 100);
   };
 
   const handleAddEntry = () => {
@@ -207,11 +141,11 @@ const LogMealModal = ({
       return;
     }
 
-    const nutrition = calculateNutrition(selectedFood, portionGrams);
+    const nutrition = calculateNutritionForFood(selectedFood, portionGrams);
     const entry = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       date: new Date().toISOString(),
-      foodName: selectedFood.description,
+      foodName: selectedFood.name,
       grams: portionGrams,
       nutrition,
     };
@@ -247,7 +181,7 @@ const LogMealModal = ({
   };
 
   const renderFoodItem = (food, onClick) => {
-    const nutrition = calculateNutrition(food, 100);
+    const nutrition = calculateNutritionForFood(food, 100);
     const isFavorite = isFavoriteFood(food);
     
     return (
@@ -277,7 +211,7 @@ const LogMealModal = ({
                   flex: 1,
                 }}
               >
-                {food.description || food.foodName}
+                {food.name || food.foodName}
               </Typography>
             </Box>
           }

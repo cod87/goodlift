@@ -319,6 +319,17 @@ export const getFavoriteFoods = () => {
 };
 
 /**
+ * Helper function to check if a food matches a favorite
+ * @param {Object} fav - Favorite food object
+ * @param {Object} food - Food object to check
+ * @returns {boolean} True if they match
+ */
+const foodMatchesFavorite = (fav, food) => {
+  return (food.fdcId && fav.fdcId === food.fdcId) || 
+         (fav.description === (food.description || food.foodName));
+};
+
+/**
  * Add a food to favorites
  * @param {Object} food - Food object to add to favorites
  * @returns {Promise<void>}
@@ -327,11 +338,8 @@ export const addFavoriteFood = async (food) => {
   try {
     const favorites = getFavoriteFoods();
     
-    // Check if already in favorites (by fdcId or foodName)
-    const exists = favorites.some(fav => 
-      (food.fdcId && fav.fdcId === food.fdcId) || 
-      (fav.foodName === food.description || fav.foodName === food.foodName)
-    );
+    // Check if already in favorites using helper function
+    const exists = favorites.some(fav => foodMatchesFavorite(fav, food));
     
     if (exists) {
       return; // Already in favorites
@@ -341,7 +349,6 @@ export const addFavoriteFood = async (food) => {
       id: food.fdcId || `fav_${Date.now()}`,
       fdcId: food.fdcId,
       description: food.description || food.foodName,
-      foodName: food.description || food.foodName,
       foodNutrients: food.foodNutrients,
       addedAt: new Date().toISOString(),
     };
@@ -396,10 +403,7 @@ export const removeFavoriteFood = async (foodId) => {
 export const isFavoriteFood = (food) => {
   try {
     const favorites = getFavoriteFoods();
-    return favorites.some(fav => 
-      (food.fdcId && fav.fdcId === food.fdcId) || 
-      (fav.foodName === food.description || fav.foodName === food.foodName)
-    );
+    return favorites.some(fav => foodMatchesFavorite(fav, food));
   } catch (error) {
     console.error('Error checking favorite food:', error);
     return false;

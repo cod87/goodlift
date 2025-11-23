@@ -35,32 +35,18 @@ import {
   Search,
 } from '@mui/icons-material';
 import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes, getFavoriteFoods } from '../../utils/nutritionStorage';
-import { matchesAllKeywords, parseSearchKeywords, hasAllowedDataType, isFoundationFood, isSRLegacyFood, sortByRelevance, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
+import { searchFoods, calculateNutrition } from '../../services/nutritionDataService';
 import RecipeBuilder from './RecipeBuilder';
 import SavedRecipes from './SavedRecipes';
 import LogMealModal from '../LogMealModal';
 
-// USDA FoodData Central API configuration
-const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
-const USDA_API_BASE_URL = 'https://api.nal.usda.gov/fdc/v1';
-
-// USDA Nutrient IDs (FoodData Central standard nutrient identifiers)
-const NUTRIENT_IDS = {
-  CALORIES: 1008,  // Energy (kcal)
-  PROTEIN: 1003,   // Protein (g)
-  CARBS: 1005,     // Carbohydrate, by difference (g)
-  FAT: 1004,       // Total lipid (fat) (g)
-  FIBER: 1079,     // Fiber, total dietary (g)
-};
-
 /**
- * NutritionTab - Component for tracking nutrition using USDA FoodData Central API
+ * NutritionTab - Component for tracking nutrition using local nutrition database
  * Features:
- * - Search foods from USDA database with flexible keyword matching
- * - Prioritizes Foundation foods first (highest quality baseline), then SR Legacy foods
- * - Within each group, prioritizes items whose description begins with the search term
- * - Fuzzy/partial matching: handles out-of-order keywords, partial words, variations
- * - Only shows USDA foods with dataType 'Foundation' and 'SR Legacy' (excludes Branded)
+ * - Search foods from nutrition-700.json with ranking support
+ * - Tag-based searching (tags not visible to users)
+ * - Standard portion measurements with multiple unit options
+ * - Custom food support
  * - Log consumed foods with portion sizes
  * - View daily nutrition summary
  * - Set and track nutrition goals
@@ -68,11 +54,9 @@ const NUTRIENT_IDS = {
  * - Log recipes with custom portion sizes
  * 
  * Search Strategy:
- * - Explicit search action required (Enter key or Search button click)
- * - Shows Foundation results first (highest quality baseline)
- * - Expands to SR Legacy foods if needed for more results
- * - Client-side filtering with fuzzy matching for better result coverage
- * - Prefix matching prioritization within each food type group
+ * - Results sorted by ranking (higher rank = more relevant)
+ * - Name matching prioritized over tag matching
+ * - Support for partial and fuzzy matching
  */
 const NutritionTab = () => {
   const [activeSubTab, setActiveSubTab] = useState(0);
@@ -95,8 +79,6 @@ const NutritionTab = () => {
   const [recipes, setRecipes] = useState([]);
   const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
-  const [showFoundation, setShowFoundation] = useState(false);
-  const [srLegacyResults, setSRLegacyResults] = useState([]);
   const [showLogMealModal, setShowLogMealModal] = useState(false);
   const [favoriteFoods, setFavoriteFoods] = useState([]);
 
@@ -132,69 +114,25 @@ const NutritionTab = () => {
     }
   };
 
-  const searchFoods = useCallback(async (query) => {
+  const searchFoodsLocal = useCallback(async (query) => {
     if (!query || query.trim().length < 2) {
       setError('Please enter at least 2 characters to search for foods');
       setSearchResults([]);
-      setSRLegacyResults([]);
-      setShowFoundation(false);
       return;
     }
 
     setSearching(true);
     setError('');
     setSearchResults([]); // Clear previous results
-    setSRLegacyResults([]);
-    setShowFoundation(false);
 
     try {
-      // Split query into keywords for flexible matching
-      // This allows 'chickpeas canned' to match 'canned chickpeas', etc.
-      // Also enables partial matching: 'chick' matches 'chickpeas'
-      const keywords = parseSearchKeywords(query);
-      
-      // Request more results from API to allow for client-side filtering
-      // Increased page size for better result coverage with fuzzy matching
-      const response = await fetch(
-        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=${FOOD_SEARCH_CONFIG.API_PAGE_SIZE}&dataType=Foundation,SR%20Legacy`
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to search foods');
-      }
-
-      const data = await response.json();
-      const allFoods = data.foods || [];
-      
-      // Apply client-side filtering:
-      // 1. Filter by dataType to ensure only Foundation and SR Legacy foods (defense-in-depth)
-      // 2. Filter foods that contain all keywords in any order (supports partial/fuzzy matching)
-      const keywordFilteredFoods = allFoods
-        .filter(hasAllowedDataType)
-        .filter(food => matchesAllKeywords(food.description, keywords));
-      
-      // PRIORITIZATION STRATEGY: Show Foundation first, then SR Legacy
-      // Foundation has the highest quality baseline, so we prioritize it
-      // Within each group, items whose description begins with the search term are shown first
-      const foundationFoods = sortByRelevance(
-        keywordFilteredFoods.filter(isFoundationFood),
-        query
-      ).slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
-      
-      const srLegacyFoods = sortByRelevance(
-        keywordFilteredFoods.filter(isSRLegacyFood),
-        query
-      ).slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
-      
-      // Show Foundation foods initially (primary results)
-      setSearchResults(foundationFoods);
-      setSRLegacyResults(srLegacyFoods);
+      // Use the new nutrition data service
+      const results = await searchFoods(query, { maxResults: 20 });
+      setSearchResults(results);
     } catch (err) {
       console.error('Error searching foods:', err);
-      setError('Unable to connect to the food database. Please check your internet connection and try again.');
+      setError('Unable to load the food database. Please try again.');
       setSearchResults([]);
-      setSRLegacyResults([]);
-      setShowFoundation(false);
     } finally {
       setSearching(false);
     }
@@ -203,32 +141,16 @@ const NutritionTab = () => {
   const handleSelectFood = (food) => {
     if (!food) return;
     setSelectedFood(food);
-    setPortionGrams(100);
+    // Use standard portion as default
+    setPortionGrams(food.portion_grams || 100);
     setShowAddDialog(true);
     setSearchQuery('');
     setSearchResults([]);
-    setSRLegacyResults([]);
-    setShowFoundation(false);
   };
 
-  const handleShowMoreResults = () => {
-    setShowFoundation(true);
-  };
-
-  const getNutrient = (food, nutrientId) => {
-    const nutrient = food.foodNutrients?.find(n => n.nutrientId === nutrientId);
-    return nutrient?.value || 0;
-  };
-
-  const calculateNutrition = (food, grams) => {
-    const multiplier = grams / 100;
-    return {
-      calories: getNutrient(food, NUTRIENT_IDS.CALORIES) * multiplier,
-      protein: getNutrient(food, NUTRIENT_IDS.PROTEIN) * multiplier,
-      carbs: getNutrient(food, NUTRIENT_IDS.CARBS) * multiplier,
-      fat: getNutrient(food, NUTRIENT_IDS.FAT) * multiplier,
-      fiber: getNutrient(food, NUTRIENT_IDS.FIBER) * multiplier,
-    };
+  // Calculate nutrition from the new food data structure
+  const calculateNutritionForFood = (food, grams) => {
+    return calculateNutrition(food, grams);
   };
 
   const handleAddEntry = () => {
@@ -236,11 +158,11 @@ const NutritionTab = () => {
       return;
     }
 
-    const nutrition = calculateNutrition(selectedFood, portionGrams);
+    const nutrition = calculateNutritionForFood(selectedFood, portionGrams);
     const entry = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`, // Unique ID: timestamp + random 9-char string
       date: new Date().toISOString(),
-      foodName: selectedFood.description,
+      foodName: selectedFood.name,
       grams: portionGrams,
       nutrition,
     };
@@ -304,18 +226,14 @@ const NutritionTab = () => {
     recentEntries.forEach(entry => {
       if (!foodMap.has(entry.foodName)) {
         foodMap.set(entry.foodName, {
-          description: entry.foodName,
-          foodName: entry.foodName,
+          name: entry.foodName,
           grams: entry.grams,
-          nutrition: entry.nutrition,
-          // Reconstruct food nutrients for consistency with search results
-          foodNutrients: [
-            { nutrientId: 1008, value: (entry.nutrition.calories / entry.grams) * 100 },
-            { nutrientId: 1003, value: (entry.nutrition.protein / entry.grams) * 100 },
-            { nutrientId: 1005, value: (entry.nutrition.carbs / entry.grams) * 100 },
-            { nutrientId: 1004, value: (entry.nutrition.fat / entry.grams) * 100 },
-            { nutrientId: 1079, value: (entry.nutrition.fiber / entry.grams) * 100 },
-          ]
+          // Reconstruct as nutrition-700 format
+          calories: (entry.nutrition.calories / entry.grams) * 100,
+          protein: (entry.nutrition.protein / entry.grams) * 100,
+          carbs: (entry.nutrition.carbs / entry.grams) * 100,
+          fat: (entry.nutrition.fat / entry.grams) * 100,
+          fiber: (entry.nutrition.fiber / entry.grams) * 100,
         });
       }
     });
@@ -371,6 +289,68 @@ const NutritionTab = () => {
     color: PropTypes.string,
   };
 
+  // Circular Progress Ring Component
+  const CalorieProgressRing = ({ current, goal }) => {
+    const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
+    const remaining = Math.max(goal - current, 0);
+    
+    return (
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ py: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Box sx={{ position: 'relative', display: 'inline-flex', mb: 2 }}>
+            <CircularProgress
+              variant="determinate"
+              value={100}
+              size={120}
+              thickness={4}
+              sx={{
+                color: 'grey.200',
+                position: 'absolute',
+              }}
+            />
+            <CircularProgress
+              variant="determinate"
+              value={percentage}
+              size={120}
+              thickness={4}
+              sx={{
+                color: percentage < 80 ? 'primary.main' : percentage < 100 ? 'warning.main' : 'success.main',
+              }}
+            />
+            <Box
+              sx={{
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                position: 'absolute',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+              }}
+            >
+              <Typography variant="h5" component="div" sx={{ fontWeight: 700 }}>
+                {current.toFixed(0)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                of {goal} kcal
+              </Typography>
+            </Box>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            {remaining.toFixed(0)} kcal remaining
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  CalorieProgressRing.propTypes = {
+    current: PropTypes.number.isRequired,
+    goal: PropTypes.number.isRequired,
+  };
+
   return (
     <Box>
       {/* Log Meal Button - Prominent at top */}
@@ -424,6 +404,9 @@ const NutritionTab = () => {
       {/* Food Diary Tab */}
       {activeSubTab === 0 && (
         <>
+          {/* Calorie Progress Ring */}
+          <CalorieProgressRing current={totals.calories} goal={goals.calories} />
+
           {/* Manual Search Section with TextField and Button */}
           <Card 
             sx={{ 
@@ -455,7 +438,7 @@ const NutritionTab = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && searchQuery.trim().length >= 2) {
-                      searchFoods(searchQuery);
+                      searchFoodsLocal(searchQuery);
                     }
                   }}
                   InputProps={{
@@ -487,7 +470,7 @@ const NutritionTab = () => {
                 />
                 <Button
                   variant="contained"
-                  onClick={() => searchFoods(searchQuery)}
+                  onClick={() => searchFoodsLocal(searchQuery)}
                   disabled={searching || trimmedQueryLength < 2}
                   sx={{ 
                     minWidth: { xs: 'auto', sm: 120 },
@@ -533,7 +516,7 @@ const NutritionTab = () => {
                 color="text.secondary" 
                 sx={{ mb: 1, fontWeight: 500 }}
               >
-                Found {searchResults.length} Foundation result{searchResults.length !== 1 ? 's' : ''} - Click to add
+                Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} - Click to add
               </Typography>
               <Paper 
                 variant="outlined" 
@@ -546,9 +529,9 @@ const NutritionTab = () => {
               >
                 <List disablePadding>
                   {searchResults.map((food, index) => {
-                    const nutrition = calculateNutrition(food, 100);
+                    const nutrition = calculateNutritionForFood(food, 100);
                     return (
-                      <Box key={food.fdcId}>
+                      <Box key={food.id}>
                         {index > 0 && <Divider />}
                         <ListItem
                           button
@@ -573,18 +556,20 @@ const NutritionTab = () => {
                                     flex: 1,
                                   }}
                                 >
-                                  {food.description}
+                                  {food.name}
                                 </Typography>
-                                <Chip 
-                                  label="Foundation" 
-                                  size="small" 
-                                  color="default"
-                                  sx={{ 
-                                    height: 22, 
-                                    fontSize: '0.7rem',
-                                    fontWeight: 600,
-                                  }} 
-                                />
+                                {food.isCustom && (
+                                  <Chip 
+                                    label="Custom" 
+                                    size="small" 
+                                    color="info"
+                                    sx={{ 
+                                      height: 22, 
+                                      fontSize: '0.7rem',
+                                      fontWeight: 600,
+                                    }} 
+                                  />
+                                )}
                               </Box>
                             }
                             secondary={
@@ -635,284 +620,12 @@ const NutritionTab = () => {
                       </Box>
                     );
                   })}
-                  
-                  {/* Show "See more results" button if SR Legacy results exist and not already shown */}
-                  {!showFoundation && srLegacyResults.length > 0 && (
-                    <>
-                      <Divider />
-                      <ListItem
-                        button
-                        onClick={handleShowMoreResults}
-                        sx={{ 
-                          py: 1.5,
-                          px: 2,
-                          backgroundColor: 'action.hover',
-                          '&:hover': {
-                            backgroundColor: 'action.selected',
-                          },
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            fontWeight: 600,
-                            color: 'primary.main',
-                            textAlign: 'center',
-                          }}
-                        >
-                          See more results ({srLegacyResults.length} from SR Legacy)
-                        </Typography>
-                      </ListItem>
-                    </>
-                  )}
-                  
-                  {/* Show SR Legacy results when expanded */}
-                  {showFoundation && srLegacyResults.length > 0 && (
-                    <>
-                      <Divider sx={{ my: 1, borderWidth: 2, borderColor: 'primary.light' }} />
-                      <Box sx={{ px: 2, py: 1, backgroundColor: 'primary.50' }}>
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            fontWeight: 600,
-                            color: 'primary.main',
-                            textTransform: 'uppercase',
-                          }}
-                        >
-                          SR Legacy Results
-                        </Typography>
-                      </Box>
-                      {srLegacyResults.map((food) => {
-                        const nutrition = calculateNutrition(food, 100);
-                        return (
-                          <Box key={food.fdcId}>
-                            <Divider />
-                            <ListItem
-                              button
-                              onClick={() => handleSelectFood(food)}
-                              sx={{ 
-                                py: 1,
-                                px: 1.5,
-                                '&:hover': {
-                                  backgroundColor: 'action.hover',
-                                },
-                                transition: 'background-color 0.2s',
-                              }}
-                            >
-                              <ListItemText
-                                primary={
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
-                                    <Typography 
-                                      variant="body2" 
-                                      sx={{ 
-                                        fontWeight: 500,
-                                        color: 'text.primary',
-                                        flex: 1,
-                                        fontSize: '0.875rem',
-                                      }}
-                                    >
-                                      {food.description}
-                                    </Typography>
-                                    <Chip 
-                                      label="SR Legacy" 
-                                      size="small" 
-                                      color="info"
-                                      sx={{ 
-                                        height: 18, 
-                                        fontSize: '0.6rem',
-                                        fontWeight: 600,
-                                      }} 
-                                    />
-                                  </Box>
-                                }
-                                secondary={
-                                  <Box component="span" sx={{ display: 'flex', gap: 0.4, mt: 0.5, flexWrap: 'wrap' }}>
-                                    <Chip 
-                                      label={`${nutrition.calories.toFixed(0)} cal`} 
-                                      size="small" 
-                                      sx={{ 
-                                        height: 18, 
-                                        fontSize: '0.65rem',
-                                        fontWeight: 600,
-                                      }} 
-                                    />
-                                    <Chip 
-                                      label={`P: ${nutrition.protein.toFixed(1)}g`} 
-                                      size="small" 
-                                      color="primary" 
-                                      sx={{ 
-                                        height: 18, 
-                                        fontSize: '0.65rem',
-                                        fontWeight: 600,
-                                      }} 
-                                    />
-                                    <Chip 
-                                      label={`C: ${nutrition.carbs.toFixed(1)}g`} 
-                                      size="small" 
-                                      color="secondary" 
-                                      sx={{ 
-                                        height: 18, 
-                                        fontSize: '0.65rem',
-                                        fontWeight: 600,
-                                      }} 
-                                    />
-                                    <Chip 
-                                      label={`F: ${nutrition.fat.toFixed(1)}g`} 
-                                      size="small" 
-                                      color="warning" 
-                                      sx={{ 
-                                        height: 18, 
-                                        fontSize: '0.65rem',
-                                        fontWeight: 600,
-                                      }} 
-                                    />
-                                  </Box>
-                                }
-                              />
-                            </ListItem>
-                          </Box>
-                        );
-                      })}
-                    </>
-                  )}
                 </List>
               </Paper>
             </>
           )}
 
-          {/* Show message when no Foundation foods but SR Legacy foods exist */}
-          {!searching && searchResults.length === 0 && srLegacyResults.length > 0 && trimmedQueryLength >= 2 && !error && (
-            <Box sx={{ mt: 2 }}>
-              <Alert 
-                severity="info" 
-                sx={{ 
-                  mb: 2,
-                  borderRadius: 2,
-                }}
-              >
-                <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
-                  No Foundation foods found for "{searchQuery}"
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  However, {srLegacyResults.length} SR Legacy result{srLegacyResults.length !== 1 ? 's are' : ' is'} available below.
-                </Typography>
-              </Alert>
-              
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
-                sx={{ mb: 1, fontWeight: 500 }}
-              >
-                Found {srLegacyResults.length} SR Legacy result{srLegacyResults.length !== 1 ? 's' : ''} - Click to add
-              </Typography>
-              <Paper 
-                variant="outlined" 
-                sx={{ 
-                  maxHeight: 350, 
-                  overflow: 'auto',
-                  borderRadius: 2,
-                  borderColor: 'divider',
-                }}
-              >
-                <List disablePadding>
-                  {srLegacyResults.map((food, index) => {
-                    const nutrition = calculateNutrition(food, 100);
-                    return (
-                      <Box key={food.fdcId}>
-                        {index > 0 && <Divider />}
-                        <ListItem
-                          button
-                          onClick={() => handleSelectFood(food)}
-                          sx={{ 
-                            py: 1,
-                            px: 1.5,
-                            '&:hover': {
-                              backgroundColor: 'action.hover',
-                            },
-                            transition: 'background-color 0.2s',
-                          }}
-                        >
-                          <ListItemText
-                            primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
-                                <Typography 
-                                  variant="body2" 
-                                  sx={{ 
-                                    fontWeight: 500,
-                                    color: 'text.primary',
-                                    flex: 1,
-                                    fontSize: '0.875rem',
-                                  }}
-                                >
-                                  {food.description}
-                                </Typography>
-                                <Chip 
-                                  label="SR Legacy" 
-                                  size="small" 
-                                  color="info"
-                                  sx={{ 
-                                    height: 18, 
-                                    fontSize: '0.6rem',
-                                    fontWeight: 600,
-                                  }} 
-                                />
-                              </Box>
-                            }
-                            secondary={
-                              <Box component="span" sx={{ display: 'flex', gap: 0.4, mt: 0.5, flexWrap: 'wrap' }}>
-                                <Chip 
-                                  label={`${nutrition.calories.toFixed(0)} cal`} 
-                                  size="small" 
-                                  sx={{ 
-                                    height: 18, 
-                                    fontSize: '0.65rem',
-                                    fontWeight: 600,
-                                  }} 
-                                />
-                                <Chip 
-                                  label={`P: ${nutrition.protein.toFixed(1)}g`} 
-                                  size="small" 
-                                  color="primary" 
-                                  sx={{ 
-                                    height: 18, 
-                                    fontSize: '0.65rem',
-                                    fontWeight: 600,
-                                  }} 
-                                />
-                                <Chip 
-                                  label={`C: ${nutrition.carbs.toFixed(1)}g`} 
-                                  size="small" 
-                                  color="secondary" 
-                                  sx={{ 
-                                    height: 18, 
-                                    fontSize: '0.65rem',
-                                    fontWeight: 600,
-                                  }} 
-                                />
-                                <Chip 
-                                  label={`F: ${nutrition.fat.toFixed(1)}g`} 
-                                  size="small" 
-                                  color="warning" 
-                                  sx={{ 
-                                    height: 18, 
-                                    fontSize: '0.65rem',
-                                    fontWeight: 600,
-                                  }} 
-                                />
-                              </Box>
-                            }
-                          />
-                        </ListItem>
-                      </Box>
-                    );
-                  })}
-                </List>
-              </Paper>
-            </Box>
-          )}
-
-          {!searching && searchResults.length === 0 && srLegacyResults.length === 0 && trimmedQueryLength >= 2 && !error && (
+          {!searching && searchResults.length === 0 && trimmedQueryLength >= 2 && !error && (
             <Alert 
               severity="info" 
               sx={{ 
@@ -1043,7 +756,10 @@ const NutritionTab = () => {
           {selectedFood && (
             <Box>
               <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 500 }}>
-                {selectedFood.description}
+                {selectedFood.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+                Standard portion: {selectedFood.standard_portion || '100g'}
               </Typography>
               <TextField
                 fullWidth
@@ -1061,7 +777,7 @@ const NutritionTab = () => {
               </Typography>
               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                 {(() => {
-                  const nutrition = calculateNutrition(selectedFood, portionGrams);
+                  const nutrition = calculateNutritionForFood(selectedFood, portionGrams);
                   return (
                     <>
                       <Chip label={`${nutrition.calories.toFixed(0)} cal`} size="small" />

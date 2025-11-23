@@ -22,38 +22,16 @@ import {
 } from '@mui/material';
 import { Delete, Add, Search } from '@mui/icons-material';
 import { saveRecipe } from '../../utils/nutritionStorage';
-import { matchesAllKeywords, parseSearchKeywords, hasAllowedDataType, isFoundationFood, isSRLegacyFood, sortByRelevance, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
-
-// USDA FoodData Central API configuration
-const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
-const USDA_API_BASE_URL = 'https://api.nal.usda.gov/fdc/v1';
-
-// USDA Nutrient IDs
-const NUTRIENT_IDS = {
-  CALORIES: 1008,
-  PROTEIN: 1003,
-  CARBS: 1005,
-  FAT: 1004,
-  FIBER: 1079,
-};
+import { searchFoods, calculateNutrition } from '../../services/nutritionDataService';
 
 /**
  * RecipeBuilder - Dialog component for creating and editing custom recipes
  * Allows users to:
- * - Add multiple foods with their weights using flexible keyword search
- * - Prioritizes Foundation foods first (highest quality baseline), then SR Legacy foods
- * - Within each group, prioritizes items whose description begins with the search term
- * - Fuzzy/partial matching: handles out-of-order keywords, partial words, variations
- * - Only shows USDA foods with dataType 'Foundation' and 'SR Legacy' (excludes Branded)
+ * - Add multiple foods with their weights
+ * - Search from local nutrition database with ranking support
+ * - Tag-based searching (tags not visible to users)
  * - Calculate total nutrition
  * - Save recipe for later use
- * 
- * Search Strategy:
- * - Explicit search action required (Enter key or Search button click)
- * - Shows Foundation results first (highest quality baseline)
- * - Expands to SR Legacy foods for additional results
- * - Client-side filtering with fuzzy matching for better result coverage
- * - Prefix matching prioritization within each food type group
  */
 const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
   const [recipeName, setRecipeName] = useState('');
@@ -78,7 +56,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
     }
   }, [editRecipe, open]);
 
-  const searchFoods = useCallback(async (query) => {
+  const searchFoodsLocal = useCallback(async (query) => {
     if (!query || query.trim().length < 2) {
       setError('Please enter at least 2 characters to search');
       return;
@@ -88,49 +66,9 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
     setError('');
 
     try {
-      // Split query into keywords for flexible matching
-      // This allows 'chickpeas canned' to match 'canned chickpeas', etc.
-      // Also enables partial matching: 'chick' matches 'chickpeas'
-      const keywords = parseSearchKeywords(query);
-      
-      // Request more results from API to allow for client-side filtering
-      // Increased page size for better result coverage with fuzzy matching
-      const response = await fetch(
-        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=${FOOD_SEARCH_CONFIG.API_PAGE_SIZE}&dataType=Foundation,SR%20Legacy`
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to search foods');
-      }
-
-      const data = await response.json();
-      const allFoods = data.foods || [];
-      
-      // Apply client-side filtering:
-      // 1. Filter by dataType to ensure only Foundation and SR Legacy foods (defense-in-depth)
-      // 2. Filter foods that contain all keywords in any order (supports partial/fuzzy matching)
-      // 3. Limit to configured maximum results
-      const keywordFilteredFoods = allFoods
-        .filter(hasAllowedDataType)
-        .filter(food => matchesAllKeywords(food.description, keywords));
-      
-      // PRIORITIZATION STRATEGY: Show Foundation first, then SR Legacy
-      // Foundation has the highest quality baseline, so we prioritize it
-      // Within each group, items whose description begins with the search term are shown first
-      const foundationFoods = sortByRelevance(
-        keywordFilteredFoods.filter(isFoundationFood),
-        query
-      ).slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
-      
-      const srLegacyFoods = sortByRelevance(
-        keywordFilteredFoods.filter(isSRLegacyFood),
-        query
-      ).slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
-      
-      // Combine with Foundation first for prioritization
-      const combinedResults = [...foundationFoods, ...srLegacyFoods];
-      
-      setSearchResults(combinedResults);
+      // Use the new nutrition data service
+      const results = await searchFoods(query, { maxResults: 20 });
+      setSearchResults(results);
     } catch (err) {
       console.error('Error searching foods:', err);
       setError('Failed to search foods. Please try again.');
@@ -140,28 +78,16 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
     }
   }, []);
 
-  const getNutrient = (food, nutrientId) => {
-    const nutrient = food.foodNutrients?.find(n => n.nutrientId === nutrientId);
-    return nutrient?.value || 0;
-  };
-
-  const calculateNutrition = (food, grams) => {
-    const multiplier = grams / 100;
-    return {
-      calories: getNutrient(food, NUTRIENT_IDS.CALORIES) * multiplier,
-      protein: getNutrient(food, NUTRIENT_IDS.PROTEIN) * multiplier,
-      carbs: getNutrient(food, NUTRIENT_IDS.CARBS) * multiplier,
-      fat: getNutrient(food, NUTRIENT_IDS.FAT) * multiplier,
-      fiber: getNutrient(food, NUTRIENT_IDS.FIBER) * multiplier,
-    };
+  const calculateNutritionForFood = (food, grams) => {
+    return calculateNutrition(food, grams);
   };
 
   const handleAddFood = (food, grams = 100) => {
-    const nutrition = calculateNutrition(food, grams);
+    const nutrition = calculateNutritionForFood(food, grams);
     const newFood = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-      fdcId: food.fdcId,
-      name: food.description,
+      foodId: food.id,
+      name: food.name,
       grams,
       nutrition,
     };
@@ -294,7 +220,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
-                    searchFoods(searchQuery);
+                    searchFoodsLocal(searchQuery);
                   }
                 }}
                 InputProps={{
@@ -307,7 +233,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
               />
               <Button
                 variant="contained"
-                onClick={() => searchFoods(searchQuery)}
+                onClick={() => searchFoodsLocal(searchQuery)}
                 disabled={searching || searchQuery.trim().length < 2}
                 sx={{ minWidth: 100 }}
               >
@@ -326,10 +252,9 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
               <Paper variant="outlined" sx={{ maxHeight: 250, overflow: 'auto', mb: 2 }}>
                 <List disablePadding>
                   {searchResults.map((food, index) => {
-                    const nutrition = calculateNutrition(food, 100);
-                    const dataType = food.dataType || '';
+                    const nutrition = calculateNutritionForFood(food, 100);
                     return (
-                      <Box key={food.fdcId}>
+                      <Box key={food.id}>
                         {index > 0 && <Divider />}
                         <ListItem
                           button
@@ -340,14 +265,16 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                             primary={
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                                 <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
-                                  {food.description}
+                                  {food.name}
                                 </Typography>
-                                <Chip 
-                                  label={dataType} 
-                                  size="small" 
-                                  color={dataType === 'SR Legacy' ? 'info' : 'default'}
-                                  sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
-                                />
+                                {food.isCustom && (
+                                  <Chip 
+                                    label="Custom" 
+                                    size="small" 
+                                    color="info"
+                                    sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} 
+                                  />
+                                )}
                               </Box>
                             }
                             secondary={

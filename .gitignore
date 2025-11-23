@@ -28,3 +28,4 @@ tmp/
 *.backup
 *~
 # Build artifacts
+docs/test.html

@@ -52,6 +52,21 @@ const NUTRIENT_IDS = {
 };
 
 /**
+ * Flexible keyword-based food matching helper
+ * Splits the query into keywords and checks if a food description contains all keywords
+ * in any order (case-insensitive). This allows queries like 'chickpeas canned' to match
+ * 'canned chickpeas' and vice versa.
+ * 
+ * @param {string} foodDescription - The food description to match against
+ * @param {string[]} keywords - Array of search keywords
+ * @returns {boolean} - True if all keywords are found in the description
+ */
+const matchesAllKeywords = (foodDescription, keywords) => {
+  const lowerDesc = foodDescription.toLowerCase();
+  return keywords.every(keyword => lowerDesc.includes(keyword.toLowerCase()));
+};
+
+/**
  * NutritionTab - Component for tracking nutrition using USDA FoodData Central API
  * Features:
  * - Search foods from USDA database
@@ -119,8 +134,13 @@ const NutritionTab = () => {
     setError('');
 
     try {
+      // Split query into keywords for flexible matching
+      // This allows 'chickpeas canned' to match 'canned chickpeas', etc.
+      const keywords = query.trim().split(/\s+/).filter(k => k.length > 0);
+      
+      // Request more results from API to allow for client-side filtering
       const response = await fetch(
-        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=5&dataType=Foundation,SR%20Legacy`
+        `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=25&dataType=Foundation,SR%20Legacy`
       );
 
       if (!response.ok) {
@@ -128,7 +148,15 @@ const NutritionTab = () => {
       }
 
       const data = await response.json();
-      setSearchResults(data.foods || []);
+      const allFoods = data.foods || [];
+      
+      // Apply flexible keyword matching on the client side
+      // Filter foods that contain all keywords in any order, then limit to top 5
+      const filteredFoods = allFoods
+        .filter(food => matchesAllKeywords(food.description, keywords))
+        .slice(0, 5);
+      
+      setSearchResults(filteredFoods);
     } catch (err) {
       console.error('Error searching foods:', err);
       setError('Failed to search foods. Please try again.');

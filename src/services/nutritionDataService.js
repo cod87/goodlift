@@ -26,7 +26,10 @@ export const loadNutritionDatabase = async () => {
   }
 
   try {
-    const response = await fetch('/data/nutrition-700.json');
+    // Use base URL for proper path resolution in both dev and production
+    const basePath = import.meta.env.BASE_URL || '/';
+    const dataPath = `${basePath}data/nutrition-700.json`;
+    const response = await fetch(dataPath);
     if (!response.ok) {
       throw new Error('Failed to load nutrition database');
     }
@@ -53,7 +56,15 @@ export const loadNutritionDatabase = async () => {
 export const loadCustomFoods = () => {
   try {
     const stored = localStorage.getItem(CUSTOM_FOODS_KEY);
-    customFoods = stored ? JSON.parse(stored) : [];
+    const rawFoods = stored ? JSON.parse(stored) : [];
+    
+    // Pre-compute lowercase fields for faster searching if not already present
+    customFoods = rawFoods.map(food => ({
+      ...food,
+      _nameLower: food._nameLower || food.name.toLowerCase(),
+      _tagsLower: food._tagsLower || (food.tags || '').toLowerCase(),
+    }));
+    
     return customFoods;
   } catch (error) {
     console.error('Error loading custom foods:', error);

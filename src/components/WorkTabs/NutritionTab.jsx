@@ -57,12 +57,20 @@ const NUTRIENT_IDS = {
  * NutritionTab - Component for tracking nutrition using USDA FoodData Central API
  * Features:
  * - Search foods from USDA database with flexible keyword matching
+ * - Prioritizes SR Legacy foods first (most comprehensive), then Foundation foods
+ * - Fuzzy/partial matching: handles out-of-order keywords, partial words, variations
  * - Only shows USDA foods with dataType 'Foundation' and 'SR Legacy' (excludes Branded)
  * - Log consumed foods with portion sizes
  * - View daily nutrition summary
  * - Set and track nutrition goals
  * - Create and save custom recipes
  * - Log recipes with custom portion sizes
+ * 
+ * Search Strategy:
+ * - Fast autocomplete with 300ms debounce for responsive UI
+ * - Shows SR Legacy results first (more comprehensive food database)
+ * - Falls back to Foundation foods if SR Legacy results are insufficient
+ * - Client-side filtering with fuzzy matching for better result coverage
  */
 const NutritionTab = () => {
   const [activeSubTab, setActiveSubTab] = useState(0);
@@ -86,8 +94,8 @@ const NutritionTab = () => {
   const [recipes, setRecipes] = useState([]);
   const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
-  const [showSRLegacy, setShowSRLegacy] = useState(false);
-  const [srLegacyResults, setSRLegacyResults] = useState([]);
+  const [showFoundation, setShowFoundation] = useState(false);
+  const [foundationResults, setFoundationResults] = useState([]);
   const debounceTimer = useRef(null);
 
   // Load today's entries, goals, and recipes on mount
@@ -122,8 +130,8 @@ const NutritionTab = () => {
         setError('Please enter at least 2 characters to search for foods');
       }
       setSearchResults([]);
-      setSRLegacyResults([]);
-      setShowSRLegacy(false);
+      setFoundationResults([]);
+      setShowFoundation(false);
       setAutocompleteOpen(false);
       return;
     }
@@ -132,16 +140,18 @@ const NutritionTab = () => {
     setError('');
     if (!isAutocomplete) {
       setSearchResults([]); // Clear previous results only for manual search
-      setSRLegacyResults([]);
-      setShowSRLegacy(false);
+      setFoundationResults([]);
+      setShowFoundation(false);
     }
 
     try {
       // Split query into keywords for flexible matching
       // This allows 'chickpeas canned' to match 'canned chickpeas', etc.
+      // Also enables partial matching: 'chick' matches 'chickpeas'
       const keywords = parseSearchKeywords(query);
       
       // Request more results from API to allow for client-side filtering
+      // Increased page size for better result coverage with fuzzy matching
       const response = await fetch(
         `${USDA_API_BASE_URL}/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=${FOOD_SEARCH_CONFIG.API_PAGE_SIZE}&dataType=Foundation,SR%20Legacy`
       );
@@ -155,26 +165,28 @@ const NutritionTab = () => {
       
       // Apply client-side filtering:
       // 1. Filter by dataType to ensure only Foundation and SR Legacy foods (defense-in-depth)
-      // 2. Filter foods that contain all keywords in any order
+      // 2. Filter foods that contain all keywords in any order (supports partial/fuzzy matching)
       const keywordFilteredFoods = allFoods
         .filter(hasAllowedDataType)
         .filter(food => matchesAllKeywords(food.description, keywords));
       
-      // Separate Foundation and SR Legacy results
-      const foundationFoods = keywordFilteredFoods
-        .filter(isFoundationFood)
-        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
-      
+      // PRIORITIZATION STRATEGY: Show SR Legacy first, then Foundation
+      // SR Legacy has the most comprehensive food database, so we prioritize it
+      // This ensures users see the most likely matches first
       const srLegacyFoods = keywordFilteredFoods
         .filter(isSRLegacyFood)
         .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
       
-      // Show Foundation foods initially
-      setSearchResults(foundationFoods);
-      setSRLegacyResults(srLegacyFoods);
+      const foundationFoods = keywordFilteredFoods
+        .filter(isFoundationFood)
+        .slice(0, FOOD_SEARCH_CONFIG.MAX_RESULTS);
+      
+      // Show SR Legacy foods initially (primary results)
+      setSearchResults(srLegacyFoods);
+      setFoundationResults(foundationFoods);
       
       if (isAutocomplete) {
-        setAutocompleteOpen(foundationFoods.length > 0);
+        setAutocompleteOpen(srLegacyFoods.length > 0);
       }
     } catch (err) {
       console.error('Error searching foods:', err);
@@ -182,15 +194,15 @@ const NutritionTab = () => {
         setError('Unable to connect to the food database. Please check your internet connection and try again.');
       }
       setSearchResults([]);
-      setSRLegacyResults([]);
-      setShowSRLegacy(false);
+      setFoundationResults([]);
+      setShowFoundation(false);
       setAutocompleteOpen(false);
     } finally {
       setSearching(false);
     }
   }, []);
 
-  // Debounced autocomplete search effect
+  // Debounced autocomplete search effect with faster response time
   useEffect(() => {
     // Clear existing timer
     if (debounceTimer.current) {
@@ -204,10 +216,10 @@ const NutritionTab = () => {
       return;
     }
 
-    // Set new timer for debounced search (500ms delay)
+    // Set new timer for debounced search (300ms delay for responsive UI)
     debounceTimer.current = setTimeout(() => {
       searchFoods(searchQuery, true); // true flag indicates autocomplete search
-    }, 500);
+    }, FOOD_SEARCH_CONFIG.DEBOUNCE_MS);
 
     // Cleanup function
     return () => {
@@ -225,13 +237,13 @@ const NutritionTab = () => {
     setShowAddDialog(true);
     setSearchQuery('');
     setSearchResults([]);
-    setSRLegacyResults([]);
-    setShowSRLegacy(false);
+    setFoundationResults([]);
+    setShowFoundation(false);
     setAutocompleteOpen(false);
   };
 
   const handleShowMoreResults = () => {
-    setShowSRLegacy(true);
+    setShowFoundation(true);
   };
 
   const getNutrient = (food, nutrientId) => {
@@ -472,12 +484,21 @@ const NutritionTab = () => {
                   )}
                   renderOption={(props, option) => {
                     const nutrition = calculateNutrition(option, 100);
+                    const dataType = option.dataType || '';
                     return (
                       <Box component="li" {...props} key={option.fdcId}>
                         <Box sx={{ width: '100%', py: 0.5 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                            {option.description}
-                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                            <Typography variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
+                              {option.description}
+                            </Typography>
+                            <Chip 
+                              label={dataType} 
+                              size="small" 
+                              color={dataType === 'SR Legacy' ? 'info' : 'default'}
+                              sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }} 
+                            />
+                          </Box>
                           <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                             <Chip 
                               label={`${nutrition.calories.toFixed(0)} cal`} 
@@ -557,7 +578,7 @@ const NutritionTab = () => {
                 color="text.secondary" 
                 sx={{ mb: 1, fontWeight: 500 }}
               >
-                Found {searchResults.length} Foundation result{searchResults.length !== 1 ? 's' : ''} - Click to add
+                Found {searchResults.length} SR Legacy result{searchResults.length !== 1 ? 's' : ''} - Click to add
               </Typography>
               <Paper 
                 variant="outlined" 
@@ -588,16 +609,28 @@ const NutritionTab = () => {
                         >
                           <ListItemText
                             primary={
-                              <Typography 
-                                variant="body1" 
-                                sx={{ 
-                                  fontWeight: 600,
-                                  mb: 0.5,
-                                  color: 'text.primary',
-                                }}
-                              >
-                                {food.description}
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                <Typography 
+                                  variant="body1" 
+                                  sx={{ 
+                                    fontWeight: 600,
+                                    color: 'text.primary',
+                                    flex: 1,
+                                  }}
+                                >
+                                  {food.description}
+                                </Typography>
+                                <Chip 
+                                  label="SR Legacy" 
+                                  size="small" 
+                                  color="info"
+                                  sx={{ 
+                                    height: 22, 
+                                    fontSize: '0.7rem',
+                                    fontWeight: 600,
+                                  }} 
+                                />
+                              </Box>
                             }
                             secondary={
                               <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
@@ -648,8 +681,8 @@ const NutritionTab = () => {
                     );
                   })}
                   
-                  {/* Show "See more results" button if SR Legacy results exist and not already shown */}
-                  {!showSRLegacy && srLegacyResults.length > 0 && (
+                  {/* Show "See more results" button if Foundation results exist and not already shown */}
+                  {!showFoundation && foundationResults.length > 0 && (
                     <>
                       <Divider />
                       <ListItem
@@ -673,14 +706,14 @@ const NutritionTab = () => {
                             textAlign: 'center',
                           }}
                         >
-                          See more results ({srLegacyResults.length} from SR Legacy)
+                          See more results ({foundationResults.length} from Foundation)
                         </Typography>
                       </ListItem>
                     </>
                   )}
                   
-                  {/* Show SR Legacy results when expanded */}
-                  {showSRLegacy && srLegacyResults.length > 0 && (
+                  {/* Show Foundation results when expanded */}
+                  {showFoundation && foundationResults.length > 0 && (
                     <>
                       <Divider sx={{ my: 1, borderWidth: 2, borderColor: 'primary.light' }} />
                       <Box sx={{ px: 2, py: 1, backgroundColor: 'primary.50' }}>
@@ -692,10 +725,10 @@ const NutritionTab = () => {
                             textTransform: 'uppercase',
                           }}
                         >
-                          SR Legacy Results
+                          Foundation Results
                         </Typography>
                       </Box>
-                      {srLegacyResults.map((food, index) => {
+                      {foundationResults.map((food) => {
                         const nutrition = calculateNutrition(food, 100);
                         return (
                           <Box key={food.fdcId}>
@@ -714,16 +747,28 @@ const NutritionTab = () => {
                             >
                               <ListItemText
                                 primary={
-                                  <Typography 
-                                    variant="body1" 
-                                    sx={{ 
-                                      fontWeight: 600,
-                                      mb: 0.5,
-                                      color: 'text.primary',
-                                    }}
-                                  >
-                                    {food.description}
-                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                    <Typography 
+                                      variant="body1" 
+                                      sx={{ 
+                                        fontWeight: 600,
+                                        color: 'text.primary',
+                                        flex: 1,
+                                      }}
+                                    >
+                                      {food.description}
+                                    </Typography>
+                                    <Chip 
+                                      label="Foundation" 
+                                      size="small" 
+                                      color="default"
+                                      sx={{ 
+                                        height: 22, 
+                                        fontSize: '0.7rem',
+                                        fontWeight: 600,
+                                      }} 
+                                    />
+                                  </Box>
                                 }
                                 secondary={
                                   <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
@@ -780,8 +825,8 @@ const NutritionTab = () => {
             </>
           )}
 
-          {/* Show message when no Foundation foods but SR Legacy foods exist */}
-          {!searching && !autocompleteOpen && searchResults.length === 0 && srLegacyResults.length > 0 && trimmedQueryLength >= 2 && !error && (
+          {/* Show message when no SR Legacy foods but Foundation foods exist */}
+          {!searching && !autocompleteOpen && searchResults.length === 0 && foundationResults.length > 0 && trimmedQueryLength >= 2 && !error && (
             <Box sx={{ mt: 2 }}>
               <Alert 
                 severity="info" 
@@ -791,10 +836,10 @@ const NutritionTab = () => {
                 }}
               >
                 <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
-                  No Foundation foods found for "{searchQuery}"
+                  No SR Legacy foods found for "{searchQuery}"
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  However, {srLegacyResults.length} SR Legacy result{srLegacyResults.length !== 1 ? 's are' : ' is'} available below.
+                  However, {foundationResults.length} Foundation result{foundationResults.length !== 1 ? 's are' : ' is'} available below.
                 </Typography>
               </Alert>
               
@@ -803,7 +848,7 @@ const NutritionTab = () => {
                 color="text.secondary" 
                 sx={{ mb: 1, fontWeight: 500 }}
               >
-                Found {srLegacyResults.length} SR Legacy result{srLegacyResults.length !== 1 ? 's' : ''} - Click to add
+                Found {foundationResults.length} Foundation result{foundationResults.length !== 1 ? 's' : ''} - Click to add
               </Typography>
               <Paper 
                 variant="outlined" 
@@ -815,7 +860,7 @@ const NutritionTab = () => {
                 }}
               >
                 <List disablePadding>
-                  {srLegacyResults.map((food, index) => {
+                  {foundationResults.map((food, index) => {
                     const nutrition = calculateNutrition(food, 100);
                     return (
                       <Box key={food.fdcId}>
@@ -834,16 +879,28 @@ const NutritionTab = () => {
                         >
                           <ListItemText
                             primary={
-                              <Typography 
-                                variant="body1" 
-                                sx={{ 
-                                  fontWeight: 600,
-                                  mb: 0.5,
-                                  color: 'text.primary',
-                                }}
-                              >
-                                {food.description}
-                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                <Typography 
+                                  variant="body1" 
+                                  sx={{ 
+                                    fontWeight: 600,
+                                    color: 'text.primary',
+                                    flex: 1,
+                                  }}
+                                >
+                                  {food.description}
+                                </Typography>
+                                <Chip 
+                                  label="Foundation" 
+                                  size="small" 
+                                  color="default"
+                                  sx={{ 
+                                    height: 22, 
+                                    fontSize: '0.7rem',
+                                    fontWeight: 600,
+                                  }} 
+                                />
+                              </Box>
                             }
                             secondary={
                               <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
@@ -898,7 +955,7 @@ const NutritionTab = () => {
             </Box>
           )}
 
-          {!searching && !autocompleteOpen && searchResults.length === 0 && srLegacyResults.length === 0 && trimmedQueryLength >= 2 && !error && (
+          {!searching && !autocompleteOpen && searchResults.length === 0 && foundationResults.length === 0 && trimmedQueryLength >= 2 && !error && (
             <Alert 
               severity="info" 
               sx={{ 

@@ -8,7 +8,7 @@ A modern React-based fitness tracking application focused on logging your workou
 - **Equipment Filtering**: Filter exercises based on available equipment (Barbells, Dumbbells, Cable Machine, Kettlebells, etc.)
 - **Real-time Workout Tracking**: Track sets, reps, and weight with a built-in timer
 - **Activity Logging**: Log all your fitness activities including strength training, cardio, and mobility work
-- **Nutrition Tracking**: Track your daily food intake using Open Food Facts database with macronutrient goals
+- **Nutrition Tracking**: Track your daily food intake using USDA FoodData Central database with macronutrient goals
 - **Progress Tracking**: View your workout history and track your fitness journey
 - **Streak Tracking**: Monitor consecutive days of activity to stay motivated
 - **Weight Progression**: Automatically suggests weight increases when you hit progression targets
@@ -208,13 +208,11 @@ See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for technical details.
 - **Firebase** - Backend infrastructure and cloud storage
 - **Chart.js** - Data visualization for progress tracking
 - **date-fns** - Date manipulation and formatting
-- **Open Food Facts** - Crowdsourced food database for nutrition tracking (CC BY-SA 3.0)
+- **USDA FoodData Central** - Nutrition database for food tracking (API provided by the U.S. Department of Agriculture)
 
 ## Data Sources
 
-This application uses the [Open Food Facts](https://world.openfoodfacts.org/) database to provide comprehensive nutrition information for food tracking. Open Food Facts is a free, open, collaborative database of food products from around the world. The database is made available under the Open Database License (ODbL), and product images are licensed under Creative Commons Attribution ShareAlike (CC BY-SA 3.0).
-
-**Attribution**: Product information and images are provided by Open Food Facts contributors. Learn more at https://world.openfoodfacts.org/
+This application uses the [USDA FoodData Central](https://fdc.nal.usda.gov/) API to provide comprehensive nutrition information for food tracking. FoodData Central is a data system that provides expanded nutrient profile data and links to related agricultural and experimental research.
 
 ## Scripts
 

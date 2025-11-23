@@ -138,31 +138,31 @@ export const isVegetableOrFruit = (query) => {
 
 /**
  * Build an optimized search query for USDA API based on food type
- * For meats/seafood: prioritize cooked forms and exclude raw
+ * For meats/seafood: add "cooked" to search term if not already present
  * For vegetables/fruits: search by name only (allows raw and cooked)
+ * 
+ * Note: USDA API doesn't support complex query syntax, so we keep it simple
+ * and rely on client-side filtering and sorting for prioritization
  * 
  * @param {string} query - The original search query
  * @returns {string} - The optimized search query for USDA API
  */
 export const buildOptimizedQuery = (query) => {
-  // For meat/seafood, build a query that prioritizes cooked forms
+  // For meat/seafood, add "cooked" to the query if not already present
+  // This helps prioritize cooked forms in the results
   if (isMeatOrSeafood(query)) {
-    // Extract base food name (remove existing cooking terms if any)
-    let baseName = query.toLowerCase();
-    COOKING_METHODS.forEach(method => {
-      baseName = baseName.replace(method, '').trim();
-    });
+    const lowerQuery = query.toLowerCase();
+    // Check if query already has a cooking method
+    const hasCookingMethod = COOKING_METHODS.some(method => lowerQuery.includes(method));
+    const hasRaw = lowerQuery.includes('raw') || lowerQuery.includes('uncooked');
     
-    // Remove 'raw' and 'uncooked' if present
-    baseName = baseName.replace(/\b(raw|uncooked)\b/g, '').trim();
-    
-    // Build query with cooking methods and exclusions
-    // Format: description:+chicken +(cooked OR roasted OR boiled OR ...) -(raw OR uncooked)
-    const cookingMethodsOr = COOKING_METHODS.join(' OR ');
-    return `description:+${baseName} +(${cookingMethodsOr}) -(raw OR uncooked)`;
+    // If no cooking method specified and not explicitly raw, add "cooked"
+    if (!hasCookingMethod && !hasRaw) {
+      return `${query} cooked`;
+    }
   }
   
-  // For vegetables/fruits and other foods, use simple search
+  // For vegetables/fruits and other foods, use the query as-is
   // This allows both raw and cooked forms to appear
   return query;
 };

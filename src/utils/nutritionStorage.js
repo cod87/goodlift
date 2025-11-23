@@ -17,6 +17,7 @@ const KEYS = {
   NUTRITION_ENTRIES: 'goodlift_nutrition_entries',
   NUTRITION_GOALS: 'goodlift_nutrition_goals',
   NUTRITION_RECIPES: 'goodlift_nutrition_recipes',
+  FAVORITE_FOODS: 'goodlift_favorite_foods',
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -293,5 +294,114 @@ export const deleteRecipe = async (recipeId) => {
   } catch (error) {
     console.error('Error deleting recipe:', error);
     throw error;
+  }
+};
+
+/**
+ * Get favorite foods from localStorage
+ * @returns {Array} Array of favorite food objects
+ */
+export const getFavoriteFoods = () => {
+  try {
+    // Check if in guest mode first
+    if (isGuestMode()) {
+      const guestData = getGuestData('favorite_foods');
+      return guestData || [];
+    }
+
+    // Try localStorage
+    const stored = localStorage.getItem(KEYS.FAVORITE_FOODS);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Error getting favorite foods:', error);
+    return [];
+  }
+};
+
+/**
+ * Add a food to favorites
+ * @param {Object} food - Food object to add to favorites
+ * @returns {Promise<void>}
+ */
+export const addFavoriteFood = async (food) => {
+  try {
+    const favorites = getFavoriteFoods();
+    
+    // Check if already in favorites (by fdcId or foodName)
+    const exists = favorites.some(fav => 
+      (food.fdcId && fav.fdcId === food.fdcId) || 
+      (fav.foodName === food.description || fav.foodName === food.foodName)
+    );
+    
+    if (exists) {
+      return; // Already in favorites
+    }
+
+    const favoriteFood = {
+      id: food.fdcId || `fav_${Date.now()}`,
+      fdcId: food.fdcId,
+      description: food.description || food.foodName,
+      foodName: food.description || food.foodName,
+      foodNutrients: food.foodNutrients,
+      addedAt: new Date().toISOString(),
+    };
+
+    favorites.push(favoriteFood);
+
+    // Save to guest mode if applicable
+    if (isGuestMode()) {
+      setGuestData('favorite_foods', favorites);
+      return;
+    }
+
+    // Save to localStorage
+    localStorage.setItem(KEYS.FAVORITE_FOODS, JSON.stringify(favorites));
+  } catch (error) {
+    console.error('Error adding favorite food:', error);
+    throw error;
+  }
+};
+
+/**
+ * Remove a food from favorites
+ * @param {string|number} foodId - Food ID (fdcId or custom id)
+ * @returns {Promise<void>}
+ */
+export const removeFavoriteFood = async (foodId) => {
+  try {
+    const favorites = getFavoriteFoods();
+    const filteredFavorites = favorites.filter(f => 
+      f.id !== foodId && f.fdcId !== foodId
+    );
+
+    // Save to guest mode if applicable
+    if (isGuestMode()) {
+      setGuestData('favorite_foods', filteredFavorites);
+      return;
+    }
+
+    // Save to localStorage
+    localStorage.setItem(KEYS.FAVORITE_FOODS, JSON.stringify(filteredFavorites));
+  } catch (error) {
+    console.error('Error removing favorite food:', error);
+    throw error;
+  }
+};
+
+/**
+ * Check if a food is in favorites
+ * @param {Object} food - Food object to check
+ * @returns {boolean} True if food is in favorites
+ */
+export const isFavoriteFood = (food) => {
+  try {
+    const favorites = getFavoriteFoods();
+    return favorites.some(fav => 
+      (food.fdcId && fav.fdcId === food.fdcId) || 
+      (fav.foodName === food.description || fav.foodName === food.foodName)
+    );
+  } catch (error) {
+    console.error('Error checking favorite food:', error);
+    return false;
   }
 };

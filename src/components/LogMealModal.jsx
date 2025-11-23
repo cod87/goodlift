@@ -41,6 +41,7 @@ import {
   Restaurant as RestaurantIcon,
   History as HistoryIcon,
   Star as StarIcon,
+  StarBorder as StarBorderIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
 import { 
@@ -55,6 +56,11 @@ import {
   isVegetableOrFruit,
   FOOD_SEARCH_CONFIG 
 } from '../utils/foodSearchUtils';
+import {
+  addFavoriteFood,
+  removeFavoriteFood,
+  isFavoriteFood,
+} from '../utils/nutritionStorage';
 
 // USDA FoodData Central API configuration
 const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
@@ -75,6 +81,7 @@ const LogMealModal = ({
   onSave,
   recentFoods = [],
   favoriteFoods = [],
+  onFavoritesChange,
 }) => {
   const [activeTab, setActiveTab] = useState(0); // 0: Search, 1: Recent, 2: Favorites
   const [searchQuery, setSearchQuery] = useState('');
@@ -219,8 +226,31 @@ const LogMealModal = ({
     onClose();
   };
 
+  const handleToggleFavorite = async (food, event) => {
+    // Stop event propagation to prevent selecting the food
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    try {
+      if (isFavoriteFood(food)) {
+        await removeFavoriteFood(food.fdcId || food.id);
+      } else {
+        await addFavoriteFood(food);
+      }
+      // Notify parent to refresh favorites list
+      if (onFavoritesChange) {
+        onFavoritesChange();
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
+
   const renderFoodItem = (food, onClick) => {
     const nutrition = calculateNutrition(food, 100);
+    const isFavorite = isFavoriteFood(food);
+    
     return (
       <ListItem
         component="button"
@@ -233,6 +263,8 @@ const LogMealModal = ({
           },
           transition: 'background-color 0.2s',
           cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'flex-start',
         }}
       >
         <ListItemText
@@ -251,33 +283,30 @@ const LogMealModal = ({
             </Box>
           }
           secondary={
-            <Box component="span" sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
-              <Chip 
-                label={`${nutrition.calories.toFixed(0)} cal`} 
-                size="small" 
-                sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600 }} 
-              />
-              <Chip 
-                label={`P: ${nutrition.protein.toFixed(1)}g`} 
-                size="small" 
-                color="primary" 
-                sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600 }} 
-              />
-              <Chip 
-                label={`C: ${nutrition.carbs.toFixed(1)}g`} 
-                size="small" 
-                color="secondary" 
-                sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600 }} 
-              />
-              <Chip 
-                label={`F: ${nutrition.fat.toFixed(1)}g`} 
-                size="small" 
-                color="warning" 
-                sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600 }} 
-              />
+            <Box component="span" sx={{ display: 'flex', gap: 1, mt: 0.5, alignItems: 'center', fontSize: '0.875rem', color: 'text.secondary' }}>
+              <span>{nutrition.calories.toFixed(0)} cal</span>
+              <span>•</span>
+              <span>P: {nutrition.protein.toFixed(1)}g</span>
+              <span>•</span>
+              <span>C: {nutrition.carbs.toFixed(1)}g</span>
+              <span>•</span>
+              <span>F: {nutrition.fat.toFixed(1)}g</span>
             </Box>
           }
         />
+        <IconButton
+          size="small"
+          onClick={(e) => handleToggleFavorite(food, e)}
+          sx={{ 
+            ml: 1,
+            color: isFavorite ? 'warning.main' : 'action.disabled',
+            '&:hover': {
+              color: 'warning.main',
+            }
+          }}
+        >
+          {isFavorite ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
+        </IconButton>
       </ListItem>
     );
   };
@@ -520,16 +549,20 @@ const LogMealModal = ({
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Nutrition for {portionGrams}g:
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', fontSize: '0.875rem', color: 'text.secondary' }}>
                   {(() => {
                     const nutrition = calculateNutrition(selectedFood, portionGrams);
                     return (
                       <>
-                        <Chip label={`${nutrition.calories.toFixed(0)} cal`} />
-                        <Chip label={`Protein: ${nutrition.protein.toFixed(1)}g`} color="primary" />
-                        <Chip label={`Carbs: ${nutrition.carbs.toFixed(1)}g`} color="secondary" />
-                        <Chip label={`Fat: ${nutrition.fat.toFixed(1)}g`} color="warning" />
-                        <Chip label={`Fiber: ${nutrition.fiber.toFixed(1)}g`} color="success" />
+                        <span style={{ fontWeight: 600 }}>{nutrition.calories.toFixed(0)} cal</span>
+                        <span>•</span>
+                        <span>Protein: {nutrition.protein.toFixed(1)}g</span>
+                        <span>•</span>
+                        <span>Carbs: {nutrition.carbs.toFixed(1)}g</span>
+                        <span>•</span>
+                        <span>Fat: {nutrition.fat.toFixed(1)}g</span>
+                        <span>•</span>
+                        <span>Fiber: {nutrition.fiber.toFixed(1)}g</span>
                       </>
                     );
                   })()}
@@ -565,6 +598,7 @@ LogMealModal.propTypes = {
   onSave: PropTypes.func.isRequired,
   recentFoods: PropTypes.array,
   favoriteFoods: PropTypes.array,
+  onFavoritesChange: PropTypes.func,
 };
 
 export default LogMealModal;

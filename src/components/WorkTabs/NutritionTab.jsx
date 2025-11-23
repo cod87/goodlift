@@ -35,7 +35,7 @@ import {
   MenuBook,
   Search,
 } from '@mui/icons-material';
-import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes } from '../../utils/nutritionStorage';
+import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes, getFavoriteFoods } from '../../utils/nutritionStorage';
 import { matchesAllKeywords, parseSearchKeywords, hasAllowedDataType, isFoundationFood, isSRLegacyFood, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
 import RecipeBuilder from './RecipeBuilder';
 import SavedRecipes from './SavedRecipes';
@@ -98,18 +98,25 @@ const NutritionTab = () => {
   const [showFoundation, setShowFoundation] = useState(false);
   const [foundationResults, setFoundationResults] = useState([]);
   const [showLogMealModal, setShowLogMealModal] = useState(false);
+  const [favoriteFoods, setFavoriteFoods] = useState([]);
   const debounceTimer = useRef(null);
 
-  // Load today's entries, goals, and recipes on mount
+  // Load today's entries, goals, recipes, and favorites on mount
   useEffect(() => {
     loadTodayEntries();
     loadGoals();
     loadRecipes();
+    loadFavorites();
   }, []);
 
   const loadRecipes = () => {
     const savedRecipes = getRecipes();
     setRecipes(savedRecipes);
+  };
+
+  const loadFavorites = () => {
+    const savedFavorites = getFavoriteFoods();
+    setFavoriteFoods(savedFavorites);
   };
 
   const loadTodayEntries = () => {
@@ -1313,7 +1320,8 @@ const NutritionTab = () => {
         onClose={() => setShowLogMealModal(false)}
         onSave={handleLogMealModalSave}
         recentFoods={getRecentFoods()}
-        favoriteFoods={[]} // TODO: Implement favorites
+        favoriteFoods={favoriteFoods}
+        onFavoritesChange={loadFavorites}
       />
     </Box>
   );

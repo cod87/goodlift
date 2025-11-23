@@ -529,7 +529,7 @@ const ProgressDashboard = () => {
 
             {/* Muscle Volume Tracker */}
             {history.length > 0 && (
-              <MuscleVolumeTracker workoutHistory={history} days={7} />
+              <MuscleVolumeTracker workoutHistory={history} />
             )}
 
             {/* Progressive Overload Section - Moved here, below adherence */}

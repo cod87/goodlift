@@ -34,6 +34,7 @@ import {
   Tabs,
   Tab,
   Alert,
+  Chip,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -55,8 +56,8 @@ const LogMealModal = ({
   open, 
   onClose, 
   onSave,
-  recentFoods = [],
-  favoriteFoods = [],
+  // recentFoods = [], // Not used yet
+  // favoriteFoods = [], // Not used yet
   onFavoritesChange,
 }) => {
   // 0: Search Food, 1: My Meal
@@ -176,7 +177,6 @@ const LogMealModal = ({
   };
 
   const handleClose = () => {
-    setSelectedFood(null);
     onClose();
   };
 
@@ -245,6 +245,8 @@ const LogMealModal = ({
               <span>C: {nutrition.carbs.toFixed(1)}g</span>
               <span>•</span>
               <span>F: {nutrition.fat.toFixed(1)}g</span>
+              <span>•</span>
+              <span>Fiber: {nutrition.fiber.toFixed(1)}g</span>
             </Box>
           }
         />
@@ -448,6 +450,7 @@ const LogMealModal = ({
                                           <Chip label={`P: ${nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
                                           <Chip label={`C: ${nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
                                           <Chip label={`F: ${nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                          <Chip label={`Fiber: ${nutrition.fiber.toFixed(1)}g`} size="small" color="success" sx={{ height: 20, fontSize: '0.7rem' }} />
                                         </>
                                       );
                                     })()}
@@ -493,6 +496,7 @@ const LogMealModal = ({
                             <Chip label={`P: ${totals.protein.toFixed(1)}g`} size="medium" color="primary" sx={{ fontWeight: 600 }} />
                             <Chip label={`C: ${totals.carbs.toFixed(1)}g`} size="medium" color="secondary" sx={{ fontWeight: 600 }} />
                             <Chip label={`F: ${totals.fat.toFixed(1)}g`} size="medium" color="warning" sx={{ fontWeight: 600 }} />
+                            <Chip label={`Fiber: ${totals.fiber.toFixed(1)}g`} size="medium" color="success" sx={{ fontWeight: 600 }} />
                           </>
                         );
                       })()}

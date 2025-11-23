@@ -36,6 +36,7 @@ import {
 } from '@mui/icons-material';
 import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes } from '../../utils/nutritionStorage';
 import { matchesAllKeywords, parseSearchKeywords, FOOD_SEARCH_CONFIG } from '../../utils/foodSearchUtils';
+import useDebounce from '../../hooks/useDebounce';
 import RecipeBuilder from './RecipeBuilder';
 import SavedRecipes from './SavedRecipes';
 
@@ -51,6 +52,18 @@ const NUTRIENT_IDS = {
   FAT: 1004,       // Total lipid (fat) (g)
   FIBER: 1079,     // Fiber, total dietary (g)
 };
+
+// Featured food suggestions for empty search state
+const FEATURED_FOODS = [
+  'chicken breast',
+  'brown rice',
+  'salmon',
+  'eggs',
+  'oatmeal',
+  'banana',
+  'greek yogurt',
+  'broccoli',
+];
 
 /**
  * NutritionTab - Component for tracking nutrition using USDA FoodData Central API
@@ -83,6 +96,10 @@ const NutritionTab = () => {
   const [recipes, setRecipes] = useState([]);
   const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  // Debounce the search query with 300ms delay for optimal responsiveness
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Load today's entries, goals, and recipes on mount
   useEffect(() => {
@@ -90,6 +107,18 @@ const NutritionTab = () => {
     loadGoals();
     loadRecipes();
   }, []);
+
+  // Automatic search when debounced query changes
+  useEffect(() => {
+    if (debouncedSearchQuery.trim().length >= 2) {
+      searchFoods(debouncedSearchQuery);
+    } else if (debouncedSearchQuery.trim().length === 0) {
+      // Clear results when search is cleared
+      setSearchResults([]);
+      setError('');
+      setHasSearched(false);
+    }
+  }, [debouncedSearchQuery, searchFoods]);
 
   const loadRecipes = () => {
     const savedRecipes = getRecipes();
@@ -118,6 +147,7 @@ const NutritionTab = () => {
 
     setSearching(true);
     setError('');
+    setHasSearched(true);
 
     try {
       // Split query into keywords for flexible matching
@@ -145,7 +175,7 @@ const NutritionTab = () => {
       setSearchResults(filteredFoods);
     } catch (err) {
       console.error('Error searching foods:', err);
-      setError('Failed to search foods. Please try again.');
+      setError('Failed to search foods. Please check your connection and try again.');
       setSearchResults([]);
     } finally {
       setSearching(false);
@@ -159,6 +189,11 @@ const NutritionTab = () => {
     setShowAddDialog(true);
     setSearchQuery('');
     setSearchResults([]);
+    setHasSearched(false);
+  };
+
+  const handleFeaturedClick = (foodName) => {
+    setSearchQuery(foodName);
   };
 
   const getNutrient = (food, nutrientId) => {
@@ -197,6 +232,7 @@ const NutritionTab = () => {
     setSelectedFood(null);
     setSearchQuery('');
     setSearchResults([]);
+    setHasSearched(false);
   };
 
   const handleDeleteEntry = (entryId) => {
@@ -313,40 +349,51 @@ const NutritionTab = () => {
               <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <Restaurant fontSize="small" /> Add Food
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                <TextField
-                  fullWidth
-                  placeholder="Enter food name (e.g., chicken breast)..."
-                  size="small"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      searchFoods(searchQuery);
-                    }
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Search fontSize="small" color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <Button
-                  variant="contained"
-                  onClick={() => searchFoods(searchQuery)}
-                  disabled={searching || searchQuery.trim().length < 2}
-                  sx={{ minWidth: 100 }}
-                >
-                  {searching ? <CircularProgress size={20} color="inherit" /> : 'Search'}
-                </Button>
-              </Box>
+              <TextField
+                fullWidth
+                placeholder="Start typing to search foods (e.g., chicken breast)..."
+                size="small"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search fontSize="small" color="action" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searching && (
+                    <InputAdornment position="end">
+                      <CircularProgress size={20} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ mb: 2 }}
+              />
           
           {error && (
             <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
               {error}
             </Alert>
+          )}
+
+          {/* Featured Suggestions - shown when search is empty */}
+          {!searchQuery.trim() && !hasSearched && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="caption" color="text.secondary" gutterBottom display="block" sx={{ mb: 1 }}>
+                Popular searches:
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                {FEATURED_FOODS.map((food) => (
+                  <Chip
+                    key={food}
+                    label={food}
+                    size="small"
+                    onClick={() => handleFeaturedClick(food)}
+                    sx={{ cursor: 'pointer' }}
+                  />
+                ))}
+              </Box>
+            </Box>
           )}
 
           {/* Search Results */}
@@ -386,9 +433,10 @@ const NutritionTab = () => {
             </Paper>
           )}
 
-          {!searching && searchResults.length === 0 && searchQuery.trim().length >= 2 && !error && (
+          {/* No results state with helpful message */}
+          {hasSearched && !searching && searchResults.length === 0 && searchQuery.trim().length >= 2 && !error && (
             <Alert severity="info" sx={{ mt: 2 }}>
-              No foods found. Try a different search term.
+              No foods found for &quot;{searchQuery}&quot;. Try different keywords or check spelling.
             </Alert>
           )}
         </CardContent>

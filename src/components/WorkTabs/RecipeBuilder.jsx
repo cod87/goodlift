@@ -22,6 +22,7 @@ import {
 } from '@mui/material';
 import { Delete, Add, Search } from '@mui/icons-material';
 import { saveRecipe } from '../../utils/nutritionStorage';
+import { matchesAllKeywords, parseSearchKeywords } from '../../utils/foodSearchUtils';
 
 // USDA FoodData Central API configuration
 const USDA_API_KEY = 'BkPRuRllUAA6YDWRMu68wGf0du7eoHUWFZuK9m7N';
@@ -37,24 +38,9 @@ const NUTRIENT_IDS = {
 };
 
 /**
- * Flexible keyword-based food matching helper
- * Splits the query into keywords and checks if a food description contains all keywords
- * in any order (case-insensitive). This allows queries like 'chickpeas canned' to match
- * 'canned chickpeas' and vice versa.
- * 
- * @param {string} foodDescription - The food description to match against
- * @param {string[]} keywords - Array of search keywords
- * @returns {boolean} - True if all keywords are found in the description
- */
-const matchesAllKeywords = (foodDescription, keywords) => {
-  const lowerDesc = foodDescription.toLowerCase();
-  return keywords.every(keyword => lowerDesc.includes(keyword.toLowerCase()));
-};
-
-/**
  * RecipeBuilder - Dialog component for creating and editing custom recipes
  * Allows users to:
- * - Add multiple foods with their weights
+ * - Add multiple foods with their weights using flexible keyword search
  * - Calculate total nutrition
  * - Save recipe for later use
  */
@@ -93,7 +79,7 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
     try {
       // Split query into keywords for flexible matching
       // This allows 'chickpeas canned' to match 'canned chickpeas', etc.
-      const keywords = query.trim().split(/\s+/).filter(k => k.length > 0);
+      const keywords = parseSearchKeywords(query);
       
       // Request more results from API to allow for client-side filtering
       const response = await fetch(

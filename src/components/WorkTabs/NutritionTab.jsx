@@ -35,6 +35,7 @@ import {
   Search,
 } from '@mui/icons-material';
 import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes } from '../../utils/nutritionStorage';
+import { matchesAllKeywords, parseSearchKeywords } from '../../utils/foodSearchUtils';
 import RecipeBuilder from './RecipeBuilder';
 import SavedRecipes from './SavedRecipes';
 
@@ -52,24 +53,9 @@ const NUTRIENT_IDS = {
 };
 
 /**
- * Flexible keyword-based food matching helper
- * Splits the query into keywords and checks if a food description contains all keywords
- * in any order (case-insensitive). This allows queries like 'chickpeas canned' to match
- * 'canned chickpeas' and vice versa.
- * 
- * @param {string} foodDescription - The food description to match against
- * @param {string[]} keywords - Array of search keywords
- * @returns {boolean} - True if all keywords are found in the description
- */
-const matchesAllKeywords = (foodDescription, keywords) => {
-  const lowerDesc = foodDescription.toLowerCase();
-  return keywords.every(keyword => lowerDesc.includes(keyword.toLowerCase()));
-};
-
-/**
  * NutritionTab - Component for tracking nutrition using USDA FoodData Central API
  * Features:
- * - Search foods from USDA database
+ * - Search foods from USDA database with flexible keyword matching
  * - Log consumed foods with portion sizes
  * - View daily nutrition summary
  * - Set and track nutrition goals
@@ -136,7 +122,7 @@ const NutritionTab = () => {
     try {
       // Split query into keywords for flexible matching
       // This allows 'chickpeas canned' to match 'canned chickpeas', etc.
-      const keywords = query.trim().split(/\s+/).filter(k => k.length > 0);
+      const keywords = parseSearchKeywords(query);
       
       // Request more results from API to allow for client-side filtering
       const response = await fetch(

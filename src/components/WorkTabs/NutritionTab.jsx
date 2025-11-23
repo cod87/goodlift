@@ -191,6 +191,7 @@ const NutritionTab = () => {
     return () => {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
       }
     };
   }, [searchQuery, searchFoods]);
@@ -399,7 +400,7 @@ const NutritionTab = () => {
                     }
                   }}
                   loading={searching}
-                  filterOptions={(x) => x} // Disable local filtering since we filter on server
+                  filterOptions={(x) => x} // Disable local filtering since we filter in the search function
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -417,7 +418,6 @@ const NutritionTab = () => {
                             <InputAdornment position="start">
                               <Search color="primary" />
                             </InputAdornment>
-                            {params.InputProps.startAdornment}
                           </>
                         ),
                       }}

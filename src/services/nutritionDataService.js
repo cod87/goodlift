@@ -17,6 +17,7 @@ const CUSTOM_FOODS_KEY = 'goodlift_custom_foods';
 
 /**
  * Load the nutrition database from JSON file
+ * Pre-computes lowercase fields for faster searching
  * @returns {Promise<Array>} Array of food items
  */
 export const loadNutritionDatabase = async () => {
@@ -29,7 +30,15 @@ export const loadNutritionDatabase = async () => {
     if (!response.ok) {
       throw new Error('Failed to load nutrition database');
     }
-    nutritionDatabase = await response.json();
+    const rawData = await response.json();
+    
+    // Pre-compute lowercase fields for faster searching
+    nutritionDatabase = rawData.map(food => ({
+      ...food,
+      _nameLower: food.name.toLowerCase(),
+      _tagsLower: (food.tags || '').toLowerCase(),
+    }));
+    
     return nutritionDatabase;
   } catch (error) {
     console.error('Error loading nutrition database:', error);
@@ -71,8 +80,12 @@ const saveCustomFoods = (foods) => {
  * @returns {Object} The added food with generated ID
  */
 export const addCustomFood = (food) => {
+  const foods = loadCustomFoods();
+  
+  // Generate a more robust ID using timestamp and random component
+  const randomPart = Math.random().toString(36).slice(2, 11);
   const customFood = {
-    id: `custom_${Date.now()}`,
+    id: `custom_${Date.now()}_${randomPart}`,
     name: food.name,
     rank: 50, // Custom foods have medium rank
     category: 'Custom',
@@ -89,9 +102,11 @@ export const addCustomFood = (food) => {
     volume_unit: food.volume_unit || 'serving',
     isCustom: true,
     createdAt: new Date().toISOString(),
+    // Pre-compute lowercase fields for search performance
+    _nameLower: food.name.toLowerCase(),
+    _tagsLower: (food.tags || '').toLowerCase(),
   };
 
-  const foods = loadCustomFoods();
   foods.push(customFood);
   saveCustomFoods(foods);
   
@@ -171,8 +186,9 @@ export const searchFoods = async (query, options = {}) => {
   // Search and score results
   const results = allFoods
     .map(food => {
-      const name = food.name.toLowerCase();
-      const tags = (food.tags || '').toLowerCase();
+      // Use pre-computed lowercase fields for better performance
+      const name = food._nameLower || food.name.toLowerCase();
+      const tags = food._tagsLower || (food.tags || '').toLowerCase();
       
       let score = 0;
       let matchCount = 0;
@@ -231,7 +247,10 @@ export const getFoodById = async (foodId) => {
   const custom = loadCustomFoods();
   const allFoods = [...database, ...custom];
   
-  return allFoods.find(food => food.id === foodId || food.id === parseInt(foodId)) || null;
+  // Convert foodId once before search
+  const numericId = typeof foodId === 'string' ? parseInt(foodId, 10) : foodId;
+  
+  return allFoods.find(food => food.id === foodId || food.id === numericId) || null;
 };
 
 /**

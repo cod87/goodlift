@@ -2,6 +2,10 @@
  * Tests for Wellness Task On-Open Feature
  * 
  * Tests the shouldShowWellnessOnOpen and markWellnessShown functions
+ * 
+ * Note: This test uses Date.prototype modification for simplicity since this is
+ * a standalone test file without a full testing framework. In production tests,
+ * consider using a mocking library like jest.spyOn() or sinon.
  */
 
 // Mock localStorage for testing

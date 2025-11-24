@@ -94,7 +94,7 @@ const HomeScreen = memo(({
     const task = getTodaysWellnessTask(wellnessPrefs);
     if (!task) return; // nothing to show
 
-    // Mark immediately to avoid re-showing if user navigates
+    // We have a task to show - mark immediately to avoid re-showing if user navigates
     markWellnessShown(currentUser?.uid);
     setShowWellnessModal(true);
   }, [preferences, currentUser]);

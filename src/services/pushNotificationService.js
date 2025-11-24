@@ -8,6 +8,7 @@
 import { messaging } from '../firebase';
 import { onMessage, getToken } from 'firebase/messaging';
 import { getTodaysWellnessTask } from '../utils/wellnessTaskService';
+import { saveFCMTokenToFirebase, getFCMTokenFromFirebase } from '../utils/firebaseStorage';
 
 // VAPID public key from vapid-key.env
 // This key is also configured in Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
@@ -77,10 +78,11 @@ export const requestNotificationPermission = async () => {
 };
 
 /**
- * Get FCM token for push notifications
+ * Get FCM token for push notifications and optionally save to Firestore
+ * @param {string} userId - Optional user ID to save token to Firestore
  * @returns {Promise<string|null>} FCM token or null
  */
-export const getFCMToken = async () => {
+export const getFCMToken = async (userId = null) => {
   try {
     console.log('[FCM] Starting FCM token retrieval...');
     
@@ -125,8 +127,43 @@ export const getFCMToken = async () => {
       console.log('[FCM] ✅ FCM token obtained successfully');
       console.log('[FCM] 📋 FCM Token (first 30 chars):', token.substring(0, 30) + '...');
       console.log('[FCM] Full token length:', token.length, 'characters');
-      console.log('[FCM] 📤 Send this token to your backend to enable Firebase push notifications');
-      console.log('[FCM] Token should be stored in your database associated with this user/device');
+      
+      // Save token to Firestore if userId is provided
+      if (userId) {
+        console.log('[FCM] User ID provided, checking if token needs to be saved to Firestore...');
+        
+        try {
+          // Check if token has changed
+          const existingToken = await getFCMTokenFromFirebase(userId);
+          
+          if (existingToken === token) {
+            console.log('[FCM] ✅ Token already stored in Firestore and matches current token');
+            console.log('[FCM] No update needed - avoiding redundant write');
+          } else {
+            if (existingToken) {
+              console.log('[FCM] Token has changed, updating in Firestore...');
+              console.log('[FCM] Old token (first 30 chars):', existingToken.substring(0, 30) + '...');
+              console.log('[FCM] New token (first 30 chars):', token.substring(0, 30) + '...');
+            } else {
+              console.log('[FCM] No existing token found, saving new token to Firestore...');
+            }
+            
+            const saved = await saveFCMTokenToFirebase(userId, token);
+            if (saved) {
+              console.log('[FCM] ✅ Token saved to Firestore successfully');
+              console.log('[FCM] Token is now stored at: users/' + userId + '/data/userData');
+            } else {
+              console.error('[FCM] ❌ Failed to save token to Firestore');
+            }
+          }
+        } catch (error) {
+          console.error('[FCM] ❌ Error managing token in Firestore:', error);
+        }
+      } else {
+        console.log('[FCM] 📤 No user ID provided - token not saved to Firestore');
+        console.log('[FCM] Token should be stored in your database associated with this user/device');
+      }
+      
       return token;
     } else {
       console.warn('[FCM] ⚠️  No FCM token received from Firebase');

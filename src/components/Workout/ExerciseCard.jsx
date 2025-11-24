@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useMemo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { 
   Box, 
@@ -10,7 +10,6 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
-  Avatar,
 } from '@mui/material';
 import { 
   CheckCircle,
@@ -26,9 +25,7 @@ import {
   ArrowForward,
 } from '@mui/icons-material';
 import ExerciseInputs from './ExerciseInputs';
-import { useUserProfile } from '../../contexts/UserProfileContext';
 import { usePreferences } from '../../contexts/PreferencesContext';
-import { getPresetAvatarColor, getDoggoAvatarUrl, DOGGO_AVATARS } from '../../utils/avatarUtils';
 
 /**
  * Helper function to check if equipment is barbell
@@ -74,7 +71,6 @@ const ExerciseCard = memo(({
   equipment = null, // Equipment type (e.g., 'Barbell', 'Dumbbell')
 }) => {
   const theme = useTheme();
-  const { profile, getInitials } = useUserProfile();
   const { preferences } = usePreferences();
   const [weight, setWeight] = useState(lastWeight || '');
   const [reps, setReps] = useState(lastReps || '');
@@ -82,11 +78,16 @@ const ExerciseCard = memo(({
   const [suggestionAccepted, setSuggestionAccepted] = useState(false);
   const [imageSrc, setImageSrc] = useState(demoImage);
   const [imageError, setImageError] = useState(false);
+  const [workIconError, setWorkIconError] = useState(false);
   
   // Detect landscape orientation on tablets (sm breakpoint and up)
   const isTabletOrLarger = useMediaQuery(theme.breakpoints.up('sm'));
   const isLandscape = useMediaQuery('(orientation: landscape)');
   const shouldUseTwoColumns = isTabletOrLarger && isLandscape;
+
+  // Construct WorkTab Icon URL with robust path handling
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
   // Update image source when demoImage prop changes
   useEffect(() => {
@@ -97,93 +98,13 @@ const ExerciseCard = memo(({
   const handleImageError = () => {
     if (!imageError) {
       setImageError(true);
-      // Instead of falling back to placeholder, we'll use null to trigger avatar display
+      // Set to null to trigger WorkTab Icon display
       setImageSrc(null);
     }
   };
   
-  // Get random doggo avatar for guest users - memoized and seeded by exercise name for consistency
-  const randomDoggoAvatar = useMemo(() => {
-    // Use exercise name to seed a consistent "random" avatar for this exercise
-    let hash = 0;
-    for (let i = 0; i < exerciseName.length; i++) {
-      hash = ((hash << 5) - hash) + exerciseName.charCodeAt(i);
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    const index = Math.abs(hash) % DOGGO_AVATARS.length;
-    return DOGGO_AVATARS[index].url;
-  }, [exerciseName]); // Recalculate only when exercise name changes
-  
-  // Render user avatar or random avatar as fallback
+  // Render WorkTab Icon as fallback when no demo image is available
   const renderAvatarFallback = () => {
-    let avatarContent = null;
-    
-    if (profile.avatar) {
-      // User has a custom avatar
-      if (profile.avatar.startsWith('preset-')) {
-        // Preset color avatar with initials
-        const color = getPresetAvatarColor(profile.avatar);
-        avatarContent = (
-          <Avatar
-            sx={{
-              width: '100%',
-              height: '100%',
-              maxWidth: 300,
-              maxHeight: 300,
-              bgcolor: color,
-              fontSize: { xs: '3rem', sm: '5rem', md: '6rem' },
-              fontWeight: 700,
-            }}
-          >
-            {getInitials()}
-          </Avatar>
-        );
-      } else if (profile.avatar.startsWith('doggo-')) {
-        // Doggo avatar
-        const avatarUrl = getDoggoAvatarUrl(profile.avatar);
-        avatarContent = (
-          <Avatar
-            src={avatarUrl}
-            alt="User avatar"
-            sx={{
-              width: '100%',
-              height: '100%',
-              maxWidth: 300,
-              maxHeight: 300,
-            }}
-          />
-        );
-      } else {
-        // Legacy custom URL
-        avatarContent = (
-          <Avatar
-            src={profile.avatar}
-            alt="User avatar"
-            sx={{
-              width: '100%',
-              height: '100%',
-              maxWidth: 300,
-              maxHeight: 300,
-            }}
-          />
-        );
-      }
-    } else {
-      // Guest user - show random doggo avatar
-      avatarContent = (
-        <Avatar
-          src={randomDoggoAvatar}
-          alt="Guest avatar"
-          sx={{
-            width: '100%',
-            height: '100%',
-            maxWidth: 300,
-            maxHeight: 300,
-          }}
-        />
-      );
-    }
-    
     return (
       <Box
         sx={{
@@ -196,7 +117,21 @@ const ExerciseCard = memo(({
           gap: 1,
         }}
       >
-        {avatarContent}
+        {!workIconError && (
+          <Box
+            component="img"
+            src={workIconUrl}
+            alt="WorkTab Icon"
+            onError={() => setWorkIconError(true)}
+            sx={{
+              width: '100%',
+              height: '100%',
+              maxWidth: shouldUseTwoColumns ? 200 : 300,
+              maxHeight: shouldUseTwoColumns ? 200 : 300,
+              objectFit: 'contain',
+            }}
+          />
+        )}
         <Typography
           variant="caption"
           sx={{
@@ -310,95 +245,179 @@ const ExerciseCard = memo(({
         gap: shouldUseTwoColumns ? 2 : 0.3,
         mb: 0.3,
       }}>
-        {/* Left Column (or top in portrait): Exercise Name and Image */}
-        <Box sx={{ 
-          flex: shouldUseTwoColumns ? '1 1 50%' : '1 1 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 0,
-          gap: 0.3,
-        }}>
-          {/* Exercise Name */}
-          <Box sx={{ flexShrink: 0 }}>
-            <Typography 
-              component="div"
-              sx={{ 
-                fontWeight: '700 !important',
-                color: 'primary.main',
-                textAlign: shouldUseTwoColumns ? 'left' : 'center',
-                lineHeight: '1.2 !important',
-                fontFamily: "'Montserrat', sans-serif !important",
-                // Responsive font sizing
-                fontSize: shouldUseTwoColumns ? {
-                  sm: '1.5rem !important', // Smaller in landscape to fit
-                  md: '2rem !important',
-                } : {
-                  xs: '1.25rem !important', // 20px on mobile
-                  sm: '1.75rem !important', // 28px on tablet
-                  md: '2.5rem !important',  // 40px on desktop
-                },
-                // Limit to max 2 lines with ellipsis
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                wordBreak: 'break-word',
-              }}
-            >
-              {exerciseName}
-            </Typography>
-          </Box>
-
-          {/* Demo Image or Video or Avatar Fallback */}
+        {/* Portrait Mode: Exercise Name and Image stacked vertically */}
+        {!shouldUseTwoColumns && (
           <Box sx={{ 
-            flexGrow: 1, 
-            flexShrink: 1, 
-            position: 'relative',
-            minHeight: 0,
+            flex: '1 1 auto',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            flexDirection: 'column',
+            minHeight: 0,
+            gap: 0.3,
           }}>
-            {imageSrc ? (
-              <Box
-                component="img"
-                src={imageSrc}
-                alt={`${exerciseName} demonstration`}
-                onError={handleImageError}
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: 2,
-                  objectFit: 'contain',
+            {/* Exercise Name */}
+            <Box sx={{ flexShrink: 0 }}>
+              <Typography 
+                component="div"
+                sx={{ 
+                  fontWeight: '700 !important',
+                  color: 'primary.main',
+                  textAlign: 'center',
+                  lineHeight: '1.2 !important',
+                  fontFamily: "'Montserrat', sans-serif !important",
+                  fontSize: {
+                    xs: '1.25rem !important', // 20px on mobile
+                    sm: '1.75rem !important', // 28px on tablet
+                    md: '2.5rem !important',  // 40px on desktop
+                  },
+                  // Limit to max 2 lines with ellipsis
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  wordBreak: 'break-word',
                 }}
-                loading="lazy"
-              />
-            ) : videoUrl ? (
-              <iframe
-                src={videoUrl}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  border: 'none',
-                  borderRadius: '8px',
-                }}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                title={`${exerciseName} video`}
-              />
-            ) : (
-              renderAvatarFallback()
-            )}
+              >
+                {exerciseName}
+              </Typography>
+            </Box>
+
+            {/* Demo Image or Video or WorkTab Icon Fallback */}
+            <Box sx={{ 
+              flexGrow: 1, 
+              flexShrink: 1, 
+              position: 'relative',
+              minHeight: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              {imageSrc ? (
+                <Box
+                  component="img"
+                  src={imageSrc}
+                  alt={`${exerciseName} demonstration`}
+                  onError={handleImageError}
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 2,
+                    objectFit: 'contain',
+                  }}
+                  loading="lazy"
+                />
+              ) : videoUrl ? (
+                <iframe
+                  src={videoUrl}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    borderRadius: '8px',
+                  }}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={`${exerciseName} video`}
+                />
+              ) : (
+                renderAvatarFallback()
+              )}
+            </Box>
           </Box>
-        </Box>
+        )}
+
+        {/* Landscape Mode: Two distinct columns - Exercise name (2/3) and Demo image (1/3) */}
+        {shouldUseTwoColumns && (
+          <>
+            {/* Left Column: Exercise Name (2/3 width) */}
+            <Box sx={{ 
+              flex: '2 1 66.66%',
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0,
+              justifyContent: 'center',
+            }}>
+              <Typography 
+                component="div"
+                sx={{ 
+                  fontWeight: '700 !important',
+                  color: 'primary.main',
+                  textAlign: 'left',
+                  lineHeight: '1.2 !important',
+                  fontFamily: "'Montserrat', sans-serif !important",
+                  fontSize: {
+                    sm: '1.5rem !important', // Smaller in landscape to fit
+                    md: '2rem !important',
+                  },
+                  // Limit to max 2 lines with ellipsis
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {exerciseName}
+              </Typography>
+            </Box>
+
+            {/* Right Column: Demo Image or WorkTab Icon (1/3 width) */}
+            <Box sx={{ 
+              flex: '1 1 33.33%',
+              position: 'relative',
+              minHeight: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              {imageSrc ? (
+                <Box
+                  component="img"
+                  src={imageSrc}
+                  alt={`${exerciseName} demonstration`}
+                  onError={handleImageError}
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 2,
+                    objectFit: 'contain',
+                  }}
+                  loading="lazy"
+                />
+              ) : videoUrl ? (
+                <iframe
+                  src={videoUrl}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    borderRadius: '8px',
+                  }}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={`${exerciseName} video`}
+                />
+              ) : (
+                renderAvatarFallback()
+              )}
+            </Box>
+          </>
+        )}
 
         {/* Right Column (or bottom in portrait): Alerts and Inputs - Only show if NOT in two-column mode */}
         {!shouldUseTwoColumns && (

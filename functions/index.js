@@ -73,6 +73,9 @@ exports.sendDailyNotifications = onSchedule({
     let usersWithTokens = 0;
     let usersWithoutTokens = 0;
 
+    // Note: For large user bases (>1000 users), consider implementing batch processing
+    // or parallel reads to improve performance. Current sequential implementation is
+    // suitable for small to medium user bases.
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
       
@@ -249,19 +252,5 @@ exports.sendDailyNotifications = onSchedule({
     logger.error("═══════════════════════════════════════════════════════");
     throw error; // Re-throw to trigger retry
   }
-});
-
-/**
- * Helper function to manually trigger notification sending
- * Useful for testing purposes
- * 
- * To call: Use Firebase console or call via HTTP trigger
- */
-exports.sendTestNotification = onSchedule({
-  schedule: "every 24 hours",
-  timeZone: "UTC",
-}, async (_event) => {
-  logger.info("Test notification function called");
-  logger.info("Note: This is a placeholder. Use sendDailyNotifications for actual notifications.");
 });
 

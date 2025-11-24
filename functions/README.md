@@ -140,7 +140,7 @@ Potential improvements for this function:
 1. **Token Cleanup**: Automatically remove invalid/expired tokens from Firestore
 2. **User Preferences**: Respect user notification preferences (time zone, enabled/disabled)
 3. **Personalization**: Customize notification content based on user data (workout plans, streaks, etc.)
-4. **Batching**: Process users in batches for large user bases
+4. **Batching**: For large user bases (>1000 users), implement batch processing or parallel reads to improve performance and reduce execution time
 5. **Multiple Notification Types**: Support different notification types (morning, evening, reminders, achievements)
 6. **Analytics**: Track notification open rates and engagement
 
@@ -166,9 +166,10 @@ Potential improvements for this function:
 - Ensure FCM is enabled in Firebase Console
 
 **Function timeout:**
-- For large user bases, consider implementing batching
-- Increase timeout in function configuration (max 540 seconds)
-- Optimize Firestore queries
+- Current implementation uses sequential Firestore reads, suitable for up to ~1000 users
+- For larger user bases, consider implementing batch processing or parallel reads
+- Increase timeout in function configuration if needed (max 540 seconds)
+- Consider sharding or pagination for very large datasets
 
 ## Related Documentation
 

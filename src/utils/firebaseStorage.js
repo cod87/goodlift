@@ -565,7 +565,6 @@ export const saveFCMTokenToFirebase = async (userId, fcmToken) => {
   
   try {
     console.log('[FCM Token Storage] Saving FCM token to Firestore...');
-    console.log('[FCM Token Storage] User ID:', userId);
     
     await saveUserDataToFirebase(userId, { 
       fcmToken,
@@ -573,12 +572,9 @@ export const saveFCMTokenToFirebase = async (userId, fcmToken) => {
     });
     
     console.log('[FCM Token Storage] ✅ FCM token saved successfully to Firestore');
-    console.log('[FCM Token Storage] Token is stored at: users/' + userId + '/data/userData');
     return true;
   } catch (error) {
     console.error('[FCM Token Storage] ❌ Error saving FCM token to Firebase:', error);
-    console.error('[FCM Token Storage] Error name:', error.name);
-    console.error('[FCM Token Storage] Error message:', error.message);
     return false;
   }
 };
@@ -611,8 +607,6 @@ export const getFCMTokenFromFirebase = async (userId) => {
     }
   } catch (error) {
     console.error('[FCM Token Storage] ❌ Error loading FCM token from Firebase:', error);
-    console.error('[FCM Token Storage] Error name:', error.name);
-    console.error('[FCM Token Storage] Error message:', error.message);
     return null;
   }
 };

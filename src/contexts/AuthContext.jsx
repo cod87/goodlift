@@ -10,7 +10,6 @@ import { auth } from '../firebase';
 import { loadUserDataFromCloud, setCurrentUserId } from '../utils/storage';
 import { setCurrentUserId as setNutritionUserId, loadUserNutritionData } from '../utils/nutritionStorage';
 import { isGuestMode, enableGuestMode, disableGuestMode, getAllGuestData } from '../utils/guestStorage';
-import { initializePushNotifications } from '../utils/pushNotificationInit';
 
 const AuthContext = createContext({});
 
@@ -91,15 +90,8 @@ export const AuthProvider = ({ children }) => {
       }
     }
     
-    // Initialize push notifications with user ID for FCM token storage
-    // This will request permission, get FCM token, and save it to Firestore
-    try {
-      console.log('[Auth] User logged in, initializing push notifications...');
-      await initializePushNotifications(user.uid);
-    } catch (error) {
-      console.error('[Auth] Error initializing push notifications:', error);
-      // Non-critical error - continue even if push notification setup fails
-    }
+    // Push notifications removed - they were causing initialization issues
+    // Firebase Auth and Firestore remain active for cross-device data sync
   };
 
   useEffect(() => {

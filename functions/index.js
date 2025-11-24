@@ -26,7 +26,7 @@ const NOTIFICATION_CONFIG = {
 
 /**
  * Scheduled function to send daily workout reminder notifications
- * Runs every day at 8:00 AM UTC
+ * Runs every day at 8:00 AM Central Time (CST/CDT)
  * 
  * This function:
  * 1. Queries all users from Firestore
@@ -38,8 +38,8 @@ const NOTIFICATION_CONFIG = {
  * To test: Use Firebase console to trigger manually or wait for scheduled time
  */
 exports.sendDailyNotifications = onSchedule({
-  schedule: "0 8 * * *", // Every day at 8:00 AM CST
-  timeZone: "America/Chicago", // Set to CST/CDT (automatically handles daylight savings)
+  schedule: "0 8 * * *", // Every day at 8:00 AM Central Time
+  timeZone: "America/Chicago", // Automatically handles CST/CDT transitions
   retryConfig: {
     retryCount: 3,
     maxRetryDuration: "600s",
@@ -256,7 +256,7 @@ exports.sendDailyNotifications = onSchedule({
 
 /**
  * Scheduled function to send evening progress check-in notifications
- * Runs every day at 9:00 PM CST
+ * Runs every day at 9:00 PM Central Time (CST/CDT)
  * 
  * This function:
  * 1. Queries all users from Firestore
@@ -268,8 +268,8 @@ exports.sendDailyNotifications = onSchedule({
  * To test: Use Firebase console to trigger manually or wait for scheduled time
  */
 exports.sendEveningNotifications = onSchedule({
-  schedule: "0 21 * * *", // Every day at 9:00 PM CST
-  timeZone: "America/Chicago", // Set to CST/CDT (automatically handles daylight savings)
+  schedule: "0 21 * * *", // Every day at 9:00 PM Central Time
+  timeZone: "America/Chicago", // Automatically handles CST/CDT transitions
   retryConfig: {
     retryCount: 3,
     maxRetryDuration: "600s",

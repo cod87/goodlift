@@ -17,7 +17,6 @@ A modern React-based fitness tracking application focused on logging your workou
 - **YouTube Demonstrations**: Each exercise includes embedded video demonstrations
 - **Data Export**: Download your workout data as CSV files
 - **Firebase Integration**: Cloud storage and cross-device syncing for authenticated users
-- **Push Notifications**: Daily workout reminders and motivational messages (requires notification permission)
 
 ## Core Concepts
 
@@ -199,46 +198,34 @@ When authenticated, the following data automatically syncs across all your devic
 3. **On Logout**: Returns to guest mode using only local storage
 4. **Offline**: App works fully offline, syncing when connection returns
 
-See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for technical details and push notification setup.
+See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for technical details.
 
-## Push Notifications
+## Push Notifications - Currently Disabled
 
-GoodLift supports push notifications for daily workout reminders and motivational messages.
+**Note:** Push notification functionality has been temporarily removed due to PWA initialization issues when the app is saved to the home screen. The app now works reliably as a PWA without push notifications. Firebase authentication and cloud sync remain fully functional.
 
-### For Users
+### Why Were Push Notifications Removed?
 
-**Enabling Notifications:**
-1. Login to your GoodLift account (notifications not available for guest users)
-2. When prompted, click "Allow" to enable browser notifications
-3. You'll receive daily reminders at 8 AM UTC to help maintain your fitness streak
+Recent addition of Firebase Cloud Messaging and scheduled push notifications caused the PWA to fail initialization when saved to the home screen on mobile devices. While the app worked fine in browsers, users experienced startup failures in standalone PWA mode. To ensure app reliability and user experience, push notification code has been removed.
 
-**Requirements:**
-- Must be logged in with an authenticated account
-- Browser must support push notifications (Chrome, Firefox, Edge, Safari 16.4+)
-- Notification permission must be granted
-- Internet connection for initial setup
+### Reintroducing Push Notifications Safely
 
-**Troubleshooting:**
-- If not receiving notifications, check browser notification settings
-- Ensure you're logged in (not in guest mode)
-- Try logging out and back in to refresh your notification token
-- Check that notifications are enabled in your browser settings for this site
+If you want to reintroduce push notifications in the future, consider these recommendations:
 
-### For Developers
+1. **Test PWA Mode Extensively**: Always test the app saved to home screen on both Android and iOS devices
+2. **Graceful Degradation**: Ensure Firebase Messaging initialization failures don't block app startup
+3. **Service Worker Isolation**: Keep push notification handlers separate from core PWA caching logic
+4. **Conditional Loading**: Consider loading Firebase Messaging only when explicitly enabled by users
+5. **Browser Compatibility**: Remember that iOS has limited FCM support (Safari/iOS 16.4+ only)
 
-See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for complete setup instructions including:
-- VAPID key configuration
-- Firebase Cloud Functions deployment
-- FCM token management
-- Testing and monitoring
-- Troubleshooting guide
+For the previous implementation details, see the git history before this removal or refer to removed documentation files.
 
 ## Technologies Used
 
 - **React 19** - Modern UI framework
 - **Vite** - Fast build tool and dev server with optimized bundling
 - **Material-UI (MUI)** - Component library for consistent design
-- **Firebase** - Backend infrastructure, cloud storage, authentication, and push notifications
+- **Firebase** - Backend infrastructure, cloud storage, and authentication
 - **Chart.js** - Data visualization for progress tracking
 - **date-fns** - Date manipulation and formatting
 - **USDA FoodData Central** - Nutrition database for food tracking (API provided by the U.S. Department of Agriculture)

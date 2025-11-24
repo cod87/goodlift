@@ -67,7 +67,7 @@ import { useUserProfile } from '../contexts/UserProfileContext';
 import ResetDataDialog from '../components/ResetDataDialog';
 import RecoverDataDialog from '../components/RecoverDataDialog';
 import { getWellnessCategories } from '../utils/wellnessTaskService';
-import { requestNotificationPermission, sendTestNotification } from '../services/pushNotificationService';
+// Push notification service removed - functionality has been disabled
 // PlansManagement removed - no longer using workout planning
 import {
   resetUserData,
@@ -297,27 +297,7 @@ const SettingsScreen = ({ onNavigate }) => {
     }
   };
 
-  // Wellness notification handlers
-  const handleEnablePushNotifications = async (enabled) => {
-    if (enabled) {
-      const granted = await requestNotificationPermission();
-      if (granted) {
-        updatePreference('pushNotificationsEnabled', true);
-        setSnackbarMessage('Push notifications enabled!');
-        setSnackbarSeverity('success');
-        setSnackbarOpen(true);
-      } else {
-        setSnackbarMessage('Permission denied. Please enable notifications in your browser settings.');
-        setSnackbarSeverity('error');
-        setSnackbarOpen(true);
-      }
-    } else {
-      updatePreference('pushNotificationsEnabled', false);
-      setSnackbarMessage('Push notifications disabled');
-      setSnackbarSeverity('info');
-      setSnackbarOpen(true);
-    }
-  };
+  // Wellness notification handlers removed - push notifications disabled
 
   const handleToggleWellnessCategory = (category) => {
     const currentCategories = preferences.wellnessCategories || [];
@@ -327,12 +307,7 @@ const SettingsScreen = ({ onNavigate }) => {
     updatePreference('wellnessCategories', newCategories);
   };
 
-  const handleTestNotification = () => {
-    sendTestNotification(preferences);
-    setSnackbarMessage('Test notification sent!');
-    setSnackbarSeverity('success');
-    setSnackbarOpen(true);
-  };
+  // Test notification handler removed - push notifications disabled
 
   return (
     <Box
@@ -701,39 +676,8 @@ const SettingsScreen = ({ onNavigate }) => {
                 Wellness & Notifications
               </Typography>
               <List sx={{ py: 0 }}>
-                {/* Push Notifications Toggle */}
-                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <ListItemIcon sx={{ minWidth: 40 }}>
-                        <Notifications sx={{ color: 'primary.main' }} />
-                      </ListItemIcon>
-                      <Typography variant="body2" fontWeight={500}>
-                        Push Notifications
-                      </Typography>
-                    </Box>
-                    <Switch
-                      checked={preferences.pushNotificationsEnabled || false}
-                      onChange={(e) => handleEnablePushNotifications(e.target.checked)}
-                      color="primary"
-                    />
-                  </Box>
-                  {preferences.pushNotificationsEnabled && (
-                    <Box sx={{ ml: 5, mt: 1, width: 'calc(100% - 40px)' }}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={handleTestNotification}
-                        sx={{ fontSize: '0.75rem' }}
-                      >
-                        Send Test Notification
-                      </Button>
-                    </Box>
-                  )}
-                </ListItem>
-                <Divider component="li" />
-
-                {/* Daily Wellness Tasks */}
+                {/* Push Notifications Toggle - REMOVED - functionality disabled */}
+                {/* Daily Wellness Tasks - now standalone without push notification dependency */}
                 <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -748,7 +692,6 @@ const SettingsScreen = ({ onNavigate }) => {
                       checked={preferences.dailyWellnessTasksEnabled || false}
                       onChange={(e) => updatePreference('dailyWellnessTasksEnabled', e.target.checked)}
                       color="primary"
-                      disabled={!preferences.pushNotificationsEnabled}
                     />
                   </Box>
                 </ListItem>
@@ -816,107 +759,7 @@ const SettingsScreen = ({ onNavigate }) => {
                   </>
                 )}
 
-                {/* Morning Notification Time */}
-                {preferences.pushNotificationsEnabled && (
-                  <>
-                    <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 0.5 }}>
-                        <ListItemIcon sx={{ minWidth: 40 }}>
-                          <Schedule sx={{ color: 'primary.main' }} />
-                        </ListItemIcon>
-                        <Typography variant="body2" fontWeight={500}>
-                          Morning Notification Time
-                        </Typography>
-                      </Box>
-                      <Box sx={{ ml: 5, display: 'flex', gap: 1 }}>
-                        <FormControl size="small" sx={{ minWidth: 80 }}>
-                          <Select
-                            value={(preferences.morningNotificationTime?.hour) || 8}
-                            onChange={(e) => updatePreference('morningNotificationTime', {
-                              ...preferences.morningNotificationTime,
-                              hour: e.target.value
-                            })}
-                          >
-                            {Array.from({ length: 24 }, (_, i) => (
-                              <MenuItem key={i} value={i}>{i.toString().padStart(2, '0')}</MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                        <Typography variant="body2" sx={{ alignSelf: 'center' }}>:</Typography>
-                        <FormControl size="small" sx={{ minWidth: 80 }}>
-                          <Select
-                            value={(preferences.morningNotificationTime?.minute) || 0}
-                            onChange={(e) => updatePreference('morningNotificationTime', {
-                              ...preferences.morningNotificationTime,
-                              minute: e.target.value
-                            })}
-                          >
-                            {[0, 15, 30, 45].map((minute) => (
-                              <MenuItem key={minute} value={minute}>{minute.toString().padStart(2, '0')}</MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </Box>
-                    </ListItem>
-                    <Divider component="li" />
-
-                    {/* Follow-up Notifications */}
-                    <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', mb: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ListItemIcon sx={{ minWidth: 40 }}>
-                            <Timer sx={{ color: 'primary.main' }} />
-                          </ListItemIcon>
-                          <Typography variant="body2" fontWeight={500}>
-                            Follow-up Notifications
-                          </Typography>
-                        </Box>
-                        <Switch
-                          checked={preferences.enableFollowupNotifications ?? true}
-                          onChange={(e) => updatePreference('enableFollowupNotifications', e.target.checked)}
-                          color="primary"
-                        />
-                      </Box>
-                      {preferences.enableFollowupNotifications && (
-                        <>
-                          <Typography variant="caption" color="text.secondary" sx={{ ml: 5, mb: 0.5, display: 'block' }}>
-                            Daily tasks: 9 PM | Weekly tasks: Saturday morning
-                          </Typography>
-                          <Box sx={{ ml: 5, display: 'flex', gap: 1, alignItems: 'center' }}>
-                            <Typography variant="caption">Follow-up time:</Typography>
-                            <FormControl size="small" sx={{ minWidth: 80 }}>
-                              <Select
-                                value={(preferences.followupNotificationTime?.hour) || 21}
-                                onChange={(e) => updatePreference('followupNotificationTime', {
-                                  ...preferences.followupNotificationTime,
-                                  hour: e.target.value
-                                })}
-                              >
-                                {Array.from({ length: 24 }, (_, i) => (
-                                  <MenuItem key={i} value={i}>{i.toString().padStart(2, '0')}</MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-                            <Typography variant="body2">:</Typography>
-                            <FormControl size="small" sx={{ minWidth: 80 }}>
-                              <Select
-                                value={(preferences.followupNotificationTime?.minute) || 0}
-                                onChange={(e) => updatePreference('followupNotificationTime', {
-                                  ...preferences.followupNotificationTime,
-                                  minute: e.target.value
-                                })}
-                              >
-                                {[0, 15, 30, 45].map((minute) => (
-                                  <MenuItem key={minute} value={minute}>{minute.toString().padStart(2, '0')}</MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-                          </Box>
-                        </>
-                      )}
-                    </ListItem>
-                  </>
-                )}
+                {/* Notification timing settings removed - push notifications disabled */}
               </List>
             </CardContent>
           </Card>

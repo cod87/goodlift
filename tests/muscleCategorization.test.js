@@ -4,56 +4,12 @@
  * Tests that delts and shoulders are properly categorized under "Shoulders" category
  */
 
-// Mock the muscle categorization functions
-const MUSCLE_CATEGORY_MAP = {
-  'Chest': ['Chest'],
-  'Back': ['Lats', 'Traps', 'Back', 'Upper Back', 'Lower Back', 'Rhomboids', 'Erector Spinae'],
-  'Shoulders': ['Shoulders', 'Delts', 'Front Delts', 'Rear Delts', 'Side Delts'],
-  'Quads': ['Quads'],
-  'Hamstrings': ['Hamstrings'],
-  'Triceps': ['Triceps'],
-  'Biceps': ['Biceps', 'Forearms'],
-  'Calves': ['Calves'],
-  'Core': ['Core', 'Obliques', 'Hip Flexors'],
-  'Glutes': ['Glutes', 'Adductors'],
-};
-
-const SECONDARY_MUSCLE_CATEGORY_MAP = {
-  'Chest': ['Chest'],
-  'Back': ['Back', 'Lats', 'Lower Back', 'Rhomboids', 'Traps', 'Upper Back'],
-  'Shoulders': ['Shoulders', 'Delts', 'Front Delts', 'Rear Delts', 'Side Delts'],
-  'Quads': ['Hip Flexors', 'Quads'],
-  'Hamstrings': ['Hamstrings'],
-  'Triceps': [],
-  'Biceps': ['Biceps', 'Forearms'],
-  'Calves': ['Calves'],
-  'Core': ['Core', 'Obliques'],
-  'Glutes': ['Adductors', 'Glutes'],
-};
-
-const MUSCLE_TO_CATEGORY = Object.entries(MUSCLE_CATEGORY_MAP).reduce((acc, [category, muscles]) => {
-  muscles.forEach(muscle => {
-    acc[muscle] = category;
-  });
-  return acc;
-}, {});
-
-const SECONDARY_MUSCLE_TO_CATEGORY = Object.entries(SECONDARY_MUSCLE_CATEGORY_MAP).reduce((acc, [category, muscles]) => {
-  muscles.forEach(muscle => {
-    acc[muscle] = category;
-  });
-  return acc;
-}, {});
-
-function getMuscleCategory(primaryMuscle) {
-  const cleanMuscle = primaryMuscle.split('(')[0].trim();
-  return MUSCLE_TO_CATEGORY[cleanMuscle] || cleanMuscle;
-}
-
-function getSecondaryMuscleCategory(secondaryMuscle) {
-  const cleanMuscle = secondaryMuscle.split('(')[0].trim();
-  return SECONDARY_MUSCLE_TO_CATEGORY[cleanMuscle] || null;
-}
+import {
+  MUSCLE_CATEGORY_MAP,
+  SECONDARY_MUSCLE_CATEGORY_MAP,
+  getMuscleCategory,
+  getSecondaryMuscleCategory,
+} from '../src/utils/muscleCategories.js';
 
 // Test Cases
 console.log('=== Muscle Categorization Tests ===\n');

@@ -25,13 +25,77 @@ const NOTIFICATION_CONFIG = {
 };
 
 /**
+ * Helper function to get today's workout info from user's active plan
+ * @param {object} userData - User data from Firestore
+ * @returns {string|null} Workout description or null
+ */
+const getTodaysWorkout = (userData) => {
+  try {
+    const { plans, planDays, activePlanId } = userData;
+    
+    if (!activePlanId || !plans || !planDays) {
+      return null;
+    }
+    
+    // Find active plan
+    const activePlan = plans.find(p => p.id === activePlanId);
+    if (!activePlan) {
+      return null;
+    }
+    
+    // Get today's day of week (0 = Sunday, 6 = Saturday)
+    const today = new Date().getDay();
+    
+    // Find today's plan day
+    const todaysPlanDay = planDays.find(pd => 
+      pd.planId === activePlanId && pd.dayOfWeek === today
+    );
+    
+    if (!todaysPlanDay) {
+      return null;
+    }
+    
+    // Format workout type
+    const typeMap = {
+      'strength': 'Strength Training',
+      'hypertrophy': 'Hypertrophy',
+      'cardio': 'Cardio',
+      'active_recovery': 'Active Recovery',
+      'rest': 'Rest Day'
+    };
+    
+    return typeMap[todaysPlanDay.type] || todaysPlanDay.type;
+  } catch (error) {
+    logger.error('Error getting today\'s workout:', error);
+    return null;
+  }
+};
+
+/**
+ * Helper function to check if user has wellness enabled
+ * @param {object} userData - User data from Firestore
+ * @returns {boolean} Whether wellness is enabled
+ */
+const isWellnessEnabled = (userData) => {
+  // Check if user has wellness preferences configured
+  // For now, wellness is enabled if user has any wellness-related data
+  return userData && (
+    userData.wellnessEnabled === true ||
+    userData.wellnessPreferences ||
+    userData.completedWellnessTasks !== undefined
+  );
+};
+
+/**
  * Scheduled function to send daily workout reminder notifications
  * Runs every day at 8:00 AM Central Time (CST/CDT)
  * 
  * This function:
  * 1. Queries all users from Firestore
- * 2. Collects FCM tokens from user documents
- * 3. Sends push notifications to all valid tokens
+ * 2. Collects FCM tokens and user data
+ * 3. Sends personalized push notifications including:
+ *    - Today's scheduled workout (if user has an active plan)
+ *    - Daily wellness task (if user has wellness enabled)
  * 4. Handles errors for invalid/expired tokens
  * 
  * To deploy: firebase deploy --only functions:sendDailyNotifications
@@ -66,16 +130,12 @@ exports.sendDailyNotifications = onSchedule({
       return;
     }
 
-    // Step 2: Collect FCM tokens from all users
-    logger.info("Step 2: Collecting FCM tokens from user documents...");
-    const tokens = [];
-    const userTokenMap = {}; // Map token to userId for logging
+    // Step 2: Collect FCM tokens and prepare personalized messages
+    logger.info("Step 2: Collecting user data and preparing messages...");
+    const messages = [];
     let usersWithTokens = 0;
     let usersWithoutTokens = 0;
 
-    // Note: For large user bases (>1000 users), consider implementing batch processing
-    // or parallel reads to improve performance. Current sequential implementation is
-    // suitable for small to medium user bases.
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
       
@@ -93,10 +153,64 @@ exports.sendDailyNotifications = onSchedule({
           const fcmToken = userData.fcmToken;
           
           if (fcmToken) {
-            tokens.push(fcmToken);
-            userTokenMap[fcmToken] = userId;
+            // Build personalized notification message
+            let bodyText = "Good morning! ";
+            const details = [];
+            
+            // Add today's workout if applicable
+            const todaysWorkout = getTodaysWorkout(userData);
+            if (todaysWorkout) {
+              if (todaysWorkout === 'Rest Day') {
+                details.push("Today is a rest day - focus on recovery");
+              } else {
+                details.push(`Today's workout: ${todaysWorkout}`);
+              }
+            }
+            
+            // Add wellness task if user has wellness enabled
+            if (isWellnessEnabled(userData)) {
+              details.push("Don't forget your daily wellness task");
+            }
+            
+            // Construct final message
+            if (details.length > 0) {
+              bodyText += details.join(". ") + ". ";
+            }
+            bodyText += "Let's make today great! 💪";
+            
+            messages.push({
+              token: fcmToken,
+              notification: {
+                title: "Good Morning! ☀️",
+                body: bodyText,
+                icon: NOTIFICATION_CONFIG.icon,
+                badge: NOTIFICATION_CONFIG.badge,
+              },
+              data: {
+                type: "daily-reminder",
+                timestamp: new Date().toISOString(),
+                click_action: NOTIFICATION_CONFIG.clickActionUrl,
+                hasWorkout: todaysWorkout ? "true" : "false",
+                workoutType: todaysWorkout || "",
+                hasWellness: isWellnessEnabled(userData) ? "true" : "false",
+              },
+              android: {
+                priority: "high",
+              },
+              apns: {
+                headers: {
+                  "apns-priority": "10",
+                },
+              },
+              webpush: {
+                headers: {
+                  Urgency: "high",
+                },
+              },
+            });
+            
             usersWithTokens++;
-            logger.info(`User ${userId}: Found FCM token`);
+            logger.info(`User ${userId}: Prepared personalized notification`);
           } else {
             usersWithoutTokens++;
             logger.warn(`User ${userId}: No FCM token found`);
@@ -112,124 +226,69 @@ exports.sendDailyNotifications = onSchedule({
     }
 
     logger.info("═══════════════════════════════════════════════════════");
-    logger.info("Token collection summary:");
+    logger.info("Message preparation summary:");
     logger.info(`  Users with tokens: ${usersWithTokens}`);
     logger.info(`  Users without tokens: ${usersWithoutTokens}`);
-    logger.info(`  Total tokens collected: ${tokens.length}`);
+    logger.info(`  Total messages prepared: ${messages.length}`);
     logger.info("═══════════════════════════════════════════════════════");
 
-    if (tokens.length === 0) {
-      logger.warn("No FCM tokens found - no notifications to send");
+    if (messages.length === 0) {
+      logger.warn("No messages to send - no valid tokens found");
       logger.info("Notification job completed (no valid tokens)");
       return;
     }
 
-    // Step 3: Create notification payload
-    logger.info("Step 3: Creating notification payload...");
-    
-    const currentDate = new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    
-    const payload = {
-      notification: {
-        title: "Good Morning! ☀️",
-        body: `Time to crush your workout today, ${currentDate}! Let's get moving! 💪`,
-        icon: NOTIFICATION_CONFIG.icon,
-        badge: NOTIFICATION_CONFIG.badge,
-        tag: "daily-reminder",
-        requireInteraction: false,
-      },
-      data: {
-        type: "daily-reminder",
-        timestamp: new Date().toISOString(),
-        click_action: NOTIFICATION_CONFIG.clickActionUrl,
-      },
-    };
-
-    logger.info("Notification payload created:");
-    logger.info("  Title:", payload.notification.title);
-    logger.info("  Body:", payload.notification.body);
-    logger.info("  Type:", payload.data.type);
-
-    // Step 4: Send notifications to all tokens
+    // Step 3: Send notifications
     logger.info("═══════════════════════════════════════════════════════");
-    logger.info("Step 4: Sending notifications...");
-    logger.info(`Sending to ${tokens.length} device(s)...`);
+    logger.info("Step 3: Sending personalized notifications...");
+    logger.info(`Sending to ${messages.length} device(s)...`);
     
     try {
-      const response = await admin.messaging().sendEachForMulticast({
-        tokens: tokens,
-        notification: payload.notification,
-        data: payload.data,
-        android: {
-          priority: "high",
-        },
-        apns: {
-          headers: {
-            "apns-priority": "10",
-          },
-        },
-        webpush: {
-          headers: {
-            Urgency: "high",
-          },
-        },
-      });
-
-      logger.info("═══════════════════════════════════════════════════════");
-      logger.info("Notification delivery results:");
-      logger.info(`  Success count: ${response.successCount}`);
-      logger.info(`  Failure count: ${response.failureCount}`);
-      logger.info("═══════════════════════════════════════════════════════");
-
-      // Step 5: Handle errors and invalid tokens
-      if (response.failureCount > 0) {
-        logger.warn("Some notifications failed to send. Processing errors...");
+      // Send all messages in batch (FCM supports up to 500 messages per batch)
+      const batchSize = 500;
+      let totalSuccess = 0;
+      let totalFailure = 0;
+      
+      for (let i = 0; i < messages.length; i += batchSize) {
+        const batch = messages.slice(i, i + batchSize);
+        const response = await admin.messaging().sendEach(batch);
         
-        const failedTokens = [];
+        totalSuccess += response.successCount;
+        totalFailure += response.failureCount;
+        
+        // Log individual failures
         response.responses.forEach((resp, idx) => {
           if (!resp.success) {
-            const token = tokens[idx];
-            const userId = userTokenMap[token];
+            const token = batch[idx].token;
             const error = resp.error;
             
-            logger.error(`Failed to send to user ${userId}:`);
+            logger.error(`Failed to send notification:`);
             logger.error(`  Error code: ${error.code}`);
             logger.error(`  Error message: ${error.message}`);
             
-            // Check if token is invalid or expired
             if (
               error.code === "messaging/invalid-registration-token" ||
               error.code === "messaging/registration-token-not-registered"
             ) {
-              logger.warn(`Token for user ${userId} is invalid/expired - should be removed from database`);
-              failedTokens.push({ userId, token, reason: error.code });
+              logger.warn(`Invalid/expired token - should be removed from database`);
             }
           }
         });
-
-        if (failedTokens.length > 0) {
-          logger.warn("═══════════════════════════════════════════════════════");
-          logger.warn(`Found ${failedTokens.length} invalid/expired token(s):`);
-          failedTokens.forEach(({ userId, reason }) => {
-            logger.warn(`  User ${userId}: ${reason}`);
-          });
-          logger.warn("Consider implementing automatic token cleanup for these users");
-          logger.warn("═══════════════════════════════════════════════════════");
-        }
       }
+
+      logger.info("═══════════════════════════════════════════════════════");
+      logger.info("Notification delivery results:");
+      logger.info(`  Success count: ${totalSuccess}`);
+      logger.info(`  Failure count: ${totalFailure}`);
+      logger.info("═══════════════════════════════════════════════════════");
 
       logger.info("═══════════════════════════════════════════════════════");
       logger.info("✅ Daily notification job completed successfully!");
       logger.info("Summary:");
       logger.info(`  Total users: ${usersSnapshot.size}`);
       logger.info(`  Users with tokens: ${usersWithTokens}`);
-      logger.info(`  Notifications sent: ${response.successCount}`);
-      logger.info(`  Notifications failed: ${response.failureCount}`);
+      logger.info(`  Notifications sent: ${totalSuccess}`);
+      logger.info(`  Notifications failed: ${totalFailure}`);
       logger.info("═══════════════════════════════════════════════════════");
 
     } catch (sendError) {
@@ -255,14 +314,17 @@ exports.sendDailyNotifications = onSchedule({
 });
 
 /**
- * Scheduled function to send evening progress check-in notifications
+ * Scheduled function to send evening wellness check-in notifications
  * Runs every day at 9:00 PM Central Time (CST/CDT)
  * 
  * This function:
- * 1. Queries all users from Firestore
- * 2. Collects FCM tokens from user documents
- * 3. Sends push notifications to all valid tokens with evening motivational message
+ * 1. Queries all users with wellness enabled from Firestore
+ * 2. Sends notifications asking users to mark wellness tasks as complete
+ * 3. Notification links to app where users can mark completion (Yes/No)
  * 4. Handles errors for invalid/expired tokens
+ * 
+ * Note: FCM doesn't support interactive notification buttons that directly update data.
+ * Users must click the notification to open the app and mark tasks complete there.
  * 
  * To deploy: firebase deploy --only functions:sendEveningNotifications
  * To test: Use Firebase console to trigger manually or wait for scheduled time
@@ -278,7 +340,7 @@ exports.sendEveningNotifications = onSchedule({
   timeoutSeconds: 540,
 }, async (event) => {
   logger.info("═══════════════════════════════════════════════════════");
-  logger.info("Starting evening notification job...");
+  logger.info("Starting evening wellness check-in job...");
   logger.info("Scheduled time:", event.scheduleTime);
   logger.info("═══════════════════════════════════════════════════════");
 
@@ -296,14 +358,12 @@ exports.sendEveningNotifications = onSchedule({
       return;
     }
 
-    // Step 2: Collect FCM tokens from all users
-    logger.info("Step 2: Collecting FCM tokens from user documents...");
-    const tokens = [];
-    const userTokenMap = {}; // Map token to userId for logging
-    let usersWithTokens = 0;
-    let usersWithoutTokens = 0;
+    // Step 2: Collect users with wellness enabled and prepare messages
+    logger.info("Step 2: Collecting users with wellness enabled...");
+    const messages = [];
+    let usersWithWellness = 0;
+    let usersWithoutWellness = 0;
 
-    // Await all token collection to ensure all tokens are properly collected
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
       
@@ -320,144 +380,123 @@ exports.sendEveningNotifications = onSchedule({
           const userData = userDataDoc.data();
           const fcmToken = userData.fcmToken;
           
-          if (fcmToken) {
-            tokens.push(fcmToken);
-            userTokenMap[fcmToken] = userId;
-            usersWithTokens++;
-            logger.info(`User ${userId}: Found FCM token`);
+          // Only send to users with wellness enabled
+          if (fcmToken && isWellnessEnabled(userData)) {
+            messages.push({
+              token: fcmToken,
+              notification: {
+                title: "Evening Wellness Check-In 🌙",
+                body: "Did you complete your wellness task today? Tap to mark it complete and track your progress! 🎯",
+                icon: NOTIFICATION_CONFIG.icon,
+                badge: NOTIFICATION_CONFIG.badge,
+              },
+              data: {
+                type: "wellness-checkin",
+                timestamp: new Date().toISOString(),
+                click_action: NOTIFICATION_CONFIG.clickActionUrl + "#wellness",
+                action: "mark-wellness-complete",
+              },
+              android: {
+                priority: "high",
+              },
+              apns: {
+                headers: {
+                  "apns-priority": "10",
+                },
+              },
+              webpush: {
+                headers: {
+                  Urgency: "high",
+                },
+                fcm_options: {
+                  link: NOTIFICATION_CONFIG.clickActionUrl + "#wellness",
+                },
+              },
+            });
+            
+            usersWithWellness++;
+            logger.info(`User ${userId}: Prepared wellness check-in notification`);
+          } else if (fcmToken) {
+            usersWithoutWellness++;
+            logger.info(`User ${userId}: Has token but wellness not enabled`);
           } else {
-            usersWithoutTokens++;
+            usersWithoutWellness++;
             logger.warn(`User ${userId}: No FCM token found`);
           }
         } else {
-          usersWithoutTokens++;
+          usersWithoutWellness++;
           logger.warn(`User ${userId}: No userData document found`);
         }
       } catch (error) {
         logger.error(`Error reading user ${userId}:`, error);
-        usersWithoutTokens++;
+        usersWithoutWellness++;
       }
     }
 
     logger.info("═══════════════════════════════════════════════════════");
-    logger.info("Token collection summary:");
-    logger.info(`  Users with tokens: ${usersWithTokens}`);
-    logger.info(`  Users without tokens: ${usersWithoutTokens}`);
-    logger.info(`  Total tokens collected: ${tokens.length}`);
+    logger.info("Message preparation summary:");
+    logger.info(`  Users with wellness enabled: ${usersWithWellness}`);
+    logger.info(`  Users without wellness: ${usersWithoutWellness}`);
+    logger.info(`  Total messages prepared: ${messages.length}`);
     logger.info("═══════════════════════════════════════════════════════");
 
-    if (tokens.length === 0) {
-      logger.warn("No FCM tokens found - no notifications to send");
-      logger.info("Notification job completed (no valid tokens)");
+    if (messages.length === 0) {
+      logger.warn("No messages to send - no users with wellness enabled");
+      logger.info("Notification job completed (no wellness users)");
       return;
     }
 
-    // Step 3: Create notification payload with evening-specific content
-    logger.info("Step 3: Creating notification payload...");
-    
-    const currentDate = new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    
-    const payload = {
-      notification: {
-        title: "Evening Check-In 🌙",
-        body: `How did today go? Review your progress and plan for tomorrow! Keep building momentum! 🎯`,
-        icon: NOTIFICATION_CONFIG.icon,
-        badge: NOTIFICATION_CONFIG.badge,
-        tag: "evening-checkin",
-        requireInteraction: false,
-      },
-      data: {
-        type: "evening-checkin",
-        timestamp: new Date().toISOString(),
-        click_action: NOTIFICATION_CONFIG.clickActionUrl,
-      },
-    };
-
-    logger.info("Notification payload created:");
-    logger.info("  Title:", payload.notification.title);
-    logger.info("  Body:", payload.notification.body);
-    logger.info("  Type:", payload.data.type);
-
-    // Step 4: Send notifications to all tokens
+    // Step 3: Send notifications
     logger.info("═══════════════════════════════════════════════════════");
-    logger.info("Step 4: Sending notifications...");
-    logger.info(`Sending to ${tokens.length} device(s)...`);
+    logger.info("Step 3: Sending wellness check-in notifications...");
+    logger.info(`Sending to ${messages.length} device(s)...`);
     
     try {
-      const response = await admin.messaging().sendEachForMulticast({
-        tokens: tokens,
-        notification: payload.notification,
-        data: payload.data,
-        android: {
-          priority: "high",
-        },
-        apns: {
-          headers: {
-            "apns-priority": "10",
-          },
-        },
-        webpush: {
-          headers: {
-            Urgency: "high",
-          },
-        },
-      });
-
-      logger.info("═══════════════════════════════════════════════════════");
-      logger.info("Notification delivery results:");
-      logger.info(`  Success count: ${response.successCount}`);
-      logger.info(`  Failure count: ${response.failureCount}`);
-      logger.info("═══════════════════════════════════════════════════════");
-
-      // Step 5: Handle errors and invalid tokens
-      if (response.failureCount > 0) {
-        logger.warn("Some notifications failed to send. Processing errors...");
+      // Send all messages in batch (FCM supports up to 500 messages per batch)
+      const batchSize = 500;
+      let totalSuccess = 0;
+      let totalFailure = 0;
+      
+      for (let i = 0; i < messages.length; i += batchSize) {
+        const batch = messages.slice(i, i + batchSize);
+        const response = await admin.messaging().sendEach(batch);
         
-        const failedTokens = [];
+        totalSuccess += response.successCount;
+        totalFailure += response.failureCount;
+        
+        // Log individual failures
         response.responses.forEach((resp, idx) => {
           if (!resp.success) {
-            const token = tokens[idx];
-            const userId = userTokenMap[token];
+            const token = batch[idx].token;
             const error = resp.error;
             
-            logger.error(`Failed to send to user ${userId}:`);
+            logger.error(`Failed to send notification:`);
             logger.error(`  Error code: ${error.code}`);
             logger.error(`  Error message: ${error.message}`);
             
-            // Check if token is invalid or expired
             if (
               error.code === "messaging/invalid-registration-token" ||
               error.code === "messaging/registration-token-not-registered"
             ) {
-              logger.warn(`Token for user ${userId} is invalid/expired - should be removed from database`);
-              failedTokens.push({ userId, token, reason: error.code });
+              logger.warn(`Invalid/expired token - should be removed from database`);
             }
           }
         });
-
-        if (failedTokens.length > 0) {
-          logger.warn("═══════════════════════════════════════════════════════");
-          logger.warn(`Found ${failedTokens.length} invalid/expired token(s):`);
-          failedTokens.forEach(({ userId, reason }) => {
-            logger.warn(`  User ${userId}: ${reason}`);
-          });
-          logger.warn("Consider implementing automatic token cleanup for these users");
-          logger.warn("═══════════════════════════════════════════════════════");
-        }
       }
 
       logger.info("═══════════════════════════════════════════════════════");
-      logger.info("✅ Evening notification job completed successfully!");
+      logger.info("Notification delivery results:");
+      logger.info(`  Success count: ${totalSuccess}`);
+      logger.info(`  Failure count: ${totalFailure}`);
+      logger.info("═══════════════════════════════════════════════════════");
+
+      logger.info("═══════════════════════════════════════════════════════");
+      logger.info("✅ Evening wellness check-in job completed successfully!");
       logger.info("Summary:");
       logger.info(`  Total users: ${usersSnapshot.size}`);
-      logger.info(`  Users with tokens: ${usersWithTokens}`);
-      logger.info(`  Notifications sent: ${response.successCount}`);
-      logger.info(`  Notifications failed: ${response.failureCount}`);
+      logger.info(`  Users with wellness enabled: ${usersWithWellness}`);
+      logger.info(`  Notifications sent: ${totalSuccess}`);
+      logger.info(`  Notifications failed: ${totalFailure}`);
       logger.info("═══════════════════════════════════════════════════════");
 
     } catch (sendError) {
@@ -473,7 +512,7 @@ exports.sendEveningNotifications = onSchedule({
 
   } catch (error) {
     logger.error("═══════════════════════════════════════════════════════");
-    logger.error("❌ Fatal error in evening notification job:");
+    logger.error("❌ Fatal error in evening wellness check-in job:");
     logger.error("Error name:", error.name);
     logger.error("Error message:", error.message);
     logger.error("Stack trace:", error.stack);

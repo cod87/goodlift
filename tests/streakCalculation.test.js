@@ -249,4 +249,20 @@ console.log('Test 11: Last session was 2 days ago (beyond grace period)');
 }
 console.log('');
 
+// Test 12: Workout history with invalid dates (edge case)
+console.log('Test 12: Workout history with invalid dates');
+{
+  const sessions = [
+    { date: 'invalid-date', type: 'strength' },
+    { date: undefined, type: 'strength' },
+  ];
+  const result = calculateStreak(sessions);
+  
+  const passed = result.currentStreak === 0 && result.longestStreak === 0;
+  console.log(`  Sessions: 2 with invalid dates (invalid string, undefined)`);
+  console.log(`  Expected currentStreak: 0, longestStreak: 0`);
+  console.log(`  Got currentStreak: ${result.currentStreak}, longestStreak: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
 console.log('=== Tests Complete ===');

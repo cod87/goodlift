@@ -81,7 +81,12 @@ export const calculateStreak = (workoutHistory = []) => {
     const d = new Date(w.date);
     d.setHours(0, 0, 0, 0);
     return d.getTime();
-  }))).sort((a, b) => a - b);
+  }).filter(timestamp => !isNaN(timestamp)))).sort((a, b) => a - b);
+
+  // If no valid dates found, return empty streak
+  if (uniqueDatesArray.length === 0) {
+    return { currentStreak: 0, longestStreak: 0 };
+  }
 
   // Normalize "today" to local midnight for consistent comparison
   const today = new Date();

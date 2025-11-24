@@ -27,12 +27,13 @@ const VAPID_PUBLIC_KEY = 'BE0ZQSJHIlmXfeA5ddjITNrqrS0TmGfGGQjBufmOlUKxRUtEwja2qH
  * This function sets up both Firebase Cloud Messaging and native Web Push API.
  * It will:
  * 1. Check browser and platform compatibility
- * 2. Get FCM token for Firebase-based notifications
+ * 2. Get FCM token for Firebase-based notifications and save to Firestore if userId provided
  * 3. Subscribe to native Web Push for direct browser notifications
  * 
+ * @param {string} userId - Optional user ID to save FCM token to Firestore
  * @returns {Promise<void>}
  */
-export async function initializePushNotifications() {
+export async function initializePushNotifications(userId = null) {
   try {
     console.log('[Push Init] ═══════════════════════════════════════════════════════');
     console.log('[Push Init] Starting push notification initialization...');
@@ -78,13 +79,21 @@ export async function initializePushNotifications() {
 
     // Step 2: Initialize Firebase Cloud Messaging
     console.log('[Push Init] Step 2: Initializing Firebase Cloud Messaging...');
+    if (userId) {
+      console.log('[Push Init] User ID provided:', userId);
+      console.log('[Push Init] FCM token will be saved to Firestore upon retrieval');
+    }
     try {
-      const fcmToken = await getFCMToken();
+      const fcmToken = await getFCMToken(userId);
       
       if (fcmToken) {
         console.log('[Push Init] ✅ Firebase Cloud Messaging initialized successfully');
         console.log('[Push Init] 📋 FCM Token:', fcmToken.substring(0, 20) + '...');
-        console.log('[Push Init] 📤 Send this token to your backend to enable Firebase push notifications');
+        if (userId) {
+          console.log('[Push Init] ✅ Token saved to Firestore at: users/' + userId + '/data/userData');
+        } else {
+          console.log('[Push Init] 📤 No user ID - token not saved to Firestore');
+        }
       } else {
         console.warn('[Push Init] ⚠️  Firebase Cloud Messaging not available');
         console.warn('[Push Init] This may be expected on Safari/iOS or if permission was denied');
@@ -207,11 +216,17 @@ export async function initializePushNotifications() {
  * Call this function to manually trigger push notification subscription
  * Useful for user settings or onboarding flows
  * 
+ * @param {string} userId - Optional user ID to save FCM token to Firestore
  * @returns {Promise<{fcmToken: string|null, webPushSubscription: PushSubscription|null}>}
  */
-export async function requestPushNotificationSubscription() {
+export async function requestPushNotificationSubscription(userId = null) {
   console.log('[Push Request] Manual push notification subscription requested');
   console.log('[Push Request] This should be called from a user interaction (button click) for best compatibility');
+  
+  if (userId) {
+    console.log('[Push Request] User ID provided:', userId);
+    console.log('[Push Request] FCM token will be saved to Firestore if obtained');
+  }
   
   const browser = detectBrowser();
   if (browser.isIOS) {
@@ -219,7 +234,7 @@ export async function requestPushNotificationSubscription() {
   }
   
   try {
-    const fcmToken = await getFCMToken();
+    const fcmToken = await getFCMToken(userId);
     const webPushSubscription = await subscribeToPushNotifications(VAPID_PUBLIC_KEY);
     
     console.log('[Push Request] Subscription results:', {

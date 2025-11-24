@@ -544,3 +544,69 @@ export const loadNutritionDataFromFirebase = async (userId) => {
     return null;
   }
 };
+
+/**
+ * Save FCM token to Firebase
+ * Stores the Firebase Cloud Messaging token for push notifications
+ * @param {string} userId - The authenticated user's UID
+ * @param {string} fcmToken - The FCM device token
+ * @returns {Promise<boolean>} - True if saved successfully
+ */
+export const saveFCMTokenToFirebase = async (userId, fcmToken) => {
+  if (!userId) {
+    console.error('[FCM Token Storage] Cannot save FCM token: No user ID provided');
+    return false;
+  }
+  
+  if (!fcmToken) {
+    console.error('[FCM Token Storage] Cannot save FCM token: No token provided');
+    return false;
+  }
+  
+  try {
+    console.log('[FCM Token Storage] Saving FCM token to Firestore...');
+    
+    await saveUserDataToFirebase(userId, { 
+      fcmToken,
+      fcmTokenUpdatedAt: new Date().toISOString()
+    });
+    
+    console.log('[FCM Token Storage] ✅ FCM token saved successfully to Firestore');
+    return true;
+  } catch (error) {
+    console.error('[FCM Token Storage] ❌ Error saving FCM token to Firebase:', error);
+    return false;
+  }
+};
+
+/**
+ * Get FCM token from Firebase
+ * Retrieves the stored Firebase Cloud Messaging token
+ * @param {string} userId - The authenticated user's UID
+ * @returns {Promise<string|null>} - The FCM token or null if not found
+ */
+export const getFCMTokenFromFirebase = async (userId) => {
+  if (!userId) {
+    console.error('[FCM Token Storage] Cannot load FCM token: No user ID provided');
+    return null;
+  }
+  
+  try {
+    console.log('[FCM Token Storage] Loading FCM token from Firestore...');
+    const userData = await loadUserDataFromFirebase(userId);
+    
+    if (userData?.fcmToken) {
+      console.log('[FCM Token Storage] ✅ FCM token found in Firestore');
+      if (userData.fcmTokenUpdatedAt) {
+        console.log('[FCM Token Storage] Last updated:', userData.fcmTokenUpdatedAt);
+      }
+      return userData.fcmToken;
+    } else {
+      console.log('[FCM Token Storage] No FCM token found in Firestore');
+      return null;
+    }
+  } catch (error) {
+    console.error('[FCM Token Storage] ❌ Error loading FCM token from Firebase:', error);
+    return null;
+  }
+};

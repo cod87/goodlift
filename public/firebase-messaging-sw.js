@@ -8,6 +8,9 @@
 console.log('[FCM Service Worker] Loading Firebase Cloud Messaging service worker...');
 
 try {
+  // Using Firebase v10 compat for service worker (stable and well-tested for SW environments)
+  // Note: The main app uses Firebase v12+ modular SDK
+  // Service workers require the compat version loaded via importScripts
   importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
   importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
   console.log('[FCM Service Worker] ✅ Firebase scripts loaded successfully');

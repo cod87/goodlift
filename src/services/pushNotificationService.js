@@ -118,6 +118,11 @@ export const getFCMToken = async (userId = null) => {
     console.log('[FCM] Requesting FCM token with VAPID key...');
     console.log('[FCM] VAPID key (first 20 chars):', VAPID_KEY.substring(0, 20) + '...');
     
+    // Firebase SDK will automatically look for and use /firebase-messaging-sw.js
+    // at the web root if no serviceWorkerRegistration is provided.
+    // This is the recommended approach per Firebase documentation.
+    // The firebase-messaging-sw.js must be served from the web root (not /src)
+    
     // Get FCM token using the VAPID key
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY

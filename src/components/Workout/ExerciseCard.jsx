@@ -78,11 +78,16 @@ const ExerciseCard = memo(({
   const [suggestionAccepted, setSuggestionAccepted] = useState(false);
   const [imageSrc, setImageSrc] = useState(demoImage);
   const [imageError, setImageError] = useState(false);
+  const [workIconError, setWorkIconError] = useState(false);
   
   // Detect landscape orientation on tablets (sm breakpoint and up)
   const isTabletOrLarger = useMediaQuery(theme.breakpoints.up('sm'));
   const isLandscape = useMediaQuery('(orientation: landscape)');
   const shouldUseTwoColumns = isTabletOrLarger && isLandscape;
+
+  // Construct WorkTab Icon URL with robust path handling
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
   // Update image source when demoImage prop changes
   useEffect(() => {
@@ -100,9 +105,6 @@ const ExerciseCard = memo(({
   
   // Render WorkTab Icon as fallback when no demo image is available
   const renderAvatarFallback = () => {
-    const baseUrl = import.meta.env.BASE_URL || '/';
-    const workIconUrl = `${baseUrl}work-icon.svg`;
-    
     return (
       <Box
         sx={{
@@ -115,18 +117,21 @@ const ExerciseCard = memo(({
           gap: 1,
         }}
       >
-        <Box
-          component="img"
-          src={workIconUrl}
-          alt="WorkTab Icon"
-          sx={{
-            width: '100%',
-            height: '100%',
-            maxWidth: shouldUseTwoColumns ? 200 : 300,
-            maxHeight: shouldUseTwoColumns ? 200 : 300,
-            objectFit: 'contain',
-          }}
-        />
+        {!workIconError && (
+          <Box
+            component="img"
+            src={workIconUrl}
+            alt="WorkTab Icon"
+            onError={() => setWorkIconError(true)}
+            sx={{
+              width: '100%',
+              height: '100%',
+              maxWidth: shouldUseTwoColumns ? 200 : 300,
+              maxHeight: shouldUseTwoColumns ? 200 : 300,
+              objectFit: 'contain',
+            }}
+          />
+        )}
         <Typography
           variant="caption"
           sx={{

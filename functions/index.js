@@ -38,8 +38,8 @@ const NOTIFICATION_CONFIG = {
  * To test: Use Firebase console to trigger manually or wait for scheduled time
  */
 exports.sendDailyNotifications = onSchedule({
-  schedule: "0 8 * * *", // Cron expression: Every day at 8:00 AM UTC
-  timeZone: "UTC",
+  schedule: "0 8 * * *", // Every day at 8:00 AM CST
+  timeZone: "America/Chicago", // Set to CST/CDT (automatically handles daylight savings)
   retryConfig: {
     retryCount: 3,
     maxRetryDuration: "600s",

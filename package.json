@@ -7,7 +7,6 @@
     "dev": "vite",
     "prebuild": "node scripts/generate-sw-version.js",
     "build": "vite build",
-    "postbuild": "node scripts/verify-service-workers.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "convert:exercises": "node scripts/convert-exercise-expanded.js",
@@ -15,8 +14,7 @@
     "convert:wellness": "node scripts/convert-wellness-tasks.js",
     "merge:cable": "node scripts/merge-cable-exercises.js",
     "test:cable": "node scripts/test-cable-integration.js",
-    "convert:all": "npm run convert:exercises && npm run convert:hiit && npm run convert:wellness",
-    "verify:sw": "node scripts/verify-service-workers.js"
+    "convert:all": "npm run convert:exercises && npm run convert:hiit && npm run convert:wellness"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

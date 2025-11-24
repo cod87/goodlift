@@ -99,24 +99,34 @@ const LogMealModal = ({
 
   // Add a search term (when user presses Enter or comma)
   const addSearchTerm = useCallback((term) => {
-    const trimmedTerm = term.trim();
-    if (trimmedTerm.length >= 2 && !searchTerms.includes(trimmedTerm)) {
-      const newTerms = [...searchTerms, trimmedTerm];
-      setSearchTerms(newTerms);
-      setSearchQuery(''); // Clear input after adding
-      // Trigger search for all terms
-      searchMultipleTerms(newTerms);
+    try {
+      const trimmedTerm = term.trim();
+      if (trimmedTerm.length >= 2 && !searchTerms.includes(trimmedTerm)) {
+        const newTerms = [...searchTerms, trimmedTerm];
+        setSearchTerms(newTerms);
+        setSearchQuery(''); // Clear input after adding
+        // Trigger search for all terms
+        searchMultipleTerms(newTerms);
+      }
+    } catch (error) {
+      console.error('Error adding search term:', error);
+      setError('Failed to add search term. Please try again.');
     }
   }, [searchTerms]);
 
   // Remove a search term chip
   const removeSearchTerm = useCallback((termToRemove) => {
-    const newTerms = searchTerms.filter(term => term !== termToRemove);
-    setSearchTerms(newTerms);
-    if (newTerms.length === 0) {
-      setSearchResults([]);
-    } else {
-      searchMultipleTerms(newTerms);
+    try {
+      const newTerms = searchTerms.filter(term => term !== termToRemove);
+      setSearchTerms(newTerms);
+      if (newTerms.length === 0) {
+        setSearchResults([]);
+      } else {
+        searchMultipleTerms(newTerms);
+      }
+    } catch (error) {
+      console.error('Error removing search term:', error);
+      setError('Failed to remove search term. Please try again.');
     }
   }, [searchTerms]);
 
@@ -208,18 +218,23 @@ const LogMealModal = ({
 
   // Toggle food selection (multi-select pattern like workout builder)
   const handleToggleFoodSelection = (food) => {
-    const foodId = food.id || food.fdcId;
-    const newSelectedIds = new Set(selectedFoodIds);
-    
-    if (newSelectedIds.has(foodId)) {
-      // Deselect - remove from selected set
-      newSelectedIds.delete(foodId);
-    } else {
-      // Select - add to selected set
-      newSelectedIds.add(foodId);
+    try {
+      const foodId = food.id || food.fdcId;
+      const newSelectedIds = new Set(selectedFoodIds);
+      
+      if (newSelectedIds.has(foodId)) {
+        // Deselect - remove from selected set
+        newSelectedIds.delete(foodId);
+      } else {
+        // Select - add to selected set
+        newSelectedIds.add(foodId);
+      }
+      
+      setSelectedFoodIds(newSelectedIds);
+    } catch (error) {
+      console.error('Error toggling food selection:', error);
+      setError('Failed to select food. Please try again.');
     }
-    
-    setSelectedFoodIds(newSelectedIds);
   };
 
   // Add selected foods to meal
@@ -228,42 +243,64 @@ const LogMealModal = ({
       return;
     }
 
-    const selectedFoods = searchResults.filter(food => 
-      selectedFoodIds.has(food.id || food.fdcId)
-    );
+    try {
+      const selectedFoods = searchResults.filter(food => 
+        selectedFoodIds.has(food.id || food.fdcId)
+      );
 
-    const newMealItems = selectedFoods.map(food => ({
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-      food: food,
-      grams: food.portion_grams || 100,
-    }));
+      const newMealItems = selectedFoods.map(food => ({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+        food: food,
+        grams: food.portion_grams || 100,
+      }));
 
-    setMealItems([...mealItems, ...newMealItems]);
-    setSelectedFoodIds(new Set()); // Clear selection
-    setActiveTab(1); // Switch to My Meal tab
+      setMealItems([...mealItems, ...newMealItems]);
+      setSelectedFoodIds(new Set()); // Clear selection
+      setActiveTab(1); // Switch to My Meal tab
+    } catch (error) {
+      console.error('Error adding selected foods to meal:', error);
+      setError('Failed to add foods to meal. Please try again.');
+    }
   };
 
   const handleSelectFood = (food) => {
-    // For backward compatibility - directly add to meal
-    const newMealItem = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-      food: food,
-      grams: food.portion_grams || 100,
-    };
-    setMealItems([...mealItems, newMealItem]);
-    
-    // Switch to "My Meal" tab to show the added item
-    setActiveTab(1);
+    try {
+      // For backward compatibility - directly add to meal
+      const newMealItem = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+        food: food,
+        grams: food.portion_grams || 100,
+      };
+      setMealItems([...mealItems, newMealItem]);
+      
+      // Switch to "My Meal" tab to show the added item
+      setActiveTab(1);
+    } catch (error) {
+      console.error('Error selecting food:', error);
+      setError('Failed to add food. Please try again.');
+    }
   };
 
   const handleRemoveMealItem = (itemId) => {
-    setMealItems(mealItems.filter(item => item.id !== itemId));
+    try {
+      setMealItems(mealItems.filter(item => item.id !== itemId));
+    } catch (error) {
+      console.error('Error removing meal item:', error);
+      setError('Failed to remove item. Please try again.');
+    }
   };
 
   const handleUpdateMealItemGrams = (itemId, grams) => {
-    setMealItems(mealItems.map(item => 
-      item.id === itemId ? { ...item, grams: Math.max(1, grams) } : item
-    ));
+    try {
+      // Ensure grams is a valid number
+      const validGrams = Math.max(1, parseFloat(grams) || 1);
+      setMealItems(mealItems.map(item => 
+        item.id === itemId ? { ...item, grams: validGrams } : item
+      ));
+    } catch (error) {
+      console.error('Error updating meal item grams:', error);
+      setError('Failed to update quantity. Please try again.');
+    }
   };
 
   const handleSaveMeal = () => {
@@ -271,20 +308,30 @@ const LogMealModal = ({
       return;
     }
 
-    // Create entries for each meal item
-    mealItems.forEach(item => {
-      const nutrition = calculateNutritionForFood(item.food, item.grams);
-      const entry = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-        date: new Date().toISOString(),
-        foodName: item.food.name,
-        grams: item.grams,
-        nutrition,
-      };
-      onSave(entry);
-    });
-    
-    onClose();
+    try {
+      // Create entries for each meal item
+      mealItems.forEach(item => {
+        try {
+          const nutrition = calculateNutritionForFood(item.food, item.grams);
+          const entry = {
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+            date: new Date().toISOString(),
+            foodName: item.food.name,
+            grams: item.grams,
+            nutrition,
+          };
+          onSave(entry);
+        } catch (itemError) {
+          console.error('Error saving meal item:', item, itemError);
+          // Continue with other items even if one fails
+        }
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error('Error saving meal:', error);
+      setError('Failed to save meal. Please try again.');
+    }
   };
 
   const handleToggleFavorite = async (food, event) => {
@@ -309,83 +356,99 @@ const LogMealModal = ({
   };
 
   const renderFoodItem = (food, onClick, isSelected = false) => {
-    const nutrition = calculateNutritionForFood(food, 100);
-    const isFavorite = isFavoriteFood(food);
-    
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 20 }}
-        transition={{ duration: 0.2 }}
-      >
-        <ListItem
-          button
-          onClick={(e) => {
-            e.preventDefault();
-            onClick();
-          }}
-          sx={{ 
-            py: 2,
-            px: 2,
-            '&:hover': {
-              backgroundColor: 'action.hover',
-            },
-            transition: 'background-color 0.2s, border-color 0.2s, margin-left 0.3s',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'flex-start',
-            borderLeft: isSelected ? '4px solid' : 'none',
-            borderLeftColor: isSelected ? 'success.main' : 'transparent',
-            marginLeft: isSelected ? 1 : 0,
-            backgroundColor: isSelected ? 'success.50' : 'transparent',
-          }}
+    try {
+      const nutrition = calculateNutritionForFood(food, 100);
+      const isFavorite = isFavoriteFood(food);
+      
+      return (
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 20 }}
+          transition={{ duration: 0.2 }}
         >
-        <ListItemText
-          primary={
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-              <Typography 
-                variant="body1" 
-                sx={{ 
-                  fontWeight: 600,
-                  color: 'text.primary',
-                  flex: 1,
-                }}
-              >
-                {food.name || food.foodName}
-              </Typography>
-            </Box>
-          }
-          secondary={
-            <Box component="span" sx={{ display: 'flex', gap: 1, mt: 0.5, alignItems: 'center', fontSize: '0.875rem', color: 'text.secondary' }}>
-              <span>{nutrition.calories.toFixed(0)} cal</span>
-              <span>•</span>
-              <span>P: {nutrition.protein.toFixed(1)}g</span>
-              <span>•</span>
-              <span>C: {nutrition.carbs.toFixed(1)}g</span>
-              <span>•</span>
-              <span>F: {nutrition.fat.toFixed(1)}g</span>
-              <span>•</span>
-              <span>Fiber: {nutrition.fiber.toFixed(1)}g</span>
-            </Box>
-          }
-        />
-        <IconButton
-          size="small"
-          onClick={(e) => handleToggleFavorite(food, e)}
-          sx={{ 
-            ml: 1,
-            color: isFavorite ? 'warning.main' : 'action.disabled',
-            '&:hover': {
-              color: 'warning.main',
+          <ListItem
+            button
+            onClick={(e) => {
+              e.preventDefault();
+              onClick();
+            }}
+            sx={{ 
+              py: 2,
+              px: 2,
+              '&:hover': {
+                backgroundColor: 'action.hover',
+              },
+              transition: 'background-color 0.2s, border-color 0.2s, margin-left 0.3s',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'flex-start',
+              borderLeft: isSelected ? '4px solid' : 'none',
+              borderLeftColor: isSelected ? 'success.main' : 'transparent',
+              marginLeft: isSelected ? 1 : 0,
+              backgroundColor: isSelected ? 'success.50' : 'transparent',
+            }}
+          >
+          <ListItemText
+            primary={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    flex: 1,
+                  }}
+                >
+                  {food.name || food.foodName || 'Unknown Food'}
+                </Typography>
+              </Box>
             }
-          }}
-        >
-          {isFavorite ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
-        </IconButton>
-      </ListItem>
-      </motion.div>
-    );
+            secondary={
+              <Box component="span" sx={{ display: 'flex', gap: 1, mt: 0.5, alignItems: 'center', fontSize: '0.875rem', color: 'text.secondary' }}>
+                <span>{nutrition.calories.toFixed(0)} cal</span>
+                <span>•</span>
+                <span>P: {nutrition.protein.toFixed(1)}g</span>
+                <span>•</span>
+                <span>C: {nutrition.carbs.toFixed(1)}g</span>
+                <span>•</span>
+                <span>F: {nutrition.fat.toFixed(1)}g</span>
+                <span>•</span>
+                <span>Fiber: {nutrition.fiber.toFixed(1)}g</span>
+              </Box>
+            }
+          />
+          <IconButton
+            size="small"
+            onClick={(e) => handleToggleFavorite(food, e)}
+            sx={{ 
+              ml: 1,
+              color: isFavorite ? 'warning.main' : 'action.disabled',
+              '&:hover': {
+                color: 'warning.main',
+              }
+            }}
+          >
+            {isFavorite ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
+          </IconButton>
+        </ListItem>
+        </motion.div>
+      );
+    } catch (error) {
+      console.error('Error rendering food item:', food, error);
+      // Return a simple error item instead of breaking the UI
+      return (
+        <ListItem sx={{ py: 2, px: 2 }}>
+          <ListItemText
+            primary={
+              <Typography variant="body2" color="error">
+                Error loading food item
+              </Typography>
+            }
+          />
+        </ListItem>
+      );
+    }
   };
 
   return (

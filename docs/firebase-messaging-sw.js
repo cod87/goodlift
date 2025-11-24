@@ -8,8 +8,8 @@
 console.log('[FCM Service Worker] Loading Firebase Cloud Messaging service worker...');
 
 try {
-  importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
-  importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
+  importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
+  importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
   console.log('[FCM Service Worker] ✅ Firebase scripts loaded successfully');
 } catch (error) {
   console.error('[FCM Service Worker] ❌ Error loading Firebase scripts:', error);

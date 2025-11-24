@@ -8,7 +8,7 @@ This directory contains Firebase Cloud Functions for the GoodLift application.
 
 A scheduled function that sends daily workout reminder notifications to all users with registered FCM tokens.
 
-- **Schedule**: Every day at 8:00 AM UTC
+- **Schedule**: Every day at 8:00 AM CST
 - **Trigger**: Scheduled (cron)
 - **Description**: Queries all users, collects FCM tokens, and sends push notifications
 
@@ -16,6 +16,22 @@ A scheduled function that sends daily workout reminder notifications to all user
 - Queries all users from Firestore (`users/{userId}/data/userData`)
 - Collects FCM tokens from user documents
 - Sends batch notifications using `admin.messaging().sendEachForMulticast()`
+- Handles errors for invalid/expired tokens
+- Comprehensive logging for monitoring and troubleshooting
+
+### `sendEveningNotifications`
+
+A scheduled function that sends evening progress check-in notifications to all users with registered FCM tokens.
+
+- **Schedule**: Every day at 9:00 PM CST
+- **Trigger**: Scheduled (cron)
+- **Description**: Queries all users, collects FCM tokens, and sends evening motivational push notifications
+
+**Key Features:**
+- Queries all users from Firestore (`users/{userId}/data/userData`)
+- Collects FCM tokens from user documents with proper await handling
+- Sends batch notifications using `admin.messaging().sendEachForMulticast()`
+- Unique evening-themed title and motivational message for progress check-in
 - Handles errors for invalid/expired tokens
 - Comprehensive logging for monitoring and troubleshooting
 
@@ -45,6 +61,10 @@ A scheduled function that sends daily workout reminder notifications to all user
 4. Deploy functions to Firebase:
    ```bash
    firebase deploy --only functions
+   
+   # Or deploy individual functions:
+   firebase deploy --only functions:sendDailyNotifications
+   firebase deploy --only functions:sendEveningNotifications
    ```
 
 ## Local Development
@@ -60,9 +80,11 @@ This will start the Firebase emulators for local testing.
 
 ### Manual Function Testing
 
-You can manually trigger the scheduled function from the Firebase Console:
+You can manually trigger the scheduled functions from the Firebase Console:
 1. Go to Firebase Console → Functions
-2. Find `sendDailyNotifications`
+2. Find the function you want to test:
+   - `sendDailyNotifications` - Morning workout reminder (8:00 AM CST)
+   - `sendEveningNotifications` - Evening progress check-in (9:00 PM CST)
 3. Click the three dots → "Run now"
 
 ## Monitoring
@@ -97,6 +119,7 @@ The function handles the following error scenarios:
 
 ## Notification Payload
 
+### Morning Notification (sendDailyNotifications)
 Default configuration:
 ```javascript
 {
@@ -109,6 +132,24 @@ Default configuration:
   data: {
     type: "daily-reminder",
     timestamp: "2024-11-24T08:00:00.000Z",
+    click_action: "/goodlift/", // Configurable via NOTIFICATION_CLICK_ACTION
+  }
+}
+```
+
+### Evening Notification (sendEveningNotifications)
+Default configuration:
+```javascript
+{
+  notification: {
+    title: "Evening Check-In 🌙",
+    body: "How did today go? Review your progress and plan for tomorrow! Keep building momentum! 🎯",
+    icon: "/goodlift/icons/goodlift-icon-192.png", // Configurable via NOTIFICATION_ICON
+    badge: "/goodlift/icons/goodlift-icon-192.png", // Configurable via NOTIFICATION_BADGE
+  },
+  data: {
+    type: "evening-checkin",
+    timestamp: "2024-11-24T21:00:00.000Z",
     click_action: "/goodlift/", // Configurable via NOTIFICATION_CLICK_ACTION
   }
 }
@@ -135,14 +176,15 @@ firebase functions:config:set notification.click_action="/path/to/page"
 
 ## Future Enhancements
 
-Potential improvements for this function:
+Potential improvements for these functions:
 
 1. **Token Cleanup**: Automatically remove invalid/expired tokens from Firestore
-2. **User Preferences**: Respect user notification preferences (time zone, enabled/disabled)
-3. **Personalization**: Customize notification content based on user data (workout plans, streaks, etc.)
+2. **User Preferences**: Respect user notification preferences (time zone, enabled/disabled, notification types)
+3. **Personalization**: Customize notification content based on user data (workout plans, streaks, achievements, etc.)
 4. **Batching**: For large user bases (>1000 users), implement batch processing or parallel reads to improve performance and reduce execution time
-5. **Multiple Notification Types**: Support different notification types (morning, evening, reminders, achievements)
-6. **Analytics**: Track notification open rates and engagement
+5. **Multiple Notification Types**: Support additional notification types (reminders, achievements, milestones, streak alerts)
+6. **Analytics**: Track notification open rates, engagement, and user response patterns
+7. **Dynamic Scheduling**: Allow users to customize notification times based on their schedules
 
 ## Troubleshooting
 
@@ -150,7 +192,9 @@ Potential improvements for this function:
 
 **Function not executing at scheduled time:**
 - Check Firebase Console → Functions → Logs for execution history
-- Verify the cron schedule is correct (0 8 * * * = 8 AM UTC daily)
+- Verify the cron schedule is correct:
+  - `sendDailyNotifications`: 0 8 * * * = 8 AM CST daily
+  - `sendEveningNotifications`: 0 21 * * * = 9 PM CST daily
 - Ensure function is deployed: `firebase deploy --only functions`
 
 **Notifications not received by users:**

@@ -638,10 +638,10 @@ const LogMealModal = ({
                   <Paper variant="outlined" sx={{ borderRadius: 2 }}>
                     <List disablePadding>
                       {searchResults.map((food, index) => {
-                        const foodId = food.id || food.fdcId;
+                        const foodId = food.id || food.fdcId || `temp-${food.name}-${index}`;
                         const isSelected = selectedFoodIds.has(foodId);
                         return (
-                          <Box key={foodId || index}>
+                          <Box key={foodId}>
                             {index > 0 && <Divider />}
                             {renderFoodItem(food, () => handleToggleFoodSelection(food), isSelected)}
                           </Box>

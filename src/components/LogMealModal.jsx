@@ -3,17 +3,21 @@
  * 
  * Features:
  * - Full-screen modal using workout builder's visual style
+ * - Multi-search capability with chip-based search terms
+ * - Multi-select food selection similar to workout builder
  * - Search foods from local nutrition database
  * - Ranking-based search (higher rank = more relevant)
  * - Tag-based searching (tags not visible to users)
  * - Support for multiple measurement units
  * - Shows previously logged foods and suggestions
  * - Favorites/commonly used foods for quick logging
+ * - Smooth animations matching workout builder experience
  * - Clean, minimalist interface with clear sections
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Dialog,
   DialogTitle,
@@ -63,22 +67,28 @@ const LogMealModal = ({
   // 0: Search Food, 1: My Meal
   const [activeTab, setActiveTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchTerms, setSearchTerms] = useState([]); // Array of search term strings
+  const [searchResults, setSearchResults] = useState([]); // Aggregated results from all search terms
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState('');
   const debounceTimer = useRef(null);
   
   // My Meal items (foods selected for logging)
   const [mealItems, setMealItems] = useState([]);
+  
+  // Selected foods (for multi-select pattern)
+  const [selectedFoodIds, setSelectedFoodIds] = useState(new Set());
 
   // Reset state when modal opens
   useEffect(() => {
     if (open) {
       setSearchQuery('');
+      setSearchTerms([]);
       setSearchResults([]);
       setError('');
       setActiveTab(0);
       setMealItems([]);
+      setSelectedFoodIds(new Set());
     }
   }, [open]);
 
@@ -86,6 +96,75 @@ const LogMealModal = ({
   const calculateNutritionForFood = (food, grams) => {
     return calculateNutrition(food, grams);
   };
+
+  // Add a search term (when user presses Enter or comma)
+  const addSearchTerm = useCallback((term) => {
+    try {
+      const trimmedTerm = term.trim();
+      if (trimmedTerm.length >= 2 && !searchTerms.includes(trimmedTerm)) {
+        const newTerms = [...searchTerms, trimmedTerm];
+        setSearchTerms(newTerms);
+        setSearchQuery(''); // Clear input after adding
+        // Trigger search for all terms
+        searchMultipleTerms(newTerms);
+      }
+    } catch (error) {
+      console.error('Error adding search term:', error);
+      setError('Failed to add search term. Please try again.');
+    }
+  }, [searchTerms]);
+
+  // Remove a search term chip
+  const removeSearchTerm = useCallback((termToRemove) => {
+    try {
+      const newTerms = searchTerms.filter(term => term !== termToRemove);
+      setSearchTerms(newTerms);
+      if (newTerms.length === 0) {
+        setSearchResults([]);
+      } else {
+        searchMultipleTerms(newTerms);
+      }
+    } catch (error) {
+      console.error('Error removing search term:', error);
+      setError('Failed to remove search term. Please try again.');
+    }
+  }, [searchTerms]);
+
+  // Search for multiple terms and aggregate results
+  const searchMultipleTerms = useCallback(async (terms) => {
+    if (!terms || terms.length === 0) {
+      setSearchResults([]);
+      return;
+    }
+
+    setSearching(true);
+    setError('');
+
+    try {
+      // Search for each term
+      const allResultsPromises = terms.map(term => searchFoods(term, { maxResults: 20 }));
+      const allResults = await Promise.all(allResultsPromises);
+      
+      // Flatten and deduplicate results by food id
+      const uniqueFoods = new Map();
+      allResults.forEach((results, index) => {
+        results.forEach(food => {
+          const foodId = food.id || food.fdcId;
+          if (!uniqueFoods.has(foodId)) {
+            uniqueFoods.set(foodId, { ...food, searchTerm: terms[index] });
+          }
+        });
+      });
+      
+      setSearchResults(Array.from(uniqueFoods.values()));
+    } catch (err) {
+      console.error('Error searching foods:', err);
+      setError('Unable to load the food database. Please try again.');
+      setSearchResults([]);
+    } finally {
+      setSearching(false);
+    }
+  }, []);
 
   const searchFoodsLocal = useCallback(async (query) => {
     if (!query || query.trim().length < 2) {
@@ -109,10 +188,15 @@ const LogMealModal = ({
     }
   }, []);
 
-  // Debounced search
+  // Debounced search - only search if no terms are added yet
   useEffect(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
+    }
+
+    // If we have search terms, use those instead
+    if (searchTerms.length > 0) {
+      return;
     }
 
     if (!searchQuery || searchQuery.trim().length < 2) {
@@ -130,29 +214,93 @@ const LogMealModal = ({
         debounceTimer.current = null;
       }
     };
-  }, [searchQuery, searchFoodsLocal]);
+  }, [searchQuery, searchTerms, searchFoodsLocal]);
+
+  // Toggle food selection (multi-select pattern like workout builder)
+  const handleToggleFoodSelection = (food) => {
+    try {
+      const foodId = food.id || food.fdcId;
+      const newSelectedIds = new Set(selectedFoodIds);
+      
+      if (newSelectedIds.has(foodId)) {
+        // Deselect - remove from selected set
+        newSelectedIds.delete(foodId);
+      } else {
+        // Select - add to selected set
+        newSelectedIds.add(foodId);
+      }
+      
+      setSelectedFoodIds(newSelectedIds);
+    } catch (error) {
+      console.error('Error toggling food selection:', error);
+      setError('Failed to select food. Please try again.');
+    }
+  };
+
+  // Add selected foods to meal
+  const handleAddSelectedToMeal = () => {
+    if (selectedFoodIds.size === 0) {
+      return;
+    }
+
+    try {
+      const selectedFoods = searchResults.filter(food => 
+        selectedFoodIds.has(food.id || food.fdcId)
+      );
+
+      const newMealItems = selectedFoods.map(food => ({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+        food: food,
+        grams: food.portion_grams || 100,
+      }));
+
+      setMealItems([...mealItems, ...newMealItems]);
+      setSelectedFoodIds(new Set()); // Clear selection
+      setActiveTab(1); // Switch to My Meal tab
+    } catch (error) {
+      console.error('Error adding selected foods to meal:', error);
+      setError('Failed to add foods to meal. Please try again.');
+    }
+  };
 
   const handleSelectFood = (food) => {
-    // Add food to meal items with default portion
-    const newMealItem = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-      food: food,
-      grams: food.portion_grams || 100,
-    };
-    setMealItems([...mealItems, newMealItem]);
-    
-    // Switch to "My Meal" tab to show the added item
-    setActiveTab(1);
+    try {
+      // For backward compatibility - directly add to meal
+      const newMealItem = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+        food: food,
+        grams: food.portion_grams || 100,
+      };
+      setMealItems([...mealItems, newMealItem]);
+      
+      // Switch to "My Meal" tab to show the added item
+      setActiveTab(1);
+    } catch (error) {
+      console.error('Error selecting food:', error);
+      setError('Failed to add food. Please try again.');
+    }
   };
 
   const handleRemoveMealItem = (itemId) => {
-    setMealItems(mealItems.filter(item => item.id !== itemId));
+    try {
+      setMealItems(mealItems.filter(item => item.id !== itemId));
+    } catch (error) {
+      console.error('Error removing meal item:', error);
+      setError('Failed to remove item. Please try again.');
+    }
   };
 
   const handleUpdateMealItemGrams = (itemId, grams) => {
-    setMealItems(mealItems.map(item => 
-      item.id === itemId ? { ...item, grams: Math.max(1, grams) } : item
-    ));
+    try {
+      // Ensure grams is a valid number
+      const validGrams = Math.max(1, parseFloat(grams) || 1);
+      setMealItems(mealItems.map(item => 
+        item.id === itemId ? { ...item, grams: validGrams } : item
+      ));
+    } catch (error) {
+      console.error('Error updating meal item grams:', error);
+      setError('Failed to update quantity. Please try again.');
+    }
   };
 
   const handleSaveMeal = () => {
@@ -160,20 +308,30 @@ const LogMealModal = ({
       return;
     }
 
-    // Create entries for each meal item
-    mealItems.forEach(item => {
-      const nutrition = calculateNutritionForFood(item.food, item.grams);
-      const entry = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-        date: new Date().toISOString(),
-        foodName: item.food.name,
-        grams: item.grams,
-        nutrition,
-      };
-      onSave(entry);
-    });
-    
-    onClose();
+    try {
+      // Create entries for each meal item
+      mealItems.forEach(item => {
+        try {
+          const nutrition = calculateNutritionForFood(item.food, item.grams);
+          const entry = {
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+            date: new Date().toISOString(),
+            foodName: item.food.name,
+            grams: item.grams,
+            nutrition,
+          };
+          onSave(entry);
+        } catch (itemError) {
+          console.error('Error saving meal item:', item, itemError);
+          // Continue with other items even if one fails
+        }
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error('Error saving meal:', error);
+      setError('Failed to save meal. Please try again.');
+    }
   };
 
   const handleToggleFavorite = async (food, event) => {
@@ -197,70 +355,100 @@ const LogMealModal = ({
     }
   };
 
-  const renderFoodItem = (food, onClick) => {
-    const nutrition = calculateNutritionForFood(food, 100);
-    const isFavorite = isFavoriteFood(food);
-    
-    return (
-      <ListItem
-        component="button"
-        onClick={onClick}
-        sx={{ 
-          py: 2,
-          px: 2,
-          '&:hover': {
-            backgroundColor: 'action.hover',
-          },
-          transition: 'background-color 0.2s',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'flex-start',
-        }}
-      >
-        <ListItemText
-          primary={
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-              <Typography 
-                variant="body1" 
-                sx={{ 
-                  fontWeight: 600,
-                  color: 'text.primary',
-                  flex: 1,
-                }}
-              >
-                {food.name || food.foodName}
-              </Typography>
-            </Box>
-          }
-          secondary={
-            <Box component="span" sx={{ display: 'flex', gap: 1, mt: 0.5, alignItems: 'center', fontSize: '0.875rem', color: 'text.secondary' }}>
-              <span>{nutrition.calories.toFixed(0)} cal</span>
-              <span>•</span>
-              <span>P: {nutrition.protein.toFixed(1)}g</span>
-              <span>•</span>
-              <span>C: {nutrition.carbs.toFixed(1)}g</span>
-              <span>•</span>
-              <span>F: {nutrition.fat.toFixed(1)}g</span>
-              <span>•</span>
-              <span>Fiber: {nutrition.fiber.toFixed(1)}g</span>
-            </Box>
-          }
-        />
-        <IconButton
-          size="small"
-          onClick={(e) => handleToggleFavorite(food, e)}
-          sx={{ 
-            ml: 1,
-            color: isFavorite ? 'warning.main' : 'action.disabled',
-            '&:hover': {
-              color: 'warning.main',
-            }
-          }}
+  const renderFoodItem = (food, onClick, isSelected = false) => {
+    try {
+      const nutrition = calculateNutritionForFood(food, 100);
+      const isFavorite = isFavoriteFood(food);
+      
+      return (
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 20 }}
+          transition={{ duration: 0.2 }}
         >
-          {isFavorite ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
-        </IconButton>
-      </ListItem>
-    );
+          <ListItem
+            button
+            onClick={(e) => {
+              e.preventDefault();
+              onClick();
+            }}
+            sx={{ 
+              py: 2,
+              px: 2,
+              '&:hover': {
+                backgroundColor: 'action.hover',
+              },
+              transition: 'background-color 0.2s, border-color 0.2s, margin-left 0.3s',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'flex-start',
+              borderLeft: isSelected ? '4px solid' : 'none',
+              borderLeftColor: isSelected ? 'success.main' : 'transparent',
+              marginLeft: isSelected ? 1 : 0,
+              backgroundColor: isSelected ? 'success.50' : 'transparent',
+            }}
+          >
+          <ListItemText
+            primary={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    flex: 1,
+                  }}
+                >
+                  {food.name || food.foodName || 'Unknown Food'}
+                </Typography>
+              </Box>
+            }
+            secondary={
+              <Box component="span" sx={{ display: 'flex', gap: 1, mt: 0.5, alignItems: 'center', fontSize: '0.875rem', color: 'text.secondary' }}>
+                <span>{nutrition.calories.toFixed(0)} cal</span>
+                <span>•</span>
+                <span>P: {nutrition.protein.toFixed(1)}g</span>
+                <span>•</span>
+                <span>C: {nutrition.carbs.toFixed(1)}g</span>
+                <span>•</span>
+                <span>F: {nutrition.fat.toFixed(1)}g</span>
+                <span>•</span>
+                <span>Fiber: {nutrition.fiber.toFixed(1)}g</span>
+              </Box>
+            }
+          />
+          <IconButton
+            size="small"
+            onClick={(e) => handleToggleFavorite(food, e)}
+            sx={{ 
+              ml: 1,
+              color: isFavorite ? 'warning.main' : 'action.disabled',
+              '&:hover': {
+                color: 'warning.main',
+              }
+            }}
+          >
+            {isFavorite ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
+          </IconButton>
+        </ListItem>
+        </motion.div>
+      );
+    } catch (error) {
+      console.error('Error rendering food item:', food, error);
+      // Return a simple error item instead of breaking the UI
+      return (
+        <ListItem sx={{ py: 2, px: 2 }}>
+          <ListItemText
+            primary={
+              <Typography variant="body2" color="error">
+                Error loading food item
+              </Typography>
+            }
+          />
+        </ListItem>
+      );
+    }
   };
 
   return (
@@ -328,26 +516,81 @@ const LogMealModal = ({
           {/* Search Food Tab */}
           {activeTab === 0 && (
             <Box>
-              {/* Search Input */}
-              <TextField
-                fullWidth
-                placeholder="Search for foods (e.g., 'chicken breast', 'brown rice', 'apple')..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="primary" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: 'background.paper',
-                  },
-                }}
-              />
+              {/* Search Input with chips */}
+              <Box sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  placeholder="Type food names and press Enter or comma to add multiple searches..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Check for comma - add term if present
+                    if (value.includes(',')) {
+                      const parts = value.split(',');
+                      if (parts.length > 1) {
+                        const termToAdd = parts[0].trim();
+                        if (termToAdd.length >= 2) {
+                          addSearchTerm(termToAdd);
+                        }
+                        // Keep any remaining text after comma
+                        setSearchQuery(parts.slice(1).join(','));
+                      }
+                    } else {
+                      setSearchQuery(value);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (searchQuery.trim().length >= 2) {
+                        addSearchTerm(searchQuery);
+                      }
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon color="primary" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'background.paper',
+                    },
+                  }}
+                />
+                
+                {/* Search term chips */}
+                {searchTerms.length > 0 && (
+                  <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+                    {searchTerms.map((term, index) => (
+                      <Chip
+                        key={index}
+                        label={term}
+                        onDelete={() => removeSearchTerm(term)}
+                        color="primary"
+                        size="small"
+                        sx={{ 
+                          fontWeight: 500,
+                          animation: 'fadeIn 0.3s ease-in',
+                          '@keyframes fadeIn': {
+                            from: { opacity: 0, transform: 'scale(0.8)' },
+                            to: { opacity: 1, transform: 'scale(1)' },
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                )}
+                
+                {/* Hint text */}
+                {searchTerms.length === 0 && searchQuery.length === 0 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    💡 Tip: Enter multiple food names separated by comma or press Enter to search for all at once
+                  </Typography>
+                )}
+              </Box>
 
               {error && (
                 <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
@@ -362,30 +605,58 @@ const LogMealModal = ({
                 </Box>
               )}
 
+              {/* Add Selected Button - shown when foods are selected */}
+              {selectedFoodIds.size > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    fullWidth
+                    onClick={handleAddSelectedToMeal}
+                    startIcon={<AddIcon />}
+                    sx={{
+                      py: 1.5,
+                      fontWeight: 600,
+                      animation: 'slideDown 0.3s ease-out',
+                      '@keyframes slideDown': {
+                        from: { opacity: 0, transform: 'translateY(-10px)' },
+                        to: { opacity: 1, transform: 'translateY(0)' },
+                      },
+                    }}
+                  >
+                    Add {selectedFoodIds.size} Selected Food{selectedFoodIds.size > 1 ? 's' : ''} to Meal
+                  </Button>
+                </Box>
+              )}
+
               {/* Results */}
               {!searching && searchResults.length > 0 && (
                 <>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
-                    Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} - Click to add
+                    Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} - Click to select, then add to meal
                   </Typography>
                   <Paper variant="outlined" sx={{ borderRadius: 2 }}>
                     <List disablePadding>
-                      {searchResults.map((food, index) => (
-                        <Box key={food.id}>
-                          {index > 0 && <Divider />}
-                          {renderFoodItem(food, () => handleSelectFood(food))}
-                        </Box>
-                      ))}
+                      {searchResults.map((food, index) => {
+                        const foodId = food.id || food.fdcId || `temp-${food.name}-${index}`;
+                        const isSelected = selectedFoodIds.has(foodId);
+                        return (
+                          <Box key={foodId}>
+                            {index > 0 && <Divider />}
+                            {renderFoodItem(food, () => handleToggleFoodSelection(food), isSelected)}
+                          </Box>
+                        );
+                      })}
                     </List>
                   </Paper>
                 </>
               )}
 
               {/* No results */}
-              {!searching && searchResults.length === 0 && searchQuery.trim().length >= 2 && !error && (
+              {!searching && searchResults.length === 0 && (searchQuery.trim().length >= 2 || searchTerms.length > 0) && !error && (
                 <Alert severity="info">
                   <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
-                    No foods found for "{searchQuery}"
+                    No foods found{searchQuery ? ` for "${searchQuery}"` : ''}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Try simpler terms or check for spelling mistakes

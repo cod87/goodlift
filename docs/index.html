@@ -32,22 +32,6 @@
     <div id="root"></div>
     
     <!-- Service Worker Registration -->
-    <!-- 
-      Two service workers are used in this application:
-      1. service-worker.js - PWA service worker for offline caching and app shell
-         - Registered below for the /goodlift/ scope
-         - Handles fetch events for caching static assets
-         - Provides offline functionality
-      
-      2. firebase-messaging-sw.js - Firebase Cloud Messaging service worker
-         - Automatically registered by Firebase SDK when getToken() is called
-         - Must be served from web root (not in /src)
-         - Handles push notifications in background
-         - Uses scope: /firebase-cloud-messaging-push-scope
-      
-      These service workers operate independently with different scopes
-      and do not conflict with each other.
-    -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

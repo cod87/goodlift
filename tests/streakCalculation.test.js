@@ -3,10 +3,10 @@
  * 
  * Tests the new streak logic where:
  * - For any given standard week block (Sunday through Saturday), users are allowed only ONE day 
- *   that counts as either an "unlocked day" (no session logged) or a "rest day" (session with type 'rest')
+ *   that counts as either an "unlogged day" (no session logged) or a "rest day" (session with type 'rest')
  *   without breaking their consecutive days streak.
  * - If a user does not log any session for TWO days in the same week block, the streak breaks.
- * - If a user logs a rest day AND has an unlocked day in the same week block, the streak breaks.
+ * - If a user logs a rest day AND has an unlogged day in the same week block, the streak breaks.
  */
 
 import { calculateStreak } from '../src/utils/trackingMetrics.js';
@@ -56,8 +56,8 @@ console.log('Test 1: All 7 days of a week with sessions (no skip days)');
 }
 console.log('');
 
-// Test 2: Week with 1 unlocked day (no session) - should work (streak continues)
-console.log('Test 2: Week with 1 unlocked day (no session logged on Wednesday)');
+// Test 2: Week with 1 unlogged day (no session) - should work (streak continues)
+console.log('Test 2: Week with 1 unlogged day (no session logged on Wednesday)');
 {
   const sunday = getSunday(new Date());
   sunday.setDate(sunday.getDate() - 7); // Last week's Sunday
@@ -72,7 +72,7 @@ console.log('Test 2: Week with 1 unlocked day (no session logged on Wednesday)')
   
   // With 1 skip day in the week, streak should be 7 (including the skipped day)
   const passed = result.longestStreak === 7;
-  console.log(`  Sessions: 6 days, Wednesday unlocked`);
+  console.log(`  Sessions: 6 days, Wednesday unlogged`);
   console.log(`  Expected longestStreak: 7, Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
 }
 console.log('');
@@ -98,8 +98,8 @@ console.log('Test 3: Week with 1 rest day (Wednesday is rest session)');
 }
 console.log('');
 
-// Test 4: Week with 2 unlocked days - streak should break
-console.log('Test 4: Week with 2 unlocked days (no session on Wednesday AND Thursday)');
+// Test 4: Week with 2 unlogged days - streak should break
+console.log('Test 4: Week with 2 unlogged days (no session on Wednesday AND Thursday)');
 {
   const sunday = getSunday(new Date());
   sunday.setDate(sunday.getDate() - 7); // Last week's Sunday
@@ -112,31 +112,31 @@ console.log('Test 4: Week with 2 unlocked days (no session on Wednesday AND Thur
   
   const result = calculateStreak(sessions);
   
-  // With 2 unlocked days in the week, streak should NOT be 7
+  // With 2 unlogged days in the week, streak should NOT be 7
   // The longest valid streak should be less than 7
   const passed = result.longestStreak < 7;
-  console.log(`  Sessions: 5 days, Wednesday AND Thursday unlocked`);
+  console.log(`  Sessions: 5 days, Wednesday AND Thursday unlogged`);
   console.log(`  Expected longestStreak < 7, Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
 }
 console.log('');
 
-// Test 5: Week with 1 rest day AND 1 unlocked day - streak should break
-console.log('Test 5: Week with 1 rest day AND 1 unlocked day');
+// Test 5: Week with 1 rest day AND 1 unlogged day - streak should break
+console.log('Test 5: Week with 1 rest day AND 1 unlogged day');
 {
   const sunday = getSunday(new Date());
   sunday.setDate(sunday.getDate() - 7); // Last week's Sunday
   const weekDates = getWeekDates(sunday);
   
-  // Wednesday is rest day, Thursday is unlocked (no session)
+  // Wednesday is rest day, Thursday is unlogged (no session)
   const sessions = weekDates
     .filter((_, i) => i !== 4) // Skip Thursday
     .map((d, i) => createSession(d, i === 3 ? 'rest' : 'strength'));
   
   const result = calculateStreak(sessions);
   
-  // With 1 rest day + 1 unlocked day in the week, streak should break
+  // With 1 rest day + 1 unlogged day in the week, streak should break
   const passed = result.longestStreak < 7;
-  console.log(`  Sessions: 6 days, Wednesday is rest, Thursday unlocked`);
+  console.log(`  Sessions: 6 days, Wednesday is rest, Thursday unlogged`);
   console.log(`  Expected longestStreak < 7, Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
 }
 console.log('');
@@ -183,7 +183,7 @@ console.log('Test 7: Two consecutive weeks, each with 1 skip day (allowed)');
   
   // Each week has only 1 skip day, so 14-day streak should be valid
   const passed = result.longestStreak === 14;
-  console.log(`  Sessions: 12 days over 2 weeks, each week has 1 unlocked day`);
+  console.log(`  Sessions: 12 days over 2 weeks, each week has 1 unlogged day`);
   console.log(`  Expected longestStreak: 14, Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
 }
 console.log('');

@@ -9,15 +9,15 @@ This document describes the expected behavior of the streak and adherence tracki
 2. **Streak Activation**: A streak is considered "current" if the last session was today or yesterday (within 1 calendar day)
    - This gives users a grace period: if you worked out yesterday, you're still "on" your streak even if you haven't worked out yet today
    - The streak only breaks if you miss both yesterday AND today
-3. **Week Block Rule**: For any given standard week block (Sunday through Saturday), users are allowed **only ONE day** that counts as either an "unlocked day" or a "rest day" without breaking their streak
-   - **Unlocked day**: A day where no session was logged
+3. **Week Block Rule**: For any given standard week block (Sunday through Saturday), users are allowed **only ONE day** that counts as either an "unlogged day" or a "rest day" without breaking their streak
+   - **Unlogged day**: A day where no session was logged
    - **Rest day**: A day where a session with type 'rest' was logged
-   - If a week block has more than 1 skip day (rest or unlocked), the streak breaks
+   - If a week block has more than 1 skip day (rest or unlogged), the streak breaks
 4. **Streak Breaking Conditions**:
    - If a user does not log any session for **TWO days** in the same week block (Sun-Sat), the streak breaks
-   - If a user logs a rest day AND has an unlocked day in the same week block, the streak breaks
+   - If a user logs a rest day AND has an unlogged day in the same week block, the streak breaks
    - If a user logs **TWO rest days** in the same week block, the streak breaks
-5. **Cross-Week Allowance**: Multiple rest/unlocked days across different week blocks are allowed (one per week)
+5. **Cross-Week Allowance**: Multiple rest/unlogged days across different week blocks are allowed (one per week)
 6. **Day Counting**: Each calendar day counts as 1 day toward the streak
    - Multiple sessions on the same day count as 1 day
    - Late-night workouts (e.g., 11:30 PM) and early morning workouts (e.g., 12:05 AM next day) correctly count as different days
@@ -27,7 +27,7 @@ This document describes the expected behavior of the streak and adherence tracki
 ### What Counts as a Rest Day?
 - A session with type 'rest' (explicitly marked as rest day)
 
-### What Counts as an Unlocked Day?
+### What Counts as an Unlogged Day?
 - A day with no session logged at all
 
 ### Test Cases
@@ -38,11 +38,11 @@ This document describes the expected behavior of the streak and adherence tracki
 - Longest Streak: 7 days
 - No skip days, week is fully valid
 
-#### Test 2: Week with 1 Unlocked Day (No Session Wednesday)
+#### Test 2: Week with 1 Unlogged Day (No Session Wednesday)
 **Setup**: User has sessions Sun-Tue, Thu-Sat but no session on Wednesday
 **Expected**: 
 - Longest Streak: 7 days
-- One unlocked day is allowed per week block
+- One unlogged day is allowed per week block
 
 #### Test 3: Week with 1 Rest Day (Wednesday is Rest Session)
 **Setup**: User has sessions every day, but Wednesday is a rest-type session
@@ -50,17 +50,17 @@ This document describes the expected behavior of the streak and adherence tracki
 - Longest Streak: 7 days
 - One rest day is allowed per week block
 
-#### Test 4: Week with 2 Unlocked Days (No Session Wed AND Thu) - BREAKS STREAK
+#### Test 4: Week with 2 Unlogged Days (No Session Wed AND Thu) - BREAKS STREAK
 **Setup**: User has sessions Sun-Tue, Fri-Sat but no sessions on Wednesday and Thursday
 **Expected**: 
 - Longest Streak < 7 days
-- Two unlocked days in the same week breaks the streak
+- Two unlogged days in the same week breaks the streak
 
-#### Test 5: Week with 1 Rest Day AND 1 Unlocked Day - BREAKS STREAK
+#### Test 5: Week with 1 Rest Day AND 1 Unlogged Day - BREAKS STREAK
 **Setup**: User has sessions Sun-Tue, Fri-Sat, Wednesday is rest, Thursday has no session
 **Expected**: 
 - Longest Streak < 7 days
-- One rest day + one unlocked day in the same week exceeds the limit
+- One rest day + one unlogged day in the same week exceeds the limit
 
 #### Test 6: Week with 2 Rest Days - BREAKS STREAK
 **Setup**: User has sessions every day, but Wednesday AND Thursday are rest-type sessions
@@ -69,7 +69,7 @@ This document describes the expected behavior of the streak and adherence tracki
 - Two rest days in the same week exceeds the limit
 
 #### Test 7: Two Consecutive Weeks, Each with 1 Skip Day
-**Setup**: Two weeks of sessions, each week has one unlocked day (e.g., Wednesday skipped both weeks)
+**Setup**: Two weeks of sessions, each week has one unlogged day (e.g., Wednesday skipped both weeks)
 **Expected**: 
 - Longest Streak: 14 days
 - Each week is allowed one skip day, so the streak continues across weeks
@@ -106,7 +106,7 @@ This document describes the expected behavior of the streak and adherence tracki
 - This is correct behavior: crossing midnight creates a new calendar day
 
 #### Test 13: Mixed Session Types in Week
-**Setup**: Week with strength, cardio, HIIT, yoga sessions (no rest sessions, no unlocked days)
+**Setup**: Week with strength, cardio, HIIT, yoga sessions (no rest sessions, no unlogged days)
 **Expected**: 
 - All non-rest session types count as active days
 - Streak is valid for all 7 days
@@ -161,16 +161,16 @@ This document describes the expected behavior of the streak and adherence tracki
 - Small help icon (?) appears next to "Day Streak" label
 - Clicking opens a dialog explaining streak rules
 - Dialog covers:
-  - Week block rule: Only 1 rest/unlocked day allowed per week (Sun-Sat)
+  - Week block rule: Only 1 rest/unlogged day allowed per week (Sun-Sat)
   - What counts as a rest day (session with type 'rest')
-  - What counts as an unlocked day (no session logged)
+  - What counts as an unlogged day (no session logged)
   - How streaks continue across week boundaries
   - When streaks break (2+ skip days in same week)
 
 ## Implementation Notes
 
 - Streak calculation counts calendar days from first session to most recent
-- **Week Block Rule**: Each week block (Sunday-Saturday) allows at most 1 "skip day" (rest or unlocked)
+- **Week Block Rule**: Each week block (Sunday-Saturday) allows at most 1 "skip day" (rest or unlogged)
 - A "skip day" is either: a day with no session, OR a day with only rest-type session(s)
 - If a week has 2+ skip days (any combination), the streak is invalid for ranges including that week
 - Crosses week boundaries seamlessly (Saturday → Sunday continues the streak) as long as each week respects the 1 skip day limit

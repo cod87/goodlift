@@ -2,7 +2,7 @@
  * Tracking Metrics Utility
  * 
  * Provides functions for calculating workout tracking metrics:
- * - Streak calculation (consecutive days with allowance for one rest/unlocked day per week)
+ * - Streak calculation (consecutive days with allowance for one rest/unlogged day per week)
  * - Adherence percentage (completed vs planned)
  * - PR (Personal Record) tracking per exercise
  * - Volume load calculation (sets x reps x weight)
@@ -12,12 +12,12 @@
  * Calculate current workout streak in days.
  * 
  * NEW RULE: For any given standard week block (Sunday through Saturday), users are allowed 
- * only ONE day that counts as either an "unlocked day" (no session logged) or a "rest day" 
+ * only ONE day that counts as either an "unlogged day" (no session logged) or a "rest day" 
  * (session with type 'rest') without breaking their consecutive days streak.
  * 
  * - If a user does not log any session for TWO days in the same week block, the streak breaks.
- * - If a user logs a rest day AND has an unlocked day in the same week block, the streak breaks.
- * - Multiple rest/unlocked days across different week blocks are allowed (one per week).
+ * - If a user logs a rest day AND has an unlogged day in the same week block, the streak breaks.
+ * - Multiple rest/unlogged days across different week blocks are allowed (one per week).
  * 
  * Date handling: All dates are normalized to local midnight (00:00:00) for consistency.
  * This ensures workouts at different times of day (e.g., 11:30 PM vs 12:05 AM) are 
@@ -94,7 +94,7 @@ export const calculateStreak = (workoutHistory = []) => {
   const todayTime = today.getTime();
 
   /**
-   * Helper function to check if a day is a "skip day" (rest day or unlocked day)
+   * Helper function to check if a day is a "skip day" (rest day or unlogged day)
    * @param {number} dateTime - Timestamp of the date to check
    * @returns {boolean} True if this is a rest day (session with type 'rest')
    */
@@ -107,7 +107,7 @@ export const calculateStreak = (workoutHistory = []) => {
   /**
    * Helper function to validate a streak range
    * Checks that each week block (Sun-Sat) within the range has at most 1 skip day
-   * (either unlocked day or rest day).
+   * (either unlogged day or rest day).
    * 
    * @param {number} startDate - Start date timestamp of the streak
    * @param {number} endDate - End date timestamp of the streak
@@ -125,7 +125,7 @@ export const calculateStreak = (workoutHistory = []) => {
       const isRest = isRestDay(currentDay);
       
       // A skip day is either:
-      // 1. No session logged (unlocked day)
+      // 1. No session logged (unlogged day)
       // 2. Session is a rest day
       const isSkipDay = !hasSessions || isRest;
       
@@ -148,7 +148,7 @@ export const calculateStreak = (workoutHistory = []) => {
 
   /**
    * Find the longest valid streak ending at or before endDate
-   * A valid streak allows at most 1 rest/unlocked day per week block.
+   * A valid streak allows at most 1 rest/unlogged day per week block.
    * 
    * @param {number} endDate - The end date of the potential streak
    * @returns {number} Length of the longest valid streak in days

@@ -29,7 +29,20 @@ A scheduled function that sends daily workout reminder notifications to all user
 
 2. Ensure Firebase Admin SDK is initialized (already done in index.js)
 
-3. Deploy functions to Firebase:
+3. (Optional) Configure environment variables for different deployment environments:
+   ```bash
+   # For production
+   firebase functions:config:set notification.icon="/goodlift/icons/goodlift-icon-192.png"
+   firebase functions:config:set notification.badge="/goodlift/icons/goodlift-icon-192.png"
+   firebase functions:config:set notification.click_action="/goodlift/"
+   
+   # For staging
+   firebase functions:config:set notification.icon="/staging/icons/goodlift-icon-192.png" --project staging
+   firebase functions:config:set notification.badge="/staging/icons/goodlift-icon-192.png" --project staging
+   firebase functions:config:set notification.click_action="/staging/" --project staging
+   ```
+
+4. Deploy functions to Firebase:
    ```bash
    firebase deploy --only functions
    ```
@@ -84,19 +97,33 @@ The function handles the following error scenarios:
 
 ## Notification Payload
 
+Default configuration:
 ```javascript
 {
   notification: {
     title: "Good Morning! ☀️",
     body: "Time to crush your workout today! Let's get moving! 💪",
-    icon: "/goodlift/icons/goodlift-icon-192.png",
+    icon: "/goodlift/icons/goodlift-icon-192.png", // Configurable via NOTIFICATION_ICON
+    badge: "/goodlift/icons/goodlift-icon-192.png", // Configurable via NOTIFICATION_BADGE
   },
   data: {
     type: "daily-reminder",
     timestamp: "2024-11-24T08:00:00.000Z",
-    click_action: "/goodlift/",
+    click_action: "/goodlift/", // Configurable via NOTIFICATION_CLICK_ACTION
   }
 }
+```
+
+**Environment Variables:**
+- `NOTIFICATION_ICON`: Path to notification icon (default: `/goodlift/icons/goodlift-icon-192.png`)
+- `NOTIFICATION_BADGE`: Path to notification badge (default: `/goodlift/icons/goodlift-icon-192.png`)
+- `NOTIFICATION_CLICK_ACTION`: URL to open when notification is clicked (default: `/goodlift/`)
+
+These can be set using Firebase Functions config:
+```bash
+firebase functions:config:set notification.icon="/path/to/icon.png"
+firebase functions:config:set notification.badge="/path/to/badge.png"
+firebase functions:config:set notification.click_action="/path/to/page"
 ```
 
 ## Cost Optimization

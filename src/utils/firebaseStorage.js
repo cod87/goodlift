@@ -566,7 +566,6 @@ export const saveFCMTokenToFirebase = async (userId, fcmToken) => {
   try {
     console.log('[FCM Token Storage] Saving FCM token to Firestore...');
     console.log('[FCM Token Storage] User ID:', userId);
-    console.log('[FCM Token Storage] Token (first 30 chars):', fcmToken.substring(0, 30) + '...');
     
     await saveUserDataToFirebase(userId, { 
       fcmToken,
@@ -602,7 +601,6 @@ export const getFCMTokenFromFirebase = async (userId) => {
     
     if (userData?.fcmToken) {
       console.log('[FCM Token Storage] ✅ FCM token found in Firestore');
-      console.log('[FCM Token Storage] Token (first 30 chars):', userData.fcmToken.substring(0, 30) + '...');
       if (userData.fcmTokenUpdatedAt) {
         console.log('[FCM Token Storage] Last updated:', userData.fcmTokenUpdatedAt);
       }

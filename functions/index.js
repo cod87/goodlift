@@ -16,6 +16,14 @@ admin.initializeApp();
 // running at the same time
 setGlobalOptions({ maxInstances: 10 });
 
+// Configuration for notification assets and URLs
+// These can be overridden with environment variables for different deployments
+const NOTIFICATION_CONFIG = {
+  icon: process.env.NOTIFICATION_ICON || "/goodlift/icons/goodlift-icon-192.png",
+  badge: process.env.NOTIFICATION_BADGE || "/goodlift/icons/goodlift-icon-192.png",
+  clickActionUrl: process.env.NOTIFICATION_CLICK_ACTION || "/goodlift/",
+};
+
 /**
  * Scheduled function to send daily workout reminder notifications
  * Runs every day at 8:00 AM UTC
@@ -85,7 +93,7 @@ exports.sendDailyNotifications = onSchedule({
             tokens.push(fcmToken);
             userTokenMap[fcmToken] = userId;
             usersWithTokens++;
-            logger.info(`User ${userId}: Found FCM token (${fcmToken.substring(0, 20)}...)`);
+            logger.info(`User ${userId}: Found FCM token`);
           } else {
             usersWithoutTokens++;
             logger.warn(`User ${userId}: No FCM token found`);
@@ -127,15 +135,15 @@ exports.sendDailyNotifications = onSchedule({
       notification: {
         title: "Good Morning! ☀️",
         body: `Time to crush your workout today, ${currentDate}! Let's get moving! 💪`,
-        icon: "/goodlift/icons/goodlift-icon-192.png",
-        badge: "/goodlift/icons/goodlift-icon-192.png",
+        icon: NOTIFICATION_CONFIG.icon,
+        badge: NOTIFICATION_CONFIG.badge,
         tag: "daily-reminder",
         requireInteraction: false,
       },
       data: {
         type: "daily-reminder",
         timestamp: new Date().toISOString(),
-        click_action: "/goodlift/",
+        click_action: NOTIFICATION_CONFIG.clickActionUrl,
       },
     };
 
@@ -189,7 +197,6 @@ exports.sendDailyNotifications = onSchedule({
             logger.error(`Failed to send to user ${userId}:`);
             logger.error(`  Error code: ${error.code}`);
             logger.error(`  Error message: ${error.message}`);
-            logger.error(`  Token: ${token.substring(0, 20)}...`);
             
             // Check if token is invalid or expired
             if (
@@ -253,7 +260,7 @@ exports.sendDailyNotifications = onSchedule({
 exports.sendTestNotification = onSchedule({
   schedule: "every 24 hours",
   timeZone: "UTC",
-}, async (event) => {
+}, async (_event) => {
   logger.info("Test notification function called");
   logger.info("Note: This is a placeholder. Use sendDailyNotifications for actual notifications.");
 });

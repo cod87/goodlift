@@ -125,8 +125,7 @@ export const getFCMToken = async (userId = null) => {
     
     if (token) {
       console.log('[FCM] ✅ FCM token obtained successfully');
-      console.log('[FCM] 📋 FCM Token (first 30 chars):', token.substring(0, 30) + '...');
-      console.log('[FCM] Full token length:', token.length, 'characters');
+      console.log('[FCM] 📋 FCM Token length:', token.length, 'characters');
       
       // Save token to Firestore if userId is provided
       if (userId) {
@@ -142,8 +141,6 @@ export const getFCMToken = async (userId = null) => {
           } else {
             if (existingToken) {
               console.log('[FCM] Token has changed, updating in Firestore...');
-              console.log('[FCM] Old token (first 30 chars):', existingToken.substring(0, 30) + '...');
-              console.log('[FCM] New token (first 30 chars):', token.substring(0, 30) + '...');
             } else {
               console.log('[FCM] No existing token found, saving new token to Firestore...');
             }

@@ -5,115 +5,111 @@ This document describes the expected behavior of the streak and adherence tracki
 ## Streak Calculation
 
 ### Business Rules
-1. **Current Streak**: Shows the number of consecutive days with at least one session, counting back from the most recent workout
+1. **Current Streak**: Shows the number of consecutive days, counting back from the most recent workout
 2. **Streak Activation**: A streak is considered "current" if the last session was today or yesterday (within 1 calendar day)
    - This gives users a grace period: if you worked out yesterday, you're still "on" your streak even if you haven't worked out yet today
    - The streak only breaks if you miss both yesterday AND today
-3. **Consecutive Days**: Counts individual consecutive calendar days with sessions, crossing week boundaries seamlessly
-4. **Week Boundaries**: Uses Sunday-Saturday as week boundaries for the "alive" check only
-5. **Strength Training Requirement (Alive Check)**: Each **complete week** (Sunday through Saturday) that is fully contained within the streak must have **at least 3 strength training sessions** for the streak to remain "alive"
-   - **Complete weeks**: Any week where all 7 days (Sunday-Saturday) are part of the streak must meet the 3-strength-session requirement
-   - **Incomplete weeks**: Partial weeks at the start or end of a streak (e.g., starting on Wednesday, ending on Friday) do NOT need to meet the strength requirement
-6. **Day Counting**: Each consecutive calendar day with a session counts as 1 day toward the streak
+3. **Week Block Rule**: For any given standard week block (Sunday through Saturday), users are allowed **only ONE day** that counts as either an "unlogged day" or a "rest day" without breaking their streak
+   - **Unlogged day**: A day where no session was logged
+   - **Rest day**: A day where a session with type 'rest' was logged
+   - If a week block has more than 1 skip day (rest or unlogged), the streak breaks
+4. **Streak Breaking Conditions**:
+   - If a user does not log any session for **TWO days** in the same week block (Sun-Sat), the streak breaks
+   - If a user logs a rest day AND has an unlogged day in the same week block, the streak breaks
+   - If a user logs **TWO rest days** in the same week block, the streak breaks
+5. **Cross-Week Allowance**: Multiple rest/unlogged days across different week blocks are allowed (one per week)
+6. **Day Counting**: Each calendar day counts as 1 day toward the streak
    - Multiple sessions on the same day count as 1 day
    - Late-night workouts (e.g., 11:30 PM) and early morning workouts (e.g., 12:05 AM next day) correctly count as different days
 7. **Longest Streak**: Tracks the maximum consecutive days ever achieved
 8. **Timezone Handling**: All dates are normalized to local midnight (00:00:00) for consistent day comparison
 
-### What Counts as Strength Training?
-- Full body workouts
-- Upper body, lower body workouts
-- Push, pull, legs workouts
-- Any workout with resistance exercises (if it has exercises field, it's considered strength)
+### What Counts as a Rest Day?
+- A session with type 'rest' (explicitly marked as rest day)
+
+### What Counts as an Unlogged Day?
+- A day with no session logged at all
 
 ### Test Cases
 
-#### Test 1: Consecutive Days Across Week Boundary (Key Example)
-**Setup**: User has 6 sessions starting Saturday, continuing one each day (Sat, Sun, Mon, Tue, Wed, Thu)
+#### Test 1: All 7 Days of a Week with Sessions (No Skip Days)
+**Setup**: User has sessions every day from Sunday to Saturday (all strength)
 **Expected**: 
-- Current Streak: 6 days (if recent)
-- Example: Saturday (strength) crosses into Sunday (strength), Mon (strength), Tue (strength), Wed (cardio), Thu (strength)
-- Week 1 (contains only Saturday): incomplete week, no strength requirement ✓
-- Week 2 (contains Sun-Thu, 5 days): incomplete week, no strength requirement ✓
-- All days consecutive = 6-day streak
+- Longest Streak: 7 days
+- No skip days, week is fully valid
 
-#### Test 2: Complete Week With Insufficient Strength Breaks Streak
-**Setup**: Consecutive days spanning a complete week (Sun-Sat) but that week has fewer than 3 strength sessions
+#### Test 2: Week with 1 Unlogged Day (No Session Wednesday)
+**Setup**: User has sessions Sun-Tue, Thu-Sat but no session on Wednesday
 **Expected**: 
-- Streak breaks at the beginning of the week that doesn't meet the requirement
-- Example: Week 1 has 3+ strength sessions, consecutive days continue into Week 2 (Sun-Sat) but Week 2 only has 2 strength sessions
-- Streak ends at Saturday of Week 1 (last day before the incomplete week)
+- Longest Streak: 7 days
+- One unlogged day is allowed per week block
 
-#### Test 3: Full Complete Week of Consecutive Sessions
-**Setup**: All 7 days of a week (Sun-Sat) have sessions, at least 3 are strength
+#### Test 3: Week with 1 Rest Day (Wednesday is Rest Session)
+**Setup**: User has sessions every day, but Wednesday is a rest-type session
 **Expected**: 
-- Current Streak: 7 days
-- Week has 3+ strength sessions, requirement met
+- Longest Streak: 7 days
+- One rest day is allowed per week block
 
-#### Test 4: Multiple Sessions Same Day
-**Setup**: 2 sessions today (1 strength, 1 cardio), 1 session yesterday
+#### Test 4: Week with 2 Unlogged Days (No Session Wed AND Thu) - BREAKS STREAK
+**Setup**: User has sessions Sun-Tue, Fri-Sat but no sessions on Wednesday and Thursday
 **Expected**: 
-- Counts unique days only (2 days)
-- Strength requirement checked per week: if a day has 2 strength sessions, it counts as 2 toward the weekly requirement
+- Longest Streak < 7 days
+- Two unlogged days in the same week breaks the streak
 
-#### Test 5: Streak Continues with Daily Sessions
-**Setup**: 10 consecutive days with sessions, each complete week having at least 3 strength sessions
+#### Test 5: Week with 1 Rest Day AND 1 Unlogged Day - BREAKS STREAK
+**Setup**: User has sessions Sun-Tue, Fri-Sat, Wednesday is rest, Thursday has no session
 **Expected**: 
-- Current Streak: 10 days
-- As long as sessions are consecutive and each complete week has 3+ strength, streak continues
+- Longest Streak < 7 days
+- One rest day + one unlogged day in the same week exceeds the limit
 
-#### Test 6: Late-Night Workout Edge Case
+#### Test 6: Week with 2 Rest Days - BREAKS STREAK
+**Setup**: User has sessions every day, but Wednesday AND Thursday are rest-type sessions
+**Expected**: 
+- Longest Streak < 7 days
+- Two rest days in the same week exceeds the limit
+
+#### Test 7: Two Consecutive Weeks, Each with 1 Skip Day
+**Setup**: Two weeks of sessions, each week has one unlogged day (e.g., Wednesday skipped both weeks)
+**Expected**: 
+- Longest Streak: 14 days
+- Each week is allowed one skip day, so the streak continues across weeks
+
+#### Test 8: Empty Workout History
+**Setup**: No sessions logged
+**Expected**: 
+- Current Streak: 0
+- Longest Streak: 0
+
+#### Test 9: Single Session Today
+**Setup**: User just logged their first session today
+**Expected**: 
+- Current Streak: 1
+- Longest Streak: 1
+
+#### Test 10: Sessions Yesterday and Today
+**Setup**: User has sessions on yesterday and today
+**Expected**: 
+- Current Streak: 2
+- Longest Streak: 2
+
+#### Test 11: Last Session Was 2 Days Ago (Beyond Grace Period)
+**Setup**: User's last session was 2 days ago
+**Expected**: 
+- Current Streak: 0 (too long ago to be current)
+- Longest Streak: [previous value]
+
+#### Test 12: Late-Night Workout Edge Case
 **Setup**: Workout at 11:30 PM one day, then workout at 12:05 AM the next day
 **Expected**:
 - Should count as 2 consecutive days (different calendar days)
 - Date normalization ensures these are treated as separate days
 - This is correct behavior: crossing midnight creates a new calendar day
 
-#### Test 7: Last Workout 2 Days Ago
-**Setup**: User's last session was 2 days ago
+#### Test 13: Mixed Session Types in Week
+**Setup**: Week with strength, cardio, HIIT, yoga sessions (no rest sessions, no unlogged days)
 **Expected**: 
-- Current Streak: 0 (too long ago to be current)
-- Longest Streak: [previous value]
-
-#### Test 8: First Session Today
-**Setup**: User just logged their first session today
-**Expected**: 
-- Current Streak: 1
-- Longest Streak: 1
-
-#### Test 9: Gap in Sessions Breaks Streak
-**Setup**: Sessions for 5 consecutive days, then 1 day gap, then 3 more consecutive days
-**Expected**: 
-- Two separate streaks (5 days and 3 days)
-- Longest streak: 5 days
-- Current streak: 3 days (if recent)
-
-#### Test 10: No Sessions
-**Setup**: Empty session history
-**Expected**: 
-- Current Streak: 0
-- Longest Streak: 0
-
-#### Test 11: Mixed Session Types
-**Setup**: Consecutive days with strength, cardio, HIIT, and yoga/stretch
-**Expected**: 
-- All session types count toward consecutive days
-- Only strength sessions count toward the weekly strength requirement (3 per complete week)
-- Each complete week in the streak must have at least 3 strength sessions
-
-#### Test 12: Incomplete Week at Start (New Test)
-**Setup**: Streak starts on Wednesday with cardio only, continues through Sunday with strength sessions
-**Expected**:
-- Wed-Sat is an incomplete week (4 days), no strength requirement
-- If the streak continues into the next week and that week is complete (Sun-Sat), it needs 3+ strength sessions
-- Incomplete weeks are exempt from the 3-strength-session rule
-
-#### Test 13: Incomplete Week at End (New Test)
-**Setup**: Complete week (Sun-Sat) with 3+ strength sessions, streak continues Mon-Wed
-**Expected**:
-- First week is complete and meets requirement (3+ strength)
-- Mon-Wed is an incomplete week (3 days), no strength requirement
-- Streak continues as long as days are consecutive
+- All non-rest session types count as active days
+- Streak is valid for all 7 days
 
 ## Adherence Calculation
 
@@ -165,19 +161,19 @@ This document describes the expected behavior of the streak and adherence tracki
 - Small help icon (?) appears next to "Day Streak" label
 - Clicking opens a dialog explaining streak rules
 - Dialog covers:
-  - Consecutive day counting (each day with a session = +1 day)
-  - Week boundaries (Sunday-Saturday) used only for "alive" check
-  - At least 1 strength training session per week requirement
-  - What counts as strength training
-  - How streaks continue across week boundaries (Saturday → Sunday)
-  - When streaks break (missing a day or week without strength)
+  - Week block rule: Only 1 rest/unlogged day allowed per week (Sun-Sat)
+  - What counts as a rest day (session with type 'rest')
+  - What counts as an unlogged day (no session logged)
+  - How streaks continue across week boundaries
+  - When streaks break (2+ skip days in same week)
 
 ## Implementation Notes
 
-- Streak calculation counts **individual consecutive days** with sessions
-- Crosses week boundaries seamlessly (Saturday → Sunday continues the streak)
-- **"Alive" check**: Each week that contains days from the streak must have at least 1 strength training session
-- Week boundaries (Sunday-Saturday) are used only for the alive check, not for counting
+- Streak calculation counts calendar days from first session to most recent
+- **Week Block Rule**: Each week block (Sunday-Saturday) allows at most 1 "skip day" (rest or unlogged)
+- A "skip day" is either: a day with no session, OR a day with only rest-type session(s)
+- If a week has 2+ skip days (any combination), the streak is invalid for ranges including that week
+- Crosses week boundaries seamlessly (Saturday → Sunday continues the streak) as long as each week respects the 1 skip day limit
 - Functions handle multiple sessions per day correctly (count as one day)
 - All calculations are timezone-safe (set hours to 0, 0, 0, 0)
 - Both functions use timestamps (`getTime()`) for date comparisons

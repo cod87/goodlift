@@ -44,6 +44,10 @@ const getTodaysWorkout = (userData) => {
     }
     
     // Get today's day of week (0 = Sunday, 6 = Saturday)
+    // Note: Uses server timezone (America/Chicago). All users receive notifications
+    // based on the same day in Central time. For users in different timezones,
+    // the workout day shown may be off by +/- 1 day near midnight.
+    // Future enhancement: store user timezone in userData for accurate day calculation
     const today = new Date().getDay();
     
     // Find today's plan day
@@ -64,7 +68,13 @@ const getTodaysWorkout = (userData) => {
       'rest': 'Rest Day'
     };
     
-    return typeMap[todaysPlanDay.type] || todaysPlanDay.type;
+    const workoutType = typeMap[todaysPlanDay.type];
+    if (!workoutType) {
+      logger.warn(`Unknown workout type: ${todaysPlanDay.type}`);
+      return 'Workout';  // Fallback to generic "Workout"
+    }
+    
+    return workoutType;
   } catch (error) {
     logger.error('Error getting today\'s workout:', error);
     return null;
@@ -77,13 +87,18 @@ const getTodaysWorkout = (userData) => {
  * @returns {boolean} Whether wellness is enabled
  */
 const isWellnessEnabled = (userData) => {
-  // Check if user has wellness preferences configured
-  // For now, wellness is enabled if user has any wellness-related data
-  return userData && (
-    userData.wellnessEnabled === true ||
-    userData.wellnessPreferences ||
-    userData.completedWellnessTasks !== undefined
-  );
+  // Check explicit wellness enabled flag first
+  if (userData && userData.wellnessEnabled === true) {
+    return true;
+  }
+  
+  // Fallback: check if user has wellness preferences configured
+  if (userData && userData.wellnessPreferences && 
+      Object.keys(userData.wellnessPreferences).length > 0) {
+    return true;
+  }
+  
+  return false;
 };
 
 /**
@@ -174,7 +189,7 @@ exports.sendDailyNotifications = onSchedule({
             
             // Construct final message
             if (details.length > 0) {
-              bodyText += details.join(". ") + ". ";
+              bodyText += details.join(". ") + " ";
             }
             bodyText += "Let's make today great! 💪";
             

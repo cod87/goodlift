@@ -31,6 +31,13 @@ import { containerPadding, touchTargets } from '../theme/responsive';
 import WellnessTaskCard from './WellnessTaskCard';
 import ActivitiesList from './Progress/ActivitiesList';
 import EditActivityDialog from './EditActivityDialog';
+import { usePreferences } from '../contexts/PreferencesContext';
+import { useAuth } from '../contexts/AuthContext';
+import {
+  getTodaysWellnessTask,
+  shouldShowWellnessOnOpen,
+  markWellnessShown,
+} from '../utils/wellnessTaskService';
 
 /**
  * HomeScreen - Quick-start interface component (Work Tab)
@@ -49,8 +56,13 @@ const HomeScreen = memo(({
   onNavigate,
   loading = false
 }) => {
+  const { preferences } = usePreferences();
+  const { currentUser } = useAuth();
   const [currentDate, setCurrentDate] = useState('');
   const [recentWorkouts, setRecentWorkouts] = useState([]);
+  
+  // Wellness modal state
+  const [showWellnessModal, setShowWellnessModal] = useState(false);
   
   // Edit/Delete state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -63,6 +75,29 @@ const HomeScreen = memo(({
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     setCurrentDate(new Date().toLocaleDateString('en-US', options));
   }, []);
+
+  // Check and show wellness task modal on mount
+  useEffect(() => {
+    // Only run if both preferences are enabled
+    if (!preferences.dailyWellnessTasksEnabled || !preferences.showWellnessOnAppOpen) return;
+
+    // Check if we should show the modal
+    const canShow = shouldShowWellnessOnOpen(currentUser?.uid);
+    if (!canShow) return;
+
+    // Build wellness preferences the same way WellnessTaskCard does
+    const wellnessPrefs = {
+      enabledCategories: preferences.wellnessCategories || [],
+      relationshipStatus: preferences.relationshipStatus || 'All',
+    };
+
+    const task = getTodaysWellnessTask(wellnessPrefs);
+    if (!task) return; // nothing to show
+
+    // We have a task to show - mark immediately to avoid re-showing if user navigates
+    markWellnessShown(currentUser?.uid);
+    setShowWellnessModal(true);
+  }, [preferences, currentUser]);
 
   // Load recent workouts
   const loadWorkoutHistory = async () => {
@@ -244,6 +279,22 @@ const HomeScreen = memo(({
       <Box sx={{ mb: 3 }}>
         <WellnessTaskCard type="daily" />
       </Box>
+
+      {/* Wellness Task Modal - shown on app open */}
+      <Dialog
+        open={showWellnessModal}
+        onClose={() => setShowWellnessModal(false)}
+        aria-labelledby="wellness-on-open-dialog"
+      >
+        <DialogTitle id="wellness-on-open-dialog">Today&apos;s Wellness Task</DialogTitle>
+        <DialogContent>
+          {/* Show the card inside the modal; the card will still use preferences and user contexts for completion logic */}
+          <WellnessTaskCard type="daily" />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowWellnessModal(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Secondary Actions - Quick Access Buttons */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

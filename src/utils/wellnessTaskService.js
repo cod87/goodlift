@@ -244,6 +244,43 @@ export const getCompletedTasksHistory = (userId = null) => {
   }
 };
 
+/**
+ * Whether we should show the wellness task on app open for this user/guest.
+ * Conditions:
+ * - Current local time is on/after 05:00
+ * - We have not already shown the wellness modal today for this user/guest
+ */
+export const shouldShowWellnessOnOpen = (userId = null) => {
+  try {
+    const now = new Date();
+    // Only after 5:00 local time
+    if (now.getHours() < 5) return false;
+
+    const today = now.toISOString().split('T')[0];
+    const storageKey = userId ? `wellness_last_shown_${userId}` : 'wellness_last_shown_guest';
+    const existing = localStorage.getItem(storageKey);
+    if (!existing) return true;
+    return existing !== today;
+  } catch (err) {
+    console.error('Error checking wellness on-open status:', err);
+    // Fail-safe: don't block showing
+    return true;
+  }
+};
+
+/**
+ * Mark the wellness modal as shown for today for this user/guest
+ */
+export const markWellnessShown = (userId = null) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const storageKey = userId ? `wellness_last_shown_${userId}` : 'wellness_last_shown_guest';
+    localStorage.setItem(storageKey, today);
+  } catch (err) {
+    console.error('Error marking wellness shown:', err);
+  }
+};
+
 export default {
   getWellnessCategories,
   getRandomWellnessTask,
@@ -253,4 +290,6 @@ export default {
   saveCompletedTask,
   getCompletedTaskCount,
   getCompletedTasksHistory,
+  shouldShowWellnessOnOpen,
+  markWellnessShown,
 };

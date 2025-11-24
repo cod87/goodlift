@@ -28,6 +28,8 @@ const DEFAULT_PREFERENCES = {
   morningNotificationTime: { hour: 8, minute: 0 }, // Time for morning notifications
   followupNotificationTime: { hour: 21, minute: 0 }, // Time for follow-up notifications
   enableFollowupNotifications: true, // Enable/disable follow-up notifications
+  // NEW: show wellness task in a modal on first app open after 5am
+  showWellnessOnAppOpen: false,
   // Barbell weight preference
   barbellWeight: 45, // Default barbell weight in lbs (standard Olympic barbell)
 };

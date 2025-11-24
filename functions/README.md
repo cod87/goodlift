@@ -1,0 +1,151 @@
+# Firebase Cloud Functions for GoodLift
+
+This directory contains Firebase Cloud Functions for the GoodLift application.
+
+## Functions
+
+### `sendDailyNotifications`
+
+A scheduled function that sends daily workout reminder notifications to all users with registered FCM tokens.
+
+- **Schedule**: Every day at 8:00 AM UTC
+- **Trigger**: Scheduled (cron)
+- **Description**: Queries all users, collects FCM tokens, and sends push notifications
+
+**Key Features:**
+- Queries all users from Firestore (`users/{userId}/data/userData`)
+- Collects FCM tokens from user documents
+- Sends batch notifications using `admin.messaging().sendEachForMulticast()`
+- Handles errors for invalid/expired tokens
+- Comprehensive logging for monitoring and troubleshooting
+
+## Setup
+
+1. Install dependencies:
+   ```bash
+   cd functions
+   npm install
+   ```
+
+2. Ensure Firebase Admin SDK is initialized (already done in index.js)
+
+3. Deploy functions to Firebase:
+   ```bash
+   firebase deploy --only functions
+   ```
+
+## Local Development
+
+### Testing with Emulators
+
+```bash
+cd functions
+npm run serve
+```
+
+This will start the Firebase emulators for local testing.
+
+### Manual Function Testing
+
+You can manually trigger the scheduled function from the Firebase Console:
+1. Go to Firebase Console → Functions
+2. Find `sendDailyNotifications`
+3. Click the three dots → "Run now"
+
+## Monitoring
+
+### View Function Logs
+
+```bash
+firebase functions:log
+```
+
+Or view logs in Firebase Console → Functions → Logs
+
+### Key Metrics to Monitor
+
+- **Success count**: Number of notifications successfully sent
+- **Failure count**: Number of notifications that failed
+- **Invalid tokens**: Tokens that should be cleaned up from the database
+- **Execution time**: Function duration (should be < 540 seconds)
+- **Error rate**: Track any exceptions or failures
+
+## Error Handling
+
+The function handles the following error scenarios:
+
+1. **Invalid/Expired Tokens**: Logs tokens with codes like:
+   - `messaging/invalid-registration-token`
+   - `messaging/registration-token-not-registered`
+
+2. **User Document Errors**: Logs when user documents are missing or malformed
+
+3. **Send Failures**: Catches and logs all send errors with full details
+
+## Notification Payload
+
+```javascript
+{
+  notification: {
+    title: "Good Morning! ☀️",
+    body: "Time to crush your workout today! Let's get moving! 💪",
+    icon: "/goodlift/icons/goodlift-icon-192.png",
+  },
+  data: {
+    type: "daily-reminder",
+    timestamp: "2024-11-24T08:00:00.000Z",
+    click_action: "/goodlift/",
+  }
+}
+```
+
+## Cost Optimization
+
+- **Max instances**: Limited to 10 concurrent containers
+- **Memory**: 256 MiB per instance
+- **Timeout**: 540 seconds (9 minutes)
+- **Retry**: Up to 3 retries with max 10 minutes duration
+
+## Future Enhancements
+
+Potential improvements for this function:
+
+1. **Token Cleanup**: Automatically remove invalid/expired tokens from Firestore
+2. **User Preferences**: Respect user notification preferences (time zone, enabled/disabled)
+3. **Personalization**: Customize notification content based on user data (workout plans, streaks, etc.)
+4. **Batching**: Process users in batches for large user bases
+5. **Multiple Notification Types**: Support different notification types (morning, evening, reminders, achievements)
+6. **Analytics**: Track notification open rates and engagement
+
+## Troubleshooting
+
+### Common Issues
+
+**Function not executing at scheduled time:**
+- Check Firebase Console → Functions → Logs for execution history
+- Verify the cron schedule is correct (0 8 * * * = 8 AM UTC daily)
+- Ensure function is deployed: `firebase deploy --only functions`
+
+**Notifications not received by users:**
+- Verify FCM tokens are stored in Firestore: `users/{userId}/data/userData`
+- Check user has granted notification permission in browser
+- Verify VAPID key matches between frontend and Firebase Console
+- Check service worker is registered and active
+
+**High failure count:**
+- Review logs for specific error codes
+- Check if tokens are expired or invalid
+- Verify Firebase project configuration
+- Ensure FCM is enabled in Firebase Console
+
+**Function timeout:**
+- For large user bases, consider implementing batching
+- Increase timeout in function configuration (max 540 seconds)
+- Optimize Firestore queries
+
+## Related Documentation
+
+- [Firebase Cloud Functions Documentation](https://firebase.google.com/docs/functions)
+- [Firebase Cloud Messaging Documentation](https://firebase.google.com/docs/cloud-messaging)
+- [FIREBASE_SETUP.md](../FIREBASE_SETUP.md) - Main Firebase setup guide
+- [README.md](../README.md) - Application overview

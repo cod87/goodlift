@@ -28,6 +28,7 @@ import {
   Delete,
   TrendingUp,
   MenuBook,
+  Restaurant,
 } from '@mui/icons-material';
 import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes, getFavoriteFoods } from '../../utils/nutritionStorage';
 import { calculateNutrition } from '../../services/nutritionDataService';

@@ -35,6 +35,7 @@ import { calculateNutrition } from '../../services/nutritionDataService';
 import RecipeBuilder from './RecipeBuilder';
 import SavedRecipes from './SavedRecipes';
 import LogMealModal from '../LogMealModal';
+import CreateRecipeModal from '../CreateRecipeModal';
 
 /**
  * NutritionTab - Component for tracking nutrition using local nutrition database
@@ -70,6 +71,7 @@ const NutritionTab = () => {
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const [recipes, setRecipes] = useState([]);
   const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
+  const [showCreateRecipeModal, setShowCreateRecipeModal] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [showLogMealModal, setShowLogMealModal] = useState(false);
   const [favoriteFoods, setFavoriteFoods] = useState([]);
@@ -142,8 +144,7 @@ const NutritionTab = () => {
   };
 
   const handleCreateRecipe = () => {
-    setEditingRecipe(null);
-    setShowRecipeBuilder(true);
+    setShowCreateRecipeModal(true);
   };
 
   const handleEditRecipe = (recipe) => {
@@ -152,6 +153,10 @@ const NutritionTab = () => {
   };
 
   const handleRecipeSaved = () => {
+    loadRecipes();
+  };
+
+  const handleCreateRecipeModalSave = () => {
     loadRecipes();
   };
 
@@ -611,6 +616,14 @@ const NutritionTab = () => {
             }}
             editRecipe={editingRecipe}
             onSave={handleRecipeSaved}
+          />
+
+          {/* Create Recipe Modal - Full-screen like Log Meal */}
+          <CreateRecipeModal
+            open={showCreateRecipeModal}
+            onClose={() => setShowCreateRecipeModal(false)}
+            onSave={handleCreateRecipeModalSave}
+            onFavoritesChange={loadFavorites}
           />
         </>
       )}

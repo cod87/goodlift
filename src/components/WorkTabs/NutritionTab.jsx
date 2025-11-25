@@ -156,10 +156,6 @@ const NutritionTab = () => {
     loadRecipes();
   };
 
-  const handleCreateRecipeModalSave = () => {
-    loadRecipes();
-  };
-
   const handleAddRecipeToLog = (entry) => {
     saveNutritionEntry(entry);
     loadTodayEntries();
@@ -622,7 +618,7 @@ const NutritionTab = () => {
           <CreateRecipeModal
             open={showCreateRecipeModal}
             onClose={() => setShowCreateRecipeModal(false)}
-            onSave={handleCreateRecipeModalSave}
+            onSave={handleRecipeSaved}
             onFavoritesChange={loadFavorites}
           />
         </>

@@ -1,5 +1,5 @@
 /**
- * LogMealModal - Full-screen modal for logging meals
+ * CreateRecipeModal - Full-screen modal for creating recipes
  * 
  * Features:
  * - Full-screen modal using workout builder's visual style
@@ -9,20 +9,18 @@
  * - Ranking-based search (higher rank = more relevant)
  * - Tag-based searching (tags not visible to users)
  * - Support for multiple measurement units
- * - Shows previously logged foods and suggestions
- * - Favorites/commonly used foods for quick logging
+ * - Saves recipe to "My Recipes" for later logging as meals
  * - Smooth animations matching workout builder experience
  * - Clean, minimalist interface with clear sections
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Button,
   Box,
   Typography,
@@ -46,17 +44,17 @@ import DialPicker from './Common/DialPicker';
 import {
   Close as CloseIcon,
   Search as SearchIcon,
-  Restaurant as RestaurantIcon,
-  History as HistoryIcon,
+  MenuBook as MenuBookIcon,
   Star as StarIcon,
   StarBorder as StarBorderIcon,
-  Add as AddIcon,
+  Save as SaveIcon,
 } from '@mui/icons-material';
 import { searchFoods, calculateNutrition, calculateNutritionForPortion, getMeasurementOptions, decimalToFraction } from '../services/nutritionDataService';
 import {
   addFavoriteFood,
   removeFavoriteFood,
   isFavoriteFood,
+  saveRecipe,
 } from '../utils/nutritionStorage';
 
 // Constants for portion validation
@@ -64,15 +62,13 @@ const MIN_PORTION_QUANTITY = 0.25;
 const MIN_GRAMS = 1;
 const DEFAULT_GRAMS = 100;
 
-const LogMealModal = ({ 
+const CreateRecipeModal = ({ 
   open, 
   onClose, 
   onSave,
-  // recentFoods = [], // Not used yet
-  // favoriteFoods = [], // Not used yet
   onFavoritesChange,
 }) => {
-  // 0: Search Food, 1: My Meal
+  // 0: Search Food, 1: Recipe Items
   const [activeTab, setActiveTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchTerms, setSearchTerms] = useState([]); // Array of search term strings
@@ -81,8 +77,12 @@ const LogMealModal = ({
   const [error, setError] = useState('');
   const debounceTimer = useRef(null);
   
-  // My Meal items (foods selected for logging)
-  const [mealItems, setMealItems] = useState([]);
+  // Recipe items (foods selected for recipe)
+  const [recipeItems, setRecipeItems] = useState([]);
+  
+  // Recipe metadata
+  const [recipeName, setRecipeName] = useState('');
+  const [recipeDescription, setRecipeDescription] = useState('');
   
   // Selected foods (for multi-select pattern)
   const [selectedFoodIds, setSelectedFoodIds] = useState(new Set());
@@ -95,8 +95,10 @@ const LogMealModal = ({
       setSearchResults([]);
       setError('');
       setActiveTab(0);
-      setMealItems([]);
+      setRecipeItems([]);
       setSelectedFoodIds(new Set());
+      setRecipeName('');
+      setRecipeDescription('');
     }
   }, [open]);
 
@@ -111,8 +113,8 @@ const LogMealModal = ({
         // Trigger search for all terms
         searchMultipleTerms(newTerms);
       }
-    } catch (error) {
-      console.error('Error adding search term:', error);
+    } catch (err) {
+      console.error('Error adding search term:', err);
       setError('Failed to add search term. Please try again.');
     }
   }, [searchTerms]);
@@ -127,8 +129,8 @@ const LogMealModal = ({
       } else {
         searchMultipleTerms(newTerms);
       }
-    } catch (error) {
-      console.error('Error removing search term:', error);
+    } catch (err) {
+      console.error('Error removing search term:', err);
       setError('Failed to remove search term. Please try again.');
     }
   }, [searchTerms]);
@@ -220,43 +222,43 @@ const LogMealModal = ({
   }, [searchQuery, searchTerms, searchFoodsLocal]);
 
   // Toggle food selection (multi-select pattern like workout builder)
-  // Auto-adds to meal when selected, removes when deselected
+  // Auto-adds to recipe when selected, removes when deselected
   const handleToggleFoodSelection = (food) => {
     try {
       const foodId = food.id || food.fdcId;
       const newSelectedIds = new Set(selectedFoodIds);
       
       if (newSelectedIds.has(foodId)) {
-        // Deselect - remove from selected set and meal
+        // Deselect - remove from selected set and recipe
         newSelectedIds.delete(foodId);
-        setMealItems(prevItems => prevItems.filter(item => {
+        setRecipeItems(prevItems => prevItems.filter(item => {
           const itemFoodId = item.food.id || item.food.fdcId;
           return itemFoodId !== foodId;
         }));
       } else {
-        // Select - add to selected set and meal
+        // Select - add to selected set and recipe
         newSelectedIds.add(foodId);
-        const newMealItem = {
+        const newRecipeItem = {
           id: crypto.randomUUID(),
           food: food,
           portionType: 'standard', // Default to standard portion
           portionQuantity: 1, // Number of standard portions
           grams: food.portion_grams || DEFAULT_GRAMS,
         };
-        setMealItems(prevItems => [...prevItems, newMealItem]);
+        setRecipeItems(prevItems => [...prevItems, newRecipeItem]);
       }
       
       setSelectedFoodIds(newSelectedIds);
-    } catch (error) {
-      console.error('Error toggling food selection:', error);
+    } catch (err) {
+      console.error('Error toggling food selection:', err);
       setError('Failed to select food. Please try again.');
     }
   };
 
-  const handleRemoveMealItem = (itemId) => {
+  const handleRemoveRecipeItem = (itemId) => {
     try {
       // Find the item to get its food ID
-      const itemToRemove = mealItems.find(item => item.id === itemId);
+      const itemToRemove = recipeItems.find(item => item.id === itemId);
       if (itemToRemove) {
         const foodId = itemToRemove.food.id || itemToRemove.food.fdcId;
         // Remove from selected IDs as well
@@ -266,9 +268,9 @@ const LogMealModal = ({
           return newIds;
         });
       }
-      setMealItems(mealItems.filter(item => item.id !== itemId));
-    } catch (error) {
-      console.error('Error removing meal item:', error);
+      setRecipeItems(recipeItems.filter(item => item.id !== itemId));
+    } catch (err) {
+      console.error('Error removing recipe item:', err);
       setError('Failed to remove item. Please try again.');
     }
   };
@@ -276,7 +278,7 @@ const LogMealModal = ({
   // Handle changing portion type (standard, grams, volume)
   const handleChangePortionType = (itemId, portionType) => {
     try {
-      setMealItems(mealItems.map(item => {
+      setRecipeItems(recipeItems.map(item => {
         if (item.id !== itemId) return item;
         
         const food = item.food;
@@ -296,8 +298,8 @@ const LogMealModal = ({
         
         return { ...item, portionType, grams, portionQuantity };
       }));
-    } catch (error) {
-      console.error('Error changing portion type:', error);
+    } catch (err) {
+      console.error('Error changing portion type:', err);
       setError('Failed to change portion type. Please try again.');
     }
   };
@@ -306,7 +308,7 @@ const LogMealModal = ({
   const handleChangePortionQuantity = (itemId, quantity) => {
     try {
       const validQuantity = Math.max(MIN_PORTION_QUANTITY, parseFloat(quantity) || 1);
-      setMealItems(mealItems.map(item => {
+      setRecipeItems(recipeItems.map(item => {
         if (item.id !== itemId) return item;
         
         const food = item.food;
@@ -314,21 +316,21 @@ const LogMealModal = ({
         
         return { ...item, portionQuantity: validQuantity, grams };
       }));
-    } catch (error) {
-      console.error('Error updating portion quantity:', error);
+    } catch (err) {
+      console.error('Error updating portion quantity:', err);
       setError('Failed to update quantity. Please try again.');
     }
   };
 
-  const handleUpdateMealItemGrams = (itemId, grams) => {
+  const handleUpdateRecipeItemGrams = (itemId, grams) => {
     try {
       // Ensure grams is a valid number
       const validGrams = Math.max(MIN_GRAMS, parseFloat(grams) || MIN_GRAMS);
-      setMealItems(mealItems.map(item => 
+      setRecipeItems(recipeItems.map(item => 
         item.id === itemId ? { ...item, grams: validGrams, portionType: 'grams', portionQuantity: 1 } : item
       ));
-    } catch (error) {
-      console.error('Error updating meal item grams:', error);
+    } catch (err) {
+      console.error('Error updating recipe item grams:', err);
       setError('Failed to update quantity. Please try again.');
     }
   };
@@ -342,36 +344,76 @@ const LogMealModal = ({
     return calculateNutrition(food, grams);
   };
 
-  const handleSaveMeal = () => {
-    if (mealItems.length === 0) {
+  const getTotalNutrition = () => {
+    return recipeItems.reduce(
+      (totals, item) => {
+        const nutrition = calculateItemNutrition(item);
+        return {
+          calories: totals.calories + nutrition.calories,
+          protein: totals.protein + nutrition.protein,
+          carbs: totals.carbs + nutrition.carbs,
+          fat: totals.fat + nutrition.fat,
+          fiber: totals.fiber + nutrition.fiber,
+        };
+      },
+      { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
+    );
+  };
+
+  const getTotalWeight = () => {
+    return recipeItems.reduce((total, item) => total + item.grams, 0);
+  };
+
+  const handleSaveRecipe = async () => {
+    if (!recipeName.trim()) {
+      setError('Please enter a recipe name');
+      return;
+    }
+
+    if (recipeItems.length === 0) {
+      setError('Please add at least one food to the recipe');
       return;
     }
 
     try {
-      // Create entries for each meal item
-      mealItems.forEach(item => {
-        try {
-          const nutrition = calculateItemNutrition(item);
-          const entry = {
-            id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-            date: new Date().toISOString(),
-            foodName: item.food.name,
-            grams: item.grams,
-            portionType: item.portionType,
-            portionQuantity: item.portionQuantity,
-            nutrition,
-          };
-          onSave(entry);
-        } catch (itemError) {
-          console.error('Error saving meal item:', item, itemError);
-          // Continue with other items even if one fails
-        }
+      const totalNutrition = getTotalNutrition();
+      const totalWeight = getTotalWeight();
+
+      // Convert recipe items to the format expected by the recipe storage
+      const foods = recipeItems.map(item => {
+        const nutrition = calculateItemNutrition(item);
+        return {
+          id: item.id,
+          foodId: item.food.id || item.food.fdcId,
+          name: item.food.name,
+          grams: item.grams,
+          portionType: item.portionType,
+          portionQuantity: item.portionQuantity,
+          nutrition,
+        };
       });
+
+      const recipe = {
+        id: `recipe-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+        name: recipeName.trim(),
+        description: recipeDescription.trim(),
+        foods,
+        totalNutrition,
+        totalWeight,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await saveRecipe(recipe);
+      
+      if (onSave) {
+        onSave(recipe);
+      }
       
       onClose();
-    } catch (error) {
-      console.error('Error saving meal:', error);
-      setError('Failed to save meal. Please try again.');
+    } catch (err) {
+      console.error('Error saving recipe:', err);
+      setError('Failed to save recipe. Please try again.');
     }
   };
 
@@ -391,8 +433,8 @@ const LogMealModal = ({
       if (onFavoritesChange) {
         onFavoritesChange();
       }
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
     }
   };
 
@@ -478,8 +520,8 @@ const LogMealModal = ({
           </ListItem>
         </motion.div>
       );
-    } catch (error) {
-      console.error('Error rendering search result item:', food, error);
+    } catch (err) {
+      console.error('Error rendering search result item:', food, err);
       return (
         <ListItem sx={{ py: 1, px: 2 }}>
           <ListItemText
@@ -517,9 +559,9 @@ const LogMealModal = ({
         py: 2,
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <RestaurantIcon color="primary" />
+          <MenuBookIcon color="primary" />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Log a Meal
+            Create Recipe
           </Typography>
         </Box>
         <IconButton onClick={onClose} edge="end">
@@ -528,8 +570,32 @@ const LogMealModal = ({
       </DialogTitle>
 
       <DialogContent sx={{ p: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* Recipe Name Input at Top */}
+        <Box sx={{ px: 3, pt: 2, pb: 1, borderBottom: 1, borderColor: 'divider' }}>
+          <TextField
+            fullWidth
+            label="Recipe Name"
+            value={recipeName}
+            onChange={(e) => setRecipeName(e.target.value)}
+            placeholder="e.g., Protein Smoothie, Chicken Salad"
+            size="small"
+            required
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            fullWidth
+            label="Description (optional)"
+            value={recipeDescription}
+            onChange={(e) => setRecipeDescription(e.target.value)}
+            placeholder="Brief description of the recipe"
+            size="small"
+            multiline
+            rows={2}
+          />
+        </Box>
+
         {/* Tabs */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3, pt: 2 }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3 }}>
           <Tabs 
             value={activeTab} 
             onChange={(e, newValue) => setActiveTab(newValue)}
@@ -547,8 +613,8 @@ const LogMealModal = ({
               iconPosition="start"
             />
             <Tab 
-              icon={<RestaurantIcon fontSize="small" />} 
-              label={`My Meal (${mealItems.length})`}
+              icon={<MenuBookIcon fontSize="small" />} 
+              label={`Recipe Items (${recipeItems.length})`}
               iconPosition="start"
             />
           </Tabs>
@@ -653,7 +719,7 @@ const LogMealModal = ({
                 <Box sx={{ mb: 2 }}>
                   <Alert severity="success" sx={{ animation: 'fadeIn 0.3s ease-out' }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {selectedFoodIds.size} food{selectedFoodIds.size !== 1 ? 's' : ''} added to meal - Click on a food below to remove it
+                      {selectedFoodIds.size} ingredient{selectedFoodIds.size !== 1 ? 's' : ''} added to recipe - Click on a food below to remove it
                     </Typography>
                   </Alert>
                 </Box>
@@ -663,7 +729,7 @@ const LogMealModal = ({
               {!searching && searchResults.length > 0 && (
                 <>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
-                    Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} - Click to add to meal
+                    Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} - Click to add to recipe
                   </Typography>
                   <Paper variant="outlined" sx={{ borderRadius: 2 }}>
                     <List disablePadding>
@@ -696,28 +762,28 @@ const LogMealModal = ({
             </Box>
           )}
 
-          {/* My Meal Tab */}
+          {/* Recipe Items Tab */}
           {activeTab === 1 && (
             <Box>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                My Meal
+                Recipe Ingredients
               </Typography>
               
-              {mealItems.length === 0 ? (
+              {recipeItems.length === 0 ? (
                 <Paper sx={{ p: 4, textAlign: 'center', bgcolor: 'background.default', borderRadius: 2 }}>
-                  <RestaurantIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <MenuBookIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
                   <Typography variant="body1" color="text.secondary" gutterBottom>
-                    No foods added yet
+                    No ingredients added yet
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Search for foods in the "Search Food" tab and click to add them here
+                    Search for foods in the &quot;Search Food&quot; tab and click to add them here
                   </Typography>
                 </Paper>
               ) : (
                 <>
                   <Paper variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
                     <List disablePadding>
-                      {mealItems.map((item, index) => {
+                      {recipeItems.map((item, index) => {
                         const measurementOptions = getMeasurementOptions(item.food);
                         const volumeOption = measurementOptions.find(opt => opt.type === 'volume');
                         const hasVolume = !!volumeOption;
@@ -780,7 +846,7 @@ const LogMealModal = ({
                                         <TextField
                                           type="number"
                                           value={item.grams}
-                                          onChange={(e) => handleUpdateMealItemGrams(item.id, parseFloat(e.target.value) || 0)}
+                                          onChange={(e) => handleUpdateRecipeItemGrams(item.id, parseFloat(e.target.value) || 0)}
                                           size="small"
                                           inputProps={{ min: 1, step: 1, style: { padding: '4px 8px', width: '60px' } }}
                                           sx={{ width: 80 }}
@@ -828,7 +894,7 @@ const LogMealModal = ({
                               />
                               <IconButton
                                 edge="end"
-                                onClick={() => handleRemoveMealItem(item.id)}
+                                onClick={() => handleRemoveRecipeItem(item.id)}
                                 color="error"
                                 size="small"
                                 sx={{ ml: 1, mt: 0.5 }}
@@ -845,20 +911,11 @@ const LogMealModal = ({
                   {/* Total Nutrition */}
                   <Paper sx={{ p: 2, bgcolor: 'primary.50', borderRadius: 2 }}>
                     <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
-                      Total Nutrition
+                      Total Recipe Nutrition ({getTotalWeight()}g)
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                       {(() => {
-                        const totals = mealItems.reduce((acc, item) => {
-                          const nutrition = calculateItemNutrition(item);
-                          return {
-                            calories: acc.calories + nutrition.calories,
-                            protein: acc.protein + nutrition.protein,
-                            carbs: acc.carbs + nutrition.carbs,
-                            fat: acc.fat + nutrition.fat,
-                            fiber: acc.fiber + nutrition.fiber,
-                          };
-                        }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
+                        const totals = getTotalNutrition();
                         
                         return (
                           <>
@@ -892,12 +949,12 @@ const LogMealModal = ({
             Cancel
           </Button>
           <Button 
-            onClick={handleSaveMeal} 
+            onClick={handleSaveRecipe} 
             variant="contained" 
-            disabled={mealItems.length === 0}
-            startIcon={<AddIcon />}
+            disabled={recipeItems.length === 0 || !recipeName.trim()}
+            startIcon={<SaveIcon />}
           >
-            Log Meal ({mealItems.length} item{mealItems.length !== 1 ? 's' : ''})
+            Save Recipe ({recipeItems.length} item{recipeItems.length !== 1 ? 's' : ''})
           </Button>
         </Box>
       </DialogContent>
@@ -905,13 +962,11 @@ const LogMealModal = ({
   );
 };
 
-LogMealModal.propTypes = {
+CreateRecipeModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired,
-  recentFoods: PropTypes.array,
-  favoriteFoods: PropTypes.array,
+  onSave: PropTypes.func,
   onFavoritesChange: PropTypes.func,
 };
 
-export default LogMealModal;
+export default CreateRecipeModal;

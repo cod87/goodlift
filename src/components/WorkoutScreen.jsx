@@ -898,9 +898,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
               {/* Exercise Name and Demo Image - Two Column Layout in Landscape, Single Column in Portrait */}
               <Box sx={{ 
-                mt: shouldUseTwoColumns ? 0 : 2,
-                mb: shouldUseTwoColumns ? 0 : 1.5,
-                px: { xs: 2, sm: shouldUseTwoColumns ? 2 : 4 },
+                mt: shouldUseTwoColumns ? 0 : 0.5,
+                mb: shouldUseTwoColumns ? 0 : 0.5,
+                px: { xs: 1.5, sm: shouldUseTwoColumns ? 2 : 3 },
                 // Use CSS Grid for landscape mode for reliable 2:1 split
                 display: shouldUseTwoColumns ? 'grid' : 'flex',
                 // CSS Grid template: 2fr for name, 1fr for image (2:1 ratio)
@@ -908,8 +908,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 gridTemplateRows: shouldUseTwoColumns ? '1fr' : 'none',
                 flexDirection: shouldUseTwoColumns ? undefined : 'column',
                 alignItems: 'center',
-                gap: shouldUseTwoColumns ? 0.5 : 0.3,
-                minHeight: shouldUseTwoColumns ? { sm: '100px', md: '120px' } : { xs: '80px', sm: '100px' },
+                gap: shouldUseTwoColumns ? 0.5 : 0.2,
+                minHeight: shouldUseTwoColumns ? { sm: '100px', md: '120px' } : { xs: '60px', sm: '80px' },
               }}>
                 {/* Exercise Name */}
                 <Box sx={{ 
@@ -918,7 +918,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   justifyContent: shouldUseTwoColumns ? 'flex-start' : 'center',
                   overflow: 'hidden',
                   width: '100%',
-                  maxHeight: shouldUseTwoColumns ? 'none' : { xs: '25vh', sm: '25vh' },
+                  maxHeight: shouldUseTwoColumns ? 'none' : { xs: '15vh', sm: '20vh' },
                 }}>
                   <Typography 
                     ref={exerciseNameRef}
@@ -952,7 +952,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   <Box 
                     sx={{ 
                       display: 'flex',
-                      justifyContent: 'center',
+                      justifyContent: shouldUseTwoColumns ? 'flex-start' : 'center',
                       alignItems: 'center',
                       width: '100%',
                       height: '100%',
@@ -967,7 +967,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                         maxWidth: '100%',
                         maxHeight: shouldUseTwoColumns 
                           ? { sm: '100px', md: '110px' }
-                          : { xs: '200px', sm: '280px' },
+                          : { xs: '150px', sm: '200px' },
                         width: 'auto',
                         height: 'auto',
                         borderRadius: 1,

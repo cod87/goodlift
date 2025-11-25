@@ -62,6 +62,11 @@ import {
   isFavoriteFood,
 } from '../utils/nutritionStorage';
 
+// Constants for portion validation
+const MIN_PORTION_QUANTITY = 0.25;
+const MIN_GRAMS = 1;
+const DEFAULT_GRAMS = 100;
+
 const LogMealModal = ({ 
   open, 
   onClose, 
@@ -254,7 +259,7 @@ const LogMealModal = ({
         food: food,
         portionType: 'standard', // Default to standard portion
         portionQuantity: 1, // Number of standard portions
-        grams: food.portion_grams || 100,
+        grams: food.portion_grams || DEFAULT_GRAMS,
       }));
 
       setMealItems([...mealItems, ...newMealItems]);
@@ -265,9 +270,6 @@ const LogMealModal = ({
       setError('Failed to add foods to meal. Please try again.');
     }
   };
-
-  // Unused function - handleSelectFood
-  // const handleSelectFood = (food) => { ... };
 
   const handleRemoveMealItem = (itemId) => {
     try {
@@ -289,13 +291,13 @@ const LogMealModal = ({
         let portionQuantity = 1;
         
         if (portionType === 'standard') {
-          grams = food.portion_grams || 100;
+          grams = food.portion_grams || DEFAULT_GRAMS;
           portionQuantity = 1;
         } else if (portionType === 'grams') {
-          grams = 100;
+          grams = DEFAULT_GRAMS;
           portionQuantity = 1;
         } else if (portionType === 'volume') {
-          grams = food.portion_grams || 100;
+          grams = food.portion_grams || DEFAULT_GRAMS;
           portionQuantity = 1;
         }
         
@@ -310,12 +312,12 @@ const LogMealModal = ({
   // Handle changing portion quantity (for standard portions)
   const handleChangePortionQuantity = (itemId, quantity) => {
     try {
-      const validQuantity = Math.max(0.25, parseFloat(quantity) || 1);
+      const validQuantity = Math.max(MIN_PORTION_QUANTITY, parseFloat(quantity) || 1);
       setMealItems(mealItems.map(item => {
         if (item.id !== itemId) return item;
         
         const food = item.food;
-        const grams = (food.portion_grams || 100) * validQuantity;
+        const grams = (food.portion_grams || DEFAULT_GRAMS) * validQuantity;
         
         return { ...item, portionQuantity: validQuantity, grams };
       }));
@@ -328,7 +330,7 @@ const LogMealModal = ({
   const handleUpdateMealItemGrams = (itemId, grams) => {
     try {
       // Ensure grams is a valid number
-      const validGrams = Math.max(1, parseFloat(grams) || 1);
+      const validGrams = Math.max(MIN_GRAMS, parseFloat(grams) || MIN_GRAMS);
       setMealItems(mealItems.map(item => 
         item.id === itemId ? { ...item, grams: validGrams, portionType: 'grams', portionQuantity: 1 } : item
       ));

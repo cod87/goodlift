@@ -89,9 +89,21 @@ const ExerciseCard = memo(({
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
+  // Check if the provided demoImage is actually a demo image (not the fallback icon)
+  const isActualDemoImage = (imagePath) => {
+    if (!imagePath) return false;
+    // If the image path contains 'work-icon.svg', it's a fallback, not an actual demo
+    return !imagePath.includes('work-icon.svg');
+  };
+
   // Update image source when demoImage prop changes
+  // Only use demoImage if it's an actual demo image, not the fallback
   useEffect(() => {
-    setImageSrc(demoImage);
+    if (isActualDemoImage(demoImage)) {
+      setImageSrc(demoImage);
+    } else {
+      setImageSrc(null);
+    }
     setImageError(false);
   }, [demoImage]);
 
@@ -240,8 +252,12 @@ const ExerciseCard = memo(({
         flexGrow: 1, 
         flexShrink: 1,
         minHeight: 0,
-        display: 'flex',
-        flexDirection: shouldUseTwoColumns ? 'row' : 'column',
+        // Use CSS Grid for landscape mode for reliable 2:1 split
+        display: shouldUseTwoColumns ? 'grid' : 'flex',
+        // CSS Grid template: 2fr for name, 1fr for image (2:1 ratio)
+        gridTemplateColumns: shouldUseTwoColumns ? '2fr 1fr' : 'none',
+        gridTemplateRows: shouldUseTwoColumns ? '1fr' : 'none',
+        flexDirection: shouldUseTwoColumns ? undefined : 'column',
         gap: shouldUseTwoColumns ? 2 : 0.3,
         mb: 0.3,
       }}>
@@ -336,13 +352,14 @@ const ExerciseCard = memo(({
         {/* Landscape Mode: Two distinct columns - Exercise name (2/3) and Demo image (1/3) */}
         {shouldUseTwoColumns && (
           <>
-            {/* Left Column: Exercise Name (2/3 width) */}
+            {/* Left Column: Exercise Name (2/3 width via CSS Grid) */}
             <Box sx={{ 
-              flex: '2 1 66.66%',
+              // CSS Grid child - column sizing handled by parent grid
               display: 'flex',
               flexDirection: 'column',
               minHeight: 0,
               justifyContent: 'center',
+              overflow: 'hidden',
             }}>
               <Typography 
                 component="div"
@@ -369,9 +386,9 @@ const ExerciseCard = memo(({
               </Typography>
             </Box>
 
-            {/* Right Column: Demo Image or WorkTab Icon (1/3 width) */}
+            {/* Right Column: Demo Image or WorkTab Icon (1/3 width via CSS Grid) */}
             <Box sx={{ 
-              flex: '1 1 33.33%',
+              // CSS Grid child - column sizing handled by parent grid
               position: 'relative',
               minHeight: 0,
               display: 'flex',

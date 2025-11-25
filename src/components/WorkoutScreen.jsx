@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout, getWorkoutHistory } from '../utils/storage';
-import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip } from '@mui/material';
+import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip, useTheme, useMediaQuery } from '@mui/material';
 import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
@@ -51,6 +51,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const [cooldownCompleted, setCooldownCompleted] = useState(false);
   const [cooldownSkipped, setCooldownSkipped] = useState(false);
   const [workoutType, setWorkoutType] = useState('full');
+  
+  // Theme and media queries for responsive layout
+  const theme = useTheme();
+  const isTabletOrLarger = useMediaQuery(theme.breakpoints.up('sm'));
+  const isLandscape = useMediaQuery('(orientation: landscape)');
+  const shouldUseTwoColumns = isTabletOrLarger && isLandscape;
 
   // Generate workout sequence (supersets) - memoized to prevent recalculation
   // Now supports custom superset configurations like [2, 3, 2, 3]
@@ -890,76 +896,93 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 </Box>
               </Box>
 
-              {/* Exercise name - responsive text that wraps and scales to fit */}
+              {/* Exercise Name and Demo Image - Two Column Layout in Landscape, Single Column in Portrait */}
               <Box sx={{ 
-                mb: 1.5,
                 mt: 2,
+                mb: 1.5,
                 px: { xs: 2, sm: 4 },
-                display: 'flex',
+                // Use CSS Grid for landscape mode for reliable 2:1 split
+                display: shouldUseTwoColumns ? 'grid' : 'flex',
+                // CSS Grid template: 2fr for name, 1fr for image (2:1 ratio)
+                gridTemplateColumns: shouldUseTwoColumns ? '2fr 1fr' : 'none',
+                gridTemplateRows: shouldUseTwoColumns ? '1fr' : 'none',
+                flexDirection: shouldUseTwoColumns ? undefined : 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: { xs: '80px', sm: '100px' },
-                maxHeight: { xs: '25vh', sm: '25vh' },
-                overflow: 'hidden'
+                gap: shouldUseTwoColumns ? 2 : 0.3,
+                minHeight: shouldUseTwoColumns ? { sm: '150px', md: '200px' } : { xs: '80px', sm: '100px' },
               }}>
-                <Typography 
-                  ref={exerciseNameRef}
-                  variant="h3" 
-                  component="h2"
-                  sx={{ 
-                    fontWeight: 600,
-                    fontSize: exerciseFontSize + ' !important',
-                    color: 'primary.main',
-                    textAlign: 'center',
-                    lineHeight: '1.2 !important',
-                    width: '100%',
-                    wordBreak: 'break-word',
-                    overflowWrap: 'break-word',
-                    whiteSpace: 'normal',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 4,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {exerciseName}
-                </Typography>
-              </Box>
-              
-              {/* Demo Image - Shows if available */}
-              {demoImageSrc && (
-                <Box 
-                  sx={{ 
-                    mb: 1.5,
-                    mt: 0,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={demoImageSrc}
-                    alt={`${exerciseName} demonstration`}
-                    onError={handleImageError}
-                    sx={{
-                      maxWidth: '100%',
-                      maxHeight: { xs: '200px', sm: '280px' },
-                      width: 'auto',
-                      height: 'auto',
-                      borderRadius: 2,
-                      objectFit: 'contain',
-                      // Semi-transparent white background for visibility of dark line drawings
-                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                      padding: 2,
-                      // Add subtle border for better definition
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                {/* Exercise Name */}
+                <Box sx={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: shouldUseTwoColumns ? 'flex-start' : 'center',
+                  overflow: 'hidden',
+                  width: '100%',
+                  maxHeight: shouldUseTwoColumns ? 'none' : { xs: '25vh', sm: '25vh' },
+                }}>
+                  <Typography 
+                    ref={exerciseNameRef}
+                    variant="h3" 
+                    component="h2"
+                    sx={{ 
+                      fontWeight: 600,
+                      fontSize: shouldUseTwoColumns 
+                        ? { sm: '1.5rem !important', md: '2rem !important' }
+                        : exerciseFontSize + ' !important',
+                      color: 'primary.main',
+                      textAlign: shouldUseTwoColumns ? 'left' : 'center',
+                      lineHeight: '1.2 !important',
+                      width: '100%',
+                      wordBreak: 'break-word',
+                      overflowWrap: 'break-word',
+                      whiteSpace: 'normal',
+                      display: '-webkit-box',
+                      WebkitLineClamp: shouldUseTwoColumns ? 2 : 4,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
-                    loading="lazy"
-                  />
+                  >
+                    {exerciseName}
+                  </Typography>
                 </Box>
-              )}
+                
+                {/* Demo Image - Shows if available */}
+                {demoImageSrc && (
+                  <Box 
+                    sx={{ 
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      height: '100%',
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={demoImageSrc}
+                      alt={`${exerciseName} demonstration`}
+                      onError={handleImageError}
+                      sx={{
+                        maxWidth: '100%',
+                        maxHeight: shouldUseTwoColumns 
+                          ? { sm: '150px', md: '180px' }
+                          : { xs: '200px', sm: '280px' },
+                        width: 'auto',
+                        height: 'auto',
+                        borderRadius: 2,
+                        objectFit: 'contain',
+                        // Semi-transparent white background for visibility of dark line drawings
+                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        padding: shouldUseTwoColumns ? 1 : 2,
+                        // Add subtle border for better definition
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}
+                      loading="lazy"
+                    />
+                  </Box>
+                )}
+              </Box>
               
               {/* Display Target and Last Performance */}
               {(prevWeight !== null || targetReps !== null || lastPerformance[exerciseName]) && (

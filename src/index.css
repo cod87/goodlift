@@ -1,29 +1,72 @@
 :root {
-  /* Dark Theme Colors */
-  --dark-bg: #1e2939;
-  --card-bg: #2a3647;
-  --teal-accent: #1db584;
-  --orange-button: #ff8c00;
-  --secondary-text: #a0a8b3;
-  --white-text: #ffffff;
+  /* Base Colors - Updated dynamically by ThemeContext */
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-text: #1a202c;
+  --color-text-light: #718096;
+  --color-border: rgba(0, 0, 0, 0.06);
+  --color-primary: #1db584;
+  --color-secondary: #f6ad55;
   
   /* Macro Colors */
-  --protein-color: #9c5a6e;
-  --carbs-color: #9d9e7e;
-  --fat-color: #6b8a9d;
+  --protein-color: #e53e3e;
+  --carbs-color: #f6ad55;
+  --fat-color: #4299e1;
+  
+  /* Gradient Colors for Cards */
+  --gradient-streak: linear-gradient(135deg, #9f7aea 0%, #ed64a6 100%);
+  --gradient-primary: linear-gradient(135deg, #1db584 0%, #4fd1aa 100%);
+  --gradient-secondary: linear-gradient(135deg, #f6ad55 0%, #f8c77e 100%);
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
 }
 
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  /* Background color is handled by MUI theme via CssBaseline */
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   /* Safe area support for mobile devices with notches and bottom bars */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
 #root {
   min-height: 100vh;
-  /* Background color is handled by MUI theme via CssBaseline */
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Selection styling */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
 }
 

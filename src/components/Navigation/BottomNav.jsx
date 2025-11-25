@@ -51,7 +51,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       label: 'Progress',
       iconActive: TrendingUp,
       iconInactive: TrendingUpOutlined,
-      activeColor: '#6b8a9d', // Blue accent
+      activeColor: '#63b3ed', // Blue accent
       screens: ['progress'],
     },
     {
@@ -59,7 +59,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       label: 'Settings',
       iconActive: Settings,
       iconInactive: SettingsOutlined,
-      activeColor: '#ff8c00', // Orange accent
+      activeColor: '#f6ad55', // Orange accent
       screens: ['settings', 'log-activity', 'exercise-list', 'profile', 'stretch', 'mobility'],
     },
   ];
@@ -84,12 +84,8 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
         right: 0,
         height: `calc(${touchTargets.navigation} + env(safe-area-inset-bottom))`,
         backgroundColor: theme.palette.background.paper,
-        borderTop: `1px solid ${theme.palette.mode === 'dark' 
-          ? 'rgba(29, 181, 132, 0.2)' 
-          : 'rgba(0, 0, 0, 0.12)'}`,
-        boxShadow: theme.palette.mode === 'dark' 
-          ? '0 -2px 10px rgba(0, 0, 0, 0.3)' 
-          : '0 -2px 10px rgba(0, 0, 0, 0.1)',
+        borderTop: `1px solid ${theme.palette.divider}`,
+        boxShadow: 'none',
         zIndex: zIndex.navigation,
         display: 'flex',
         alignItems: 'center',

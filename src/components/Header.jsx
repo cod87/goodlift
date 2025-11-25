@@ -68,21 +68,17 @@ const Header = ({ onNavigate }) => {
         top: 0,
         left: 0,
         right: 0,
-        height: '60px',
+        height: '56px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-start',
         padding: '0 1rem',
         background: theme.palette.background.paper,
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        boxShadow: theme.palette.mode === 'dark' 
-          ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
-          : '0 2px 8px rgba(0, 0, 0, 0.1)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: 'none',
         zIndex: 100,
-        borderBottom: `1px solid ${theme.palette.mode === 'dark' 
-          ? 'rgba(29, 181, 132, 0.2)' 
-          : 'rgba(0, 0, 0, 0.12)'}`,
+        borderBottom: `1px solid ${theme.palette.divider}`,
       }}
     >
       {/* Left-aligned favicon icon */}

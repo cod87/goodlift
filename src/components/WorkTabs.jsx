@@ -47,62 +47,64 @@ const WorkTabs = ({
   return (
     <Box 
       sx={{ 
-        padding: { xs: 2, sm: 2, md: 3 },
+        padding: { xs: 1.5, sm: 1.5, md: 2 },
+        paddingTop: { xs: 0.5, sm: 0.5, md: 1 },
         maxWidth: '1200px',
         margin: '0 auto',
-        minHeight: 'calc(100vh - 60px)',
+        minHeight: 'calc(100vh - 48px)',
         paddingBottom: { xs: '80px', md: '2rem' },
       }}
     >
-      {/* Tabs Navigation */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+      {/* Tabs Navigation - More compact */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 1.5 }}>
         <Tabs 
           value={activeTab} 
           onChange={handleTabChange}
           variant="fullWidth"
           sx={{
             '& .MuiTab-root': {
-              minHeight: 64,
-              fontSize: { xs: '0.875rem', sm: '1rem' },
+              minHeight: 48,
+              fontSize: { xs: '0.8rem', sm: '0.9rem' },
               fontWeight: 600,
               transition: 'color 0.3s ease',
+              py: 1,
               '&.Mui-selected': {
                 color: activeTab === 0 ? 'primary.main' : activeTab === 1 ? 'secondary.main' : activeTab === 2 ? 'success.main' : 'warning.main',
               },
             },
             '& .MuiTabs-indicator': {
-              height: 3,
-              borderRadius: '3px 3px 0 0',
+              height: 2,
+              borderRadius: '2px 2px 0 0',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               backgroundColor: activeTab === 0 ? 'primary.main' : activeTab === 1 ? 'secondary.main' : activeTab === 2 ? 'success.main' : 'warning.main',
             },
           }}
         >
           <Tab 
-            icon={<FitnessCenter />} 
+            icon={<FitnessCenter sx={{ fontSize: '1.1rem' }} />} 
             label={<Box sx={{ display: { xs: 'none', sm: 'block' } }}>Strength</Box>}
             iconPosition="start"
           />
           <Tab 
-            icon={<DirectionsRun />} 
+            icon={<DirectionsRun sx={{ fontSize: '1.1rem' }} />} 
             label={<Box sx={{ display: { xs: 'none', sm: 'block' } }}>Mobility</Box>}
             iconPosition="start"
           />
           <Tab 
-            icon={<EditNote />} 
+            icon={<EditNote sx={{ fontSize: '1.1rem' }} />} 
             label={<Box sx={{ display: { xs: 'none', sm: 'block' } }}>Activity</Box>}
             iconPosition="start"
           />
           <Tab 
-            icon={<Restaurant />} 
+            icon={<Restaurant sx={{ fontSize: '1.1rem' }} />} 
             label={<Box sx={{ display: { xs: 'none', sm: 'block' } }}>Nutrition</Box>}
             iconPosition="start"
           />
         </Tabs>
       </Box>
 
-      {/* Tab Content */}
-      <Box sx={{ mt: 2 }}>
+      {/* Tab Content - Reduced top margin */}
+      <Box sx={{ mt: 1 }}>
         {activeTab === 0 && (
           <StrengthTab
             onNavigate={onNavigate}

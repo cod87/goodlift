@@ -650,11 +650,11 @@ function AppContent() {
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header onNavigate={handleNavigate} />
+        <Header currentTab={currentScreen} />
         
         <div id="app" style={{ 
           flex: 1,
-          marginTop: '60px',
+          marginTop: '48px',
           paddingBottom: '80px', // Space for bottom nav
         }}>
           {currentScreen === 'home' && (

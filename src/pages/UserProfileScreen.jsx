@@ -126,7 +126,7 @@ const UserProfileScreen = () => {
   };
 
   const renderAvatar = () => {
-    const size = 100;
+    const size = 80;
 
     // Only show dog avatars - if user has a doggo avatar, show it
     if (profile.avatar && isDoggoAvatar(profile.avatar)) {
@@ -172,38 +172,28 @@ const UserProfileScreen = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        padding: { xs: 2, sm: 3, md: 4 },
+        padding: { xs: 1.5, sm: 2, md: 3 },
+        paddingTop: { xs: 0.5, sm: 1, md: 2 },
         paddingBottom: { xs: '80px', sm: 3, md: 4 },
         background: (theme) => theme.palette.background.default,
       }}
     >
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.3 }}
       >
-        <Typography
-          variant="h4"
-          sx={{
-            mb: 3,
-            fontWeight: 700,
-            color: 'text.primary',
-          }}
-        >
-          Profile
-        </Typography>
-
         {/* Profile Header Card */}
-        <Card sx={{ mb: 3, borderRadius: 2 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3, mb: 3 }}>
+        <Card sx={{ mb: 2, borderRadius: 2 }}>
+          <CardContent sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 2 }}>
               {/* Avatar */}
               <Box sx={{ position: 'relative', alignSelf: { xs: 'center', sm: 'flex-start' } }}>
                 <Box sx={{ 
                   borderRadius: '50%', 
                   overflow: 'hidden',
-                  width: 100,
-                  height: 100,
+                  width: 80,
+                  height: 80,
                   border: '2px solid',
                   borderColor: 'divider',
                 }}>
@@ -382,15 +372,15 @@ const UserProfileScreen = () => {
           </CardContent>
         </Card>
 
-        {/* Stats Cards */}
-        <Grid container spacing={3} sx={{ mb: 3 }}>
+        {/* Stats Cards - Compact */}
+        <Grid container spacing={1.5} sx={{ mb: 2 }}>
           <Grid item xs={6} sm={4}>
             <Card>
-              <CardContent>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
+              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                   Total Workouts
                 </Typography>
-                <Typography variant="h4" fontWeight={700}>
+                <Typography variant="h5" fontWeight={700}>
                   {stats.totalWorkouts}
                 </Typography>
               </CardContent>
@@ -399,43 +389,47 @@ const UserProfileScreen = () => {
 
           <Grid item xs={6} sm={4}>
             <Card>
-              <CardContent>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
+              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                   Current Streak
                 </Typography>
-                <Typography variant="h4" fontWeight={700} color="warning.main">
-                  {stats.currentStreak}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  days
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
+                  <Typography variant="h5" fontWeight={700} color="warning.main">
+                    {stats.currentStreak}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    days
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
 
           <Grid item xs={6} sm={4}>
             <Card>
-              <CardContent>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
+              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                   Longest Streak
                 </Typography>
-                <Typography variant="h4" fontWeight={700}>
-                  {stats.longestStreak}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  days
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
+                  <Typography variant="h5" fontWeight={700}>
+                    {stats.longestStreak}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    days
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
 
           <Grid item xs={6} sm={4}>
             <Card>
-              <CardContent>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
+              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                   Total PRs
                 </Typography>
-                <Typography variant="h4" fontWeight={700} color="success.main">
+                <Typography variant="h5" fontWeight={700} color="success.main">
                   {stats.totalPRs}
                 </Typography>
               </CardContent>
@@ -444,30 +438,32 @@ const UserProfileScreen = () => {
 
           <Grid item xs={6} sm={4}>
             <Card>
-              <CardContent>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
+              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                   Wellness Tasks
                 </Typography>
-                <Typography variant="h4" fontWeight={700} color="secondary.main">
-                  {stats.completedWellnessTasks || 0}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  completed
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
+                  <Typography variant="h5" fontWeight={700} color="secondary.main">
+                    {stats.completedWellnessTasks || 0}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    done
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
 
           <Grid item xs={12} sm={8}>
             <Card>
-              <CardContent>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
+              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                   Favorite Exercise
                 </Typography>
                 <Chip 
                   label={stats.favoriteExercise || 'No data yet'}
                   color="primary"
-                  sx={{ mt: 1 }}
+                  size="small"
                 />
               </CardContent>
             </Card>

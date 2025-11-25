@@ -39,13 +39,10 @@ import {
   Tab,
   Alert,
   Chip,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
+import DialPicker from './Common/DialPicker';
 import {
   Close as CloseIcon,
   Search as SearchIcon,
@@ -223,17 +220,30 @@ const LogMealModal = ({
   }, [searchQuery, searchTerms, searchFoodsLocal]);
 
   // Toggle food selection (multi-select pattern like workout builder)
+  // Auto-adds to meal when selected, removes when deselected
   const handleToggleFoodSelection = (food) => {
     try {
       const foodId = food.id || food.fdcId;
       const newSelectedIds = new Set(selectedFoodIds);
       
       if (newSelectedIds.has(foodId)) {
-        // Deselect - remove from selected set
+        // Deselect - remove from selected set and meal
         newSelectedIds.delete(foodId);
+        setMealItems(prevItems => prevItems.filter(item => {
+          const itemFoodId = item.food.id || item.food.fdcId;
+          return itemFoodId !== foodId;
+        }));
       } else {
-        // Select - add to selected set
+        // Select - add to selected set and meal
         newSelectedIds.add(foodId);
+        const newMealItem = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+          food: food,
+          portionType: 'standard', // Default to standard portion
+          portionQuantity: 1, // Number of standard portions
+          grams: food.portion_grams || DEFAULT_GRAMS,
+        };
+        setMealItems(prevItems => [...prevItems, newMealItem]);
       }
       
       setSelectedFoodIds(newSelectedIds);
@@ -243,36 +253,19 @@ const LogMealModal = ({
     }
   };
 
-  // Add selected foods to meal
-  const handleAddSelectedToMeal = () => {
-    if (selectedFoodIds.size === 0) {
-      return;
-    }
-
-    try {
-      const selectedFoods = searchResults.filter(food => 
-        selectedFoodIds.has(food.id || food.fdcId)
-      );
-
-      const newMealItems = selectedFoods.map(food => ({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-        food: food,
-        portionType: 'standard', // Default to standard portion
-        portionQuantity: 1, // Number of standard portions
-        grams: food.portion_grams || DEFAULT_GRAMS,
-      }));
-
-      setMealItems([...mealItems, ...newMealItems]);
-      setSelectedFoodIds(new Set()); // Clear selection
-      setActiveTab(1); // Switch to My Meal tab
-    } catch (error) {
-      console.error('Error adding selected foods to meal:', error);
-      setError('Failed to add foods to meal. Please try again.');
-    }
-  };
-
   const handleRemoveMealItem = (itemId) => {
     try {
+      // Find the item to get its food ID
+      const itemToRemove = mealItems.find(item => item.id === itemId);
+      if (itemToRemove) {
+        const foodId = itemToRemove.food.id || itemToRemove.food.fdcId;
+        // Remove from selected IDs as well
+        setSelectedFoodIds(prevIds => {
+          const newIds = new Set(prevIds);
+          newIds.delete(foodId);
+          return newIds;
+        });
+      }
       setMealItems(mealItems.filter(item => item.id !== itemId));
     } catch (error) {
       console.error('Error removing meal item:', error);
@@ -660,27 +653,14 @@ const LogMealModal = ({
                 </Box>
               )}
 
-              {/* Add Selected Button - shown when foods are selected */}
+              {/* Selection indicator - shown when foods are selected */}
               {selectedFoodIds.size > 0 && (
                 <Box sx={{ mb: 2 }}>
-                  <Button
-                    variant="contained"
-                    color="success"
-                    fullWidth
-                    onClick={handleAddSelectedToMeal}
-                    startIcon={<AddIcon />}
-                    sx={{
-                      py: 1.5,
-                      fontWeight: 600,
-                      animation: 'slideDown 0.3s ease-out',
-                      '@keyframes slideDown': {
-                        from: { opacity: 0, transform: 'translateY(-10px)' },
-                        to: { opacity: 1, transform: 'translateY(0)' },
-                      },
-                    }}
-                  >
-                    Add {selectedFoodIds.size} Selected Food{selectedFoodIds.size > 1 ? 's' : ''} to Meal
-                  </Button>
+                  <Alert severity="success" sx={{ animation: 'fadeIn 0.3s ease-out' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {selectedFoodIds.size} food{selectedFoodIds.size !== 1 ? 's' : ''} added to meal - Click to deselect
+                    </Typography>
+                  </Alert>
                 </Box>
               )}
 
@@ -688,7 +668,7 @@ const LogMealModal = ({
               {!searching && searchResults.length > 0 && (
                 <>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
-                    Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} - Click to select, then add to meal
+                    Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} - Click to add to meal
                   </Typography>
                   <Paper variant="outlined" sx={{ borderRadius: 2 }}>
                     <List disablePadding>
@@ -812,25 +792,25 @@ const LogMealModal = ({
                                         />
                                       ) : (
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                          <FormControl size="small" sx={{ minWidth: 80 }}>
-                                            <InputLabel>Qty</InputLabel>
-                                            <Select
-                                              value={item.portionQuantity}
-                                              label="Qty"
-                                              onChange={(e) => handleChangePortionQuantity(item.id, e.target.value)}
-                                            >
-                                              <MenuItem value={0.25}>1/4</MenuItem>
-                                              <MenuItem value={0.5}>1/2</MenuItem>
-                                              <MenuItem value={0.75}>3/4</MenuItem>
-                                              <MenuItem value={1}>1</MenuItem>
-                                              <MenuItem value={1.5}>1.5</MenuItem>
-                                              <MenuItem value={2}>2</MenuItem>
-                                              <MenuItem value={2.5}>2.5</MenuItem>
-                                              <MenuItem value={3}>3</MenuItem>
-                                              <MenuItem value={4}>4</MenuItem>
-                                              <MenuItem value={5}>5</MenuItem>
-                                            </Select>
-                                          </FormControl>
+                                          <DialPicker
+                                            value={item.portionQuantity}
+                                            options={[
+                                              { label: '1/4', value: 0.25 },
+                                              { label: '1/2', value: 0.5 },
+                                              { label: '3/4', value: 0.75 },
+                                              { label: '1', value: 1 },
+                                              { label: '1.5', value: 1.5 },
+                                              { label: '2', value: 2 },
+                                              { label: '2.5', value: 2.5 },
+                                              { label: '3', value: 3 },
+                                              { label: '4', value: 4 },
+                                              { label: '5', value: 5 },
+                                            ]}
+                                            onChange={(value) => handleChangePortionQuantity(item.id, value)}
+                                            minValueWidth="40px"
+                                            useArrows={true}
+                                            sx={{ minWidth: 120 }}
+                                          />
                                           <Typography variant="body2" color="text.secondary">
                                             {getPortionDisplayLabel()}
                                           </Typography>

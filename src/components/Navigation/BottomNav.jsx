@@ -10,6 +10,9 @@ import {
 } from '@mui/icons-material';
 import { touchTargets, zIndex } from '../../theme/responsive';
 
+// Single highlight color for all nav items
+const ACTIVE_COLOR = '#1db584';
+
 /**
  * BottomNav - Fixed bottom navigation for all devices
  * 
@@ -32,7 +35,6 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       iconActive: null, // Use custom SVG
       iconInactive: null, // Use custom SVG
       customIcon: 'work-icon.svg',
-      activeColor: '#1db584', // Green
       screens: [
         'home', 
         'selection', 
@@ -44,14 +46,13 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
         'timer',
         'cardio',
         'hiit'
-      ], // removed 'workout-plan' - no longer using workout planning
+      ],
     },
     {
       id: 'progress',
       label: 'Progress',
       iconActive: TrendingUp,
       iconInactive: TrendingUpOutlined,
-      activeColor: '#63b3ed', // Blue accent
       screens: ['progress'],
     },
     {
@@ -59,7 +60,6 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       label: 'Settings',
       iconActive: Settings,
       iconInactive: SettingsOutlined,
-      activeColor: '#f6ad55', // Orange accent
       screens: ['settings', 'log-activity', 'exercise-list', 'profile', 'stretch', 'mobility'],
     },
   ];
@@ -73,19 +73,15 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
   };
 
   return (
-    <motion.nav
-      initial={{ y: 100 }}
-      animate={{ y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+    <nav
       style={{
         position: 'fixed',
         bottom: 0,
         left: 0,
         right: 0,
         height: `calc(${touchTargets.navigation} + env(safe-area-inset-bottom))`,
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.default,
         borderTop: `1px solid ${theme.palette.divider}`,
-        boxShadow: 'none',
         zIndex: zIndex.navigation,
         display: 'flex',
         alignItems: 'center',
@@ -101,7 +97,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
         const baseUrl = import.meta.env.BASE_URL || '/';
         
         return (
-          <motion.button
+          <button
             key={item.id}
             onClick={() => handleNavClick(item.id)}
             style={{
@@ -115,14 +111,13 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              color: active ? item.activeColor : theme.palette.text.secondary,
+              color: active ? ACTIVE_COLOR : theme.palette.text.secondary,
               transition: 'color 0.2s ease, opacity 0.15s ease',
               padding: '8px 4px',
               position: 'relative',
             }}
             aria-label={item.label}
             aria-current={active ? 'page' : undefined}
-            whilePressed={{ opacity: 0.7 }}
           >
             {/* Icon */}
             <div style={{
@@ -161,27 +156,10 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
             }}>
               {item.label}
             </span>
-            
-            {/* Active indicator */}
-            {active && (
-              <motion.div
-                layoutId="bottomNavIndicator"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '3px',
-                  backgroundColor: item.activeColor,
-                  borderRadius: '0 0 3px 3px',
-                }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              />
-            )}
-          </motion.button>
+          </button>
         );
       })}
-    </motion.nav>
+    </nav>
   );
 });
 

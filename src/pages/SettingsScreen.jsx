@@ -343,7 +343,7 @@ const SettingsScreen = ({ onNavigate }) => {
           {/* My Plans Section removed - no longer using workout planning */}
 
           {/* User Profile Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -378,7 +378,7 @@ const SettingsScreen = ({ onNavigate }) => {
           </Card>
 
           {/* Exercise Database Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -413,7 +413,7 @@ const SettingsScreen = ({ onNavigate }) => {
           </Card>
 
           {/* Workout Scheduling Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -461,7 +461,7 @@ const SettingsScreen = ({ onNavigate }) => {
           </Card>
 
           {/* App Preferences Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -648,7 +648,7 @@ const SettingsScreen = ({ onNavigate }) => {
           </Card>
 
           {/* Wellness & Push Notifications Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -755,7 +755,7 @@ const SettingsScreen = ({ onNavigate }) => {
           </Card>
 
           {/* Data & Privacy Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"

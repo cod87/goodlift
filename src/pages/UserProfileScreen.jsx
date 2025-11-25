@@ -208,10 +208,8 @@ const UserProfileScreen = () => {
                     right: -4,
                     bgcolor: 'primary.main',
                     color: 'white',
-                    boxShadow: 2,
                     '&:hover': { 
                       bgcolor: 'primary.dark',
-                      boxShadow: 4,
                     },
                   }}
                 >

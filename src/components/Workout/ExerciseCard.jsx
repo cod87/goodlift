@@ -258,7 +258,7 @@ const ExerciseCard = memo(({
         gridTemplateColumns: shouldUseTwoColumns ? '2fr 1fr' : 'none',
         gridTemplateRows: shouldUseTwoColumns ? '1fr' : 'none',
         flexDirection: shouldUseTwoColumns ? undefined : 'column',
-        gap: shouldUseTwoColumns ? 2 : 0.3,
+        gap: shouldUseTwoColumns ? 0.5 : 0.3,
         mb: 0.3,
       }}>
         {/* Portrait Mode: Exercise Name and Image stacked vertically */}
@@ -367,11 +367,11 @@ const ExerciseCard = memo(({
                   fontWeight: '700 !important',
                   color: 'primary.main',
                   textAlign: 'left',
-                  lineHeight: '1.2 !important',
+                  lineHeight: '1.05 !important',
                   fontFamily: "'Montserrat', sans-serif !important",
                   fontSize: {
-                    sm: '1.5rem !important', // Smaller in landscape to fit
-                    md: '2rem !important',
+                    sm: '2.5rem !important', // Larger in landscape
+                    md: '3.5rem !important',
                   },
                   // Limit to max 2 lines with ellipsis
                   display: '-webkit-box',

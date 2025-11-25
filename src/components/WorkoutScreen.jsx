@@ -898,9 +898,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
               {/* Exercise Name and Demo Image - Two Column Layout in Landscape, Single Column in Portrait */}
               <Box sx={{ 
-                mt: 2,
-                mb: 1.5,
-                px: { xs: 2, sm: 4 },
+                mt: shouldUseTwoColumns ? 0 : 2,
+                mb: shouldUseTwoColumns ? 0 : 1.5,
+                px: { xs: 2, sm: shouldUseTwoColumns ? 2 : 4 },
                 // Use CSS Grid for landscape mode for reliable 2:1 split
                 display: shouldUseTwoColumns ? 'grid' : 'flex',
                 // CSS Grid template: 2fr for name, 1fr for image (2:1 ratio)
@@ -908,8 +908,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 gridTemplateRows: shouldUseTwoColumns ? '1fr' : 'none',
                 flexDirection: shouldUseTwoColumns ? undefined : 'column',
                 alignItems: 'center',
-                gap: shouldUseTwoColumns ? 2 : 0.3,
-                minHeight: shouldUseTwoColumns ? { sm: '150px', md: '200px' } : { xs: '80px', sm: '100px' },
+                gap: shouldUseTwoColumns ? 0.5 : 0.3,
+                minHeight: shouldUseTwoColumns ? { sm: '100px', md: '120px' } : { xs: '80px', sm: '100px' },
               }}>
                 {/* Exercise Name */}
                 <Box sx={{ 
@@ -925,13 +925,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                     variant="h3" 
                     component="h2"
                     sx={{ 
-                      fontWeight: 600,
+                      fontWeight: 700,
                       fontSize: shouldUseTwoColumns 
-                        ? { sm: '1.5rem !important', md: '2rem !important' }
+                        ? { sm: '2.5rem !important', md: '3.5rem !important' }
                         : exerciseFontSize + ' !important',
                       color: 'primary.main',
                       textAlign: shouldUseTwoColumns ? 'left' : 'center',
-                      lineHeight: '1.2 !important',
+                      lineHeight: '1.05 !important',
                       width: '100%',
                       wordBreak: 'break-word',
                       overflowWrap: 'break-word',
@@ -966,17 +966,12 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                       sx={{
                         maxWidth: '100%',
                         maxHeight: shouldUseTwoColumns 
-                          ? { sm: '150px', md: '180px' }
+                          ? { sm: '100px', md: '110px' }
                           : { xs: '200px', sm: '280px' },
                         width: 'auto',
                         height: 'auto',
-                        borderRadius: 2,
+                        borderRadius: 1,
                         objectFit: 'contain',
-                        // Semi-transparent white background for visibility of dark line drawings
-                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                        padding: shouldUseTwoColumns ? 1 : 2,
-                        // Add subtle border for better definition
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
                       }}
                       loading="lazy"
                     />

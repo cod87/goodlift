@@ -89,17 +89,17 @@ const ExerciseCard = memo(({
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
-  // Check if the provided demoImage is actually a demo image (not the fallback icon)
-  const isActualDemoImage = (imagePath) => {
+  // Check if the provided demoImage is a real demo image (not the fallback icon)
+  const hasValidDemoImage = (imagePath) => {
     if (!imagePath) return false;
     // If the image path contains 'work-icon.svg', it's a fallback, not an actual demo
     return !imagePath.includes('work-icon.svg');
   };
 
   // Update image source when demoImage prop changes
-  // Only use demoImage if it's an actual demo image, not the fallback
+  // Only use demoImage if it's a valid demo image, not the fallback
   useEffect(() => {
-    if (isActualDemoImage(demoImage)) {
+    if (hasValidDemoImage(demoImage)) {
       setImageSrc(demoImage);
     } else {
       setImageSrc(null);

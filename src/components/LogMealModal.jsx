@@ -237,7 +237,7 @@ const LogMealModal = ({
         // Select - add to selected set and meal
         newSelectedIds.add(foodId);
         const newMealItem = {
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+          id: crypto.randomUUID(),
           food: food,
           portionType: 'standard', // Default to standard portion
           portionQuantity: 1, // Number of standard portions
@@ -658,7 +658,7 @@ const LogMealModal = ({
                 <Box sx={{ mb: 2 }}>
                   <Alert severity="success" sx={{ animation: 'fadeIn 0.3s ease-out' }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {selectedFoodIds.size} food{selectedFoodIds.size !== 1 ? 's' : ''} added to meal - Click to deselect
+                      {selectedFoodIds.size} food{selectedFoodIds.size !== 1 ? 's' : ''} added to meal - Click on a food below to remove it
                     </Typography>
                   </Alert>
                 </Box>

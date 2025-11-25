@@ -50,7 +50,6 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import CompactHeader from './Common/CompactHeader';
 import Achievements from './Achievements';
 import WeightTracker from './WeightTracker';
 import MonthCalendarView from './Calendar/MonthCalendarView';
@@ -367,57 +366,58 @@ const ProgressDashboard = () => {
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh', overflowX: 'hidden' }}>
-      <CompactHeader title="Progress" subtitle="Track your fitness journey" />
-
       <Box sx={{ 
         maxWidth: '1400px', 
         margin: '0 auto', 
-        p: { xs: 1, sm: 2, md: 3 }, 
+        p: { xs: 1.5, sm: 2, md: 3 }, 
+        pt: { xs: 0.5, sm: 1, md: 2 },
         pb: { xs: '80px', md: 3 },
         width: '100%',
         boxSizing: 'border-box',
       }}>
-        {/* Tab Navigation */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        {/* Tab Navigation - Compact */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
           <Tabs
             value={currentTab}
             onChange={(e, newValue) => setCurrentTab(newValue)}
             variant="fullWidth"
             sx={{ 
-              maxWidth: { xs: '100%', sm: 600 }, 
+              maxWidth: { xs: '100%', sm: 500 }, 
               margin: '0 auto',
               '& .MuiTab-root': {
+                minHeight: 44,
                 transition: 'color 0.3s ease',
+                fontSize: '0.85rem',
                 '&.Mui-selected': {
                   color: currentTab === 0 ? 'primary.main' : 'warning.main',
                 },
               },
               '& .MuiTabs-indicator': {
-                height: 3,
-                borderRadius: '3px 3px 0 0',
+                height: 2,
+                borderRadius: '2px 2px 0 0',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 backgroundColor: currentTab === 0 ? 'primary.main' : 'warning.main',
               },
             }}
           >
             <Tab 
-              icon={<Assessment />} 
+              icon={<Assessment sx={{ fontSize: '1.1rem' }} />} 
               iconPosition="start" 
               label="Statistics" 
-              sx={{ minHeight: 48 }}
+              sx={{ minHeight: 44 }}
             />
             <Tab 
-              icon={<EmojiEvents />} 
+              icon={<EmojiEvents sx={{ fontSize: '1.1rem' }} />} 
               iconPosition="start" 
               label="Achievements" 
-              sx={{ minHeight: 48 }}
+              sx={{ minHeight: 44 }}
             />
           </Tabs>
         </Box>
 
         {/* Statistics Tab */}
         {currentTab === 0 && (
-          <Stack spacing={3}>
+          <Stack spacing={2}>
             {/* Monthly Calendar View - at the top */}
             <Box>
               <MonthCalendarView

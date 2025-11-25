@@ -47,10 +47,10 @@ export const ThemeProvider = ({ children }) => {
       root.style.setProperty('--color-primary', '#1db584');
       root.style.setProperty('--color-secondary', '#f6ad55');
     } else {
-      // Light theme: Clean whites with subtle grays
-      root.style.setProperty('--color-bg', '#f8fafc');
-      root.style.setProperty('--color-surface', '#ffffff');
-      root.style.setProperty('--color-surface-elevated', '#ffffff');
+      // Light theme: White main background with subtle gray for surfaces
+      root.style.setProperty('--color-bg', '#ffffff');
+      root.style.setProperty('--color-surface', '#f8fafc');
+      root.style.setProperty('--color-surface-elevated', '#f8fafc');
       root.style.setProperty('--color-text', '#1a202c');
       root.style.setProperty('--color-text-light', '#718096');
       root.style.setProperty('--color-border', 'rgba(0, 0, 0, 0.06)');
@@ -111,7 +111,7 @@ export const ThemeProvider = ({ children }) => {
             dark: '#4299e1',
           },
         } : {
-          // Light theme - clean minimalist design
+          // Light theme - clean minimalist design with white main background
           mode: 'light',
           primary: {
             main: '#1db584', // Teal accent
@@ -126,8 +126,8 @@ export const ThemeProvider = ({ children }) => {
             contrastText: '#1a202c',
           },
           background: {
-            default: '#f8fafc', // Very light gray background
-            paper: '#ffffff', // White for cards and surfaces
+            default: '#ffffff', // White main background
+            paper: '#f8fafc', // Very light gray for cards/surfaces for subtle contrast
           },
           text: {
             primary: '#1a202c', // Dark text

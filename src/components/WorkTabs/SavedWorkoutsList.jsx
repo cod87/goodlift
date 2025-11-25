@@ -8,7 +8,6 @@ import {
   Button, 
   Stack,
   IconButton,
-  Chip,
   List,
   ListItem,
   ListItemText,
@@ -31,6 +30,8 @@ import {
   Unarchive,
   ExpandMore,
   ExpandLess,
+  FitnessCenter,
+  Layers,
 } from '@mui/icons-material';
 import { getSavedWorkouts, deleteSavedWorkout, updateSavedWorkout } from '../../utils/storage';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
@@ -47,6 +48,16 @@ const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'F
 const getExerciseName = (exercise) => {
   if (!exercise) return null;
   return exercise['Exercise Name'] || exercise.exerciseName || exercise.name || null;
+};
+
+/**
+ * Get count of supersets from superset config
+ * @param {Array} supersetConfig - Array of exercise counts per superset
+ * @returns {number} Count of supersets (groups with more than 1 exercise)
+ */
+const getSupersetCount = (supersetConfig) => {
+  if (!supersetConfig || !Array.isArray(supersetConfig)) return 0;
+  return supersetConfig.filter(count => count > 1).length;
 };
 
 /**
@@ -264,63 +275,81 @@ const SavedWorkoutsList = memo(({
         {workouts.map((workout) => {
           // Find the original index in savedWorkouts array
           const originalIndex = savedWorkouts.findIndex(w => w.id === workout.id || (w.createdAt === workout.createdAt && w.name === workout.name));
+          const supersetCount = getSupersetCount(workout.supersetConfig);
           
           return (
-            <Card key={workout.id || originalIndex} sx={{ mb: 2, borderRadius: 3 }}>
+            <Card key={workout.id || originalIndex} sx={{ mb: 1.5, borderRadius: 2 }}>
               <ListItem
                 disablePadding
                 secondaryAction={
                   <IconButton
                     edge="end"
                     onClick={(e) => handleMenuOpen(e, originalIndex)}
-                    sx={{ mr: 1 }}
+                    size="small"
+                    sx={{ mr: 0.5 }}
                   >
-                    <MoreVert />
+                    <MoreVert fontSize="small" />
                   </IconButton>
                 }
               >
-                <ListItemButton onClick={() => handleWorkoutClick(workout)}>
+                <ListItemButton onClick={() => handleWorkoutClick(workout)} sx={{ py: 1.5, px: 2 }}>
                   <ListItemText
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                          {workout.name || `${workout.type || 'Custom'} Workout`}
-                        </Typography>
-                        {workout.assignedDay && (
-                          <Chip
-                            icon={<CalendarMonth />}
-                            label={workout.assignedDay.substring(0, 3)}
-                            size="small"
-                            color="primary"
-                            sx={{ fontWeight: 600 }}
-                          />
-                        )}
-                      </Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.95rem', mb: 0.5 }}>
+                        {workout.name || `${workout.type || 'Custom'} Workout`}
+                      </Typography>
                     }
                     secondary={
-                      <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap">
-                        <Chip
-                          label={`${workout.exercises?.length || 0} exercises`}
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                        />
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 1.5,
+                        color: 'text.secondary',
+                        fontSize: '0.75rem',
+                      }}>
+                        {/* Exercise count */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <FitnessCenter sx={{ fontSize: '0.875rem', opacity: 0.7 }} />
+                          <span>{workout.exercises?.length || 0}</span>
+                        </Box>
+                        
+                        {/* Workout type */}
                         {workout.type && (
-                          <Chip
-                            label={getWorkoutTypeShorthand(workout.type)}
-                            size="small"
-                            variant="outlined"
-                          />
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography 
+                              component="span" 
+                              sx={{ 
+                                fontSize: '0.75rem', 
+                                color: 'text.secondary',
+                                textTransform: 'lowercase',
+                              }}
+                            >
+                              {getWorkoutTypeShorthand(workout.type)}
+                            </Typography>
+                          </Box>
                         )}
-                        {workout.supersetConfig && workout.supersetConfig.length > 0 && (
-                          <Chip
-                            label={`${workout.supersetConfig.filter(count => count > 1).length} supersets`}
-                            size="small"
-                            color="secondary"
-                            variant="outlined"
-                          />
+                        
+                        {/* Superset count */}
+                        {supersetCount > 0 && (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Layers sx={{ fontSize: '0.875rem', opacity: 0.7 }} />
+                            <span>{supersetCount}</span>
+                          </Box>
                         )}
-                      </Stack>
+                        
+                        {/* Assigned day */}
+                        {workout.assignedDay && (
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 0.5,
+                            color: 'primary.main',
+                          }}>
+                            <CalendarMonth sx={{ fontSize: '0.875rem' }} />
+                            <span style={{ fontWeight: 500 }}>{workout.assignedDay.substring(0, 3)}</span>
+                          </Box>
+                        )}
+                      </Box>
                     }
                   />
                 </ListItemButton>
@@ -334,29 +363,28 @@ const SavedWorkoutsList = memo(({
 
   return (
     <Box>
-      {/* Header with Create Button - Minimalist Style */}
-      <Box sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-              My Workouts
-            </Typography>
-          </Box>
-          <IconButton
-            color="primary"
-            onClick={onCreateWorkout}
-            sx={{ 
-              bgcolor: 'primary.main',
-              color: 'white',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              },
-            }}
-          >
-            <Add />
-          </IconButton>
-        </Stack>
-      </Box>
+      {/* Header with Create Button - Compact Minimalist Style */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          My Workouts
+        </Typography>
+        <IconButton
+          color="primary"
+          onClick={onCreateWorkout}
+          size="small"
+          sx={{ 
+            bgcolor: 'primary.main',
+            color: 'white',
+            width: 32,
+            height: 32,
+            '&:hover': {
+              bgcolor: 'primary.dark',
+            },
+          }}
+        >
+          <Add fontSize="small" />
+        </IconButton>
+      </Stack>
 
       {/* Saved Workouts List */}
       {activeWorkouts.length === 0 && archivedWorkouts.length === 0 ? (

@@ -4,6 +4,26 @@ import { Box, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Butto
 import WeekBadge from './Common/WeekBadge';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 
+// Tab name mapping - defined outside component for performance
+const TAB_DISPLAY_NAMES = {
+  'home': 'Work',
+  'selection': 'Work',
+  'preview': 'Workout Preview',
+  'workout': 'Workout',
+  'completion': 'Workout Complete',
+  'progress': 'Progress',
+  'settings': 'Settings',
+  'profile': 'Profile',
+  'exercise-list': 'Exercise Library',
+  'cardio': 'Timer',
+  'hiit': 'Timer',
+  'timer': 'Timer',
+  'stretch': 'Mobility',
+  'mobility': 'Mobility',
+  'log-activity': 'Log Activity',
+  'edit-weekly-schedule': 'Weekly Schedule',
+};
+
 /**
  * Header component - Compact, minimalist sticky header
  * Shows current tab/subtab name on left, week badge on right
@@ -32,27 +52,7 @@ const Header = ({ currentTab, currentSubtab }) => {
   };
 
   // Get display name for current tab
-  const getTabDisplayName = () => {
-    const tabNames = {
-      'home': 'Work',
-      'selection': 'Work',
-      'preview': 'Workout Preview',
-      'workout': 'Workout',
-      'completion': 'Workout Complete',
-      'progress': 'Progress',
-      'settings': 'Settings',
-      'profile': 'Profile',
-      'exercise-list': 'Exercise Library',
-      'cardio': 'Timer',
-      'hiit': 'Timer',
-      'timer': 'Timer',
-      'stretch': 'Mobility',
-      'mobility': 'Mobility',
-      'log-activity': 'Log Activity',
-      'edit-weekly-schedule': 'Weekly Schedule',
-    };
-    return tabNames[currentTab] || 'GoodLift';
-  };
+  const tabDisplayName = TAB_DISPLAY_NAMES[currentTab] || 'GoodLift';
 
   return (
     <Box
@@ -83,7 +83,7 @@ const Header = ({ currentTab, currentSubtab }) => {
             letterSpacing: '-0.01em',
           }}
         >
-          {getTabDisplayName()}
+          {tabDisplayName}
         </Typography>
         {currentSubtab && (
           <>

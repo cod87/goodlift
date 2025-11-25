@@ -51,6 +51,16 @@ const getExerciseName = (exercise) => {
 };
 
 /**
+ * Get count of supersets from superset config
+ * @param {Array} supersetConfig - Array of exercise counts per superset
+ * @returns {number} Count of supersets (groups with more than 1 exercise)
+ */
+const getSupersetCount = (supersetConfig) => {
+  if (!supersetConfig || !Array.isArray(supersetConfig)) return 0;
+  return supersetConfig.filter(count => count > 1).length;
+};
+
+/**
  * SavedWorkoutsList - Display list of saved workouts
  * Features:
  * - List of saved workouts with basic info
@@ -265,7 +275,7 @@ const SavedWorkoutsList = memo(({
         {workouts.map((workout) => {
           // Find the original index in savedWorkouts array
           const originalIndex = savedWorkouts.findIndex(w => w.id === workout.id || (w.createdAt === workout.createdAt && w.name === workout.name));
-          const supersetCount = workout.supersetConfig ? workout.supersetConfig.filter(count => count > 1).length : 0;
+          const supersetCount = getSupersetCount(workout.supersetConfig);
           
           return (
             <Card key={workout.id || originalIndex} sx={{ mb: 1.5, borderRadius: 2 }}>

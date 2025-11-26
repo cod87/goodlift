@@ -1,12 +1,12 @@
 import { Box, keyframes } from '@mui/material';
 
-// Spinning animation for the favicon
+// Spinning animation for the favicon (counter-clockwise)
 const spin = keyframes`
   from {
-    transform: rotate(0deg);
+    transform: rotate(360deg);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(0deg);
   }
 `;
 
@@ -25,10 +25,11 @@ const LoadingScreen = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         minHeight: '100vh',
         bgcolor: 'background.default',
         gap: 4,
+        pt: 'calc((100vh - 300px) / 3)', // Position 1/3 from top (2/3 from bottom)
       }}
     >
       {/* Main Logo */}

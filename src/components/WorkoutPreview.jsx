@@ -378,9 +378,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
         mb: 2,
       }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-          <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 700 }}>
-            {isCustomizeMode ? 'Customize Workout' : 'Workout Preview'}
-          </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
             {supersets.length} Supersets • {currentWorkout.filter(ex => ex !== null).length} Exercises
             {!hasIndividualSets && ` • ${setsPerSuperset} Sets Each`}
@@ -457,9 +454,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             </Box>
           </Box>
         )}
-        <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-          {isCustomizeMode ? 'Select exercises and set your target weight and reps for each' : 'Set your starting target weight and target reps for each exercise'}
-        </Typography>
       </Box>
 
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ px: { xs: 0.5, sm: 0 } }}>
@@ -576,7 +570,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               direction="row" 
                               spacing={{ xs: 1, sm: 1.5 }} 
                               sx={{ 
-                                pl: { xs: 3.5, sm: 5.5 },
+                                pl: { xs: 4, sm: 5.5 },
                                 flexWrap: { xs: 'wrap', sm: 'nowrap' },
                                 mb: { xs: 1, sm: 1.5 }
                               }}
@@ -635,7 +629,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             variant="caption" 
                             color="text.secondary" 
                             sx={{ 
-                              pl: { xs: 3.5, sm: 5.5 },
+                              pl: { xs: 4, sm: 5.5 },
                               fontStyle: 'italic',
                               fontSize: { xs: '0.65rem', sm: '0.75rem' }
                             }}
@@ -650,7 +644,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                         )}
                         {/* Muscle, Equipment indicators and Randomize button - Below weight/reps */}
                         <Box sx={{ 
-                          pl: { xs: 3.5, sm: 5.5 },
+                          pl: { xs: 4, sm: 5.5 },
                           display: 'flex',
                           alignItems: 'center',
                           gap: 0.5,

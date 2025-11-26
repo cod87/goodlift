@@ -1,8 +1,8 @@
 import { useState, useEffect, memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
-import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, Snackbar, Alert, IconButton } from '@mui/material';
-import { PlayArrow, Close, StarOutline, Star, Shuffle, Add, Remove } from '@mui/icons-material';
+import { Box, Typography, Card, CardContent, Button, Stack, TextField, Snackbar, Alert, IconButton } from '@mui/material';
+import { PlayArrow, StarOutline, Star, Shuffle, Add, Remove } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 import ExerciseAutocomplete from './ExerciseAutocomplete';
@@ -472,42 +472,42 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           >
             <Card 
               sx={{ 
-                background: 'linear-gradient(135deg, rgba(138, 190, 185, 0.1), rgba(193, 120, 90, 0.1))',
-                border: '2px solid',
-                borderColor: 'primary.main',
-                borderRadius: 3,
-                transition: 'all 0.3s ease',
+                bgcolor: 'background.paper',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 2,
+                transition: 'all 0.2s ease',
                 maxWidth: '100%',
                 boxSizing: 'border-box',
+                boxShadow: 1,
                 '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 12px 24px rgba(48, 86, 105, 0.2)',
+                  boxShadow: 2,
                 }
               }}
             >
               <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
-                <Typography 
-                  variant="h6" 
-                  gutterBottom 
+                <Box 
                   sx={{ 
-                    color: 'secondary.main',
-                    fontWeight: 600,
-                    mb: 1.5,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    gap: 1,
+                    mb: 1.5,
+                    pb: 1,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
                   }}
                 >
-                  <Chip 
-                    label={`Superset ${idx + 1}`} 
-                    size="small" 
+                  <Typography 
+                    variant="body2" 
                     sx={{ 
-                      bgcolor: 'secondary.main',
-                      color: 'white',
-                      fontWeight: 600
-                    }} 
-                  />
-                </Typography>
+                      color: 'text.secondary',
+                      fontWeight: 600,
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                    }}
+                  >
+                    Superset {idx + 1}
+                  </Typography>
+                </Box>
                 
                 <Stack spacing={{ xs: 1, sm: 1.5 }}>
                   {superset.map((exercise, exerciseIdx) => {
@@ -524,21 +524,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                         sx={{ 
                           position: 'relative',
                           p: { xs: 1, sm: 1.5 },
-                          bgcolor: 'background.paper',
-                          borderRadius: 2,
-                          transition: 'all 0.3s ease',
-                          transform: focusedExerciseIndex === globalIndex ? 'translateX(8px)' : 'translateX(0)',
-                          '&::before': {
-                            content: '""',
-                            position: 'absolute',
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            width: '4px',
-                            borderRadius: '2px 0 0 2px',
-                            bgcolor: focusedExerciseIndex === globalIndex ? 'primary.main' : 'transparent',
-                            transition: 'all 0.3s ease',
-                          },
+                          bgcolor: 'background.default',
+                          borderRadius: 1.5,
+                          transition: 'all 0.2s ease',
+                          border: '1px solid',
+                          borderColor: focusedExerciseIndex === globalIndex ? 'primary.main' : 'transparent',
                         }}
                         onFocus={() => setFocusedExerciseIndex(globalIndex)}
                         onBlur={() => setFocusedExerciseIndex(null)}
@@ -551,10 +541,10 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                         }}>
                           <Typography 
                             sx={{ 
-                              fontSize: { xs: '1.25rem', sm: '1.75rem' },
-                              color: 'primary.main',
-                              fontWeight: 700,
-                              width: { xs: '28px', sm: '36px' },
+                              fontSize: { xs: '1rem', sm: '1.25rem' },
+                              color: 'text.secondary',
+                              fontWeight: 600,
+                              width: { xs: '24px', sm: '32px' },
                               textAlign: 'center',
                               flexShrink: 0,
                             }}
@@ -663,40 +653,58 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                           pl: { xs: 3.5, sm: 5.5 },
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 1,
+                          gap: 0.5,
                           flexWrap: 'wrap'
                         }}>
-                          <Chip 
-                            label={exercise['Primary Muscle']} 
-                            size="small" 
-                            variant="outlined"
+                          <Typography
+                            variant="caption"
                             sx={{ 
-                              borderColor: 'primary.main',
-                              color: 'primary.main',
-                              fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                            }}
-                          />
-                          <Chip 
-                            label={exercise['Equipment']} 
-                            size="small" 
-                            variant="outlined"
-                            sx={{ 
-                              borderColor: 'text.secondary',
                               color: 'text.secondary',
                               fontSize: { xs: '0.65rem', sm: '0.75rem' }
                             }}
-                          />
+                          >
+                            {exercise['Primary Muscle']}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ 
+                              color: 'text.disabled',
+                              fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            }}
+                          >
+                            •
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ 
+                              color: 'text.secondary',
+                              fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            }}
+                          >
+                            {exercise['Equipment']}
+                          </Typography>
                           {typeof exercise.sets === 'number' && (
-                            <Chip 
-                              label={`${exercise.sets} Set${exercise.sets !== 1 ? 's' : ''}`}
-                              size="small" 
-                              variant="filled"
-                              sx={{ 
-                                bgcolor: 'primary.main',
-                                color: 'white',
-                                fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                              }}
-                            />
+                            <>
+                              <Typography
+                                variant="caption"
+                                sx={{ 
+                                  color: 'text.disabled',
+                                  fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                                }}
+                              >
+                                •
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{ 
+                                  color: 'primary.main',
+                                  fontWeight: 600,
+                                  fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                                }}
+                              >
+                                {exercise.sets} Set{exercise.sets !== 1 ? 's' : ''}
+                              </Typography>
+                            </>
                           )}
                           {onRandomizeExercise && !isCustomizeMode && (
                             <IconButton
@@ -706,16 +714,18 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                                 handleRandomizeExercise(exercise, globalIndex);
                               }}
                               sx={{
-                                color: 'primary.main',
-                                minWidth: '36px',
-                                minHeight: '36px',
+                                color: 'text.secondary',
+                                minWidth: '28px',
+                                minHeight: '28px',
+                                ml: 0.5,
                                 '&:hover': {
-                                  backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                                  color: 'primary.main',
+                                  backgroundColor: 'action.hover',
                                 },
                               }}
                               aria-label={`Randomize ${exerciseName}`}
                             >
-                              <Shuffle fontSize="small" />
+                              <Shuffle sx={{ fontSize: { xs: 16, sm: 18 } }} />
                             </IconButton>
                           )}
                         </Box>
@@ -743,48 +753,50 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           justifyContent="center"
         >
           <Button
-            variant="contained"
+            variant="outlined"
             size="large"
             onClick={onCancel}
             sx={{
-              borderRadius: 2,
-              minWidth: { xs: '60px', sm: '80px' },
-              px: { xs: 1, sm: 2 },
-              py: 1.5,
-              fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              borderRadius: 1.5,
+              minWidth: { xs: '50px', sm: '60px' },
+              px: { xs: 1.5, sm: 2 },
+              py: 1,
+              fontSize: { xs: '0.9rem', sm: '1rem' },
               fontWeight: 600,
-              bgcolor: 'rgb(237, 63, 39)',
-              color: 'white',
+              borderColor: 'divider',
+              color: 'text.secondary',
               '&:hover': {
-                bgcolor: 'rgb(200, 50, 30)',
+                borderColor: 'text.secondary',
+                bgcolor: 'action.hover',
               }
             }}
           >
-            ✕
+            Cancel
           </Button>
           <Button
-            variant="contained"
+            variant="outlined"
             size="large"
             startIcon={savedToFavorites ? <Star /> : <StarOutline />}
             onClick={handleSaveToFavorites}
             disabled={savedToFavorites}
             sx={{
-              borderRadius: 2,
+              borderRadius: 1.5,
               flex: 1,
-              maxWidth: { xs: '130px', sm: '150px' },
-              px: { xs: 2, sm: 3 },
-              py: 1.5,
-              fontSize: { xs: '0.9rem', sm: '1.1rem' },
+              maxWidth: { xs: '110px', sm: '130px' },
+              px: { xs: 1.5, sm: 2 },
+              py: 1,
+              fontSize: { xs: '0.85rem', sm: '0.95rem' },
               fontWeight: 600,
-              bgcolor: savedToFavorites ? 'rgb(76, 175, 80)' : 'rgb(254, 178, 26)',
-              color: 'white',
+              borderColor: savedToFavorites ? 'success.main' : 'warning.main',
+              color: savedToFavorites ? 'success.main' : 'warning.main',
               '&:hover': {
-                bgcolor: savedToFavorites ? 'rgb(56, 142, 60)' : 'rgb(245, 158, 11)',
+                borderColor: savedToFavorites ? 'success.dark' : 'warning.dark',
+                bgcolor: 'action.hover',
               },
-              '&:disabled': {
-                bgcolor: 'rgb(76, 175, 80)',
-                color: 'white',
-                opacity: 0.8,
+              '&.Mui-disabled': {
+                borderColor: 'success.main',
+                color: 'success.main',
+                opacity: 0.7,
               }
             }}
           >
@@ -797,26 +809,23 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             onClick={handleStartWorkout}
             disabled={isStarting}
             sx={{
-              borderRadius: 2,
+              borderRadius: 1.5,
               flex: 1,
-              maxWidth: { xs: '130px', sm: '150px' },
+              maxWidth: { xs: '120px', sm: '140px' },
               px: { xs: 2, sm: 3 },
-              py: 1.5,
-              fontSize: { xs: '0.9rem', sm: '1.1rem' },
+              py: 1,
+              fontSize: { xs: '0.9rem', sm: '1rem' },
               fontWeight: 600,
-              bgcolor: 'rgb(19, 70, 134)',
+              bgcolor: 'primary.main',
               color: 'white',
               '&:hover': {
-                bgcolor: 'rgb(15, 56, 107)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 16px rgba(19, 70, 134, 0.3)',
+                bgcolor: 'primary.dark',
               },
-              '&:disabled': {
-                bgcolor: 'rgb(19, 70, 134)',
+              '&.Mui-disabled': {
+                bgcolor: 'primary.main',
                 color: 'white',
                 opacity: 0.6,
               },
-              transition: 'all 0.3s ease'
             }}
           >
             {isStarting ? 'Starting...' : 'Begin'}

@@ -35,6 +35,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const [exercisesWithChangedWeight, setExercisesWithChangedWeight] = useState(new Set());
   // Track the updated weight for each exercise (for propagation to subsequent sets)
   const [updatedWeights, setUpdatedWeights] = useState({});
+  // Track finishing state to prevent multiple clicks
+  const [isFinishing, setIsFinishing] = useState(false);
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
   const exerciseNameRef = useRef(null);
@@ -224,6 +226,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
   // Calculate responsive font size for exercise name
   // Ensures text is large and readable but always fits within available space
+  // Text scales down for long names while maintaining readability
   useEffect(() => {
     const calculateFontSize = () => {
       const nameElement = exerciseNameRef.current;
@@ -234,38 +237,40 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       if (!container) return;
       
       const containerWidth = container.clientWidth;
-      const containerHeight = container.clientHeight;
       
-      // The Box wrapper has px: { xs: 2, sm: 4 } which is 16px or 32px per side
+      // The Box wrapper has px: { xs: 1.5, sm: 2/3 } which varies
       // Account for this padding to get the actual available width for text
-      const paddingX = window.innerWidth < 600 ? 16 : 32;
+      const paddingX = window.innerWidth < 600 ? 12 : 24;
       const availableWidth = containerWidth - (paddingX * 2);
       
-      // Limit height to reasonable portion of viewport to prevent overflow
-      // Use a maximum of 25vh to match the new container maxHeight
-      const maxHeight = Math.min(containerHeight * 0.8, window.innerHeight * 0.25);
+      // Calculate available height based on viewport
+      // Use smaller portion on mobile portrait for better layout
+      const isPortrait = window.innerHeight > window.innerWidth;
+      const maxHeight = isPortrait 
+        ? window.innerHeight * 0.12 // 12% of viewport height in portrait
+        : window.innerHeight * 0.18; // 18% in landscape
       
       if (availableWidth <= 0) return;
       
-      // Responsive minimum font size based on viewport width
-      // Mobile: 48px, Tablet: 60px, Desktop: 72px
-      const minFontSize = window.innerWidth < 600 ? 48 : window.innerWidth < 1024 ? 60 : 72;
-      // Maximum font size - scale with viewport
-      const maxFontSize = window.innerWidth < 600 ? 110 : window.innerWidth < 1024 ? 140 : 180;
+      // Allow smaller minimum font size on mobile for very long names
+      // This prevents cropping by allowing text to scale down further
+      const minFontSize = window.innerWidth < 600 ? 24 : window.innerWidth < 1024 ? 36 : 48;
+      // Default/maximum font size - scale with viewport
+      const defaultFontSize = window.innerWidth < 600 ? 56 : window.innerWidth < 1024 ? 80 : 110;
       
-      // Use full exercise name for measurement (no split logic)
+      // Use full exercise name for measurement
       const textToMeasure = exerciseName;
       
-      // Target 90% of available width to ensure some margin
-      const targetWidth = availableWidth * 0.9;
+      // Target 95% of available width to ensure some margin
+      const targetWidth = availableWidth * 0.95;
       
       // Create a temporary element to measure text dimensions with wrapping
       const tempElement = document.createElement('div');
       tempElement.style.visibility = 'hidden';
       tempElement.style.position = 'absolute';
       tempElement.style.fontFamily = getComputedStyle(nameElement).fontFamily;
-      tempElement.style.fontWeight = '600';
-      tempElement.style.lineHeight = '1.2';
+      tempElement.style.fontWeight = '700';
+      tempElement.style.lineHeight = '1.15';
       tempElement.style.width = targetWidth + 'px';
       tempElement.style.wordBreak = 'break-word';
       tempElement.style.overflowWrap = 'break-word';
@@ -276,7 +281,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       
       // Binary search for the largest font size that fits both width and height
       let low = minFontSize;
-      let high = maxFontSize;
+      let high = defaultFontSize;
       let bestSize = minFontSize;
       
       while (low <= high) {
@@ -284,10 +289,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
         tempElement.style.fontSize = mid + 'px';
         
         // Check both width and height constraints
-        const textWidth = tempElement.scrollWidth;
         const textHeight = tempElement.scrollHeight;
         
-        if (textWidth <= targetWidth && textHeight <= maxHeight) {
+        if (textHeight <= maxHeight) {
           // This size fits, try larger
           bestSize = mid;
           low = mid + 1;
@@ -300,7 +304,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       document.body.removeChild(tempElement);
       
       // Ensure we stay within min/max bounds
-      const finalSize = Math.max(minFontSize, Math.min(bestSize, maxFontSize));
+      const finalSize = Math.max(minFontSize, Math.min(bestSize, defaultFontSize));
       setExerciseFontSize(`${finalSize}px`);
     };
 
@@ -430,6 +434,10 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   };
 
   const handleWorkoutComplete = () => {
+    // Prevent multiple clicks
+    if (isFinishing) return;
+    setIsFinishing(true);
+    
     const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -714,9 +722,17 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
             variant="contained"
             size="large"
             onClick={handleWorkoutComplete}
-            sx={{ mt: 2 }}
+            disabled={isFinishing}
+            sx={{ 
+              mt: 2,
+              '&.Mui-disabled': {
+                bgcolor: 'primary.main',
+                color: 'white',
+                opacity: 0.7,
+              }
+            }}
           >
-            Finish Workout
+            {isFinishing ? 'Finishing...' : 'Finish Workout'}
           </Button>
         </motion.div>
       </div>
@@ -898,27 +914,32 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
               {/* Exercise Name and Demo Image - Two Column Layout in Landscape, Single Column in Portrait */}
               <Box sx={{ 
-                mt: shouldUseTwoColumns ? 0 : 0.5,
-                mb: shouldUseTwoColumns ? 0 : 0.5,
+                mt: shouldUseTwoColumns ? 1 : 0.5,
+                mb: shouldUseTwoColumns ? 1 : 0.5,
                 px: { xs: 1.5, sm: shouldUseTwoColumns ? 2 : 3 },
-                // Use CSS Grid for landscape mode for reliable 2:1 split
+                // Use CSS Grid for landscape mode for reliable split
                 display: shouldUseTwoColumns ? 'grid' : 'flex',
-                // CSS Grid template: 2fr for name, 1fr for image (2:1 ratio)
-                gridTemplateColumns: shouldUseTwoColumns ? '2fr 1fr' : 'none',
+                // CSS Grid template: 1.5fr for name, 1fr for image (3:2 ratio) - gives more room to image
+                gridTemplateColumns: shouldUseTwoColumns ? '1.5fr 1fr' : 'none',
                 gridTemplateRows: shouldUseTwoColumns ? '1fr' : 'none',
                 flexDirection: shouldUseTwoColumns ? undefined : 'column',
                 alignItems: 'center',
-                gap: shouldUseTwoColumns ? 0.5 : 0.2,
-                minHeight: shouldUseTwoColumns ? { sm: '100px', md: '120px' } : { xs: '60px', sm: '80px' },
+                gap: shouldUseTwoColumns ? 2 : 0.2,
+                // Larger min-height in landscape tablet to accommodate bigger images
+                minHeight: shouldUseTwoColumns 
+                  ? { sm: 'calc(35vh - 80px)', md: 'calc(40vh - 80px)' } 
+                  : { xs: '60px', sm: '80px' },
+                flex: shouldUseTwoColumns ? 1 : 'none',
               }}>
                 {/* Exercise Name */}
                 <Box sx={{ 
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: shouldUseTwoColumns ? 'flex-start' : 'center',
-                  overflow: 'hidden',
                   width: '100%',
-                  maxHeight: shouldUseTwoColumns ? 'none' : { xs: '15vh', sm: '20vh' },
+                  // Remove max-height constraint to prevent vertical cropping
+                  // Let the text flow naturally within its container
+                  flexShrink: 0,
                 }}>
                   <Typography 
                     ref={exerciseNameRef}
@@ -931,13 +952,14 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                         : exerciseFontSize + ' !important',
                       color: 'primary.main',
                       textAlign: shouldUseTwoColumns ? 'left' : 'center',
-                      lineHeight: '1.05 !important',
+                      lineHeight: '1.15 !important', // Slightly increased for better readability
                       width: '100%',
                       wordBreak: 'break-word',
                       overflowWrap: 'break-word',
                       whiteSpace: 'normal',
+                      // Allow up to 3 lines without ellipsis, full text visible
                       display: '-webkit-box',
-                      WebkitLineClamp: shouldUseTwoColumns ? 2 : 4,
+                      WebkitLineClamp: shouldUseTwoColumns ? 2 : 3,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -952,10 +974,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   <Box 
                     sx={{ 
                       display: 'flex',
-                      justifyContent: shouldUseTwoColumns ? 'flex-start' : 'center',
+                      justifyContent: shouldUseTwoColumns ? 'center' : 'center',
                       alignItems: 'center',
                       width: '100%',
-                      height: '100%',
+                      height: shouldUseTwoColumns ? '100%' : 'auto',
+                      // In landscape tablet, allow more vertical space for the image
+                      minHeight: shouldUseTwoColumns ? { sm: '150px', md: '200px' } : 0,
+                      flex: shouldUseTwoColumns ? 1 : 'none',
                     }}
                   >
                     <Box
@@ -965,8 +990,9 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                       onError={handleImageError}
                       sx={{
                         maxWidth: '100%',
+                        // Significantly larger image in landscape tablet mode
                         maxHeight: shouldUseTwoColumns 
-                          ? { sm: '100px', md: '110px' }
+                          ? { sm: 'calc(40vh - 100px)', md: 'calc(45vh - 100px)' }
                           : { xs: '150px', sm: '200px' },
                         width: 'auto',
                         height: 'auto',

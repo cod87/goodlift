@@ -13,6 +13,7 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  Bookmark,
 } from '@mui/icons-material';
 import { 
   startOfMonth, 
@@ -73,11 +74,44 @@ const MonthCalendarView = ({
 
   // hasCompletedWorkout function removed - using getWorkoutsForDay instead
 
-  // Get primary workout type for display (if multiple workouts, show first)
+  // Check if a workout type is a strength training type
+  const isStrengthType = (type) => {
+    if (!type) return false;
+    const normalizedType = type.toLowerCase();
+    // Strength training types include: upper, lower, full, push, pull, legs, strength, hypertrophy
+    const strengthTypes = ['upper', 'lower', 'full', 'push', 'pull', 'legs', 'strength', 'hypertrophy'];
+    return strengthTypes.includes(normalizedType);
+  };
+
+  // Get primary workout type for display
+  // Priority: 1. Strength training sessions, 2. Longer session (for non-strength)
   const getPrimaryWorkoutType = (workouts) => {
     if (!workouts || workouts.length === 0) return null;
-    const workout = workouts[0];
-    return workout.type?.toLowerCase() || workout.workoutType?.toLowerCase() || 'strength';
+    
+    if (workouts.length === 1) {
+      const workout = workouts[0];
+      return workout.type?.toLowerCase() || workout.workoutType?.toLowerCase() || 'strength';
+    }
+
+    // Multiple workouts on the same day
+    // First, look for strength training sessions
+    const strengthWorkout = workouts.find(w => {
+      const type = w.type?.toLowerCase() || w.workoutType?.toLowerCase();
+      return isStrengthType(type);
+    });
+
+    if (strengthWorkout) {
+      return strengthWorkout.type?.toLowerCase() || strengthWorkout.workoutType?.toLowerCase() || 'strength';
+    }
+
+    // No strength workout found - prefer the longer session
+    const longestWorkout = workouts.reduce((longest, current) => {
+      const currentDuration = current.duration || 0;
+      const longestDuration = longest.duration || 0;
+      return currentDuration > longestDuration ? current : longest;
+    }, workouts[0]);
+
+    return longestWorkout.type?.toLowerCase() || longestWorkout.workoutType?.toLowerCase() || 'strength';
   };
 
   // Get workout type abbreviation for display
@@ -263,6 +297,20 @@ const MonthCalendarView = ({
                   >
                     {getWorkoutTypeLabel(primaryType)}
                   </Typography>
+                )}
+                
+                {/* Bookmark indicator for days with multiple sessions */}
+                {workoutsOnDay.length > 1 && (
+                  <Bookmark
+                    sx={{
+                      position: 'absolute',
+                      top: { xs: 0, sm: 1 },
+                      right: { xs: 0, sm: 1 },
+                      fontSize: { xs: '0.6rem', sm: '0.75rem' },
+                      color: 'text.secondary',
+                      opacity: 0.7,
+                    }}
+                  />
                 )}
               </Box>
             );

@@ -55,6 +55,7 @@ import WeightTracker from './WeightTracker';
 import MonthCalendarView from './Calendar/MonthCalendarView';
 import ActivitiesList from './Progress/ActivitiesList';
 import EditActivityDialog from './EditActivityDialog';
+import LoadingScreen from './LoadingScreen';
 import {
   getWorkoutHistory,
   getStretchSessions,
@@ -348,25 +349,7 @@ const ProgressDashboard = () => {
   };
 
   if (loading) {
-    return (
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh'
-      }}>
-        <Typography variant="h5" color="text.secondary">
-          Loading
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 1, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          >
-            ...
-          </motion.span>
-        </Typography>
-      </Box>
-    );
+    return <LoadingScreen showLogo={false} />;
   }
 
   return (

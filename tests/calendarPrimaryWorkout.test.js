@@ -17,9 +17,12 @@ const createSession = (type, duration = 0) => ({
 });
 
 // Replicate the logic from MonthCalendarView for testing
+// Note: These helper functions mirror the component logic to enable standalone testing
+// without requiring React component rendering
 const isStrengthType = (type) => {
   if (!type) return false;
   const normalizedType = type.toLowerCase();
+  // Strength training types - must match the list in MonthCalendarView.jsx
   const strengthTypes = ['upper', 'lower', 'full', 'push', 'pull', 'legs', 'strength', 'hypertrophy'];
   return strengthTypes.includes(normalizedType);
 };

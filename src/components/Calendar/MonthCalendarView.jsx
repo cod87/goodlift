@@ -105,6 +105,7 @@ const MonthCalendarView = ({
     }
 
     // No strength workout found - prefer the longer session
+    // Note: If durations are equal, the first workout in the array is returned (stable selection)
     const longestWorkout = workouts.reduce((longest, current) => {
       const currentDuration = current.duration || 0;
       const longestDuration = longest.duration || 0;

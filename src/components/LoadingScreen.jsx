@@ -18,7 +18,7 @@ const spin = keyframes`
 const LoadingScreen = () => {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const logoUrl = `${baseUrl}goodlift-logo.svg`;
-  const faviconUrl = `${baseUrl}goodlift-favicon.svg`;
+  const faviconUrl = `${baseUrl}goodlift-dog.svg`;
 
   return (
     <Box

@@ -12,7 +12,7 @@ const urlsToCache = [
   '/goodlift/index.html',
   '/goodlift/icons/goodlift-icon-192.png',
   '/goodlift/icons/goodlift-icon-512.png',
-  '/goodlift/goodlift-favicon.svg',
+  '/goodlift/goodlift-dog.svg',
   '/goodlift/goodlift-appletouchicon.png',
   '/goodlift/goodlift-logo.svg',
   '/goodlift/manifest.json',

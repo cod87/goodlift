@@ -34,7 +34,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       label: 'Work',
       iconActive: null, // Use custom SVG
       iconInactive: null, // Use custom SVG
-      customIcon: 'goodlift-favicon.svg',
+      customIcon: 'goodlift-dog.svg',
       screens: [
         'home', 
         'selection', 

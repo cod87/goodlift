@@ -40,7 +40,7 @@ import CreateRecipeModal from '../CreateRecipeModal';
 /**
  * NutritionTab - Component for tracking nutrition using local nutrition database
  * Features:
- * - Search foods from nutrition-700.json with ranking support
+ * - Search foods from nutrition.json with ranking support
  * - Tag-based searching (tags not visible to users)
  * - Standard portion measurements with multiple unit options
  * - Custom food support
@@ -185,7 +185,7 @@ const NutritionTab = () => {
         foodMap.set(entry.foodName, {
           name: entry.foodName,
           grams: entry.grams,
-          // Reconstruct as nutrition-700 format
+          // Reconstruct as nutrition format
           calories: (entry.nutrition.calories / entry.grams) * 100,
           protein: (entry.nutrition.protein / entry.grams) * 100,
           carbs: (entry.nutrition.carbs / entry.grams) * 100,

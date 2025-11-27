@@ -81,7 +81,7 @@ const calculateNutritionForPortion = (food, quantity = 1) => {
   };
 };
 
-// Test data from nutrition-700.json
+// Test data from nutrition.json
 const chickenBreast = {
   id: 1,
   name: "Chicken breast, cooked, roasted",

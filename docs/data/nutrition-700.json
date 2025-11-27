@@ -5694,9 +5694,9 @@
     "portion_factor": 1.0,
     "volume_amount": 1.0,
     "volume_unit": "cup"
-  }
-{
-  "id": 836,
+  },
+  {
+    "id": 836,
   "name": "Soda bread, whole wheat",
   "rank": 65,
   "category": "Breads",

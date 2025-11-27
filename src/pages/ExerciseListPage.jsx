@@ -176,7 +176,7 @@ const ExerciseListPage = () => {
   };
 
   if (loading) {
-    return <LoadingScreen showLogo={false} />;
+    return <LoadingScreen />;
   }
 
   return (

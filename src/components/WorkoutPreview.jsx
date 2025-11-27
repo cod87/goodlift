@@ -315,7 +315,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   }
 
   if (loading) {
-    return <LoadingScreen showLogo={false} />;
+    return <LoadingScreen />;
   }
 
   return (

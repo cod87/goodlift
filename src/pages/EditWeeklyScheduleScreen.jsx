@@ -449,7 +449,7 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
 
   // Show loading state while context is loading
   if (loading) {
-    return <LoadingScreen showLogo={false} />;
+    return <LoadingScreen />;
   }
 
   return (

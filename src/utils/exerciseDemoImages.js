@@ -112,9 +112,15 @@ export const normalizeExerciseName = (exerciseName) => {
  * @returns {string|null} Path to the demo image, placeholder, or null if not found
  */
 export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile = null) => {
-  // If webpFile is explicitly provided, use it directly
+  // If webpFile is explicitly provided, validate and use it directly
   if (webpFile) {
-    return `${getBaseUrl()}demos/${webpFile}`;
+    // Basic validation: only allow safe filenames (alphanumeric, hyphens, and .webp extension)
+    // This prevents path traversal attacks (e.g., '../../../sensitive-file')
+    const safeFilenamePattern = /^[a-zA-Z0-9-]+\.webp$/;
+    if (safeFilenamePattern.test(webpFile)) {
+      return `${getBaseUrl()}demos/${webpFile}`;
+    }
+    // If webpFile is invalid, fall through to name-based matching
   }
   
   if (!exerciseName) return usePlaceholder ? `${getBaseUrl()}work-icon.svg` : null;
@@ -348,8 +354,13 @@ export const getAvailableDemoImages = () => {
  * @returns {boolean} True if a demo image exists
  */
 export const hasDemoImage = (exerciseName, webpFile = null) => {
-  // If webpFile is provided, image exists
-  if (webpFile) return true;
+  // If webpFile is provided and valid, image exists
+  if (webpFile) {
+    const safeFilenamePattern = /^[a-zA-Z0-9-]+\.webp$/;
+    if (safeFilenamePattern.test(webpFile)) {
+      return true;
+    }
+  }
   return getDemoImagePath(exerciseName, false) !== null;
 };
 

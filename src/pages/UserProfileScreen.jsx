@@ -153,7 +153,7 @@ const UserProfileScreen = () => {
   const profileCompletion = getProfileCompletion();
 
   if (profileLoading) {
-    return <LoadingScreen showLogo={false} />;
+    return <LoadingScreen />;
   }
 
   return (

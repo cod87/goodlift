@@ -168,13 +168,17 @@ const ProgressDashboard = () => {
     let strengthSessions = 0;
     let cardioSessions = 0;
     let yogaSessions = 0;
+    let restSessions = 0;
     let totalDuration = 0;
     
     const exercisePRs = {}; // Track PRs per exercise
     
     filteredHistory.forEach(workout => {
       // Count session types based on workout.type or workout properties
-      if (workout.type === 'cardio' || workout.type === 'hiit' || workout.cardioType) {
+      if (workout.type === 'rest' || workout.sessionType === 'rest') {
+        // Rest days - count separately but don't include in workouts
+        restSessions++;
+      } else if (workout.type === 'cardio' || workout.type === 'hiit' || workout.cardioType) {
         cardioSessions++;
       } else if (workout.type === 'yoga' || workout.type === 'stretch' || workout.type === 'mobility' || workout.yogaType) {
         yogaSessions++;
@@ -210,7 +214,8 @@ const ProgressDashboard = () => {
       }
     });
     
-    const totalWorkouts = filteredHistory.length;
+    // Total workouts excludes rest days
+    const totalWorkouts = filteredHistory.length - restSessions;
     const averageDuration = totalWorkouts > 0 ? Math.round(totalDuration / totalWorkouts) : 0;
     
     return {

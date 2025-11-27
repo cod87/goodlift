@@ -555,10 +555,14 @@ button:active {
     border-color: var(--color-primary);
 }
 
-/* Remove spinner arrows on desktop but keep them on mobile */
+/* Remove spinner arrows from number inputs */
 .exercise-input::-webkit-inner-spin-button,
 .exercise-input::-webkit-outer-spin-button {
-    opacity: 1;
+    -webkit-appearance: none;
+    margin: 0;
+}
+.exercise-input[type="number"] {
+    -moz-appearance: textfield;
 }
 
 /* Ensure inputs are visible when keyboard is shown on mobile */

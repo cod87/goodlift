@@ -57,18 +57,17 @@ const ExerciseInputs = memo(forwardRef(({
       {/* Input Row */}
       <Stack 
         direction="row" 
-        spacing={{ xs: 1, sm: 2 }} 
-        sx={{ mb: 1, flexWrap: 'nowrap' }}
+        spacing={2} 
+        sx={{ mb: 1 }}
       >
         {/* Weight Input */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1, minWidth: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1 }}>
           <Typography 
             variant="caption" 
             sx={{ 
-              minWidth: { xs: '40px', sm: '50px' },
+              minWidth: '50px',
               fontWeight: 600,
               color: 'text.secondary',
-              flexShrink: 0,
             }}
           >
             Weight:
@@ -80,10 +79,8 @@ const ExerciseInputs = memo(forwardRef(({
             sx={{ 
               border: '1px solid',
               borderColor: 'divider',
-              width: { xs: '28px', sm: '32px' },
-              height: { xs: '28px', sm: '32px' },
-              minWidth: { xs: '28px', sm: '32px' },
-              flexShrink: 0,
+              width: '32px',
+              height: '32px',
             }}
           >
             <Remove fontSize="small" />
@@ -97,14 +94,18 @@ const ExerciseInputs = memo(forwardRef(({
             inputRef={ref}
             size="small"
             sx={{ 
-              width: { xs: '55px', sm: '70px' },
-              minWidth: { xs: '55px', sm: '70px' },
-              flexShrink: 1,
+              width: '70px',
               '& input': {
                 textAlign: 'center',
-                padding: { xs: '6px 2px', sm: '8px 4px' },
-                fontSize: { xs: '0.875rem', sm: '1rem' },
+                padding: '8px 4px',
+                fontSize: '1rem',
                 fontWeight: 600,
+                // Hide native number input spinners
+                MozAppearance: 'textfield',
+                '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
               },
             }}
           />
@@ -115,28 +116,25 @@ const ExerciseInputs = memo(forwardRef(({
             sx={{ 
               border: '1px solid',
               borderColor: 'divider',
-              width: { xs: '28px', sm: '32px' },
-              height: { xs: '28px', sm: '32px' },
-              minWidth: { xs: '28px', sm: '32px' },
-              flexShrink: 0,
+              width: '32px',
+              height: '32px',
             }}
           >
             <Add fontSize="small" />
           </IconButton>
-          <Typography variant="caption" sx={{ color: 'text.secondary', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             lbs
           </Typography>
         </Box>
 
         {/* Reps Input */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1, minWidth: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1 }}>
           <Typography 
             variant="caption" 
             sx={{ 
-              minWidth: { xs: '32px', sm: '40px' },
+              minWidth: '40px',
               fontWeight: 600,
               color: 'text.secondary',
-              flexShrink: 0,
             }}
           >
             Reps:
@@ -148,10 +146,8 @@ const ExerciseInputs = memo(forwardRef(({
             sx={{ 
               border: '1px solid',
               borderColor: 'divider',
-              width: { xs: '28px', sm: '32px' },
-              height: { xs: '28px', sm: '32px' },
-              minWidth: { xs: '28px', sm: '32px' },
-              flexShrink: 0,
+              width: '32px',
+              height: '32px',
             }}
           >
             <Remove fontSize="small" />
@@ -164,14 +160,18 @@ const ExerciseInputs = memo(forwardRef(({
             inputMode="numeric"
             size="small"
             sx={{ 
-              width: { xs: '48px', sm: '60px' },
-              minWidth: { xs: '48px', sm: '60px' },
-              flexShrink: 1,
+              width: '60px',
               '& input': {
                 textAlign: 'center',
-                padding: { xs: '6px 2px', sm: '8px 4px' },
-                fontSize: { xs: '0.875rem', sm: '1rem' },
+                padding: '8px 4px',
+                fontSize: '1rem',
                 fontWeight: 600,
+                // Hide native number input spinners
+                MozAppearance: 'textfield',
+                '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
               },
             }}
           />
@@ -182,10 +182,8 @@ const ExerciseInputs = memo(forwardRef(({
             sx={{ 
               border: '1px solid',
               borderColor: 'divider',
-              width: { xs: '28px', sm: '32px' },
-              height: { xs: '28px', sm: '32px' },
-              minWidth: { xs: '28px', sm: '32px' },
-              flexShrink: 0,
+              width: '32px',
+              height: '32px',
             }}
           >
             <Add fontSize="small" />

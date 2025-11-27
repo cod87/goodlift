@@ -22,6 +22,7 @@ import { Edit, Save, Cancel, PhotoCamera } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import AvatarSelector from '../components/AvatarSelector';
+import LoadingScreen from '../components/LoadingScreen';
 import { 
   validateDisplayName, 
   validateTextField, 
@@ -152,20 +153,7 @@ const UserProfileScreen = () => {
   const profileCompletion = getProfileCompletion();
 
   if (profileLoading) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography color="text.secondary">
-          Loading profile
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 1, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          >
-            ...
-          </motion.span>
-        </Typography>
-      </Box>
-    );
+    return <LoadingScreen showLogo={false} />;
   }
 
   return (

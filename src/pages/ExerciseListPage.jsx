@@ -32,6 +32,7 @@ import {
   FilterList as FilterListIcon,
 } from '@mui/icons-material';
 import CompactHeader from '../components/Common/CompactHeader';
+import LoadingScreen from '../components/LoadingScreen';
 import { useWorkoutGenerator } from '../hooks/useWorkoutGenerator';
 import {
   toggleFavoriteExercise,
@@ -175,13 +176,7 @@ const ExerciseListPage = () => {
   };
 
   if (loading) {
-    return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography variant="h5" color="text.secondary">
-          Loading exercises...
-        </Typography>
-      </Box>
-    );
+    return <LoadingScreen showLogo={false} />;
   }
 
   return (

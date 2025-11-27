@@ -1,4 +1,5 @@
 import { Box, keyframes } from '@mui/material';
+import PropTypes from 'prop-types';
 
 // Spinning animation for the favicon (counter-clockwise)
 const spin = keyframes`
@@ -11,14 +12,20 @@ const spin = keyframes`
 `;
 
 /**
- * LoadingScreen - Initial loading screen displayed while the app is initializing
- * Shows the goodlift logo with a rotating favicon below it
- * Content is positioned at 1/3 from the top (2/3 from the bottom)
+ * LoadingScreen - Loading screen displayed while the app is loading
+ * 
+ * When showLogo is true (default, for initial loading):
+ * - Shows the goodlift logo with a rotating goodlift-dog.svg below it
+ * - Content is positioned at 1/3 from the top (2/3 from the bottom)
+ * 
+ * When showLogo is false (for secondary/in-app loading):
+ * - Shows only the rotating goodlift-dog.svg in the same position
+ * - No goodlift logo is displayed
  */
-const LoadingScreen = () => {
+const LoadingScreen = ({ showLogo = true }) => {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const logoUrl = `${baseUrl}goodlift-logo.svg`;
-  const faviconUrl = `${baseUrl}goodlift-favicon.svg`;
+  const dogUrl = `${baseUrl}goodlift-dog.svg`;
 
   return (
     <Box
@@ -41,22 +48,24 @@ const LoadingScreen = () => {
           gap: 4,
         }}
       >
-        {/* Main Logo */}
-        <Box
-          component="img"
-          src={logoUrl}
-          alt="GoodLift"
-          sx={{
-            width: { xs: '200px', sm: '280px', md: '320px' },
-            height: 'auto',
-            maxWidth: '80vw',
-          }}
-        />
+        {/* Main Logo - only shown on initial loading screen */}
+        {showLogo && (
+          <Box
+            component="img"
+            src={logoUrl}
+            alt="GoodLift"
+            sx={{
+              width: { xs: '200px', sm: '280px', md: '320px' },
+              height: 'auto',
+              maxWidth: '80vw',
+            }}
+          />
+        )}
         
-        {/* Spinning Favicon */}
+        {/* Spinning Dog Favicon */}
         <Box
           component="img"
-          src={faviconUrl}
+          src={dogUrl}
           alt="Loading..."
           sx={{
             width: { xs: '40px', sm: '48px' },
@@ -70,6 +79,10 @@ const LoadingScreen = () => {
       <Box sx={{ flex: 2 }} />
     </Box>
   );
+};
+
+LoadingScreen.propTypes = {
+  showLogo: PropTypes.bool,
 };
 
 export default LoadingScreen;

@@ -37,6 +37,7 @@ import SessionTypeQuickToggle from '../components/SessionTypeQuickToggle';
 import { getSavedWorkouts, updateSavedWorkout } from '../utils/storage';
 import { getDefaultSessionData } from '../utils/sessionTemplates';
 import WorkoutCreationModal from '../components/WorkTabs/WorkoutCreationModal';
+import LoadingScreen from '../components/LoadingScreen';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 
 // Days of the week constant - Sunday through Saturday
@@ -448,21 +449,7 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
 
   // Show loading state while context is loading
   if (loading) {
-    return (
-      <Box
-        sx={{
-          minHeight: '100vh',
-          padding: { xs: 2, sm: 3 },
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Typography variant="h6" color="text.secondary">
-          Loading schedule...
-        </Typography>
-      </Box>
-    );
+    return <LoadingScreen showLogo={false} />;
   }
 
   return (

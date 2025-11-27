@@ -1,4 +1,4 @@
-import { Box, keyframes } from '@mui/material';
+import { Box, Typography, keyframes } from '@mui/material';
 
 // Spinning animation for the favicon (counter-clockwise)
 const spin = keyframes`
@@ -52,6 +52,18 @@ const LoadingScreen = () => {
             animation: `${spin} 1.5s linear infinite`,
           }}
         />
+        
+        {/* Loading text below the spinner */}
+        <Typography
+          variant="h6"
+          sx={{
+            color: 'text.secondary',
+            fontWeight: 500,
+            mt: 2,
+          }}
+        >
+          Loading GoodLift...
+        </Typography>
       </Box>
       
       {/* Bottom spacer - takes 2/3 of the viewport */}

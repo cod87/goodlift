@@ -1,7 +1,7 @@
 /**
  * Nutrition Data Service
  * 
- * Provides access to the nutrition-700.json local database
+ * Provides access to the nutrition.json local database
  * Supports:
  * - Search with ranking (higher rank = more relevant)
  * - Tag-based search (tags not visible to users)
@@ -28,7 +28,7 @@ export const loadNutritionDatabase = async () => {
   try {
     // Use base URL for proper path resolution in both dev and production
     const basePath = import.meta.env.BASE_URL || '/';
-    const dataPath = `${basePath}data/nutrition-700.json`;
+    const dataPath = `${basePath}data/nutrition.json`;
     const response = await fetch(dataPath);
     if (!response.ok) {
       throw new Error('Failed to load nutrition database');

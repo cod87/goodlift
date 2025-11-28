@@ -322,7 +322,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+     "Webp File": "reverse-grip-pulldown.webp"
   },
   {
     "Exercise Name": "Cable Skull Crusher",
@@ -1119,7 +1120,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+     "Webp File": "slamball-squat.webp"
   },
   {
     "Exercise Name": "Squat",
@@ -1139,7 +1141,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+     "Webp File": "straight-arm-lat-pulldown.webp"
   },
   {
     "Exercise Name": "Superman",

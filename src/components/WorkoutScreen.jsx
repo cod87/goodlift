@@ -26,10 +26,9 @@ const spin = keyframes`
  * Displays exercises in superset format, tracks time, and collects set data
  * Supports mid-workout exercise swapping and adding extra sets
  */
-const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, supersetConfig: initialSupersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, savedWorkoutId = null, savedWorkoutName = null }) => {
+const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, savedWorkoutId = null, savedWorkoutName = null }) => {
   // Mutable workout plan that can be modified during workout
   const [workoutPlan, setWorkoutPlan] = useState(initialWorkoutPlan);
-  const [supersetConfig, setSupersetConfig] = useState(initialSupersetConfig);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -60,7 +59,6 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const [swapDialogOpen, setSwapDialogOpen] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [addSetsDialogOpen, setAddSetsDialogOpen] = useState(false);
-  const [extraSetsAdded, setExtraSetsAdded] = useState(0);
   
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
@@ -701,7 +699,6 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
       sets: (ex.sets || setsPerSuperset) + 1
     }));
     setWorkoutPlan(updatedPlan);
-    setExtraSetsAdded(prev => prev + 1);
     setHasModifications(true);
     setAddSetsDialogOpen(false);
     

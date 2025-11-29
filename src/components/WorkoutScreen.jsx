@@ -3,17 +3,33 @@ import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout, getWorkoutHistory } from '../utils/storage';
-import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip, useTheme, useMediaQuery } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Celebration, Add, Remove, SkipNext, TrendingUp, HelpOutline, Save } from '@mui/icons-material';
+import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip, useTheme, useMediaQuery, keyframes } from '@mui/material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Add, Remove, SkipNext, TrendingUp, HelpOutline, Save, SwapHoriz, PlaylistAdd } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
+import SwapExerciseDialog from './Common/SwapExerciseDialog';
+import SaveModifiedWorkoutDialog from './Common/SaveModifiedWorkoutDialog';
+
+// Spinning animation for finish celebration (counter-clockwise like loading screen)
+const spin = keyframes`
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+`;
 
 /**
  * WorkoutScreen component manages the active workout session
  * Displays exercises in superset format, tracks time, and collects set data
+ * Supports mid-workout exercise swapping and adding extra sets
  */
-const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3 }) => {
+const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, supersetConfig: initialSupersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, savedWorkoutId = null, savedWorkoutName = null }) => {
+  // Mutable workout plan that can be modified during workout
+  const [workoutPlan, setWorkoutPlan] = useState(initialWorkoutPlan);
+  const [supersetConfig, setSupersetConfig] = useState(initialSupersetConfig);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [workoutData, setWorkoutData] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -21,6 +37,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const [targetReps, setTargetReps] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
   // Store initial target values for each exercise at workout start
   const [initialTargets, setInitialTargets] = useState({});
   // Store last performance data for each exercise
@@ -37,6 +54,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const [updatedWeights, setUpdatedWeights] = useState({});
   // Track finishing state to prevent multiple clicks
   const [isFinishing, setIsFinishing] = useState(false);
+  
+  // Workout modification tracking
+  const [hasModifications, setHasModifications] = useState(false);
+  const [swapDialogOpen, setSwapDialogOpen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [extraSetsAdded, setExtraSetsAdded] = useState(0);
+  
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
   const exerciseNameRef = useRef(null);
@@ -436,6 +460,13 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
   const handleWorkoutComplete = () => {
     // Prevent multiple clicks
     if (isFinishing) return;
+    
+    // If modifications were made and this was a saved workout, show save dialog
+    if (hasModifications && savedWorkoutId) {
+      setSaveDialogOpen(true);
+      return;
+    }
+    
     setIsFinishing(true);
     
     const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
@@ -453,6 +484,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
       cooldownCompleted,
       cooldownSkipped,
       totalDuration: totalTime,
+      hasModifications,
+      modifiedWorkoutPlan: hasModifications ? workoutPlan : undefined,
     };
     
     workoutData.forEach(step => {
@@ -639,6 +672,75 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
     }
   };
 
+  // Handle exercise swap
+  const handleSwapExercise = (newExercise) => {
+    const currentExerciseName = currentStep.exercise['Exercise Name'];
+    
+    // Update workout plan with the new exercise
+    const updatedPlan = workoutPlan.map(ex => 
+      ex['Exercise Name'] === currentExerciseName ? { ...newExercise, sets: ex.sets } : ex
+    );
+    setWorkoutPlan(updatedPlan);
+    setHasModifications(true);
+    
+    // Show confirmation
+    setSnackbarMessage(`Swapped to ${newExercise['Exercise Name']}`);
+    setSnackbarOpen(true);
+  };
+
+  // Handle adding extra sets at end of workout
+  const handleAddExtraSets = () => {
+    if (window.confirm('Add an extra set for each exercise? This will extend the workout.')) {
+      // Update each exercise to have one more set
+      const updatedPlan = workoutPlan.map(ex => ({
+        ...ex,
+        sets: (ex.sets || setsPerSuperset) + 1
+      }));
+      setWorkoutPlan(updatedPlan);
+      setExtraSetsAdded(prev => prev + 1);
+      setHasModifications(true);
+      
+      setSnackbarMessage('Added extra set to each exercise');
+      setSnackbarOpen(true);
+    }
+  };
+
+  // Handle save dialog actions
+  const handleOverrideSavedWorkout = async () => {
+    try {
+      // Override the existing saved workout with modified exercises
+      // This would need integration with storage functions
+      await saveFavoriteWorkout({
+        id: savedWorkoutId,
+        name: savedWorkoutName || 'Modified Workout',
+        type: detectWorkoutType(workoutPlan[0]),
+        equipment: 'all',
+        exercises: workoutPlan,
+      });
+      setSaveDialogOpen(false);
+      setSnackbarMessage('Workout updated!');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error saving workout:', error);
+    }
+  };
+
+  const handleSaveAsNewWorkout = async (newName) => {
+    try {
+      await saveFavoriteWorkout({
+        name: newName,
+        type: detectWorkoutType(workoutPlan[0]),
+        equipment: 'all',
+        exercises: workoutPlan,
+      });
+      setSaveDialogOpen(false);
+      setSnackbarMessage('Saved as new workout!');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error saving workout:', error);
+    }
+  };
+
   if (!currentStep && currentPhase === 'exercise') {
     return null;
   }
@@ -693,6 +795,8 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
 
   // Render completion screen
   if (currentPhase === 'complete') {
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    
     return (
       <div className="screen" style={{ 
         paddingBottom: '100px', 
@@ -711,9 +815,20 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
           transition={{ duration: 0.5 }}
           style={{ textAlign: 'center' }}
         >
-          <Celebration sx={{ fontSize: 80, color: 'primary.main', mb: 2 }} />
+          {/* Celebration dog image - spins when finishing */}
+          <Box
+            component="img"
+            src={`${baseUrl}goodlift-dog-celebration.svg`}
+            alt="Celebration"
+            sx={{ 
+              width: { xs: 100, sm: 120 },
+              height: { xs: 100, sm: 120 },
+              mb: 2,
+              animation: isFinishing ? `${spin} 1.5s linear infinite` : 'none',
+            }}
+          />
           <Typography variant="h4" sx={{ fontWeight: 600, mb: 2 }}>
-            Workout Complete! 🎉
+            Workout Complete!
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             Great job! You've completed your workout{!warmupSkipped && !cooldownSkipped ? ' including warmup and cooldown phases' : !warmupSkipped ? ' including warmup phase' : !cooldownSkipped ? ' including cooldown phase' : ''}.
@@ -813,7 +928,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 flexDirection: 'column',
               }}
             >
-              {/* Top Controls - Help, Skip, and Set Indicator on left, End Workout Controls on right */}
+              {/* Top Controls - Help, Skip, Swap and Set Indicator on left, End Workout Controls on right */}
               <Box sx={{ 
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -821,7 +936,7 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 gap: 1,
                 mb: 2
               }}>
-                {/* Left: Help, Skip Icons and Set Indicator */}
+                {/* Left: Help, Skip, Swap Icons and Set Indicator */}
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <IconButton
                     component="a"
@@ -860,6 +975,23 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                   >
                     <SkipNext sx={{ fontSize: { xs: 20, sm: 24 } }} />
                   </IconButton>
+                  <IconButton
+                    onClick={() => setSwapDialogOpen(true)}
+                    sx={{
+                      minWidth: { xs: '36px', sm: '44px' },
+                      minHeight: { xs: '36px', sm: '44px' },
+                      color: 'primary.main',
+                      border: '2px solid',
+                      borderColor: 'primary.main',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                      }
+                    }}
+                    aria-label="Swap exercise"
+                  >
+                    <SwapHoriz sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                  </IconButton>
                   
                   {/* Set indicator */}
                   <Chip 
@@ -875,6 +1007,24 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
                 
                 {/* End Workout Controls - Right side */}
                 <Box sx={{ display: 'flex', gap: 1 }}>
+                  {/* Add extra sets button */}
+                  <IconButton
+                    onClick={handleAddExtraSets}
+                    sx={{
+                      minWidth: { xs: '36px', sm: '44px' },
+                      minHeight: { xs: '36px', sm: '44px' },
+                      color: 'info.main',
+                      border: '2px solid',
+                      borderColor: 'info.main',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      }
+                    }}
+                    aria-label="Add extra sets"
+                  >
+                    <PlaylistAdd sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                  </IconButton>
                   {workoutData.length > 0 && (
                     <IconButton
                       onClick={handlePartialComplete}
@@ -1276,9 +1426,27 @@ const WorkoutScreen = ({ workoutPlan, onComplete, onExit, supersetConfig = [2, 2
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert severity="success" onClose={() => setSnackbarOpen(false)}>
-          Workout saved to favorites!
+          {snackbarMessage || 'Workout saved to favorites!'}
         </Alert>
       </Snackbar>
+      
+      {/* Swap Exercise Dialog */}
+      <SwapExerciseDialog
+        open={swapDialogOpen}
+        onClose={() => setSwapDialogOpen(false)}
+        currentExercise={currentStep?.exercise}
+        onSwap={handleSwapExercise}
+      />
+      
+      {/* Save Modified Workout Dialog */}
+      <SaveModifiedWorkoutDialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        onOverride={handleOverrideSavedWorkout}
+        onSaveAsNew={handleSaveAsNewWorkout}
+        originalWorkoutName={savedWorkoutName}
+        hasExistingWorkout={!!savedWorkoutId}
+      />
     </div>
   );
 };
@@ -1289,6 +1457,8 @@ WorkoutScreen.propTypes = {
   onExit: PropTypes.func.isRequired,
   supersetConfig: PropTypes.arrayOf(PropTypes.number),
   setsPerSuperset: PropTypes.number,
+  savedWorkoutId: PropTypes.string,
+  savedWorkoutName: PropTypes.string,
 };
 
 export default WorkoutScreen;

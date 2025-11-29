@@ -140,12 +140,17 @@ export const getRepChangeDescription = (currentReps, targetReps) => {
   const currentPercent = REP_TO_PERCENTAGE[currentReps];
   const targetPercent = REP_TO_PERCENTAGE[targetReps];
   
+  // Guard against division by zero (should never happen with our valid percentages)
+  if (currentPercent === 0) return '';
+  
   const percentChange = ((targetPercent - currentPercent) / currentPercent) * 100;
   
+  // When target percent is higher (moving to fewer reps), weight is HEAVIER
+  // When target percent is lower (moving to more reps), weight is LIGHTER
   if (percentChange > 0) {
-    return `${Math.round(percentChange)}% lighter`;
+    return `${Math.round(percentChange)}% heavier`;
   } else {
-    return `${Math.abs(Math.round(percentChange))}% heavier`;
+    return `${Math.abs(Math.round(percentChange))}% lighter`;
   }
 };
 

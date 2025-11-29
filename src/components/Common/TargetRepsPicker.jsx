@@ -183,12 +183,4 @@ TargetRepsPicker.propTypes = {
   showLabel: PropTypes.bool,
 };
 
-TargetRepsPicker.defaultProps = {
-  value: DEFAULT_TARGET_REPS,
-  disabled: false,
-  compact: false,
-  label: 'Target Reps',
-  showLabel: true,
-};
-
 export default TargetRepsPicker;

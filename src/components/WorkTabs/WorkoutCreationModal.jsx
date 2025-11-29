@@ -252,19 +252,17 @@ const ExerciseItem = ({
               <MenuItem value={4}>4</MenuItem>
             </Select>
           </FormControl>
-          <Box onClick={(e) => e.stopPropagation()}>
-            <TargetRepsPicker
-              value={typeof exercise.reps === 'number' ? getClosestValidTargetReps(exercise.reps) : DEFAULT_TARGET_REPS}
-              onChange={(newReps) => {
-                const updated = [...myWorkout];
-                updated[index].reps = newReps;
-                setMyWorkout(updated);
-              }}
-              compact
-              showLabel
-              label="Reps"
-            />
-          </Box>
+          <TargetRepsPicker
+            value={typeof exercise.reps === 'number' ? getClosestValidTargetReps(exercise.reps) : DEFAULT_TARGET_REPS}
+            onChange={(newReps) => {
+              const updated = [...myWorkout];
+              updated[index].reps = newReps;
+              setMyWorkout(updated);
+            }}
+            compact
+            showLabel
+            label="Reps"
+          />
         </Stack>
       </CardContent>
     </Card>

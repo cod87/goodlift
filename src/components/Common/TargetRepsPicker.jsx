@@ -11,6 +11,10 @@ import {
   Box,
   Typography,
   IconButton,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
 } from '@mui/material';
 import {
   Remove,
@@ -22,6 +26,7 @@ import { TARGET_REPS_OPTIONS, DEFAULT_TARGET_REPS } from '../../utils/repRangeWe
  * TargetRepsPicker Component
  * 
  * A dial/stepper component for selecting target reps from predefined options
+ * Styled to match MUI TextField/Select components for visual consistency
  * 
  * @param {number} value - Current target reps value
  * @param {function} onChange - Callback when value changes (receives new value)
@@ -35,7 +40,7 @@ const TargetRepsPicker = ({
   onChange,
   disabled = false,
   compact = false,
-  label = 'Target Reps',
+  label = 'Reps',
   showLabel = true,
 }) => {
   
@@ -75,102 +80,60 @@ const TargetRepsPicker = ({
   
   const canDecrease = TARGET_REPS_OPTIONS.indexOf(displayValue) > 0;
   const canIncrease = TARGET_REPS_OPTIONS.indexOf(displayValue) < TARGET_REPS_OPTIONS.length - 1;
-  
+
+  // Use FormControl with OutlinedInput to match MUI Select styling
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: compact ? 0.25 : 0.5,
-      }}
-    >
-      {showLabel && (
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 600,
-            color: 'text.secondary',
-            fontSize: compact ? '0.65rem' : '0.75rem',
-          }}
-        >
-          {label}
-        </Typography>
-      )}
-      
-      <Box
+    <FormControl size="small" sx={{ minWidth: compact ? 100 : 120 }}>
+      {showLabel && <InputLabel shrink>{label}</InputLabel>}
+      <OutlinedInput
+        value={displayValue}
+        readOnly
+        disabled={disabled}
+        size="small"
+        label={showLabel ? label : undefined}
+        notched={showLabel}
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: compact ? 0.25 : 0.5,
+          '& .MuiOutlinedInput-input': {
+            textAlign: 'center',
+            fontWeight: 600,
+            py: compact ? 0.75 : 1,
+            cursor: 'default',
+          },
         }}
-      >
-        {/* Decrease Button */}
-        <IconButton
-          size="small"
-          onClick={handleDecrease}
-          disabled={disabled || !canDecrease}
-          sx={{
-            border: '1px solid',
-            borderColor: disabled || !canDecrease ? 'action.disabled' : 'divider',
-            width: compact ? 24 : 28,
-            height: compact ? 24 : 28,
-            minWidth: compact ? 24 : 28,
-            borderRadius: 1,
-            '&:hover': {
-              bgcolor: 'action.hover',
-            },
-          }}
-        >
-          <Remove sx={{ fontSize: compact ? 14 : 16 }} />
-        </IconButton>
-        
-        {/* Value Display */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: compact ? 36 : 44,
-            px: compact ? 0.75 : 1,
-            py: compact ? 0.25 : 0.5,
-            borderRadius: 1,
-            bgcolor: disabled ? 'action.disabledBackground' : 'primary.main',
-            color: disabled ? 'action.disabled' : 'white',
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 700,
-              fontSize: compact ? '0.85rem' : '1rem',
-            }}
-          >
-            {displayValue}
-          </Typography>
-        </Box>
-        
-        {/* Increase Button */}
-        <IconButton
-          size="small"
-          onClick={handleIncrease}
-          disabled={disabled || !canIncrease}
-          sx={{
-            border: '1px solid',
-            borderColor: disabled || !canIncrease ? 'action.disabled' : 'divider',
-            width: compact ? 24 : 28,
-            height: compact ? 24 : 28,
-            minWidth: compact ? 24 : 28,
-            borderRadius: 1,
-            '&:hover': {
-              bgcolor: 'action.hover',
-            },
-          }}
-        >
-          <Add sx={{ fontSize: compact ? 14 : 16 }} />
-        </IconButton>
-      </Box>
-    </Box>
+        startAdornment={
+          <InputAdornment position="start" sx={{ mr: 0 }}>
+            <IconButton
+              size="small"
+              onClick={handleDecrease}
+              disabled={disabled || !canDecrease}
+              edge="start"
+              sx={{
+                p: 0.5,
+                color: disabled || !canDecrease ? 'action.disabled' : 'text.secondary',
+              }}
+            >
+              <Remove sx={{ fontSize: compact ? 16 : 18 }} />
+            </IconButton>
+          </InputAdornment>
+        }
+        endAdornment={
+          <InputAdornment position="end" sx={{ ml: 0 }}>
+            <IconButton
+              size="small"
+              onClick={handleIncrease}
+              disabled={disabled || !canIncrease}
+              edge="end"
+              sx={{
+                p: 0.5,
+                color: disabled || !canIncrease ? 'action.disabled' : 'text.secondary',
+              }}
+            >
+              <Add sx={{ fontSize: compact ? 16 : 18 }} />
+            </IconButton>
+          </InputAdornment>
+        }
+      />
+    </FormControl>
   );
 };
 

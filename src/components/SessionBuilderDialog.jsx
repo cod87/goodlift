@@ -40,6 +40,8 @@ import {
   ArrowDownward as ArrowDownIcon
 } from '@mui/icons-material';
 import ExerciseAutocomplete from './ExerciseAutocomplete';
+import TargetRepsPicker from './Common/TargetRepsPicker';
+import { DEFAULT_TARGET_REPS, getClosestValidTargetReps } from '../utils/repRangeWeightAdjustment';
 
 const SessionBuilderDialog = ({ 
   open, 
@@ -105,7 +107,7 @@ const SessionBuilderDialog = ({
       ...selectedExercise,
       name: selectedExercise['Exercise Name'] || selectedExercise.name,
       sets: 3,
-      reps: '10',
+      reps: DEFAULT_TARGET_REPS,
       weight: '',
       restSeconds: 90,
       supersetGroup: null
@@ -307,7 +309,7 @@ const SessionBuilderDialog = ({
                       </Box>
 
                       {/* Exercise Configuration */}
-                      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+                      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
                         <TextField
                           size="small"
                           label="Sets"
@@ -317,13 +319,12 @@ const SessionBuilderDialog = ({
                           sx={{ width: '80px' }}
                           inputProps={{ min: 1, max: 10 }}
                         />
-                        <TextField
-                          size="small"
+                        <TargetRepsPicker
+                          value={typeof exercise.reps === 'number' ? exercise.reps : getClosestValidTargetReps(parseInt(exercise.reps) || DEFAULT_TARGET_REPS)}
+                          onChange={(newReps) => handleExerciseChange(index, 'reps', newReps)}
+                          compact
+                          showLabel
                           label="Reps"
-                          value={exercise.reps === '' ? '' : exercise.reps}
-                          onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
-                          sx={{ width: '100px' }}
-                          placeholder="e.g., 10 or 8-12"
                         />
                         <TextField
                           size="small"

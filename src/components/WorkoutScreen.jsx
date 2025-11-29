@@ -4,12 +4,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout, getWorkoutHistory } from '../utils/storage';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip, useTheme, useMediaQuery, keyframes, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Add, Remove, SkipNext, TrendingUp, HelpOutline, Save, SwapHoriz, PlaylistAdd } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Add, Remove, SkipNext, TrendingUp, HelpOutline, Save, SwapHoriz, PlaylistAdd, Settings } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import SwapExerciseDialog from './Common/SwapExerciseDialog';
 import SaveModifiedWorkoutDialog from './Common/SaveModifiedWorkoutDialog';
+import TargetRepsPicker from './Common/TargetRepsPicker';
+import { 
+  DEFAULT_TARGET_REPS, 
+  getClosestValidTargetReps, 
+  calculateWeightForRepChange,
+  getNextWeight,
+  getPreviousWeight,
+} from '../utils/repRangeWeightAdjustment';
 
 // Spinning animation for finish celebration (counter-clockwise like loading screen)
 const spin = keyframes`
@@ -51,6 +59,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const [exercisesWithChangedWeight, setExercisesWithChangedWeight] = useState(new Set());
   // Track the updated weight for each exercise (for propagation to subsequent sets)
   const [updatedWeights, setUpdatedWeights] = useState({});
+  // Track updated target reps for each exercise (for mid-workout changes)
+  const [updatedTargetReps, setUpdatedTargetReps] = useState({});
   // Track finishing state to prevent multiple clicks
   const [isFinishing, setIsFinishing] = useState(false);
   
@@ -59,6 +69,9 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const [swapDialogOpen, setSwapDialogOpen] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [addSetsDialogOpen, setAddSetsDialogOpen] = useState(false);
+  // Target reps change dialog state
+  const [targetRepsDialogOpen, setTargetRepsDialogOpen] = useState(false);
+  const [pendingTargetReps, setPendingTargetReps] = useState(null);
   
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
@@ -168,7 +181,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
           ]);
           targets[exerciseName] = {
             weight: weight ?? null,
-            reps: reps ?? null
+            // Convert to valid target reps
+            reps: reps ? getClosestValidTargetReps(reps) : DEFAULT_TARGET_REPS
           };
           
           // Get last performance from history
@@ -223,15 +237,17 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
       
       // Use updated weight if available, otherwise use initial target
       const targetWeight = updatedWeights[exerciseName] ?? initialTarget?.weight ?? null;
+      // Use updated target reps if available, otherwise use initial target
+      const currentTargetReps = updatedTargetReps[exerciseName] ?? initialTarget?.reps ?? DEFAULT_TARGET_REPS;
       
       // Set values from initialTarget if it exists, otherwise use null
       // This ensures we don't show stale values from a previous exercise
       setPrevWeight(targetWeight);
-      setTargetReps(initialTarget?.reps ?? null);
+      setTargetReps(currentTargetReps);
       
       // Set controlled input values
       setCurrentWeight(targetWeight ?? '');
-      setCurrentReps(initialTarget?.reps ?? '');
+      setCurrentReps(currentTargetReps ?? '');
       
       // Reset suggestion when changing exercises
       setProgressiveOverloadSuggestion(null);
@@ -240,7 +256,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     
     // Scroll to top when exercise changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentStepIndex, initialTargets, workoutSequence, updatedWeights]);
+  }, [currentStepIndex, initialTargets, workoutSequence, updatedWeights, updatedTargetReps]);
 
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
@@ -633,9 +649,17 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   // Helper functions for +/- buttons
   const adjustWeight = (delta) => {
     const current = parseFloat(currentWeight) || 0;
-    const newWeight = Math.max(0, current + delta);
-    // Round to 1 decimal place to handle 2.5lb increments cleanly
-    setCurrentWeight(newWeight.toFixed(1));
+    let newWeight;
+    
+    if (delta > 0) {
+      // Increasing weight - use dynamic increment
+      newWeight = getNextWeight(current);
+    } else {
+      // Decreasing weight - use dynamic decrement
+      newWeight = getPreviousWeight(current);
+    }
+    
+    setCurrentWeight(newWeight.toString());
   };
 
   const adjustReps = (delta) => {
@@ -704,6 +728,54 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     
     setSnackbarMessage('Added extra set to each exercise');
     setSnackbarOpen(true);
+  };
+
+  // Handle opening target reps dialog
+  const handleOpenTargetRepsDialog = () => {
+    setPendingTargetReps(targetReps || DEFAULT_TARGET_REPS);
+    setTargetRepsDialogOpen(true);
+  };
+
+  // Handle mid-workout target reps change
+  const handleTargetRepsChange = async (newReps) => {
+    if (!exerciseName) return;
+    
+    const currentExerciseTargetReps = targetReps || DEFAULT_TARGET_REPS;
+    const currentExerciseWeight = parseFloat(currentWeight) || prevWeight || 0;
+    
+    // Calculate new weight based on rep change
+    let newWeight = currentExerciseWeight;
+    if (currentExerciseWeight > 0 && currentExerciseTargetReps !== newReps) {
+      const adjustedWeight = calculateWeightForRepChange(currentExerciseWeight, currentExerciseTargetReps, newReps);
+      if (adjustedWeight !== null) {
+        newWeight = adjustedWeight;
+        // Update the current weight input
+        setCurrentWeight(adjustedWeight.toString());
+      }
+    }
+    
+    // Update state
+    setTargetReps(newReps);
+    setUpdatedTargetReps(prev => ({ ...prev, [exerciseName]: newReps }));
+    if (newWeight !== currentExerciseWeight) {
+      setPrevWeight(newWeight);
+      setUpdatedWeights(prev => ({ ...prev, [exerciseName]: newWeight }));
+    }
+    setHasModifications(true);
+    
+    // Save to storage (like changing an exercise mid-workout)
+    await setExerciseTargetReps(exerciseName, newReps);
+    if (newWeight !== currentExerciseWeight) {
+      await setExerciseWeight(exerciseName, newWeight);
+    }
+    
+    // Show confirmation
+    const direction = newReps < currentExerciseTargetReps ? 'increased' : 'decreased';
+    setSnackbarMessage(newWeight !== currentExerciseWeight 
+      ? `Target: ${newReps} reps, weight ${direction} to ${newWeight} lbs`
+      : `Target updated to ${newReps} reps`);
+    setSnackbarOpen(true);
+    setTargetRepsDialogOpen(false);
   };
 
   // Helper to derive equipment from workout plan
@@ -1172,16 +1244,36 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
                     >
-                      <Typography
-                        variant="body2"
+                      <Box 
                         sx={{ 
-                          textAlign: 'center',
-                          color: 'text.secondary',
-                          fontWeight: 500
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          gap: 1,
                         }}
                       >
-                        Target: {prevWeight ?? '–'} lbs • {targetReps ?? '–'} reps
-                      </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ 
+                            textAlign: 'center',
+                            color: 'text.secondary',
+                            fontWeight: 500
+                          }}
+                        >
+                          Target: {prevWeight ?? '–'} lbs • {targetReps ?? '–'} reps
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={handleOpenTargetRepsDialog}
+                          sx={{
+                            color: 'primary.main',
+                            p: 0.5,
+                          }}
+                          aria-label="Change target reps"
+                        >
+                          <Settings sx={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Box>
                     </motion.div>
                   )}
                   
@@ -1468,6 +1560,33 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
           <Button onClick={() => setAddSetsDialogOpen(false)}>Cancel</Button>
           <Button onClick={confirmAddExtraSets} variant="contained" color="primary">
             Add Sets
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Change Target Reps Dialog */}
+      <Dialog open={targetRepsDialogOpen} onClose={() => setTargetRepsDialogOpen(false)}>
+        <DialogTitle>Change Target Reps</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, pt: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              Changing target reps will adjust the weight automatically.
+            </Typography>
+            <TargetRepsPicker
+              value={pendingTargetReps || DEFAULT_TARGET_REPS}
+              onChange={(newReps) => setPendingTargetReps(newReps)}
+              showLabel
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTargetRepsDialogOpen(false)}>Cancel</Button>
+          <Button 
+            onClick={() => handleTargetRepsChange(pendingTargetReps)} 
+            variant="contained" 
+            color="primary"
+          >
+            Apply
           </Button>
         </DialogActions>
       </Dialog>

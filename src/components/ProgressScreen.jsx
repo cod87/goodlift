@@ -30,6 +30,7 @@ import {
   LinearProgress,
   Snackbar,
   Alert,
+  useMediaQuery,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -67,6 +68,7 @@ import {
 } from '../utils/storage';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
+import { BREAKPOINTS } from '../theme/responsive';
 import { StreakDisplay, AdherenceDisplay, VolumeTrendDisplay } from './Progress/TrackingCards';
 import MuscleVolumeTracker from './Progress/MuscleVolumeTracker';
 import { useUserProfile } from '../contexts/UserProfileContext';
@@ -81,6 +83,7 @@ import { calculateStreak, calculateAdherence } from '../utils/trackingMetrics';
  * - Strength/Cardio/Yoga session counts
  * - Weight tracking integration
  * - Time frame filtering (7 days, 3 months, year, all time)
+ * - Desktop: Enhanced multi-column grid layout
  */
 const ProgressDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -92,6 +95,9 @@ const ProgressDashboard = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [streakInfoOpen, setStreakInfoOpen] = useState(false);
+  
+  // Desktop layout detection
+  const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
   
   // Time frame filter state
   const [timeFrame, setTimeFrame] = useState('all'); // '7days', '30days', '3months', 'year', 'custom', 'all'
@@ -355,9 +361,10 @@ const ProgressDashboard = () => {
   return (
     <Box sx={{ width: '100%', minHeight: '100vh', overflowX: 'hidden' }}>
       <Box sx={{ 
-        maxWidth: '1400px', 
+        // Desktop: wider max-width
+        maxWidth: isDesktop ? '1600px' : '1400px', 
         margin: '0 auto', 
-        p: { xs: 1.5, sm: 2, md: 3 }, 
+        p: { xs: 1.5, sm: 2, md: 3, lg: 4 }, 
         pt: { xs: 0.5, sm: 1, md: 2 },
         pb: { xs: '80px', md: 3 },
         width: '100%',
@@ -434,86 +441,94 @@ const ProgressDashboard = () => {
               </Button>
             </Box>
 
-            {/* Streak - Highlighted */}
-            <Card 
-              sx={{ 
-                bgcolor: 'background.paper',
-                boxShadow: 3,
-                border: '2px solid #FF6B35',
-              }}
-            >
-              <CardContent sx={{ p: 2.5 }}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Whatshot sx={{ fontSize: 48, color: '#FF6B35' }} />
-                    <Box>
-                      <Typography variant="h2" sx={{ fontWeight: 700, color: '#FF6B35', lineHeight: 1 }}>
-                        {streakData.currentStreak}
-                      </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
-                          Day Streak
+            {/* Streak and Adherence - side by side on desktop */}
+            <Box sx={{ 
+              display: isDesktop ? 'grid' : 'block',
+              gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
+              gap: 2,
+            }}>
+              {/* Streak - Highlighted */}
+              <Card 
+                sx={{ 
+                  bgcolor: 'background.paper',
+                  boxShadow: 3,
+                  border: '2px solid #FF6B35',
+                  mb: isDesktop ? 0 : 2,
+                }}
+              >
+                <CardContent sx={{ p: 2.5 }}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Whatshot sx={{ fontSize: 48, color: '#FF6B35' }} />
+                      <Box>
+                        <Typography variant="h2" sx={{ fontWeight: 700, color: '#FF6B35', lineHeight: 1 }}>
+                          {streakData.currentStreak}
                         </Typography>
-                        <IconButton 
-                          size="small" 
-                          onClick={() => setStreakInfoOpen(true)}
-                          sx={{ 
-                            padding: 0.5, 
-                            color: 'text.secondary',
-                            '&:hover': { color: 'primary.main' }
-                          }}
-                        >
-                          <HelpOutline sx={{ fontSize: 16 }} />
-                        </IconButton>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
+                            Day Streak
+                          </Typography>
+                          <IconButton 
+                            size="small" 
+                            onClick={() => setStreakInfoOpen(true)}
+                            sx={{ 
+                              padding: 0.5, 
+                              color: 'text.secondary',
+                              '&:hover': { color: 'primary.main' }
+                            }}
+                          >
+                            <HelpOutline sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                  <Box sx={{ textAlign: 'right' }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Longest
-                    </Typography>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                      {streakData.longestStreak}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-
-            {/* Adherence */}
-            <Card sx={{ bgcolor: 'background.paper' }}>
-              <CardContent sx={{ p: 2 }}>
-                <Stack spacing={1.5}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Assessment sx={{ color: 'secondary.main' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        Adherence
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="caption" color="text.secondary">
+                        Longest
+                      </Typography>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                        {streakData.longestStreak}
                       </Typography>
                     </Box>
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                      {adherence}%
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={adherence}
-                    sx={{
-                      height: 12,
-                      borderRadius: 6,
-                      bgcolor: 'action.hover',
-                      '& .MuiLinearProgress-bar': {
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              {/* Adherence */}
+              <Card sx={{ bgcolor: 'background.paper' }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack spacing={1.5}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Assessment sx={{ color: 'secondary.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                          Adherence
+                        </Typography>
+                      </Box>
+                      <Typography variant="h4" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                        {adherence}%
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={adherence}
+                      sx={{
+                        height: 12,
                         borderRadius: 6,
-                        background: 'linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%)',
-                      },
-                    }}
-                  />
-                  <Typography variant="caption" color="text.secondary">
-                    Days with sessions (last 30 days or since first session)
-                  </Typography>
-                </Stack>
-              </CardContent>
-            </Card>
+                        bgcolor: 'action.hover',
+                        '& .MuiLinearProgress-bar': {
+                          borderRadius: 6,
+                          background: 'linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%)',
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      Days with sessions (last 30 days or since first session)
+                    </Typography>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Box>
 
             {/* Muscle Volume Tracker */}
             {history.length > 0 && (

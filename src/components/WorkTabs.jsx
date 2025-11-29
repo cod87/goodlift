@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Tabs, Tab } from '@mui/material';
+import { Box, Tabs, Tab, useMediaQuery } from '@mui/material';
 import { 
   FitnessCenter,
   DirectionsRun,
@@ -11,6 +11,7 @@ import StrengthTab from './WorkTabs/StrengthTab';
 import MobilityTab from './WorkTabs/MobilityTab';
 import LogActivityTab from './WorkTabs/LogActivityTab';
 import NutritionTab from './WorkTabs/NutritionTab';
+import { BREAKPOINTS } from '../theme/responsive';
 
 /**
  * WorkTabs - Main Work area component with four sub-tabs
@@ -20,6 +21,8 @@ import NutritionTab from './WorkTabs/NutritionTab';
  * 2. Mobility - Timer functionality for mobility workouts (cardio, yoga)
  * 3. Activity - Manual activity logging
  * 4. Nutrition - Food tracking with USDA FoodData Central API
+ * 
+ * Desktop: Wider layout with enhanced spacing
  */
 const WorkTabs = ({ 
   onNavigate,
@@ -34,6 +37,7 @@ const WorkTabs = ({
   onCustomize,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
+  const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -47,9 +51,10 @@ const WorkTabs = ({
   return (
     <Box 
       sx={{ 
-        padding: { xs: 1.5, sm: 1.5, md: 2 },
-        paddingTop: { xs: 0.5, sm: 0.5, md: 1 },
-        maxWidth: '1200px',
+        padding: { xs: 1.5, sm: 1.5, md: 2, lg: 3 },
+        paddingTop: { xs: 0.5, sm: 0.5, md: 1, lg: 1.5 },
+        // Desktop: wider max-width to utilize screen space
+        maxWidth: isDesktop ? '1400px' : '1200px',
         margin: '0 auto',
         minHeight: 'calc(100vh - 48px)',
         paddingBottom: { xs: '80px', md: '2rem' },
@@ -62,9 +67,12 @@ const WorkTabs = ({
           onChange={handleTabChange}
           variant="fullWidth"
           sx={{
+            // Desktop: limit tab width for better aesthetics
+            maxWidth: isDesktop ? '600px' : '100%',
+            margin: isDesktop ? '0 auto' : '0',
             '& .MuiTab-root': {
               minHeight: 48,
-              fontSize: { xs: '0.8rem', sm: '0.9rem' },
+              fontSize: { xs: '0.8rem', sm: '0.9rem', lg: '1rem' },
               fontWeight: 600,
               transition: 'color 0.3s ease',
               py: 1,

@@ -46,10 +46,11 @@ import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Snackbar, Alert, Button } from '@mui/material';
+import { Snackbar, Alert, Button, useMediaQuery } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 import { runDataMigration } from './migrations/simplifyDataStructure';
 import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achievements';
+import { BREAKPOINTS } from './theme/responsive';
 
 /**
  * Main app component wrapped with theme
@@ -72,6 +73,9 @@ function AppContent() {
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Track superset configuration
   const [setsPerSuperset, setSetsPerSuperset] = useState(3); // Track number of sets per superset
   const { currentUser, isGuest, hasGuestData } = useAuth();
+  
+  // Desktop layout detection
+  const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
   const favoriteExercises = useFavoriteExercises();
@@ -649,13 +653,21 @@ function AppContent() {
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        minHeight: '100vh',
+        // Desktop: offset for sidebar navigation
+        marginLeft: isDesktop ? '80px' : '0',
+      }}>
         <Header currentTab={currentScreen} />
         
         <div id="app" style={{ 
           flex: 1,
           marginTop: '48px',
-          paddingBottom: '80px', // Space for bottom nav
+          // Desktop: no bottom padding needed (no bottom nav)
+          // Mobile/Tablet: space for bottom nav
+          paddingBottom: isDesktop ? '2rem' : '80px',
         }}>
           {currentScreen === 'home' && (
             <WorkTabs

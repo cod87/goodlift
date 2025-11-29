@@ -1293,3 +1293,117 @@ button:active {
         width: 100%;
     }
 }
+
+/* ===== DESKTOP-SPECIFIC STYLES ===== */
+/* These styles are exclusively for desktop viewports (min-width: 1024px) */
+/* Mobile and tablet layouts remain untouched */
+
+@media (min-width: 1024px) {
+    /* Desktop: Use sidebar navigation layout */
+    .desktop-layout-wrapper {
+        display: flex;
+        flex-direction: row;
+        min-height: 100vh;
+    }
+
+    /* Desktop sidebar navigation container */
+    .desktop-sidebar-nav {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 80px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 1rem;
+        background: var(--color-surface);
+        border-right: 1px solid var(--color-border);
+        z-index: 1000;
+    }
+
+    /* Desktop main content area - offset for sidebar */
+    .desktop-main-content {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+        min-height: 100vh;
+    }
+
+    /* Hide bottom nav on desktop (handled via inline styles in component) */
+    
+    /* Desktop header adjustments */
+    .desktop-header {
+        left: 80px !important;
+        width: calc(100% - 80px) !important;
+    }
+
+    /* Wider content containers for desktop */
+    .desktop-wide-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 2rem 3rem;
+    }
+
+    /* Desktop card grids - utilize horizontal space */
+    .desktop-grid-2col {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .desktop-grid-3col {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    /* Desktop stats cards - side by side */
+    .desktop-stats-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .desktop-stats-row > * {
+        flex: 1;
+        min-width: 280px;
+    }
+
+    /* Settings page - 2 column layout */
+    .desktop-settings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    /* Progress page - enhanced layout */
+    .desktop-progress-layout {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 2rem;
+    }
+
+    /* Calendar and stats side by side */
+    .desktop-calendar-section {
+        grid-column: 1 / -1;
+    }
+
+    /* Exercise card on desktop - centered with max-width */
+    .exercise-card-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* Better button sizing on desktop */
+    .desktop-btn-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .desktop-btn-row button {
+        flex: 1;
+        min-width: 200px;
+    }
+}

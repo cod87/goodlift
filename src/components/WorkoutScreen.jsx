@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout, getWorkoutHistory } from '../utils/storage';
-import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip, useTheme, useMediaQuery, keyframes } from '@mui/material';
+import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip, useTheme, useMediaQuery, keyframes, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Add, Remove, SkipNext, TrendingUp, HelpOutline, Save, SwapHoriz, PlaylistAdd } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
@@ -59,6 +59,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const [hasModifications, setHasModifications] = useState(false);
   const [swapDialogOpen, setSwapDialogOpen] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [addSetsDialogOpen, setAddSetsDialogOpen] = useState(false);
   const [extraSetsAdded, setExtraSetsAdded] = useState(0);
   
   const startTimeRef = useRef(null);
@@ -690,31 +691,41 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
 
   // Handle adding extra sets at end of workout
   const handleAddExtraSets = () => {
-    if (window.confirm('Add an extra set for each exercise? This will extend the workout.')) {
-      // Update each exercise to have one more set
-      const updatedPlan = workoutPlan.map(ex => ({
-        ...ex,
-        sets: (ex.sets || setsPerSuperset) + 1
-      }));
-      setWorkoutPlan(updatedPlan);
-      setExtraSetsAdded(prev => prev + 1);
-      setHasModifications(true);
-      
-      setSnackbarMessage('Added extra set to each exercise');
-      setSnackbarOpen(true);
-    }
+    setAddSetsDialogOpen(true);
+  };
+
+  const confirmAddExtraSets = () => {
+    // Update each exercise to have one more set
+    const updatedPlan = workoutPlan.map(ex => ({
+      ...ex,
+      sets: (ex.sets || setsPerSuperset) + 1
+    }));
+    setWorkoutPlan(updatedPlan);
+    setExtraSetsAdded(prev => prev + 1);
+    setHasModifications(true);
+    setAddSetsDialogOpen(false);
+    
+    setSnackbarMessage('Added extra set to each exercise');
+    setSnackbarOpen(true);
+  };
+
+  // Helper to derive equipment from workout plan
+  const deriveEquipmentFromPlan = (plan) => {
+    const equipmentSet = new Set(plan.map(ex => ex['Equipment']).filter(Boolean));
+    if (equipmentSet.size === 0) return 'all';
+    if (equipmentSet.size === 1) return [...equipmentSet][0].toLowerCase();
+    return 'mixed';
   };
 
   // Handle save dialog actions
   const handleOverrideSavedWorkout = async () => {
     try {
       // Override the existing saved workout with modified exercises
-      // This would need integration with storage functions
       await saveFavoriteWorkout({
         id: savedWorkoutId,
         name: savedWorkoutName || 'Modified Workout',
         type: detectWorkoutType(workoutPlan[0]),
-        equipment: 'all',
+        equipment: deriveEquipmentFromPlan(workoutPlan),
         exercises: workoutPlan,
       });
       setSaveDialogOpen(false);
@@ -730,7 +741,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
       await saveFavoriteWorkout({
         name: newName,
         type: detectWorkoutType(workoutPlan[0]),
-        equipment: 'all',
+        equipment: deriveEquipmentFromPlan(workoutPlan),
         exercises: workoutPlan,
       });
       setSaveDialogOpen(false);
@@ -1447,6 +1458,22 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
         originalWorkoutName={savedWorkoutName}
         hasExistingWorkout={!!savedWorkoutId}
       />
+
+      {/* Add Extra Sets Confirmation Dialog */}
+      <Dialog open={addSetsDialogOpen} onClose={() => setAddSetsDialogOpen(false)}>
+        <DialogTitle>Add Extra Sets</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Add an extra set for each exercise? This will extend the workout.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddSetsDialogOpen(false)}>Cancel</Button>
+          <Button onClick={confirmAddExtraSets} variant="contained" color="primary">
+            Add Sets
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

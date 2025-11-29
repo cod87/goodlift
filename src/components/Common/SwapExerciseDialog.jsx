@@ -15,9 +15,13 @@ import {
   ListItemText,
   Chip,
   IconButton,
+  Alert,
 } from '@mui/material';
 import { Close, Search, SwapHoriz } from '@mui/icons-material';
 import { EXERCISES_DATA_PATH } from '../../utils/constants';
+
+// Maximum number of exercises to display in the list for performance
+const MAX_DISPLAYED_EXERCISES = 50;
 
 /**
  * SwapExerciseDialog - Allows users to swap an exercise mid-workout
@@ -32,18 +36,22 @@ const SwapExerciseDialog = ({
   const [allExercises, setAllExercises] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Load exercises on mount
   useEffect(() => {
     const loadExercises = async () => {
       try {
+        setError(null);
         const response = await fetch(EXERCISES_DATA_PATH);
-        if (response.ok) {
-          const exercises = await response.json();
-          setAllExercises(exercises);
+        if (!response.ok) {
+          throw new Error(`Failed to load exercises: ${response.status}`);
         }
-      } catch (error) {
-        console.error('Failed to load exercises:', error);
+        const exercises = await response.json();
+        setAllExercises(exercises);
+      } catch (err) {
+        console.error('Failed to load exercises:', err);
+        setError('Unable to load exercises. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -79,7 +87,7 @@ const SwapExerciseDialog = ({
       );
     }
 
-    return filtered.slice(0, 50); // Limit for performance
+    return filtered.slice(0, MAX_DISPLAYED_EXERCISES); // Limit for performance
   };
 
   const handleSelect = (exercise) => {
@@ -91,6 +99,7 @@ const SwapExerciseDialog = ({
   const handleClose = () => {
     onClose();
     setSearchTerm('');
+    setError(null);
   };
 
   const filteredExercises = getFilteredExercises();
@@ -137,6 +146,10 @@ const SwapExerciseDialog = ({
             </Typography>
           )}
         </Box>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+        )}
 
         {loading ? (
           <Typography>Loading exercises...</Typography>

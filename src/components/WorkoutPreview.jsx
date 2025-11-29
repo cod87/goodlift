@@ -9,6 +9,13 @@ import ExerciseAutocomplete from './ExerciseAutocomplete';
 import { calculateBarbellPerSide } from '../utils/weightUtils';
 import { usePreferences } from '../contexts/PreferencesContext';
 import LoadingScreen from './LoadingScreen';
+import TargetRepsPicker from './Common/TargetRepsPicker';
+import { 
+  DEFAULT_TARGET_REPS, 
+  getClosestValidTargetReps, 
+  calculateWeightForRepChange,
+  roundToNearestIncrement,
+} from '../utils/repRangeWeightAdjustment';
 
 /**
  * WorkoutPreview component displays a preview of the generated workout
@@ -77,7 +84,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
         ]);
         settings[exerciseName] = {
           weight: weight ?? '', // Use empty string for null/undefined
-          targetReps: targetReps ?? '', // Use empty string for null/undefined
+          targetReps: targetReps ? getClosestValidTargetReps(targetReps) : DEFAULT_TARGET_REPS, // Convert to valid target reps
         };
       }
       setExerciseSettings(settings);
@@ -111,7 +118,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             ]);
             newSettings[exerciseName] = {
               weight: weight ?? '', // Use empty string for null/undefined
-              targetReps: targetReps ?? '', // Use empty string for null/undefined
+              targetReps: targetReps ? getClosestValidTargetReps(targetReps) : DEFAULT_TARGET_REPS, // Convert to valid target reps
             };
           }
         }
@@ -153,8 +160,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
     
     const numValue = parseFloat(value);
     if (!isNaN(numValue) && numValue > 0) {
-      // Round to nearest 2.5 lbs
-      const rounded = Math.round(numValue / 2.5) * 2.5;
+      // Round to nearest valid increment (2.5 lbs for ≤35, 5 lbs for >35)
+      const rounded = roundToNearestIncrement(numValue);
       if (rounded !== numValue) {
         setExerciseSettings(prev => ({
           ...prev,
@@ -164,51 +171,51 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           }
         }));
         // Show notification
+        const incrementText = rounded <= 35 ? '2.5 lb' : '5 lb';
         setSnackbar({
           open: true,
-          message: `Weight adjusted to ${rounded} lbs (nearest 2.5 lb increment)`,
+          message: `Weight adjusted to ${rounded} lbs (nearest ${incrementText} increment)`,
           severity: 'info'
         });
       }
     }
   };
 
-  const handleTargetRepsChange = (exerciseName, value) => {
-    // Allow empty state and validate: only allow positive integers
-    if (value === '' || /^\d+$/.test(value)) {
-      const numValue = value === '' ? '' : parseInt(value, 10);
-      setExerciseSettings(prev => ({
-        ...prev,
-        [exerciseName]: {
-          ...prev[exerciseName],
-          targetReps: numValue,
-        }
-      }));
-      // Track as customized
-      setCustomizedSettings(prev => ({
-        ...prev,
-        [exerciseName]: { ...prev[exerciseName], repsCustomized: true }
-      }));
-    }
-  };
-
-  const handleTargetRepsBlur = (exerciseName, value) => {
-    // If empty, keep empty on blur (don't force to default)
-    if (value === '' || value === null || value === undefined) {
-      return;
+  const handleTargetRepsChange = (exerciseName, newReps) => {
+    // Get current settings for this exercise
+    const currentSettings = exerciseSettings[exerciseName] || { weight: '', targetReps: DEFAULT_TARGET_REPS };
+    const currentReps = currentSettings.targetReps || DEFAULT_TARGET_REPS;
+    const currentWeight = currentSettings.weight;
+    
+    // Calculate new weight if we have a current weight
+    let newWeight = currentWeight;
+    if (currentWeight && currentWeight > 0 && currentReps !== newReps) {
+      const adjustedWeight = calculateWeightForRepChange(currentWeight, currentReps, newReps);
+      if (adjustedWeight !== null) {
+        newWeight = adjustedWeight;
+        // Show notification about weight adjustment
+        const direction = newReps < currentReps ? 'increased' : 'decreased';
+        setSnackbar({
+          open: true,
+          message: `Weight ${direction} to ${adjustedWeight} lbs for ${newReps} reps`,
+          severity: 'info'
+        });
+      }
     }
     
-    const numValue = parseInt(value, 10);
-    if (isNaN(numValue) || numValue < 1) {
-      // Keep empty if invalid
-      setExerciseSettings(prev => ({
-        ...prev,
-        [exerciseName]: {
-          ...prev[exerciseName],
-          targetReps: '',
-        }
-      }));
-    }
+    setExerciseSettings(prev => ({
+      ...prev,
+      [exerciseName]: {
+        ...prev[exerciseName],
+        targetReps: newReps,
+        weight: newWeight,
+      }
+    }));
+    // Track as customized
+    setCustomizedSettings(prev => ({
+      ...prev,
+      [exerciseName]: { ...prev[exerciseName], repsCustomized: true, weightCustomized: newWeight !== currentWeight }
+    }));
   };
 
   const handleRandomizeExercise = useCallback((exercise, globalIndex) => {
@@ -236,7 +243,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             ...prev,
             [exerciseName]: {
               weight: weight ?? '',
-              targetReps: targetReps ?? '',
+              targetReps: targetReps ? getClosestValidTargetReps(targetReps) : DEFAULT_TARGET_REPS,
             }
           }));
         });
@@ -540,7 +547,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               sx={{ 
                                 pl: { xs: 4, sm: 5.5 },
                                 flexWrap: { xs: 'wrap', sm: 'nowrap' },
-                                mb: { xs: 1, sm: 1.5 }
+                                mb: { xs: 1, sm: 1.5 },
+                                alignItems: 'center',
                               }}
                             >
                           <TextField
@@ -569,26 +577,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               }
                             }}
                           />
-                          <TextField
-                            type="tel"
-                            inputMode="numeric"
-                            value={settings.targetReps === '' ? '' : settings.targetReps}
-                            onChange={(e) => handleTargetRepsChange(exerciseName, e.target.value)}
-                            onBlur={(e) => handleTargetRepsBlur(exerciseName, e.target.value)}
-                            onFocus={(e) => e.target.select()}
-                            placeholder="Reps"
-                            size="small"
-                            inputProps={{
-                              min: 1,
-                              max: 20,
-                              step: 1,
-                              pattern: '\\d*',
-                              'aria-label': `Target repetitions for ${exerciseName}`,
-                            }}
-                            sx={{ 
-                              minWidth: { xs: 100, sm: 120 },
-                              flex: { xs: '1 1 45%', sm: 'none' }
-                            }}
+                          <TargetRepsPicker
+                            value={settings.targetReps || DEFAULT_TARGET_REPS}
+                            onChange={(newReps) => handleTargetRepsChange(exerciseName, newReps)}
+                            compact
+                            showLabel
                           />
                         </Stack>
                         {/* Display per-side weight for barbell exercises */}

@@ -42,6 +42,8 @@ import {
 import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 import { generateStandardWorkout } from '../../utils/workoutGenerator';
 import { getAllCategories, filterExercisesByCategory } from '../../utils/muscleCategories';
+import TargetRepsPicker from '../Common/TargetRepsPicker';
+import { DEFAULT_TARGET_REPS, getClosestValidTargetReps } from '../../utils/repRangeWeightAdjustment';
 
 /**
  * Superset color palette - cycling through distinct colors
@@ -250,20 +252,16 @@ const ExerciseItem = ({
               <MenuItem value={4}>4</MenuItem>
             </Select>
           </FormControl>
-          <TextField
-            label="Reps"
-            type="number"
-            size="small"
-            value={exercise.reps === '' ? '' : exercise.reps}
-            onChange={(e) => {
-              e.stopPropagation();
+          <TargetRepsPicker
+            value={typeof exercise.reps === 'number' ? getClosestValidTargetReps(exercise.reps) : DEFAULT_TARGET_REPS}
+            onChange={(newReps) => {
               const updated = [...myWorkout];
-              const value = e.target.value;
-              updated[index].reps = value === '' ? '' : (parseInt(value) || 0);
+              updated[index].reps = newReps;
               setMyWorkout(updated);
             }}
-            onClick={(e) => e.stopPropagation()}
-            sx={{ width: 80 }}
+            compact
+            showLabel
+            label="Reps"
           />
         </Stack>
       </CardContent>
@@ -441,7 +439,7 @@ const WorkoutCreationModal = ({
       setMyWorkout([...myWorkout, {
         ...exercise,
         sets: 3,
-        reps: savedReps ?? 10, // Use saved reps or default to 10
+        reps: savedReps ? getClosestValidTargetReps(savedReps) : DEFAULT_TARGET_REPS, // Use valid target reps
         weight: savedWeight ?? 0, // Use saved weight or default to 0
         restTime: 60,
         supersetGroup: null, // No superset group initially
@@ -735,10 +733,13 @@ const WorkoutCreationModal = ({
           getExerciseTargetReps(exercise['Exercise Name'])
         ]);
         
+        // Determine reps: use saved if available, then existing, then default
+        const existingReps = savedReps ?? exercise.reps ?? DEFAULT_TARGET_REPS;
+        
         return {
           ...exercise,
           sets: exercise.sets || 3,
-          reps: savedReps ?? (exercise.reps || 10),
+          reps: getClosestValidTargetReps(existingReps),
           weight: savedWeight ?? (exercise.weight || 0),
           restTime: exercise.restTime || 60,
         };

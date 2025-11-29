@@ -96,12 +96,10 @@ const TargetRepsPicker = ({
         label={showLabel ? label : undefined}
         notched={showLabel}
         sx={{
-          // Match the height of MUI Select with size="small" (40px)
-          height: compact ? 40 : undefined,
           '& .MuiOutlinedInput-input': {
             textAlign: 'center',
             fontWeight: 400,
-            py: 1,
+            py: compact ? 0.75 : 1,
             px: 0.5,
             minWidth: 28,
             cursor: 'default',

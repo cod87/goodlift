@@ -28,6 +28,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  useMediaQuery,
 } from '@mui/material';
 import { 
   Brightness4, 
@@ -76,12 +77,14 @@ import {
   getResetInfo,
   cleanupExpiredBackups,
 } from '../utils/dataResetService';
+import { BREAKPOINTS } from '../theme/responsive';
 
 const SettingsScreen = ({ onNavigate }) => {
   const { mode, toggleTheme } = useTheme();
   const { preferences, updatePreference } = usePreferences();
   const { profile, stats } = useUserProfile();
   const { isGuest } = useAuth();
+  const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
   const { resetWeekCycle } = useWeekScheduling();
   
   const [volume, setVolume] = useState(() => {
@@ -339,7 +342,17 @@ const SettingsScreen = ({ onNavigate }) => {
           />
         </Box>
 
-        <Stack spacing={1.5} sx={{ maxWidth: 600 }}>
+        {/* Desktop: wider max-width and centered */}
+        <Box sx={{ 
+          maxWidth: isDesktop ? '900px' : '600px',
+          margin: '0 auto',
+        }}>
+          {/* Desktop: 2-column grid for settings cards */}
+          <Box sx={{ 
+            display: isDesktop ? 'grid' : 'block',
+            gridTemplateColumns: isDesktop ? 'repeat(2, 1fr)' : '1fr',
+            gap: 1.5,
+          }}>
           {/* My Plans Section removed - no longer using workout planning */}
 
           {/* User Profile Section */}
@@ -849,12 +862,14 @@ const SettingsScreen = ({ onNavigate }) => {
             </CardContent>
           </Card>
 
-          <Box sx={{ mt: 2 }}>
+          {/* Preferences saved message - spans full width on desktop grid */}
+          <Box sx={{ mt: 2, gridColumn: isDesktop ? '1 / -1' : 'auto' }}>
             <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
               Your preferences are saved automatically
             </Typography>
           </Box>
-        </Stack>
+          </Box>
+        </Box>
       </motion.div>
 
       {/* Reset Data Dialog */}

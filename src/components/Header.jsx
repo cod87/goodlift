@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
+import { Box, useTheme, useMediaQuery, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
 import WeekBadge from './Common/WeekBadge';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
+import { BREAKPOINTS } from '../theme/responsive';
 
 // Tab name mapping - defined outside component for performance
 const TAB_DISPLAY_NAMES = {
@@ -28,9 +29,11 @@ const TAB_DISPLAY_NAMES = {
  * Header component - Compact, minimalist sticky header
  * Shows current tab/subtab name on left, week badge on right
  * Sound and wake lock controls moved to timer modals
+ * Desktop: Offset to account for sidebar navigation
  */
 const Header = ({ currentTab, currentSubtab }) => {
   const theme = useTheme();
+  const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
   const { currentWeek, deloadWeekActive, triggerDeloadWeek } = useWeekScheduling();
   const [showDeloadDialog, setShowDeloadDialog] = useState(false);
 
@@ -60,13 +63,17 @@ const Header = ({ currentTab, currentSubtab }) => {
       sx={{
         position: 'fixed',
         top: 0,
-        left: 0,
+        // Desktop: offset for sidebar navigation
+        left: isDesktop ? '80px' : 0,
         right: 0,
         height: '48px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
+        // Desktop: more horizontal padding
+        paddingLeft: isDesktop ? '2rem' : '1rem',
+        paddingRight: isDesktop ? '2rem' : '1rem',
         background: theme.palette.background.default,
         zIndex: 100,
         borderBottom: `1px solid ${theme.palette.divider}`,

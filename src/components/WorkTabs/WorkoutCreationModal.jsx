@@ -96,7 +96,7 @@ const ExerciseItem = ({
   const isHighlighted = highlightedExercises.has(exercise['Exercise Name']);
   const highlightColor = getSupersetColor(currentSupersetNumber);
 
-  // Handle clicking on the card to highlight or remove from superset
+  // Handle clicking on the card to highlight
   const handleCardClick = (e) => {
     // Don't trigger if clicking on input fields or buttons
     const target = e.target;
@@ -104,13 +104,7 @@ const ExerciseItem = ({
     const isButton = target.tagName === 'BUTTON' || target.closest('button');
     
     if (!isInput && !isButton) {
-      // If exercise is already in a superset, tapping removes it from the superset
-      if (isInSuperset) {
-        onDeselectFromSuperset(exercise['Exercise Name']);
-      } else {
-        // Otherwise, toggle highlight for superset creation
-        onToggleHighlight(exercise['Exercise Name']);
-      }
+      onToggleHighlight(exercise['Exercise Name']);
     }
   };
 
@@ -501,28 +495,6 @@ const WorkoutCreationModal = ({
     
     // Clear highlights (superset number will be auto-updated by useEffect)
     setHighlightedExercises(new Set());
-  };
-
-  // Decrement superset number (e.g., from 5 to 4)
-  const handleDecrementSupersetNumber = (e) => {
-    e.stopPropagation();
-    if (currentSupersetNumber > 1) {
-      setCurrentSupersetNumber(currentSupersetNumber - 1);
-    }
-  };
-
-  // Increment superset number (e.g., from 4 to 5)
-  const handleIncrementSupersetNumber = (e) => {
-    e.stopPropagation();
-    // Get max existing superset number
-    const supersetIds = myWorkout
-      .filter(ex => ex.supersetGroup !== null && ex.supersetGroup !== undefined)
-      .map(ex => ex.supersetGroup);
-    const maxExisting = supersetIds.length > 0 ? Math.max(...supersetIds) : 0;
-    // Allow incrementing up to max + 1
-    if (currentSupersetNumber <= maxExisting + 1) {
-      setCurrentSupersetNumber(currentSupersetNumber + 1);
-    }
   };
 
   // Reorder exercises to group by superset
@@ -1014,7 +986,7 @@ const WorkoutCreationModal = ({
 
             {/* Exercise List with Arrow Controls */}
             <Box sx={{ mb: 2 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   Exercises ({myWorkout.length})
                 </Typography>
@@ -1029,6 +1001,9 @@ const WorkoutCreationModal = ({
                   </Button>
                 </Stack>
               </Stack>
+              <Typography variant="body2" color="text.secondary">
+                Tap exercises to highlight them in the current superset color, then press the floating button to group them. Use arrow buttons to reorder groups. Click the X on a superset chip to remove an exercise from that superset.
+              </Typography>
             </Box>
             
             {myWorkout.length > 0 ? (
@@ -1046,91 +1021,39 @@ const WorkoutCreationModal = ({
             
             {/* Sticky Floating Superset Button - show when has highlighted exercises */}
             {highlightedExercises.size > 0 && (
-              <Box
-                sx={{
-                  position: 'fixed',
-                  bottom: 24,
-                  right: 24,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  zIndex: 1000,
-                }}
-              >
-                {/* Arrow Up - Decrement */}
-                <IconButton
-                  onClick={handleDecrementSupersetNumber}
-                  disabled={currentSupersetNumber <= 1}
-                  size="small"
+              <Tooltip title={`Create Superset ${currentSupersetNumber}`} placement="left">
+                <Box
+                  onClick={handleLockInSuperset}
                   sx={{
+                    position: 'fixed',
+                    bottom: 24,
+                    right: 24,
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    backgroundColor: getSupersetColor(currentSupersetNumber)?.main,
                     color: 'white',
-                    opacity: currentSupersetNumber <= 1 ? 0.3 : 0.6,
-                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                    mb: 0.5,
-                    width: 28,
-                    height: 28,
-                    transition: 'opacity 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    boxShadow: 6,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    zIndex: 1000,
                     '&:hover': {
-                      opacity: 0.9,
-                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                      transform: 'scale(1.1)',
+                      boxShadow: 12,
+                    },
+                    '&:active': {
+                      transform: 'scale(0.95)',
                     },
                   }}
                 >
-                  <ArrowUpward sx={{ fontSize: 18 }} />
-                </IconButton>
-
-                {/* Main Circle Button */}
-                <Tooltip title={`Create Superset ${currentSupersetNumber}`} placement="left">
-                  <Box
-                    onClick={handleLockInSuperset}
-                    sx={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: '50%',
-                      backgroundColor: getSupersetColor(currentSupersetNumber)?.main,
-                      color: 'white',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 'bold',
-                      fontSize: '1.5rem',
-                      cursor: 'pointer',
-                      boxShadow: 6,
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      '&:hover': {
-                        transform: 'scale(1.1)',
-                        boxShadow: 12,
-                      },
-                      '&:active': {
-                        transform: 'scale(0.95)',
-                      },
-                    }}
-                  >
-                    {currentSupersetNumber}
-                  </Box>
-                </Tooltip>
-
-                {/* Arrow Down - Increment */}
-                <IconButton
-                  onClick={handleIncrementSupersetNumber}
-                  size="small"
-                  sx={{
-                    color: 'white',
-                    opacity: 0.6,
-                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                    mt: 0.5,
-                    width: 28,
-                    height: 28,
-                    transition: 'opacity 0.2s ease',
-                    '&:hover': {
-                      opacity: 0.9,
-                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                    },
-                  }}
-                >
-                  <ArrowDownward sx={{ fontSize: 18 }} />
-                </IconButton>
-              </Box>
+                  {currentSupersetNumber}
+                </Box>
+              </Tooltip>
             )}
           </Box>
         )}

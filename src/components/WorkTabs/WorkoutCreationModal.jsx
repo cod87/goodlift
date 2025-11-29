@@ -1001,9 +1001,6 @@ const WorkoutCreationModal = ({
                   </Button>
                 </Stack>
               </Stack>
-              <Typography variant="body2" color="text.secondary">
-                Tap exercises to highlight them in the current superset color, then press the floating button to group them. Use arrow buttons to reorder groups. Click the X on a superset chip to remove an exercise from that superset.
-              </Typography>
             </Box>
             
             {myWorkout.length > 0 ? (

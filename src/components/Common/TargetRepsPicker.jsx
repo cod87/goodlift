@@ -82,7 +82,9 @@ const TargetRepsPicker = ({
   const canIncrease = TARGET_REPS_OPTIONS.indexOf(displayValue) < TARGET_REPS_OPTIONS.length - 1;
 
   // Use FormControl with OutlinedInput to match MUI Select styling
-  // Width sized to fit +/- buttons and two-digit numbers with good spacing
+  // Width: 100-110px provides adequate space for +/- buttons and two-digit numbers
+  // Padding: 0.5 horizontal padding gives breathing room between buttons and value
+  // minWidth: 28 ensures two-digit numbers (like "15") fit comfortably
   return (
     <FormControl size="small" sx={{ width: compact ? 100 : 110, minWidth: compact ? 100 : 110 }}>
       {showLabel && <InputLabel shrink>{label}</InputLabel>}

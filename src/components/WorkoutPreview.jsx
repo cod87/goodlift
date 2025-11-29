@@ -1,7 +1,7 @@
 import { useState, useEffect, memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
-import { Box, Typography, Card, CardContent, Button, Stack, TextField, Snackbar, Alert, IconButton } from '@mui/material';
+import { Box, Typography, Card, CardContent, Button, Stack, TextField, Snackbar, Alert, IconButton, InputAdornment } from '@mui/material';
 import { PlayArrow, StarOutline, Star, Shuffle, Add, Remove } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
@@ -558,8 +558,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
                             onBlur={(e) => handleWeightBlur(exerciseName, e.target.value)}
                             onFocus={(e) => e.target.select()}
-                            placeholder={exercise['Equipment']?.toLowerCase() === 'bodyweight' ? 'N/A' : 'Weight'}
-                            label="lbs"
+                            placeholder={exercise['Equipment']?.toLowerCase() === 'bodyweight' ? 'N/A' : '–'}
                             size="small"
                             disabled={exercise['Equipment']?.toLowerCase() === 'bodyweight'}
                             inputProps={{
@@ -569,12 +568,20 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               pattern: '[0-9]*([.,][0-9]+)?',
                               'aria-label': `Target weight in pounds for ${exerciseName}`,
                             }}
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <Typography variant="caption" color="text.secondary">lbs</Typography>
+                                </InputAdornment>
+                              ),
+                            }}
                             sx={{ 
-                              width: { xs: 80, sm: 90 },
-                              minWidth: { xs: 80, sm: 90 },
+                              width: { xs: 90, sm: 100 },
+                              minWidth: { xs: 90, sm: 100 },
                               flex: 'none',
                               '& .MuiInputBase-input': {
                                 textAlign: 'center',
+                                pr: 0,
                               },
                               '& .MuiInputBase-input.Mui-disabled': {
                                 WebkitTextFillColor: 'rgba(0, 0, 0, 0.38)',

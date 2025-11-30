@@ -167,10 +167,10 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
             {isFavorite ? <Star sx={{ fontSize: 32 }} /> : <StarBorder sx={{ fontSize: 32 }} />}
           </IconButton>
         </Box>
-        {/* Spinning favicon celebration icon - replaces broken dancing-icon.svg */}
+        {/* Spinning celebration icon - uses same celebration dog as Workout Finish screen */}
         <Box
           component="img"
-          src={`${import.meta.env.BASE_URL}goodlift-dog.svg`}
+          src={`${import.meta.env.BASE_URL}goodlift-dog-celebration.svg`}
           alt="Celebration"
           sx={{
             width: { xs: '80px', sm: '100px' },

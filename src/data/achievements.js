@@ -596,16 +596,48 @@ export const getUnlockedAchievements = (userStats, workoutHistory = []) => {
 
 /**
  * Get newly unlocked achievements since last check
+ * 
+ * This function determines which achievements were just unlocked by the latest action.
+ * It uses a two-pronged approach for reliability:
+ * 1. Checks if the achievement ID is in the previouslyUnlocked list
+ * 2. For workoutCount-based achievements, also verifies the achievement wasn't 
+ *    unlockable before the current workout (using workout history length)
+ * 
+ * This ensures achievements are only shown as "new" when they are truly first unlocked,
+ * even if the previouslyUnlocked list is out of sync or empty.
+ * 
  * @param {Object} userStats - Current user statistics
- * @param {Array} workoutHistory - Workout history
+ * @param {Array} workoutHistory - Workout history (including the just-completed workout)
  * @param {Array} previouslyUnlocked - Previously unlocked achievement IDs
  * @returns {Array} Newly unlocked achievements
  */
 export const getNewlyUnlockedAchievements = (userStats, workoutHistory, previouslyUnlocked = []) => {
   const currentUnlocked = getUnlockedAchievements(userStats, workoutHistory);
-  return currentUnlocked.filter(achievement => 
-    !previouslyUnlocked.includes(achievement.id)
-  );
+  
+  // Calculate how many workouts existed BEFORE the current one was added
+  // This provides a fallback check in case previouslyUnlocked is not accurate
+  const workoutsBeforeCurrent = Math.max(0, (workoutHistory?.length || 0) - 1);
+  
+  return currentUnlocked.filter(achievement => {
+    // If already in the previouslyUnlocked list, it's not new
+    if (previouslyUnlocked.includes(achievement.id)) {
+      return false;
+    }
+    
+    // Additional check for workoutCount-based achievements:
+    // If this achievement would have been unlocked with the previous workout count,
+    // then it's not truly new (the stored list was just out of sync)
+    if (achievement.condition.type === 'workoutCount') {
+      const requiredWorkouts = achievement.condition.value;
+      // If we had enough workouts BEFORE this one, the achievement was already unlockable
+      if (workoutsBeforeCurrent >= requiredWorkouts) {
+        return false;
+      }
+    }
+    
+    // Achievement is newly unlocked
+    return true;
+  });
 };
 
 /**

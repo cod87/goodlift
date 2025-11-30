@@ -2056,3 +2056,63 @@ export const updateSavedWorkout = async (index, updatedWorkout) => {
     throw error;
   }
 };
+
+/**
+ * Duplicate a saved workout
+ * Creates a new copy with a unique name indicating it's a duplicate
+ * @param {number} index - Index of the saved workout to duplicate
+ * @returns {Promise<Object>} The newly created duplicate workout
+ */
+export const duplicateSavedWorkout = async (index) => {
+  try {
+    const workouts = await getSavedWorkouts();
+    
+    if (index < 0 || index >= workouts.length) {
+      throw new Error('Invalid workout index');
+    }
+    
+    const originalWorkout = workouts[index];
+    
+    // Create a deep copy of the workout with a new ID and name
+    const timestamp = new Date().toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    
+    const duplicateWorkout = {
+      ...originalWorkout,
+      id: Date.now(),
+      name: `${originalWorkout.name || 'Workout'} (Copy - ${timestamp})`,
+      // Deep copy exercises array to avoid reference issues
+      exercises: originalWorkout.exercises ? 
+        JSON.parse(JSON.stringify(originalWorkout.exercises)) : [],
+      // Deep copy supersetConfig if exists
+      supersetConfig: originalWorkout.supersetConfig ?
+        JSON.parse(JSON.stringify(originalWorkout.supersetConfig)) : undefined,
+      createdAt: new Date().toISOString(),
+      // Remove assigned day from duplicate
+      assignedDay: undefined,
+      archived: false,
+    };
+    
+    workouts.push(duplicateWorkout);
+    
+    if (isGuestMode()) {
+      setGuestData('saved_workouts', workouts);
+    } else {
+      localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(workouts));
+      
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveSavedWorkoutsToFirebase(currentUserId, workouts);
+      }
+    }
+    
+    return duplicateWorkout;
+  } catch (error) {
+    console.error('Error duplicating saved workout:', error);
+    throw error;
+  }
+};

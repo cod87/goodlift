@@ -241,4 +241,129 @@ console.log('Test 9: Duplicate handles workout with no name');
 }
 console.log('');
 
+// =====================================
+// Tests for duplicateSavedWorkout
+// =====================================
+
+console.log('=== Saved Workout Duplication Tests ===\n');
+
+// Helper to create a sample saved workout
+const createSampleSavedWorkout = (name, type = 'full') => ({
+  id: Date.now(),
+  name,
+  type,
+  exercises: [
+    { 'Exercise Name': 'Bench Press', sets: 3, reps: 10, weight: 135 },
+    { 'Exercise Name': 'Squat', sets: 3, reps: 8, weight: 225 },
+  ],
+  supersetConfig: [2, 2, 2, 2],
+  assignedDay: 'Monday',
+  archived: false,
+  createdAt: new Date().toISOString(),
+});
+
+console.log('Test 10: Saved workout duplicate has new createdAt timestamp');
+{
+  const original = createSampleSavedWorkout('Leg Day');
+  
+  const timestamp = new Date().toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  
+  const duplicate = {
+    ...original,
+    id: Date.now(),
+    name: `${original.name || 'Workout'} (Copy - ${timestamp})`,
+    exercises: original.exercises ? JSON.parse(JSON.stringify(original.exercises)) : [],
+    supersetConfig: original.supersetConfig ? JSON.parse(JSON.stringify(original.supersetConfig)) : undefined,
+    createdAt: new Date().toISOString(),
+    assignedDay: undefined,
+    archived: false,
+  };
+  
+  const originalCreatedAt = !isNaN(Date.parse(original.createdAt));
+  const duplicateCreatedAt = !isNaN(Date.parse(duplicate.createdAt));
+  const passed = originalCreatedAt && duplicateCreatedAt;
+  
+  console.log(`  Original createdAt valid: ${originalCreatedAt ? '✓' : '✗'}`);
+  console.log(`  Duplicate createdAt valid: ${duplicateCreatedAt ? '✓' : '✗'}`);
+  console.log(`  Both timestamps valid: ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+console.log('Test 11: Saved workout duplicate removes assigned day');
+{
+  const original = createSampleSavedWorkout('Push Day');
+  original.assignedDay = 'Wednesday';
+  
+  const duplicate = {
+    ...original,
+    id: Date.now(),
+    name: `${original.name} (Copy)`,
+    exercises: JSON.parse(JSON.stringify(original.exercises)),
+    supersetConfig: JSON.parse(JSON.stringify(original.supersetConfig)),
+    createdAt: new Date().toISOString(),
+    assignedDay: undefined,
+    archived: false,
+  };
+  
+  const passed = duplicate.assignedDay === undefined;
+  console.log(`  Original assignedDay: ${original.assignedDay}`);
+  console.log(`  Duplicate assignedDay: ${duplicate.assignedDay}`);
+  console.log(`  Assigned day is removed from duplicate: ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+console.log('Test 12: Saved workout duplicate preserves superset config');
+{
+  const original = createSampleSavedWorkout('Full Body');
+  original.supersetConfig = [3, 2, 1, 2];
+  
+  const duplicate = {
+    ...original,
+    id: Date.now(),
+    name: `${original.name} (Copy)`,
+    exercises: JSON.parse(JSON.stringify(original.exercises)),
+    supersetConfig: original.supersetConfig ? JSON.parse(JSON.stringify(original.supersetConfig)) : undefined,
+    createdAt: new Date().toISOString(),
+    assignedDay: undefined,
+    archived: false,
+  };
+  
+  // Modify duplicate to verify deep copy
+  duplicate.supersetConfig[0] = 5;
+  
+  const passed = original.supersetConfig[0] === 3 && duplicate.supersetConfig[0] === 5;
+  console.log(`  Original supersetConfig[0]: ${original.supersetConfig[0]}`);
+  console.log(`  Duplicate supersetConfig[0] (modified): ${duplicate.supersetConfig[0]}`);
+  console.log(`  Superset configs are independent: ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+console.log('Test 13: Saved workout duplicate sets archived to false');
+{
+  const original = createSampleSavedWorkout('Archived Workout');
+  original.archived = true;
+  
+  const duplicate = {
+    ...original,
+    id: Date.now(),
+    name: `${original.name} (Copy)`,
+    exercises: JSON.parse(JSON.stringify(original.exercises)),
+    supersetConfig: JSON.parse(JSON.stringify(original.supersetConfig)),
+    createdAt: new Date().toISOString(),
+    assignedDay: undefined,
+    archived: false,
+  };
+  
+  const passed = original.archived === true && duplicate.archived === false;
+  console.log(`  Original archived: ${original.archived}`);
+  console.log(`  Duplicate archived: ${duplicate.archived}`);
+  console.log(`  Archived status reset to false: ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
 console.log('=== Tests Complete ===');

@@ -120,6 +120,22 @@ const ExerciseItem = ({
     }
   };
 
+  // Helper to determine border left color based on states
+  const getBorderLeftColor = () => {
+    if (isInSuperset) {
+      return isBeingRegrouped ? highlightColor?.main : supersetColor?.main;
+    }
+    return isHighlighted ? highlightColor?.main : 'divider';
+  };
+
+  // Helper to determine background color based on states
+  const getBackgroundColor = () => {
+    if (isBeingRegrouped) return highlightColor?.light;
+    if (isInSuperset) return supersetColor?.light;
+    if (isHighlighted) return highlightColor?.light;
+    return 'background.paper';
+  };
+
   return (
     <Card
       onClick={handleCardClick}
@@ -129,15 +145,9 @@ const ExerciseItem = ({
         border: '2px solid',
         borderColor: isBeingRegrouped ? highlightColor?.main : 'divider',
         borderLeft: '4px solid',
-        borderLeftColor: isInSuperset 
-          ? (isBeingRegrouped ? highlightColor?.main : supersetColor?.main)
-          : (isHighlighted ? highlightColor?.main : 'divider'),
-        backgroundColor: isBeingRegrouped
-          ? highlightColor?.light
-          : (isInSuperset 
-            ? supersetColor?.light 
-            : (isHighlighted ? highlightColor?.light : 'background.paper')),
-        transition: 'all 0.2s ease',
+        borderLeftColor: getBorderLeftColor(),
+        backgroundColor: getBackgroundColor(),
+        transition: 'background-color 0.2s ease, border-color 0.2s ease, margin-left 0.2s ease, padding-left 0.2s ease, opacity 0.15s ease',
         marginLeft: isHighlighted ? 3 : 0,
         paddingLeft: isHighlighted ? 1 : 0,
         '&:hover': {

@@ -294,4 +294,234 @@ console.log('Test 11: 6th workout should not re-award dedicated-5');
 }
 console.log('');
 
+// === NEW ACHIEVEMENT TESTS ===
+console.log('=== New Achievement Type Tests ===\n');
+
+// Helper function to create a workout with a specific type
+const createTypedWorkout = (type, date = new Date()) => ({
+  date: date.toISOString(),
+  type: type,
+  exercises: type === 'strength' ? { 'Bench Press': { sets: [{ weight: 100, reps: 10 }] } } : {},
+  duration: 3600,
+});
+
+// Test 12: Strength workout count achievement
+console.log('Test 12: Strength workout count achievement - 10 strength workouts');
+{
+  const stats = createUserStats(10);
+  const workoutHistory = Array(10).fill(null).map((_, i) => 
+    createTypedWorkout('full', new Date(Date.now() - i * DAY_IN_MS))
+  );
+  
+  const strengthAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'strength-10');
+  const isUnlocked = isAchievementUnlocked(strengthAchievement, stats, workoutHistory);
+  
+  const passed = isUnlocked === true;
+  console.log(`  Workout history: 10 strength workouts (type: 'full')`);
+  console.log(`  Expected: strength-10 should be unlocked`);
+  console.log(`  Got: ${isUnlocked} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 13: Cardio workout count achievement
+console.log('Test 13: Cardio workout count achievement - 10 cardio workouts');
+{
+  const stats = createUserStats(10);
+  const workoutHistory = Array(10).fill(null).map((_, i) => 
+    createTypedWorkout('cardio', new Date(Date.now() - i * DAY_IN_MS))
+  );
+  
+  const cardioAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'cardio-10');
+  const isUnlocked = isAchievementUnlocked(cardioAchievement, stats, workoutHistory);
+  
+  const passed = isUnlocked === true;
+  console.log(`  Workout history: 10 cardio workouts`);
+  console.log(`  Expected: cardio-10 should be unlocked`);
+  console.log(`  Got: ${isUnlocked} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 14: Yoga workout count achievement
+console.log('Test 14: Yoga workout count achievement - 10 yoga workouts');
+{
+  const stats = createUserStats(10);
+  const workoutHistory = Array(10).fill(null).map((_, i) => 
+    createTypedWorkout('yoga', new Date(Date.now() - i * DAY_IN_MS))
+  );
+  
+  const yogaAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'yoga-10');
+  const isUnlocked = isAchievementUnlocked(yogaAchievement, stats, workoutHistory);
+  
+  const passed = isUnlocked === true;
+  console.log(`  Workout history: 10 yoga workouts`);
+  console.log(`  Expected: yoga-10 should be unlocked`);
+  console.log(`  Got: ${isUnlocked} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 15: Mixed workout types - only strength count for strength achievements
+console.log('Test 15: Mixed workout types - only strength workouts count for strength achievements');
+{
+  const stats = createUserStats(15);
+  // 5 strength + 5 cardio + 5 yoga = 15 total, but only 5 strength
+  const workoutHistory = [
+    ...Array(5).fill(null).map((_, i) => createTypedWorkout('upper', new Date(Date.now() - i * DAY_IN_MS))),
+    ...Array(5).fill(null).map((_, i) => createTypedWorkout('cardio', new Date(Date.now() - (5 + i) * DAY_IN_MS))),
+    ...Array(5).fill(null).map((_, i) => createTypedWorkout('yoga', new Date(Date.now() - (10 + i) * DAY_IN_MS))),
+  ];
+  
+  const strengthAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'strength-10');
+  const isUnlocked = isAchievementUnlocked(strengthAchievement, stats, workoutHistory);
+  
+  const passed = isUnlocked === false;
+  console.log(`  Workout history: 5 strength + 5 cardio + 5 yoga = 15 total`);
+  console.log(`  Expected: strength-10 should NOT be unlocked (only 5 strength)`);
+  console.log(`  Got: ${isUnlocked} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 16: Strength week streak - 1 week with 3+ strength workouts
+console.log('Test 16: Strength week streak - 1 week with 3+ strength workouts');
+{
+  const stats = createUserStats(3);
+  // 3 strength workouts in the same week (Mon, Wed, Fri)
+  const monday = new Date();
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7)); // Get this Monday
+  monday.setHours(10, 0, 0, 0);
+  
+  const wednesday = new Date(monday);
+  wednesday.setDate(wednesday.getDate() + 2);
+  
+  const friday = new Date(monday);
+  friday.setDate(friday.getDate() + 4);
+  
+  const workoutHistory = [
+    createTypedWorkout('push', friday),
+    createTypedWorkout('pull', wednesday),
+    createTypedWorkout('legs', monday),
+  ];
+  
+  const streakAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'strength-week-1');
+  const isUnlocked = isAchievementUnlocked(streakAchievement, stats, workoutHistory);
+  
+  const passed = isUnlocked === true;
+  console.log(`  Workout history: 3 strength workouts in same week (Mon, Wed, Fri)`);
+  console.log(`  Expected: strength-week-1 should be unlocked`);
+  console.log(`  Got: ${isUnlocked} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 17: Strength week streak - only 2 workouts in a week (not enough)
+console.log('Test 17: Strength week streak - only 2 workouts in a week (not enough)');
+{
+  const stats = createUserStats(2);
+  const monday = new Date();
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  monday.setHours(10, 0, 0, 0);
+  
+  const wednesday = new Date(monday);
+  wednesday.setDate(wednesday.getDate() + 2);
+  
+  const workoutHistory = [
+    createTypedWorkout('push', wednesday),
+    createTypedWorkout('pull', monday),
+  ];
+  
+  const streakAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'strength-week-1');
+  const isUnlocked = isAchievementUnlocked(streakAchievement, stats, workoutHistory);
+  
+  const passed = isUnlocked === false;
+  console.log(`  Workout history: 2 strength workouts in same week (Mon, Wed)`);
+  console.log(`  Expected: strength-week-1 should NOT be unlocked (need 3+)`);
+  console.log(`  Got: ${isUnlocked} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 18: Strength week streak - 3 consecutive weeks
+console.log('Test 18: Strength week streak - 3 consecutive weeks with 3+ strength workouts');
+{
+  const stats = createUserStats(9);
+  
+  // Create 3 workouts per week for 3 consecutive weeks
+  const workoutHistory = [];
+  const today = new Date();
+  
+  for (let week = 0; week < 3; week++) {
+    for (let day = 0; day < 3; day++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - (week * 7) - day);
+      workoutHistory.push(createTypedWorkout('full', date));
+    }
+  }
+  
+  const streakAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'strength-week-3');
+  const isUnlocked = isAchievementUnlocked(streakAchievement, stats, workoutHistory);
+  
+  const passed = isUnlocked === true;
+  console.log(`  Workout history: 3 strength workouts per week for 3 weeks`);
+  console.log(`  Expected: strength-week-3 should be unlocked`);
+  console.log(`  Got: ${isUnlocked} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 19: New achievements should NOT be awarded twice
+console.log('Test 19: Strength-10 achievement should NOT be awarded twice');
+{
+  const stats = createUserStats(11);
+  const workoutHistory = Array(11).fill(null).map((_, i) => 
+    createTypedWorkout('push', new Date(Date.now() - i * DAY_IN_MS))
+  );
+  const previouslyUnlocked = ['strength-10'];
+  
+  const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
+  const hasStrength10 = newAchievements.some(a => a.id === 'strength-10');
+  
+  const passed = hasStrength10 === false;
+  console.log(`  Workout history: 11 strength workouts`);
+  console.log(`  Previously unlocked: ['strength-10']`);
+  console.log(`  Expected: strength-10 should NOT be in newAchievements`);
+  console.log(`  Got: ${hasStrength10 ? 'FOUND (BUG!)' : 'correctly excluded'} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 20: New achievements should be awarded when milestone is reached
+console.log('Test 20: Strength-10 achievement should be awarded on 10th strength workout');
+{
+  const stats = createUserStats(10);
+  const workoutHistory = Array(10).fill(null).map((_, i) => 
+    createTypedWorkout('legs', new Date(Date.now() - i * DAY_IN_MS))
+  );
+  const previouslyUnlocked = [];
+  
+  const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
+  const hasStrength10 = newAchievements.some(a => a.id === 'strength-10');
+  
+  const passed = hasStrength10 === true;
+  console.log(`  Workout history: 10 strength workouts`);
+  console.log(`  Previously unlocked: []`);
+  console.log(`  Expected: strength-10 SHOULD be in newAchievements`);
+  console.log(`  Got: ${hasStrength10 ? 'found' : 'NOT found (BUG!)'} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 21: Fallback detection for strength achievements (previouslyUnlocked out of sync)
+console.log('Test 21: 11th strength workout should NOT re-award strength-10 even if previouslyUnlocked is empty');
+{
+  const stats = createUserStats(11);
+  const workoutHistory = Array(11).fill(null).map((_, i) => 
+    createTypedWorkout('upper', new Date(Date.now() - i * DAY_IN_MS))
+  );
+  const previouslyUnlocked = []; // Out of sync
+  
+  const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
+  const hasStrength10 = newAchievements.some(a => a.id === 'strength-10');
+  
+  const passed = hasStrength10 === false;
+  console.log(`  Workout history: 11 strength workouts`);
+  console.log(`  Previously unlocked: [] (out of sync)`);
+  console.log(`  Expected: strength-10 should NOT be in newAchievements (was already earned before)`);
+  console.log(`  Got: ${hasStrength10 ? 'FOUND (BUG!)' : 'correctly excluded'} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
 console.log('=== Tests Complete ===');

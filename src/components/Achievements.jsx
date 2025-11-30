@@ -374,15 +374,25 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
     volume: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'totalVolume'),
     time: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'totalTime'),
     special: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'special'),
+    strength: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'strengthWorkoutCount'),
+    cardio: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'cardioWorkoutCount'),
+    yoga: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'yogaWorkoutCount'),
+    strengthStreak: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'strengthWeekStreak'),
+    wellness: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'wellnessTaskCount'),
   };
   
   const categories = [
     { label: 'All', key: 'all' },
     { label: 'Workouts', key: 'workout' },
+    { label: 'Strength', key: 'strength' },
+    { label: 'Cardio', key: 'cardio' },
+    { label: 'Yoga', key: 'yoga' },
     { label: 'Streaks', key: 'streak' },
+    { label: 'Strength Streaks', key: 'strengthStreak' },
     { label: 'PRs', key: 'pr' },
     { label: 'Volume', key: 'volume' },
     { label: 'Time', key: 'time' },
+    { label: 'Wellness', key: 'wellness' },
     { label: 'Special', key: 'special' },
   ];
   
@@ -576,6 +586,16 @@ const getConditionText = (condition) => {
       const hours = Math.floor(condition.value / 3600);
       return `Complete ${hours} hour${hours !== 1 ? 's' : ''} of total workout time`;
     }
+    case 'strengthWorkoutCount':
+      return `Complete ${condition.value} strength workout${condition.value !== 1 ? 's' : ''}`;
+    case 'cardioWorkoutCount':
+      return `Complete ${condition.value} cardio workout${condition.value !== 1 ? 's' : ''}`;
+    case 'yogaWorkoutCount':
+      return `Complete ${condition.value} yoga or stretching workout${condition.value !== 1 ? 's' : ''}`;
+    case 'strengthWeekStreak':
+      return `Complete 3+ strength workouts per week for ${condition.value} consecutive week${condition.value !== 1 ? 's' : ''}`;
+    case 'wellnessTaskCount':
+      return `Complete ${condition.value} wellness task${condition.value !== 1 ? 's' : ''}`;
     case 'special':
       return condition.value;
     default:

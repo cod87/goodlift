@@ -960,6 +960,63 @@ export const updateFavoriteWorkoutName = async (workoutId, newName) => {
 };
 
 /**
+ * Duplicate a favorite workout
+ * Creates a new copy with a unique name indicating it's a duplicate
+ * @param {string} workoutId - ID of the favorite workout to duplicate
+ * @returns {Promise<Object>} The newly created duplicate workout
+ */
+export const duplicateFavoriteWorkout = async (workoutId) => {
+  try {
+    if (!workoutId) {
+      throw new Error('Workout ID is required');
+    }
+    
+    const favorites = await getFavoriteWorkouts();
+    const originalWorkout = favorites.find(fav => fav.id === workoutId);
+    
+    if (!originalWorkout) {
+      throw new Error('Workout not found');
+    }
+    
+    // Create a deep copy of the workout with a new ID and name
+    const timestamp = new Date().toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    
+    const duplicateWorkout = {
+      ...originalWorkout,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: `${originalWorkout.name || 'Workout'} (Copy - ${timestamp})`,
+      // Deep copy exercises array to avoid reference issues
+      exercises: originalWorkout.exercises ? 
+        JSON.parse(JSON.stringify(originalWorkout.exercises)) : [],
+      savedAt: new Date().toISOString(),
+    };
+    
+    favorites.unshift(duplicateWorkout);
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('favorite_workouts', favorites);
+    } else {
+      localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(favorites));
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveFavoriteWorkoutsToFirebase(currentUserId, favorites);
+      }
+    }
+    
+    return duplicateWorkout;
+  } catch (error) {
+    console.error('Error duplicating favorite workout:', error);
+    throw error;
+  }
+};
+
+/**
  * Get stretch sessions from localStorage
  * @returns {Array} Array of stretch session objects
  */

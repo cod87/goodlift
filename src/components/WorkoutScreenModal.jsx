@@ -24,7 +24,7 @@ const WorkoutScreenModal = ({
   const [wakeLockSupported] = useState(wakeLockManager.isWakeLockSupported());
   
   // Rest timer state
-  const [restDuration, setRestDuration] = useState(60); // 60 or 90 seconds
+  const [restDuration, setRestDuration] = useState(0); // 0 (off), 60, or 90 seconds
   const [isResting, setIsResting] = useState(false);
   const [restTimeRemaining, setRestTimeRemaining] = useState(0);
 
@@ -59,8 +59,11 @@ const WorkoutScreenModal = ({
 
   // Callback to start rest timer (called from WorkoutScreen)
   const handleStartRestTimer = useCallback(() => {
-    setRestTimeRemaining(restDuration);
-    setIsResting(true);
+    // Only start rest timer if duration is not 0 (off)
+    if (restDuration > 0) {
+      setRestTimeRemaining(restDuration);
+      setIsResting(true);
+    }
   }, [restDuration]);
 
   // Skip rest timer
@@ -177,6 +180,18 @@ const WorkoutScreenModal = ({
               size="small"
               aria-label="rest timer duration"
             >
+              <ToggleButton 
+                value={0} 
+                aria-label="rest timer off"
+                sx={{ 
+                  py: 0.5, 
+                  px: 1.5,
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                }}
+              >
+                Off
+              </ToggleButton>
               <ToggleButton 
                 value={60} 
                 aria-label="60 seconds rest"

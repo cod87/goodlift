@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout, getWorkoutHistory } from '../utils/storage';
 import { Box, LinearProgress, Typography, IconButton, Snackbar, Alert, Button, Chip, useTheme, useMediaQuery, keyframes, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Add, Remove, SkipNext, TrendingUp, HelpOutline, Save, SwapHoriz, PlaylistAdd, Settings } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, ExitToApp, Star, StarBorder, Add, Remove, SkipNext, TrendingUp, HelpOutline, SwapHoriz, PlaylistAdd, Settings } from '@mui/icons-material';
 import StretchReminder from './StretchReminder';
 import { calculateProgressiveOverload } from '../utils/progressiveOverload';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
@@ -72,6 +72,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   // Target reps change dialog state
   const [targetRepsDialogOpen, setTargetRepsDialogOpen] = useState(false);
   const [pendingTargetReps, setPendingTargetReps] = useState(null);
+  // End workout dialog state
+  const [endWorkoutDialogOpen, setEndWorkoutDialogOpen] = useState(false);
   
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
@@ -629,36 +631,6 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     }
   };
 
-  const handlePartialComplete = async () => {
-    if (window.confirm('Save this workout as partially complete? Your current progress will be saved.')) {
-      // Apply conditional persist rules for partial workout
-      await applyConditionalPersistRules(workoutData);
-      
-      const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      
-      const finalData = {
-        date: new Date().toISOString(),
-        type: workoutPlan[0]?.['Primary Muscle'] || 'unknown',
-        duration: totalTime,
-        exercises: {},
-        isPartial: true,
-      };
-      
-      workoutData.forEach(step => {
-        const { exerciseName: exName, setNumber, weight: w, reps: r } = step;
-        if (!finalData.exercises[exName]) {
-          finalData.exercises[exName] = { sets: [] };
-        }
-        finalData.exercises[exName].sets.push({ set: setNumber, weight: w, reps: r });
-      });
-      
-      onComplete(finalData);
-    }
-  };
-
   const handleExit = () => {
     if (window.confirm('Are you sure you want to exit? Your progress will not be saved.')) {
       if (timerRef.current) {
@@ -666,6 +638,54 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
       }
       onExit();
     }
+  };
+
+  // Dialog-based handlers for end workout (used when workoutData.length > 0)
+  const handleEndWorkoutClick = () => {
+    if (workoutData.length > 0) {
+      // Show dialog with options when there's data to potentially save
+      setEndWorkoutDialogOpen(true);
+    } else {
+      // On first exercise, just exit directly (no data to save)
+      handleExit();
+    }
+  };
+
+  const handleDialogPartialComplete = async () => {
+    setEndWorkoutDialogOpen(false);
+    // Apply conditional persist rules for partial workout
+    await applyConditionalPersistRules(workoutData);
+    
+    const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    
+    const finalData = {
+      date: new Date().toISOString(),
+      type: workoutPlan[0]?.['Primary Muscle'] || 'unknown',
+      duration: totalTime,
+      exercises: {},
+      isPartial: true,
+    };
+    
+    workoutData.forEach(step => {
+      const { exerciseName: exName, setNumber, weight: w, reps: r } = step;
+      if (!finalData.exercises[exName]) {
+        finalData.exercises[exName] = { sets: [] };
+      }
+      finalData.exercises[exName].sets.push({ set: setNumber, weight: w, reps: r });
+    });
+    
+    onComplete(finalData);
+  };
+
+  const handleDialogExit = () => {
+    setEndWorkoutDialogOpen(false);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    onExit();
   };
 
   const handleSaveToFavorites = () => {
@@ -1146,26 +1166,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                   >
                     <PlaylistAdd sx={{ fontSize: { xs: 20, sm: 24 } }} />
                   </IconButton>
-                  {workoutData.length > 0 && (
-                    <IconButton
-                      onClick={handlePartialComplete}
-                      sx={{
-                        minWidth: { xs: '36px', sm: '44px' },
-                        minHeight: { xs: '36px', sm: '44px' },
-                        color: 'rgb(254, 178, 26)',
-                        border: '2px solid rgb(254, 178, 26)',
-                        borderRadius: '8px',
-                        '&:hover': {
-                          backgroundColor: 'rgba(254, 178, 26, 0.08)',
-                        },
-                      }}
-                      aria-label="End and save workout"
-                    >
-                      <Save sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                    </IconButton>
-                  )}
                   <IconButton
-                    onClick={handleExit}
+                    onClick={handleEndWorkoutClick}
                     sx={{
                       minWidth: { xs: '36px', sm: '44px' },
                       minHeight: { xs: '36px', sm: '44px' },
@@ -1176,7 +1178,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                         backgroundColor: 'rgba(237, 63, 39, 0.08)',
                       },
                     }}
-                    aria-label="End workout without saving"
+                    aria-label="End workout"
                   >
                     <ExitToApp sx={{ fontSize: { xs: 20, sm: 24 } }} />
                   </IconButton>
@@ -1628,6 +1630,48 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
             color="primary"
           >
             Apply
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* End Workout Confirmation Dialog */}
+      <Dialog 
+        open={endWorkoutDialogOpen} 
+        onClose={() => setEndWorkoutDialogOpen(false)}
+        aria-labelledby="end-workout-dialog-title"
+      >
+        <DialogTitle id="end-workout-dialog-title">End Workout</DialogTitle>
+        <DialogContent>
+          <Typography>
+            How would you like to end this workout?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ flexDirection: 'column', gap: 1, pb: 2, px: 2 }}>
+          <Button 
+            fullWidth
+            variant="contained" 
+            color="primary"
+            onClick={handleDialogPartialComplete}
+            sx={{ minHeight: '44px' }}
+          >
+            End and Save as Partial
+          </Button>
+          <Button 
+            fullWidth
+            variant="outlined" 
+            color="error"
+            onClick={handleDialogExit}
+            sx={{ minHeight: '44px' }}
+          >
+            End Without Saving
+          </Button>
+          <Button 
+            fullWidth
+            variant="text"
+            onClick={() => setEndWorkoutDialogOpen(false)}
+            sx={{ minHeight: '44px' }}
+          >
+            Cancel
           </Button>
         </DialogActions>
       </Dialog>

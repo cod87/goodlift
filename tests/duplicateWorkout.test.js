@@ -14,7 +14,7 @@ console.log('=== Duplicate Workout Tests ===\n');
 
 // Helper to create a sample workout
 const createSampleWorkout = (name, type = 'full') => ({
-  id: `workout-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+  id: `workout-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
   name,
   type,
   equipment: 'all',
@@ -40,7 +40,7 @@ console.log('Test 1: Duplicate workout creates a new workout with different ID')
   
   const duplicate = {
     ...original,
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: `${original.name || 'Workout'} (Copy - ${timestamp})`,
     exercises: JSON.parse(JSON.stringify(original.exercises)),
     savedAt: new Date().toISOString(),
@@ -66,7 +66,7 @@ console.log('Test 2: Duplicate workout has correct name with (Copy) suffix');
   
   const duplicate = {
     ...original,
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: `${original.name || 'Workout'} (Copy - ${timestamp})`,
     exercises: JSON.parse(JSON.stringify(original.exercises)),
     savedAt: new Date().toISOString(),
@@ -85,7 +85,7 @@ console.log('Test 3: Duplicate workout has deep copied exercises (not same refer
   
   const duplicate = {
     ...original,
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: `${original.name} (Copy)`,
     exercises: JSON.parse(JSON.stringify(original.exercises)),
     savedAt: new Date().toISOString(),
@@ -113,7 +113,7 @@ console.log('Test 4: Duplicate preserves all exercise details');
   
   const duplicate = {
     ...original,
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: `${original.name} (Copy)`,
     exercises: JSON.parse(JSON.stringify(original.exercises)),
     savedAt: new Date().toISOString(),
@@ -146,7 +146,7 @@ console.log('Test 5: Duplicate has new savedAt timestamp');
   
   const duplicate = {
     ...original,
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: `${original.name} (Copy)`,
     exercises: JSON.parse(JSON.stringify(original.exercises)),
     savedAt: new Date().toISOString(),
@@ -170,7 +170,7 @@ console.log('Test 6: Duplicate preserves workout type and equipment');
   
   const duplicate = {
     ...original,
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: `${original.name} (Copy)`,
     exercises: JSON.parse(JSON.stringify(original.exercises)),
     savedAt: new Date().toISOString(),
@@ -193,7 +193,7 @@ console.log('Test 7: Duplicate handles workout with empty exercises array');
   
   const duplicate = {
     ...original,
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: `${original.name} (Copy)`,
     exercises: original.exercises ? JSON.parse(JSON.stringify(original.exercises)) : [],
     savedAt: new Date().toISOString(),
@@ -211,7 +211,7 @@ console.log('Test 8: Duplicate handles workout with undefined exercises');
   
   const duplicate = {
     ...original,
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: `${original.name} (Copy)`,
     exercises: original.exercises ? JSON.parse(JSON.stringify(original.exercises)) : [],
     savedAt: new Date().toISOString(),
@@ -229,7 +229,7 @@ console.log('Test 9: Duplicate handles workout with no name');
   
   const duplicate = {
     ...original,
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: `${original.name || 'Workout'} (Copy)`,
     exercises: original.exercises ? JSON.parse(JSON.stringify(original.exercises)) : [],
     savedAt: new Date().toISOString(),

@@ -988,7 +988,7 @@ export const duplicateFavoriteWorkout = async (workoutId) => {
     
     const duplicateWorkout = {
       ...originalWorkout,
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       name: `${originalWorkout.name || 'Workout'} (Copy - ${timestamp})`,
       // Deep copy exercises array to avoid reference issues
       exercises: originalWorkout.exercises ? 

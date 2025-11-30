@@ -14,6 +14,9 @@ import {
 
 console.log('=== Achievement Logic Tests ===\n');
 
+// Constants
+const DAY_IN_MS = 86400000; // Milliseconds in a day
+
 // Helper function to create basic user stats
 const createUserStats = (totalWorkouts = 0) => ({
   totalWorkouts,
@@ -31,6 +34,12 @@ const createWorkout = (date = new Date()) => ({
   exercises: { 'Bench Press': { sets: [{ weight: 100, reps: 10 }] } },
   duration: 3600,
 });
+
+// Helper function to create a workout history with a given number of workouts
+const createWorkoutHistory = (count) => 
+  Array(count).fill(null).map((_, i) => 
+    createWorkout(new Date(Date.now() - i * DAY_IN_MS))
+  );
 
 // Test 1: First workout achievement is unlocked after first workout
 console.log('Test 1: First workout achievement is unlocked after first workout');
@@ -54,7 +63,7 @@ console.log('');
 console.log('Test 2: First workout achievement is NOT returned if already unlocked');
 {
   const stats = createUserStats(2);
-  const workoutHistory = [createWorkout(), createWorkout(new Date(Date.now() - 86400000))];
+  const workoutHistory = [createWorkout(), createWorkout(new Date(Date.now() - DAY_IN_MS))];
   const previouslyUnlocked = ['first-workout']; // Already unlocked
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
@@ -105,9 +114,7 @@ console.log('Test 5: Multiple workouts with empty previouslyUnlocked - only trul
 {
   const stats = createUserStats(5);
   stats.totalVolume = 10001; // Over 10k for volume achievement
-  const workoutHistory = Array(5).fill(null).map((_, i) => 
-    createWorkout(new Date(Date.now() - i * 86400000))
-  );
+  const workoutHistory = createWorkoutHistory(5);
   const previouslyUnlocked = [];
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
@@ -134,7 +141,7 @@ console.log('Test 6: Simulate second workout - first-workout should not appear a
   const stats = createUserStats(2);
   const workoutHistory = [
     createWorkout(new Date()),
-    createWorkout(new Date(Date.now() - 86400000))
+    createWorkout(new Date(Date.now() - DAY_IN_MS))
   ];
   // This should be saved from the first workout
   const previouslyUnlocked = ['first-workout'];
@@ -179,7 +186,7 @@ console.log('Test 7: Verify actual bug scenario - stats double counting');
   const statsAfterSecondWorkout = createUserStats(2);  // From getUserStats()
   statsAfterSecondWorkout.totalWorkouts += 1;  // App.jsx line 564 (now it's 3!)
   
-  const workoutHistory2 = [createWorkout(), createWorkout(new Date(Date.now() - 86400000))];
+  const workoutHistory2 = [createWorkout(), createWorkout(new Date(Date.now() - DAY_IN_MS))];
   const previouslyUnlocked2 = ['first-workout'];  // Should be saved from first workout
   
   const newAchievements2 = getNewlyUnlockedAchievements(statsAfterSecondWorkout, workoutHistory2, previouslyUnlocked2);
@@ -201,7 +208,7 @@ console.log('Test 8: Bug scenario - previouslyUnlocked is empty on second workou
   // This WAS the bug - if previouslyUnlocked is empty, first-workout would be shown again
   // After fix: we check workout history length to prevent this
   const stats = createUserStats(2);
-  const workoutHistory = [createWorkout(), createWorkout(new Date(Date.now() - 86400000))];
+  const workoutHistory = [createWorkout(), createWorkout(new Date(Date.now() - DAY_IN_MS))];
   const previouslyUnlocked = [];  // Empty, but there are 2 workouts, so first-workout was already earned
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
@@ -245,9 +252,7 @@ console.log('');
 console.log('Test 10: 5 workout achievement on exactly 5th workout');
 {
   const stats = createUserStats(5);
-  const workoutHistory = Array(5).fill(null).map((_, i) => 
-    createWorkout(new Date(Date.now() - i * 86400000))
-  );
+  const workoutHistory = createWorkoutHistory(5);
   const previouslyUnlocked = ['first-workout']; // Already got first-workout
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
@@ -270,9 +275,7 @@ console.log('');
 console.log('Test 11: 6th workout should not re-award dedicated-5');
 {
   const stats = createUserStats(6);
-  const workoutHistory = Array(6).fill(null).map((_, i) => 
-    createWorkout(new Date(Date.now() - i * 86400000))
-  );
+  const workoutHistory = createWorkoutHistory(6);
   const previouslyUnlocked = [];  // Simulating out-of-sync storage
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);

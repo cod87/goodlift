@@ -614,9 +614,9 @@ export const getUnlockedAchievements = (userStats, workoutHistory = []) => {
 export const getNewlyUnlockedAchievements = (userStats, workoutHistory, previouslyUnlocked = []) => {
   const currentUnlocked = getUnlockedAchievements(userStats, workoutHistory);
   
-  // Calculate what would have been unlocked BEFORE this workout
+  // Calculate how many workouts existed BEFORE the current one was added
   // This provides a fallback check in case previouslyUnlocked is not accurate
-  const previousWorkoutCount = Math.max(0, (workoutHistory?.length || 0) - 1);
+  const workoutsBeforeCurrent = Math.max(0, (workoutHistory?.length || 0) - 1);
   
   return currentUnlocked.filter(achievement => {
     // If already in the previouslyUnlocked list, it's not new
@@ -630,7 +630,7 @@ export const getNewlyUnlockedAchievements = (userStats, workoutHistory, previous
     if (achievement.condition.type === 'workoutCount') {
       const requiredWorkouts = achievement.condition.value;
       // If we had enough workouts BEFORE this one, the achievement was already unlockable
-      if (previousWorkoutCount >= requiredWorkouts) {
+      if (workoutsBeforeCurrent >= requiredWorkouts) {
         return false;
       }
     }

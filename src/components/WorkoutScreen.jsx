@@ -34,7 +34,7 @@ const spin = keyframes`
  * Displays exercises in superset format, tracks time, and collects set data
  * Supports mid-workout exercise swapping and adding extra sets
  */
-const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, savedWorkoutId = null, savedWorkoutName = null }) => {
+const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, savedWorkoutId = null, savedWorkoutName = null, onSetComplete = null }) => {
   // Mutable workout plan that can be modified during workout
   const [workoutPlan, setWorkoutPlan] = useState(initialWorkoutPlan);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -132,6 +132,43 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     }
     
     return sequence;
+  }, [workoutPlan, supersetConfig, setsPerSuperset]);
+
+  // Calculate indices where a set round ends (for triggering rest timer)
+  // A set round ends when we've completed all exercises for a given set number within a superset
+  const setRoundEndIndices = useMemo(() => {
+    const endIndices = new Set();
+    let seqIndex = 0;
+    let exerciseIndex = 0;
+    
+    for (const supersetSize of supersetConfig) {
+      const supersetExercises = [];
+      
+      // Collect exercises for this superset
+      for (let i = 0; i < supersetSize && exerciseIndex < workoutPlan.length; i++) {
+        if (workoutPlan[exerciseIndex]) {
+          supersetExercises.push(workoutPlan[exerciseIndex]);
+        }
+        exerciseIndex++;
+      }
+      
+      if (supersetExercises.length === 0) continue;
+      
+      const maxSets = Math.max(
+        ...supersetExercises.map(ex => ex.sets || setsPerSuperset || 3)
+      );
+      
+      // For each set round, mark the end index (last exercise in the set round)
+      for (let set = 1; set <= maxSets; set++) {
+        seqIndex += supersetExercises.length;
+        // Don't trigger rest after the very last set of a superset (or the workout)
+        if (set < maxSets) {
+          endIndices.add(seqIndex - 1);
+        }
+      }
+    }
+    
+    return endIndices;
   }, [workoutPlan, supersetConfig, setsPerSuperset]);
 
   // Detect workout type and check user preferences for stretch reminders
@@ -577,6 +614,10 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
         setCurrentPhase('complete');
       }
     } else {
+      // Check if we just completed a set round and should trigger rest timer
+      if (onSetComplete && setRoundEndIndices.has(currentStepIndex)) {
+        onSetComplete();
+      }
       setCurrentStepIndex(prev => prev + 1);
     }
   };
@@ -1602,6 +1643,7 @@ WorkoutScreen.propTypes = {
   setsPerSuperset: PropTypes.number,
   savedWorkoutId: PropTypes.string,
   savedWorkoutName: PropTypes.string,
+  onSetComplete: PropTypes.func,
 };
 
 export default WorkoutScreen;

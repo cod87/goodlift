@@ -10,12 +10,15 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import { 
   CheckCircle,
   TrendingUp,
   HelpOutline,
-  Save,
   ExitToApp,
   SkipNext,
   SwapHoriz,
@@ -79,6 +82,8 @@ const ExerciseCard = memo(({
   const [imageSrc, setImageSrc] = useState(demoImage);
   const [imageError, setImageError] = useState(false);
   const [workIconError, setWorkIconError] = useState(false);
+  // State for end workout confirmation dialog
+  const [endWorkoutDialogOpen, setEndWorkoutDialogOpen] = useState(false);
   
   // Detect landscape orientation on tablets (sm breakpoint and up)
   const isTabletOrLarger = useMediaQuery(theme.breakpoints.up('sm'));
@@ -189,6 +194,27 @@ const ExerciseCard = memo(({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Handle End Workout button click - show dialog if workout data exists
+  const handleEndWorkoutClick = () => {
+    if (showPartialComplete) {
+      setEndWorkoutDialogOpen(true);
+    } else if (onExit) {
+      onExit();
+    }
+  };
+
+  // Handle "End and Save as Partial" from dialog
+  const handleDialogPartialComplete = () => {
+    setEndWorkoutDialogOpen(false);
+    if (onPartialComplete) onPartialComplete();
+  };
+
+  // Handle "End Without Saving" from dialog
+  const handleDialogExit = () => {
+    setEndWorkoutDialogOpen(false);
+    if (onExit) onExit();
+  };
+
   return (
     <Box 
       className="exercise-card"
@@ -242,8 +268,27 @@ const ExerciseCard = memo(({
           {onSwap && <IconButton onClick={onSwap} sx={{ minWidth: { xs: '36px', sm: shouldUseTwoColumns ? '36px' : '44px' }, minHeight: { xs: '36px', sm: shouldUseTwoColumns ? '36px' : '44px' }, color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)', } }} aria-label="Swap exercise"><SwapHoriz sx={{ fontSize: { xs: 20, sm: shouldUseTwoColumns ? 18 : 24 } }} /></IconButton>}
         </Box>
         <Box sx={{ display: 'flex', gap: shouldUseTwoColumns ? 0.5 : 1 }}>
-          {showPartialComplete && onPartialComplete && <IconButton onClick={onPartialComplete} sx={{ minWidth: { xs: '36px', sm: shouldUseTwoColumns ? '36px' : '44px' }, minHeight: { xs: '36px', sm: shouldUseTwoColumns ? '36px' : '44px' }, color: 'warning.main', border: '2px solid', borderColor: 'warning.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 140, 0, 0.08)' : 'rgba(255, 140, 0, 0.08)', }, }} aria-label="End and save workout"><Save sx={{ fontSize: { xs: 20, sm: shouldUseTwoColumns ? 18 : 24 } }} /></IconButton>}
-          {onExit && <IconButton onClick={onExit} sx={{ minWidth: { xs: '36px', sm: shouldUseTwoColumns ? '36px' : '44px' }, minHeight: { xs: '36px', sm: shouldUseTwoColumns ? '36px' : '44px' }, color: 'error.main', border: '2px solid', borderColor: 'error.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(239, 83, 80, 0.08)' : 'rgba(239, 83, 80, 0.08)', }, }} aria-label="End workout without saving"><ExitToApp sx={{ fontSize: { xs: 20, sm: shouldUseTwoColumns ? 18 : 24 } }} /></IconButton>}
+          {onExit && (
+            <IconButton 
+              onClick={handleEndWorkoutClick} 
+              sx={{ 
+                minWidth: { xs: '36px', sm: shouldUseTwoColumns ? '36px' : '44px' }, 
+                minHeight: { xs: '36px', sm: shouldUseTwoColumns ? '36px' : '44px' }, 
+                color: 'error.main', 
+                border: '2px solid', 
+                borderColor: 'error.main', 
+                borderRadius: '8px', 
+                '&:hover': { 
+                  backgroundColor: theme.palette.mode === 'dark' 
+                    ? 'rgba(239, 83, 80, 0.08)' 
+                    : 'rgba(239, 83, 80, 0.08)', 
+                }, 
+              }} 
+              aria-label="End workout"
+            >
+              <ExitToApp sx={{ fontSize: { xs: 20, sm: shouldUseTwoColumns ? 18 : 24 } }} />
+            </IconButton>
+          )}
         </Box>
       </Box>
 
@@ -536,6 +581,48 @@ const ExerciseCard = memo(({
           </Box>
         </Box>
       )}
+
+      {/* End Workout Confirmation Dialog */}
+      <Dialog 
+        open={endWorkoutDialogOpen} 
+        onClose={() => setEndWorkoutDialogOpen(false)}
+        aria-labelledby="end-workout-dialog-title"
+      >
+        <DialogTitle id="end-workout-dialog-title">End Workout</DialogTitle>
+        <DialogContent>
+          <Typography>
+            How would you like to end this workout?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ flexDirection: 'column', gap: 1, pb: 2, px: 2 }}>
+          <Button 
+            fullWidth
+            variant="contained" 
+            color="primary"
+            onClick={handleDialogPartialComplete}
+            sx={{ minHeight: '44px' }}
+          >
+            End and Save as Partial
+          </Button>
+          <Button 
+            fullWidth
+            variant="outlined" 
+            color="error"
+            onClick={handleDialogExit}
+            sx={{ minHeight: '44px' }}
+          >
+            End Without Saving
+          </Button>
+          <Button 
+            fullWidth
+            variant="text"
+            onClick={() => setEndWorkoutDialogOpen(false)}
+            sx={{ minHeight: '44px' }}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 });

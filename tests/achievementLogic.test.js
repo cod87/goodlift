@@ -100,8 +100,8 @@ console.log('Test 4: Zero workouts should not unlock first-workout');
 }
 console.log('');
 
-// Test 5: Multiple achievements can be newly unlocked in one call
-console.log('Test 5: Multiple achievements can be newly unlocked');
+// Test 5: Multiple workouts with empty previouslyUnlocked - only truly new shown
+console.log('Test 5: Multiple workouts with empty previouslyUnlocked - only truly new shown');
 {
   const stats = createUserStats(5);
   stats.totalVolume = 10001; // Over 10k for volume achievement
@@ -115,10 +115,14 @@ console.log('Test 5: Multiple achievements can be newly unlocked');
   const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
   const hasDedicated5 = newAchievements.some(a => a.id === 'dedicated-5');
   
-  const passed = hasFirstWorkout && hasDedicated5;
+  // With the fix:
+  // - first-workout should NOT be shown (was unlockable before this 5th workout)
+  // - dedicated-5 SHOULD be shown (just became unlockable with this 5th workout)
+  const passed = !hasFirstWorkout && hasDedicated5;
   console.log(`  Stats: totalWorkouts = 5, totalVolume = 10001`);
-  console.log(`  Previously unlocked: []`);
-  console.log(`  Expected: first-workout AND dedicated-5 to be newly unlocked`);
+  console.log(`  Workout history: 5 workouts`);
+  console.log(`  Previously unlocked: [] (empty)`);
+  console.log(`  Expected: first-workout NOT new, dedicated-5 IS new`);
   console.log(`  Got first-workout: ${hasFirstWorkout}, dedicated-5: ${hasDedicated5} ${passed ? '✓' : '✗ FAIL'}`);
 }
 console.log('');
@@ -191,26 +195,99 @@ console.log('Test 7: Verify actual bug scenario - stats double counting');
 }
 console.log('');
 
-// Test 8: What if previouslyUnlocked is somehow empty on second workout?
-console.log('Test 8: Bug scenario - previouslyUnlocked is empty on second workout');
+// Test 8: Bug scenario - previouslyUnlocked is empty on second workout (FIXED)
+console.log('Test 8: Bug scenario - previouslyUnlocked is empty on second workout (FIXED)');
 {
-  // This is the ACTUAL BUG - if previouslyUnlocked is empty, first-workout will be shown again
+  // This WAS the bug - if previouslyUnlocked is empty, first-workout would be shown again
+  // After fix: we check workout history length to prevent this
   const stats = createUserStats(2);
   const workoutHistory = [createWorkout(), createWorkout(new Date(Date.now() - 86400000))];
-  const previouslyUnlocked = [];  // BUG: This should have 'first-workout' but it's empty
+  const previouslyUnlocked = [];  // Empty, but there are 2 workouts, so first-workout was already earned
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
   const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
   
   console.log(`  Stats: totalWorkouts = 2`);
   console.log(`  Workout history: 2 workouts`);
-  console.log(`  Previously unlocked: [] (BUG - should have 'first-workout')`);
+  console.log(`  Previously unlocked: [] (was a bug)`);
   console.log(`  first-workout in new achievements: ${hasFirstWorkout}`);
-  console.log(`  This is the bug! first-workout is shown again because previouslyUnlocked is empty`);
   
-  // This test PASSES because it demonstrates the bug exists
+  // After fix, first-workout should NOT be in new achievements
+  // because the workout history shows there was already 1+ workout before
+  const passed = hasFirstWorkout === false;
+  console.log(`  Expected: first-workout should NOT be returned (was already earned)`);
+  console.log(`  Result: ${passed ? '✓ FIXED - first-workout correctly excluded' : '✗ STILL BROKEN'}`);
+}
+console.log('');
+
+// Test 9: First workout should still be awarded on first workout
+console.log('Test 9: First workout achievement on actual first workout');
+{
+  const stats = createUserStats(1);
+  const workoutHistory = [createWorkout()];
+  const previouslyUnlocked = [];
+  
+  const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
+  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
+  
+  console.log(`  Stats: totalWorkouts = 1`);
+  console.log(`  Workout history: 1 workout (this is the first)`);
+  console.log(`  Previously unlocked: []`);
+  console.log(`  first-workout in new achievements: ${hasFirstWorkout}`);
+  
   const passed = hasFirstWorkout === true;
-  console.log(`  Bug confirmed: ${passed ? '✓ BUG EXISTS' : 'Bug not found'}`);
+  console.log(`  Expected: first-workout SHOULD be returned`);
+  console.log(`  Result: ${passed ? '✓ PASS' : '✗ FAIL - first-workout not returned when it should be'}`);
+}
+console.log('');
+
+// Test 10: 5th workout achievement on exactly 5th workout
+console.log('Test 10: 5 workout achievement on exactly 5th workout');
+{
+  const stats = createUserStats(5);
+  const workoutHistory = Array(5).fill(null).map((_, i) => 
+    createWorkout(new Date(Date.now() - i * 86400000))
+  );
+  const previouslyUnlocked = ['first-workout']; // Already got first-workout
+  
+  const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
+  const hasDedicated5 = newAchievements.some(a => a.id === 'dedicated-5');
+  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
+  
+  console.log(`  Stats: totalWorkouts = 5`);
+  console.log(`  Workout history: 5 workouts`);
+  console.log(`  Previously unlocked: ['first-workout']`);
+  console.log(`  dedicated-5 in new achievements: ${hasDedicated5}`);
+  console.log(`  first-workout in new achievements: ${hasFirstWorkout}`);
+  
+  const passed = hasDedicated5 === true && hasFirstWorkout === false;
+  console.log(`  Expected: dedicated-5 SHOULD be returned, first-workout should NOT`);
+  console.log(`  Result: ${passed ? '✓ PASS' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 11: 6th workout should not award 5th workout achievement again
+console.log('Test 11: 6th workout should not re-award dedicated-5');
+{
+  const stats = createUserStats(6);
+  const workoutHistory = Array(6).fill(null).map((_, i) => 
+    createWorkout(new Date(Date.now() - i * 86400000))
+  );
+  const previouslyUnlocked = [];  // Simulating out-of-sync storage
+  
+  const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
+  const hasDedicated5 = newAchievements.some(a => a.id === 'dedicated-5');
+  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
+  
+  console.log(`  Stats: totalWorkouts = 6`);
+  console.log(`  Workout history: 6 workouts`);
+  console.log(`  Previously unlocked: [] (out of sync)`);
+  console.log(`  dedicated-5 in new achievements: ${hasDedicated5}`);
+  console.log(`  first-workout in new achievements: ${hasFirstWorkout}`);
+  
+  const passed = hasDedicated5 === false && hasFirstWorkout === false;
+  console.log(`  Expected: Neither should be returned (both were already earned before this workout)`);
+  console.log(`  Result: ${passed ? '✓ PASS' : '✗ FAIL'}`);
 }
 console.log('');
 

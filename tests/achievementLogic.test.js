@@ -443,22 +443,41 @@ console.log('Test 18: Strength week streak - 3 consecutive weeks with 3+ strengt
   const stats = createUserStats(9);
   
   // Create 3 workouts per week for 3 consecutive weeks
+  // Explicitly use Monday-aligned weeks to ensure consistency
   const workoutHistory = [];
-  const today = new Date();
   
+  // Get a reference Monday (this week's Monday)
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const thisMonday = new Date(today);
+  thisMonday.setDate(today.getDate() - daysToMonday);
+  thisMonday.setHours(10, 0, 0, 0);
+  
+  // Create 3 workouts for each of the last 3 weeks (Mon, Wed, Fri of each week)
   for (let week = 0; week < 3; week++) {
-    for (let day = 0; day < 3; day++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - (week * 7) - day);
-      workoutHistory.push(createTypedWorkout('full', date));
-    }
+    const weekMonday = new Date(thisMonday);
+    weekMonday.setDate(thisMonday.getDate() - (week * 7));
+    
+    // Monday workout
+    workoutHistory.push(createTypedWorkout('push', new Date(weekMonday)));
+    
+    // Wednesday workout
+    const wed = new Date(weekMonday);
+    wed.setDate(weekMonday.getDate() + 2);
+    workoutHistory.push(createTypedWorkout('pull', wed));
+    
+    // Friday workout
+    const fri = new Date(weekMonday);
+    fri.setDate(weekMonday.getDate() + 4);
+    workoutHistory.push(createTypedWorkout('legs', fri));
   }
   
   const streakAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'strength-week-3');
   const isUnlocked = isAchievementUnlocked(streakAchievement, stats, workoutHistory);
   
   const passed = isUnlocked === true;
-  console.log(`  Workout history: 3 strength workouts per week for 3 weeks`);
+  console.log(`  Workout history: 3 strength workouts per week for 3 weeks (Mon, Wed, Fri each week)`);
   console.log(`  Expected: strength-week-3 should be unlocked`);
   console.log(`  Got: ${isUnlocked} ${passed ? '✓' : '✗ FAIL'}`);
 }

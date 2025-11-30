@@ -612,7 +612,8 @@ const countYogaWorkouts = (workoutHistory) => {
 const getWeekStart = (date) => {
   const d = new Date(date);
   const day = d.getDay();
-  // Adjust so Monday is 0, Sunday is 6
+  // Calculate days to subtract to get to Monday
+  // Sunday (0) needs to go back 6 days, other days go back (day - 1) days
   const diff = day === 0 ? 6 : day - 1;
   d.setDate(d.getDate() - diff);
   d.setHours(0, 0, 0, 0);

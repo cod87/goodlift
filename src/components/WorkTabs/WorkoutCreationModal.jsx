@@ -69,10 +69,6 @@ const getSupersetColor = (groupId) => {
 
 /**
  * ExerciseItem - Exercise item in My Workout with arrow controls
- * Enhanced to support:
- * - Reordering exercises within supersets
- * - Highlighting exercises in supersets for regrouping
- * - Visual feedback when regrouping is available
  */
 const ExerciseItem = ({ 
   exercise, 
@@ -87,14 +83,9 @@ const ExerciseItem = ({
   onDeselectFromSuperset,
   onMoveUp,
   onMoveDown,
-  onMoveWithinGroupUp,
-  onMoveWithinGroupDown,
   canMoveUp,
   canMoveDown,
-  canMoveWithinGroupUp,
-  canMoveWithinGroupDown,
   isFirstInGroup,
-  supersetSize,
 }) => {
   // Check if this exercise is in a superset group
   const supersetGroupId = exercise.supersetGroup;
@@ -104,9 +95,6 @@ const ExerciseItem = ({
   // Check if this exercise is highlighted
   const isHighlighted = highlightedExercises.has(exercise['Exercise Name']);
   const highlightColor = getSupersetColor(currentSupersetNumber);
-
-  // Determine if exercise is being regrouped (highlighted while in a superset)
-  const isBeingRegrouped = isHighlighted && isInSuperset;
 
   // Handle clicking on the card to highlight
   const handleCardClick = (e) => {
@@ -120,34 +108,22 @@ const ExerciseItem = ({
     }
   };
 
-  // Helper to determine border left color based on states
-  const getBorderLeftColor = () => {
-    if (isInSuperset) {
-      return isBeingRegrouped ? highlightColor?.main : supersetColor?.main;
-    }
-    return isHighlighted ? highlightColor?.main : 'divider';
-  };
-
-  // Helper to determine background color based on states
-  const getBackgroundColor = () => {
-    if (isBeingRegrouped) return highlightColor?.light;
-    if (isInSuperset) return supersetColor?.light;
-    if (isHighlighted) return highlightColor?.light;
-    return 'background.paper';
-  };
-
   return (
     <Card
       onClick={handleCardClick}
       sx={{
         position: 'relative',
         cursor: 'pointer',
-        border: '2px solid',
-        borderColor: isBeingRegrouped ? highlightColor?.main : 'divider',
+        border: '1px solid',
+        borderColor: 'divider',
         borderLeft: '4px solid',
-        borderLeftColor: getBorderLeftColor(),
-        backgroundColor: getBackgroundColor(),
-        transition: 'background-color 0.2s ease, border-color 0.2s ease, margin-left 0.2s ease, padding-left 0.2s ease, opacity 0.15s ease',
+        borderLeftColor: isInSuperset 
+          ? supersetColor?.main 
+          : (isHighlighted ? highlightColor?.main : 'divider'),
+        backgroundColor: isInSuperset 
+          ? supersetColor?.light 
+          : (isHighlighted ? highlightColor?.light : 'background.paper'),
+        transition: 'background-color 0.2s ease, border-color 0.2s ease, opacity 0.15s ease, margin-left 0.3s ease, padding-left 0.3s ease',
         marginLeft: isHighlighted ? 3 : 0,
         paddingLeft: isHighlighted ? 1 : 0,
         '&:hover': {
@@ -160,110 +136,45 @@ const ExerciseItem = ({
     >
       <CardContent sx={{ pb: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
-          {/* Arrow buttons column */}
-          <Stack direction="column" spacing={0.5}>
-            {/* Group move up - only for first in group */}
-            {isFirstInGroup && (
-              <Tooltip title="Move group up" placement="left">
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMoveUp();
-                    }}
-                    disabled={!canMoveUp}
-                    sx={{ 
-                      padding: 0.5,
-                      '&:disabled': { opacity: 0.3 }
-                    }}
-                  >
-                    <ArrowUpward fontSize="small" />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            )}
-            {/* Within-group reordering for exercises in supersets with more than 1 exercise */}
-            {isInSuperset && supersetSize > 1 && (
-              <>
-                <Tooltip title="Move up within superset" placement="left">
-                  <span>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMoveWithinGroupUp();
-                      }}
-                      disabled={!canMoveWithinGroupUp}
-                      sx={{ 
-                        padding: 0.25,
-                        backgroundColor: supersetColor?.light,
-                        border: `1px solid ${supersetColor?.main}`,
-                        '&:hover': {
-                          backgroundColor: supersetColor?.main,
-                          color: 'white',
-                        },
-                        '&:disabled': { opacity: 0.3 }
-                      }}
-                    >
-                      <ArrowUpward sx={{ fontSize: 14 }} />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-                <Tooltip title="Move down within superset" placement="left">
-                  <span>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMoveWithinGroupDown();
-                      }}
-                      disabled={!canMoveWithinGroupDown}
-                      sx={{ 
-                        padding: 0.25,
-                        backgroundColor: supersetColor?.light,
-                        border: `1px solid ${supersetColor?.main}`,
-                        '&:hover': {
-                          backgroundColor: supersetColor?.main,
-                          color: 'white',
-                        },
-                        '&:disabled': { opacity: 0.3 }
-                      }}
-                    >
-                      <ArrowDownward sx={{ fontSize: 14 }} />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              </>
-            )}
-            {/* Group move down - only for first in group */}
-            {isFirstInGroup && (
-              <Tooltip title="Move group down" placement="left">
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMoveDown();
-                    }}
-                    disabled={!canMoveDown}
-                    sx={{ 
-                      padding: 0.5,
-                      '&:disabled': { opacity: 0.3 }
-                    }}
-                  >
-                    <ArrowDownward fontSize="small" />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            )}
-          </Stack>
+          {/* Arrow buttons - only show for the first exercise in a group or standalone exercises */}
+          {isFirstInGroup && (
+            <Stack direction="column" spacing={0.5}>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveUp();
+                }}
+                disabled={!canMoveUp}
+                sx={{ 
+                  padding: 0.5,
+                  '&:disabled': { opacity: 0.3 }
+                }}
+              >
+                <ArrowUpward fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveDown();
+                }}
+                disabled={!canMoveDown}
+                sx={{ 
+                  padding: 0.5,
+                  '&:disabled': { opacity: 0.3 }
+                }}
+              >
+                <ArrowDownward fontSize="small" />
+              </IconButton>
+            </Stack>
+          )}
           <Box sx={{ flex: 1 }}>
-            <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+            <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="body1" sx={{ fontWeight: 600 }}>
                 {exercise['Exercise Name']}
               </Typography>
-              {isInSuperset && !isBeingRegrouped && (
+              {isInSuperset && (
                 <Chip
                   label={`Set ${supersetGroupId}`}
                   size="small"
@@ -284,26 +195,10 @@ const ExerciseItem = ({
                   }}
                 />
               )}
-              {isBeingRegrouped && (
-                <Chip
-                  label={`→ Set ${currentSupersetNumber}`}
-                  size="small"
-                  sx={{
-                    backgroundColor: highlightColor?.main,
-                    color: 'white',
-                    fontWeight: 'bold',
-                  }}
-                />
-              )}
             </Stack>
             <Typography variant="caption" color="text.secondary">
               {exercise['Primary Muscle']} • {exercise.Equipment}
             </Typography>
-            {isBeingRegrouped && (
-              <Typography variant="caption" sx={{ display: 'block', color: highlightColor?.dark, fontWeight: 500 }}>
-                Click the superset button to move to Set {currentSupersetNumber}
-              </Typography>
-            )}
           </Box>
           <IconButton
             size="small"
@@ -387,14 +282,9 @@ ExerciseItem.propTypes = {
   onDeselectFromSuperset: PropTypes.func.isRequired,
   onMoveUp: PropTypes.func.isRequired,
   onMoveDown: PropTypes.func.isRequired,
-  onMoveWithinGroupUp: PropTypes.func.isRequired,
-  onMoveWithinGroupDown: PropTypes.func.isRequired,
   canMoveUp: PropTypes.bool.isRequired,
   canMoveDown: PropTypes.bool.isRequired,
-  canMoveWithinGroupUp: PropTypes.bool.isRequired,
-  canMoveWithinGroupDown: PropTypes.bool.isRequired,
   isFirstInGroup: PropTypes.bool.isRequired,
-  supersetSize: PropTypes.number.isRequired,
 };
 
 /**
@@ -716,52 +606,6 @@ const WorkoutCreationModal = ({
     setMyWorkout(renumberSupersets(newExercises));
   }, [myWorkout]);
 
-  // Move an exercise up within its superset group
-  const moveWithinGroupUp = useCallback((exerciseIndex) => {
-    const exercise = myWorkout[exerciseIndex];
-    if (!exercise || exercise.supersetGroup === null || exercise.supersetGroup === undefined) return;
-
-    // Find all exercises in this superset group with their indices
-    const groupExercises = myWorkout
-      .map((ex, idx) => ({ exercise: ex, index: idx }))
-      .filter(item => item.exercise.supersetGroup === exercise.supersetGroup);
-
-    // Find position of this exercise within the group
-    const positionInGroup = groupExercises.findIndex(item => item.index === exerciseIndex);
-    if (positionInGroup <= 0) return; // Can't move up if first in group
-
-    // Swap with previous exercise in the group
-    const newWorkout = [...myWorkout];
-    const prevExerciseIndex = groupExercises[positionInGroup - 1].index;
-    [newWorkout[exerciseIndex], newWorkout[prevExerciseIndex]] = 
-      [newWorkout[prevExerciseIndex], newWorkout[exerciseIndex]];
-
-    setMyWorkout(newWorkout);
-  }, [myWorkout]);
-
-  // Move an exercise down within its superset group
-  const moveWithinGroupDown = useCallback((exerciseIndex) => {
-    const exercise = myWorkout[exerciseIndex];
-    if (!exercise || exercise.supersetGroup === null || exercise.supersetGroup === undefined) return;
-
-    // Find all exercises in this superset group with their indices
-    const groupExercises = myWorkout
-      .map((ex, idx) => ({ exercise: ex, index: idx }))
-      .filter(item => item.exercise.supersetGroup === exercise.supersetGroup);
-
-    // Find position of this exercise within the group
-    const positionInGroup = groupExercises.findIndex(item => item.index === exerciseIndex);
-    if (positionInGroup < 0 || positionInGroup >= groupExercises.length - 1) return; // Can't move down if last in group
-
-    // Swap with next exercise in the group
-    const newWorkout = [...myWorkout];
-    const nextExerciseIndex = groupExercises[positionInGroup + 1].index;
-    [newWorkout[exerciseIndex], newWorkout[nextExerciseIndex]] = 
-      [newWorkout[nextExerciseIndex], newWorkout[exerciseIndex]];
-
-    setMyWorkout(newWorkout);
-  }, [myWorkout]);
-
   // Renumber supersets to reflect their order in the list
   const renumberSupersets = (exercises) => {
     const newSupersetMapping = new Map();
@@ -924,9 +768,6 @@ const WorkoutCreationModal = ({
         const isFirstInGroup = indexInGroup === 0;
         const canMoveUp = groupIndex > 0;
         const canMoveDown = groupIndex < groups.length - 1;
-        const supersetSize = group.length;
-        const canMoveWithinGroupUp = indexInGroup > 0;
-        const canMoveWithinGroupDown = indexInGroup < group.length - 1;
         
         return (
           <ExerciseItem
@@ -943,19 +784,14 @@ const WorkoutCreationModal = ({
             onDeselectFromSuperset={handleDeselectFromSuperset}
             onMoveUp={() => moveGroupUp(currentExerciseIndex)}
             onMoveDown={() => moveGroupDown(currentExerciseIndex)}
-            onMoveWithinGroupUp={() => moveWithinGroupUp(currentExerciseIndex)}
-            onMoveWithinGroupDown={() => moveWithinGroupDown(currentExerciseIndex)}
             canMoveUp={canMoveUp}
             canMoveDown={canMoveDown}
-            canMoveWithinGroupUp={canMoveWithinGroupUp}
-            canMoveWithinGroupDown={canMoveWithinGroupDown}
             isFirstInGroup={isFirstInGroup}
-            supersetSize={supersetSize}
           />
         );
       })
     );
-  }, [myWorkout, selectedExercises, highlightedExercises, currentSupersetNumber, handleToggleHighlight, handleDeselectFromSuperset, moveGroupUp, moveGroupDown, moveWithinGroupUp, moveWithinGroupDown]);
+  }, [myWorkout, selectedExercises, highlightedExercises, currentSupersetNumber, handleToggleHighlight, handleDeselectFromSuperset, moveGroupUp, moveGroupDown]);
 
   return (
     <Dialog

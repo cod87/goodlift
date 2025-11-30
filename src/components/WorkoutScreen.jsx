@@ -136,12 +136,17 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     return sequence;
   }, [workoutPlan, supersetConfig, setsPerSuperset]);
 
-  // Calculate indices where a set round ends (for triggering rest timer)
-  // A set round ends when we've completed all exercises for a given set number within a superset
+  // Calculate indices where rest timer should trigger
+  // Rest timer triggers:
+  // 1. Between supersets (after completing all sets of a superset, before starting next superset)
+  // 2. For ungrouped exercises (superset size = 1): between sets of that single exercise
+  // Rest timer should NOT trigger between sets within a superset (when superset has multiple exercises)
   const setRoundEndIndices = useMemo(() => {
     const endIndices = new Set();
     let seqIndex = 0;
     let exerciseIndex = 0;
+    const totalSupersets = supersetConfig.length;
+    let supersetIdx = 0;
     
     for (const supersetSize of supersetConfig) {
       const supersetExercises = [];
@@ -154,20 +159,37 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
         exerciseIndex++;
       }
       
-      if (supersetExercises.length === 0) continue;
+      if (supersetExercises.length === 0) {
+        supersetIdx++;
+        continue;
+      }
       
       const maxSets = Math.max(
         ...supersetExercises.map(ex => ex.sets || setsPerSuperset || 3)
       );
       
-      // For each set round, mark the end index (last exercise in the set round)
+      const isUngroupedExercise = supersetExercises.length === 1;
+      const isLastSuperset = supersetIdx === totalSupersets - 1;
+      
       for (let set = 1; set <= maxSets; set++) {
         seqIndex += supersetExercises.length;
-        // Don't trigger rest after the very last set of a superset (or the workout)
-        if (set < maxSets) {
-          endIndices.add(seqIndex - 1);
+        const isLastSetOfSuperset = set === maxSets;
+        
+        if (isUngroupedExercise) {
+          // For ungrouped exercises: trigger rest between sets (but not after the last set if it's the last superset)
+          if (!isLastSetOfSuperset || !isLastSuperset) {
+            endIndices.add(seqIndex - 1);
+          }
+        } else {
+          // For supersets with multiple exercises: only trigger rest between supersets
+          // i.e., after the last set of this superset, before the next superset
+          if (isLastSetOfSuperset && !isLastSuperset) {
+            endIndices.add(seqIndex - 1);
+          }
         }
       }
+      
+      supersetIdx++;
     }
     
     return endIndices;
@@ -1066,124 +1088,147 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
               transition={{ duration: 0.3 }}
               style={{
                 display: 'flex',
-                flexDirection: 'column',
+                flexDirection: shouldUseTwoColumns ? 'row' : 'column',
+                gap: shouldUseTwoColumns ? '0.5rem' : undefined,
               }}
             >
-              {/* Top Controls - Help, Skip, Swap and Set Indicator on left, End Workout Controls on right */}
+              {/* Main content area - flex column in portrait, flex row in landscape */}
               <Box sx={{ 
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 1,
-                mb: 2
+                flex: 1, 
+                display: 'flex', 
+                flexDirection: 'column',
+                minWidth: 0, // Prevent flex item from overflowing
               }}>
-                {/* Left: Help, Skip, Swap Icons and Set Indicator */}
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                  <IconButton
-                    component="a"
-                    href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{
-                      minWidth: { xs: '36px', sm: '44px' },
-                      minHeight: { xs: '36px', sm: '44px' },
-                      color: 'primary.main',
-                      border: '2px solid',
-                      borderColor: 'primary.main',
-                      borderRadius: '8px',
-                      '&:hover': {
-                        backgroundColor: 'rgba(19, 70, 134, 0.08)',
-                      }
-                    }}
-                    aria-label={`Search for ${exerciseName} form guide`}
-                  >
-                    <HelpOutline sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                  </IconButton>
-                  <IconButton
-                    onClick={skipExercise}
-                    sx={{
-                      minWidth: { xs: '36px', sm: '44px' },
-                      minHeight: { xs: '36px', sm: '44px' },
-                      color: 'primary.main',
-                      border: '2px solid',
-                      borderColor: 'primary.main',
-                      borderRadius: '8px',
-                      '&:hover': {
-                        backgroundColor: 'rgba(19, 70, 134, 0.08)',
-                      }
-                    }}
-                    aria-label="Skip exercise"
-                  >
-                    <SkipNext sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => setSwapDialogOpen(true)}
-                    sx={{
-                      minWidth: { xs: '36px', sm: '44px' },
-                      minHeight: { xs: '36px', sm: '44px' },
-                      color: 'primary.main',
-                      border: '2px solid',
-                      borderColor: 'primary.main',
-                      borderRadius: '8px',
-                      '&:hover': {
-                        backgroundColor: 'rgba(19, 70, 134, 0.08)',
-                      }
-                    }}
-                    aria-label="Swap exercise"
-                  >
-                    <SwapHoriz sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                  </IconButton>
-                  
-                  {/* Set indicator */}
-                  <Chip 
-                    label={`Set ${currentStep.setNumber} of ${currentStep.totalSets}`}
-                    color="primary"
-                    size="medium"
-                    sx={{ 
-                      fontWeight: 600,
-                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                    }}
-                  />
-                </Box>
-                
-                {/* End Workout Controls - Right side */}
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  {/* Add extra sets button */}
-                  <IconButton
-                    onClick={handleAddExtraSets}
-                    sx={{
-                      minWidth: { xs: '36px', sm: '44px' },
-                      minHeight: { xs: '36px', sm: '44px' },
-                      color: 'info.main',
-                      border: '2px solid',
-                      borderColor: 'info.main',
-                      borderRadius: '8px',
-                      '&:hover': {
-                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                      }
-                    }}
-                    aria-label="Add extra sets"
-                  >
-                    <PlaylistAdd sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                  </IconButton>
-                  <IconButton
-                    onClick={handleEndWorkoutClick}
-                    sx={{
-                      minWidth: { xs: '36px', sm: '44px' },
-                      minHeight: { xs: '36px', sm: '44px' },
-                      color: 'rgb(237, 63, 39)',
-                      border: '2px solid rgb(237, 63, 39)',
-                      borderRadius: '8px',
-                      '&:hover': {
-                        backgroundColor: 'rgba(237, 63, 39, 0.08)',
-                      },
-                    }}
-                    aria-label="End workout"
-                  >
-                    <ExitToApp sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                  </IconButton>
-                </Box>
-              </Box>
+                {/* Top Controls - Help, Skip, Swap and Set Indicator on left, End Workout Controls on right */}
+                {/* In landscape tablet, these move to right column - so hide here */}
+                {!shouldUseTwoColumns && (
+                  <Box sx={{ 
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 1,
+                    mb: 2
+                  }}>
+                    {/* Left: Help, Skip, Swap Icons and Set Indicator */}
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <IconButton
+                        component="a"
+                        href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          minWidth: { xs: '36px', sm: '44px' },
+                          minHeight: { xs: '36px', sm: '44px' },
+                          color: 'primary.main',
+                          border: '2px solid',
+                          borderColor: 'primary.main',
+                          borderRadius: '8px',
+                          '&:hover': {
+                            backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                          }
+                        }}
+                        aria-label={`Search for ${exerciseName} form guide`}
+                      >
+                        <HelpOutline sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                      </IconButton>
+                      <IconButton
+                        onClick={skipExercise}
+                        sx={{
+                          minWidth: { xs: '36px', sm: '44px' },
+                          minHeight: { xs: '36px', sm: '44px' },
+                          color: 'primary.main',
+                          border: '2px solid',
+                          borderColor: 'primary.main',
+                          borderRadius: '8px',
+                          '&:hover': {
+                            backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                          }
+                        }}
+                        aria-label="Skip exercise"
+                      >
+                        <SkipNext sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => setSwapDialogOpen(true)}
+                        sx={{
+                          minWidth: { xs: '36px', sm: '44px' },
+                          minHeight: { xs: '36px', sm: '44px' },
+                          color: 'primary.main',
+                          border: '2px solid',
+                          borderColor: 'primary.main',
+                          borderRadius: '8px',
+                          '&:hover': {
+                            backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                          }
+                        }}
+                        aria-label="Swap exercise"
+                      >
+                        <SwapHoriz sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                      </IconButton>
+                      
+                      {/* Set indicator */}
+                      <Chip 
+                        label={`Set ${currentStep.setNumber} of ${currentStep.totalSets}`}
+                        color="primary"
+                        size="medium"
+                        sx={{ 
+                          fontWeight: 600,
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                        }}
+                      />
+                    </Box>
+                    
+                    {/* End Workout Controls - Right side */}
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      {/* Add extra sets button */}
+                      <IconButton
+                        onClick={handleAddExtraSets}
+                        sx={{
+                          minWidth: { xs: '36px', sm: '44px' },
+                          minHeight: { xs: '36px', sm: '44px' },
+                          color: 'info.main',
+                          border: '2px solid',
+                          borderColor: 'info.main',
+                          borderRadius: '8px',
+                          '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          }
+                        }}
+                        aria-label="Add extra sets"
+                      >
+                        <PlaylistAdd sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                      </IconButton>
+                      <IconButton
+                        onClick={handleEndWorkoutClick}
+                        sx={{
+                          minWidth: { xs: '36px', sm: '44px' },
+                          minHeight: { xs: '36px', sm: '44px' },
+                          color: 'rgb(237, 63, 39)',
+                          border: '2px solid rgb(237, 63, 39)',
+                          borderRadius: '8px',
+                          '&:hover': {
+                            backgroundColor: 'rgba(237, 63, 39, 0.08)',
+                          },
+                        }}
+                        aria-label="End workout"
+                      >
+                        <ExitToApp sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                )}
+
+                {/* Tablet landscape: Compact header with set indicator */}
+                {shouldUseTwoColumns && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                    <Chip 
+                      label={`Set ${currentStep.setNumber}/${currentStep.totalSets}`}
+                      color="primary"
+                      size="small"
+                      sx={{ fontWeight: 600, fontSize: '0.7rem' }}
+                    />
+                  </Box>
+                )}
 
               {/* Exercise Name and Demo Image - Two Column Layout in Landscape, Single Column in Portrait */}
               <Box sx={{ 
@@ -1278,9 +1323,9 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                 )}
               </Box>
               
-              {/* Display Target and Last Performance */}
+              {/* Display Target and Last Performance - More compact in tablet landscape */}
               {(prevWeight !== null || targetReps !== null || lastPerformance[exerciseName]) && (
-                <Box sx={{ mb: 2, mt: 1, px: 2 }}>
+                <Box sx={{ mb: shouldUseTwoColumns ? 0.5 : 2, mt: shouldUseTwoColumns ? 0 : 1, px: shouldUseTwoColumns ? 1 : 2 }}>
                   {(prevWeight !== null || targetReps !== null) && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
@@ -1292,11 +1337,11 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                           display: 'flex', 
                           alignItems: 'center', 
                           justifyContent: 'center',
-                          gap: 1,
+                          gap: 0.5,
                         }}
                       >
                         <Typography
-                          variant="body2"
+                          variant={shouldUseTwoColumns ? "caption" : "body2"}
                           sx={{ 
                             textAlign: 'center',
                             color: 'text.secondary',
@@ -1310,11 +1355,11 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                           onClick={handleOpenTargetRepsDialog}
                           sx={{
                             color: 'primary.main',
-                            p: 0.5,
+                            p: 0.25,
                           }}
                           aria-label="Change target reps"
                         >
-                          <Settings sx={{ fontSize: 16 }} />
+                          <Settings sx={{ fontSize: shouldUseTwoColumns ? 14 : 16 }} />
                         </IconButton>
                       </Box>
                     </motion.div>
@@ -1327,12 +1372,12 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                       transition={{ delay: 0.3 }}
                     >
                       <Typography
-                        variant="body2"
+                        variant={shouldUseTwoColumns ? "caption" : "body2"}
                         sx={{ 
                           textAlign: 'center',
                           color: 'primary.main',
                           fontWeight: 600,
-                          mt: 0.5
+                          mt: 0.25
                         }}
                       >
                         Last: {lastPerformance[exerciseName].weight} lbs • {lastPerformance[exerciseName].reps} reps
@@ -1342,7 +1387,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                 </Box>
               )}
               
-              {/* Progressive Overload Suggestion */}
+              {/* Progressive Overload Suggestion - More compact in tablet landscape */}
               <AnimatePresence>
                 {showSuggestion && progressiveOverloadSuggestion && (
                   <motion.div
@@ -1359,13 +1404,13 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                             color="inherit" 
                             size="small" 
                             onClick={applySuggestion}
-                            sx={{ minHeight: '44px' }}
+                            sx={{ minHeight: shouldUseTwoColumns ? '32px' : '44px', fontSize: shouldUseTwoColumns ? '0.75rem' : undefined }}
                           >
                             Apply
                           </Button>
                         )
                       }
-                      sx={{ mb: 2, minHeight: '44px' }}
+                      sx={{ mb: shouldUseTwoColumns ? 0.5 : 2, minHeight: shouldUseTwoColumns ? '32px' : '44px', py: shouldUseTwoColumns ? 0.25 : undefined }}
                     >
                       {progressiveOverloadSuggestion.message}
                     </Alert>
@@ -1373,9 +1418,9 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                 )}
               </AnimatePresence>
               
-              <div className="input-row">
+              <div className="input-row" style={{ marginBottom: shouldUseTwoColumns ? '0.25rem' : undefined }}>
                 <div className="input-group">
-                  <label htmlFor="weight-select">Weight (lbs){isBodyweight && ' (N/A)'}</label>
+                  <label htmlFor="weight-select" style={{ fontSize: shouldUseTwoColumns ? '0.75rem' : undefined }}>Weight (lbs){isBodyweight && ' (N/A)'}</label>
                   <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                     <IconButton 
                       onClick={() => adjustWeight(-2.5)}
@@ -1383,15 +1428,15 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                       size="small"
                       sx={{ 
                         bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
-                        minWidth: '32px',
-                        minHeight: '32px',
-                        width: '32px',
-                        height: '32px',
+                        minWidth: shouldUseTwoColumns ? '28px' : '32px',
+                        minHeight: shouldUseTwoColumns ? '28px' : '32px',
+                        width: shouldUseTwoColumns ? '28px' : '32px',
+                        height: shouldUseTwoColumns ? '28px' : '32px',
                         p: 0.5,
                         '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
                       }}
                     >
-                      <Remove sx={{ fontSize: 16 }} />
+                      <Remove sx={{ fontSize: shouldUseTwoColumns ? 14 : 16 }} />
                     </IconButton>
                     <input
                       id="weight-select"
@@ -1544,7 +1589,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                     type="button"
                     className="back-btn"
                     onClick={handleBack}
-                    style={{ minHeight: '44px' }}
+                    style={{ minHeight: shouldUseTwoColumns ? '36px' : '44px' }}
                   >
                     <ArrowBack sx={{ fontSize: 18, mr: 0.5 }} /> Back
                   </button>
@@ -1552,11 +1597,103 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                 <button
                   type="submit"
                   className="next-btn"
-                  style={{ minHeight: '44px' }}
+                  style={{ minHeight: shouldUseTwoColumns ? '36px' : '44px' }}
                 >
                   Next <ArrowForward sx={{ fontSize: 18, ml: 0.5 }} />
                 </button>
               </div>
+              </Box>
+              
+              {/* Right Column: Action Buttons - Only visible in tablet landscape */}
+              {shouldUseTwoColumns && (
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 0.5,
+                  pl: 1,
+                  borderLeft: '1px solid',
+                  borderColor: 'divider',
+                }}>
+                  <IconButton
+                    component="a"
+                    href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{
+                      minWidth: '36px',
+                      minHeight: '36px',
+                      color: 'primary.main',
+                      border: '2px solid',
+                      borderColor: 'primary.main',
+                      borderRadius: '6px',
+                      '&:hover': { backgroundColor: 'rgba(19, 70, 134, 0.08)' }
+                    }}
+                    aria-label={`Search for ${exerciseName} form guide`}
+                  >
+                    <HelpOutline sx={{ fontSize: 18 }} />
+                  </IconButton>
+                  <IconButton
+                    onClick={skipExercise}
+                    sx={{
+                      minWidth: '36px',
+                      minHeight: '36px',
+                      color: 'primary.main',
+                      border: '2px solid',
+                      borderColor: 'primary.main',
+                      borderRadius: '6px',
+                      '&:hover': { backgroundColor: 'rgba(19, 70, 134, 0.08)' }
+                    }}
+                    aria-label="Skip exercise"
+                  >
+                    <SkipNext sx={{ fontSize: 18 }} />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => setSwapDialogOpen(true)}
+                    sx={{
+                      minWidth: '36px',
+                      minHeight: '36px',
+                      color: 'primary.main',
+                      border: '2px solid',
+                      borderColor: 'primary.main',
+                      borderRadius: '6px',
+                      '&:hover': { backgroundColor: 'rgba(19, 70, 134, 0.08)' }
+                    }}
+                    aria-label="Swap exercise"
+                  >
+                    <SwapHoriz sx={{ fontSize: 18 }} />
+                  </IconButton>
+                  <IconButton
+                    onClick={handleAddExtraSets}
+                    sx={{
+                      minWidth: '36px',
+                      minHeight: '36px',
+                      color: 'info.main',
+                      border: '2px solid',
+                      borderColor: 'info.main',
+                      borderRadius: '6px',
+                      '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.08)' }
+                    }}
+                    aria-label="Add extra sets"
+                  >
+                    <PlaylistAdd sx={{ fontSize: 18 }} />
+                  </IconButton>
+                  <Box sx={{ flexGrow: 1 }} />
+                  <IconButton
+                    onClick={handleEndWorkoutClick}
+                    sx={{
+                      minWidth: '36px',
+                      minHeight: '36px',
+                      color: 'rgb(237, 63, 39)',
+                      border: '2px solid rgb(237, 63, 39)',
+                      borderRadius: '6px',
+                      '&:hover': { backgroundColor: 'rgba(237, 63, 39, 0.08)' },
+                    }}
+                    aria-label="End workout"
+                  >
+                    <ExitToApp sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Box>
+              )}
             </motion.div>
           </motion.form>
         </AnimatePresence>

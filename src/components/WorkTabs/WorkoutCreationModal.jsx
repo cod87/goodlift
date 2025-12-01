@@ -319,75 +319,66 @@ const SupersetGroup = ({
       dragControls={dragControls}
       style={{ listStyle: 'none' }}
     >
-      <Box
-        sx={{
-          border: '2px solid',
-          borderColor: supersetColor?.main,
-          borderRadius: 2,
-          backgroundColor: supersetColor?.light,
-          overflow: 'hidden',
-        }}
-      >
-        {/* Superset Header */}
+      <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+        {/* Left Bracket - Minimalist superset indicator */}
         <Box
           sx={{
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            px: 1.5,
-            py: 0.75,
-            backgroundColor: supersetColor?.main,
-            color: 'white',
+            mr: 0.5,
           }}
         >
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Box
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                dragControls.start(e);
-              }}
-              sx={{
-                cursor: 'grab',
-                display: 'flex',
-                alignItems: 'center',
-                touchAction: 'none',
-                '&:active': { cursor: 'grabbing' },
-              }}
-            >
-              <DragIndicator fontSize="small" />
-            </Box>
-            <LinkIcon fontSize="small" />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              Superset {groupId}
-            </Typography>
-            <Chip
-              label={`${exercises.length} exercises • ${exercises[0]?.sets || 3} sets`}
-              size="small"
-              sx={{
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                fontSize: '0.7rem',
-                height: 20,
-              }}
-            />
-          </Stack>
-          <Tooltip title="Ungroup superset">
+          {/* Drag Handle */}
+          <Box
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              dragControls.start(e);
+            }}
+            sx={{
+              cursor: 'grab',
+              display: 'flex',
+              alignItems: 'center',
+              color: 'text.secondary',
+              touchAction: 'none',
+              py: 0.5,
+              '&:active': { cursor: 'grabbing' },
+            }}
+          >
+            <DragIndicator fontSize="small" />
+          </Box>
+          
+          {/* Vertical Bracket Line */}
+          <Box
+            sx={{
+              flex: 1,
+              width: 4,
+              backgroundColor: supersetColor?.main,
+              borderRadius: 1,
+              minHeight: 20,
+            }}
+          />
+          
+          {/* Ungroup Button at Bottom */}
+          <Tooltip title="Ungroup" placement="left">
             <IconButton
               size="small"
               onClick={() => onUngroup(groupId)}
               sx={{ 
-                color: 'white',
-                p: 0.5,
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' }
+                p: 0.25,
+                color: supersetColor?.main,
+                '&:hover': { 
+                  backgroundColor: supersetColor?.light,
+                }
               }}
             >
-              <LinkOff fontSize="small" />
+              <LinkOff sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
         </Box>
 
-        {/* Superset Exercises */}
-        <Stack spacing={0.5} sx={{ p: 1 }}>
+        {/* Exercises Stack */}
+        <Stack spacing={0.75} sx={{ flex: 1 }}>
           {exercises.map((exercise, idx) => {
             const originalIndex = exerciseIndices[idx];
             return (
@@ -397,9 +388,11 @@ const SupersetGroup = ({
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1,
-                  py: 0.75,
-                  px: 1,
+                  py: 1,
+                  px: 1.5,
                   borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
                   backgroundColor: 'background.paper',
                 }}
               >
@@ -412,18 +405,43 @@ const SupersetGroup = ({
                       overflow: 'hidden', 
                       textOverflow: 'ellipsis', 
                       whiteSpace: 'nowrap',
-                      fontSize: '0.85rem',
                     }}
                   >
                     {exercise['Exercise Name']}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {exercise['Primary Muscle']}
+                    {exercise['Primary Muscle']} • {exercise.Equipment}
                   </Typography>
                 </Box>
 
-                {/* Reps Control */}
-                <Box onClick={(e) => e.stopPropagation()}>
+                {/* Sets & Reps Controls */}
+                <Stack direction="row" spacing={0.5} alignItems="center" onClick={(e) => e.stopPropagation()}>
+                  <FormControl size="small" sx={{ width: 55 }}>
+                    <Select
+                      value={exercise.sets}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        const newSets = parseInt(e.target.value);
+                        const updated = [...myWorkout];
+                        // Update all exercises in the superset
+                        updated.forEach((ex, i) => {
+                          if (ex.supersetGroup === groupId) {
+                            updated[i].sets = newSets;
+                          }
+                        });
+                        setMyWorkout(updated);
+                      }}
+                      size="small"
+                      sx={{ 
+                        fontSize: '0.75rem',
+                        '& .MuiSelect-select': { py: 0.5, px: 1 }
+                      }}
+                    >
+                      {[1, 2, 3, 4, 5].map(n => (
+                        <MenuItem key={n} value={n}>{n}s</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                   <TargetRepsPicker
                     value={typeof exercise.reps === 'number' ? getClosestValidTargetReps(exercise.reps) : DEFAULT_TARGET_REPS}
                     onChange={(newReps) => {
@@ -434,10 +452,10 @@ const SupersetGroup = ({
                     compact
                     showLabel={false}
                   />
-                </Box>
+                </Stack>
 
                 {/* Action Buttons */}
-                <Stack direction="row" spacing={0.25}>
+                <Stack direction="row" spacing={0.5}>
                   <Tooltip title="Swap exercise">
                     <IconButton 
                       size="small" 
@@ -450,7 +468,7 @@ const SupersetGroup = ({
                       <SwapHoriz fontSize="small" />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Remove from workout">
+                  <Tooltip title="Remove">
                     <IconButton
                       size="small"
                       onClick={(e) => {

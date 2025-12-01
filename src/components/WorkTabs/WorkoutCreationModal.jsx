@@ -13,22 +13,12 @@ import {
   Typography,
   TextField,
   InputAdornment,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Card,
-  CardContent,
-  CardMedia,
   Stack,
   Chip,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Divider,
-  ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
 } from '@mui/material';
 import {
@@ -36,13 +26,17 @@ import {
   Search,
   FitnessCenter,
   AutoAwesome,
-  ArrowUpward,
-  ArrowDownward,
+  DragIndicator,
+  SwapHoriz,
+  LinkOff,
+  Link as LinkIcon,
 } from '@mui/icons-material';
+import { Reorder, useDragControls } from 'framer-motion';
 import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 import { generateStandardWorkout } from '../../utils/workoutGenerator';
 import { getAllCategories, filterExercisesByCategory } from '../../utils/muscleCategories';
 import TargetRepsPicker from '../Common/TargetRepsPicker';
+import SwapExerciseDialog from '../Common/SwapExerciseDialog';
 import { DEFAULT_TARGET_REPS, getClosestValidTargetReps } from '../../utils/repRangeWeightAdjustment';
 
 /**
@@ -68,223 +62,431 @@ const getSupersetColor = (groupId) => {
 };
 
 /**
- * ExerciseItem - Exercise item in My Workout with arrow controls
+ * CompactExerciseRow - Compact exercise row with drag handle, swap, and delete
+ * Designed for maximum information density
  */
-const ExerciseItem = ({ 
+const CompactExerciseRow = ({ 
   exercise, 
-  index, 
-  myWorkout, 
-  setMyWorkout, 
-  selectedExercises, 
+  index,
+  myWorkout,
+  setMyWorkout,
+  selectedExercises,
   setSelectedExercises,
-  highlightedExercises,
-  onToggleHighlight,
-  currentSupersetNumber,
-  onDeselectFromSuperset,
-  onMoveUp,
-  onMoveDown,
-  canMoveUp,
-  canMoveDown,
-  isFirstInGroup,
+  isSelected,
+  onToggleSelect,
+  onSwap,
+  dragControls,
+  isInSuperset,
 }) => {
-  // Check if this exercise is in a superset group
-  const supersetGroupId = exercise.supersetGroup;
-  const isInSuperset = supersetGroupId !== null && supersetGroupId !== undefined;
-  const supersetColor = getSupersetColor(supersetGroupId);
+  const handleRemove = (e) => {
+    e.stopPropagation();
+    const newSelected = new Set(selectedExercises);
+    newSelected.delete(exercise['Exercise Name']);
+    setSelectedExercises(newSelected);
+    setMyWorkout(myWorkout.filter(ex => 
+      ex['Exercise Name'] !== exercise['Exercise Name']
+    ));
+  };
 
-  // Check if this exercise is highlighted
-  const isHighlighted = highlightedExercises.has(exercise['Exercise Name']);
-  const highlightColor = getSupersetColor(currentSupersetNumber);
-
-  // Handle clicking on the card to highlight
-  const handleCardClick = (e) => {
-    // Don't trigger if clicking on input fields or buttons
-    const target = e.target;
-    const isInput = target.tagName === 'INPUT' || target.closest('input');
-    const isButton = target.tagName === 'BUTTON' || target.closest('button');
+  const handleSetsChange = (e) => {
+    e.stopPropagation();
+    const newSets = parseInt(e.target.value);
+    const updated = [...myWorkout];
     
-    if (!isInput && !isButton) {
-      onToggleHighlight(exercise['Exercise Name']);
+    // Check if this exercise is in a superset group
+    const supersetGroupId = exercise.supersetGroup;
+    if (supersetGroupId !== null && supersetGroupId !== undefined) {
+      // Update all exercises in the same superset group
+      updated.forEach((ex, i) => {
+        if (ex.supersetGroup === supersetGroupId) {
+          updated[i].sets = newSets;
+        }
+      });
+    } else {
+      // Only update this exercise
+      updated[index].sets = newSets;
     }
+    
+    setMyWorkout(updated);
+  };
+
+  const handleRepsChange = (newReps) => {
+    const updated = [...myWorkout];
+    updated[index].reps = newReps;
+    setMyWorkout(updated);
   };
 
   return (
-    <Card
-      onClick={handleCardClick}
+    <Box
       sx={{
-        position: 'relative',
-        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        py: 1,
+        px: 1.5,
+        borderRadius: 1,
+        backgroundColor: isSelected ? 'action.selected' : 'transparent',
         border: '1px solid',
-        borderColor: 'divider',
-        borderLeft: '4px solid',
-        borderLeftColor: isInSuperset 
-          ? supersetColor?.main 
-          : (isHighlighted ? highlightColor?.main : 'divider'),
-        backgroundColor: isInSuperset 
-          ? supersetColor?.light 
-          : (isHighlighted ? highlightColor?.light : 'background.paper'),
-        transition: 'background-color 0.2s ease, border-color 0.2s ease, opacity 0.15s ease, margin-left 0.3s ease, padding-left 0.3s ease',
-        marginLeft: isHighlighted ? 3 : 0,
-        paddingLeft: isHighlighted ? 1 : 0,
+        borderColor: isSelected ? 'primary.main' : 'divider',
+        transition: 'all 0.15s ease',
+        cursor: 'pointer',
         '&:hover': {
-          opacity: 0.9,
-        },
-        '&:active': {
-          opacity: 0.8,
+          backgroundColor: isSelected ? 'action.selected' : 'action.hover',
         },
       }}
+      onClick={() => !isInSuperset && onToggleSelect(exercise['Exercise Name'])}
     >
-      <CardContent sx={{ pb: 2 }}>
-        <Stack direction="row" alignItems="center" spacing={2}>
-          {/* Arrow buttons - only show for the first exercise in a group or standalone exercises */}
-          {isFirstInGroup && (
-            <Stack direction="column" spacing={0.5}>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveUp();
-                }}
-                disabled={!canMoveUp}
-                sx={{ 
-                  padding: 0.5,
-                  '&:disabled': { opacity: 0.3 }
-                }}
-              >
-                <ArrowUpward fontSize="small" />
-              </IconButton>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveDown();
-                }}
-                disabled={!canMoveDown}
-                sx={{ 
-                  padding: 0.5,
-                  '&:disabled': { opacity: 0.3 }
-                }}
-              >
-                <ArrowDownward fontSize="small" />
-              </IconButton>
-            </Stack>
-          )}
-          <Box sx={{ flex: 1 }}>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                {exercise['Exercise Name']}
-              </Typography>
-              {isInSuperset && (
-                <Chip
-                  label={`Set ${supersetGroupId}`}
-                  size="small"
-                  onDelete={(e) => {
-                    e.stopPropagation();
-                    onDeselectFromSuperset(exercise['Exercise Name']);
-                  }}
-                  sx={{
-                    backgroundColor: supersetColor?.main,
-                    color: 'white',
-                    fontWeight: 'bold',
-                    '& .MuiChip-deleteIcon': {
-                      color: 'white',
-                      '&:hover': {
-                        color: 'rgba(255, 255, 255, 0.7)',
-                      },
-                    },
-                  }}
-                />
-              )}
-            </Stack>
-            <Typography variant="caption" color="text.secondary">
-              {exercise['Primary Muscle']} • {exercise.Equipment}
-            </Typography>
-          </Box>
-          <IconButton
+      {/* Drag Handle */}
+      <Box
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          dragControls.start(e);
+        }}
+        sx={{
+          cursor: 'grab',
+          display: 'flex',
+          alignItems: 'center',
+          color: 'text.secondary',
+          touchAction: 'none',
+          '&:active': { cursor: 'grabbing' },
+        }}
+      >
+        <DragIndicator fontSize="small" />
+      </Box>
+
+      {/* Exercise Info - Compact */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            fontWeight: 600, 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap' 
+          }}
+        >
+          {exercise['Exercise Name']}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+          {exercise['Primary Muscle']} • {exercise.Equipment}
+        </Typography>
+      </Box>
+
+      {/* Sets & Reps Controls - Inline */}
+      <Stack direction="row" spacing={0.5} alignItems="center" onClick={(e) => e.stopPropagation()}>
+        <FormControl size="small" sx={{ width: 55 }}>
+          <Select
+            value={exercise.sets}
+            onChange={handleSetsChange}
             size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              const newSelected = new Set(selectedExercises);
-              newSelected.delete(exercise['Exercise Name']);
-              setSelectedExercises(newSelected);
-              setMyWorkout(myWorkout.filter(ex => 
-                ex['Exercise Name'] !== exercise['Exercise Name']
-              ));
+            sx={{ 
+              fontSize: '0.75rem',
+              '& .MuiSelect-select': { py: 0.5, px: 1 }
             }}
           >
-            <Close />
-          </IconButton>
-        </Stack>
-        
-        {/* Exercise Configuration */}
-        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-          <FormControl size="small" sx={{ width: 80 }}>
-            <InputLabel>Sets</InputLabel>
-            <Select
-              label="Sets"
-              value={exercise.sets}
-              onChange={(e) => {
-                e.stopPropagation();
-                const newSets = parseInt(e.target.value);
-                const updated = [...myWorkout];
-                
-                // Check if this exercise is in a superset group
-                const supersetGroupId = exercise.supersetGroup;
-                if (supersetGroupId !== null && supersetGroupId !== undefined) {
-                  // Update all exercises in the same superset group
-                  updated.forEach((ex, i) => {
-                    if (ex.supersetGroup === supersetGroupId) {
-                      updated[i].sets = newSets;
-                    }
-                  });
-                } else {
-                  // Only update this exercise
-                  updated[index].sets = newSets;
-                }
-                
-                setMyWorkout(updated);
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MenuItem value={1}>1</MenuItem>
-              <MenuItem value={2}>2</MenuItem>
-              <MenuItem value={3}>3</MenuItem>
-              <MenuItem value={4}>4</MenuItem>
-            </Select>
-          </FormControl>
-          <TargetRepsPicker
-            value={typeof exercise.reps === 'number' ? getClosestValidTargetReps(exercise.reps) : DEFAULT_TARGET_REPS}
-            onChange={(newReps) => {
-              const updated = [...myWorkout];
-              updated[index].reps = newReps;
-              setMyWorkout(updated);
+            {[1, 2, 3, 4, 5].map(n => (
+              <MenuItem key={n} value={n}>{n}s</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <TargetRepsPicker
+          value={typeof exercise.reps === 'number' ? getClosestValidTargetReps(exercise.reps) : DEFAULT_TARGET_REPS}
+          onChange={handleRepsChange}
+          compact
+          showLabel={false}
+        />
+      </Stack>
+
+      {/* Action Buttons */}
+      <Stack direction="row" spacing={0.5}>
+        <Tooltip title="Swap exercise">
+          <IconButton 
+            size="small" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onSwap(exercise);
             }}
-            compact
-            showLabel
-            label="Reps"
-          />
-        </Stack>
-      </CardContent>
-    </Card>
+            sx={{ p: 0.5 }}
+          >
+            <SwapHoriz fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Remove">
+          <IconButton 
+            size="small" 
+            onClick={handleRemove}
+            sx={{ p: 0.5 }}
+          >
+            <Close fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
+    </Box>
   );
 };
 
-ExerciseItem.propTypes = {
+CompactExerciseRow.propTypes = {
   exercise: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   myWorkout: PropTypes.array.isRequired,
   setMyWorkout: PropTypes.func.isRequired,
   selectedExercises: PropTypes.instanceOf(Set).isRequired,
   setSelectedExercises: PropTypes.func.isRequired,
-  highlightedExercises: PropTypes.instanceOf(Set).isRequired,
-  onToggleHighlight: PropTypes.func.isRequired,
-  currentSupersetNumber: PropTypes.number.isRequired,
-  onDeselectFromSuperset: PropTypes.func.isRequired,
-  onMoveUp: PropTypes.func.isRequired,
-  onMoveDown: PropTypes.func.isRequired,
-  canMoveUp: PropTypes.bool.isRequired,
-  canMoveDown: PropTypes.bool.isRequired,
-  isFirstInGroup: PropTypes.bool.isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  onToggleSelect: PropTypes.func.isRequired,
+  onSwap: PropTypes.func.isRequired,
+  dragControls: PropTypes.object.isRequired,
+  isInSuperset: PropTypes.bool.isRequired,
+};
+
+/**
+ * DraggableExercise - Wrapper for Reorder.Item with drag controls
+ */
+const DraggableExercise = ({ 
+  exercise, 
+  index,
+  myWorkout,
+  setMyWorkout,
+  selectedExercises,
+  setSelectedExercises,
+  selectedForSuperset,
+  onToggleSelect,
+  onSwap,
+  isInSuperset,
+}) => {
+  const dragControls = useDragControls();
+  
+  return (
+    <Reorder.Item
+      value={exercise}
+      id={exercise['Exercise Name']}
+      dragListener={false}
+      dragControls={dragControls}
+      style={{ listStyle: 'none' }}
+    >
+      <CompactExerciseRow
+        exercise={exercise}
+        index={index}
+        myWorkout={myWorkout}
+        setMyWorkout={setMyWorkout}
+        selectedExercises={selectedExercises}
+        setSelectedExercises={setSelectedExercises}
+        isSelected={selectedForSuperset.has(exercise['Exercise Name'])}
+        onToggleSelect={onToggleSelect}
+        onSwap={onSwap}
+        dragControls={dragControls}
+        isInSuperset={isInSuperset}
+      />
+    </Reorder.Item>
+  );
+};
+
+DraggableExercise.propTypes = {
+  exercise: PropTypes.object.isRequired,
+  index: PropTypes.number.isRequired,
+  myWorkout: PropTypes.array.isRequired,
+  setMyWorkout: PropTypes.func.isRequired,
+  selectedExercises: PropTypes.instanceOf(Set).isRequired,
+  setSelectedExercises: PropTypes.func.isRequired,
+  selectedForSuperset: PropTypes.instanceOf(Set).isRequired,
+  onToggleSelect: PropTypes.func.isRequired,
+  onSwap: PropTypes.func.isRequired,
+  isInSuperset: PropTypes.bool.isRequired,
+};
+
+/**
+ * SupersetGroup - Visual container for grouped exercises
+ */
+const SupersetGroup = ({
+  groupId,
+  exercises,
+  exerciseIndices,
+  myWorkout,
+  setMyWorkout,
+  selectedExercises,
+  setSelectedExercises,
+  onUngroup,
+  onSwap,
+}) => {
+  const supersetColor = getSupersetColor(groupId);
+  const dragControls = useDragControls();
+  
+  return (
+    <Reorder.Item
+      value={`superset-${groupId}`}
+      id={`superset-${groupId}`}
+      dragListener={false}
+      dragControls={dragControls}
+      style={{ listStyle: 'none' }}
+    >
+      <Box
+        sx={{
+          border: '2px solid',
+          borderColor: supersetColor?.main,
+          borderRadius: 2,
+          backgroundColor: supersetColor?.light,
+          overflow: 'hidden',
+        }}
+      >
+        {/* Superset Header */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            px: 1.5,
+            py: 0.75,
+            backgroundColor: supersetColor?.main,
+            color: 'white',
+          }}
+        >
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Box
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                dragControls.start(e);
+              }}
+              sx={{
+                cursor: 'grab',
+                display: 'flex',
+                alignItems: 'center',
+                touchAction: 'none',
+                '&:active': { cursor: 'grabbing' },
+              }}
+            >
+              <DragIndicator fontSize="small" />
+            </Box>
+            <LinkIcon fontSize="small" />
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              Superset {groupId}
+            </Typography>
+            <Chip
+              label={`${exercises.length} exercises • ${exercises[0]?.sets || 3} sets`}
+              size="small"
+              sx={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                fontSize: '0.7rem',
+                height: 20,
+              }}
+            />
+          </Stack>
+          <Tooltip title="Ungroup superset">
+            <IconButton
+              size="small"
+              onClick={() => onUngroup(groupId)}
+              sx={{ 
+                color: 'white',
+                p: 0.5,
+                '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' }
+              }}
+            >
+              <LinkOff fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
+        {/* Superset Exercises */}
+        <Stack spacing={0.5} sx={{ p: 1 }}>
+          {exercises.map((exercise, idx) => {
+            const originalIndex = exerciseIndices[idx];
+            return (
+              <Box
+                key={exercise['Exercise Name']}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  py: 0.75,
+                  px: 1,
+                  borderRadius: 1,
+                  backgroundColor: 'background.paper',
+                }}
+              >
+                {/* Exercise Info */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      fontWeight: 600, 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap',
+                      fontSize: '0.85rem',
+                    }}
+                  >
+                    {exercise['Exercise Name']}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {exercise['Primary Muscle']}
+                  </Typography>
+                </Box>
+
+                {/* Reps Control */}
+                <Box onClick={(e) => e.stopPropagation()}>
+                  <TargetRepsPicker
+                    value={typeof exercise.reps === 'number' ? getClosestValidTargetReps(exercise.reps) : DEFAULT_TARGET_REPS}
+                    onChange={(newReps) => {
+                      const updated = [...myWorkout];
+                      updated[originalIndex].reps = newReps;
+                      setMyWorkout(updated);
+                    }}
+                    compact
+                    showLabel={false}
+                  />
+                </Box>
+
+                {/* Action Buttons */}
+                <Stack direction="row" spacing={0.25}>
+                  <Tooltip title="Swap exercise">
+                    <IconButton 
+                      size="small" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSwap(exercise);
+                      }}
+                      sx={{ p: 0.5 }}
+                    >
+                      <SwapHoriz fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Remove from workout">
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newSelected = new Set(selectedExercises);
+                        newSelected.delete(exercise['Exercise Name']);
+                        setSelectedExercises(newSelected);
+                        setMyWorkout(myWorkout.filter(ex => 
+                          ex['Exercise Name'] !== exercise['Exercise Name']
+                        ));
+                      }}
+                      sx={{ p: 0.5 }}
+                    >
+                      <Close fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
+              </Box>
+            );
+          })}
+        </Stack>
+      </Box>
+    </Reorder.Item>
+  );
+};
+
+SupersetGroup.propTypes = {
+  groupId: PropTypes.number.isRequired,
+  exercises: PropTypes.array.isRequired,
+  exerciseIndices: PropTypes.array.isRequired,
+  myWorkout: PropTypes.array.isRequired,
+  setMyWorkout: PropTypes.func.isRequired,
+  selectedExercises: PropTypes.instanceOf(Set).isRequired,
+  setSelectedExercises: PropTypes.func.isRequired,
+  onUngroup: PropTypes.func.isRequired,
+  onSwap: PropTypes.func.isRequired,
 };
 
 /**
@@ -310,13 +512,17 @@ const WorkoutCreationModal = ({
   const [myWorkout, setMyWorkout] = useState([]);
   const [workoutName, setWorkoutName] = useState('');
   const [workoutType, setWorkoutType] = useState('full');
-  const [highlightedExercises, setHighlightedExercises] = useState(new Set());
+  const [selectedForSuperset, setSelectedForSuperset] = useState(new Set());
   const [currentSupersetNumber, setCurrentSupersetNumber] = useState(1);
   
   // Generate workout state
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
   const [generateCountDialogOpen, setGenerateCountDialogOpen] = useState(false);
   const [exerciseCount, setExerciseCount] = useState(8);
+  
+  // Swap exercise dialog state
+  const [swapDialogOpen, setSwapDialogOpen] = useState(false);
+  const [exerciseToSwap, setExerciseToSwap] = useState(null);
 
   // Update currentSupersetNumber whenever myWorkout changes
   useEffect(() => {
@@ -357,17 +563,11 @@ const WorkoutCreationModal = ({
         setWorkoutName(existingWorkout.name || '');
         setWorkoutType(existingWorkout.type || 'full');
         
-        // Calculate highlighted exercises based on superset grouping
+        // Reset superset selection
+        setSelectedForSuperset(new Set());
+        
+        // Set current superset number to the max + 1
         if (existingWorkout.exercises && existingWorkout.exercises.length > 0) {
-          const highlighted = new Set();
-          existingWorkout.exercises.forEach(exercise => {
-            if (exercise.supersetGroup) {
-              highlighted.add(exercise.id || exercise['Exercise Name']);
-            }
-          });
-          setHighlightedExercises(highlighted);
-          
-          // Set current superset number to the max + 1
           const supersetGroups = existingWorkout.exercises
             .filter(ex => ex.supersetGroup)
             .map(ex => ex.supersetGroup);
@@ -382,7 +582,7 @@ const WorkoutCreationModal = ({
         setMyWorkout([]);
         setWorkoutName('');
         setWorkoutType('full');
-        setHighlightedExercises(new Set());
+        setSelectedForSuperset(new Set());
         setCurrentSupersetNumber(1);
       }
       
@@ -449,21 +649,21 @@ const WorkoutCreationModal = ({
     setSelectedExercises(newSelected);
   };
 
-  // Toggle highlight for an exercise
-  const handleToggleHighlight = useCallback((exerciseName) => {
-    const newHighlighted = new Set(highlightedExercises);
-    if (newHighlighted.has(exerciseName)) {
-      newHighlighted.delete(exerciseName);
+  // Toggle selection for superset grouping
+  const handleToggleSelectForSuperset = useCallback((exerciseName) => {
+    const newSelected = new Set(selectedForSuperset);
+    if (newSelected.has(exerciseName)) {
+      newSelected.delete(exerciseName);
     } else {
-      newHighlighted.add(exerciseName);
+      newSelected.add(exerciseName);
     }
-    setHighlightedExercises(newHighlighted);
-  }, [highlightedExercises]);
+    setSelectedForSuperset(newSelected);
+  }, [selectedForSuperset]);
 
-  // Deselect exercise from superset (remove superset group)
-  const handleDeselectFromSuperset = useCallback((exerciseName) => {
+  // Ungroup a superset
+  const handleUngroupSuperset = useCallback((groupId) => {
     const updated = myWorkout.map(exercise => {
-      if (exercise['Exercise Name'] === exerciseName) {
+      if (exercise.supersetGroup === groupId) {
         return { ...exercise, supersetGroup: null };
       }
       return exercise;
@@ -471,19 +671,19 @@ const WorkoutCreationModal = ({
     setMyWorkout(updated);
   }, [myWorkout]);
 
-  // Lock in superset - assign highlighted exercises to current superset group
-  const handleLockInSuperset = () => {
-    if (highlightedExercises.size === 0) return;
+  // Create superset from selected exercises
+  const handleCreateSuperset = useCallback(() => {
+    if (selectedForSuperset.size < 2) return;
 
-    // Find the greatest sets value among highlighted exercises
-    const highlightedSetsValues = myWorkout
-      .filter(exercise => highlightedExercises.has(exercise['Exercise Name']))
+    // Find the greatest sets value among selected exercises
+    const selectedSetsValues = myWorkout
+      .filter(exercise => selectedForSuperset.has(exercise['Exercise Name']))
       .map(exercise => exercise.sets);
-    const maxSets = Math.max(...highlightedSetsValues);
+    const maxSets = Math.max(...selectedSetsValues);
 
-    // Update all highlighted exercises with the current superset number and max sets value
+    // Update selected exercises with the current superset number and max sets
     const updated = myWorkout.map(exercise => {
-      if (highlightedExercises.has(exercise['Exercise Name'])) {
+      if (selectedForSuperset.has(exercise['Exercise Name'])) {
         return { ...exercise, supersetGroup: currentSupersetNumber, sets: maxSets };
       }
       return exercise;
@@ -493,9 +693,43 @@ const WorkoutCreationModal = ({
     const reordered = reorderBySupersets(updated);
     setMyWorkout(reordered);
     
-    // Clear highlights (superset number will be auto-updated by useEffect)
-    setHighlightedExercises(new Set());
-  };
+    // Clear selection
+    setSelectedForSuperset(new Set());
+  }, [selectedForSuperset, myWorkout, currentSupersetNumber]);
+
+  // Handle swap exercise
+  const handleOpenSwapDialog = useCallback((exercise) => {
+    setExerciseToSwap(exercise);
+    setSwapDialogOpen(true);
+  }, []);
+
+  const handleSwapExercise = useCallback((newExercise) => {
+    if (!exerciseToSwap) return;
+    
+    const updated = myWorkout.map(ex => {
+      if (ex['Exercise Name'] === exerciseToSwap['Exercise Name']) {
+        return {
+          ...newExercise,
+          sets: ex.sets,
+          reps: ex.reps,
+          weight: ex.weight || 0,
+          restTime: ex.restTime || 60,
+          supersetGroup: ex.supersetGroup,
+        };
+      }
+      return ex;
+    });
+    
+    // Update selected exercises set
+    const newSelectedExercises = new Set(selectedExercises);
+    newSelectedExercises.delete(exerciseToSwap['Exercise Name']);
+    newSelectedExercises.add(newExercise['Exercise Name']);
+    setSelectedExercises(newSelectedExercises);
+    
+    setMyWorkout(updated);
+    setSwapDialogOpen(false);
+    setExerciseToSwap(null);
+  }, [exerciseToSwap, myWorkout, selectedExercises]);
 
   // Reorder exercises to group by superset
   const reorderBySupersets = (exercises) => {
@@ -527,84 +761,6 @@ const WorkoutCreationModal = ({
 
     return reorderedExercises;
   };
-
-  // Get groups from exercises (a group can be a superset or a single exercise)
-  const getExerciseGroups = (exercises) => {
-    const groups = [];
-    const processedExercises = new Set();
-
-    exercises.forEach((exercise) => {
-      const exerciseName = exercise['Exercise Name'];
-      if (processedExercises.has(exerciseName)) return;
-
-      if (exercise.supersetGroup !== null && exercise.supersetGroup !== undefined) {
-        // Find all exercises in this superset group
-        const groupExercises = exercises.filter(
-          ex => ex.supersetGroup === exercise.supersetGroup
-        );
-        groups.push(groupExercises);
-        groupExercises.forEach(ex => processedExercises.add(ex['Exercise Name']));
-      } else {
-        // Single exercise (not in a superset)
-        groups.push([exercise]);
-        processedExercises.add(exerciseName);
-      }
-    });
-
-    return groups;
-  };
-
-  // Get the group index for an exercise at a given index
-  const getGroupIndexForExercise = (exerciseIndex, groups) => {
-    let currentIndex = 0;
-    for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
-      for (let i = 0; i < groups[groupIndex].length; i++) {
-        if (currentIndex === exerciseIndex) {
-          return groupIndex;
-        }
-        currentIndex++;
-      }
-    }
-    return -1;
-  };
-
-  // Move a group (superset or single exercise) up
-  const moveGroupUp = useCallback((exerciseIndex) => {
-    const groups = getExerciseGroups(myWorkout);
-    const currentGroupIndex = getGroupIndexForExercise(exerciseIndex, groups);
-
-    if (currentGroupIndex <= 0) return; // Can't move up if it's the first group
-
-    // Swap with the previous group
-    const newGroups = [...groups];
-    [newGroups[currentGroupIndex - 1], newGroups[currentGroupIndex]] = 
-      [newGroups[currentGroupIndex], newGroups[currentGroupIndex - 1]];
-
-    // Flatten back to exercises array
-    const newExercises = newGroups.flat();
-    
-    // Renumber supersets based on their new order
-    setMyWorkout(renumberSupersets(newExercises));
-  }, [myWorkout]);
-
-  // Move a group (superset or single exercise) down
-  const moveGroupDown = useCallback((exerciseIndex) => {
-    const groups = getExerciseGroups(myWorkout);
-    const currentGroupIndex = getGroupIndexForExercise(exerciseIndex, groups);
-
-    if (currentGroupIndex < 0 || currentGroupIndex >= groups.length - 1) return; // Can't move down if it's the last group
-
-    // Swap with the next group
-    const newGroups = [...groups];
-    [newGroups[currentGroupIndex], newGroups[currentGroupIndex + 1]] = 
-      [newGroups[currentGroupIndex + 1], newGroups[currentGroupIndex]];
-
-    // Flatten back to exercises array
-    const newExercises = newGroups.flat();
-    
-    // Renumber supersets based on their new order
-    setMyWorkout(renumberSupersets(newExercises));
-  }, [myWorkout]);
 
   // Renumber supersets to reflect their order in the list
   const renumberSupersets = (exercises) => {
@@ -711,7 +867,7 @@ const WorkoutCreationModal = ({
     // Clear existing exercises
     setMyWorkout([]);
     setSelectedExercises(new Set());
-    setHighlightedExercises(new Set());
+    setSelectedForSuperset(new Set());
     setCurrentSupersetNumber(1);
     
     // Generate new workout
@@ -757,41 +913,60 @@ const WorkoutCreationModal = ({
     setGenerateCountDialogOpen(false);
   };
 
-  // Memoize the rendered exercise items for better performance
-  const renderedExercises = useMemo(() => {
-    const groups = getExerciseGroups(myWorkout);
-    let exerciseIndex = 0;
-    
-    return groups.flatMap((group, groupIndex) => 
-      group.map((exercise, indexInGroup) => {
-        const currentExerciseIndex = exerciseIndex++;
-        const isFirstInGroup = indexInGroup === 0;
-        const canMoveUp = groupIndex > 0;
-        const canMoveDown = groupIndex < groups.length - 1;
-        
-        return (
-          <ExerciseItem
-            key={exercise['Exercise Name']}
-            exercise={exercise}
-            index={currentExerciseIndex}
-            myWorkout={myWorkout}
-            setMyWorkout={setMyWorkout}
-            selectedExercises={selectedExercises}
-            setSelectedExercises={setSelectedExercises}
-            highlightedExercises={highlightedExercises}
-            onToggleHighlight={handleToggleHighlight}
-            currentSupersetNumber={currentSupersetNumber}
-            onDeselectFromSuperset={handleDeselectFromSuperset}
-            onMoveUp={() => moveGroupUp(currentExerciseIndex)}
-            onMoveDown={() => moveGroupDown(currentExerciseIndex)}
-            canMoveUp={canMoveUp}
-            canMoveDown={canMoveDown}
-            isFirstInGroup={isFirstInGroup}
-          />
-        );
-      })
-    );
-  }, [myWorkout, selectedExercises, highlightedExercises, currentSupersetNumber, handleToggleHighlight, handleDeselectFromSuperset, moveGroupUp, moveGroupDown]);
+  // Build reorderable items (supersets as groups, standalone exercises as singles)
+  const reorderableItems = useMemo(() => {
+    const items = [];
+    const processedExercises = new Set();
+
+    myWorkout.forEach((exercise, index) => {
+      const exerciseName = exercise['Exercise Name'];
+      if (processedExercises.has(exerciseName)) return;
+
+      if (exercise.supersetGroup !== null && exercise.supersetGroup !== undefined) {
+        // Find all exercises in this superset
+        const groupExercises = [];
+        const groupIndices = [];
+        myWorkout.forEach((ex, i) => {
+          if (ex.supersetGroup === exercise.supersetGroup) {
+            groupExercises.push(ex);
+            groupIndices.push(i);
+            processedExercises.add(ex['Exercise Name']);
+          }
+        });
+        items.push({
+          type: 'superset',
+          id: `superset-${exercise.supersetGroup}`,
+          groupId: exercise.supersetGroup,
+          exercises: groupExercises,
+          indices: groupIndices,
+        });
+      } else {
+        items.push({
+          type: 'exercise',
+          id: exerciseName,
+          exercise,
+          index,
+        });
+        processedExercises.add(exerciseName);
+      }
+    });
+
+    return items;
+  }, [myWorkout]);
+
+  // Handle reorder from drag-and-drop
+  const handleReorder = useCallback((newItems) => {
+    // Rebuild myWorkout from the reordered items
+    const newWorkout = [];
+    newItems.forEach(item => {
+      if (item.type === 'superset') {
+        newWorkout.push(...item.exercises);
+      } else {
+        newWorkout.push(item.exercise);
+      }
+    });
+    setMyWorkout(renumberSupersets(newWorkout));
+  }, []);
 
   return (
     <Dialog
@@ -845,10 +1020,11 @@ const WorkoutCreationModal = ({
       <DialogContent sx={{ p: 0, overflow: 'auto' }}>
         {/* Exercises Tab */}
         {currentTab === 0 && (
-          <Box sx={{ p: 2 }}>
-            {/* Search and Filters */}
-            <Stack spacing={2} sx={{ mb: 3 }}>
+          <Box sx={{ p: 2, maxWidth: 600, mx: 'auto' }}>
+            {/* Search and Filters - Compact */}
+            <Stack spacing={1.5} sx={{ mb: 2 }}>
               <TextField
+                size="small"
                 fullWidth
                 placeholder="Search exercises..."
                 value={searchQuery}
@@ -856,13 +1032,13 @@ const WorkoutCreationModal = ({
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Search />
+                      <Search fontSize="small" />
                     </InputAdornment>
                   ),
                 }}
               />
               
-              <Stack direction="row" spacing={2}>
+              <Stack direction="row" spacing={1}>
                 <FormControl size="small" sx={{ flex: 1 }}>
                   <InputLabel>Equipment</InputLabel>
                   <Select
@@ -872,22 +1048,22 @@ const WorkoutCreationModal = ({
                   >
                     {equipmentTypes.map(eq => (
                       <MenuItem key={eq} value={eq}>
-                        {eq === 'all' ? 'All Equipment' : eq}
+                        {eq === 'all' ? 'All' : eq}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
 
                 <FormControl size="small" sx={{ flex: 1 }}>
-                  <InputLabel>Muscle Group</InputLabel>
+                  <InputLabel>Muscle</InputLabel>
                   <Select
                     value={filterMuscleGroup}
-                    label="Muscle Group"
+                    label="Muscle"
                     onChange={(e) => setFilterMuscleGroup(e.target.value)}
                   >
                     {muscleGroups.map(muscle => (
                       <MenuItem key={muscle} value={muscle}>
-                        {muscle === 'all' ? 'All Muscles' : muscle}
+                        {muscle === 'all' ? 'All' : muscle}
                       </MenuItem>
                     ))}
                   </Select>
@@ -895,56 +1071,59 @@ const WorkoutCreationModal = ({
               </Stack>
             </Stack>
 
-            {/* Exercise List */}
-            <Stack spacing={2}>
+            {/* Exercise List - Compact */}
+            <Stack spacing={0.75}>
               {categoryFilteredExercises.map((exercise) => {
                 const exerciseName = exercise['Exercise Name'];
                 const isSelected = selectedExercises.has(exerciseName);
                 
                 return (
-                  <Card
+                  <Box
                     key={exerciseName}
+                    onClick={() => handleExerciseToggle(exercise)}
                     sx={{
                       cursor: 'pointer',
-                      position: 'relative',
-                      transition: 'border-color 0.2s ease, opacity 0.15s ease, margin-left 0.3s ease, padding-left 0.3s ease',
-                      borderLeft: isSelected ? '4px solid' : '4px solid transparent',
-                      borderLeftColor: isSelected ? 'success.main' : 'transparent',
-                      marginLeft: isSelected ? 3 : 0,
-                      paddingLeft: isSelected ? 1 : 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      py: 1,
+                      px: 1.5,
+                      borderRadius: 1,
+                      border: '1px solid',
+                      borderColor: isSelected ? 'success.main' : 'divider',
+                      backgroundColor: isSelected ? 'success.light' : 'background.paper',
+                      transition: 'all 0.15s ease',
                       '&:hover': {
-                        borderLeftColor: isSelected ? 'success.dark' : 'primary.light',
-                      },
-                      '&:active': {
-                        opacity: 0.8,
+                        borderColor: isSelected ? 'success.dark' : 'primary.light',
+                        backgroundColor: isSelected ? 'success.light' : 'action.hover',
                       },
                     }}
-                    onClick={() => handleExerciseToggle(exercise)}
                   >
-                    <CardContent>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          fontWeight: 600, 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          whiteSpace: 'nowrap' 
+                        }}
+                      >
                         {exerciseName}
                       </Typography>
-                      <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-                        <Chip
-                          label={exercise['Primary Muscle']}
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                        />
-                        <Chip
-                          label={exercise.Equipment}
-                          size="small"
-                          variant="outlined"
-                        />
-                        <Chip
-                          label={exercise['Exercise Type']}
-                          size="small"
-                          variant="outlined"
-                        />
-                      </Stack>
-                    </CardContent>
-                  </Card>
+                      <Typography variant="caption" color="text.secondary">
+                        {exercise['Primary Muscle']} • {exercise.Equipment}
+                      </Typography>
+                    </Box>
+                    {isSelected && (
+                      <Chip 
+                        label="Added" 
+                        size="small" 
+                        color="success" 
+                        sx={{ height: 20, fontSize: '0.7rem' }} 
+                      />
+                    )}
+                  </Box>
                 );
               })}
             </Stack>
@@ -953,27 +1132,31 @@ const WorkoutCreationModal = ({
 
         {/* My Workout Tab */}
         {currentTab === 1 && (
-          <Box sx={{ p: 2 }}>
-            {/* Workout Details */}
-            <Stack spacing={2} sx={{ mb: 3 }}>
+          <Box sx={{ 
+            p: 2, 
+            maxWidth: 600, 
+            mx: 'auto', // Center on desktop
+          }}>
+            {/* Compact Workout Details - Side by Side */}
+            <Stack direction="row" spacing={1.5} sx={{ mb: 2 }}>
               <TextField
-                fullWidth
-                label="Workout Name"
+                size="small"
+                label="Name"
                 value={workoutName}
                 onChange={(e) => setWorkoutName(e.target.value)}
-                placeholder="e.g., Upper Body Power"
+                placeholder="e.g., Upper Body"
+                sx={{ flex: 2 }}
               />
-              
-              <FormControl fullWidth>
-                <InputLabel>Workout Type</InputLabel>
+              <FormControl size="small" sx={{ flex: 1, minWidth: 100 }}>
+                <InputLabel>Type</InputLabel>
                 <Select
                   value={workoutType}
-                  label="Workout Type"
+                  label="Type"
                   onChange={(e) => setWorkoutType(e.target.value)}
                 >
-                  <MenuItem value="full">Full Body</MenuItem>
-                  <MenuItem value="upper">Upper Body</MenuItem>
-                  <MenuItem value="lower">Lower Body</MenuItem>
+                  <MenuItem value="full">Full</MenuItem>
+                  <MenuItem value="upper">Upper</MenuItem>
+                  <MenuItem value="lower">Lower</MenuItem>
                   <MenuItem value="push">Push</MenuItem>
                   <MenuItem value="pull">Pull</MenuItem>
                   <MenuItem value="legs">Legs</MenuItem>
@@ -982,79 +1165,114 @@ const WorkoutCreationModal = ({
               </FormControl>
             </Stack>
 
-            <Divider sx={{ my: 2 }} />
-
-            {/* Exercise List with Arrow Controls */}
-            <Box sx={{ mb: 2 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Exercises ({myWorkout.length})
-                </Typography>
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    variant="outlined"
+            {/* Exercise List Header */}
+            <Stack 
+              direction="row" 
+              justifyContent="space-between" 
+              alignItems="center" 
+              sx={{ mb: 1.5 }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                {myWorkout.length} exercise{myWorkout.length !== 1 ? 's' : ''}
+                {selectedForSuperset.size > 0 && (
+                  <Chip 
+                    label={`${selectedForSuperset.size} selected`}
                     size="small"
-                    startIcon={<AutoAwesome />}
-                    onClick={handleGenerateClick}
+                    color="primary"
+                    sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                  />
+                )}
+              </Typography>
+              <Stack direction="row" spacing={0.5}>
+                {selectedForSuperset.size >= 2 && (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<LinkIcon />}
+                    onClick={handleCreateSuperset}
+                    sx={{ fontSize: '0.75rem', py: 0.5 }}
                   >
-                    Generate
+                    Group ({selectedForSuperset.size})
                   </Button>
-                </Stack>
+                )}
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<AutoAwesome />}
+                  onClick={handleGenerateClick}
+                  sx={{ fontSize: '0.75rem', py: 0.5 }}
+                >
+                  Generate
+                </Button>
               </Stack>
-            </Box>
+            </Stack>
             
             {myWorkout.length > 0 ? (
-              <Stack spacing={2}>
-                {renderedExercises}
-              </Stack>
+              <Reorder.Group 
+                axis="y" 
+                values={reorderableItems} 
+                onReorder={handleReorder}
+                style={{ listStyle: 'none', padding: 0, margin: 0 }}
+              >
+                <Stack spacing={1}>
+                  {reorderableItems.map((item) => {
+                    if (item.type === 'superset') {
+                      return (
+                        <SupersetGroup
+                          key={item.id}
+                          groupId={item.groupId}
+                          exercises={item.exercises}
+                          exerciseIndices={item.indices}
+                          myWorkout={myWorkout}
+                          setMyWorkout={setMyWorkout}
+                          selectedExercises={selectedExercises}
+                          setSelectedExercises={setSelectedExercises}
+                          onUngroup={handleUngroupSuperset}
+                          onSwap={handleOpenSwapDialog}
+                        />
+                      );
+                    } else {
+                      return (
+                        <DraggableExercise
+                          key={item.id}
+                          exercise={item.exercise}
+                          index={item.index}
+                          myWorkout={myWorkout}
+                          setMyWorkout={setMyWorkout}
+                          selectedExercises={selectedExercises}
+                          setSelectedExercises={setSelectedExercises}
+                          selectedForSuperset={selectedForSuperset}
+                          onToggleSelect={handleToggleSelectForSuperset}
+                          onSwap={handleOpenSwapDialog}
+                          isInSuperset={false}
+                        />
+                      );
+                    }
+                  })}
+                </Stack>
+              </Reorder.Group>
             ) : (
               <Box sx={{ textAlign: 'center', py: 4 }}>
-                <FitnessCenter sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-                <Typography variant="body1" color="text.secondary">
-                  No exercises added yet. Switch to the "Exercises" tab to add some.
+                <FitnessCenter sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+                <Typography variant="body2" color="text.secondary">
+                  No exercises yet. Go to Exercises tab to add some.
                 </Typography>
               </Box>
-            )}
-            
-            {/* Sticky Floating Superset Button - show when has highlighted exercises */}
-            {highlightedExercises.size > 0 && (
-              <Tooltip title={`Create Superset ${currentSupersetNumber}`} placement="left">
-                <Box
-                  onClick={handleLockInSuperset}
-                  sx={{
-                    position: 'fixed',
-                    bottom: 24,
-                    right: 24,
-                    width: 64,
-                    height: 64,
-                    borderRadius: '50%',
-                    backgroundColor: getSupersetColor(currentSupersetNumber)?.main,
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 'bold',
-                    fontSize: '1.5rem',
-                    cursor: 'pointer',
-                    boxShadow: 6,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    zIndex: 1000,
-                    '&:hover': {
-                      transform: 'scale(1.1)',
-                      boxShadow: 12,
-                    },
-                    '&:active': {
-                      transform: 'scale(0.95)',
-                    },
-                  }}
-                >
-                  {currentSupersetNumber}
-                </Box>
-              </Tooltip>
             )}
           </Box>
         )}
       </DialogContent>
+
+      {/* Swap Exercise Dialog */}
+      <SwapExerciseDialog
+        open={swapDialogOpen}
+        onClose={() => {
+          setSwapDialogOpen(false);
+          setExerciseToSwap(null);
+        }}
+        currentExercise={exerciseToSwap}
+        onSwap={handleSwapExercise}
+      />
 
       {/* Warning Dialog - Clear Existing Exercises */}
       <Dialog

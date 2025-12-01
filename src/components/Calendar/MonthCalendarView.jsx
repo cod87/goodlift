@@ -116,11 +116,20 @@ const MonthCalendarView = ({
     return longestWorkout.type?.toLowerCase() || longestWorkout.workoutType?.toLowerCase() || 'strength';
   };
 
+  // Cardio subtypes that should be treated as cardio
+  const cardioSubtypes = ['running', 'cycling', 'swimming', 'general'];
+
   // Get workout type abbreviation for display
   const getWorkoutTypeLabel = (type) => {
     if (!type) return 'X';
     
     const normalizedType = type.toLowerCase();
+    
+    // Check if this is a cardio subtype
+    if (cardioSubtypes.includes(normalizedType)) {
+      return 'C';
+    }
+    
     const labelMap = {
       'upper': 'UP',
       'lower': 'LO',
@@ -140,11 +149,13 @@ const MonthCalendarView = ({
   const getWorkoutColor = (type) => {
     if (!type) return 'primary.main';
     
-    if (type === 'cardio' || type === 'hiit') {
+    const normalizedType = type.toLowerCase();
+    
+    if (normalizedType === 'cardio' || normalizedType === 'hiit' || cardioSubtypes.includes(normalizedType)) {
       return 'error.main';
-    } else if (type === 'stretch' || type === 'active_recovery' || type === 'yoga' || type === 'mobility') {
+    } else if (normalizedType === 'stretch' || normalizedType === 'active_recovery' || normalizedType === 'yoga' || normalizedType === 'mobility') {
       return 'secondary.main';
-    } else if (type === 'rest') {
+    } else if (normalizedType === 'rest') {
       return 'action.disabled';
     } else {
       return 'primary.main'; // Strength training

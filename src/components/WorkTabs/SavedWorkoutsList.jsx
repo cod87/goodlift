@@ -32,8 +32,9 @@ import {
   ExpandLess,
   FitnessCenter,
   Layers,
+  ContentCopy,
 } from '@mui/icons-material';
-import { getSavedWorkouts, deleteSavedWorkout, updateSavedWorkout } from '../../utils/storage';
+import { getSavedWorkouts, deleteSavedWorkout, updateSavedWorkout, duplicateSavedWorkout } from '../../utils/storage';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
 import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
 
@@ -65,7 +66,7 @@ const getSupersetCount = (supersetConfig) => {
  * Features:
  * - List of saved workouts with basic info
  * - Create new workout button
- * - Options to edit/delete saved workouts
+ * - Options to edit/duplicate/delete saved workouts
  * - Assign workouts to specific days of the week
  */
 const SavedWorkoutsList = memo(({ 
@@ -266,6 +267,19 @@ const SavedWorkoutsList = memo(({
     handleMenuClose();
   };
 
+  const handleDuplicateWorkout = async () => {
+    if (selectedWorkoutIndex !== null) {
+      try {
+        await duplicateSavedWorkout(selectedWorkoutIndex);
+        const workouts = await getSavedWorkouts();
+        setSavedWorkouts(workouts || []);
+      } catch (error) {
+        console.error('Error duplicating workout:', error);
+      }
+    }
+    handleMenuClose();
+  };
+
   // Helper to render workout list
   const renderWorkoutList = (workouts) => {
     if (workouts.length === 0) return null;
@@ -451,6 +465,10 @@ const SavedWorkoutsList = memo(({
         <MenuItem onClick={handleEditWorkout}>
           <Edit sx={{ mr: 1 }} fontSize="small" />
           Edit
+        </MenuItem>
+        <MenuItem onClick={handleDuplicateWorkout}>
+          <ContentCopy sx={{ mr: 1 }} fontSize="small" />
+          Duplicate
         </MenuItem>
         <MenuItem onClick={() => handleOpenDayPicker(selectedWorkoutIndex)}>
           <CalendarMonth sx={{ mr: 1 }} fontSize="small" />

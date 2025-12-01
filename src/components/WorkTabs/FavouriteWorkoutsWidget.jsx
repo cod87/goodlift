@@ -22,8 +22,9 @@ import {
   FitnessCenter,
   CalendarMonth,
   CheckCircle,
+  ContentCopy,
 } from '@mui/icons-material';
-import { getFavoriteWorkouts, deleteFavoriteWorkout } from '../../utils/storage';
+import { getFavoriteWorkouts, deleteFavoriteWorkout, duplicateFavoriteWorkout } from '../../utils/storage';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
 import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
 
@@ -32,6 +33,7 @@ import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
  * Features:
  * - Compact display of favourite workouts
  * - Quick start button for each workout
+ * - Duplicate functionality to copy a workout
  * - Delete functionality
  * - Assign to specific day of week
  */
@@ -91,6 +93,16 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
       setFavoriteWorkouts(favorites);
     } catch (error) {
       console.error('Error deleting favorite workout:', error);
+    }
+  };
+
+  const handleDuplicate = async (workoutId) => {
+    try {
+      await duplicateFavoriteWorkout(workoutId);
+      const favorites = await getFavoriteWorkouts();
+      setFavoriteWorkouts(favorites);
+    } catch (error) {
+      console.error('Error duplicating favorite workout:', error);
     }
   };
 
@@ -250,6 +262,21 @@ const FavouriteWorkoutsWidget = memo(({ onStartWorkout }) => {
                     aria-label={`Assign ${workout.name || 'workout'} to day`}
                   >
                     <CalendarMonth fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Duplicate">
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDuplicate(workout.id)}
+                    sx={{
+                      color: 'text.secondary',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.08)',
+                      },
+                    }}
+                    aria-label={`Duplicate ${workout.name || 'workout'}`}
+                  >
+                    <ContentCopy fontSize="small" />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Start workout">

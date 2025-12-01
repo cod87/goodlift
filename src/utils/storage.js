@@ -960,6 +960,63 @@ export const updateFavoriteWorkoutName = async (workoutId, newName) => {
 };
 
 /**
+ * Duplicate a favorite workout
+ * Creates a new copy with a unique name indicating it's a duplicate
+ * @param {string} workoutId - ID of the favorite workout to duplicate
+ * @returns {Promise<Object>} The newly created duplicate workout
+ */
+export const duplicateFavoriteWorkout = async (workoutId) => {
+  try {
+    if (!workoutId) {
+      throw new Error('Workout ID is required');
+    }
+    
+    const favorites = await getFavoriteWorkouts();
+    const originalWorkout = favorites.find(fav => fav.id === workoutId);
+    
+    if (!originalWorkout) {
+      throw new Error('Workout not found');
+    }
+    
+    // Create a deep copy of the workout with a new ID and name
+    const timestamp = new Date().toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    
+    const duplicateWorkout = {
+      ...originalWorkout,
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      name: `${originalWorkout.name || 'Workout'} (Copy - ${timestamp})`,
+      // Deep copy exercises array to avoid reference issues
+      exercises: originalWorkout.exercises ? 
+        JSON.parse(JSON.stringify(originalWorkout.exercises)) : [],
+      savedAt: new Date().toISOString(),
+    };
+    
+    favorites.unshift(duplicateWorkout);
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('favorite_workouts', favorites);
+    } else {
+      localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(favorites));
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveFavoriteWorkoutsToFirebase(currentUserId, favorites);
+      }
+    }
+    
+    return duplicateWorkout;
+  } catch (error) {
+    console.error('Error duplicating favorite workout:', error);
+    throw error;
+  }
+};
+
+/**
  * Get stretch sessions from localStorage
  * @returns {Array} Array of stretch session objects
  */
@@ -1996,6 +2053,66 @@ export const updateSavedWorkout = async (index, updatedWorkout) => {
     return workouts;
   } catch (error) {
     console.error('Error updating saved workout:', error);
+    throw error;
+  }
+};
+
+/**
+ * Duplicate a saved workout
+ * Creates a new copy with a unique name indicating it's a duplicate
+ * @param {number} index - Index of the saved workout to duplicate
+ * @returns {Promise<Object>} The newly created duplicate workout
+ */
+export const duplicateSavedWorkout = async (index) => {
+  try {
+    const workouts = await getSavedWorkouts();
+    
+    if (index < 0 || index >= workouts.length) {
+      throw new Error('Invalid workout index');
+    }
+    
+    const originalWorkout = workouts[index];
+    
+    // Create a deep copy of the workout with a new ID and name
+    const timestamp = new Date().toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    
+    const duplicateWorkout = {
+      ...originalWorkout,
+      id: Date.now(),
+      name: `${originalWorkout.name || 'Workout'} (Copy - ${timestamp})`,
+      // Deep copy exercises array to avoid reference issues
+      exercises: originalWorkout.exercises ? 
+        JSON.parse(JSON.stringify(originalWorkout.exercises)) : [],
+      // Deep copy supersetConfig if exists
+      supersetConfig: originalWorkout.supersetConfig ?
+        JSON.parse(JSON.stringify(originalWorkout.supersetConfig)) : undefined,
+      createdAt: new Date().toISOString(),
+      // Remove assigned day from duplicate
+      assignedDay: undefined,
+      archived: false,
+    };
+    
+    workouts.push(duplicateWorkout);
+    
+    if (isGuestMode()) {
+      setGuestData('saved_workouts', workouts);
+    } else {
+      localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(workouts));
+      
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveSavedWorkoutsToFirebase(currentUserId, workouts);
+      }
+    }
+    
+    return duplicateWorkout;
+  } catch (error) {
+    console.error('Error duplicating saved workout:', error);
     throw error;
   }
 };

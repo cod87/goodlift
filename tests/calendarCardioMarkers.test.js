@@ -10,7 +10,7 @@
  */
 
 // Cardio subtypes that should be treated as cardio
-// Must match the list in MonthCalendarView.jsx
+// NOTE: This list must match CARDIO_SUBTYPES in src/components/Calendar/MonthCalendarView.jsx
 const cardioSubtypes = ['running', 'cycling', 'swimming', 'general'];
 
 // Replicate the getWorkoutTypeLabel logic from MonthCalendarView.jsx

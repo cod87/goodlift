@@ -227,7 +227,11 @@ const MonthCalendarView = ({
           sx={{ 
             display: 'grid',
             gridTemplateColumns: 'repeat(7, 1fr)',
-            gap: { xs: 0.25, sm: 0.5 },
+            gap: 0,
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: 1,
+            overflow: 'hidden',
           }}
         >
           {cells.map((date, index) => {
@@ -236,6 +240,9 @@ const MonthCalendarView = ({
             const workoutsOnDay = getWorkoutsForDay(date);
             const isCompleted = workoutsOnDay.length > 0;
             const primaryType = getPrimaryWorkoutType(workoutsOnDay);
+            // Calculate if this is in the last row
+            const totalRows = Math.ceil(cells.length / 7);
+            const isLastRow = Math.floor(index / 7) === totalRows - 1;
 
             return (
               <Box
@@ -247,14 +254,24 @@ const MonthCalendarView = ({
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: 1,
+                  borderRadius: 0,
                   cursor: isCompleted ? 'pointer' : 'default',
                   bgcolor: isToday 
                     ? 'action.selected' 
                     : 'transparent',
                   opacity: isCurrentMonth ? 1 : 0.3,
-                  border: isToday ? 2 : 1,
-                  borderColor: isToday ? 'primary.main' : 'transparent',
+                  // Subtle grid borders
+                  borderRight: 1,
+                  borderBottom: isLastRow ? 0 : 1,
+                  borderColor: 'divider',
+                  // Highlight today with a visible outline
+                  ...(isToday && {
+                    outlineWidth: 2,
+                    outlineStyle: 'solid',
+                    outlineColor: 'primary.main',
+                    outlineOffset: -2,
+                    zIndex: 1,
+                  }),
                   transition: 'all 0.2s ease',
                   minHeight: { xs: 40, sm: 52 },
                   maxHeight: { xs: 44, sm: 60 },
@@ -262,9 +279,14 @@ const MonthCalendarView = ({
                   padding: { xs: '3px 2px', sm: '6px 4px' },
                   '&:hover': isCompleted ? {
                     bgcolor: 'action.hover',
-                    transform: 'scale(1.05)',
+                    transform: 'scale(1.02)',
                     boxShadow: 1,
+                    zIndex: 2,
                   } : {},
+                  // Remove right border from last column (every 7th cell in the weekly grid)
+                  '&:nth-of-type(7n)': {
+                    borderRight: 0,
+                  },
                 }}
               >
                 <Typography

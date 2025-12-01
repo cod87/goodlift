@@ -240,9 +240,42 @@ const MonthCalendarView = ({
             const workoutsOnDay = getWorkoutsForDay(date);
             const isCompleted = workoutsOnDay.length > 0;
             const primaryType = getPrimaryWorkoutType(workoutsOnDay);
-            // Calculate if this is in the last row
+            const hasStrengthTraining = isCompleted && isStrengthType(primaryType);
+            // Calculate grid position for corner radius handling
             const totalRows = Math.ceil(cells.length / 7);
             const isLastRow = Math.floor(index / 7) === totalRows - 1;
+            const isFirstRow = Math.floor(index / 7) === 0;
+            const isFirstColumn = index % 7 === 0;
+            const isLastColumn = index % 7 === 6;
+            // Determine if this cell is at a corner of the grid
+            const isTopLeftCorner = isFirstRow && isFirstColumn;
+            const isTopRightCorner = isFirstRow && isLastColumn;
+            const isBottomLeftCorner = isLastRow && isFirstColumn;
+            const isBottomRightCorner = isLastRow && isLastColumn;
+
+            // Get background color - strength training days get a prominent background
+            const getBackgroundColor = () => {
+              if (hasStrengthTraining) {
+                // Use a tinted background for strength training days
+                return (theme) => theme.palette.mode === 'dark'
+                  ? 'rgba(29, 181, 132, 0.18)' // primary.main with transparency for dark mode
+                  : 'rgba(29, 181, 132, 0.12)'; // lighter tint for light mode
+              }
+              if (isToday) {
+                return 'action.selected';
+              }
+              return 'transparent';
+            };
+
+            // Calculate border radius for corners - matches the grid's borderRadius of 1 (4px)
+            const getBorderRadius = () => {
+              const radius = '4px';
+              if (isTopLeftCorner) return `${radius} 0 0 0`;
+              if (isTopRightCorner) return `0 ${radius} 0 0`;
+              if (isBottomLeftCorner) return `0 0 0 ${radius}`;
+              if (isBottomRightCorner) return `0 0 ${radius} 0`;
+              return 0;
+            };
 
             return (
               <Box
@@ -254,20 +287,17 @@ const MonthCalendarView = ({
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: 0,
+                  borderRadius: getBorderRadius(),
                   cursor: isCompleted ? 'pointer' : 'default',
-                  bgcolor: isToday 
-                    ? 'action.selected' 
-                    : 'transparent',
+                  bgcolor: getBackgroundColor(),
                   opacity: isCurrentMonth ? 1 : 0.3,
                   // Subtle grid borders
                   borderRight: 1,
                   borderBottom: isLastRow ? 0 : 1,
                   borderColor: 'divider',
-                  // Highlight today with a visible outline
+                  // Highlight today with a visible outline that respects corner radius
                   ...(isToday && {
-                    outlineWidth: 2,
-                    outlineStyle: 'solid',
+                    outline: '2px solid',
                     outlineColor: 'primary.main',
                     outlineOffset: -2,
                     zIndex: 1,
@@ -278,7 +308,11 @@ const MonthCalendarView = ({
                   position: 'relative',
                   padding: { xs: '3px 2px', sm: '6px 4px' },
                   '&:hover': isCompleted ? {
-                    bgcolor: 'action.hover',
+                    bgcolor: hasStrengthTraining 
+                      ? (theme) => theme.palette.mode === 'dark'
+                        ? 'rgba(29, 181, 132, 0.28)'
+                        : 'rgba(29, 181, 132, 0.20)'
+                      : 'action.hover',
                     transform: 'scale(1.02)',
                     boxShadow: 1,
                     zIndex: 2,

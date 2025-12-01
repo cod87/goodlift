@@ -30,6 +30,10 @@ import {
 } from 'date-fns';
 // getWorkoutTypeShorthand import removed - no longer needed
 
+// Cardio subtypes that should be treated as cardio for display purposes
+// These are the specific cardio activity types from manual logging
+const CARDIO_SUBTYPES = ['running', 'cycling', 'swimming', 'general'];
+
 /**
  * MonthCalendarView - Standard calendar grid view with workout indicators
  * Features:
@@ -121,6 +125,12 @@ const MonthCalendarView = ({
     if (!type) return 'X';
     
     const normalizedType = type.toLowerCase();
+    
+    // Check if this is a cardio subtype
+    if (CARDIO_SUBTYPES.includes(normalizedType)) {
+      return 'C';
+    }
+    
     const labelMap = {
       'upper': 'UP',
       'lower': 'LO',
@@ -140,11 +150,13 @@ const MonthCalendarView = ({
   const getWorkoutColor = (type) => {
     if (!type) return 'primary.main';
     
-    if (type === 'cardio' || type === 'hiit') {
+    const normalizedType = type.toLowerCase();
+    
+    if (normalizedType === 'cardio' || normalizedType === 'hiit' || CARDIO_SUBTYPES.includes(normalizedType)) {
       return 'error.main';
-    } else if (type === 'stretch' || type === 'active_recovery' || type === 'yoga' || type === 'mobility') {
+    } else if (normalizedType === 'stretch' || normalizedType === 'active_recovery' || normalizedType === 'yoga' || normalizedType === 'mobility') {
       return 'secondary.main';
-    } else if (type === 'rest') {
+    } else if (normalizedType === 'rest') {
       return 'action.disabled';
     } else {
       return 'primary.main'; // Strength training

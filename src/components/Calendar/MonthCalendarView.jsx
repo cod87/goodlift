@@ -9,6 +9,7 @@ import {
   Chip,
   useTheme,
   useMediaQuery,
+  alpha,
 } from '@mui/material';
 import {
   ChevronLeft,
@@ -253,13 +254,18 @@ const MonthCalendarView = ({
             const isBottomLeftCorner = isLastRow && isFirstColumn;
             const isBottomRightCorner = isLastRow && isLastColumn;
 
+            // Strength training background colors using theme's primary color
+            const strengthBgLight = alpha(theme.palette.primary.main, 0.12);
+            const strengthBgDark = alpha(theme.palette.primary.main, 0.18);
+            const strengthHoverLight = alpha(theme.palette.primary.main, 0.20);
+            const strengthHoverDark = alpha(theme.palette.primary.main, 0.28);
+
             // Get background color - strength training days get a prominent background
+            // Today with strength training gets the strength background (outline still shows today)
             const getBackgroundColor = () => {
               if (hasStrengthTraining) {
                 // Use a tinted background for strength training days
-                return (theme) => theme.palette.mode === 'dark'
-                  ? 'rgba(29, 181, 132, 0.18)' // primary.main with transparency for dark mode
-                  : 'rgba(29, 181, 132, 0.12)'; // lighter tint for light mode
+                return theme.palette.mode === 'dark' ? strengthBgDark : strengthBgLight;
               }
               if (isToday) {
                 return 'action.selected';
@@ -309,9 +315,7 @@ const MonthCalendarView = ({
                   padding: { xs: '3px 2px', sm: '6px 4px' },
                   '&:hover': isCompleted ? {
                     bgcolor: hasStrengthTraining 
-                      ? (theme) => theme.palette.mode === 'dark'
-                        ? 'rgba(29, 181, 132, 0.28)'
-                        : 'rgba(29, 181, 132, 0.20)'
+                      ? (theme.palette.mode === 'dark' ? strengthHoverDark : strengthHoverLight)
                       : 'action.hover',
                     transform: 'scale(1.02)',
                     boxShadow: 1,

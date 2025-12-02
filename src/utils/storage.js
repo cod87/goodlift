@@ -207,6 +207,36 @@ export const updateWorkout = async (index, updatedData) => {
 };
 
 /**
+ * Calculate total volume lifted from workout history
+ * Volume = sum of (weight * reps) for all sets in all workouts
+ * @param {Array} workoutHistory - Array of workout objects
+ * @returns {number} Total volume in lbs
+ */
+const calculateTotalVolumeFromHistory = (workoutHistory) => {
+  if (!workoutHistory || !Array.isArray(workoutHistory)) return 0;
+  
+  let totalVolume = 0;
+  
+  for (const workout of workoutHistory) {
+    if (!workout.exercises) continue;
+    
+    for (const exerciseData of Object.values(workout.exercises)) {
+      if (!exerciseData.sets || !Array.isArray(exerciseData.sets)) continue;
+      
+      for (const set of exerciseData.sets) {
+        const weight = parseFloat(set.weight) || 0;
+        const reps = parseInt(set.reps, 10) || 0;
+        if (weight > 0 && reps > 0) {
+          totalVolume += weight * reps;
+        }
+      }
+    }
+  }
+  
+  return totalVolume;
+};
+
+/**
  * Get user statistics (total workouts, time, etc.)
  * IMPORTANT: Stats are now calculated from actual session data to ensure they're always in sync
  * @returns {Promise<Object>} User stats object with totalWorkouts, totalTime, and all session type times
@@ -224,6 +254,9 @@ export const getUserStats = async () => {
     const totalWorkouts = history.length;
     const totalTime = history.reduce((sum, workout) => sum + (workout.duration || 0), 0);
     
+    // Calculate total volume from workout history
+    const totalVolume = calculateTotalVolumeFromHistory(history);
+    
     // Calculate time for each session type by summing their actual sessions
     const hiitSessions = getHiitSessions();
     const totalHiitTime = hiitSessions.reduce((sum, session) => sum + (session.duration || 0), 0);
@@ -236,7 +269,6 @@ export const getUserStats = async () => {
     
     // Get achievement-related stats
     const totalPRs = await getTotalPRs();
-    const totalVolume = await getTotalVolume();
     
     const calculatedStats = { 
       totalWorkouts, 

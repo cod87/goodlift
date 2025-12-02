@@ -139,9 +139,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   });
   const [warmupEnabled, setWarmupEnabled] = useState(true);
   const [warmupDuration, setWarmupDuration] = useState(5); // minutes: off, 2, 5, 7, 10
-  // Note: elapsedHiitTime is used via its setter function (setElapsedHiitTime) throughout the timer logic
-  // eslint-disable-next-line no-unused-vars
-  const [elapsedHiitTime, setElapsedHiitTime] = useState(0); // Track elapsed HIIT time for extended rest
+  // Use a ref for elapsed HIIT time to allow synchronous access during timer updates
+  const elapsedHiitTimeRef = useRef(0);
   const [isExtendedRest, setIsExtendedRest] = useState(false); // Flag for 1-minute extended rest
   const [extendedRestIntervalMinutes, setExtendedRestIntervalMinutes] = useState(() => {
     // Load previous extended rest interval from localStorage, default to 8 minutes
@@ -414,21 +413,14 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 hasPlayedWarningRef.current = false;
                 return workInterval;
               } else if (isWorkPeriod) {
-                // Track elapsed HIIT time for extended rest calculation
-                let shouldExtendRest = false;
-                let newElapsedTime = 0;
+                // Track elapsed HIIT time for extended rest calculation using ref for synchronous access
+                const newElapsedTime = elapsedHiitTimeRef.current + workInterval;
+                elapsedHiitTimeRef.current = newElapsedTime;
                 
-                setElapsedHiitTime(prev => {
-                  newElapsedTime = prev + workInterval;
-                  
-                  // Calculate if this rest period should be extended
-                  // Use a small tolerance for float comparison to avoid precision issues
-                  if (nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE) {
-                    shouldExtendRest = true;
-                  }
-                  
-                  return newElapsedTime;
-                });
+                // Calculate if this rest period should be extended
+                // Use a small tolerance for float comparison to avoid precision issues
+                const shouldExtendRest = nextExtendedRestTime !== null && 
+                  Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
                 
                 // Switch to rest
                 setIsWorkPeriod(false);
@@ -522,7 +514,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
       // Initialize based on mode
       if (mode === TIMER_MODES.HIIT) {
         // Reset elapsed time and extended rest tracking
-        setElapsedHiitTime(0);
+        elapsedHiitTimeRef.current = 0;
         setIsExtendedRest(false);
         
         // Calculate the first extended rest time
@@ -590,7 +582,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     setIsPrepPeriod(false);
     setIsRecoveryPeriod(false);
     setCurrentPoseIndex(0);
-    setElapsedHiitTime(0);
+    elapsedHiitTimeRef.current = 0;
     setIsExtendedRest(false);
     setNextExtendedRestTime(null);
   };
@@ -619,7 +611,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setIsWorkPeriod(true);
         setTimeRemaining(workInterval);
         // Elapsed time remains 0 as we're just starting HIIT
-        setElapsedHiitTime(0);
+        elapsedHiitTimeRef.current = 0;
         // Recalculate next extended rest from start
         const nextTime = calculateNextExtendedRestTime(0, extendedRestIntervalMinutes, workInterval, restInterval);
         setNextExtendedRestTime(nextTime);
@@ -627,7 +619,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
       } else if (isWorkPeriod) {
         // Skipping from work to rest
         const newElapsedTime = calculateElapsedTimeFromPosition(currentSet, currentRound, false, false, false);
-        setElapsedHiitTime(newElapsedTime);
+        elapsedHiitTimeRef.current = newElapsedTime;
         
         // Check if this rest should be extended
         const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
@@ -651,7 +643,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setTimeRemaining(workInterval);
         // Update elapsed time for new set
         const newElapsedTime = calculateElapsedTimeFromPosition(currentSet + 1, 1, true, false, false);
-        setElapsedHiitTime(newElapsedTime);
+        elapsedHiitTimeRef.current = newElapsedTime;
         setIsExtendedRest(false);
       } else {
         // End of rest - skip to next work period
@@ -661,7 +653,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           setTimeRemaining(workInterval);
           // Update elapsed time for next round
           const newElapsedTime = calculateElapsedTimeFromPosition(currentSet, currentRound + 1, true, false, false);
-          setElapsedHiitTime(newElapsedTime);
+          elapsedHiitTimeRef.current = newElapsedTime;
           setIsExtendedRest(false);
         } else if (currentSet < numberOfSets) {
           if (recoveryBetweenSets > 0) {
@@ -675,7 +667,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
             setTimeRemaining(workInterval);
             // Update elapsed time for new set
             const newElapsedTime = calculateElapsedTimeFromPosition(currentSet + 1, 1, true, false, false);
-            setElapsedHiitTime(newElapsedTime);
+            elapsedHiitTimeRef.current = newElapsedTime;
             setIsExtendedRest(false);
           }
         }
@@ -699,7 +691,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         
         // Calculate elapsed time for previous round's rest
         const newElapsedTime = calculateElapsedTimeFromPosition(currentSet, currentRound - 1, false, false, false);
-        setElapsedHiitTime(newElapsedTime);
+        elapsedHiitTimeRef.current = newElapsedTime;
         
         // Check if this rest should be extended
         const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
@@ -714,7 +706,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           setTimeRemaining(recoveryBetweenSets);
           // Elapsed time for end of previous set
           const newElapsedTime = calculateElapsedTimeFromPosition(currentSet - 1, roundsPerSet, false, false, true);
-          setElapsedHiitTime(newElapsedTime);
+          elapsedHiitTimeRef.current = newElapsedTime;
           setIsExtendedRest(false);
         } else {
           setCurrentSet(currentSet - 1);
@@ -723,7 +715,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           
           // Calculate elapsed time for previous set's last rest
           const newElapsedTime = calculateElapsedTimeFromPosition(currentSet - 1, roundsPerSet, false, false, false);
-          setElapsedHiitTime(newElapsedTime);
+          elapsedHiitTimeRef.current = newElapsedTime;
           
           // Check if this rest should be extended
           const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
@@ -737,7 +729,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         
         // Calculate elapsed time for current round's work
         const newElapsedTime = calculateElapsedTimeFromPosition(currentSet, currentRound, true, false, false);
-        setElapsedHiitTime(newElapsedTime);
+        elapsedHiitTimeRef.current = newElapsedTime;
         setIsExtendedRest(false);
       } else if (isRecoveryPeriod) {
         // Go back from recovery to previous set's rest
@@ -746,7 +738,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         
         // Calculate elapsed time for previous set's last rest
         const newElapsedTime = calculateElapsedTimeFromPosition(currentSet, roundsPerSet, false, false, false);
-        setElapsedHiitTime(newElapsedTime);
+        elapsedHiitTimeRef.current = newElapsedTime;
         
         // Check if this rest should be extended
         const shouldExtend = nextExtendedRestTime !== null && Math.abs(newElapsedTime - nextExtendedRestTime) < TIME_COMPARISON_TOLERANCE;
@@ -892,9 +884,9 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
       // Reset and return to config
       handleReset();
       
-      // Navigate back if callback provided
+      // Navigate back to home (WorkTabs) if callback provided
       if (onNavigate) {
-        setTimeout(() => onNavigate('selection'), 500);
+        setTimeout(() => onNavigate('home'), 500);
       }
     } catch (error) {
       console.error('Error saving session:', error);
@@ -1465,7 +1457,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
           <Button
             variant="outlined"
             fullWidth
-            onClick={() => onNavigate('selection')}
+            onClick={() => onNavigate('home')}
             sx={{ mt: 2 }}
           >
             Back to Home

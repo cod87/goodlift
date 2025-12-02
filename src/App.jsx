@@ -4,9 +4,7 @@ import Header from './components/Header';
 import BottomNav from './components/Navigation/BottomNav';
 import WorkTabs from './components/WorkTabs';
 import TodayView from './components/TodayView/TodayView';
-import SelectionScreen from './components/SelectionScreen';
-// UnifiedWorkoutHub removed - using SelectionScreen instead
-// WorkoutPlanScreen removed - no longer using workout planning
+// SelectionScreen removed - functionality moved to WorkTabs
 import WorkoutScreenModal from './components/WorkoutScreenModal';
 import WorkoutPreview from './components/WorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
@@ -680,20 +678,6 @@ function AppContent() {
               onEquipmentChange={handleEquipmentChange}
               onStartWorkout={handleStartWorkout}
               onCustomize={handleCustomize}
-            />
-          )}
-
-          {/* SelectionScreen kept for backward compatibility but no longer in main workflow */}
-          {currentScreen === 'selection' && (
-            <SelectionScreen
-              workoutType={workoutType}
-              selectedEquipment={selectedEquipment}
-              equipmentOptions={equipmentOptions}
-              onWorkoutTypeChange={handleWorkoutTypeChange}
-              onEquipmentChange={handleEquipmentChange}
-              onStartWorkout={handleStartWorkout}
-              onCustomize={handleCustomize}
-              loading={loading}
             />
           )}
           

@@ -18,8 +18,6 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { calculateYAxisMax, getLabelPosition, getLabelAnchor } from '../../utils/chartUtils';
 
 // Register Chart.js components
 ChartJS.register(
@@ -30,8 +28,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler,
-  ChartDataLabels
+  Filler
 );
 
 /**
@@ -98,20 +95,12 @@ const generate4WeekData = (workoutHistory = []) => {
 export const FourWeekProgressionChart = memo(({ workoutHistory = [] }) => {
   const weeklyData = generate4WeekData(workoutHistory);
 
-  // Prepare data arrays
-  const workoutsData = weeklyData.map(w => w.workouts);
-  const volumeData = weeklyData.map(w => Math.round(w.volume / 1000));
-
-  // Calculate y-axis max values using the new logic: max + 50, rounded to nearest 50
-  const yAxisMaxWorkouts = calculateYAxisMax(workoutsData);
-  const yAxisMaxVolume = calculateYAxisMax(volumeData);
-
   const chartData = {
     labels: weeklyData.map(w => w.label),
     datasets: [
       {
         label: 'Workouts',
-        data: workoutsData,
+        data: weeklyData.map(w => w.workouts),
         borderColor: 'rgb(102, 126, 234)',
         backgroundColor: 'rgba(102, 126, 234, 0.1)',
         tension: 0.4,
@@ -120,7 +109,7 @@ export const FourWeekProgressionChart = memo(({ workoutHistory = [] }) => {
       },
       {
         label: 'Volume (1000s lbs)',
-        data: volumeData,
+        data: weeklyData.map(w => Math.round(w.volume / 1000)),
         borderColor: 'rgb(118, 75, 162)',
         backgroundColor: 'rgba(118, 75, 162, 0.1)',
         tension: 0.4,
@@ -170,30 +159,6 @@ export const FourWeekProgressionChart = memo(({ workoutHistory = [] }) => {
           },
         },
       },
-      datalabels: {
-        display: true,
-        color: (context) => {
-          // Match the label color to the dataset color
-          return context.datasetIndex === 0 ? 'rgb(102, 126, 234)' : 'rgb(118, 75, 162)';
-        },
-        font: {
-          size: 10,
-          weight: 'bold',
-        },
-        // Dynamic positioning based on proximity to y-axis max
-        align: (context) => {
-          const value = context.dataset.data[context.dataIndex];
-          const yAxisMax = context.datasetIndex === 0 ? yAxisMaxWorkouts : yAxisMaxVolume;
-          return getLabelPosition(value, yAxisMax);
-        },
-        anchor: (context) => {
-          const value = context.dataset.data[context.dataIndex];
-          const yAxisMax = context.datasetIndex === 0 ? yAxisMaxWorkouts : yAxisMaxVolume;
-          return getLabelAnchor(value, yAxisMax);
-        },
-        offset: 4,
-        formatter: (value) => value > 0 ? value : '',
-      },
     },
     scales: {
       x: {
@@ -210,8 +175,6 @@ export const FourWeekProgressionChart = memo(({ workoutHistory = [] }) => {
         type: 'linear',
         display: true,
         position: 'left',
-        min: 0,
-        max: yAxisMaxWorkouts,
         title: {
           display: true,
           text: 'Workouts',
@@ -233,8 +196,6 @@ export const FourWeekProgressionChart = memo(({ workoutHistory = [] }) => {
         type: 'linear',
         display: true,
         position: 'right',
-        min: 0,
-        max: yAxisMaxVolume,
         title: {
           display: true,
           text: 'Volume (1000s lbs)',

@@ -29,7 +29,6 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { 
   validateWeight, 
   formatWeight,
@@ -37,7 +36,6 @@ import {
   prepareWeightChartData,
   getWeightStats 
 } from '../utils/weightUtils';
-import { calculateYAxisMax, getLabelPosition, getLabelAnchor } from '../utils/chartUtils';
 
 // Register Chart.js components
 ChartJS.register(
@@ -48,8 +46,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler,
-  ChartDataLabels
+  Filler
 );
 
 const WeightTracker = ({ 
@@ -91,9 +88,6 @@ const WeightTracker = ({
   // Prepare chart data
   const chartData = prepareWeightChartData(weightHistory, 30, selectedUnit);
 
-  // Calculate y-axis max using the new logic: max + 50, rounded to nearest 50
-  const yAxisMax = chartData.data.length > 0 ? calculateYAxisMax(chartData.data) : 100;
-
   // Calculate y-axis minimum based on target weight
   let yAxisMin = undefined;
   if (targetWeight && chartData.data.length > 0) {
@@ -114,31 +108,11 @@ const WeightTracker = ({
           label: (context) => `${context.parsed.y} ${selectedUnit}`,
         },
       },
-      datalabels: {
-        display: true,
-        color: 'rgb(25, 118, 210)',
-        font: {
-          size: 10,
-          weight: 'bold',
-        },
-        // Dynamic positioning based on proximity to y-axis max
-        align: (context) => {
-          const value = context.dataset.data[context.dataIndex];
-          return getLabelPosition(value, yAxisMax);
-        },
-        anchor: (context) => {
-          const value = context.dataset.data[context.dataIndex];
-          return getLabelAnchor(value, yAxisMax);
-        },
-        offset: 4,
-        formatter: (value) => value > 0 ? `${value}` : '',
-      },
     },
     scales: {
       y: {
         beginAtZero: false,
         min: yAxisMin,
-        max: yAxisMax,
         ticks: {
           callback: (value) => `${value} ${selectedUnit}`,
         },

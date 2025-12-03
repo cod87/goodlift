@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { 
   Box, 
@@ -13,6 +13,7 @@ import {
   useMediaQuery
 } from '@mui/material';
 import { Line } from 'react-chartjs-2';
+import { calculateYAxisMax, getLabelPosition, getLabelAnchor } from '../../utils/chartUtils';
 
 /**
  * ChartTabs - Tabbed chart interface for exercise progression
@@ -45,7 +46,15 @@ const ChartTabs = memo(({
 
   const chartData = selectedExercise ? getChartData(selectedExercise, timeRange) : null;
 
-  const chartOptions = {
+  // Calculate y-axis max using the new logic: max + 50, rounded to nearest 50
+  const yAxisMax = useMemo(() => {
+    if (!chartData?.datasets?.[0]?.data || chartData.datasets[0].data.length === 0) {
+      return 100;
+    }
+    return calculateYAxisMax(chartData.datasets[0].data);
+  }, [chartData]);
+
+  const chartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: true,
     aspectRatio: isMobile ? 1.5 : 2,
@@ -59,6 +68,25 @@ const ChartTabs = memo(({
       tooltip: {
         mode: 'index',
         intersect: false,
+      },
+      datalabels: {
+        display: true,
+        color: 'rgb(19, 70, 134)',
+        font: {
+          size: 10,
+          weight: 'bold',
+        },
+        // Dynamic positioning based on proximity to y-axis max
+        align: (context) => {
+          const value = context.dataset.data[context.dataIndex];
+          return getLabelPosition(value, yAxisMax);
+        },
+        anchor: (context) => {
+          const value = context.dataset.data[context.dataIndex];
+          return getLabelAnchor(value, yAxisMax);
+        },
+        offset: 4,
+        formatter: (value) => value > 0 ? value : '',
       },
     },
     scales: {
@@ -75,6 +103,8 @@ const ChartTabs = memo(({
         },
       },
       y: {
+        min: 0,
+        max: yAxisMax,
         grid: {
           color: theme.palette.divider,
         },
@@ -90,7 +120,7 @@ const ChartTabs = memo(({
       axis: 'x',
       intersect: false,
     },
-  };
+  }), [isMobile, theme.palette.divider, yAxisMax]);
 
   if (!exercises || exercises.length === 0) {
     return (

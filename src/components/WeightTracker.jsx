@@ -37,7 +37,7 @@ import {
   prepareWeightChartData,
   getWeightStats 
 } from '../utils/weightUtils';
-import { calculateYAxisMax, getLabelPosition } from '../utils/chartUtils';
+import { calculateYAxisMax, getLabelPosition, getLabelAnchor } from '../utils/chartUtils';
 
 // Register Chart.js components
 ChartJS.register(
@@ -128,7 +128,7 @@ const WeightTracker = ({
         },
         anchor: (context) => {
           const value = context.dataset.data[context.dataIndex];
-          return getLabelPosition(value, yAxisMax) === 'bottom' ? 'start' : 'end';
+          return getLabelAnchor(value, yAxisMax);
         },
         offset: 4,
         formatter: (value) => value > 0 ? `${value}` : '',

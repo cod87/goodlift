@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog, DialogContent, IconButton, Box, Tooltip, ToggleButtonGroup, ToggleButton, Typography, LinearProgress } from '@mui/material';
 import { Maximize, Timer } from '@mui/icons-material';
@@ -6,6 +6,7 @@ import { MdScreenLockPortrait, MdScreenLockRotation } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 import WorkoutScreen from './WorkoutScreen';
 import wakeLockManager from '../utils/wakeLock';
+import { useSessionPersistence, SessionTypes, loadSessionState, clearSessionState } from '../hooks/useSessionPersistence';
 
 /**
  * WorkoutScreenModal - Modal wrapper for WorkoutScreen component
@@ -27,6 +28,83 @@ const WorkoutScreenModal = ({
   const [restDuration, setRestDuration] = useState(0); // 0 (off), 60, or 90 seconds
   const [isResting, setIsResting] = useState(false);
   const [restTimeRemaining, setRestTimeRemaining] = useState(0);
+  
+  // Workout progress state (tracked for session persistence)
+  const [workoutProgress, setWorkoutProgress] = useState({
+    currentStepIndex: 0,
+    workoutData: [],
+    elapsedTime: 0,
+    currentPhase: 'exercise', // 'warmup', 'exercise', 'cooldown', 'complete'
+  });
+
+  // Session state for persistence - memoized to prevent unnecessary saves
+  const sessionState = useMemo(() => ({
+    workoutPlan,
+    supersetConfig,
+    setsPerSuperset,
+    restDuration,
+    restTimeRemaining,
+    isResting,
+    progress: workoutProgress,
+    isMinimized,
+  }), [workoutPlan, supersetConfig, setsPerSuperset, restDuration, restTimeRemaining, isResting, workoutProgress, isMinimized]);
+
+  // Handle session restore
+  const handleSessionRestore = useCallback((savedState) => {
+    if (savedState?.state) {
+      const { restDuration: savedRestDuration, restTimeRemaining: savedRestTime, isResting: wasResting, progress } = savedState.state;
+      
+      // Restore rest timer state if applicable
+      if (savedRestDuration !== undefined) setRestDuration(savedRestDuration);
+      if (wasResting && savedRestTime > 0) {
+        setRestTimeRemaining(savedRestTime);
+        setIsResting(true);
+      }
+      
+      // Restore workout progress
+      if (progress) {
+        setWorkoutProgress(progress);
+      }
+    }
+  }, []);
+
+  // Use session persistence hook
+  useSessionPersistence({
+    sessionType: SessionTypes.WORKOUT,
+    sessionState,
+    isActive: open,
+    onRestore: handleSessionRestore,
+  });
+
+  // Callback to update workout progress from WorkoutScreen
+  const handleProgressUpdate = useCallback((progressData) => {
+    setWorkoutProgress(prev => ({
+      ...prev,
+      ...progressData,
+    }));
+  }, []);
+
+  // Clear session state when workout completes
+  const handleWorkoutComplete = useCallback((workoutData) => {
+    clearSessionState();
+    onComplete(workoutData);
+  }, [onComplete]);
+
+  // Clear session state when user exits
+  const handleWorkoutExit = useCallback(() => {
+    clearSessionState();
+    onExit();
+  }, [onExit]);
+
+  // Check for existing session on mount
+  useEffect(() => {
+    if (open) {
+      const savedSession = loadSessionState();
+      if (savedSession?.type === SessionTypes.WORKOUT && savedSession.isActive) {
+        handleSessionRestore(savedSession);
+      }
+    }
+  }, [open, handleSessionRestore]);
 
   useEffect(() => {
     // Setup visibility change handler for wake lock
@@ -325,11 +403,13 @@ const WorkoutScreenModal = ({
         }}>
           <WorkoutScreen
             workoutPlan={workoutPlan}
-            onComplete={onComplete}
-            onExit={onExit}
+            onComplete={handleWorkoutComplete}
+            onExit={handleWorkoutExit}
             supersetConfig={supersetConfig}
             setsPerSuperset={setsPerSuperset}
             onSetComplete={handleStartRestTimer}
+            onProgressUpdate={handleProgressUpdate}
+            initialProgress={workoutProgress}
           />
         </DialogContent>
       </Dialog>

@@ -237,43 +237,43 @@ const ExerciseCard = memo(({
     >
       {/* LANDSCAPE TABLET: Horizontal layout with action buttons on right */}
       {shouldUseTwoColumns ? (
-        <Box sx={{ display: 'flex', flexDirection: 'row', height: '100%', gap: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'row', height: '100%', gap: 2 }}>
           {/* Left section: Exercise content */}
           <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            {/* Top Header Bar - Compact */}
+            {/* Top Header Bar */}
             <Box sx={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
               alignItems: 'center',
-              mb: 0.5,
+              mb: 1,
               flexShrink: 0,
             }}>
               {elapsedTime !== null && (
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '1rem' }}>
                   {formatTime(elapsedTime)}
                 </Typography>
               )}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Chip label={`Set ${setNumber}/${totalSets}`} color="primary" size="small" sx={{ fontWeight: 600, fontSize: '0.75rem' }} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Chip label={`Set ${setNumber}/${totalSets}`} color="primary" size="medium" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
+                <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '1rem' }}>
                   {currentStep}/{totalSteps}
                 </Typography>
                 {onToggleFavorite && (
-                  <IconButton onClick={onToggleFavorite} size="small" sx={{ color: isFavorite ? 'warning.main' : 'action.active', p: 0.3 }} aria-label="Toggle favorite">
-                    {isFavorite ? <Star sx={{ fontSize: 18 }} /> : <StarBorder sx={{ fontSize: 18 }} />}
+                  <IconButton onClick={onToggleFavorite} size="small" sx={{ color: isFavorite ? 'warning.main' : 'action.active', p: 0.5 }} aria-label="Toggle favorite">
+                    {isFavorite ? <Star sx={{ fontSize: 22 }} /> : <StarBorder sx={{ fontSize: 22 }} />}
                   </IconButton>
                 )}
               </Box>
             </Box>
 
-            {/* Exercise Name and Demo Image - Side by Side */}
+            {/* Exercise Name and Demo Image - Side by Side with larger image */}
             <Box sx={{ 
               display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              gap: 1,
+              gridTemplateColumns: '1.5fr 1fr',
+              gap: 2,
               flex: 1,
               minHeight: 0,
-              mb: 0.5,
+              mb: 1,
             }}>
               {/* Exercise Name */}
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -283,9 +283,9 @@ const ExerciseCard = memo(({
                     fontWeight: '700 !important',
                     color: 'primary.main',
                     textAlign: 'left',
-                    lineHeight: '1.1 !important',
+                    lineHeight: '1.15 !important',
                     fontFamily: "'Montserrat', sans-serif !important",
-                    fontSize: { sm: '1.5rem !important', md: '2rem !important' },
+                    fontSize: { sm: '1.75rem !important', md: '2.25rem !important' },
                     display: '-webkit-box',
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
@@ -298,10 +298,10 @@ const ExerciseCard = memo(({
                 </Typography>
               </Box>
 
-              {/* Demo Image - Compact */}
+              {/* Demo Image - Larger for better visibility */}
               <Box sx={{ 
-                width: { sm: '100px', md: '120px' },
-                height: { sm: '80px', md: '100px' },
+                width: '100%',
+                height: { sm: '150px', md: '180px' },
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
@@ -362,21 +362,21 @@ const ExerciseCard = memo(({
               </Alert>
             )}
 
-            {/* Input Form with Target Info inline */}
-            <Box component="form" onSubmit={handleSubmit} sx={{ flexShrink: 0 }}>
-              {/* Weight Row - Target and Input on same line */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', minWidth: '80px' }}>
+            {/* Input Form with Target Info - Enhanced for tablet landscape */}
+            <Box component="form" onSubmit={handleSubmit} sx={{ flexShrink: 0, mt: 1 }}>
+              {/* Weight Row - Enhanced spacing and sizing */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', minWidth: '100px', fontSize: '0.95rem' }}>
                   Weight {lastWeight !== null && <span style={{ color: theme.palette.primary.main }}>({lastWeight})</span>}:
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <IconButton 
-                    size="small" 
+                    size="medium" 
                     onClick={() => setWeight(Math.max(0, (parseFloat(weight) || 0) - 2.5))}
                     disabled={setLogged}
-                    sx={{ border: '1px solid', borderColor: 'divider', width: '24px', height: '24px', minWidth: '24px' }}
+                    sx={{ border: '2px solid', borderColor: 'divider', width: '40px', height: '40px', minWidth: '40px' }}
                   >
-                    <Remove sx={{ fontSize: 14 }} />
+                    <Remove sx={{ fontSize: 20 }} />
                   </IconButton>
                   <TextField 
                     type="number" 
@@ -386,34 +386,34 @@ const ExerciseCard = memo(({
                     inputMode="decimal"
                     size="small"
                     sx={{ 
-                      width: '50px',
-                      '& input': { textAlign: 'center', padding: '4px 2px', fontSize: '0.85rem', fontWeight: 600, MozAppearance: 'textfield', '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 } },
+                      width: '80px',
+                      '& input': { textAlign: 'center', padding: '10px 6px', fontSize: '1.1rem', fontWeight: 600, MozAppearance: 'textfield', '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 } },
                     }}
                   />
                   <IconButton 
-                    size="small" 
+                    size="medium" 
                     onClick={() => setWeight((parseFloat(weight) || 0) + 2.5)}
                     disabled={setLogged}
-                    sx={{ border: '1px solid', borderColor: 'divider', width: '24px', height: '24px', minWidth: '24px' }}
+                    sx={{ border: '2px solid', borderColor: 'divider', width: '40px', height: '40px', minWidth: '40px' }}
                   >
-                    <Add sx={{ fontSize: 14 }} />
+                    <Add sx={{ fontSize: 20 }} />
                   </IconButton>
                 </Box>
               </Box>
 
-              {/* Reps Row - Target and Input on same line */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', minWidth: '80px' }}>
+              {/* Reps Row - Enhanced spacing and sizing */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', minWidth: '100px', fontSize: '0.95rem' }}>
                   Reps {lastReps !== null && <span style={{ color: theme.palette.primary.main }}>({lastReps})</span>}:
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <IconButton 
-                    size="small" 
+                    size="medium" 
                     onClick={() => setReps(Math.max(0, (parseInt(reps) || 0) - 1))}
                     disabled={setLogged}
-                    sx={{ border: '1px solid', borderColor: 'divider', width: '24px', height: '24px', minWidth: '24px' }}
+                    sx={{ border: '2px solid', borderColor: 'divider', width: '40px', height: '40px', minWidth: '40px' }}
                   >
-                    <Remove sx={{ fontSize: 14 }} />
+                    <Remove sx={{ fontSize: 20 }} />
                   </IconButton>
                   <TextField 
                     type="number" 
@@ -423,25 +423,25 @@ const ExerciseCard = memo(({
                     inputMode="numeric"
                     size="small"
                     sx={{ 
-                      width: '40px',
-                      '& input': { textAlign: 'center', padding: '4px 2px', fontSize: '0.85rem', fontWeight: 600, MozAppearance: 'textfield', '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 } },
+                      width: '70px',
+                      '& input': { textAlign: 'center', padding: '10px 6px', fontSize: '1.1rem', fontWeight: 600, MozAppearance: 'textfield', '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 } },
                     }}
                   />
                   <IconButton 
-                    size="small" 
+                    size="medium" 
                     onClick={() => setReps((parseInt(reps) || 0) + 1)}
                     disabled={setLogged}
-                    sx={{ border: '1px solid', borderColor: 'divider', width: '24px', height: '24px', minWidth: '24px' }}
+                    sx={{ border: '2px solid', borderColor: 'divider', width: '40px', height: '40px', minWidth: '40px' }}
                   >
-                    <Add sx={{ fontSize: 14 }} />
+                    <Add sx={{ fontSize: 20 }} />
                   </IconButton>
                 </Box>
               </Box>
 
-              {/* Navigation Buttons */}
-              <Stack direction="row" spacing={1}>
-                {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '36px', fontSize: '0.85rem' }}>Back</Button>}
-                <Button type="submit" variant="contained" fullWidth={!showBack} disabled={setLogged} endIcon={<ArrowForward />} sx={{ minHeight: '36px', fontSize: '0.85rem' }}>
+              {/* Navigation Buttons - Enhanced size */}
+              <Stack direction="row" spacing={1.5}>
+                {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '44px', fontSize: '0.95rem', fontWeight: 600 }}>Back</Button>}
+                <Button type="submit" variant="contained" fullWidth={!showBack} disabled={setLogged} endIcon={<ArrowForward />} sx={{ minHeight: '44px', fontSize: '0.95rem', fontWeight: 600 }}>
                   {setLogged ? 'Logging...' : 'Next'}
                 </Button>
               </Stack>
@@ -452,9 +452,9 @@ const ExerciseCard = memo(({
           <Box sx={{ 
             display: 'flex', 
             flexDirection: 'column', 
-            gap: 0.5,
+            gap: 1,
             justifyContent: 'flex-start',
-            pt: 0.5,
+            pt: 1,
           }}>
             <IconButton 
               component="a" 
@@ -462,52 +462,52 @@ const ExerciseCard = memo(({
               target="_blank" 
               rel="noopener noreferrer" 
               sx={{ 
-                minWidth: '32px', minHeight: '32px', 
-                color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '6px',
+                minWidth: '44px', minHeight: '44px', 
+                color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px',
                 '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)' }
               }} 
               aria-label={`Search for ${exerciseName} form guide`}
             >
-              <HelpOutline sx={{ fontSize: 16 }} />
+              <HelpOutline sx={{ fontSize: 22 }} />
             </IconButton>
             {onSkip && (
               <IconButton 
                 onClick={onSkip} 
                 sx={{ 
-                  minWidth: '32px', minHeight: '32px', 
-                  color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '6px',
+                  minWidth: '44px', minHeight: '44px', 
+                  color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px',
                   '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)' }
                 }} 
                 aria-label="Skip exercise"
               >
-                <SkipNext sx={{ fontSize: 16 }} />
+                <SkipNext sx={{ fontSize: 22 }} />
               </IconButton>
             )}
             {onSwap && (
               <IconButton 
                 onClick={onSwap} 
                 sx={{ 
-                  minWidth: '32px', minHeight: '32px', 
-                  color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '6px',
+                  minWidth: '44px', minHeight: '44px', 
+                  color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px',
                   '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)' }
                 }} 
                 aria-label="Swap exercise"
               >
-                <SwapHoriz sx={{ fontSize: 16 }} />
+                <SwapHoriz sx={{ fontSize: 22 }} />
               </IconButton>
             )}
             {onExit && (
               <IconButton 
                 onClick={handleEndWorkoutClick} 
                 sx={{ 
-                  minWidth: '32px', minHeight: '32px', 
-                  color: 'error.main', border: '2px solid', borderColor: 'error.main', borderRadius: '6px',
+                  minWidth: '44px', minHeight: '44px', 
+                  color: 'error.main', border: '2px solid', borderColor: 'error.main', borderRadius: '8px',
                   '&:hover': { backgroundColor: 'rgba(239, 83, 80, 0.08)' },
                   mt: 'auto', // Push to bottom
                 }} 
                 aria-label="End workout"
               >
-                <ExitToApp sx={{ fontSize: 16 }} />
+                <ExitToApp sx={{ fontSize: 22 }} />
               </IconButton>
             )}
           </Box>

@@ -34,12 +34,12 @@ const spin = keyframes`
  * Displays exercises in superset format, tracks time, and collects set data
  * Supports mid-workout exercise swapping and adding extra sets
  */
-const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, savedWorkoutId = null, savedWorkoutName = null, onSetComplete = null }) => {
+const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, savedWorkoutId = null, savedWorkoutName = null, onSetComplete = null, onProgressUpdate = null, initialProgress = null }) => {
   // Mutable workout plan that can be modified during workout
   const [workoutPlan, setWorkoutPlan] = useState(initialWorkoutPlan);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [workoutData, setWorkoutData] = useState([]);
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState(initialProgress?.currentStepIndex ?? 0);
+  const [workoutData, setWorkoutData] = useState(initialProgress?.workoutData ?? []);
+  const [elapsedTime, setElapsedTime] = useState(initialProgress?.elapsedTime ?? 0);
   const [prevWeight, setPrevWeight] = useState(null);
   const [targetReps, setTargetReps] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -84,8 +84,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const [demoImageSrc, setDemoImageSrc] = useState(null);
   const [imageError, setImageError] = useState(false);
   
-  // Stretching phase state
-  const [currentPhase, setCurrentPhase] = useState('warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
+  // Stretching phase state - initialize from saved progress if available
+  const [currentPhase, setCurrentPhase] = useState(initialProgress?.currentPhase ?? 'warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
   const [warmupCompleted, setWarmupCompleted] = useState(false);
   const [warmupSkipped, setWarmupSkipped] = useState(false);
   const [cooldownCompleted, setCooldownCompleted] = useState(false);
@@ -97,6 +97,24 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const isTabletOrLarger = useMediaQuery(theme.breakpoints.up('sm'));
   const isLandscape = useMediaQuery('(orientation: landscape)');
   const shouldUseTwoColumns = isTabletOrLarger && isLandscape;
+  
+  // Track workoutData length to avoid excessive re-renders 
+  // (workoutData array changes frequently during workout)
+  const workoutDataLength = workoutData.length;
+  
+  // Report progress updates to parent for session persistence
+  // Use workoutDataLength instead of workoutData to reduce re-renders
+  useEffect(() => {
+    if (onProgressUpdate) {
+      onProgressUpdate({
+        currentStepIndex,
+        workoutData,
+        elapsedTime,
+        currentPhase,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStepIndex, workoutDataLength, elapsedTime, currentPhase, onProgressUpdate]);
 
   // Generate workout sequence (supersets) - memoized to prevent recalculation
   // Now supports custom superset configurations like [2, 3, 2, 3]
@@ -1598,55 +1616,60 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                 </>
               )}
               
-              {/* Tablet Landscape: Single compact row with target info, inputs, and nav buttons */}
+              {/* Tablet Landscape: Enhanced layout with larger inputs and better spacing */}
               {shouldUseTwoColumns && (
                 <Box sx={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: 1, 
+                  gap: 2, 
                   flexWrap: 'wrap',
                   justifyContent: 'space-between',
-                  px: 1,
-                  mt: 0.5,
+                  px: 2,
+                  py: 1.5,
+                  mt: 1,
+                  bgcolor: 'background.paper',
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: 'divider',
                 }}>
-                  {/* Target/Last info - compact */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 'fit-content' }}>
+                  {/* Target/Last info - more visible */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 'fit-content', gap: 0.5 }}>
                     {(prevWeight !== null || targetReps !== null) && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500, fontSize: '0.65rem' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600, fontSize: '0.85rem' }}>
                           Target: {prevWeight ?? '–'} × {targetReps ?? '–'}
                         </Typography>
                         <IconButton
                           size="small"
                           onClick={handleOpenTargetRepsDialog}
-                          sx={{ color: 'primary.main', p: 0, minWidth: 16, minHeight: 16 }}
+                          sx={{ color: 'primary.main', p: 0.25, minWidth: 24, minHeight: 24 }}
                           aria-label="Change target reps"
                         >
-                          <Settings sx={{ fontSize: 12 }} />
+                          <Settings sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Box>
                     )}
                     {lastPerformance[exerciseName] && (
-                      <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600, fontSize: '0.65rem' }}>
+                      <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600, fontSize: '0.85rem' }}>
                         Last: {lastPerformance[exerciseName].weight} × {lastPerformance[exerciseName].reps}
                       </Typography>
                     )}
                   </Box>
                   
-                  {/* Weight Input - compact */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', mr: 0.25 }}>Wt:</Typography>
+                  {/* Weight Input - larger and more accessible */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 600, minWidth: '50px' }}>Weight:</Typography>
                     <IconButton 
                       onClick={() => adjustWeight(-2.5)}
                       disabled={isBodyweight}
-                      size="small"
+                      size="medium"
                       sx={{ 
                         bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
-                        minWidth: '24px', minHeight: '24px', width: '24px', height: '24px', p: 0.25,
+                        minWidth: '40px', minHeight: '40px', width: '40px', height: '40px',
                         '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
                       }}
                     >
-                      <Remove sx={{ fontSize: 12 }} />
+                      <Remove sx={{ fontSize: 20 }} />
                     </IconButton>
                     <input
                       type="tel"
@@ -1657,8 +1680,14 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                       disabled={isBodyweight}
                       aria-label="Weight"
                       style={{
-                        width: '40px', padding: '4px 2px', minHeight: '24px', borderRadius: '4px',
-                        border: '1px solid var(--color-border)', fontSize: '0.75rem', textAlign: 'center',
+                        width: '70px', 
+                        padding: '10px 8px', 
+                        minHeight: '40px', 
+                        borderRadius: '8px',
+                        border: '2px solid var(--color-border)', 
+                        fontSize: '1.1rem', 
+                        fontWeight: 600,
+                        textAlign: 'center',
                         backgroundColor: isBodyweight ? 'var(--color-disabled)' : 'var(--color-surface)',
                         color: isBodyweight ? 'var(--color-text-disabled)' : 'var(--color-text)',
                       }}
@@ -1666,30 +1695,30 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                     <IconButton 
                       onClick={() => adjustWeight(2.5)}
                       disabled={isBodyweight}
-                      size="small"
+                      size="medium"
                       sx={{ 
                         bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.hover',
-                        minWidth: '24px', minHeight: '24px', width: '24px', height: '24px', p: 0.25,
+                        minWidth: '40px', minHeight: '40px', width: '40px', height: '40px',
                         '&:hover': { bgcolor: isBodyweight ? 'action.disabledBackground' : 'action.selected' }
                       }}
                     >
-                      <Add sx={{ fontSize: 12 }} />
+                      <Add sx={{ fontSize: 20 }} />
                     </IconButton>
                   </Box>
                   
-                  {/* Reps Input - compact */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', mr: 0.25 }}>Reps:</Typography>
+                  {/* Reps Input - larger and more accessible */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 600, minWidth: '40px' }}>Reps:</Typography>
                     <IconButton 
                       onClick={() => adjustReps(-1)}
-                      size="small"
+                      size="medium"
                       sx={{ 
                         bgcolor: 'action.hover',
-                        minWidth: '24px', minHeight: '24px', width: '24px', height: '24px', p: 0.25,
+                        minWidth: '40px', minHeight: '40px', width: '40px', height: '40px',
                         '&:hover': { bgcolor: 'action.selected' }
                       }}
                     >
-                      <Remove sx={{ fontSize: 12 }} />
+                      <Remove sx={{ fontSize: 20 }} />
                     </IconButton>
                     <input
                       type="number"
@@ -1699,44 +1728,51 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                       placeholder="–"
                       aria-label="Reps"
                       style={{
-                        width: '32px', padding: '4px 2px', minHeight: '24px', borderRadius: '4px',
-                        border: '1px solid var(--color-border)', fontSize: '0.75rem', textAlign: 'center',
-                        backgroundColor: 'var(--color-surface)', color: 'var(--color-text)',
+                        width: '60px', 
+                        padding: '10px 8px', 
+                        minHeight: '40px', 
+                        borderRadius: '8px',
+                        border: '2px solid var(--color-border)', 
+                        fontSize: '1.1rem', 
+                        fontWeight: 600,
+                        textAlign: 'center',
+                        backgroundColor: 'var(--color-surface)', 
+                        color: 'var(--color-text)',
                       }}
                     />
                     <IconButton 
                       onClick={() => adjustReps(1)}
-                      size="small"
+                      size="medium"
                       sx={{ 
                         bgcolor: 'action.hover',
-                        minWidth: '24px', minHeight: '24px', width: '24px', height: '24px', p: 0.25,
+                        minWidth: '40px', minHeight: '40px', width: '40px', height: '40px',
                         '&:hover': { bgcolor: 'action.selected' }
                       }}
                     >
-                      <Add sx={{ fontSize: 12 }} />
+                      <Add sx={{ fontSize: 20 }} />
                     </IconButton>
                   </Box>
                   
-                  {/* Nav Buttons - compact */}
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  {/* Nav Buttons - more prominent */}
+                  <Box sx={{ display: 'flex', gap: 1 }}>
                     {currentStepIndex > 0 && (
                       <Button
                         type="button"
                         variant="outlined"
-                        size="small"
+                        size="medium"
                         onClick={handleBack}
-                        sx={{ minHeight: '28px', fontSize: '0.7rem', px: 1 }}
+                        sx={{ minHeight: '44px', fontSize: '0.95rem', px: 2, fontWeight: 600 }}
                       >
-                        <ArrowBack sx={{ fontSize: 14, mr: 0.25 }} /> Back
+                        <ArrowBack sx={{ fontSize: 18, mr: 0.5 }} /> Back
                       </Button>
                     )}
                     <Button
                       type="submit"
                       variant="contained"
-                      size="small"
-                      sx={{ minHeight: '28px', fontSize: '0.7rem', px: 1 }}
+                      size="medium"
+                      sx={{ minHeight: '44px', fontSize: '0.95rem', px: 3, fontWeight: 600 }}
                     >
-                      Next <ArrowForward sx={{ fontSize: 14, ml: 0.25 }} />
+                      Next <ArrowForward sx={{ fontSize: 18, ml: 0.5 }} />
                     </Button>
                   </Box>
                 </Box>
@@ -1972,6 +2008,13 @@ WorkoutScreen.propTypes = {
   savedWorkoutId: PropTypes.string,
   savedWorkoutName: PropTypes.string,
   onSetComplete: PropTypes.func,
+  onProgressUpdate: PropTypes.func,
+  initialProgress: PropTypes.shape({
+    currentStepIndex: PropTypes.number,
+    workoutData: PropTypes.array,
+    elapsedTime: PropTypes.number,
+    currentPhase: PropTypes.string,
+  }),
 };
 
 export default WorkoutScreen;

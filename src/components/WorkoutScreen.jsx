@@ -98,7 +98,12 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const isLandscape = useMediaQuery('(orientation: landscape)');
   const shouldUseTwoColumns = isTabletOrLarger && isLandscape;
   
+  // Track workoutData length to avoid excessive re-renders 
+  // (workoutData array changes frequently during workout)
+  const workoutDataLength = workoutData.length;
+  
   // Report progress updates to parent for session persistence
+  // Use workoutDataLength instead of workoutData to reduce re-renders
   useEffect(() => {
     if (onProgressUpdate) {
       onProgressUpdate({
@@ -108,7 +113,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
         currentPhase,
       });
     }
-  }, [currentStepIndex, workoutData, elapsedTime, currentPhase, onProgressUpdate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStepIndex, workoutDataLength, elapsedTime, currentPhase, onProgressUpdate]);
 
   // Generate workout sequence (supersets) - memoized to prevent recalculation
   // Now supports custom superset configurations like [2, 3, 2, 3]

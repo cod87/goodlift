@@ -11,6 +11,8 @@ import { useEffect, useCallback, useRef } from 'react';
 // Storage key for active session state
 const SESSION_STATE_KEY = 'goodlift_active_session';
 const SESSION_EXPIRY_MS = 4 * 60 * 60 * 1000; // 4 hours - expire stale sessions
+// Delay before clearing session to allow completion handlers to finish saving
+const SESSION_CLEAR_DELAY_MS = 500;
 
 /**
  * Session types that can be persisted
@@ -214,10 +216,10 @@ export const useSessionPersistence = ({
   // Clear state when session ends
   useEffect(() => {
     if (!isActive) {
-      // Small delay to allow any final state to be saved
+      // Allow final state saves before clearing (e.g., for completion handlers)
       const timeoutId = setTimeout(() => {
         clearSessionState();
-      }, 500);
+      }, SESSION_CLEAR_DELAY_MS);
       return () => clearTimeout(timeoutId);
     }
   }, [isActive]);

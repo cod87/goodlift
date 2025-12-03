@@ -49,22 +49,30 @@ const WorkoutScreenModal = ({
     isMinimized,
   }), [workoutPlan, supersetConfig, setsPerSuperset, restDuration, restTimeRemaining, isResting, workoutProgress, isMinimized]);
 
-  // Handle session restore
+  // Handle session restore with validation
   const handleSessionRestore = useCallback((savedState) => {
-    if (savedState?.state) {
-      const { restDuration: savedRestDuration, restTimeRemaining: savedRestTime, isResting: wasResting, progress } = savedState.state;
-      
-      // Restore rest timer state if applicable
-      if (savedRestDuration !== undefined) setRestDuration(savedRestDuration);
-      if (wasResting && savedRestTime > 0) {
-        setRestTimeRemaining(savedRestTime);
-        setIsResting(true);
-      }
-      
-      // Restore workout progress
-      if (progress) {
-        setWorkoutProgress(progress);
-      }
+    // Validate saved state structure before destructuring
+    if (!savedState || typeof savedState !== 'object' || !savedState.state) {
+      return;
+    }
+    
+    const state = savedState.state;
+    
+    // Restore rest timer state if applicable (with type validation)
+    if (typeof state.restDuration === 'number') {
+      setRestDuration(state.restDuration);
+    }
+    if (state.isResting && typeof state.restTimeRemaining === 'number' && state.restTimeRemaining > 0) {
+      setRestTimeRemaining(state.restTimeRemaining);
+      setIsResting(true);
+    }
+    
+    // Restore workout progress (with structure validation)
+    if (state.progress && typeof state.progress === 'object') {
+      setWorkoutProgress(prev => ({
+        ...prev,
+        ...state.progress,
+      }));
     }
   }, []);
 

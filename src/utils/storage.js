@@ -20,6 +20,7 @@ import {
   loadUserDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
+import { normalizeWorkoutExercises } from './exerciseNameNormalizer';
 
 /**
  * Storage module for managing workout data in localStorage and Firebase
@@ -863,32 +864,39 @@ export const updateCardioSession = async (sessionId, updatedData) => {
 
 /**
  * Get favorite workouts from Firebase (if authenticated) or localStorage
+ * Normalizes exercise names to movement-first format for consistency
  * @returns {Promise<Array>} Array of favorite workout objects
  */
 export const getFavoriteWorkouts = async () => {
   try {
+    let favorites = [];
+    
     // Check if in guest mode first
     if (isGuestMode()) {
-      return getGuestData('favorite_workouts') || [];
-    }
-
-    // Try Firebase first if user is authenticated
-    if (currentUserId) {
+      favorites = getGuestData('favorite_workouts') || [];
+    } else if (currentUserId) {
+      // Try Firebase first if user is authenticated
       try {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
         if (firebaseData?.favoriteWorkouts) {
           // Update localStorage cache for offline access
           localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(firebaseData.favoriteWorkouts));
-          return firebaseData.favoriteWorkouts;
+          favorites = firebaseData.favoriteWorkouts;
         }
       } catch (error) {
         console.error('Firebase fetch failed for favorite workouts, using localStorage:', error);
+        // Fallback to localStorage
+        const stored = localStorage.getItem(KEYS.FAVORITE_WORKOUTS);
+        favorites = stored ? JSON.parse(stored) : [];
       }
+    } else {
+      // Fallback to localStorage
+      const stored = localStorage.getItem(KEYS.FAVORITE_WORKOUTS);
+      favorites = stored ? JSON.parse(stored) : [];
     }
     
-    // Fallback to localStorage
-    const favorites = localStorage.getItem(KEYS.FAVORITE_WORKOUTS);
-    return favorites ? JSON.parse(favorites) : [];
+    // Normalize exercise names to movement-first format
+    return favorites.map(workout => normalizeWorkoutExercises(workout));
   } catch (error) {
     console.error('Error reading favorite workouts:', error);
     return [];
@@ -1961,31 +1969,38 @@ export const deleteHiitPreset = async (presetId) => {
 
 /**
  * Get saved workouts from localStorage
+ * Normalizes exercise names to movement-first format for consistency
  * @returns {Promise<Array>} Array of saved workout objects
  */
 export const getSavedWorkouts = async () => {
   try {
+    let workouts = [];
+    
     if (isGuestMode()) {
-      const guestData = getGuestData('saved_workouts');
-      return guestData || [];
-    }
-
-    // Try Firebase first if user is authenticated
-    if (currentUserId) {
+      workouts = getGuestData('saved_workouts') || [];
+    } else if (currentUserId) {
+      // Try Firebase first if user is authenticated
       try {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
         if (firebaseData?.savedWorkouts) {
           // Update localStorage cache for offline access
           localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(firebaseData.savedWorkouts));
-          return firebaseData.savedWorkouts;
+          workouts = firebaseData.savedWorkouts;
         }
       } catch (error) {
         console.error('Firebase fetch failed, using localStorage:', error);
+        // Fallback to localStorage
+        const stored = localStorage.getItem(KEYS.SAVED_WORKOUTS);
+        workouts = stored ? JSON.parse(stored) : [];
       }
+    } else {
+      // Fallback to localStorage
+      const stored = localStorage.getItem(KEYS.SAVED_WORKOUTS);
+      workouts = stored ? JSON.parse(stored) : [];
     }
 
-    const workouts = localStorage.getItem(KEYS.SAVED_WORKOUTS);
-    return workouts ? JSON.parse(workouts) : [];
+    // Normalize exercise names to movement-first format
+    return workouts.map(workout => normalizeWorkoutExercises(workout));
   } catch (error) {
     console.error('Error reading saved workouts:', error);
     return [];

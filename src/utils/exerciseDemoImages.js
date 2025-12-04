@@ -92,9 +92,13 @@ export const normalizeExerciseName = (exerciseName) => {
   
   // Handle the new "Movement, Equipment" format (e.g., "Bench Press, Barbell" -> "Barbell Bench Press")
   // This converts it back to the old format for image matching
-  if (name.includes(', ')) {
-    const [movement, equipment] = name.split(', ');
-    if (equipment && movement) {
+  // Only process if there's exactly one ", " separator and it produces valid parts
+  const commaIndex = name.lastIndexOf(', ');
+  if (commaIndex > 0 && commaIndex < name.length - 2) {
+    const movement = name.substring(0, commaIndex).trim();
+    const equipment = name.substring(commaIndex + 2).trim();
+    // Only transform if both parts are non-empty and equipment doesn't contain another comma
+    if (movement && equipment && !equipment.includes(',')) {
       name = `${equipment} ${movement}`;
     }
   }

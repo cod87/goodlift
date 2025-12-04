@@ -80,6 +80,7 @@ const AVAILABLE_DEMO_IMAGES = [
 /**
  * Normalizes an exercise name to match the demo image filename pattern
  * Converts to lowercase, replaces spaces with hyphens, removes special chars
+ * Handles the new "Movement, Equipment" naming format by converting to "equipment-movement"
  * 
  * @param {string} exerciseName - The exercise name to normalize
  * @returns {string} Normalized filename (without extension)
@@ -87,9 +88,23 @@ const AVAILABLE_DEMO_IMAGES = [
 export const normalizeExerciseName = (exerciseName) => {
   if (!exerciseName) return '';
   
-  return exerciseName
+  let name = exerciseName.trim();
+  
+  // Handle the new "Movement, Equipment" format (e.g., "Bench Press, Barbell" -> "Barbell Bench Press")
+  // This converts it back to the old format for image matching
+  // Only process if there's exactly one ", " separator and it produces valid parts
+  const commaIndex = name.lastIndexOf(', ');
+  if (commaIndex > 0 && commaIndex < name.length - 2) {
+    const movement = name.substring(0, commaIndex).trim();
+    const equipment = name.substring(commaIndex + 2).trim();
+    // Only transform if both parts are non-empty and equipment doesn't contain another comma
+    if (movement && equipment && !equipment.includes(',')) {
+      name = `${equipment} ${movement}`;
+    }
+  }
+  
+  return name
     .toLowerCase()
-    .trim()
     // Replace multiple spaces with single space
     .replace(/\s+/g, ' ')
     // Replace spaces with hyphens

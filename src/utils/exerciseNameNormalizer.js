@@ -15,7 +15,6 @@
  */
 const OLD_TO_NEW_NAME_MAP = {
   // Barbell exercises
-  'Barbell Arnold Press': 'Arnold Press, Dumbbell',
   'Barbell Belt Squat': 'Belt Squat, Barbell',
   'Barbell Bench Press': 'Bench Press, Barbell',
   'Barbell Bent-Over Row': 'Bent-Over Row, Barbell',

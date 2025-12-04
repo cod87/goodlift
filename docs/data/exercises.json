@@ -711,13 +711,13 @@
   },
     {
     "Exercise Name": "Dumbbell Squat",
+    "Webp File": "dumbbell-squat.webp",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core",
+    "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-squat.webp"
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Dumbbell Step-Up",

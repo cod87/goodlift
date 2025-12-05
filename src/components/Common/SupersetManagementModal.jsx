@@ -8,7 +8,7 @@
  * - Exercises already in a superset show their group color
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, Button, List, Stack } from '@mui/material';
 import BottomSheet from './BottomSheet';
@@ -25,12 +25,14 @@ const SupersetManagementModal = ({
   // Track which exercises are selected in this modal
   const [selectedIndices, setSelectedIndices] = useState(new Set());
   
-  // Initialize with current exercise selected
-  useState(() => {
-    if (currentExerciseIndex !== undefined && currentExerciseIndex >= 0) {
+  // Initialize with current exercise selected when modal opens
+  useEffect(() => {
+    if (open && currentExerciseIndex !== undefined && currentExerciseIndex >= 0) {
       setSelectedIndices(new Set([currentExerciseIndex]));
+    } else if (!open) {
+      setSelectedIndices(new Set());
     }
-  });
+  }, [open, currentExerciseIndex]);
 
   // Calculate existing superset groups from exercises
   const supersetGroups = useMemo(() => {
@@ -51,7 +53,8 @@ const SupersetManagementModal = ({
   const getNextGroupId = () => {
     const existingIds = Object.keys(supersetGroups).map(Number);
     if (existingIds.length === 0) return 0;
-    return Math.max(...existingIds) + 1;
+    // Use reduce for better performance
+    return existingIds.reduce((max, id) => Math.max(max, id), 0) + 1;
   };
 
   const handleToggleExercise = (index) => {

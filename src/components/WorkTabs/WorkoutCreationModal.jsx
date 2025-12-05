@@ -41,7 +41,6 @@ import TargetRepsPicker from '../Common/TargetRepsPicker';
 import ExerciseListItem from '../Common/ExerciseListItem';
 import FilterBottomSheet from '../Common/FilterBottomSheet';
 import { DEFAULT_TARGET_REPS, getClosestValidTargetReps } from '../../utils/repRangeWeightAdjustment';
-import { getSupersetColor } from '../../utils/supersetColors';
 
 /**
  * Superset color palette - using shared superset colors

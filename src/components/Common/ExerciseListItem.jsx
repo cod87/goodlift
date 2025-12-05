@@ -2,23 +2,21 @@
  * ExerciseListItem - A minimalist exercise list item component
  * 
  * Displays:
- * - Mini demo image on the left
+ * - Mini demo image on the left (transparent background)
  * - Exercise name (larger text)
  * - Primary muscle below in smaller text
- * - Optional selection state with checkmark
+ * - Selection indicated by colored left bar and right indent
  * - Optional color-coded left bar for superset grouping
  */
 
 import { memo, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Typography, ListItemButton, Checkbox } from '@mui/material';
-import { Check } from '@mui/icons-material';
+import { Box, Typography, ListItemButton } from '@mui/material';
 
 const ExerciseListItem = memo(({
   exercise,
   selected = false,
   onClick,
-  showCheckbox = false,
   supersetColor = null,
   disabled = false,
 }) => {
@@ -41,6 +39,9 @@ const ExerciseListItem = memo(({
     }
   };
 
+  // Determine left bar color (selection takes priority, then superset)
+  const leftBarColor = selected ? 'primary.main' : supersetColor;
+
   return (
     <ListItemButton
       onClick={handleClick}
@@ -53,25 +54,23 @@ const ExerciseListItem = memo(({
         px: 1.5,
         borderRadius: 1,
         position: 'relative',
-        bgcolor: selected ? 'action.selected' : 'transparent',
+        bgcolor: 'background.paper', // White background
+        transition: 'all 0.2s ease',
+        // Colored left bar when selected or in superset
+        borderLeft: leftBarColor ? '4px solid' : '4px solid transparent',
+        borderLeftColor: leftBarColor || 'transparent',
+        // Indent to right when selected
+        ml: selected ? 1.5 : 0,
+        pl: selected ? 1.5 : 1.5,
         '&:hover': {
-          bgcolor: selected ? 'action.selected' : 'action.hover',
+          bgcolor: 'action.hover',
         },
-        // Superset color bar on left side
-        '&::before': supersetColor ? {
-          content: '""',
-          position: 'absolute',
-          left: 0,
-          top: 4,
-          bottom: 4,
-          width: '4px',
-          bgcolor: supersetColor,
-          borderRadius: '2px',
-        } : undefined,
-        pl: supersetColor ? 2.5 : 1.5,
+        '&:active': {
+          opacity: 0.8,
+        },
       }}
     >
-      {/* Demo Image */}
+      {/* Demo Image - transparent background */}
       <Box
         sx={{
           width: 56,
@@ -79,7 +78,7 @@ const ExerciseListItem = memo(({
           flexShrink: 0,
           borderRadius: 1,
           overflow: 'hidden',
-          bgcolor: 'background.default',
+          bgcolor: 'transparent',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -128,49 +127,6 @@ const ExerciseListItem = memo(({
           {equipment && ` • ${equipment}`}
         </Typography>
       </Box>
-      
-      {/* Selection Indicator */}
-      {showCheckbox && (
-        <Checkbox
-          checked={selected}
-          disabled={disabled}
-          icon={<Box sx={{ width: 24, height: 24, border: '2px solid', borderColor: 'divider', borderRadius: '50%' }} />}
-          checkedIcon={
-            <Box
-              sx={{
-                width: 24,
-                height: 24,
-                bgcolor: 'primary.main',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Check sx={{ fontSize: 16, color: 'white' }} />
-            </Box>
-          }
-          sx={{ p: 0, ml: 1 }}
-        />
-      )}
-      
-      {/* Simple check for non-checkbox selection */}
-      {!showCheckbox && selected && (
-        <Box
-          sx={{
-            width: 24,
-            height: 24,
-            bgcolor: 'primary.main',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <Check sx={{ fontSize: 16, color: 'white' }} />
-        </Box>
-      )}
     </ListItemButton>
   );
 });
@@ -181,7 +137,6 @@ ExerciseListItem.propTypes = {
   exercise: PropTypes.object.isRequired,
   selected: PropTypes.bool,
   onClick: PropTypes.func,
-  showCheckbox: PropTypes.bool,
   supersetColor: PropTypes.string,
   disabled: PropTypes.bool,
 };

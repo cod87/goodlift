@@ -14,8 +14,7 @@ import {
   TextField,
   InputAdornment,
   List,
-  Card,
-  CardContent,
+  ListItemButton,
   Stack,
   Chip,
   FormControl,
@@ -30,9 +29,8 @@ import {
   Search,
   FitnessCenter,
   AutoAwesome,
-  ArrowUpward,
-  ArrowDownward,
   FilterList,
+  MoreVert,
 } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 import { generateStandardWorkout } from '../../utils/workoutGenerator';
@@ -40,6 +38,8 @@ import { getAllCategories, filterExercisesByCategory } from '../../utils/muscleC
 import TargetRepsPicker from '../Common/TargetRepsPicker';
 import ExerciseListItem from '../Common/ExerciseListItem';
 import FilterBottomSheet from '../Common/FilterBottomSheet';
+import ExerciseOptionsMenu from '../Common/ExerciseOptionsMenu';
+import SupersetManagementModal from '../Common/SupersetManagementModal';
 import { DEFAULT_TARGET_REPS, getClosestValidTargetReps } from '../../utils/repRangeWeightAdjustment';
 
 /**
@@ -65,223 +65,202 @@ const getSupersetColorWithLight = (groupId) => {
 };
 
 /**
- * ExerciseItem - Exercise item in My Workout with arrow controls
+ * MyWorkoutExerciseItem - Exercise item in My Workout tab
+ * 
+ * Matches the style of ExerciseListItem from Exercises tab:
+ * - Mini demo image on the left
+ * - Exercise name (larger text)
+ * - Primary muscle below in smaller text
+ * - Color-coded left bar for superset grouping
+ * - Three-dot menu for actions (reorder, replace, superset, remove)
  */
-const ExerciseItem = ({ 
+const MyWorkoutExerciseItem = ({ 
   exercise, 
   index, 
-  myWorkout, 
-  setMyWorkout, 
-  selectedExercises, 
-  setSelectedExercises,
-  highlightedExercises,
-  onToggleHighlight,
-  currentSupersetNumber,
-  onDeselectFromSuperset,
-  onMoveUp,
-  onMoveDown,
-  canMoveUp,
-  canMoveDown,
-  isFirstInGroup,
+  onOpenOptionsMenu,
+  onUpdateReps,
+  onUpdateSets,
 }) => {
+  const [imageError, setImageError] = useState(false);
+  
+  const exerciseName = exercise?.['Exercise Name'] || exercise?.name || 'Unknown Exercise';
+  const primaryMuscle = exercise?.['Primary Muscle'] || '';
+  const webpFile = exercise?.['Webp File'];
+  const equipment = exercise?.['Equipment'] || '';
+  
+  // Construct image path
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const imagePath = webpFile 
+    ? `${baseUrl}demos/${webpFile}`
+    : `${baseUrl}work-icon.svg`;
+
   // Check if this exercise is in a superset group
   const supersetGroupId = exercise.supersetGroup;
   const isInSuperset = supersetGroupId !== null && supersetGroupId !== undefined;
   const supersetColor = getSupersetColorWithLight(supersetGroupId);
 
-  // Check if this exercise is highlighted
-  const isHighlighted = highlightedExercises.has(exercise['Exercise Name']);
-  const highlightColor = getSupersetColorWithLight(currentSupersetNumber);
-
-  // Handle clicking on the card to highlight
-  const handleCardClick = (e) => {
-    // Don't trigger if clicking on input fields or buttons
-    const target = e.target;
-    const isInput = target.tagName === 'INPUT' || target.closest('input');
-    const isButton = target.tagName === 'BUTTON' || target.closest('button');
-    
-    if (!isInput && !isButton) {
-      onToggleHighlight(exercise['Exercise Name']);
-    }
+  // Handle click on three-dot menu
+  const handleMenuClick = (e) => {
+    e.stopPropagation();
+    onOpenOptionsMenu(index, exercise);
   };
 
   return (
-    <Card
-      onClick={handleCardClick}
+    <Box
       sx={{
-        position: 'relative',
-        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.paper',
+        borderRadius: 1,
         border: '1px solid',
         borderColor: 'divider',
         borderLeft: '4px solid',
-        borderLeftColor: isInSuperset 
-          ? supersetColor?.main 
-          : (isHighlighted ? highlightColor?.main : 'divider'),
-        backgroundColor: isInSuperset 
-          ? supersetColor?.light 
-          : (isHighlighted ? highlightColor?.light : 'background.paper'),
-        transition: 'background-color 0.2s ease, border-color 0.2s ease, opacity 0.15s ease, margin-left 0.3s ease, padding-left 0.3s ease',
-        marginLeft: isHighlighted ? 3 : 0,
-        paddingLeft: isHighlighted ? 1 : 0,
-        '&:hover': {
-          opacity: 0.9,
-        },
-        '&:active': {
-          opacity: 0.8,
-        },
+        borderLeftColor: isInSuperset ? supersetColor?.main : 'divider',
+        overflow: 'hidden',
+        transition: 'all 0.2s ease',
+        mb: 1,
       }}
     >
-      <CardContent sx={{ pb: 2 }}>
-        <Stack direction="row" alignItems="center" spacing={2}>
-          {/* Arrow buttons - only show for the first exercise in a group or standalone exercises */}
-          {isFirstInGroup && (
-            <Stack direction="column" spacing={0.5}>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveUp();
-                }}
-                disabled={!canMoveUp}
-                sx={{ 
-                  padding: 0.5,
-                  '&:disabled': { opacity: 0.3 }
-                }}
-              >
-                <ArrowUpward fontSize="small" />
-              </IconButton>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveDown();
-                }}
-                disabled={!canMoveDown}
-                sx={{ 
-                  padding: 0.5,
-                  '&:disabled': { opacity: 0.3 }
-                }}
-              >
-                <ArrowDownward fontSize="small" />
-              </IconButton>
-            </Stack>
-          )}
-          <Box sx={{ flex: 1 }}>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                {exercise['Exercise Name']}
-              </Typography>
-              {isInSuperset && (
-                <Chip
-                  label={`Set ${supersetGroupId}`}
-                  size="small"
-                  onDelete={(e) => {
-                    e.stopPropagation();
-                    onDeselectFromSuperset(exercise['Exercise Name']);
-                  }}
-                  sx={{
-                    backgroundColor: supersetColor?.main,
-                    color: 'white',
-                    fontWeight: 'bold',
-                    '& .MuiChip-deleteIcon': {
-                      color: 'white',
-                      '&:hover': {
-                        color: 'rgba(255, 255, 255, 0.7)',
-                      },
-                    },
-                  }}
-                />
-              )}
-            </Stack>
-            <Typography variant="caption" color="text.secondary">
-              {exercise['Primary Muscle']} • {exercise.Equipment}
+      {/* Main row - exercise info + menu */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          py: 1.5,
+          px: 1.5,
+        }}
+      >
+        {/* Demo Image - transparent background */}
+        <Box
+          sx={{
+            width: 56,
+            height: 56,
+            flexShrink: 0,
+            borderRadius: 1,
+            overflow: 'hidden',
+            bgcolor: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Box
+            component="img"
+            src={imageError ? `${baseUrl}work-icon.svg` : imagePath}
+            alt={exerciseName}
+            onError={() => setImageError(true)}
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+            }}
+            loading="lazy"
+          />
+        </Box>
+        
+        {/* Exercise Info */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: 600,
+                fontSize: '1rem',
+                lineHeight: 1.3,
+                color: 'text.primary',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {exerciseName}
             </Typography>
-          </Box>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              const newSelected = new Set(selectedExercises);
-              newSelected.delete(exercise['Exercise Name']);
-              setSelectedExercises(newSelected);
-              setMyWorkout(myWorkout.filter(ex => 
-                ex['Exercise Name'] !== exercise['Exercise Name']
-              ));
+            {isInSuperset && (
+              <Chip
+                label={`Set ${supersetGroupId}`}
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: '0.7rem',
+                  backgroundColor: supersetColor?.main,
+                  color: 'white',
+                  fontWeight: 'bold',
+                }}
+              />
+            )}
+          </Stack>
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+              fontSize: '0.85rem',
+              lineHeight: 1.3,
+              mt: 0.25,
             }}
           >
-            <Close />
-          </IconButton>
-        </Stack>
+            {primaryMuscle}
+            {equipment && ` • ${equipment}`}
+          </Typography>
+        </Box>
         
-        {/* Exercise Configuration */}
-        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-          <FormControl size="small" sx={{ width: 80 }}>
-            <InputLabel>Sets</InputLabel>
-            <Select
-              label="Sets"
-              value={exercise.sets}
-              onChange={(e) => {
-                e.stopPropagation();
-                const newSets = parseInt(e.target.value);
-                const updated = [...myWorkout];
-                
-                // Check if this exercise is in a superset group
-                const supersetGroupId = exercise.supersetGroup;
-                if (supersetGroupId !== null && supersetGroupId !== undefined) {
-                  // Update all exercises in the same superset group
-                  updated.forEach((ex, i) => {
-                    if (ex.supersetGroup === supersetGroupId) {
-                      updated[i].sets = newSets;
-                    }
-                  });
-                } else {
-                  // Only update this exercise
-                  updated[index].sets = newSets;
-                }
-                
-                setMyWorkout(updated);
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MenuItem value={1}>1</MenuItem>
-              <MenuItem value={2}>2</MenuItem>
-              <MenuItem value={3}>3</MenuItem>
-              <MenuItem value={4}>4</MenuItem>
-            </Select>
-          </FormControl>
-          <TargetRepsPicker
-            value={typeof exercise.reps === 'number' ? getClosestValidTargetReps(exercise.reps) : DEFAULT_TARGET_REPS}
-            onChange={(newReps) => {
-              const updated = [...myWorkout];
-              updated[index].reps = newReps;
-              setMyWorkout(updated);
+        {/* Three-dot menu button */}
+        <IconButton
+          size="small"
+          onClick={handleMenuClick}
+          sx={{ color: 'text.secondary' }}
+        >
+          <MoreVert />
+        </IconButton>
+      </Box>
+      
+      {/* Exercise Configuration Row */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          px: 1.5,
+          pb: 1.5,
+          pt: 0,
+        }}
+      >
+        <FormControl size="small" sx={{ width: 80 }}>
+          <InputLabel>Sets</InputLabel>
+          <Select
+            label="Sets"
+            value={exercise.sets || 3}
+            onChange={(e) => {
+              e.stopPropagation();
+              onUpdateSets(index, parseInt(e.target.value));
             }}
-            compact
-            showLabel
-            label="Reps"
-          />
-        </Stack>
-      </CardContent>
-    </Card>
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MenuItem value={1}>1</MenuItem>
+            <MenuItem value={2}>2</MenuItem>
+            <MenuItem value={3}>3</MenuItem>
+            <MenuItem value={4}>4</MenuItem>
+            <MenuItem value={5}>5</MenuItem>
+          </Select>
+        </FormControl>
+        <TargetRepsPicker
+          value={typeof exercise.reps === 'number' ? getClosestValidTargetReps(exercise.reps) : DEFAULT_TARGET_REPS}
+          onChange={(newReps) => onUpdateReps(index, newReps)}
+          compact
+          showLabel
+          label="Reps"
+        />
+      </Box>
+    </Box>
   );
 };
 
-ExerciseItem.propTypes = {
+MyWorkoutExerciseItem.propTypes = {
   exercise: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
-  myWorkout: PropTypes.array.isRequired,
-  setMyWorkout: PropTypes.func.isRequired,
-  selectedExercises: PropTypes.instanceOf(Set).isRequired,
-  setSelectedExercises: PropTypes.func.isRequired,
-  highlightedExercises: PropTypes.instanceOf(Set).isRequired,
-  onToggleHighlight: PropTypes.func.isRequired,
-  currentSupersetNumber: PropTypes.number.isRequired,
-  onDeselectFromSuperset: PropTypes.func.isRequired,
-  onMoveUp: PropTypes.func.isRequired,
-  onMoveDown: PropTypes.func.isRequired,
-  canMoveUp: PropTypes.bool.isRequired,
-  canMoveDown: PropTypes.bool.isRequired,
-  isFirstInGroup: PropTypes.bool.isRequired,
+  onOpenOptionsMenu: PropTypes.func.isRequired,
+  onUpdateReps: PropTypes.func.isRequired,
+  onUpdateSets: PropTypes.func.isRequired,
 };
 
 /**
@@ -318,6 +297,14 @@ const WorkoutCreationModal = ({
   // Filter modal states
   const [equipmentFilterOpen, setEquipmentFilterOpen] = useState(false);
   const [muscleFilterOpen, setMuscleFilterOpen] = useState(false);
+  
+  // Exercise options menu states
+  const [optionsMenuOpen, setOptionsMenuOpen] = useState(false);
+  const [selectedExerciseIndex, setSelectedExerciseIndex] = useState(null);
+  const [selectedExerciseForMenu, setSelectedExerciseForMenu] = useState(null);
+  
+  // Superset management modal state
+  const [supersetModalOpen, setSupersetModalOpen] = useState(false);
 
   // Update currentSupersetNumber whenever myWorkout changes
   useEffect(() => {
@@ -449,28 +436,6 @@ const WorkoutCreationModal = ({
     
     setSelectedExercises(newSelected);
   };
-
-  // Toggle highlight for an exercise
-  const handleToggleHighlight = useCallback((exerciseName) => {
-    const newHighlighted = new Set(highlightedExercises);
-    if (newHighlighted.has(exerciseName)) {
-      newHighlighted.delete(exerciseName);
-    } else {
-      newHighlighted.add(exerciseName);
-    }
-    setHighlightedExercises(newHighlighted);
-  }, [highlightedExercises]);
-
-  // Deselect exercise from superset (remove superset group)
-  const handleDeselectFromSuperset = useCallback((exerciseName) => {
-    const updated = myWorkout.map(exercise => {
-      if (exercise['Exercise Name'] === exerciseName) {
-        return { ...exercise, supersetGroup: null };
-      }
-      return exercise;
-    });
-    setMyWorkout(updated);
-  }, [myWorkout]);
 
   // Lock in superset - assign highlighted exercises to current superset group
   const handleLockInSuperset = () => {
@@ -758,41 +723,109 @@ const WorkoutCreationModal = ({
     setGenerateCountDialogOpen(false);
   };
 
+  // Handle opening the options menu for an exercise
+  const handleOpenOptionsMenu = useCallback((index, exercise) => {
+    setSelectedExerciseIndex(index);
+    setSelectedExerciseForMenu(exercise);
+    setOptionsMenuOpen(true);
+  }, []);
+
+  // Handle closing the options menu
+  const handleCloseOptionsMenu = useCallback(() => {
+    setOptionsMenuOpen(false);
+    setSelectedExerciseIndex(null);
+    setSelectedExerciseForMenu(null);
+  }, []);
+
+  // Handle removing exercise from options menu
+  const handleRemoveExercise = useCallback(() => {
+    if (selectedExerciseIndex !== null && selectedExerciseForMenu) {
+      const exerciseName = selectedExerciseForMenu['Exercise Name'];
+      const newSelected = new Set(selectedExercises);
+      newSelected.delete(exerciseName);
+      setSelectedExercises(newSelected);
+      setMyWorkout(prev => prev.filter(ex => ex['Exercise Name'] !== exerciseName));
+    }
+    handleCloseOptionsMenu();
+  }, [selectedExerciseIndex, selectedExerciseForMenu, selectedExercises, handleCloseOptionsMenu]);
+
+  // Handle replacing an exercise (for now, just switch to Exercises tab)
+  const handleReplaceExercise = useCallback(() => {
+    setCurrentTab(0); // Switch to Exercises tab to select replacement
+    handleCloseOptionsMenu();
+  }, [handleCloseOptionsMenu]);
+
+  // Handle opening superset modal from options menu
+  const handleOpenSupersetModal = useCallback(() => {
+    handleCloseOptionsMenu();
+    setSupersetModalOpen(true);
+  }, [handleCloseOptionsMenu]);
+
+  // Handle updating supersets from the modal
+  const handleUpdateSupersets = useCallback((updatedExercises) => {
+    // Renumber supersets to keep them consistent
+    const renumbered = renumberSupersets(updatedExercises);
+    setMyWorkout(renumbered);
+    setSupersetModalOpen(false);
+  }, []);
+
+  // Handle moving exercise up from options menu
+  const handleMoveExerciseUp = useCallback(() => {
+    if (selectedExerciseIndex !== null) {
+      moveGroupUp(selectedExerciseIndex);
+    }
+    handleCloseOptionsMenu();
+  }, [selectedExerciseIndex, moveGroupUp, handleCloseOptionsMenu]);
+
+  // Handle moving exercise down from options menu
+  const handleMoveExerciseDown = useCallback(() => {
+    if (selectedExerciseIndex !== null) {
+      moveGroupDown(selectedExerciseIndex);
+    }
+    handleCloseOptionsMenu();
+  }, [selectedExerciseIndex, moveGroupDown, handleCloseOptionsMenu]);
+
+  // Handle updating reps for an exercise
+  const handleUpdateReps = useCallback((index, newReps) => {
+    const updated = [...myWorkout];
+    updated[index].reps = newReps;
+    setMyWorkout(updated);
+  }, [myWorkout]);
+
+  // Handle updating sets for an exercise (also update superset group members)
+  const handleUpdateSets = useCallback((index, newSets) => {
+    const updated = [...myWorkout];
+    const exercise = updated[index];
+    const supersetGroupId = exercise.supersetGroup;
+    
+    if (supersetGroupId !== null && supersetGroupId !== undefined) {
+      // Update all exercises in the same superset group
+      updated.forEach((ex, i) => {
+        if (ex.supersetGroup === supersetGroupId) {
+          updated[i] = { ...updated[i], sets: newSets };
+        }
+      });
+    } else {
+      // Only update this exercise
+      updated[index] = { ...updated[index], sets: newSets };
+    }
+    
+    setMyWorkout(updated);
+  }, [myWorkout]);
+
   // Memoize the rendered exercise items for better performance
   const renderedExercises = useMemo(() => {
-    const groups = getExerciseGroups(myWorkout);
-    let exerciseIndex = 0;
-    
-    return groups.flatMap((group, groupIndex) => 
-      group.map((exercise, indexInGroup) => {
-        const currentExerciseIndex = exerciseIndex++;
-        const isFirstInGroup = indexInGroup === 0;
-        const canMoveUp = groupIndex > 0;
-        const canMoveDown = groupIndex < groups.length - 1;
-        
-        return (
-          <ExerciseItem
-            key={exercise['Exercise Name']}
-            exercise={exercise}
-            index={currentExerciseIndex}
-            myWorkout={myWorkout}
-            setMyWorkout={setMyWorkout}
-            selectedExercises={selectedExercises}
-            setSelectedExercises={setSelectedExercises}
-            highlightedExercises={highlightedExercises}
-            onToggleHighlight={handleToggleHighlight}
-            currentSupersetNumber={currentSupersetNumber}
-            onDeselectFromSuperset={handleDeselectFromSuperset}
-            onMoveUp={() => moveGroupUp(currentExerciseIndex)}
-            onMoveDown={() => moveGroupDown(currentExerciseIndex)}
-            canMoveUp={canMoveUp}
-            canMoveDown={canMoveDown}
-            isFirstInGroup={isFirstInGroup}
-          />
-        );
-      })
-    );
-  }, [myWorkout, selectedExercises, highlightedExercises, currentSupersetNumber, handleToggleHighlight, handleDeselectFromSuperset, moveGroupUp, moveGroupDown]);
+    return myWorkout.map((exercise, index) => (
+      <MyWorkoutExerciseItem
+        key={`${exercise['Exercise Name']}-${index}`}
+        exercise={exercise}
+        index={index}
+        onOpenOptionsMenu={handleOpenOptionsMenu}
+        onUpdateReps={handleUpdateReps}
+        onUpdateSets={handleUpdateSets}
+      />
+    ));
+  }, [myWorkout, handleOpenOptionsMenu, handleUpdateReps, handleUpdateSets]);
 
   return (
     <Dialog
@@ -1118,6 +1151,29 @@ const WorkoutCreationModal = ({
         }))}
         selectedValue={filterMuscleGroup}
         onSelect={setFilterMuscleGroup}
+      />
+
+      {/* Exercise Options Menu (three-dot menu) */}
+      <ExerciseOptionsMenu
+        open={optionsMenuOpen}
+        onClose={handleCloseOptionsMenu}
+        exerciseName={selectedExerciseForMenu?.['Exercise Name'] || ''}
+        onMoveUp={handleMoveExerciseUp}
+        onMoveDown={handleMoveExerciseDown}
+        onReplace={handleReplaceExercise}
+        onAddToSuperset={handleOpenSupersetModal}
+        onRemove={handleRemoveExercise}
+        canMoveUp={selectedExerciseIndex > 0}
+        canMoveDown={selectedExerciseIndex !== null && selectedExerciseIndex < myWorkout.length - 1}
+      />
+
+      {/* Superset Management Modal */}
+      <SupersetManagementModal
+        open={supersetModalOpen}
+        onClose={() => setSupersetModalOpen(false)}
+        exercises={myWorkout}
+        currentExerciseIndex={selectedExerciseIndex}
+        onUpdateSupersets={handleUpdateSupersets}
       />
     </Dialog>
   );

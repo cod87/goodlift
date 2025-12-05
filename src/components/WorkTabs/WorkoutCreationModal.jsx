@@ -14,12 +14,8 @@ import {
   TextField,
   InputAdornment,
   List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
   Card,
   CardContent,
-  CardMedia,
   Stack,
   Chip,
   FormControl,
@@ -27,8 +23,6 @@ import {
   Select,
   MenuItem,
   Divider,
-  ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
 } from '@mui/material';
 import {
@@ -38,31 +32,35 @@ import {
   AutoAwesome,
   ArrowUpward,
   ArrowDownward,
+  FilterList,
 } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 import { generateStandardWorkout } from '../../utils/workoutGenerator';
 import { getAllCategories, filterExercisesByCategory } from '../../utils/muscleCategories';
 import TargetRepsPicker from '../Common/TargetRepsPicker';
+import ExerciseListItem from '../Common/ExerciseListItem';
+import FilterBottomSheet from '../Common/FilterBottomSheet';
 import { DEFAULT_TARGET_REPS, getClosestValidTargetReps } from '../../utils/repRangeWeightAdjustment';
+import { getSupersetColor } from '../../utils/supersetColors';
 
 /**
- * Superset color palette - cycling through distinct colors
+ * Superset color palette - using shared superset colors
  */
 const SUPERSET_COLORS = [
-  { main: '#4caf50', light: '#e8f5e9', dark: '#2e7d32' }, // Green
-  { main: '#2196f3', light: '#e3f2fd', dark: '#1565c0' }, // Blue
-  { main: '#ff9800', light: '#fff3e0', dark: '#ef6c00' }, // Orange
-  { main: '#9c27b0', light: '#f3e5f5', dark: '#6a1b9a' }, // Purple
-  { main: '#f44336', light: '#ffebee', dark: '#c62828' }, // Red
-  { main: '#00bcd4', light: '#e0f7fa', dark: '#00838f' }, // Cyan
-  { main: '#ffeb3b', light: '#fffde7', dark: '#f57f17' }, // Yellow
-  { main: '#795548', light: '#efebe9', dark: '#4e342e' }, // Brown
+  { main: '#1db584', light: '#e8f5e9', dark: '#2e7d32' }, // Primary green
+  { main: '#4299e1', light: '#e3f2fd', dark: '#1565c0' }, // Blue
+  { main: '#ed64a6', light: '#fce4ec', dark: '#c62828' }, // Pink
+  { main: '#f6ad55', light: '#fff3e0', dark: '#ef6c00' }, // Orange
+  { main: '#9f7aea', light: '#f3e5f5', dark: '#6a1b9a' }, // Purple
+  { main: '#48bb78', light: '#e0f7fa', dark: '#00838f' }, // Green
+  { main: '#fc8181', light: '#ffebee', dark: '#c62828' }, // Red
+  { main: '#63b3ed', light: '#e3f2fd', dark: '#1565c0' }, // Light blue
 ];
 
 /**
- * Get color for a superset group ID
+ * Get color for a superset group ID (with light variant for backgrounds)
  */
-const getSupersetColor = (groupId) => {
+const getSupersetColorWithLight = (groupId) => {
   if (groupId === null || groupId === undefined) return null;
   return SUPERSET_COLORS[(groupId - 1) % SUPERSET_COLORS.length];
 };
@@ -90,11 +88,11 @@ const ExerciseItem = ({
   // Check if this exercise is in a superset group
   const supersetGroupId = exercise.supersetGroup;
   const isInSuperset = supersetGroupId !== null && supersetGroupId !== undefined;
-  const supersetColor = getSupersetColor(supersetGroupId);
+  const supersetColor = getSupersetColorWithLight(supersetGroupId);
 
   // Check if this exercise is highlighted
   const isHighlighted = highlightedExercises.has(exercise['Exercise Name']);
-  const highlightColor = getSupersetColor(currentSupersetNumber);
+  const highlightColor = getSupersetColorWithLight(currentSupersetNumber);
 
   // Handle clicking on the card to highlight
   const handleCardClick = (e) => {
@@ -317,6 +315,10 @@ const WorkoutCreationModal = ({
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
   const [generateCountDialogOpen, setGenerateCountDialogOpen] = useState(false);
   const [exerciseCount, setExerciseCount] = useState(8);
+  
+  // Filter modal states
+  const [equipmentFilterOpen, setEquipmentFilterOpen] = useState(false);
+  const [muscleFilterOpen, setMuscleFilterOpen] = useState(false);
 
   // Update currentSupersetNumber whenever myWorkout changes
   useEffect(() => {
@@ -847,107 +849,87 @@ const WorkoutCreationModal = ({
         {currentTab === 0 && (
           <Box sx={{ p: 2 }}>
             {/* Search and Filters */}
-            <Stack spacing={2} sx={{ mb: 3 }}>
+            <Stack spacing={1.5} sx={{ mb: 2 }}>
               <TextField
                 fullWidth
+                size="small"
                 placeholder="Search exercises..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Search />
+                      <Search color="action" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchQuery && (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => setSearchQuery('')}>
+                        <Close fontSize="small" />
+                      </IconButton>
                     </InputAdornment>
                   ),
                 }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    bgcolor: 'background.default',
+                  },
+                }}
               />
               
-              <Stack direction="row" spacing={2}>
-                <FormControl size="small" sx={{ flex: 1 }}>
-                  <InputLabel>Equipment</InputLabel>
-                  <Select
-                    value={filterEquipment}
-                    label="Equipment"
-                    onChange={(e) => setFilterEquipment(e.target.value)}
+              {/* Filter Chips - tap to open bottom sheet modals */}
+              <Stack direction="row" spacing={1}>
+                <Chip
+                  icon={<FitnessCenter fontSize="small" />}
+                  label={filterEquipment === 'all' ? 'Equipment' : filterEquipment}
+                  onClick={() => setEquipmentFilterOpen(true)}
+                  variant={filterEquipment === 'all' ? 'outlined' : 'filled'}
+                  color={filterEquipment === 'all' ? 'default' : 'primary'}
+                  sx={{ flex: 1, justifyContent: 'flex-start' }}
+                />
+                <Chip
+                  icon={<FilterList fontSize="small" />}
+                  label={filterMuscleGroup === 'all' ? 'Muscle' : filterMuscleGroup}
+                  onClick={() => setMuscleFilterOpen(true)}
+                  variant={filterMuscleGroup === 'all' ? 'outlined' : 'filled'}
+                  color={filterMuscleGroup === 'all' ? 'default' : 'primary'}
+                  sx={{ flex: 1, justifyContent: 'flex-start' }}
+                />
+                {(filterEquipment !== 'all' || filterMuscleGroup !== 'all') && (
+                  <IconButton 
+                    size="small" 
+                    onClick={() => {
+                      setFilterEquipment('all');
+                      setFilterMuscleGroup('all');
+                    }}
                   >
-                    {equipmentTypes.map(eq => (
-                      <MenuItem key={eq} value={eq}>
-                        {eq === 'all' ? 'All Equipment' : eq}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl size="small" sx={{ flex: 1 }}>
-                  <InputLabel>Muscle Group</InputLabel>
-                  <Select
-                    value={filterMuscleGroup}
-                    label="Muscle Group"
-                    onChange={(e) => setFilterMuscleGroup(e.target.value)}
-                  >
-                    {muscleGroups.map(muscle => (
-                      <MenuItem key={muscle} value={muscle}>
-                        {muscle === 'all' ? 'All Muscles' : muscle}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    <Close fontSize="small" />
+                  </IconButton>
+                )}
               </Stack>
+              
+              {/* Results count */}
+              <Typography variant="body2" color="text.secondary">
+                {categoryFilteredExercises.length} exercise{categoryFilteredExercises.length !== 1 ? 's' : ''} found
+              </Typography>
             </Stack>
 
-            {/* Exercise List */}
-            <Stack spacing={2}>
+            {/* Exercise List - using ExerciseListItem for minimalist design */}
+            <List disablePadding>
               {categoryFilteredExercises.map((exercise) => {
                 const exerciseName = exercise['Exercise Name'];
                 const isSelected = selectedExercises.has(exerciseName);
                 
                 return (
-                  <Card
+                  <ExerciseListItem
                     key={exerciseName}
-                    sx={{
-                      cursor: 'pointer',
-                      position: 'relative',
-                      transition: 'border-color 0.2s ease, opacity 0.15s ease, margin-left 0.3s ease, padding-left 0.3s ease',
-                      borderLeft: isSelected ? '4px solid' : '4px solid transparent',
-                      borderLeftColor: isSelected ? 'success.main' : 'transparent',
-                      marginLeft: isSelected ? 3 : 0,
-                      paddingLeft: isSelected ? 1 : 0,
-                      '&:hover': {
-                        borderLeftColor: isSelected ? 'success.dark' : 'primary.light',
-                      },
-                      '&:active': {
-                        opacity: 0.8,
-                      },
-                    }}
+                    exercise={exercise}
+                    selected={isSelected}
                     onClick={() => handleExerciseToggle(exercise)}
-                  >
-                    <CardContent>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                        {exerciseName}
-                      </Typography>
-                      <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-                        <Chip
-                          label={exercise['Primary Muscle']}
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                        />
-                        <Chip
-                          label={exercise.Equipment}
-                          size="small"
-                          variant="outlined"
-                        />
-                        <Chip
-                          label={exercise['Exercise Type']}
-                          size="small"
-                          variant="outlined"
-                        />
-                      </Stack>
-                    </CardContent>
-                  </Card>
+                  />
                 );
               })}
-            </Stack>
+            </List>
           </Box>
         )}
 
@@ -1028,7 +1010,7 @@ const WorkoutCreationModal = ({
                     width: 64,
                     height: 64,
                     borderRadius: '50%',
-                    backgroundColor: getSupersetColor(currentSupersetNumber)?.main,
+                    backgroundColor: getSupersetColorWithLight(currentSupersetNumber)?.main,
                     color: 'white',
                     display: 'flex',
                     alignItems: 'center',
@@ -1112,6 +1094,32 @@ const WorkoutCreationModal = ({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Equipment Filter Bottom Sheet Modal */}
+      <FilterBottomSheet
+        open={equipmentFilterOpen}
+        onClose={() => setEquipmentFilterOpen(false)}
+        title="Select Equipment"
+        options={equipmentTypes.map(eq => ({
+          value: eq,
+          label: eq === 'all' ? 'All Equipment' : eq,
+        }))}
+        selectedValue={filterEquipment}
+        onSelect={setFilterEquipment}
+      />
+
+      {/* Muscle Group Filter Bottom Sheet Modal */}
+      <FilterBottomSheet
+        open={muscleFilterOpen}
+        onClose={() => setMuscleFilterOpen(false)}
+        title="Select Muscle Group"
+        options={muscleGroups.map(muscle => ({
+          value: muscle,
+          label: muscle === 'all' ? 'All Muscles' : muscle,
+        }))}
+        selectedValue={filterMuscleGroup}
+        onSelect={setFilterMuscleGroup}
+      />
     </Dialog>
   );
 };

@@ -14,6 +14,9 @@ import { Dialog, DialogContent, Box, IconButton, Typography, Slide, useMediaQuer
 import { Close } from '@mui/icons-material';
 import { forwardRef, useMemo } from 'react';
 
+// Max height threshold for detecting mobile/tablet landscape mode
+const LANDSCAPE_MAX_HEIGHT_PX = 600;
+
 // Transition component for sliding up from bottom
 const SlideUp = forwardRef(function SlideUp(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -42,7 +45,7 @@ const BottomSheet = ({
   maxHeight = '70vh',
 }) => {
   // Detect landscape orientation (on mobile/tablet)
-  const isLandscape = useMediaQuery('(orientation: landscape) and (max-height: 600px)');
+  const isLandscape = useMediaQuery(`(orientation: landscape) and (max-height: ${LANDSCAPE_MAX_HEIGHT_PX}px)`);
   
   // Determine which transition and styling to use
   const TransitionComponent = isLandscape ? SlideRight : SlideUp;

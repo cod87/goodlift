@@ -1,23 +1,18 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
   TextField,
   Box,
   Typography,
   List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Chip,
+  InputAdornment,
   IconButton,
   Alert,
+  CircularProgress,
 } from '@mui/material';
-import { Close, Search, SwapHoriz } from '@mui/icons-material';
+import { Close, Search } from '@mui/icons-material';
+import BottomSheet from './BottomSheet';
+import ExerciseListItem from './ExerciseListItem';
 import { EXERCISES_DATA_PATH } from '../../utils/constants';
 
 // Maximum number of exercises to display in the list for performance
@@ -26,6 +21,7 @@ const MAX_DISPLAYED_EXERCISES = 50;
 /**
  * SwapExerciseDialog - Allows users to swap an exercise mid-workout
  * Shows exercises from the same muscle group by default
+ * Uses bottom sheet modal design for consistency
  */
 const SwapExerciseDialog = ({
   open,
@@ -105,92 +101,81 @@ const SwapExerciseDialog = ({
   const filteredExercises = getFilteredExercises();
 
   return (
-    <Dialog
+    <BottomSheet
       open={open}
       onClose={handleClose}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        sx: { maxHeight: '80vh' }
-      }}
+      title="Replace Exercise"
+      maxHeight="80vh"
     >
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <SwapHoriz color="primary" />
-          <Typography variant="h6">Swap Exercise</Typography>
-        </Box>
-        <IconButton onClick={handleClose} size="small">
-          <Close />
-        </IconButton>
-      </DialogTitle>
-
-      <DialogContent dividers>
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Current: <strong>{currentExercise?.['Exercise Name']}</strong>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 300 }}>
+        {/* Current exercise info */}
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+          Current: <strong>{currentExercise?.['Exercise Name']}</strong>
+        </Typography>
+        
+        {/* Search Bar */}
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Search exercises..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search color="action" />
+              </InputAdornment>
+            ),
+            endAdornment: searchTerm && (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setSearchTerm('')}>
+                  <Close fontSize="small" />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            mb: 1,
+            '& .MuiOutlinedInput-root': {
+              bgcolor: 'background.default',
+            },
+          }}
+        />
+        
+        {!searchTerm && (
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1 }}>
+            Showing {currentExercise?.['Primary Muscle']} exercises. Search to see all.
           </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Search exercises..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
-            }}
-            autoFocus
-          />
-          {!searchTerm && (
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-              Showing {currentExercise?.['Primary Muscle']} exercises. Search to see all.
-            </Typography>
-          )}
-        </Box>
+        )}
 
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
         )}
 
-        {loading ? (
-          <Typography>Loading exercises...</Typography>
-        ) : filteredExercises.length === 0 ? (
-          <Typography color="text.secondary">No exercises found</Typography>
-        ) : (
-          <List sx={{ maxHeight: '40vh', overflow: 'auto' }}>
-            {filteredExercises.map((exercise, index) => (
-              <ListItem key={index} disablePadding>
-                <ListItemButton onClick={() => handleSelect(exercise)}>
-                  <ListItemText
-                    primary={exercise['Exercise Name']}
-                    secondary={
-                      <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
-                        <Chip
-                          label={exercise['Primary Muscle']}
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                        />
-                        {exercise['Equipment'] && (
-                          <Chip
-                            label={exercise['Equipment']}
-                            size="small"
-                            variant="outlined"
-                          />
-                        )}
-                      </Box>
-                    }
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        )}
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-      </DialogActions>
-    </Dialog>
+        {/* Exercise List */}
+        <Box sx={{ flex: 1, overflow: 'auto', mx: -2 }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : filteredExercises.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography color="text.secondary">No exercises found</Typography>
+            </Box>
+          ) : (
+            <List disablePadding>
+              {filteredExercises.map((exercise, index) => (
+                <ExerciseListItem
+                  key={`${exercise['Exercise Name']}-${index}`}
+                  exercise={exercise}
+                  onClick={handleSelect}
+                />
+              ))}
+            </List>
+          )}
+        </Box>
+      </Box>
+    </BottomSheet>
   );
 };
 

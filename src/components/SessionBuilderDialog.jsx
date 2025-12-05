@@ -2,10 +2,11 @@
  * SessionBuilderDialog - Interactive dialog for building workout sessions exercise-by-exercise
  * 
  * Features:
- * - Add exercises one at a time using autocomplete search
+ * - Add exercises using a full-screen picker with filters
  * - Configure sets, reps, weight for each exercise
- * - Reorder exercises via arrow buttons
+ * - Reorder exercises via options menu
  * - Remove exercises
+ * - Superset management with color-coded groupings
  * - Save session for use in workout plans
  */
 
@@ -19,10 +20,6 @@ import {
   Button,
   Box,
   Typography,
-  List,
-  ListItem,
-  IconButton,
-  TextField,
   FormControl,
   InputLabel,
   Select,
@@ -30,17 +27,15 @@ import {
   Chip,
   Paper,
   Divider,
-  Stack
 } from '@mui/material';
 import {
-  Delete as DeleteIcon,
   Add as AddIcon,
   FitnessCenter as ExerciseIcon,
-  ArrowUpward as ArrowUpIcon,
-  ArrowDownward as ArrowDownIcon
 } from '@mui/icons-material';
-import ExerciseAutocomplete from './ExerciseAutocomplete';
-import TargetRepsPicker from './Common/TargetRepsPicker';
+import WorkoutExerciseCard from './Common/WorkoutExerciseCard';
+import ExercisePicker from './Common/ExercisePicker';
+import SupersetManagementModal from './Common/SupersetManagementModal';
+import SwapExerciseDialog from './Common/SwapExerciseDialog';
 import { DEFAULT_TARGET_REPS, getClosestValidTargetReps } from '../utils/repRangeWeightAdjustment';
 
 const SessionBuilderDialog = ({ 
@@ -48,13 +43,16 @@ const SessionBuilderDialog = ({
   onClose, 
   onSave,
   initialSession = null,
-  allExercises = [],
+  // allExercises is available but not used since ExercisePicker loads its own data
   sessionDate = null
 }) => {
   const [sessionType, setSessionType] = useState('full');
   const [exercises, setExercises] = useState([]);
-  const [selectedExercise, setSelectedExercise] = useState(null);
-  const [availableExercises, setAvailableExercises] = useState([]);
+  const [exercisePickerOpen, setExercisePickerOpen] = useState(false);
+  const [supersetModalOpen, setSupersetModalOpen] = useState(false);
+  const [supersetExerciseIndex, setSupersetExerciseIndex] = useState(null);
+  const [swapDialogOpen, setSwapDialogOpen] = useState(false);
+  const [swapExerciseIndex, setSwapExerciseIndex] = useState(null);
 
   // Initialize session data
   useEffect(() => {
@@ -67,54 +65,33 @@ const SessionBuilderDialog = ({
     }
   }, [initialSession, open]);
 
-  // Filter exercises based on session type
-  useEffect(() => {
-    if (!allExercises || allExercises.length === 0) return;
-
-    let filtered = allExercises;
-
-    if (sessionType === 'upper') {
-      filtered = allExercises.filter(ex => 
-        ex['Workout Type'] && 
-        (ex['Workout Type'].includes('Upper Body') || 
-         ex['Workout Type'].includes('Full Body') ||
-         ex['Workout Type'].includes('Push/Pull/Legs'))
-      );
-    } else if (sessionType === 'lower') {
-      filtered = allExercises.filter(ex => 
-        ex['Workout Type'] && 
-        (ex['Workout Type'].includes('Lower Body') || 
-         ex['Workout Type'].includes('Full Body') ||
-         ex['Workout Type'].includes('Push/Pull/Legs'))
-      );
-    } else if (sessionType === 'full') {
-      filtered = allExercises.filter(ex => 
-        ex['Workout Type'] && ex['Workout Type'].includes('Full Body')
-      );
-    } else if (['push', 'pull', 'legs'].includes(sessionType)) {
-      filtered = allExercises.filter(ex => 
-        ex['Workout Type'] && ex['Workout Type'].includes('Push/Pull/Legs')
-      );
+  // Handle adding an exercise from the picker
+  const handleAddExercise = (exercise) => {
+    // Check if exercise is already in the list
+    const exerciseName = exercise['Exercise Name'] || exercise.name;
+    const alreadyAdded = exercises.some(ex => 
+      (ex['Exercise Name'] || ex.name) === exerciseName
+    );
+    
+    if (alreadyAdded) {
+      // Remove exercise if already selected (toggle behavior)
+      setExercises(exercises.filter(ex => 
+        (ex['Exercise Name'] || ex.name) !== exerciseName
+      ));
+    } else {
+      // Add new exercise
+      const newExercise = {
+        ...exercise,
+        name: exercise['Exercise Name'] || exercise.name,
+        sets: 3,
+        reps: DEFAULT_TARGET_REPS,
+        weight: '',
+        restSeconds: 90,
+        supersetGroup: null,
+        notes: '',
+      };
+      setExercises([...exercises, newExercise]);
     }
-
-    setAvailableExercises(filtered);
-  }, [allExercises, sessionType]);
-
-  const handleAddExercise = () => {
-    if (!selectedExercise) return;
-
-    const newExercise = {
-      ...selectedExercise,
-      name: selectedExercise['Exercise Name'] || selectedExercise.name,
-      sets: 3,
-      reps: DEFAULT_TARGET_REPS,
-      weight: '',
-      restSeconds: 90,
-      supersetGroup: null
-    };
-
-    setExercises([...exercises, newExercise]);
-    setSelectedExercise(null);
   };
 
   const handleRemoveExercise = (index) => {
@@ -125,6 +102,53 @@ const SessionBuilderDialog = ({
     setExercises(exercises.map((ex, i) => 
       i === index ? { ...ex, [field]: value } : ex
     ));
+  };
+
+  // Move exercise up or down
+  const moveExercise = (fromIndex, direction) => {
+    const newExercises = [...exercises];
+    const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+    
+    if (toIndex < 0 || toIndex >= exercises.length) return;
+    
+    [newExercises[fromIndex], newExercises[toIndex]] = [newExercises[toIndex], newExercises[fromIndex]];
+    setExercises(newExercises);
+  };
+
+  // Handle opening superset modal
+  const handleAddToSuperset = (index) => {
+    setSupersetExerciseIndex(index);
+    setSupersetModalOpen(true);
+  };
+
+  // Handle superset updates
+  const handleUpdateSupersets = (updatedExercises) => {
+    setExercises(updatedExercises);
+  };
+
+  // Handle opening swap dialog
+  const handleOpenSwapDialog = (index) => {
+    setSwapExerciseIndex(index);
+    setSwapDialogOpen(true);
+  };
+
+  // Handle exercise swap
+  const handleSwapExercise = (newExercise) => {
+    if (swapExerciseIndex === null) return;
+    
+    const updatedExercises = [...exercises];
+    updatedExercises[swapExerciseIndex] = {
+      ...newExercise,
+      name: newExercise['Exercise Name'] || newExercise.name,
+      sets: exercises[swapExerciseIndex].sets || 3,
+      reps: exercises[swapExerciseIndex].reps || DEFAULT_TARGET_REPS,
+      restSeconds: exercises[swapExerciseIndex].restSeconds || 90,
+      supersetGroup: exercises[swapExerciseIndex].supersetGroup,
+      notes: exercises[swapExerciseIndex].notes || '',
+    };
+    setExercises(updatedExercises);
+    setSwapDialogOpen(false);
+    setSwapExerciseIndex(null);
   };
 
   const handleSave = () => {
@@ -150,19 +174,10 @@ const SessionBuilderDialog = ({
 
   const handleClose = () => {
     setExercises([]);
-    setSelectedExercise(null);
+    setExercisePickerOpen(false);
+    setSupersetModalOpen(false);
+    setSwapDialogOpen(false);
     onClose();
-  };
-
-  // Move exercise up
-  const moveExercise = (fromIndex, direction) => {
-    const newExercises = [...exercises];
-    const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
-    
-    if (toIndex < 0 || toIndex >= exercises.length) return;
-    
-    [newExercises[fromIndex], newExercises[toIndex]] = [newExercises[toIndex], newExercises[fromIndex]];
-    setExercises(newExercises);
   };
 
   return (
@@ -203,36 +218,9 @@ const SessionBuilderDialog = ({
 
           <Divider />
 
-          {/* Exercise Search and Add */}
+          {/* Add Exercise Button */}
           <Box>
-            <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-              Add Exercise
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-              <ExerciseAutocomplete
-                value={selectedExercise}
-                onChange={(event, newValue) => setSelectedExercise(newValue)}
-                availableExercises={availableExercises}
-                label="Search exercises"
-                placeholder="Type to search by name, muscle, or equipment..."
-                sx={{ flex: 1 }}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleAddExercise}
-                disabled={!selectedExercise}
-                startIcon={<AddIcon />}
-                sx={{ mt: 0.5 }}
-              >
-                Add
-              </Button>
-            </Box>
-          </Box>
-
-          {/* Exercise List */}
-          <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                 Exercises ({exercises.length})
               </Typography>
@@ -244,102 +232,53 @@ const SessionBuilderDialog = ({
                 />
               )}
             </Box>
+            
+            <Button
+              fullWidth
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => setExercisePickerOpen(true)}
+              sx={{
+                mb: 2,
+                py: 1.5,
+                borderStyle: 'dashed',
+              }}
+            >
+              Add Exercise
+            </Button>
 
+            {/* Exercise List */}
             {exercises.length === 0 ? (
               <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'background.default' }}>
                 <Typography variant="body2" color="text.secondary">
-                  No exercises added yet. Use the search bar above to add exercises.
+                  No exercises added yet. Tap "Add Exercise" to build your workout.
                 </Typography>
               </Paper>
             ) : (
-              <List sx={{ maxHeight: '400px', overflowY: 'auto', p: 0 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, maxHeight: '400px', overflowY: 'auto' }}>
                 {exercises.map((exercise, index) => (
-                  <Paper key={index} sx={{ mb: 1.5, border: '1px solid', borderColor: 'divider' }}>
-                    <ListItem
-                      sx={{ 
-                        flexDirection: 'column', 
-                        alignItems: 'stretch',
-                        p: 2
-                      }}
-                    >
-                      {/* Exercise Header */}
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {/* Arrow buttons for reordering */}
-                          <Stack direction="column" spacing={0.5}>
-                            <IconButton
-                              size="small"
-                              onClick={() => moveExercise(index, 'up')}
-                              disabled={index === 0}
-                              sx={{ 
-                                padding: 0.5,
-                                '&:disabled': { opacity: 0.3 }
-                              }}
-                            >
-                              <ArrowUpIcon fontSize="small" />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={() => moveExercise(index, 'down')}
-                              disabled={index === exercises.length - 1}
-                              sx={{ 
-                                padding: 0.5,
-                                '&:disabled': { opacity: 0.3 }
-                              }}
-                            >
-                              <ArrowDownIcon fontSize="small" />
-                            </IconButton>
-                          </Stack>
-                          <Box>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                              {index + 1}. {exercise.name || exercise['Exercise Name']}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {exercise['Primary Muscle']} • {exercise['Equipment']}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleRemoveExercise(index)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-
-                      {/* Exercise Configuration */}
-                      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
-                        <TextField
-                          size="small"
-                          label="Sets"
-                          type="number"
-                          value={(exercise.sets === '' || exercise.sets === undefined) ? '' : exercise.sets}
-                          onChange={(e) => handleExerciseChange(index, 'sets', e.target.value === '' ? '' : (parseInt(e.target.value) || 0))}
-                          sx={{ width: '80px' }}
-                          inputProps={{ min: 1, max: 10 }}
-                        />
-                        <TargetRepsPicker
-                          value={typeof exercise.reps === 'number' ? exercise.reps : getClosestValidTargetReps(parseInt(exercise.reps) || DEFAULT_TARGET_REPS)}
-                          onChange={(newReps) => handleExerciseChange(index, 'reps', newReps)}
-                          compact
-                          showLabel
-                          label="Reps"
-                        />
-                        <TextField
-                          size="small"
-                          label="Rest (sec)"
-                          type="number"
-                          value={(exercise.restSeconds === '' || exercise.restSeconds === undefined) ? '' : exercise.restSeconds}
-                          onChange={(e) => handleExerciseChange(index, 'restSeconds', e.target.value === '' ? '' : (parseInt(e.target.value) || 0))}
-                          sx={{ width: '100px' }}
-                          inputProps={{ min: 0, max: 300 }}
-                        />
-                      </Box>
-                    </ListItem>
-                  </Paper>
+                  <WorkoutExerciseCard
+                    key={`${exercise['Exercise Name'] || exercise.name}-${index}`}
+                    exercise={exercise}
+                    index={index}
+                    sets={exercise.sets || 3}
+                    reps={typeof exercise.reps === 'number' ? exercise.reps : getClosestValidTargetReps(parseInt(exercise.reps) || DEFAULT_TARGET_REPS)}
+                    restSeconds={exercise.restSeconds || 90}
+                    notes={exercise.notes || ''}
+                    onSetsChange={(value) => handleExerciseChange(index, 'sets', value)}
+                    onRepsChange={(value) => handleExerciseChange(index, 'reps', value)}
+                    onRestChange={(value) => handleExerciseChange(index, 'restSeconds', value)}
+                    onNotesChange={(value) => handleExerciseChange(index, 'notes', value)}
+                    onMoveUp={() => moveExercise(index, 'up')}
+                    onMoveDown={() => moveExercise(index, 'down')}
+                    onReplace={() => handleOpenSwapDialog(index)}
+                    onAddToSuperset={() => handleAddToSuperset(index)}
+                    onRemove={() => handleRemoveExercise(index)}
+                    canMoveUp={index > 0}
+                    canMoveDown={index < exercises.length - 1}
+                  />
                 ))}
-              </List>
+              </Box>
             )}
           </Box>
         </Box>
@@ -356,6 +295,33 @@ const SessionBuilderDialog = ({
           Save Session
         </Button>
       </DialogActions>
+
+      {/* Exercise Picker Modal */}
+      <ExercisePicker
+        open={exercisePickerOpen}
+        onClose={() => setExercisePickerOpen(false)}
+        onSelectExercise={handleAddExercise}
+        selectedExercises={exercises}
+        multiSelect
+        title="Add Exercises"
+      />
+
+      {/* Superset Management Modal */}
+      <SupersetManagementModal
+        open={supersetModalOpen}
+        onClose={() => setSupersetModalOpen(false)}
+        exercises={exercises}
+        currentExerciseIndex={supersetExerciseIndex}
+        onUpdateSupersets={handleUpdateSupersets}
+      />
+
+      {/* Swap Exercise Dialog */}
+      <SwapExerciseDialog
+        open={swapDialogOpen}
+        onClose={() => setSwapDialogOpen(false)}
+        currentExercise={swapExerciseIndex !== null ? exercises[swapExerciseIndex] : null}
+        onSwap={handleSwapExercise}
+      />
     </Dialog>
   );
 };

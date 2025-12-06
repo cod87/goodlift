@@ -1005,55 +1005,67 @@ const WorkoutCreationModal = ({
               </Typography>
             </Box>
             
-            {myWorkout.length > 0 ? (
-              <Stack spacing={2}>
-                {renderedExercises}
-              </Stack>
-            ) : (
-              <Box sx={{ textAlign: 'center', py: 4 }}>
-                <FitnessCenter sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-                <Typography variant="body1" color="text.secondary">
-                  No exercises added yet. Switch to the "Exercises" tab to add some.
-                </Typography>
-              </Box>
-            )}
-            
-            {/* Sticky Floating Superset Button - show when has highlighted exercises */}
-            {highlightedExercises.size > 0 && (
-              <Tooltip title={`Create Superset ${currentSupersetNumber}`} placement="left">
+            {/* Exercise list container with sticky button */}
+            <Box sx={{ position: 'relative' }}>
+              {/* Sticky Superset Button - becomes sticky when scrolling */}
+              {highlightedExercises.size > 0 && (
                 <Box
-                  onClick={handleLockInSuperset}
                   sx={{
-                    position: 'fixed',
-                    bottom: 24,
-                    right: 24,
-                    width: 64,
-                    height: 64,
-                    borderRadius: '50%',
-                    backgroundColor: getSupersetColor(currentSupersetNumber)?.main,
-                    color: 'white',
+                    position: 'sticky',
+                    top: 16,
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 'bold',
-                    fontSize: '1.5rem',
-                    cursor: 'pointer',
-                    boxShadow: 6,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    justifyContent: 'flex-end',
                     zIndex: 1000,
-                    '&:hover': {
-                      transform: 'scale(1.1)',
-                      boxShadow: 12,
-                    },
-                    '&:active': {
-                      transform: 'scale(0.95)',
-                    },
+                    pointerEvents: 'none',
+                    height: 0,
                   }}
                 >
-                  {currentSupersetNumber}
+                  <Tooltip title={`Create Superset ${currentSupersetNumber}`} placement="left">
+                    <Box
+                      onClick={handleLockInSuperset}
+                      sx={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: '50%',
+                        backgroundColor: getSupersetColor(currentSupersetNumber)?.main,
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold',
+                        fontSize: '1.5rem',
+                        cursor: 'pointer',
+                        boxShadow: 6,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        pointerEvents: 'auto',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                          boxShadow: 12,
+                        },
+                        '&:active': {
+                          transform: 'scale(0.95)',
+                        },
+                      }}
+                    >
+                      {currentSupersetNumber}
+                    </Box>
+                  </Tooltip>
                 </Box>
-              </Tooltip>
-            )}
+              )}
+              
+              {myWorkout.length > 0 ? (
+                <Stack spacing={2}>
+                  {renderedExercises}
+                </Stack>
+              ) : (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <FitnessCenter sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="body1" color="text.secondary">
+                    No exercises added yet. Switch to the "Exercises" tab to add some.
+                  </Typography>
+                </Box>
+              )}
+            </Box>
           </Box>
         )}
       </DialogContent>

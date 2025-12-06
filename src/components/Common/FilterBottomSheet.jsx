@@ -5,12 +5,12 @@
  * - Equipment filter selection
  * - Muscle group filter selection
  * 
- * Clean, list-style layout with clear labels and spacing
+ * Minimalist design with chips/buttons for selection
  */
 
 import PropTypes from 'prop-types';
-import { Box, Typography, Button, Stack, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import { Check, RadioButtonUnchecked, CheckCircle } from '@mui/icons-material';
+import { Box, Chip, Typography, Button, Stack } from '@mui/material';
+import { Check } from '@mui/icons-material';
 import BottomSheet from './BottomSheet';
 
 const FilterBottomSheet = ({
@@ -63,23 +63,15 @@ const FilterBottomSheet = ({
       open={open}
       onClose={onClose}
       title={title}
-      maxHeight="70vh"
+      maxHeight="60vh"
     >
       <Box sx={{ pb: 2 }}>
-        {/* Filter Options as List */}
-        <List 
-          disablePadding
+        {/* Filter Options */}
+        <Box
           sx={{
-            mx: -2, // Extend to edges of content area
-            '& .MuiListItemButton-root': {
-              py: 1.5,
-              px: 2,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              '&:last-child': {
-                borderBottom: 'none',
-              },
-            },
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
           }}
         >
           {options.map((option) => {
@@ -88,45 +80,38 @@ const FilterBottomSheet = ({
             const selected = isSelected(value);
             
             return (
-              <ListItemButton
+              <Chip
                 key={value}
+                label={label}
                 onClick={() => handleSelect(value)}
-                selected={selected}
+                icon={selected ? <Check sx={{ fontSize: 16 }} /> : undefined}
                 sx={{
-                  bgcolor: selected ? 'action.selected' : 'transparent',
-                  '&.Mui-selected': {
-                    bgcolor: 'action.selected',
-                    '&:hover': {
-                      bgcolor: 'action.selected',
-                    },
+                  px: 0.5,
+                  py: 2,
+                  fontSize: '0.9rem',
+                  fontWeight: selected ? 600 : 400,
+                  bgcolor: selected ? 'primary.main' : 'background.default',
+                  color: selected ? 'white' : 'text.primary',
+                  border: '1px solid',
+                  borderColor: selected ? 'primary.main' : 'divider',
+                  '&:hover': {
+                    bgcolor: selected ? 'primary.dark' : 'action.hover',
+                  },
+                  '& .MuiChip-icon': {
+                    color: 'white',
+                    ml: 0.5,
                   },
                 }}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  {selected ? (
-                    <CheckCircle color="primary" />
-                  ) : (
-                    <RadioButtonUnchecked color="disabled" />
-                  )}
-                </ListItemIcon>
-                <ListItemText
-                  primary={label}
-                  primaryTypographyProps={{
-                    fontWeight: selected ? 600 : 400,
-                    color: selected ? 'primary.main' : 'text.primary',
-                    fontSize: '1rem',
-                  }}
-                />
-              </ListItemButton>
+              />
             );
           })}
-        </List>
+        </Box>
 
         {/* Action Buttons */}
         <Stack
           direction="row"
           spacing={1}
-          sx={{ mt: 3, px: 0 }}
+          sx={{ mt: 3 }}
         >
           {showClearButton && hasSelection && (
             <Button

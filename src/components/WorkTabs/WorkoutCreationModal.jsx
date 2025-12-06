@@ -454,13 +454,25 @@ const WorkoutCreationModal = ({
   // Toggle highlight for an exercise
   const handleToggleHighlight = useCallback((exerciseName) => {
     const newHighlighted = new Set(highlightedExercises);
+    
+    // Find the exercise to check if it's in a superset
+    const exercise = myWorkout.find(ex => ex['Exercise Name'] === exerciseName);
+    const exerciseSuperset = exercise?.supersetGroup;
+    
     if (newHighlighted.has(exerciseName)) {
+      // Deselecting an exercise - useEffect will reset currentSupersetNumber when all are deselected
       newHighlighted.delete(exerciseName);
     } else {
+      // Selecting an exercise
+      // If this is the first selection and the exercise is already in a superset,
+      // switch to that superset's color for editing
+      if (newHighlighted.size === 0 && exerciseSuperset !== null && exerciseSuperset !== undefined) {
+        setCurrentSupersetNumber(exerciseSuperset);
+      }
       newHighlighted.add(exerciseName);
     }
     setHighlightedExercises(newHighlighted);
-  }, [highlightedExercises]);
+  }, [highlightedExercises, myWorkout]);
 
   // Deselect exercise from superset (remove superset group)
   const handleDeselectFromSuperset = useCallback((exerciseName) => {
@@ -1018,11 +1030,17 @@ const WorkoutCreationModal = ({
               </Box>
             )}
             
-            {/* Sticky Floating Superset Button - show when has highlighted exercises */}
-            {highlightedExercises.size > 0 && (
-              <Tooltip title={`Create Superset ${currentSupersetNumber}`} placement="left">
+            {/* Sticky Floating Superset Button - always show when exercises exist */}
+            {myWorkout.length > 0 && (
+              <Tooltip 
+                title={highlightedExercises.size > 0 
+                  ? `Create Superset ${currentSupersetNumber}` 
+                  : `Select exercises for Superset ${currentSupersetNumber}`
+                } 
+                placement="left"
+              >
                 <Box
-                  onClick={handleLockInSuperset}
+                  onClick={highlightedExercises.size > 0 ? handleLockInSuperset : undefined}
                   sx={{
                     position: 'fixed',
                     bottom: 24,
@@ -1037,20 +1055,21 @@ const WorkoutCreationModal = ({
                     justifyContent: 'center',
                     fontWeight: 'bold',
                     fontSize: '1.5rem',
-                    cursor: 'pointer',
+                    cursor: highlightedExercises.size > 0 ? 'pointer' : 'default',
                     boxShadow: 6,
+                    opacity: highlightedExercises.size > 0 ? 1 : 0.7,
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     zIndex: 1000,
-                    '&:hover': {
+                    '&:hover': highlightedExercises.size > 0 ? {
                       transform: 'scale(1.1)',
                       boxShadow: 12,
-                    },
-                    '&:active': {
+                    } : {},
+                    '&:active': highlightedExercises.size > 0 ? {
                       transform: 'scale(0.95)',
-                    },
+                    } : {},
                   }}
                 >
-                  {currentSupersetNumber}
+                  {highlightedExercises.size > 0 ? currentSupersetNumber : '+'}
                 </Box>
               </Tooltip>
             )}

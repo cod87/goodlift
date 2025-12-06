@@ -460,26 +460,15 @@ const WorkoutCreationModal = ({
     const exerciseSuperset = exercise?.supersetGroup;
     
     if (newHighlighted.has(exerciseName)) {
-      // Deselecting an exercise
+      // Deselecting an exercise - useEffect will reset currentSupersetNumber when all are deselected
       newHighlighted.delete(exerciseName);
-      
-      // If no exercises are highlighted anymore and we were editing an existing superset,
-      // reset to the next available superset number
-      if (newHighlighted.size === 0) {
-        // Will be handled by useEffect
-      }
     } else {
       // Selecting an exercise
-      
-      // Check if this is the FIRST selection (no other exercises are highlighted yet)
+      // If this is the first selection and the exercise is already in a superset,
+      // switch to that superset's color for editing
       if (newHighlighted.size === 0 && exerciseSuperset !== null && exerciseSuperset !== undefined) {
-        // First selection is an exercise that's already in a superset
-        // Switch to that superset's color for editing
         setCurrentSupersetNumber(exerciseSuperset);
       }
-      // If not the first selection and exercise is in a different superset,
-      // just add it to the current highlight group (it will join the new superset)
-      
       newHighlighted.add(exerciseName);
     }
     setHighlightedExercises(newHighlighted);

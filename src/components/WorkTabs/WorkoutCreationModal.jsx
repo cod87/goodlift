@@ -1161,14 +1161,14 @@ const WorkoutCreationModal = ({
                           width: 36,
                           height: 36,
                           bgcolor: currentSupersetColor?.main || 'transparent',
-                          color: 'white',
+                          color: currentSupersetColor?.main ? 'white' : 'text.secondary',
                           '&:hover': {
                             bgcolor: currentSupersetColor?.dark || 'action.hover',
                           },
                           '&.Mui-disabled': {
                             bgcolor: currentSupersetColor?.main || 'transparent',
-                            color: 'white',
-                            opacity: 0.6,
+                            color: currentSupersetColor?.main ? 'rgba(255, 255, 255, 0.7)' : 'text.disabled',
+                            opacity: 0.7,
                             borderColor: currentSupersetColor?.main || 'divider',
                           },
                         }}

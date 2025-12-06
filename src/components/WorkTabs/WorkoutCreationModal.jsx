@@ -896,6 +896,11 @@ const WorkoutCreationModal = ({
     });
   }, []);
 
+  // Memoize the current superset color to avoid repeated function calls
+  const currentSupersetColor = useMemo(() => {
+    return getSupersetColorWithLight(currentSupersetNumber);
+  }, [currentSupersetNumber]);
+
   // Memoize the rendered exercise items for better performance
   const renderedExercises = useMemo(() => {
     return myWorkout.map((exercise, index) => (
@@ -1111,16 +1116,17 @@ const WorkoutCreationModal = ({
                         size="small"
                         onClick={handleLockInSuperset}
                         disabled={highlightedExercises.size < 2}
+                        aria-label={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : 'Select exercises to create superset'}
                         sx={{
                           border: '1px solid',
-                          borderColor: highlightedExercises.size >= 2 ? getSupersetColorWithLight(currentSupersetNumber)?.main : 'divider',
+                          borderColor: highlightedExercises.size >= 2 ? currentSupersetColor?.main : 'divider',
                           borderRadius: 1,
                           width: 36,
                           height: 36,
-                          bgcolor: highlightedExercises.size >= 2 ? getSupersetColorWithLight(currentSupersetNumber)?.main : 'transparent',
+                          bgcolor: highlightedExercises.size >= 2 ? currentSupersetColor?.main : 'transparent',
                           color: highlightedExercises.size >= 2 ? 'white' : 'text.secondary',
                           '&:hover': {
-                            bgcolor: highlightedExercises.size >= 2 ? getSupersetColorWithLight(currentSupersetNumber)?.dark : 'action.hover',
+                            bgcolor: highlightedExercises.size >= 2 ? currentSupersetColor?.dark : 'action.hover',
                           },
                           '&.Mui-disabled': {
                             color: 'text.disabled',

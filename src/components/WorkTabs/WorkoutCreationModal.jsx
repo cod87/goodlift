@@ -83,6 +83,7 @@ const MyWorkoutExerciseItem = ({
   onUpdateSets,
   isHighlighted = false,
   onToggleHighlight,
+  currentSupersetColor = null,
 }) => {
   const [imageError, setImageError] = useState(false);
   
@@ -115,9 +116,9 @@ const MyWorkoutExerciseItem = ({
     }
   };
 
-  // Determine the left border color: highlighted takes priority, then superset, then default
+  // Determine the left border color: highlighted uses current superset color, then superset color if in superset, then default
   const getLeftBorderColor = () => {
-    if (isHighlighted) return 'primary.main';
+    if (isHighlighted && currentSupersetColor) return currentSupersetColor.main;
     if (isInSuperset) return supersetColor?.main;
     return 'divider';
   };
@@ -131,7 +132,7 @@ const MyWorkoutExerciseItem = ({
         bgcolor: isHighlighted ? 'action.selected' : 'background.paper',
         borderRadius: 1,
         border: '1px solid',
-        borderColor: isHighlighted ? 'primary.main' : 'divider',
+        borderColor: isHighlighted && currentSupersetColor ? currentSupersetColor.main : isHighlighted ? 'primary.main' : 'divider',
         borderLeft: '4px solid',
         borderLeftColor: getLeftBorderColor(),
         overflow: 'hidden',
@@ -285,6 +286,7 @@ MyWorkoutExerciseItem.propTypes = {
   onUpdateSets: PropTypes.func.isRequired,
   isHighlighted: PropTypes.bool,
   onToggleHighlight: PropTypes.func,
+  currentSupersetColor: PropTypes.object,
 };
 
 /**
@@ -405,6 +407,32 @@ const WorkoutCreationModal = ({
       setSelectedExercises(new Set());
     }
   }, [open, existingWorkout]);
+
+  // Reset superset context to the next available number when all highlighted exercises are deselected
+  useEffect(() => {
+    if (highlightedExercises.size === 0) {
+      // Get the lowest available superset number
+      const getLowestAvailableSupersetNumber = () => {
+        const supersetIds = myWorkout
+          .filter(ex => ex.supersetGroup !== null && ex.supersetGroup !== undefined)
+          .map(ex => ex.supersetGroup);
+        
+        if (supersetIds.length === 0) return 1;
+        
+        const uniqueIds = [...new Set(supersetIds)].sort((a, b) => a - b);
+        
+        for (let i = 1; i <= uniqueIds[uniqueIds.length - 1]; i++) {
+          if (!uniqueIds.includes(i)) {
+            return i;
+          }
+        }
+        
+        return uniqueIds[uniqueIds.length - 1] + 1;
+      };
+      
+      setCurrentSupersetNumber(getLowestAvailableSupersetNumber());
+    }
+  }, [highlightedExercises, myWorkout]);
 
   // Filter exercises based on search and filters
   const filteredExercises = exercises.filter(exercise => {
@@ -879,18 +907,26 @@ const WorkoutCreationModal = ({
   }, [myWorkout]);
 
   // Handle toggling exercise highlight for superset selection
-  // If tapping an exercise in an existing superset, set the context to that superset
+  // If tapping an exercise in an existing superset BEFORE starting a new superset selection,
+  // set the context to that superset's color. If tapping AFTER exercises are already highlighted,
+  // keep the current superset context (to add the exercise to the new superset).
   const handleToggleHighlight = useCallback((exerciseName, supersetGroupId) => {
     setHighlightedExercises(prev => {
       const newSet = new Set(prev);
       if (newSet.has(exerciseName)) {
         newSet.delete(exerciseName);
+        // If we removed all highlighted exercises and the context was from a superset, 
+        // reset to the next available superset number
+        if (newSet.size === 0) {
+          // Let useEffect handle resetting to the next available superset number
+        }
       } else {
-        newSet.add(exerciseName);
-        // If tapping an exercise in an existing superset, set context to that superset
-        if (supersetGroupId !== null && supersetGroupId !== undefined) {
+        // If no exercises are highlighted yet and the selected exercise is in a superset,
+        // switch context to that superset
+        if (newSet.size === 0 && supersetGroupId !== null && supersetGroupId !== undefined) {
           setCurrentSupersetNumber(supersetGroupId);
         }
+        newSet.add(exerciseName);
       }
       return newSet;
     });
@@ -913,9 +949,10 @@ const WorkoutCreationModal = ({
         onUpdateSets={handleUpdateSets}
         isHighlighted={highlightedExercises.has(exercise['Exercise Name'])}
         onToggleHighlight={handleToggleHighlight}
+        currentSupersetColor={currentSupersetColor}
       />
     ));
-  }, [myWorkout, handleOpenOptionsMenu, handleUpdateReps, handleUpdateSets, highlightedExercises, handleToggleHighlight]);
+  }, [myWorkout, handleOpenOptionsMenu, handleUpdateReps, handleUpdateSets, highlightedExercises, handleToggleHighlight, currentSupersetColor]);
 
   return (
     <Dialog
@@ -1110,27 +1147,29 @@ const WorkoutCreationModal = ({
                       <AutoAwesome fontSize="small" />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title={highlightedExercises.size > 0 ? `Create Superset ${currentSupersetNumber}` : 'Select exercises to create superset'}>
+                  <Tooltip title={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}>
                     <span>
                       <IconButton
                         size="small"
                         onClick={handleLockInSuperset}
                         disabled={highlightedExercises.size < 2}
-                        aria-label={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : 'Select exercises to create superset'}
+                        aria-label={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}
                         sx={{
                           border: '1px solid',
-                          borderColor: highlightedExercises.size >= 2 ? currentSupersetColor?.main : 'divider',
+                          borderColor: currentSupersetColor?.main || 'divider',
                           borderRadius: 1,
                           width: 36,
                           height: 36,
-                          bgcolor: highlightedExercises.size >= 2 ? currentSupersetColor?.main : 'transparent',
-                          color: highlightedExercises.size >= 2 ? 'white' : 'text.secondary',
+                          bgcolor: currentSupersetColor?.main || 'transparent',
+                          color: 'white',
                           '&:hover': {
-                            bgcolor: highlightedExercises.size >= 2 ? currentSupersetColor?.dark : 'action.hover',
+                            bgcolor: currentSupersetColor?.dark || 'action.hover',
                           },
                           '&.Mui-disabled': {
-                            color: 'text.disabled',
-                            borderColor: 'divider',
+                            bgcolor: currentSupersetColor?.main || 'transparent',
+                            color: 'white',
+                            opacity: 0.6,
+                            borderColor: currentSupersetColor?.main || 'divider',
                           },
                         }}
                       >
@@ -1143,8 +1182,8 @@ const WorkoutCreationModal = ({
               {/* Show superset selection hint when exercises are highlighted */}
               {highlightedExercises.size > 0 && (
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  {highlightedExercises.size} exercise{highlightedExercises.size !== 1 ? 's' : ''} selected
-                  {highlightedExercises.size >= 2 && ` - Tap + to create Superset ${currentSupersetNumber}`}
+                  {highlightedExercises.size} exercise{highlightedExercises.size !== 1 ? 's' : ''} selected for Superset {currentSupersetNumber}
+                  {highlightedExercises.size >= 2 && ` - Tap + to confirm`}
                   {highlightedExercises.size === 1 && ' - Select at least one more'}
                 </Typography>
               )}

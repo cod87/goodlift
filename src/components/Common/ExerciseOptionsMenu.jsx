@@ -4,8 +4,7 @@
  * Options:
  * - Reorder (Move Up/Down)
  * - Replace exercise
- * - Add to superset (if not in superset)
- * - Remove from superset (if in superset)
+ * - Add to superset
  * - Remove from workout
  */
 
@@ -16,7 +15,6 @@ import {
   ArrowDownward,
   SwapHoriz,
   GroupWork,
-  LinkOff,
   Delete,
 } from '@mui/icons-material';
 import BottomSheet from './BottomSheet';
@@ -29,11 +27,9 @@ const ExerciseOptionsMenu = ({
   onMoveDown,
   onReplace,
   onAddToSuperset,
-  onRemoveFromSuperset,
   onRemove,
   canMoveUp = true,
   canMoveDown = true,
-  isInSuperset = false,
 }) => {
   const handleAction = (action) => {
     onClose();
@@ -94,37 +90,19 @@ const ExerciseOptionsMenu = ({
           />
         </ListItemButton>
         
-        {/* Add to Superset - only show if not in superset */}
-        {!isInSuperset && (
-          <ListItemButton
-            onClick={() => handleAction(onAddToSuperset)}
-            sx={{ py: 1.5 }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <GroupWork color="primary" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Add to Superset"
-              primaryTypographyProps={{ fontWeight: 500 }}
-            />
-          </ListItemButton>
-        )}
-        
-        {/* Remove from Superset - only show if in superset */}
-        {isInSuperset && (
-          <ListItemButton
-            onClick={() => handleAction(onRemoveFromSuperset)}
-            sx={{ py: 1.5 }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <LinkOff color="warning" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Remove from Superset"
-              primaryTypographyProps={{ fontWeight: 500, color: 'warning.main' }}
-            />
-          </ListItemButton>
-        )}
+        {/* Add to Superset */}
+        <ListItemButton
+          onClick={() => handleAction(onAddToSuperset)}
+          sx={{ py: 1.5 }}
+        >
+          <ListItemIcon sx={{ minWidth: 40 }}>
+            <GroupWork color="primary" />
+          </ListItemIcon>
+          <ListItemText
+            primary="Add to Superset"
+            primaryTypographyProps={{ fontWeight: 500 }}
+          />
+        </ListItemButton>
         
         <Divider sx={{ my: 1 }} />
         
@@ -154,11 +132,9 @@ ExerciseOptionsMenu.propTypes = {
   onMoveDown: PropTypes.func,
   onReplace: PropTypes.func,
   onAddToSuperset: PropTypes.func,
-  onRemoveFromSuperset: PropTypes.func,
   onRemove: PropTypes.func,
   canMoveUp: PropTypes.bool,
   canMoveDown: PropTypes.bool,
-  isInSuperset: PropTypes.bool,
 };
 
 export default ExerciseOptionsMenu;

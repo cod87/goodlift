@@ -11,7 +11,7 @@ const ExerciseCardDemo = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const exerciseName = 'Dumbbell Incline Bench Press';
+  const exerciseName = 'Incline Bench Press, Dumbbell';
   const demoImage = getDemoImagePath(exerciseName);
 
   // Simulate timer

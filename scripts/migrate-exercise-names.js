@@ -1,19 +1,26 @@
+#!/usr/bin/env node
 /**
- * Exercise Name Normalizer Utility
+ * Exercise Name Migration Script
  * 
- * Converts old-format exercise names (equipment-first: "Barbell Bench Press") 
- * to new movement-first format ("Bench Press, Barbell").
+ * Migrates exercise names in CSV files from old format (Equipment First) 
+ * to new format (Movement, Equipment).
  * 
- * Uses a simple static mapping for reliability and ease of maintenance.
- * To add new mappings, simply add entries to OLD_TO_NEW_NAME_MAP.
+ * Examples:
+ *   "Barbell Bench Press" → "Bench Press, Barbell"
+ *   "Dumbbell Romanian Deadlift" → "Romanian Deadlift, Dumbbell"
  */
 
-/**
- * Static mapping of old exercise names to new format names.
- * Add new entries here when exercise names change.
- * Format: 'Old Name': 'New Name'
- */
-const OLD_TO_NEW_NAME_MAP = {
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import Papa from 'papaparse';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Exercise name mapping from old format to new format
+// Based on the existing normalizer mapping plus additional exercises
+const EXERCISE_NAME_MAPPING = {
   // Barbell exercises
   'Barbell Belt Squat': 'Belt Squat, Barbell',
   'Barbell Bench Press': 'Bench Press, Barbell',
@@ -122,64 +129,122 @@ const OLD_TO_NEW_NAME_MAP = {
 };
 
 /**
- * Normalize an exercise name to the new movement-first format.
- * Uses a simple lookup - if the name is in the mapping, return the new name.
- * Otherwise, return the original name unchanged.
- * 
- * @param {string} exerciseName - Exercise name to normalize
- * @returns {string} Normalized exercise name
+ * Migrate exercise name from old format to new format
+ * @param {string} name - Exercise name to migrate
+ * @returns {string} Migrated exercise name
  */
-export const normalizeExerciseNameToNewFormat = (exerciseName) => {
-  if (!exerciseName || typeof exerciseName !== 'string') return exerciseName;
-  return OLD_TO_NEW_NAME_MAP[exerciseName] || exerciseName;
-};
+function migrateExerciseName(name) {
+  if (!name) return name;
+  const trimmedName = name.trim();
+  return EXERCISE_NAME_MAPPING[trimmedName] || trimmedName;
+}
 
 /**
- * Normalize an exercise object's name to the new format.
- * 
- * @param {Object} exercise - Exercise object with 'Exercise Name' or 'name' property
- * @returns {Object} Exercise object with normalized name
+ * Migrate a CSV file
+ * @param {string} inputPath - Path to input CSV file
+ * @param {string} outputPath - Path to output CSV file
  */
-export const normalizeExerciseObject = (exercise) => {
-  if (!exercise) return exercise;
+async function migrateCSVFile(inputPath, outputPath) {
+  console.log(`\nMigrating: ${path.basename(inputPath)}`);
   
-  const exerciseName = exercise['Exercise Name'] || exercise.name;
-  if (!exerciseName) return exercise;
+  // Read CSV file
+  const csvContent = fs.readFileSync(inputPath, 'utf-8');
   
-  const normalizedName = normalizeExerciseNameToNewFormat(exerciseName);
+  // Parse CSV
+  const parseResult = Papa.parse(csvContent, {
+    header: true,
+    skipEmptyLines: false,
+  });
   
-  // Only create new object if name changed
-  if (normalizedName === exerciseName) return exercise;
+  if (parseResult.errors.length > 0) {
+    console.warn('  CSV parsing warnings:');
+    parseResult.errors.forEach(err => console.warn(`    - ${err.message}`));
+  }
   
-  return {
-    ...exercise,
-    'Exercise Name': normalizedName,
-    ...(exercise.name ? { name: normalizedName } : {}),
-  };
-};
+  let migratedCount = 0;
+  let unchangedCount = 0;
+  
+  // Migrate exercise names
+  const migratedData = parseResult.data.map(row => {
+    if (!row['Exercise Name']) return row;
+    
+    const oldName = row['Exercise Name'];
+    const newName = migrateExerciseName(oldName);
+    
+    if (oldName !== newName) {
+      migratedCount++;
+      console.log(`  ✓ "${oldName}" → "${newName}"`);
+    } else {
+      unchangedCount++;
+    }
+    
+    return {
+      ...row,
+      'Exercise Name': newName,
+    };
+  });
+  
+  // Convert back to CSV
+  const csv = Papa.unparse(migratedData, {
+    header: true,
+  });
+  
+  // Write to output file
+  fs.writeFileSync(outputPath, csv, 'utf-8');
+  
+  console.log(`  Migrated: ${migratedCount} exercises`);
+  console.log(`  Unchanged: ${unchangedCount} exercises`);
+  console.log(`  Output: ${outputPath}`);
+}
 
 /**
- * Normalize all exercise names in an array.
- * 
- * @param {Array} exercises - Array of exercise objects
- * @returns {Array} Array with normalized exercise names
+ * Main migration function
  */
-export const normalizeExerciseArray = (exercises) => {
-  if (!Array.isArray(exercises)) return exercises;
-  return exercises.map(ex => ex ? normalizeExerciseObject(ex) : ex);
-};
-
-/**
- * Normalize all exercise names in a workout object.
- * 
- * @param {Object} workout - Workout object with exercises array
- * @returns {Object} Workout object with normalized exercise names
- */
-export const normalizeWorkoutExercises = (workout) => {
-  if (!workout || !Array.isArray(workout.exercises)) return workout;
+async function main() {
+  console.log('=== Exercise Name Migration ===');
+  console.log('Converting from "Equipment Exercise" to "Exercise, Equipment" format\n');
   
-  return {
-    ...workout,
-    exercises: normalizeExerciseArray(workout.exercises),
-  };
-};
+  const publicDataDir = path.join(__dirname, '../public/data');
+  const docsDataDir = path.join(__dirname, '../docs/data');
+  
+  // Migrate exercise-expanded.csv
+  await migrateCSVFile(
+    path.join(publicDataDir, 'exercise-expanded.csv'),
+    path.join(publicDataDir, 'exercise-expanded.csv')
+  );
+  
+  // Migrate cable-exercise.csv
+  await migrateCSVFile(
+    path.join(publicDataDir, 'cable-exercise.csv'),
+    path.join(publicDataDir, 'cable-exercise.csv')
+  );
+  
+  // Copy to docs directory if it exists
+  if (fs.existsSync(docsDataDir)) {
+    console.log('\nCopying migrated files to docs/data/...');
+    
+    fs.copyFileSync(
+      path.join(publicDataDir, 'exercise-expanded.csv'),
+      path.join(docsDataDir, 'exercise-expanded.csv')
+    );
+    console.log('  ✓ Copied exercise-expanded.csv');
+    
+    fs.copyFileSync(
+      path.join(publicDataDir, 'cable-exercise.csv'),
+      path.join(docsDataDir, 'cable-exercise.csv')
+    );
+    console.log('  ✓ Copied cable-exercise.csv');
+  }
+  
+  console.log('\n=== Migration Complete ===');
+  console.log('\nNext steps:');
+  console.log('  1. Run: npm run convert:exercises');
+  console.log('  2. Review the changes in exercises.json');
+  console.log('  3. Test the application');
+}
+
+// Run migration
+main().catch(error => {
+  console.error('Migration failed:', error);
+  process.exit(1);
+});

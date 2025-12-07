@@ -47,6 +47,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Snackbar, Alert, Button, useMediaQuery } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 import { runDataMigration } from './migrations/simplifyDataStructure';
+import { runExerciseNameMigration } from './utils/exerciseNameMigration';
 import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achievements';
 import { BREAKPOINTS } from './theme/responsive';
 
@@ -82,6 +83,7 @@ function AppContent() {
   useEffect(() => {
     const initializeMigration = async () => {
       try {
+        // Run data structure migration first
         console.log('Running data structure migration...');
         const migrationResult = runDataMigration();
         if (migrationResult.status === 'success') {
@@ -90,6 +92,17 @@ function AppContent() {
           console.log('Migration skipped:', migrationResult.reason);
         } else {
           console.error('Migration failed:', migrationResult);
+        }
+
+        // Run exercise name migration
+        console.log('Running exercise name migration...');
+        const exerciseNameMigrationResult = runExerciseNameMigration();
+        if (exerciseNameMigrationResult.status === 'success') {
+          console.log('Exercise name migration completed:', exerciseNameMigrationResult);
+        } else if (exerciseNameMigrationResult.status === 'skipped') {
+          console.log('Exercise name migration skipped:', exerciseNameMigrationResult.reason);
+        } else {
+          console.error('Exercise name migration failed:', exerciseNameMigrationResult);
         }
       } catch (error) {
         console.error('Error running migration:', error);

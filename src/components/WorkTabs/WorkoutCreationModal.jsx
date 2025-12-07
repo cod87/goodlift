@@ -1226,49 +1226,81 @@ const WorkoutCreationModal = ({
                       <AutoAwesome fontSize="small" />
                     </IconButton>
                   </Tooltip>
+                  {/* Original Add to Superset Button - stays in normal position */}
+                  <Tooltip title={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        onClick={handleLockInSuperset}
+                        disabled={highlightedExercises.size < 2}
+                        aria-label={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}
+                        sx={{
+                          border: '1px solid',
+                          borderColor: currentSupersetColor?.main || 'divider',
+                          borderRadius: 1,
+                          width: 36,
+                          height: 36,
+                          bgcolor: currentSupersetColor?.main || 'transparent',
+                          color: currentSupersetColor?.main ? 'white' : 'text.secondary',
+                          '&:hover': {
+                            bgcolor: currentSupersetColor?.dark || 'action.hover',
+                          },
+                          '&.Mui-disabled': {
+                            bgcolor: currentSupersetColor?.main || 'transparent',
+                            color: currentSupersetColor?.main ? 'rgba(255, 255, 255, 0.7)' : 'text.disabled',
+                            opacity: 0.7,
+                            borderColor: currentSupersetColor?.main || 'divider',
+                          },
+                        }}
+                      >
+                        <Add fontSize="small" />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
                 </Stack>
               </Stack>
               
-              {/* Floating Add to Superset Button */}
-              <Tooltip title={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}>
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={handleLockInSuperset}
-                    disabled={highlightedExercises.size < 2}
-                    aria-label={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}
-                    sx={{
-                      position: isButtonSticky ? 'fixed' : 'absolute',
-                      right: isButtonSticky ? 24 : 16,
-                      top: isButtonSticky ? 180 : -4,
-                      zIndex: 1000,
-                      border: '1px solid',
-                      borderColor: currentSupersetColor?.main || 'divider',
-                      borderRadius: 1,
-                      width: 36,
-                      height: 36,
-                      bgcolor: currentSupersetColor?.main || 'transparent',
-                      color: currentSupersetColor?.main ? 'white' : 'text.secondary',
-                      transition: 'all 0.3s ease-in-out',
-                      '&:hover': {
-                        bgcolor: currentSupersetColor?.dark || 'action.hover',
-                      },
-                      '&.Mui-disabled': {
-                        bgcolor: currentSupersetColor?.main || 'transparent',
-                        color: currentSupersetColor?.main ? 'rgba(255, 255, 255, 0.7)' : 'text.disabled',
-                        opacity: 0.7,
+              {/* Floating duplicate button - only shown when scrolled */}
+              {isButtonSticky && (
+                <Tooltip title={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={handleLockInSuperset}
+                      disabled={highlightedExercises.size < 2}
+                      aria-label={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}
+                      sx={{
+                        position: 'fixed',
+                        right: 24,
+                        top: 180,
+                        zIndex: 1000,
+                        border: '1px solid',
                         borderColor: currentSupersetColor?.main || 'divider',
-                      },
-                    }}
-                  >
-                    <Add fontSize="small" />
-                  </IconButton>
-                </span>
-              </Tooltip>
+                        borderRadius: 1,
+                        width: 36,
+                        height: 36,
+                        bgcolor: currentSupersetColor?.main || 'transparent',
+                        color: currentSupersetColor?.main ? 'white' : 'text.secondary',
+                        '&:hover': {
+                          bgcolor: currentSupersetColor?.dark || 'action.hover',
+                        },
+                        '&.Mui-disabled': {
+                          bgcolor: currentSupersetColor?.main || 'transparent',
+                          color: currentSupersetColor?.main ? 'rgba(255, 255, 255, 0.7)' : 'text.disabled',
+                          opacity: 0.7,
+                          borderColor: currentSupersetColor?.main || 'divider',
+                        },
+                      }}
+                    >
+                      <Add fontSize="small" />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              )}
               
               {/* Show superset selection hint when exercises are highlighted */}
               {highlightedExercises.size > 0 && (
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, pr: 6 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                   {highlightedExercises.size} exercise{highlightedExercises.size !== 1 ? 's' : ''} selected for Superset {currentSupersetNumber}
                   {highlightedExercises.size >= 2 && ` - Tap + to confirm`}
                   {highlightedExercises.size === 1 && ' - Select at least one more'}

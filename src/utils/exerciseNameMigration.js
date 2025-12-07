@@ -6,6 +6,10 @@
  * 
  * Old format: "Equipment Exercise" (e.g., "Dumbbell Bench Press")
  * New format: "Exercise, Equipment" (e.g., "Bench Press, Dumbbell")
+ * 
+ * Note: Uses JSON import with type assertion (ES2020+), supported by:
+ * - Chrome 91+, Firefox 89+, Safari 15+, Edge 91+
+ * - Vite handles this for production builds
  */
 
 import exerciseNameMapping from '../../public/data/exercise-name-mapping.json' with { type: 'json' };

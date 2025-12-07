@@ -181,19 +181,56 @@ const ProgressDashboard = () => {
     const exercisePRs = {}; // Track PRs per exercise
     
     filteredHistory.forEach(workout => {
-      // Count session types based on workout.type or workout properties
-      if (workout.type === 'rest' || workout.sessionType === 'rest') {
+      // Count session types based on workout.sessionType (preferred) or workout.type
+      // sessionType is more reliable for manually logged sessions
+      const sessionType = workout.sessionType || workout.type || '';
+      const workoutType = workout.type || '';
+      
+      // Check for rest sessions first
+      if (sessionType === 'rest' || workoutType === 'rest') {
         // Rest days - count separately but don't include in workouts
         restSessions++;
-      } else if (workout.type === 'cardio' || workout.type === 'hiit' || workout.cardioType) {
+      }
+      // Check for cardio sessions (including HIIT and all cardio subtypes)
+      else if (
+        sessionType === 'cardio' || 
+        workoutType === 'cardio' || 
+        workoutType === 'hiit' || 
+        workoutType === 'running' || 
+        workoutType === 'cycling' || 
+        workoutType === 'swimming' ||
+        workout.cardioType
+      ) {
         cardioSessions++;
-      } else if (workout.type === 'yoga' || workout.type === 'stretch' || workout.type === 'mobility' || workout.yogaType) {
+      }
+      // Check for yoga/stretch/mobility sessions
+      else if (
+        sessionType === 'yoga' || 
+        sessionType === 'stretch' ||
+        workoutType === 'yoga' || 
+        workoutType === 'stretch' || 
+        workoutType === 'mobility' ||
+        workout.yogaType ||
+        workout.stretches // Stretch sessions have a stretches array
+      ) {
         yogaSessions++;
-      } else if (workout.type === 'strength' || workout.type === 'full' || workout.type === 'upper' || 
-          workout.type === 'lower' || workout.type === 'push' || workout.type === 'pull' || workout.type === 'legs') {
+      }
+      // Check for strength sessions
+      else if (
+        sessionType === 'strength' ||
+        workoutType === 'strength' || 
+        workoutType === 'full' || 
+        workoutType === 'upper' || 
+        workoutType === 'lower' || 
+        workoutType === 'push' || 
+        workoutType === 'pull' || 
+        workoutType === 'legs' ||
+        workoutType === 'core'
+      ) {
         strengthSessions++;
-      } else if (workout.exercises && Object.keys(workout.exercises).length > 0) {
-        // If it has exercises, assume it's a strength session
+      }
+      // Fallback: if it has exercises, assume it's a strength session
+      else if (workout.exercises && Object.keys(workout.exercises).length > 0) {
         strengthSessions++;
       }
       

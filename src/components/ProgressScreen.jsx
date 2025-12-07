@@ -538,38 +538,39 @@ const ProgressDashboard = () => {
             {/* Progressive Overload Section - Moved here, below adherence */}
           {history.length > 0 && (
             <Card sx={{ bgcolor: 'background.paper' }}>
-              <CardContent>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                  <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <TrendingUp /> Progressive Overload
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Progressive Overload
                   </Typography>
                   {pinnedExercises.length < 10 && (
                     <Button
                       size="small"
                       startIcon={<Add />}
                       onClick={() => setAddExerciseDialogOpen(true)}
-                      sx={{ color: 'secondary.main' }}
+                      variant="text"
                     >
-                      Track Exercise
+                      Add
                     </Button>
                   )}
                 </Stack>
 
                 {pinnedExercises.length === 0 ? (
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Box sx={{ textAlign: 'center', py: 3 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Track your favorite exercises to see your progress over time
+                      Track your favorite exercises to see your progress
                     </Typography>
                     <Button
-                      variant="contained"
+                      variant="outlined"
                       startIcon={<Add />}
                       onClick={() => setAddExerciseDialogOpen(true)}
+                      size="small"
                     >
                       Add Exercise
                     </Button>
                   </Box>
                 ) : (
-                  <Stack spacing={2}>
+                  <Stack spacing={1}>
                     {pinnedExercises.map((pinned) => {
                       // Use tracking mode from pinned exercise, default to weight
                       const trackingMode = pinned.trackingMode || 'weight';
@@ -579,85 +580,92 @@ const ProgressDashboard = () => {
                         trackingMode
                       );
 
-                      const startingValue = progression.length > 0 ? progression[0].value : 0;
-                      // Use stored latest performance if available, otherwise fall back to progression data
-                      const currentValue = trackingMode === 'reps' 
-                        ? (pinned.lastReps !== undefined ? pinned.lastReps : 
-                           (progression.length > 0 ? progression[progression.length - 1].value : 0))
-                        : (pinned.lastWeight !== undefined ? pinned.lastWeight : 
-                           (progression.length > 0 ? progression[progression.length - 1].value : 0));
+                      // Always use stored latest performance - this is synced from workout history
+                      const currentWeight = pinned.lastWeight !== undefined ? pinned.lastWeight : 0;
+                      const currentReps = pinned.lastReps !== undefined ? pinned.lastReps : 0;
+                      
+                      // Determine if we have any data to show
+                      const hasData = currentWeight > 0 || currentReps > 0 || progression.length > 0;
+                      
+                      // Calculate starting and current values for comparison
+                      const startingValue = progression.length > 0 ? progression[0].value : 
+                                           (trackingMode === 'reps' ? currentReps : currentWeight);
+                      const currentValue = trackingMode === 'reps' ? currentReps : currentWeight;
+                      
+                      // Determine progression direction
                       const progressionDirection = currentValue > startingValue ? 'up' : 
-                                                   currentValue < startingValue ? 'down' : 'same';
+                                                   currentValue < startingValue ? 'down' : 'stable';
+                      
                       const unit = trackingMode === 'reps' ? 'reps' : 'lbs';
 
                       return (
                         <Box 
                           key={pinned.exerciseName}
                           sx={{
-                            p: 2,
-                            borderRadius: 2,
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            bgcolor: 'background.default',
+                            py: 1,
+                            px: 1.5,
+                            borderRadius: 1.5,
+                            bgcolor: 'action.hover',
                           }}
                         >
-                          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
-                            <Typography variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
+                          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, flex: 1, fontSize: '0.8rem' }}>
                               {pinned.exerciseName}
                             </Typography>
                             <IconButton
                               onClick={() => handleRemovePinnedExercise(pinned.exerciseName)}
                               size="small"
-                              sx={{ color: 'text.secondary' }}
+                              sx={{ color: 'text.secondary', p: 0.5 }}
                             >
-                              <Close sx={{ fontSize: 18 }} />
+                              <Close sx={{ fontSize: 14 }} />
                             </IconButton>
                           </Stack>
 
-                          {(progression.length > 0 || pinned.lastWeight !== undefined || pinned.lastReps !== undefined) ? (
-                            <Stack 
-                              direction="row" 
-                              alignItems="center" 
-                              spacing={2}
-                              sx={{ justifyContent: 'center', py: 1 }}
-                            >
-                              <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="caption" color="text.secondary">
-                                  Starting
+                          {hasData ? (
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ justifyContent: 'space-between' }}>
+                              <Box sx={{ textAlign: 'center', flex: 1 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', display: 'block' }}>
+                                  Start
                                 </Typography>
-                                <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                                <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.875rem', lineHeight: 1.2 }}>
                                   {startingValue} {unit}
                                 </Typography>
+                                {trackingMode === 'weight' && (
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                                    {currentReps}r
+                                  </Typography>
+                                )}
                               </Box>
                               
-                              <Box sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 20 }}>
                                 {progressionDirection === 'up' && (
-                                  <TrendingUp sx={{ fontSize: 40, color: 'success.main' }} />
+                                  <TrendingUp sx={{ fontSize: 20, color: 'success.main' }} />
                                 )}
                                 {progressionDirection === 'down' && (
-                                  <TrendingDown sx={{ fontSize: 40, color: 'error.main' }} />
+                                  <TrendingDown sx={{ fontSize: 20, color: 'error.main' }} />
                                 )}
-                                {progressionDirection === 'same' && (
-                                  <Remove sx={{ fontSize: 40, color: 'text.secondary' }} />
+                                {progressionDirection === 'stable' && (
+                                  <Remove sx={{ fontSize: 20, color: 'text.secondary' }} />
                                 )}
                               </Box>
 
-                              <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="caption" color="text.secondary">
-                                  Current
+                              <Box sx={{ textAlign: 'center', flex: 1 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', display: 'block' }}>
+                                  Now
                                 </Typography>
-                                <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                                <Typography variant="body2" sx={{ fontWeight: 700, color: 'secondary.main', fontSize: '0.875rem', lineHeight: 1.2 }}>
                                   {currentValue} {unit}
                                 </Typography>
+                                {trackingMode === 'weight' && (
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                                    {currentReps}r
+                                  </Typography>
+                                )}
                               </Box>
                             </Stack>
                           ) : (
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ display: 'block', textAlign: 'center', py: 2 }}
-                            >
-                              No data available
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              No data yet
                             </Typography>
                           )}
                         </Box>

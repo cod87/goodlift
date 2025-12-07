@@ -2,6 +2,15 @@
 
 A modern React-based fitness tracking application focused on logging your workouts and monitoring your progress.
 
+## Recent Updates
+
+### Exercise Name Format (December 2024)
+All exercises now use a consistent "Movement, Equipment" naming format (e.g., "Bench Press, Barbell" instead of "Barbell Bench Press"). This change:
+- Makes exercises easier to find and organize by movement pattern
+- Maintains full backward compatibility with existing user data
+- Automatically migrates your workout history, weights, and preferences
+- See [CHANGELOG.md](./CHANGELOG.md) for detailed migration information
+
 ## Features
 
 - **Quick Workout Generation**: Generate randomized strength training workouts for Upper Body, Lower Body, or Full Body

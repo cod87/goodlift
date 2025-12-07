@@ -50,7 +50,6 @@ import { Snackbar, Alert, Button } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 import { runDataMigration } from './migrations/simplifyDataStructure';
 import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achievements';
-import { performAutoMigration } from './utils/exerciseNameMigration';
 
 /**
  * Main app component wrapped with theme
@@ -81,11 +80,6 @@ function AppContent() {
   useEffect(() => {
     const initializeMigration = async () => {
       try {
-        // Run exercise name migration first
-        console.log('Running exercise name migration...');
-        performAutoMigration();
-        
-        // Then run data structure migration
         console.log('Running data structure migration...');
         const migrationResult = runDataMigration();
         if (migrationResult.status === 'success') {

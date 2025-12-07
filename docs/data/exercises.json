@@ -261,6 +261,15 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Close Grip Lat Pulldown",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Rhomboids, Traps",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Crab Walk",
     "Primary Muscle": "Triceps",
     "Secondary Muscles": "Shoulders, Core, Glutes",
@@ -639,6 +648,15 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Lat Pulldown",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Rear Delts, Traps",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Lateral Bound",
     "Primary Muscle": "Glutes",
     "Secondary Muscles": "Adductors, Abductors, Core",
@@ -864,6 +882,15 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Pull-Up, Cable",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Rear Delts, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength, Full Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Pullover, Dumbbell",
     "Primary Muscle": "Chest",
     "Secondary Muscles": "Lats, Triceps",
@@ -999,6 +1026,15 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Seated Cable Row",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Traps, Rhomboids, Biceps, Rear Delts",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Shoulder Press, Dumbbell",
     "Primary Muscle": "Delts",
     "Secondary Muscles": "Triceps, Chest, Core",
@@ -1096,6 +1132,15 @@
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
+  },
+  {
+    "Exercise Name": "Skull Crusher, Cable",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Front Delts, Chest",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Slam, Slam Ball",
@@ -1251,6 +1296,24 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Tricep Extension, Cable",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Front Delts, Chest",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Tricep Extension, Rope",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Chest, Front Delts",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Tuck Jump",
     "Primary Muscle": "Quads",
     "Secondary Muscles": "Glutes, Hip Flexors, Calves",
@@ -1275,6 +1338,15 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "V-Bar Seated Cable Row",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Traps, Rhomboids, Biceps, Rear Delts",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
   {

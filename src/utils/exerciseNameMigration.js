@@ -8,7 +8,7 @@
  * New format: "Exercise, Equipment" (e.g., "Bench Press, Dumbbell")
  */
 
-import exerciseNameMapping from '../../public/data/exercise-name-mapping.json';
+import exerciseNameMapping from '../../public/data/exercise-name-mapping.json' with { type: 'json' };
 
 const MIGRATION_VERSION_KEY = 'goodlift_exercise_name_migration_version';
 const CURRENT_MIGRATION_VERSION = 1;

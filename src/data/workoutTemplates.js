@@ -57,7 +57,7 @@ export const upperLowerSplit = {
       description: 'Heavy compound movements focusing on chest, back, and shoulders',
       exercises: [
         {
-          name: 'Bench Press, Barbell',
+          name: 'Barbell Bench Press',
           'Primary Muscle': 'Chest',
           sets: 4,
           reps: '6-8',
@@ -65,7 +65,7 @@ export const upperLowerSplit = {
           notes: 'Focus on progressive overload. Add 2.5-5lbs when you hit 4x8.'
         },
         {
-          name: 'Bent-Over Row, Barbell',
+          name: 'Barbell Bent-Over Row',
           'Primary Muscle': 'Lats',
           sets: 4,
           reps: '6-8',
@@ -73,7 +73,7 @@ export const upperLowerSplit = {
           notes: 'Maintain neutral spine. Pull to lower chest.'
         },
         {
-          name: 'Overhead Press, Barbell',
+          name: 'Barbell Overhead Press',
           'Primary Muscle': 'Shoulders',
           sets: 3,
           reps: '8-10',
@@ -89,7 +89,7 @@ export const upperLowerSplit = {
           notes: 'Use assistance or add weight as needed. Full range of motion.'
         },
         {
-          name: 'Incline Bench Press, Dumbbell',
+          name: 'Dumbbell Incline Bench Press',
           'Primary Muscle': 'Upper Chest',
           sets: 3,
           reps: '10-12',
@@ -97,7 +97,7 @@ export const upperLowerSplit = {
           notes: '30-45 degree incline. Control the eccentric.'
         },
         {
-          name: 'Reverse Fly, Dumbbell',
+          name: 'Dumbbell Reverse Fly',
           'Primary Muscle': 'Rear Delts',
           sets: 3,
           reps: '12-15',
@@ -105,7 +105,7 @@ export const upperLowerSplit = {
           notes: 'Pull to face level. Focus on rear delts.'
         },
         {
-          name: 'Bicep Curl, Barbell',
+          name: 'Barbell Bicep Curl',
           'Primary Muscle': 'Biceps',
           sets: 3,
           reps: '10-12',
@@ -137,7 +137,7 @@ export const upperLowerSplit = {
           notes: 'Progressive overload priority. Squat to parallel or below.'
         },
         {
-          name: 'Romanian Deadlift, Barbell',
+          name: 'Barbell Romanian Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 3,
           reps: '8-10',
@@ -153,7 +153,7 @@ export const upperLowerSplit = {
           notes: 'Per leg. Maintain upright torso.'
         },
         {
-          name: 'Goblet Squat, Dumbbell',
+          name: 'Dumbbell Goblet Squat',
           'Primary Muscle': 'Quads',
           sets: 3,
           reps: '12-15',
@@ -161,7 +161,7 @@ export const upperLowerSplit = {
           notes: 'Full range of motion. Control the eccentric.'
         },
         {
-          name: 'Romanian Deadlift, Barbell',
+          name: 'Barbell Romanian Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 3,
           reps: '12-15',
@@ -200,7 +200,7 @@ export const upperLowerSplit = {
       description: 'Higher volume work with moderate weights',
       exercises: [
         {
-          name: 'Incline Bench Press, Barbell',
+          name: 'Barbell Incline Bench Press',
           'Primary Muscle': 'Upper Chest',
           sets: 4,
           reps: '8-10',
@@ -208,7 +208,7 @@ export const upperLowerSplit = {
           notes: 'Focus on upper chest development.'
         },
         {
-          name: 'Bent-Over Row, Barbell',
+          name: 'Barbell Bent-Over Row',
           'Primary Muscle': 'Lats',
           sets: 4,
           reps: '10-12',
@@ -216,7 +216,7 @@ export const upperLowerSplit = {
           notes: 'Pull to lower chest. Squeeze shoulder blades.'
         },
         {
-          name: 'Shoulder Press, Dumbbell',
+          name: 'Dumbbell Shoulder Press',
           'Primary Muscle': 'Shoulders',
           sets: 3,
           reps: '10-12',
@@ -232,7 +232,7 @@ export const upperLowerSplit = {
           notes: 'Pull to upper chest. Control the eccentric.'
         },
         {
-          name: 'Fly, Dumbbell',
+          name: 'Dumbbell Fly',
           'Primary Muscle': 'Chest',
           sets: 3,
           reps: '12-15',
@@ -240,7 +240,7 @@ export const upperLowerSplit = {
           notes: 'Slight bend in elbows. Feel stretch in chest.'
         },
         {
-          name: 'Lateral Raise, Dumbbell',
+          name: 'Dumbbell Lateral Raise',
           'Primary Muscle': 'Side Delts',
           sets: 3,
           reps: '12-15',
@@ -248,7 +248,7 @@ export const upperLowerSplit = {
           notes: 'Lead with elbows. Control the weight.'
         },
         {
-          name: 'Hammer Curl, Dumbbell',
+          name: 'Dumbbell Hammer Curl',
           'Primary Muscle': 'Biceps',
           sets: 3,
           reps: '10-12',
@@ -256,7 +256,7 @@ export const upperLowerSplit = {
           notes: 'Targets brachialis. Neutral grip throughout.'
         },
         {
-          name: 'Overhead Tricep Extension, Dumbbell',
+          name: 'Dumbbell Overhead Tricep Extension',
           'Primary Muscle': 'Triceps',
           sets: 3,
           reps: '12-15',
@@ -272,7 +272,7 @@ export const upperLowerSplit = {
       description: 'Deadlift and hamstring/glute dominant movements',
       exercises: [
         {
-          name: 'Deadlift, Barbell',
+          name: 'Barbell Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 4,
           reps: '5-8',
@@ -280,7 +280,7 @@ export const upperLowerSplit = {
           notes: 'Progressive overload priority. Maintain neutral spine.'
         },
         {
-          name: 'Front Squat, Barbell',
+          name: 'Barbell Front Squat',
           'Primary Muscle': 'Quads',
           sets: 3,
           reps: '8-10',
@@ -304,7 +304,7 @@ export const upperLowerSplit = {
           notes: 'Squeeze quads at top. Control the eccentric.'
         },
         {
-          name: 'Romanian Deadlift, Barbell',
+          name: 'Barbell Romanian Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 3,
           reps: '8-12',
@@ -388,7 +388,7 @@ export const pushPullLegs = {
       description: 'Chest, shoulders, and triceps with emphasis on pressing movements',
       exercises: [
         {
-          name: 'Bench Press, Barbell',
+          name: 'Barbell Bench Press',
           'Primary Muscle': 'Chest',
           sets: 4,
           reps: '6-8',
@@ -396,7 +396,7 @@ export const pushPullLegs = {
           notes: 'Main strength movement. Progressive overload priority.'
         },
         {
-          name: 'Incline Bench Press, Dumbbell',
+          name: 'Dumbbell Incline Bench Press',
           'Primary Muscle': 'Upper Chest',
           sets: 4,
           reps: '8-10',
@@ -404,7 +404,7 @@ export const pushPullLegs = {
           notes: '30-45 degree angle. Focus on upper chest.'
         },
         {
-          name: 'Overhead Press, Barbell',
+          name: 'Barbell Overhead Press',
           'Primary Muscle': 'Shoulders',
           sets: 3,
           reps: '8-10',
@@ -412,7 +412,7 @@ export const pushPullLegs = {
           notes: 'Barbell or dumbbell. Keep core tight.'
         },
         {
-          name: 'Fly, Dumbbell',
+          name: 'Dumbbell Fly',
           'Primary Muscle': 'Chest',
           sets: 3,
           reps: '10-12',
@@ -420,7 +420,7 @@ export const pushPullLegs = {
           notes: 'Slight elbow bend. Feel the stretch.'
         },
         {
-          name: 'Lateral Raise, Dumbbell',
+          name: 'Dumbbell Lateral Raise',
           'Primary Muscle': 'Side Delts',
           sets: 3,
           reps: '12-15',
@@ -436,7 +436,7 @@ export const pushPullLegs = {
           notes: 'Keep elbows pinned. Full extension.'
         },
         {
-          name: 'Overhead Tricep Extension, Dumbbell',
+          name: 'Dumbbell Overhead Tricep Extension',
           'Primary Muscle': 'Triceps',
           sets: 3,
           reps: '12-15',
@@ -452,7 +452,7 @@ export const pushPullLegs = {
       description: 'Back, biceps with focus on lat width and thickness',
       exercises: [
         {
-          name: 'Deadlift, Barbell',
+          name: 'Barbell Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 4,
           reps: '5-8',
@@ -468,7 +468,7 @@ export const pushPullLegs = {
           notes: 'Wide grip. Full range of motion for width.'
         },
         {
-          name: 'Bent-Over Row, Barbell',
+          name: 'Barbell Bent-Over Row',
           'Primary Muscle': 'Lats',
           sets: 4,
           reps: '8-10',
@@ -476,7 +476,7 @@ export const pushPullLegs = {
           notes: 'Pull to lower chest. Retract scapula.'
         },
         {
-          name: 'Reverse Fly, Dumbbell',
+          name: 'Dumbbell Reverse Fly',
           'Primary Muscle': 'Rear Delts',
           sets: 3,
           reps: '12-15',
@@ -484,7 +484,7 @@ export const pushPullLegs = {
           notes: 'Pull to face. Emphasize rear delts.'
         },
         {
-          name: 'Shrug, Barbell',
+          name: 'Barbell Shrug',
           'Primary Muscle': 'Traps',
           sets: 3,
           reps: '12-15',
@@ -492,7 +492,7 @@ export const pushPullLegs = {
           notes: 'Straight up and down. Squeeze at top.'
         },
         {
-          name: 'Bicep Curl, Barbell',
+          name: 'Barbell Bicep Curl',
           'Primary Muscle': 'Biceps',
           sets: 3,
           reps: '10-12',
@@ -500,7 +500,7 @@ export const pushPullLegs = {
           notes: 'No swinging. Control the eccentric.'
         },
         {
-          name: 'Hammer Curl, Dumbbell',
+          name: 'Dumbbell Hammer Curl',
           'Primary Muscle': 'Biceps',
           sets: 3,
           reps: '10-12',
@@ -524,7 +524,7 @@ export const pushPullLegs = {
           notes: 'King of leg exercises. Progressive overload.'
         },
         {
-          name: 'Front Squat, Barbell',
+          name: 'Barbell Front Squat',
           'Primary Muscle': 'Quads',
           sets: 3,
           reps: '8-10',
@@ -532,7 +532,7 @@ export const pushPullLegs = {
           notes: 'Upright torso. More quad emphasis.'
         },
         {
-          name: 'Romanian Deadlift, Barbell',
+          name: 'Barbell Romanian Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 3,
           reps: '10-12',
@@ -540,7 +540,7 @@ export const pushPullLegs = {
           notes: 'Hip hinge. Feel hamstring stretch.'
         },
         {
-          name: 'Goblet Squat, Dumbbell',
+          name: 'Dumbbell Goblet Squat',
           'Primary Muscle': 'Quads',
           sets: 3,
           reps: '12-15',
@@ -556,7 +556,7 @@ export const pushPullLegs = {
           notes: 'Isolation work. Squeeze at top.'
         },
         {
-          name: 'Romanian Deadlift, Barbell',
+          name: 'Barbell Romanian Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 3,
           reps: '12-15',
@@ -580,7 +580,7 @@ export const pushPullLegs = {
       description: 'Shoulders, chest, and triceps with emphasis on shoulder development',
       exercises: [
         {
-          name: 'Overhead Press, Barbell',
+          name: 'Barbell Overhead Press',
           'Primary Muscle': 'Shoulders',
           sets: 4,
           reps: '6-8',
@@ -588,7 +588,7 @@ export const pushPullLegs = {
           notes: 'Heavy shoulder work. Build strength.'
         },
         {
-          name: 'Incline Bench Press, Barbell',
+          name: 'Barbell Incline Bench Press',
           'Primary Muscle': 'Upper Chest',
           sets: 4,
           reps: '8-10',
@@ -596,7 +596,7 @@ export const pushPullLegs = {
           notes: 'Upper chest development.'
         },
         {
-          name: 'Shoulder Press, Dumbbell',
+          name: 'Dumbbell Shoulder Press',
           'Primary Muscle': 'Shoulders',
           sets: 3,
           reps: '10-12',
@@ -604,7 +604,7 @@ export const pushPullLegs = {
           notes: 'Full range of motion. Control the weight.'
         },
         {
-          name: 'Fly, Dumbbell',
+          name: 'Dumbbell Fly',
           'Primary Muscle': 'Chest',
           sets: 3,
           reps: '12-15',
@@ -612,7 +612,7 @@ export const pushPullLegs = {
           notes: 'Constant tension. Squeeze at contraction.'
         },
         {
-          name: 'Front Raise, Dumbbell',
+          name: 'Dumbbell Front Raise',
           'Primary Muscle': 'Front Delts',
           sets: 3,
           reps: '12-15',
@@ -628,7 +628,7 @@ export const pushPullLegs = {
           notes: 'Bodyweight or weighted. Full range.'
         },
         {
-          name: 'Close Grip Bench Press, Barbell',
+          name: 'Barbell Close Grip Bench Press',
           'Primary Muscle': 'Triceps',
           sets: 3,
           reps: '10-12',
@@ -644,7 +644,7 @@ export const pushPullLegs = {
       description: 'Back and biceps with focus on thickness and detail',
       exercises: [
         {
-          name: 'Bent-Over Row, Barbell',
+          name: 'Barbell Bent-Over Row',
           'Primary Muscle': 'Lats',
           sets: 4,
           reps: '8-10',
@@ -660,7 +660,7 @@ export const pushPullLegs = {
           notes: 'Wide grip. Control the eccentric.'
         },
         {
-          name: 'Bent-Over Row, Barbell',
+          name: 'Barbell Bent-Over Row',
           'Primary Muscle': 'Lats',
           sets: 3,
           reps: '10-12',
@@ -668,7 +668,7 @@ export const pushPullLegs = {
           notes: 'Mid-back thickness. Full range.'
         },
         {
-          name: 'Single-Arm Row, Dumbbell',
+          name: 'Dumbbell Single-Arm Row',
           'Primary Muscle': 'Lats',
           sets: 3,
           reps: '10-12',
@@ -676,7 +676,7 @@ export const pushPullLegs = {
           notes: 'Per arm. Full stretch and contraction.'
         },
         {
-          name: 'Reverse Fly, Dumbbell',
+          name: 'Dumbbell Reverse Fly',
           'Primary Muscle': 'Rear Delts',
           sets: 3,
           reps: '12-15',
@@ -684,7 +684,7 @@ export const pushPullLegs = {
           notes: 'Cable or dumbbell. Rear delt isolation.'
         },
         {
-          name: 'Bicep Curl, Barbell',
+          name: 'Barbell Bicep Curl',
           'Primary Muscle': 'Biceps',
           sets: 3,
           reps: '12-15',
@@ -692,7 +692,7 @@ export const pushPullLegs = {
           notes: 'Constant tension. Peak contraction.'
         },
         {
-          name: 'Bicep Curl, Dumbbell',
+          name: 'Dumbbell Bicep Curl',
           'Primary Muscle': 'Biceps',
           sets: 3,
           reps: '12-15',
@@ -708,7 +708,7 @@ export const pushPullLegs = {
       description: 'Hamstring and glute dominant leg day',
       exercises: [
         {
-          name: 'Romanian Deadlift, Barbell',
+          name: 'Barbell Romanian Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 4,
           reps: '8-10',
@@ -724,7 +724,7 @@ export const pushPullLegs = {
           notes: 'Per leg. Balance and unilateral strength.'
         },
         {
-          name: 'Goblet Squat, Dumbbell',
+          name: 'Dumbbell Goblet Squat',
           'Primary Muscle': 'Quads',
           sets: 3,
           reps: '12-15',
@@ -732,7 +732,7 @@ export const pushPullLegs = {
           notes: 'High foot placement for glutes.'
         },
         {
-          name: 'Romanian Deadlift, Barbell',
+          name: 'Barbell Romanian Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 4,
           reps: '12-15',
@@ -748,7 +748,7 @@ export const pushPullLegs = {
           notes: 'Per leg. Focus on glute activation.'
         },
         {
-          name: 'Romanian Deadlift, Barbell',
+          name: 'Barbell Romanian Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 3,
           reps: '8-12',
@@ -824,7 +824,7 @@ export const fullBody3Day = {
           notes: 'Main lower body movement. Focus on form.'
         },
         {
-          name: 'Bench Press, Barbell',
+          name: 'Barbell Bench Press',
           'Primary Muscle': 'Chest',
           sets: 3,
           reps: '8-10',
@@ -832,7 +832,7 @@ export const fullBody3Day = {
           notes: 'Main upper body push. Controlled descent.'
         },
         {
-          name: 'Bent-Over Row, Barbell',
+          name: 'Barbell Bent-Over Row',
           'Primary Muscle': 'Lats',
           sets: 3,
           reps: '8-10',
@@ -840,7 +840,7 @@ export const fullBody3Day = {
           notes: 'Main upper body pull. Neutral spine.'
         },
         {
-          name: 'Overhead Press, Barbell',
+          name: 'Barbell Overhead Press',
           'Primary Muscle': 'Shoulders',
           sets: 3,
           reps: '8-10',
@@ -848,7 +848,7 @@ export const fullBody3Day = {
           notes: 'Build shoulder strength. Core tight.'
         },
         {
-          name: 'Romanian Deadlift, Barbell',
+          name: 'Barbell Romanian Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 3,
           reps: '10-12',
@@ -887,7 +887,7 @@ export const fullBody3Day = {
       description: 'Exercise variations for balanced development',
       exercises: [
         {
-          name: 'Front Squat, Barbell',
+          name: 'Barbell Front Squat',
           'Primary Muscle': 'Quads',
           sets: 3,
           reps: '8-10',
@@ -895,7 +895,7 @@ export const fullBody3Day = {
           notes: 'Squat variation. Upright torso.'
         },
         {
-          name: 'Incline Bench Press, Dumbbell',
+          name: 'Dumbbell Incline Bench Press',
           'Primary Muscle': 'Upper Chest',
           sets: 3,
           reps: '10-12',
@@ -903,7 +903,7 @@ export const fullBody3Day = {
           notes: 'Upper chest focus. Control the weight.'
         },
         {
-          name: 'Bent-Over Row, Barbell',
+          name: 'Barbell Bent-Over Row',
           'Primary Muscle': 'Lats',
           sets: 3,
           reps: '10-12',
@@ -911,7 +911,7 @@ export const fullBody3Day = {
           notes: 'Pull to lower chest. Squeeze back.'
         },
         {
-          name: 'Shoulder Press, Dumbbell',
+          name: 'Dumbbell Shoulder Press',
           'Primary Muscle': 'Shoulders',
           sets: 3,
           reps: '10-12',
@@ -919,7 +919,7 @@ export const fullBody3Day = {
           notes: 'Neutral or pronated grip.'
         },
         {
-          name: 'Romanian Deadlift, Barbell',
+          name: 'Barbell Romanian Deadlift',
           'Primary Muscle': 'Hamstrings',
           sets: 3,
           reps: '12-15',
@@ -958,7 +958,7 @@ export const fullBody3Day = {
       description: 'Higher rep ranges for muscle endurance and hypertrophy',
       exercises: [
         {
-          name: 'Goblet Squat, Dumbbell',
+          name: 'Dumbbell Goblet Squat',
           'Primary Muscle': 'Quads',
           sets: 3,
           reps: '12-15',
@@ -966,7 +966,7 @@ export const fullBody3Day = {
           notes: 'Dumbbell or kettlebell. Squat deep.'
         },
         {
-          name: 'Bench Press, Dumbbell',
+          name: 'Dumbbell Bench Press',
           'Primary Muscle': 'Chest',
           sets: 3,
           reps: '10-12',
@@ -974,7 +974,7 @@ export const fullBody3Day = {
           notes: 'Full range of motion. Control descent.'
         },
         {
-          name: 'Single-Arm Row, Dumbbell',
+          name: 'Dumbbell Single-Arm Row',
           'Primary Muscle': 'Lats',
           sets: 3,
           reps: '10-12',
@@ -982,7 +982,7 @@ export const fullBody3Day = {
           notes: 'Per arm. Full stretch and contraction.'
         },
         {
-          name: 'Lateral Raise, Dumbbell',
+          name: 'Dumbbell Lateral Raise',
           'Primary Muscle': 'Side Delts',
           sets: 3,
           reps: '12-15',
@@ -998,7 +998,7 @@ export const fullBody3Day = {
           notes: 'Per leg. Controlled steps.'
         },
         {
-          name: 'Reverse Fly, Dumbbell',
+          name: 'Dumbbell Reverse Fly',
           'Primary Muscle': 'Rear Delts',
           sets: 3,
           reps: '15-20',

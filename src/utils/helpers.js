@@ -123,8 +123,8 @@ export const generateSessionId = () => {
  * @param {string} name - The exercise name to split
  * @returns {{ line1: string, line2: string, isSplit: boolean }} Split result
  * @example
- * splitExerciseName('Incline Bench Press, Dumbbell')
- * // Returns { line1: 'Incline Bench', line2: 'Press, Dumbbell', isSplit: true }
+ * splitExerciseName('Dumbbell Bench Press')
+ * // Returns { line1: 'Dumbbell', line2: 'Bench Press', isSplit: true }
  */
 export const splitExerciseName = (name) => {
   if (!name || name.length <= 15) {

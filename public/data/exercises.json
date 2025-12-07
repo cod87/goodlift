@@ -883,8 +883,8 @@
   },
   {
     "Exercise Name": "Pull-Up, Cable",
-    "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Rear Delts, Core",
+    "Primary Muscle": "Lats, Biceps",
+    "Secondary Muscles": "Rear Delts, Core",
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Full Body Strength",
@@ -1338,6 +1338,15 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "V-Bar Pulldown",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Traps, Rhomboids, Biceps, Rear Delts",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
     "Progression": "Progressive Overload"
   },
   {

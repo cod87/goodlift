@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -32,6 +32,7 @@ import {
   FilterList,
   MoreVert,
   Add,
+  ClearAll,
 } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 import { generateStandardWorkout } from '../../utils/workoutGenerator';
@@ -331,6 +332,14 @@ const WorkoutCreationModal = ({
   
   // Superset management modal state
   const [supersetModalOpen, setSupersetModalOpen] = useState(false);
+  
+  // Clear supersets confirmation dialog state
+  const [clearSupersetsDialogOpen, setClearSupersetsDialogOpen] = useState(false);
+  
+  // Floating button state and ref
+  const [isButtonSticky, setIsButtonSticky] = useState(false);
+  const contentRef = useRef(null);
+  const buttonContainerRef = useRef(null);
 
   // Update currentSupersetNumber whenever myWorkout changes
   useEffect(() => {
@@ -371,17 +380,11 @@ const WorkoutCreationModal = ({
         setWorkoutName(existingWorkout.name || '');
         setWorkoutType(existingWorkout.type || 'full');
         
-        // Calculate highlighted exercises based on superset grouping
+        // Don't pre-select exercises when editing - users should start with no exercises selected
+        setHighlightedExercises(new Set());
+        
+        // Set current superset number to the next available number
         if (existingWorkout.exercises && existingWorkout.exercises.length > 0) {
-          const highlighted = new Set();
-          existingWorkout.exercises.forEach(exercise => {
-            if (exercise.supersetGroup) {
-              highlighted.add(exercise.id || exercise['Exercise Name']);
-            }
-          });
-          setHighlightedExercises(highlighted);
-          
-          // Set current superset number to the max + 1
           const supersetGroups = existingWorkout.exercises
             .filter(ex => ex.supersetGroup)
             .map(ex => ex.supersetGroup);
@@ -389,6 +392,8 @@ const WorkoutCreationModal = ({
             ? Math.max(...supersetGroups)
             : 0;
           setCurrentSupersetNumber(maxSuperset + 1);
+        } else {
+          setCurrentSupersetNumber(1);
         }
       } else {
         // Creating new workout
@@ -433,6 +438,37 @@ const WorkoutCreationModal = ({
       setCurrentSupersetNumber(getLowestAvailableSupersetNumber());
     }
   }, [highlightedExercises, myWorkout]);
+
+  // Scroll detection for floating button
+  useEffect(() => {
+    if (!open || currentTab !== 1) return;
+
+    const contentElement = contentRef.current;
+    if (!contentElement) return;
+
+    const handleScroll = () => {
+      const buttonContainer = buttonContainerRef.current;
+      if (!buttonContainer) return;
+
+      // Get button container's position relative to viewport
+      const rect = buttonContainer.getBoundingClientRect();
+      
+      // Calculate the threshold: when button is about to go out of view at the top
+      // We want it to stick when it reaches near the tabs (which are ~120px from top including header)
+      const stickyThreshold = 180; // Adjust based on header + tabs height
+      
+      // Button should be sticky when it would scroll past the threshold
+      setIsButtonSticky(rect.top < stickyThreshold);
+    };
+
+    contentElement.addEventListener('scroll', handleScroll);
+    // Check initial state
+    handleScroll();
+
+    return () => {
+      contentElement.removeEventListener('scroll', handleScroll);
+    };
+  }, [open, currentTab]);
 
   // Filter exercises based on search and filters
   const filteredExercises = exercises.filter(exercise => {
@@ -932,6 +968,25 @@ const WorkoutCreationModal = ({
     });
   }, []);
 
+  // Handle clearing all supersets
+  const handleClearSupersets = useCallback(() => {
+    setClearSupersetsDialogOpen(true);
+  }, []);
+
+  // Confirm clearing all supersets
+  const handleConfirmClearSupersets = useCallback(() => {
+    // Remove all superset assignments from exercises
+    const updatedExercises = myWorkout.map(exercise => ({
+      ...exercise,
+      supersetGroup: null,
+    }));
+    
+    setMyWorkout(updatedExercises);
+    setHighlightedExercises(new Set());
+    setCurrentSupersetNumber(1);
+    setClearSupersetsDialogOpen(false);
+  }, [myWorkout]);
+
   // Memoize the current superset color to avoid repeated function calls
   const currentSupersetColor = useMemo(() => {
     return getSupersetColorWithLight(currentSupersetNumber);
@@ -1003,7 +1058,7 @@ const WorkoutCreationModal = ({
         </Tabs>
       </Box>
 
-      <DialogContent sx={{ p: 0, overflow: 'auto' }}>
+      <DialogContent ref={contentRef} sx={{ p: 0, overflow: 'auto' }}>
         {/* Exercises Tab */}
         {currentTab === 0 && (
           <Box sx={{ p: 2 }}>
@@ -1126,12 +1181,36 @@ const WorkoutCreationModal = ({
             <Divider sx={{ my: 2 }} />
 
             {/* Exercise List with Arrow Controls */}
-            <Box sx={{ mb: 2 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+            <Box sx={{ mb: 2, position: 'relative' }}>
+              <Stack 
+                ref={buttonContainerRef}
+                direction="row" 
+                justifyContent="space-between" 
+                alignItems="center" 
+                sx={{ mb: 1 }}
+              >
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   Exercises ({myWorkout.length})
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
+                  <Tooltip title="Clear All Supersets">
+                    <span>
+                      <IconButton
+                        size="small"
+                        onClick={handleClearSupersets}
+                        disabled={!myWorkout.some(ex => ex.supersetGroup !== null && ex.supersetGroup !== undefined)}
+                        sx={{
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          borderRadius: 1,
+                          width: 36,
+                          height: 36,
+                        }}
+                      >
+                        <ClearAll fontSize="small" />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
                   <Tooltip title="Generate Workout">
                     <IconButton
                       size="small"
@@ -1147,41 +1226,51 @@ const WorkoutCreationModal = ({
                       <AutoAwesome fontSize="small" />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        onClick={handleLockInSuperset}
-                        disabled={highlightedExercises.size < 2}
-                        aria-label={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}
-                        sx={{
-                          border: '1px solid',
-                          borderColor: currentSupersetColor?.main || 'divider',
-                          borderRadius: 1,
-                          width: 36,
-                          height: 36,
-                          bgcolor: currentSupersetColor?.main || 'transparent',
-                          color: currentSupersetColor?.main ? 'white' : 'text.secondary',
-                          '&:hover': {
-                            bgcolor: currentSupersetColor?.dark || 'action.hover',
-                          },
-                          '&.Mui-disabled': {
-                            bgcolor: currentSupersetColor?.main || 'transparent',
-                            color: currentSupersetColor?.main ? 'rgba(255, 255, 255, 0.7)' : 'text.disabled',
-                            opacity: 0.7,
-                            borderColor: currentSupersetColor?.main || 'divider',
-                          },
-                        }}
-                      >
-                        <Add fontSize="small" />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
                 </Stack>
               </Stack>
+              
+              {/* Floating Add to Superset Button */}
+              <Tooltip title={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}>
+                <span>
+                  <IconButton
+                    size="medium"
+                    onClick={handleLockInSuperset}
+                    disabled={highlightedExercises.size < 2}
+                    aria-label={highlightedExercises.size >= 2 ? `Create Superset ${currentSupersetNumber}` : `Superset ${currentSupersetNumber} - Select exercises`}
+                    sx={{
+                      position: isButtonSticky ? 'fixed' : 'absolute',
+                      right: isButtonSticky ? 24 : 16,
+                      top: isButtonSticky ? 180 : -4,
+                      zIndex: 1000,
+                      border: '2px solid',
+                      borderColor: currentSupersetColor?.main || 'divider',
+                      borderRadius: '50%',
+                      width: 56,
+                      height: 56,
+                      bgcolor: currentSupersetColor?.main || 'background.paper',
+                      color: currentSupersetColor?.main ? 'white' : 'text.secondary',
+                      boxShadow: isButtonSticky ? 4 : 2,
+                      transition: 'all 0.3s ease-in-out',
+                      '&:hover': {
+                        bgcolor: currentSupersetColor?.dark || 'action.hover',
+                        boxShadow: 6,
+                      },
+                      '&.Mui-disabled': {
+                        bgcolor: currentSupersetColor?.main ? currentSupersetColor.main : 'background.paper',
+                        color: currentSupersetColor?.main ? 'rgba(255, 255, 255, 0.5)' : 'text.disabled',
+                        opacity: 0.6,
+                        borderColor: currentSupersetColor?.main || 'divider',
+                      },
+                    }}
+                  >
+                    <Add fontSize="medium" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              
               {/* Show superset selection hint when exercises are highlighted */}
               {highlightedExercises.size > 0 && (
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, pr: 8 }}>
                   {highlightedExercises.size} exercise{highlightedExercises.size !== 1 ? 's' : ''} selected for Superset {currentSupersetNumber}
                   {highlightedExercises.size >= 2 && ` - Tap + to confirm`}
                   {highlightedExercises.size === 1 && ' - Select at least one more'}
@@ -1258,6 +1347,27 @@ const WorkoutCreationModal = ({
           <Button onClick={() => setGenerateCountDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleGenerateWorkout} variant="contained">
             Generate
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Clear Supersets Confirmation Dialog */}
+      <Dialog
+        open={clearSupersetsDialogOpen}
+        onClose={() => setClearSupersetsDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Clear All Supersets?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            This will remove all superset groupings from your workout. Exercises will remain in your workout but will no longer be grouped as supersets. This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setClearSupersetsDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleConfirmClearSupersets} variant="contained" color="warning">
+            Clear Supersets
           </Button>
         </DialogActions>
       </Dialog>

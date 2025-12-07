@@ -587,13 +587,16 @@ const ProgressDashboard = () => {
                       // Determine if we have any data to show
                       const hasData = currentWeight > 0 || currentReps > 0 || progression.length > 0;
                       
-                      // Calculate progression direction if we have history
-                      const hasProgression = progression.length > 1;
+                      // Calculate starting and current values for comparison
                       const startingValue = progression.length > 0 ? progression[0].value : 
                                            (trackingMode === 'reps' ? currentReps : currentWeight);
                       const currentValue = trackingMode === 'reps' ? currentReps : currentWeight;
-                      const progressionDirection = hasProgression && currentValue > startingValue ? 'up' : 
-                                                   hasProgression && currentValue < startingValue ? 'down' : 'stable';
+                      
+                      // Determine progression direction
+                      const progressionDirection = currentValue > startingValue ? 'up' : 
+                                                   currentValue < startingValue ? 'down' : 'stable';
+                      
+                      const unit = trackingMode === 'reps' ? 'reps' : 'lbs';
 
                       return (
                         <Box 
@@ -619,29 +622,46 @@ const ProgressDashboard = () => {
                           </Stack>
 
                           {hasData ? (
-                            <Stack spacing={0.5}>
-                              <Stack direction="row" alignItems="center" spacing={1}>
-                                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 50 }}>
-                                  Weight:
+                            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ justifyContent: 'space-between' }}>
+                              <Box sx={{ textAlign: 'center', flex: 1 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                  Starting
                                 </Typography>
-                                <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                  {currentWeight} lbs
+                                <Typography variant="body1" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                                  {startingValue} {unit}
                                 </Typography>
+                                {trackingMode === 'weight' && (
+                                  <Typography variant="caption" color="text.secondary">
+                                    {currentReps} reps
+                                  </Typography>
+                                )}
+                              </Box>
+                              
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 32 }}>
                                 {progressionDirection === 'up' && (
-                                  <TrendingUp sx={{ fontSize: 18, color: 'success.main' }} />
+                                  <TrendingUp sx={{ fontSize: 28, color: 'success.main' }} />
                                 )}
                                 {progressionDirection === 'down' && (
-                                  <TrendingDown sx={{ fontSize: 18, color: 'error.main' }} />
+                                  <TrendingDown sx={{ fontSize: 28, color: 'error.main' }} />
                                 )}
-                              </Stack>
-                              <Stack direction="row" alignItems="center" spacing={1}>
-                                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 50 }}>
-                                  Reps:
+                                {progressionDirection === 'stable' && (
+                                  <Remove sx={{ fontSize: 28, color: 'text.secondary' }} />
+                                )}
+                              </Box>
+
+                              <Box sx={{ textAlign: 'center', flex: 1 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                  Current
                                 </Typography>
-                                <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                  {currentReps} reps
+                                <Typography variant="body1" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                                  {currentValue} {unit}
                                 </Typography>
-                              </Stack>
+                                {trackingMode === 'weight' && (
+                                  <Typography variant="caption" color="text.secondary">
+                                    {currentReps} reps
+                                  </Typography>
+                                )}
+                              </Box>
                             </Stack>
                           ) : (
                             <Typography variant="caption" color="text.secondary">

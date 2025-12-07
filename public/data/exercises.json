@@ -1,5 +1,14 @@
 [
   {
+    "Exercise Name": "Arnold Press, Dumbbell",
+    "Primary Muscle": "Delts",
+    "Secondary Muscles": "Triceps, Chest",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Back Lever",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Back, Shoulders",
@@ -19,233 +28,6 @@
     "Webp File": "back-squat.webp"
   },
   {
-    "Exercise Name": "Barbell Belt Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Barbell Bench Press",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Full Body Strength, Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-bench-press.webp"
-  },
-  {
-    "Exercise Name": "Barbell Bent-Over Row",
-    "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Lower Back, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Full Body Strength, Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-bent-over-row.webp"
-  },
-  {
-    "Exercise Name": "Barbell Bicep Curl",
-    "Primary Muscle": "Biceps",
-    "Secondary Muscles": "Front Delts, Forearms",
-    "Exercise Type": "Isolation",
-    "Equipment": "Barbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-bicep-curl.webp"
-  },
-  {
-    "Exercise Name": "Barbell Close Grip Bench Press",
-    "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Chest, Front Delts",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Barbell Deadlift",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Lower Back, Quads",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Full Body Strength, Lower Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-deadlift.webp"
-  },
-
-  {
-    "Exercise Name": "Barbell Front Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Core, Glutes, Upper Back",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Lower Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "front-squat.webp"
-  },
-  {
-    "Exercise Name": "Barbell Good Morning",
-    "Primary Muscle": "Glutes",
-    "Secondary Muscles": "Hamstrings, Lower Back, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "good-morning.webp"
-  },
-  {
-    "Exercise Name": "Barbell Hack Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Barbell High Pull",
-    "Primary Muscle": "Traps",
-    "Secondary Muscles": "Delts, Hamstrings",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Cardio, HIIT",
-    "Progression": "Power Development"
-  },
-  {
-    "Exercise Name": "Barbell Hip Thrust",
-    "Webp File": "barbell-hip-thrust.webp",
-    "Primary Muscle": "Glutes",
-    "Secondary Muscles": "Hamstrings, Lower Back, Quads",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Barbell Incline Bench Press",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "incline-barbell-bench-press.webp"
-  },
-  {
-    "Exercise Name": "Barbell Overhead Press",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-overhead-press.webp"
-  },
-  {
-    "Exercise Name": "Barbell Paused Bench Press",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-paused-bench-press.webp"
-  },
-  {
-    "Exercise Name": "Barbell Pendulum Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Barbell Pullover",
-    "Webp File": "barbell-pullover.webp",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Lats, Triceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Barbell Push Press",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-push-press.webp"
-  },
-  {
-    "Exercise Name": "Barbell Romanian Deadlift",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Lower Back",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Lower Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-romanian-deadlift.webp"
-  },
-  {
-    "Exercise Name": "Barbell Shrug",
-    "Primary Muscle": "Traps",
-    "Secondary Muscles": "Upper Back",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-shrugs.webp"
-  },
-
-
-  {
-    "Exercise Name": "Barbell Sumo Deadlift",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Quads, Lower Back, Adductors",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-sumo-deadlift.webp"
-  },
-  {
-    "Exercise Name": "Barbell Thruster",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Delts, Triceps, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Power Development"
-  },
-  {
-    "Exercise Name": "Barbell Trap Bar Deadlift",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Quads, Lower Back",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Lower Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "trap-bar-deadlift.webp"
-  },
-  {
-    "Exercise Name": "Barbell Upright Row",
-    "Primary Muscle": "Traps",
-    "Secondary Muscles": "Delts, Biceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Barbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-upright-row.webp"
-  },
-  {
     "Exercise Name": "Behind Neck Pulldown",
     "Webp File": "behind-neck-pulldown.webp",
     "Primary Muscle": "Lats",
@@ -253,6 +35,15 @@
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Belt Squat, Barbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
   {
@@ -265,6 +56,26 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Bench Press, Barbell",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "Front Delts, Triceps",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Full Body Strength, Upper Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-bench-press.webp"
+  },
+  {
+    "Exercise Name": "Bench Press, Dumbbell",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "Front Delts, Triceps",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength, Full Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-bench-press.webp"
+  },
+  {
     "Exercise Name": "Bent Over Lateral Raise",
     "Webp File": "bent-over-lateral-raise.webp",
     "Primary Muscle": "",
@@ -272,6 +83,45 @@
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Bent-Over Row, Barbell",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Lower Back, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Full Body Strength, Upper Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-bent-over-row.webp"
+  },
+  {
+    "Exercise Name": "Bent-Over Row, Dumbbell",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength, Full Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-bent-over-row.webp"
+  },
+  {
+    "Exercise Name": "Bicep Curl, Barbell",
+    "Primary Muscle": "Biceps",
+    "Secondary Muscles": "Front Delts, Forearms",
+    "Exercise Type": "Isolation",
+    "Equipment": "Barbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-bicep-curl.webp"
+  },
+  {
+    "Exercise Name": "Bicep Curl, Dumbbell",
+    "Primary Muscle": "Biceps",
+    "Secondary Muscles": "Front Delts, Forearms",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
   {
@@ -302,7 +152,6 @@
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
-
   {
     "Exercise Name": "Bulgarian Split Squat",
     "Primary Muscle": "Quads",
@@ -313,34 +162,15 @@
     "Progression": "Progressive Overload",
     "Webp File": "bodyweight-bulgarian-split-squat.webp"
   },
-
-
   {
-    "Exercise Name": "Cable Pull-Up",
-    "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Rear Delts, Core",
+    "Exercise Name": "Bulgarian Split Squat, Dumbbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
-    "Equipment": "Cable Machine",
-    "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Cable Skull Crusher",
-    "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Front Delts, Chest",
-    "Exercise Type": "Isolation",
-    "Equipment": "Cable Machine",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Cable Tricep Extension",
-    "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Front Delts, Chest",
-    "Exercise Type": "Isolation",
-    "Equipment": "Cable Machine",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-bulgarian-split-squat.webp"
   },
   {
     "Exercise Name": "Calf Raise",
@@ -371,6 +201,24 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Close Grip Bench Press, Barbell",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Chest, Front Delts",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Close Grip Bench Press, Dumbbell",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Chest, Front Delts",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Close Grip Lat Pulldown",
     "Primary Muscle": "Lats",
     "Secondary Muscles": "Biceps, Rhomboids, Traps",
@@ -380,7 +228,16 @@
     "Progression": "Progressive Overload",
     "Webp File": "close-grip-pulldown.webp"
   },
-
+  {
+    "Exercise Name": "Concentration Curl, Dumbbell",
+    "Webp File": "dumbbell-concentration-curl.webp",
+    "Primary Muscle": "Biceps",
+    "Secondary Muscles": "Front Delts, Forearms",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
   {
     "Exercise Name": "Crunch",
     "Primary Muscle": "Core",
@@ -390,7 +247,35 @@
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
-  
+  {
+    "Exercise Name": "Deadlift, Barbell",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "Glutes, Lower Back, Quads",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Full Body Strength, Lower Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-deadlift.webp"
+  },
+  {
+    "Exercise Name": "Deadlift, Dumbbell",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "Glutes, Quads, Lower Back",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength, Full Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-deadlift.webp"
+  },
+  {
+    "Exercise Name": "Deadlift, Landmine",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "Glutes, Lower Back, Quads",
+    "Exercise Type": "Compound",
+    "Equipment": "Landmine",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
+  },
   {
     "Exercise Name": "Decline Push-Up",
     "Primary Muscle": "Chest",
@@ -419,329 +304,12 @@
     "Progression": "Progressive Overload"
   },
   {
-    "Exercise Name": "Dumbbell Arnold Press",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Bench Press",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-bench-press.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Bent-Over Row",
-    "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-bent-over-row.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Bicep Curl",
-    "Primary Muscle": "Biceps",
-    "Secondary Muscles": "Front Delts, Forearms",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Bulgarian Split Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-bulgarian-split-squat.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Close Grip Bench Press",
-    "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Chest, Front Delts",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Concentration Curl",
-    "Webp File": "dumbbell-concentration-curl.webp",
-    "Primary Muscle": "Biceps",
-    "Secondary Muscles": "Front Delts, Forearms",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Deadlift",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Quads, Lower Back",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-deadlift.webp"
-  },
-
-  {
-    "Exercise Name": "Dumbbell Farmer Carry",
+    "Exercise Name": "Farmer Carry, Dumbbell",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Traps, Forearms",
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Fly",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-fly.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Front Raise",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Chest",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-front-raise.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Front Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core, Upper Back",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Goblet Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-goblet-squat.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Hammer Curl",
-    "Primary Muscle": "Biceps",
-    "Secondary Muscles": "Forearms",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "hammer-curl.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Incline Bench Press",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "incline-dumbbell-bench-press.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Incline Curl",
-    "Primary Muscle": "Biceps",
-    "Secondary Muscles": "Front Delts",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "incline-dumbbell-curl.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Jump Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core, Calves",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength, HIIT",
-    "Progression": "Power Development"
-  },
-  {
-    "Exercise Name": "Dumbbell Kickback",
-    "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Shoulders",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Lateral Raise",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Traps",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-lateral-raise.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Lunge",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Overhead Tricep Extension",
-    "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Shoulders, Chest",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-
-  {
-    "Exercise Name": "Dumbbell Pullover",
-    "Primary Muscle": "Chest",
-    "Secondary Muscles": "Lats, Triceps",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-pullover.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Renegade Row",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Lats, Triceps, Shoulders",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Reverse Fly",
-    "Primary Muscle": "Rear Delts",
-    "Secondary Muscles": "Upper Back",
-    "Exercise Type": "Isolation",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Reverse Lunge",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Romanian Deadlift",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Lower Back",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-romanian-deadlift.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Shoulder Press",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-shoulder-press.webp"
-  },
-  {
-    "Exercise Name": "Dumbbell Shrug",
-    "Webp File": "dumbbell-shrug.webp",
-    "Primary Muscle": "Traps",
-    "Secondary Muscles": "Upper Back",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Single-Arm Row",
-    "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core, Obliques",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-bent-over-row-single-arm.webp"
-  },
-
-  {
-    "Exercise Name": "Dumbbell Single-Leg Deadlift",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Core, Balance",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Step-Up",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Suitcase Deadlift",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Obliques, Lower Back, Glutes",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Core",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Dumbbell Thruster",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Delts, Triceps, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Power Development"
-  },
-  {
-    "Exercise Name": "Dumbbell Walking Lunge",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Dumbbell",
-    "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },
   {
@@ -754,12 +322,51 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Fly, Dumbbell",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "Front Delts",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-fly.webp"
+  },
+  {
     "Exercise Name": "Front Lever",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Chest, Shoulders, Lats",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Front Raise, Dumbbell",
+    "Primary Muscle": "Delts",
+    "Secondary Muscles": "Chest",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-front-raise.webp"
+  },
+  {
+    "Exercise Name": "Front Squat, Barbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Core, Glutes, Upper Back",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Lower Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload",
+    "Webp File": "front-squat.webp"
+  },
+  {
+    "Exercise Name": "Front Squat, Dumbbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Core, Upper Back",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
   {
@@ -771,8 +378,45 @@
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
-
-
+  {
+    "Exercise Name": "Goblet Squat, Dumbbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength, Full Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-goblet-squat.webp"
+  },
+  {
+    "Exercise Name": "Good Morning, Barbell",
+    "Primary Muscle": "Glutes",
+    "Secondary Muscles": "Hamstrings, Lower Back, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "good-morning.webp"
+  },
+  {
+    "Exercise Name": "Hack Squat, Barbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Hamstrings",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Hammer Curl, Dumbbell",
+    "Primary Muscle": "Biceps",
+    "Secondary Muscles": "Forearms",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "hammer-curl.webp"
+  },
   {
     "Exercise Name": "Hanging Knee Raise",
     "Primary Muscle": "Core",
@@ -782,7 +426,25 @@
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
- 
+  {
+    "Exercise Name": "High Pull, Barbell",
+    "Primary Muscle": "Traps",
+    "Secondary Muscles": "Delts, Hamstrings",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Cardio, HIIT",
+    "Progression": "Power Development"
+  },
+  {
+    "Exercise Name": "Hip Thrust, Barbell",
+    "Webp File": "barbell-hip-thrust.webp",
+    "Primary Muscle": "Glutes",
+    "Secondary Muscles": "Hamstrings, Lower Back, Quads",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
+  },
   {
     "Exercise Name": "Hollow Body Hold",
     "Primary Muscle": "Core",
@@ -792,7 +454,36 @@
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
-
+  {
+    "Exercise Name": "Incline Bench Press, Barbell",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "Front Delts, Triceps",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload",
+    "Webp File": "incline-barbell-bench-press.webp"
+  },
+  {
+    "Exercise Name": "Incline Bench Press, Dumbbell",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "Front Delts, Triceps",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "incline-dumbbell-bench-press.webp"
+  },
+  {
+    "Exercise Name": "Incline Curl, Dumbbell",
+    "Primary Muscle": "Biceps",
+    "Secondary Muscles": "Front Delts",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "incline-dumbbell-curl.webp"
+  },
   {
     "Exercise Name": "Incline Dumbbell Fly",
     "Webp File": "incline-dumbbell-fly.webp",
@@ -803,7 +494,6 @@
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
-
   {
     "Exercise Name": "Jump Squat",
     "Primary Muscle": "Quads",
@@ -814,18 +504,24 @@
     "Progression": "Power Development",
     "Webp File": "jump-squat.webp"
   },
-
   {
-    "Exercise Name": "Kettlebell Swing",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Core, Upper Back",
+    "Exercise Name": "Jump Squat, Dumbbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Core, Calves",
     "Exercise Type": "Compound",
-    "Equipment": "Kettlebell",
-    "Workout Type": "Lower Body Strength, Cardio, HIIT",
-    "Progression": "Power Development",
-    "Webp File": "kettlebell-swing.webp"
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength, HIIT",
+    "Progression": "Power Development"
   },
-
+  {
+    "Exercise Name": "Kickback, Dumbbell",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Shoulders",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
   {
     "Exercise Name": "L-Sit",
     "Primary Muscle": "Core",
@@ -833,51 +529,6 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Landmine Deadlift",
-    "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Lower Back, Quads",
-    "Exercise Type": "Compound",
-    "Equipment": "Landmine",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Landmine Press",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Landmine",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Landmine Rotation",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Obliques, Shoulders",
-    "Exercise Type": "Compound",
-    "Equipment": "Landmine",
-    "Workout Type": "Core, HIIT",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Landmine Row",
-    "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Landmine",
-    "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
-  },
-  {
-    "Exercise Name": "Landmine Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core, Upper Back",
-    "Exercise Type": "Compound",
-    "Equipment": "Landmine",
-    "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
   {
@@ -890,7 +541,6 @@
     "Progression": "Progressive Overload",
     "Webp File": "lat-pulldown.webp"
   },
-
   {
     "Exercise Name": "Lateral Lunge",
     "Primary Muscle": "Quads",
@@ -901,6 +551,16 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Lateral Raise, Dumbbell",
+    "Primary Muscle": "Delts",
+    "Secondary Muscles": "Traps",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-lateral-raise.webp"
+  },
+  {
     "Exercise Name": "Leg Raise",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Hip Flexors",
@@ -909,7 +569,6 @@
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
-
   {
     "Exercise Name": "Lunge",
     "Primary Muscle": "Quads",
@@ -921,6 +580,15 @@
     "Webp File": "lunge.webp"
   },
   {
+    "Exercise Name": "Lunge, Dumbbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Mountain Climber",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Shoulders, Hip Flexors, Quads",
@@ -929,7 +597,6 @@
     "Workout Type": "Cardio, HIIT",
     "Progression": "Power Development"
   },
-
   {
     "Exercise Name": "Oblique Crunch",
     "Primary Muscle": "Obliques",
@@ -939,7 +606,44 @@
     "Workout Type": "Core",
     "Progression": "Progressive Overload"
   },
-
+  {
+    "Exercise Name": "Overhead Press, Barbell",
+    "Primary Muscle": "Delts",
+    "Secondary Muscles": "Triceps, Chest, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Upper Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-overhead-press.webp"
+  },
+  {
+    "Exercise Name": "Overhead Tricep Extension, Dumbbell",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Shoulders, Chest",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Paused Bench Press, Barbell",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "Front Delts, Triceps",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-paused-bench-press.webp"
+  },
+  {
+    "Exercise Name": "Pendulum Squat, Barbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Hamstrings",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
+  },
   {
     "Exercise Name": "Plank",
     "Primary Muscle": "Core",
@@ -958,7 +662,6 @@
     "Workout Type": "Core, HIIT",
     "Progression": "Progressive Overload"
   },
- 
   {
     "Exercise Name": "Pogo Hop",
     "Primary Muscle": "Calves",
@@ -969,6 +672,15 @@
     "Progression": "Power Development"
   },
   {
+    "Exercise Name": "Press, Landmine",
+    "Primary Muscle": "Delts",
+    "Secondary Muscles": "Triceps, Chest, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Landmine",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Pull-Up",
     "Primary Muscle": "Lats",
     "Secondary Muscles": "Biceps, Core, Delts",
@@ -977,6 +689,56 @@
     "Workout Type": "Upper Body Strength, Full Body Strength",
     "Progression": "Progressive Overload",
     "Webp File": "pull-up.webp"
+  },
+  {
+    "Exercise Name": "Pull-Up, Cable",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Rear Delts, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength, Full Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "reverse-grip-pulldown.webp"
+  },
+  {
+    "Exercise Name": "Pulldown, Rope",
+    "Webp File": "rope-pulldown.webp",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Pullover, Barbell",
+    "Webp File": "barbell-pullover.webp",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "Lats, Triceps",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Pullover, Dumbbell",
+    "Primary Muscle": "Chest",
+    "Secondary Muscles": "Lats, Triceps",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-pullover.webp"
+  },
+  {
+    "Exercise Name": "Push Press, Barbell",
+    "Primary Muscle": "Delts",
+    "Secondary Muscles": "Triceps, Chest, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-push-press.webp"
   },
   {
     "Exercise Name": "Push-Up",
@@ -998,6 +760,24 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Renegade Row, Dumbbell",
+    "Primary Muscle": "Core",
+    "Secondary Muscles": "Lats, Triceps, Shoulders",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Full Body Strength, HIIT",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Reverse Fly, Dumbbell",
+    "Primary Muscle": "Rear Delts",
+    "Secondary Muscles": "Upper Back",
+    "Exercise Type": "Isolation",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Reverse Grip Pulldown",
     "Webp File": "reverse-grip-pulldown.webp",
     "Primary Muscle": "Lats",
@@ -1016,23 +796,59 @@
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
- 
   {
-    "Exercise Name": "Rope Pulldown",
-    "Webp File": "rope-pulldown.webp",
-    "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core",
+    "Exercise Name": "Reverse Lunge, Dumbbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
-    "Equipment": "Cable Machine",
-    "Workout Type": "Upper Body Strength",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
   {
-    "Exercise Name": "Rope Tricep Extension",
-    "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Chest, Front Delts",
-    "Exercise Type": "Isolation",
-    "Equipment": "Cable Machine",
+    "Exercise Name": "Romanian Deadlift, Barbell",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "Glutes, Lower Back",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Lower Body Strength, Push/Pull/Legs",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-romanian-deadlift.webp"
+  },
+  {
+    "Exercise Name": "Romanian Deadlift, Dumbbell",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "Glutes, Lower Back",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-romanian-deadlift.webp"
+  },
+  {
+    "Exercise Name": "Rotation, Landmine",
+    "Primary Muscle": "Core",
+    "Secondary Muscles": "Obliques, Shoulders",
+    "Exercise Type": "Compound",
+    "Equipment": "Landmine",
+    "Workout Type": "Core, HIIT",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Rotational Slam, Slam Ball",
+    "Primary Muscle": "Core",
+    "Secondary Muscles": "Obliques, Delts, Hamstrings",
+    "Exercise Type": "Compound",
+    "Equipment": "Slam Ball",
+    "Workout Type": "Core, HIIT, Cardio",
+    "Progression": "Power Development"
+  },
+  {
+    "Exercise Name": "Row, Landmine",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Landmine",
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
@@ -1065,12 +881,61 @@
     "Webp File": "seated-cable-row.webp"
   },
   {
+    "Exercise Name": "Shoulder Press, Dumbbell",
+    "Primary Muscle": "Delts",
+    "Secondary Muscles": "Triceps, Chest, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength, Full Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-shoulder-press.webp"
+  },
+  {
+    "Exercise Name": "Shrug, Barbell",
+    "Primary Muscle": "Traps",
+    "Secondary Muscles": "Upper Back",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-shrugs.webp"
+  },
+  {
+    "Exercise Name": "Shrug, Dumbbell",
+    "Webp File": "dumbbell-shrug.webp",
+    "Primary Muscle": "Traps",
+    "Secondary Muscles": "Upper Back",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
     "Exercise Name": "Side Plank",
     "Primary Muscle": "Obliques",
     "Secondary Muscles": "Core, Shoulders",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Single-Arm Row, Dumbbell",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Core, Obliques",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-bent-over-row-single-arm.webp"
+  },
+  {
+    "Exercise Name": "Single-Leg Deadlift, Dumbbell",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "Glutes, Core, Balance",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
   {
@@ -1082,34 +947,23 @@
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
   },
-
-
   {
-    "Exercise Name": "Slam Ball Rotational Slam",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Obliques, Delts, Hamstrings",
-    "Exercise Type": "Compound",
-    "Equipment": "Slam Ball",
-    "Workout Type": "Core, HIIT, Cardio",
-    "Progression": "Power Development"
+    "Exercise Name": "Skull Crusher, Cable",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Front Delts, Chest",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
   },
   {
-    "Exercise Name": "Slam Ball Slam",
+    "Exercise Name": "Slam, Slam Ball",
     "Primary Muscle": "Core",
     "Secondary Muscles": "Delts, Hamstrings, Glutes",
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
     "Progression": "Power Development"
-  },
-  {
-    "Exercise Name": "Slam Ball Squat",
-    "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core",
-    "Exercise Type": "Compound",
-    "Equipment": "Slam Ball",
-    "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Slamball Squat",
@@ -1130,7 +984,43 @@
     "Workout Type": "Lower Body Strength, Full Body Strength",
     "Progression": "Progressive Overload"
   },
-
+  {
+    "Exercise Name": "Squat, Dumbbell",
+    "Webp File": "dumbbell-squat.webp",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Squat, Landmine",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Core, Upper Back",
+    "Exercise Type": "Compound",
+    "Equipment": "Landmine",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Squat, Slam Ball",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Slam Ball",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Step-Up, Dumbbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Hamstrings",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload"
+  },
   {
     "Exercise Name": "Straight Arm Lat Pulldown",
     "Webp File": "straight-arm-lat-pulldown.webp",
@@ -1142,6 +1032,25 @@
     "Progression": "Progressive Overload"
   },
   {
+    "Exercise Name": "Suitcase Deadlift, Dumbbell",
+    "Primary Muscle": "Core",
+    "Secondary Muscles": "Obliques, Lower Back, Glutes",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Core",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Sumo Deadlift, Barbell",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "Glutes, Quads, Lower Back, Adductors",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Lower Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-sumo-deadlift.webp"
+  },
+  {
     "Exercise Name": "Superman",
     "Primary Muscle": "Erector Spinae",
     "Secondary Muscles": "Glutes, Rear Delts",
@@ -1149,6 +1058,16 @@
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
     "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Swing, Kettlebell",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "Glutes, Core, Upper Back",
+    "Exercise Type": "Compound",
+    "Equipment": "Kettlebell",
+    "Workout Type": "Lower Body Strength, Cardio, HIIT",
+    "Progression": "Power Development",
+    "Webp File": "kettlebell-swing.webp"
   },
   {
     "Exercise Name": "T Bar Row",
@@ -1160,8 +1079,62 @@
     "Workout Type": "Upper Body Strength",
     "Progression": "Progressive Overload"
   },
-
-
+  {
+    "Exercise Name": "Thruster, Barbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Delts, Triceps, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Full Body Strength, HIIT",
+    "Progression": "Power Development"
+  },
+  {
+    "Exercise Name": "Thruster, Dumbbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Delts, Triceps, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
+    "Workout Type": "Full Body Strength, HIIT",
+    "Progression": "Power Development"
+  },
+  {
+    "Exercise Name": "Trap Bar Deadlift, Barbell",
+    "Primary Muscle": "Hamstrings",
+    "Secondary Muscles": "Glutes, Quads, Lower Back",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Lower Body Strength, Full Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "trap-bar-deadlift.webp"
+  },
+  {
+    "Exercise Name": "Tricep Extension, Cable",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Front Delts, Chest",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Tricep Extension, Rope",
+    "Primary Muscle": "Triceps",
+    "Secondary Muscles": "Chest, Front Delts",
+    "Exercise Type": "Isolation",
+    "Equipment": "Cable Machine",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Upright Row, Barbell",
+    "Primary Muscle": "Traps",
+    "Secondary Muscles": "Delts, Biceps",
+    "Exercise Type": "Compound",
+    "Equipment": "Barbell",
+    "Workout Type": "Upper Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "barbell-upright-row.webp"
+  },
   {
     "Exercise Name": "V-Up",
     "Primary Muscle": "Core",
@@ -1177,6 +1150,15 @@
     "Secondary Muscles": "Glutes, Hamstrings, Core",
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
+    "Workout Type": "Lower Body Strength, HIIT",
+    "Progression": "Progressive Overload"
+  },
+  {
+    "Exercise Name": "Walking Lunge, Dumbbell",
+    "Primary Muscle": "Quads",
+    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength, HIIT",
     "Progression": "Progressive Overload"
   },

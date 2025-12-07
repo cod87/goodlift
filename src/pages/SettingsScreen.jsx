@@ -28,6 +28,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  useMediaQuery,
 } from '@mui/material';
 import { 
   Brightness4, 
@@ -76,12 +77,14 @@ import {
   getResetInfo,
   cleanupExpiredBackups,
 } from '../utils/dataResetService';
+import { BREAKPOINTS } from '../theme/responsive';
 
 const SettingsScreen = ({ onNavigate }) => {
   const { mode, toggleTheme } = useTheme();
   const { preferences, updatePreference } = usePreferences();
   const { profile, stats } = useUserProfile();
   const { isGuest } = useAuth();
+  const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
   const { resetWeekCycle } = useWeekScheduling();
   
   const [volume, setVolume] = useState(() => {
@@ -313,7 +316,8 @@ const SettingsScreen = ({ onNavigate }) => {
     <Box
       sx={{
         minHeight: '100vh',
-        padding: { xs: 1, sm: 2, md: 3, lg: 4 },
+        padding: { xs: 1.5, sm: 2, md: 3, lg: 4 },
+        paddingTop: { xs: 0.5, sm: 1, md: 2 },
         paddingBottom: { xs: '80px', sm: 3, md: 4 },
         background: (theme) => theme.palette.background.default,
         overflowX: 'hidden',
@@ -322,38 +326,37 @@ const SettingsScreen = ({ onNavigate }) => {
       }}
     >
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.3 }}
       >
-        {/* GoodLift Logo */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+        {/* GoodLift Logo - Compact */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1.5 }}>
           <img 
             src={`${import.meta.env.BASE_URL}goodlift-logo.svg`}
             alt="GoodLift" 
             style={{ 
-              height: '50px',
+              height: '40px',
               width: 'auto',
             }} 
           />
         </Box>
 
-        <Typography
-          variant="h4"
-          sx={{
-            mb: 2,
-            fontWeight: 700,
-            color: 'text.primary',
-          }}
-        >
-          Settings
-        </Typography>
-
-        <Stack spacing={2} sx={{ maxWidth: 600 }}>
+        {/* Desktop: wider max-width and centered */}
+        <Box sx={{ 
+          maxWidth: isDesktop ? '900px' : '600px',
+          margin: '0 auto',
+        }}>
+          {/* Desktop: 2-column grid for settings cards */}
+          <Box sx={{ 
+            display: isDesktop ? 'grid' : 'block',
+            gridTemplateColumns: isDesktop ? 'repeat(2, 1fr)' : '1fr',
+            gap: 1.5,
+          }}>
           {/* My Plans Section removed - no longer using workout planning */}
 
           {/* User Profile Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -388,7 +391,7 @@ const SettingsScreen = ({ onNavigate }) => {
           </Card>
 
           {/* Exercise Database Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -423,7 +426,7 @@ const SettingsScreen = ({ onNavigate }) => {
           </Card>
 
           {/* Workout Scheduling Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -471,7 +474,7 @@ const SettingsScreen = ({ onNavigate }) => {
           </Card>
 
           {/* App Preferences Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -658,7 +661,7 @@ const SettingsScreen = ({ onNavigate }) => {
           </Card>
 
           {/* Wellness & Push Notifications Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -765,7 +768,7 @@ const SettingsScreen = ({ onNavigate }) => {
           </Card>
 
           {/* Data & Privacy Section */}
-          <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: 0 }}>
             <CardContent sx={{ p: 0 }}>
               <Typography
                 variant="overline"
@@ -859,12 +862,14 @@ const SettingsScreen = ({ onNavigate }) => {
             </CardContent>
           </Card>
 
-          <Box sx={{ mt: 2 }}>
+          {/* Preferences saved message - spans full width on desktop grid */}
+          <Box sx={{ mt: 2, gridColumn: isDesktop ? '1 / -1' : 'auto' }}>
             <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
               Your preferences are saved automatically
             </Typography>
           </Box>
-        </Stack>
+          </Box>
+        </Box>
       </motion.div>
 
       {/* Reset Data Dialog */}

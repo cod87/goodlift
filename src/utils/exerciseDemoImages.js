@@ -80,6 +80,7 @@ const AVAILABLE_DEMO_IMAGES = [
 /**
  * Normalizes an exercise name to match the demo image filename pattern
  * Converts to lowercase, replaces spaces with hyphens, removes special chars
+ * Handles the new "Movement, Equipment" naming format by converting to "equipment-movement"
  * 
  * @param {string} exerciseName - The exercise name to normalize
  * @returns {string} Normalized filename (without extension)
@@ -87,9 +88,23 @@ const AVAILABLE_DEMO_IMAGES = [
 export const normalizeExerciseName = (exerciseName) => {
   if (!exerciseName) return '';
   
-  return exerciseName
+  let name = exerciseName.trim();
+  
+  // Handle the new "Movement, Equipment" format (e.g., "Bench Press, Barbell" -> "Barbell Bench Press")
+  // This converts it back to the old format for image matching
+  // Only process if there's exactly one ", " separator and it produces valid parts
+  const commaIndex = name.lastIndexOf(', ');
+  if (commaIndex > 0 && commaIndex < name.length - 2) {
+    const movement = name.substring(0, commaIndex).trim();
+    const equipment = name.substring(commaIndex + 2).trim();
+    // Only transform if both parts are non-empty and equipment doesn't contain another comma
+    if (movement && equipment && !equipment.includes(',')) {
+      name = `${equipment} ${movement}`;
+    }
+  }
+  
+  return name
     .toLowerCase()
-    .trim()
     // Replace multiple spaces with single space
     .replace(/\s+/g, ' ')
     // Replace spaces with hyphens
@@ -103,14 +118,26 @@ export const normalizeExerciseName = (exerciseName) => {
 };
 
 /**
- * Gets the demo image path for a given exercise name
+ * Gets the demo image path for a given exercise name or webp file
  * Returns a placeholder image path if no matching image is found
  * 
  * @param {string} exerciseName - The exercise name to find an image for
  * @param {boolean} usePlaceholder - Whether to return placeholder if no match (default: true)
+ * @param {string} webpFile - Optional webp filename from exercise data (e.g., 'back-squat.webp')
  * @returns {string|null} Path to the demo image, placeholder, or null if not found
  */
-export const getDemoImagePath = (exerciseName, usePlaceholder = true) => {
+export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile = null) => {
+  // If webpFile is explicitly provided, validate and use it directly
+  if (webpFile) {
+    // Basic validation: only allow safe filenames (alphanumeric, hyphens, and .webp extension)
+    // This prevents path traversal attacks (e.g., '../../../sensitive-file')
+    const safeFilenamePattern = /^[a-zA-Z0-9-]+\.webp$/;
+    if (safeFilenamePattern.test(webpFile)) {
+      return `${getBaseUrl()}demos/${webpFile}`;
+    }
+    // If webpFile is invalid, fall through to name-based matching
+  }
+  
   if (!exerciseName) return usePlaceholder ? `${getBaseUrl()}work-icon.svg` : null;
   
   const normalized = normalizeExerciseName(exerciseName);
@@ -338,17 +365,26 @@ export const getAvailableDemoImages = () => {
  * Checks if a demo image exists for a given exercise
  * 
  * @param {string} exerciseName - The exercise name to check
+ * @param {string} webpFile - Optional webp filename from exercise data
  * @returns {boolean} True if a demo image exists
  */
-export const hasDemoImage = (exerciseName) => {
-  return getDemoImagePath(exerciseName) !== null;
+export const hasDemoImage = (exerciseName, webpFile = null) => {
+  // If webpFile is provided and valid, image exists
+  if (webpFile) {
+    const safeFilenamePattern = /^[a-zA-Z0-9-]+\.webp$/;
+    if (safeFilenamePattern.test(webpFile)) {
+      return true;
+    }
+  }
+  return getDemoImagePath(exerciseName, false) !== null;
 };
 
 /**
  * Maps an array of exercise objects to include demo image paths
  * Adds a `demoImage` property to each exercise
+ * Uses the 'Webp File' property if available, otherwise falls back to name-based matching
  * 
- * @param {Array} exercises - Array of exercise objects with `name` property
+ * @param {Array} exercises - Array of exercise objects with `name` or `Exercise Name` property
  * @returns {Array} Array of exercises with added `demoImage` property
  */
 export const mapExercisesWithDemoImages = (exercises) => {
@@ -356,7 +392,11 @@ export const mapExercisesWithDemoImages = (exercises) => {
   
   return exercises.map(exercise => ({
     ...exercise,
-    demoImage: getDemoImagePath(exercise.name),
+    demoImage: getDemoImagePath(
+      exercise.name || exercise['Exercise Name'],
+      true,
+      exercise['Webp File'] || null
+    ),
   }));
 };
 

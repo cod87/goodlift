@@ -371,6 +371,142 @@ export const ACHIEVEMENT_BADGES = [
     icon: '🌸',
     tier: 'platinum',
     condition: { type: 'wellnessTaskCount', value: 100 }
+  },
+
+  // Strength Workout Count Achievements
+  {
+    id: 'strength-10',
+    name: 'Iron Starter',
+    description: 'Complete 10 strength workouts',
+    icon: '🏋️',
+    tier: 'bronze',
+    condition: { type: 'strengthWorkoutCount', value: 10 }
+  },
+  {
+    id: 'strength-50',
+    name: 'Iron Regular',
+    description: 'Complete 50 strength workouts',
+    icon: '💪',
+    tier: 'silver',
+    condition: { type: 'strengthWorkoutCount', value: 50 }
+  },
+  {
+    id: 'strength-100',
+    name: 'Iron Warrior',
+    description: 'Complete 100 strength workouts',
+    icon: '🦾',
+    tier: 'gold',
+    condition: { type: 'strengthWorkoutCount', value: 100 }
+  },
+  {
+    id: 'strength-250',
+    name: 'Iron Master',
+    description: 'Complete 250 strength workouts',
+    icon: '⚔️',
+    tier: 'platinum',
+    condition: { type: 'strengthWorkoutCount', value: 250 }
+  },
+
+  // Cardio Workout Count Achievements
+  {
+    id: 'cardio-10',
+    name: 'Cardio Starter',
+    description: 'Complete 10 cardio workouts',
+    icon: '🏃',
+    tier: 'bronze',
+    condition: { type: 'cardioWorkoutCount', value: 10 }
+  },
+  {
+    id: 'cardio-50',
+    name: 'Cardio Enthusiast',
+    description: 'Complete 50 cardio workouts',
+    icon: '❤️‍🔥',
+    tier: 'silver',
+    condition: { type: 'cardioWorkoutCount', value: 50 }
+  },
+  {
+    id: 'cardio-100',
+    name: 'Cardio Champion',
+    description: 'Complete 100 cardio workouts',
+    icon: '🫀',
+    tier: 'gold',
+    condition: { type: 'cardioWorkoutCount', value: 100 }
+  },
+  {
+    id: 'cardio-250',
+    name: 'Cardio Legend',
+    description: 'Complete 250 cardio workouts',
+    icon: '🏅',
+    tier: 'platinum',
+    condition: { type: 'cardioWorkoutCount', value: 250 }
+  },
+
+  // Yoga/Flexibility Workout Count Achievements
+  {
+    id: 'yoga-10',
+    name: 'Flexibility Starter',
+    description: 'Complete 10 yoga or stretching workouts',
+    icon: '🧘',
+    tier: 'bronze',
+    condition: { type: 'yogaWorkoutCount', value: 10 }
+  },
+  {
+    id: 'yoga-50',
+    name: 'Flexibility Enthusiast',
+    description: 'Complete 50 yoga or stretching workouts',
+    icon: '🌺',
+    tier: 'silver',
+    condition: { type: 'yogaWorkoutCount', value: 50 }
+  },
+  {
+    id: 'yoga-100',
+    name: 'Flexibility Master',
+    description: 'Complete 100 yoga or stretching workouts',
+    icon: '🪷',
+    tier: 'gold',
+    condition: { type: 'yogaWorkoutCount', value: 100 }
+  },
+  {
+    id: 'yoga-250',
+    name: 'Zen Master',
+    description: 'Complete 250 yoga or stretching workouts',
+    icon: '☯️',
+    tier: 'platinum',
+    condition: { type: 'yogaWorkoutCount', value: 250 }
+  },
+
+  // Strength Weekly Streak Achievements (3+ strength workouts per week)
+  {
+    id: 'strength-week-1',
+    name: 'Strong Week',
+    description: 'Complete 3+ strength workouts in a single week',
+    icon: '📅',
+    tier: 'bronze',
+    condition: { type: 'strengthWeekStreak', value: 1 }
+  },
+  {
+    id: 'strength-week-3',
+    name: 'Strength Streak',
+    description: 'Complete 3+ strength workouts per week for 3 consecutive weeks',
+    icon: '🔗',
+    tier: 'silver',
+    condition: { type: 'strengthWeekStreak', value: 3 }
+  },
+  {
+    id: 'strength-week-5',
+    name: 'Strength Warrior',
+    description: 'Complete 3+ strength workouts per week for 5 consecutive weeks',
+    icon: '⚡',
+    tier: 'gold',
+    condition: { type: 'strengthWeekStreak', value: 5 }
+  },
+  {
+    id: 'strength-week-10',
+    name: 'Strength Legend',
+    description: 'Complete 3+ strength workouts per week for 10 consecutive weeks',
+    icon: '🏆',
+    tier: 'platinum',
+    condition: { type: 'strengthWeekStreak', value: 10 }
   }
 ];
 
@@ -401,6 +537,140 @@ export const ACHIEVEMENT_TIERS = {
 };
 
 /**
+ * Workout type category definitions
+ * These categorize different workout types into broader categories for achievement tracking
+ */
+const STRENGTH_TYPES = ['full', 'upper', 'lower', 'push', 'pull', 'legs', 'core', 'strength'];
+const CARDIO_TYPES = ['cardio', 'hiit'];
+const YOGA_TYPES = ['yoga', 'stretch', 'mobility', 'flexibility'];
+
+/**
+ * Check if a workout type belongs to strength category
+ * @param {string} type - Workout type
+ * @returns {boolean} True if strength type
+ */
+const isStrengthType = (type) => {
+  if (!type) return false;
+  return STRENGTH_TYPES.includes(type.toLowerCase());
+};
+
+/**
+ * Check if a workout type belongs to cardio category
+ * @param {string} type - Workout type
+ * @returns {boolean} True if cardio type
+ */
+const isCardioType = (type) => {
+  if (!type) return false;
+  return CARDIO_TYPES.includes(type.toLowerCase());
+};
+
+/**
+ * Check if a workout type belongs to yoga/flexibility category
+ * @param {string} type - Workout type
+ * @returns {boolean} True if yoga/flexibility type
+ */
+const isYogaType = (type) => {
+  if (!type) return false;
+  return YOGA_TYPES.includes(type.toLowerCase());
+};
+
+/**
+ * Count strength workouts in workout history
+ * @param {Array} workoutHistory - Array of completed workouts
+ * @returns {number} Count of strength workouts
+ */
+const countStrengthWorkouts = (workoutHistory) => {
+  if (!workoutHistory || !Array.isArray(workoutHistory)) return 0;
+  return workoutHistory.filter(w => isStrengthType(w.type)).length;
+};
+
+/**
+ * Count cardio workouts in workout history
+ * @param {Array} workoutHistory - Array of completed workouts
+ * @returns {number} Count of cardio workouts
+ */
+const countCardioWorkouts = (workoutHistory) => {
+  if (!workoutHistory || !Array.isArray(workoutHistory)) return 0;
+  return workoutHistory.filter(w => isCardioType(w.type)).length;
+};
+
+/**
+ * Count yoga/flexibility workouts in workout history
+ * @param {Array} workoutHistory - Array of completed workouts
+ * @returns {number} Count of yoga workouts
+ */
+const countYogaWorkouts = (workoutHistory) => {
+  if (!workoutHistory || !Array.isArray(workoutHistory)) return 0;
+  return workoutHistory.filter(w => isYogaType(w.type)).length;
+};
+
+/**
+ * Get the start of the week (Monday) for a given date
+ * @param {Date} date - Date to get week start for
+ * @returns {Date} Start of the week (Monday at 00:00:00)
+ */
+const getWeekStart = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  // Calculate days to subtract to get to Monday
+  // Sunday (0) needs to go back 6 days, other days go back (day - 1) days
+  const diff = day === 0 ? 6 : day - 1;
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+/**
+ * Calculate the consecutive weeks with 3+ strength workouts per week
+ * @param {Array} workoutHistory - Array of completed workouts
+ * @returns {number} Number of consecutive weeks with 3+ strength workouts, including current week if qualifying
+ */
+const calculateStrengthWeekStreak = (workoutHistory) => {
+  if (!workoutHistory || !Array.isArray(workoutHistory) || workoutHistory.length === 0) return 0;
+  
+  // Filter to strength workouts only
+  const strengthWorkouts = workoutHistory.filter(w => isStrengthType(w.type));
+  if (strengthWorkouts.length === 0) return 0;
+  
+  // Group workouts by week (week starts on Monday)
+  const weekCounts = new Map();
+  
+  strengthWorkouts.forEach(workout => {
+    const workoutDate = new Date(workout.date);
+    const weekStart = getWeekStart(workoutDate);
+    const weekKey = weekStart.toISOString();
+    
+    weekCounts.set(weekKey, (weekCounts.get(weekKey) || 0) + 1);
+  });
+  
+  // Get all week start dates that have 3+ workouts
+  const qualifyingWeeks = Array.from(weekCounts.entries())
+    .filter(([, count]) => count >= 3)
+    .map(([weekKey]) => new Date(weekKey))
+    .sort((a, b) => b - a); // Sort descending (most recent first)
+  
+  if (qualifyingWeeks.length === 0) return 0;
+  
+  // Count consecutive weeks from the most recent qualifying week
+  let streak = 1;
+  const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+  
+  for (let i = 0; i < qualifyingWeeks.length - 1; i++) {
+    const currentWeek = qualifyingWeeks[i].getTime();
+    const previousWeek = qualifyingWeeks[i + 1].getTime();
+    
+    // Check if weeks are consecutive (exactly 7 days apart)
+    if (currentWeek - previousWeek === oneWeekMs) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  
+  return streak;
+};
+
+/**
  * Check if an achievement condition is met
  * @param {Object} achievement - Achievement object with condition
  * @param {Object} userStats - User statistics object
@@ -428,6 +698,18 @@ export const isAchievementUnlocked = (achievement, userStats, workoutHistory = [
     
     case 'wellnessTaskCount':
       return (userStats.completedWellnessTasks || 0) >= condition.value;
+    
+    case 'strengthWorkoutCount':
+      return countStrengthWorkouts(workoutHistory) >= condition.value;
+    
+    case 'cardioWorkoutCount':
+      return countCardioWorkouts(workoutHistory) >= condition.value;
+    
+    case 'yogaWorkoutCount':
+      return countYogaWorkouts(workoutHistory) >= condition.value;
+    
+    case 'strengthWeekStreak':
+      return calculateStrengthWeekStreak(workoutHistory) >= condition.value;
     
     case 'special':
       return checkSpecialCondition(condition, userStats, workoutHistory);
@@ -568,6 +850,18 @@ export const getNextAchievementProgress = (categoryAchievements, userStats, work
     case 'totalTime':
       currentValue = userStats.totalTime || 0;
       break;
+    case 'strengthWorkoutCount':
+      currentValue = countStrengthWorkouts(workoutHistory);
+      break;
+    case 'cardioWorkoutCount':
+      currentValue = countCardioWorkouts(workoutHistory);
+      break;
+    case 'yogaWorkoutCount':
+      currentValue = countYogaWorkouts(workoutHistory);
+      break;
+    case 'strengthWeekStreak':
+      currentValue = calculateStrengthWeekStreak(workoutHistory);
+      break;
     default:
       currentValue = 0;
   }
@@ -596,16 +890,87 @@ export const getUnlockedAchievements = (userStats, workoutHistory = []) => {
 
 /**
  * Get newly unlocked achievements since last check
+ * 
+ * This function determines which achievements were just unlocked by the latest action.
+ * It uses a two-pronged approach for reliability:
+ * 1. Checks if the achievement ID is in the previouslyUnlocked list
+ * 2. For workoutCount-based achievements, also verifies the achievement wasn't 
+ *    unlockable before the current workout (using workout history length)
+ * 
+ * This ensures achievements are only shown as "new" when they are truly first unlocked,
+ * even if the previouslyUnlocked list is out of sync or empty.
+ * 
  * @param {Object} userStats - Current user statistics
- * @param {Array} workoutHistory - Workout history
+ * @param {Array} workoutHistory - Workout history (including the just-completed workout)
  * @param {Array} previouslyUnlocked - Previously unlocked achievement IDs
  * @returns {Array} Newly unlocked achievements
  */
 export const getNewlyUnlockedAchievements = (userStats, workoutHistory, previouslyUnlocked = []) => {
   const currentUnlocked = getUnlockedAchievements(userStats, workoutHistory);
-  return currentUnlocked.filter(achievement => 
-    !previouslyUnlocked.includes(achievement.id)
-  );
+  
+  // Calculate how many workouts existed BEFORE the current one was added
+  // This provides a fallback check in case previouslyUnlocked is not accurate
+  const workoutsBeforeCurrent = Math.max(0, (workoutHistory?.length || 0) - 1);
+  
+  // Calculate category-specific workout counts before current workout
+  const workoutHistoryBefore = workoutHistory?.slice(1) || [];
+  const strengthCountBefore = countStrengthWorkouts(workoutHistoryBefore);
+  const cardioCountBefore = countCardioWorkouts(workoutHistoryBefore);
+  const yogaCountBefore = countYogaWorkouts(workoutHistoryBefore);
+  const strengthWeekStreakBefore = calculateStrengthWeekStreak(workoutHistoryBefore);
+  
+  return currentUnlocked.filter(achievement => {
+    // If already in the previouslyUnlocked list, it's not new
+    if (previouslyUnlocked.includes(achievement.id)) {
+      return false;
+    }
+    
+    // Additional check for workoutCount-based achievements:
+    // If this achievement would have been unlocked with the previous workout count,
+    // then it's not truly new (the stored list was just out of sync)
+    if (achievement.condition.type === 'workoutCount') {
+      const requiredWorkouts = achievement.condition.value;
+      // If we had enough workouts BEFORE this one, the achievement was already unlockable
+      if (workoutsBeforeCurrent >= requiredWorkouts) {
+        return false;
+      }
+    }
+    
+    // Additional check for strengthWorkoutCount-based achievements
+    if (achievement.condition.type === 'strengthWorkoutCount') {
+      const requiredWorkouts = achievement.condition.value;
+      if (strengthCountBefore >= requiredWorkouts) {
+        return false;
+      }
+    }
+    
+    // Additional check for cardioWorkoutCount-based achievements
+    if (achievement.condition.type === 'cardioWorkoutCount') {
+      const requiredWorkouts = achievement.condition.value;
+      if (cardioCountBefore >= requiredWorkouts) {
+        return false;
+      }
+    }
+    
+    // Additional check for yogaWorkoutCount-based achievements
+    if (achievement.condition.type === 'yogaWorkoutCount') {
+      const requiredWorkouts = achievement.condition.value;
+      if (yogaCountBefore >= requiredWorkouts) {
+        return false;
+      }
+    }
+    
+    // Additional check for strengthWeekStreak-based achievements
+    if (achievement.condition.type === 'strengthWeekStreak') {
+      const requiredStreak = achievement.condition.value;
+      if (strengthWeekStreakBefore >= requiredStreak) {
+        return false;
+      }
+    }
+    
+    // Achievement is newly unlocked
+    return true;
+  });
 };
 
 /**

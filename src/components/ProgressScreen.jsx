@@ -30,6 +30,7 @@ import {
   LinearProgress,
   Snackbar,
   Alert,
+  useMediaQuery,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -50,12 +51,12 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import CompactHeader from './Common/CompactHeader';
 import Achievements from './Achievements';
 import WeightTracker from './WeightTracker';
 import MonthCalendarView from './Calendar/MonthCalendarView';
 import ActivitiesList from './Progress/ActivitiesList';
 import EditActivityDialog from './EditActivityDialog';
+import LoadingScreen from './LoadingScreen';
 import {
   getWorkoutHistory,
   getStretchSessions,
@@ -67,6 +68,7 @@ import {
 } from '../utils/storage';
 import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
+import { BREAKPOINTS } from '../theme/responsive';
 import { StreakDisplay, AdherenceDisplay, VolumeTrendDisplay } from './Progress/TrackingCards';
 import MuscleVolumeTracker from './Progress/MuscleVolumeTracker';
 import { useUserProfile } from '../contexts/UserProfileContext';
@@ -81,6 +83,7 @@ import { calculateStreak, calculateAdherence } from '../utils/trackingMetrics';
  * - Strength/Cardio/Yoga session counts
  * - Weight tracking integration
  * - Time frame filtering (7 days, 3 months, year, all time)
+ * - Desktop: Enhanced multi-column grid layout
  */
 const ProgressDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -92,6 +95,9 @@ const ProgressDashboard = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [streakInfoOpen, setStreakInfoOpen] = useState(false);
+  
+  // Desktop layout detection
+  const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
   
   // Time frame filter state
   const [timeFrame, setTimeFrame] = useState('all'); // '7days', '30days', '3months', 'year', 'custom', 'all'
@@ -169,13 +175,17 @@ const ProgressDashboard = () => {
     let strengthSessions = 0;
     let cardioSessions = 0;
     let yogaSessions = 0;
+    let restSessions = 0;
     let totalDuration = 0;
     
     const exercisePRs = {}; // Track PRs per exercise
     
     filteredHistory.forEach(workout => {
       // Count session types based on workout.type or workout properties
-      if (workout.type === 'cardio' || workout.type === 'hiit' || workout.cardioType) {
+      if (workout.type === 'rest' || workout.sessionType === 'rest') {
+        // Rest days - count separately but don't include in workouts
+        restSessions++;
+      } else if (workout.type === 'cardio' || workout.type === 'hiit' || workout.cardioType) {
         cardioSessions++;
       } else if (workout.type === 'yoga' || workout.type === 'stretch' || workout.type === 'mobility' || workout.yogaType) {
         yogaSessions++;
@@ -211,7 +221,8 @@ const ProgressDashboard = () => {
       }
     });
     
-    const totalWorkouts = filteredHistory.length;
+    // Total workouts excludes rest days
+    const totalWorkouts = filteredHistory.length - restSessions;
     const averageDuration = totalWorkouts > 0 ? Math.round(totalDuration / totalWorkouts) : 0;
     
     return {
@@ -344,80 +355,64 @@ const ProgressDashboard = () => {
   };
 
   if (loading) {
-    return (
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh'
-      }}>
-        <Typography variant="h5" color="text.secondary">
-          Loading
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 1, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          >
-            ...
-          </motion.span>
-        </Typography>
-      </Box>
-    );
+    return <LoadingScreen />;
   }
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh', overflowX: 'hidden' }}>
-      <CompactHeader title="Progress" subtitle="Track your fitness journey" />
-
       <Box sx={{ 
-        maxWidth: '1400px', 
+        // Desktop: wider max-width
+        maxWidth: isDesktop ? '1600px' : '1400px', 
         margin: '0 auto', 
-        p: { xs: 1, sm: 2, md: 3 }, 
+        p: { xs: 1.5, sm: 2, md: 3, lg: 4 }, 
+        pt: { xs: 0.5, sm: 1, md: 2 },
         pb: { xs: '80px', md: 3 },
         width: '100%',
         boxSizing: 'border-box',
       }}>
-        {/* Tab Navigation */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        {/* Tab Navigation - Compact */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
           <Tabs
             value={currentTab}
             onChange={(e, newValue) => setCurrentTab(newValue)}
             variant="fullWidth"
             sx={{ 
-              maxWidth: { xs: '100%', sm: 600 }, 
+              maxWidth: { xs: '100%', sm: 500 }, 
               margin: '0 auto',
               '& .MuiTab-root': {
+                minHeight: 44,
                 transition: 'color 0.3s ease',
+                fontSize: '0.85rem',
                 '&.Mui-selected': {
                   color: currentTab === 0 ? 'primary.main' : 'warning.main',
                 },
               },
               '& .MuiTabs-indicator': {
-                height: 3,
-                borderRadius: '3px 3px 0 0',
+                height: 2,
+                borderRadius: '2px 2px 0 0',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 backgroundColor: currentTab === 0 ? 'primary.main' : 'warning.main',
               },
             }}
           >
             <Tab 
-              icon={<Assessment />} 
+              icon={<Assessment sx={{ fontSize: '1.1rem' }} />} 
               iconPosition="start" 
               label="Statistics" 
-              sx={{ minHeight: 48 }}
+              sx={{ minHeight: 44 }}
             />
             <Tab 
-              icon={<EmojiEvents />} 
+              icon={<EmojiEvents sx={{ fontSize: '1.1rem' }} />} 
               iconPosition="start" 
               label="Achievements" 
-              sx={{ minHeight: 48 }}
+              sx={{ minHeight: 44 }}
             />
           </Tabs>
         </Box>
 
         {/* Statistics Tab */}
         {currentTab === 0 && (
-          <Stack spacing={3}>
+          <Stack spacing={2}>
             {/* Monthly Calendar View - at the top */}
             <Box>
               <MonthCalendarView
@@ -446,86 +441,94 @@ const ProgressDashboard = () => {
               </Button>
             </Box>
 
-            {/* Streak - Highlighted */}
-            <Card 
-              sx={{ 
-                bgcolor: 'background.paper',
-                boxShadow: 3,
-                border: '2px solid #FF6B35',
-              }}
-            >
-              <CardContent sx={{ p: 2.5 }}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Whatshot sx={{ fontSize: 48, color: '#FF6B35' }} />
-                    <Box>
-                      <Typography variant="h2" sx={{ fontWeight: 700, color: '#FF6B35', lineHeight: 1 }}>
-                        {streakData.currentStreak}
-                      </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
-                          Day Streak
+            {/* Streak and Adherence - side by side on desktop */}
+            <Box sx={{ 
+              display: isDesktop ? 'grid' : 'block',
+              gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
+              gap: 2,
+            }}>
+              {/* Streak - Highlighted */}
+              <Card 
+                sx={{ 
+                  bgcolor: 'background.paper',
+                  boxShadow: 3,
+                  border: '2px solid #FF6B35',
+                  mb: isDesktop ? 0 : 2,
+                }}
+              >
+                <CardContent sx={{ p: 2.5 }}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Whatshot sx={{ fontSize: 48, color: '#FF6B35' }} />
+                      <Box>
+                        <Typography variant="h2" sx={{ fontWeight: 700, color: '#FF6B35', lineHeight: 1 }}>
+                          {streakData.currentStreak}
                         </Typography>
-                        <IconButton 
-                          size="small" 
-                          onClick={() => setStreakInfoOpen(true)}
-                          sx={{ 
-                            padding: 0.5, 
-                            color: 'text.secondary',
-                            '&:hover': { color: 'primary.main' }
-                          }}
-                        >
-                          <HelpOutline sx={{ fontSize: 16 }} />
-                        </IconButton>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
+                            Day Streak
+                          </Typography>
+                          <IconButton 
+                            size="small" 
+                            onClick={() => setStreakInfoOpen(true)}
+                            sx={{ 
+                              padding: 0.5, 
+                              color: 'text.secondary',
+                              '&:hover': { color: 'primary.main' }
+                            }}
+                          >
+                            <HelpOutline sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                  <Box sx={{ textAlign: 'right' }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Longest
-                    </Typography>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                      {streakData.longestStreak}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-
-            {/* Adherence */}
-            <Card sx={{ bgcolor: 'background.paper' }}>
-              <CardContent sx={{ p: 2 }}>
-                <Stack spacing={1.5}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Assessment sx={{ color: 'secondary.main' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        Adherence
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="caption" color="text.secondary">
+                        Longest
+                      </Typography>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                        {streakData.longestStreak}
                       </Typography>
                     </Box>
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                      {adherence}%
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={adherence}
-                    sx={{
-                      height: 12,
-                      borderRadius: 6,
-                      bgcolor: 'action.hover',
-                      '& .MuiLinearProgress-bar': {
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              {/* Adherence */}
+              <Card sx={{ bgcolor: 'background.paper' }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Stack spacing={1.5}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Assessment sx={{ color: 'secondary.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                          Adherence
+                        </Typography>
+                      </Box>
+                      <Typography variant="h4" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                        {adherence}%
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={adherence}
+                      sx={{
+                        height: 12,
                         borderRadius: 6,
-                        background: 'linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%)',
-                      },
-                    }}
-                  />
-                  <Typography variant="caption" color="text.secondary">
-                    Days with sessions (last 30 days or since first session)
-                  </Typography>
-                </Stack>
-              </CardContent>
-            </Card>
+                        bgcolor: 'action.hover',
+                        '& .MuiLinearProgress-bar': {
+                          borderRadius: 6,
+                          background: 'linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%)',
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      Days with sessions (last 30 days or since first session)
+                    </Typography>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Box>
 
             {/* Muscle Volume Tracker */}
             {history.length > 0 && (
@@ -535,38 +538,39 @@ const ProgressDashboard = () => {
             {/* Progressive Overload Section - Moved here, below adherence */}
           {history.length > 0 && (
             <Card sx={{ bgcolor: 'background.paper' }}>
-              <CardContent>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                  <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <TrendingUp /> Progressive Overload
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Progressive Overload
                   </Typography>
                   {pinnedExercises.length < 10 && (
                     <Button
                       size="small"
                       startIcon={<Add />}
                       onClick={() => setAddExerciseDialogOpen(true)}
-                      sx={{ color: 'secondary.main' }}
+                      variant="text"
                     >
-                      Track Exercise
+                      Add
                     </Button>
                   )}
                 </Stack>
 
                 {pinnedExercises.length === 0 ? (
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Box sx={{ textAlign: 'center', py: 3 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Track your favorite exercises to see your progress over time
+                      Track your favorite exercises to see your progress
                     </Typography>
                     <Button
-                      variant="contained"
+                      variant="outlined"
                       startIcon={<Add />}
                       onClick={() => setAddExerciseDialogOpen(true)}
+                      size="small"
                     >
                       Add Exercise
                     </Button>
                   </Box>
                 ) : (
-                  <Stack spacing={2}>
+                  <Stack spacing={1}>
                     {pinnedExercises.map((pinned) => {
                       // Use tracking mode from pinned exercise, default to weight
                       const trackingMode = pinned.trackingMode || 'weight';
@@ -576,85 +580,92 @@ const ProgressDashboard = () => {
                         trackingMode
                       );
 
-                      const startingValue = progression.length > 0 ? progression[0].value : 0;
-                      // Use stored latest performance if available, otherwise fall back to progression data
-                      const currentValue = trackingMode === 'reps' 
-                        ? (pinned.lastReps !== undefined ? pinned.lastReps : 
-                           (progression.length > 0 ? progression[progression.length - 1].value : 0))
-                        : (pinned.lastWeight !== undefined ? pinned.lastWeight : 
-                           (progression.length > 0 ? progression[progression.length - 1].value : 0));
+                      // Always use stored latest performance - this is synced from workout history
+                      const currentWeight = pinned.lastWeight !== undefined ? pinned.lastWeight : 0;
+                      const currentReps = pinned.lastReps !== undefined ? pinned.lastReps : 0;
+                      
+                      // Determine if we have any data to show
+                      const hasData = currentWeight > 0 || currentReps > 0 || progression.length > 0;
+                      
+                      // Calculate starting and current values for comparison
+                      const startingValue = progression.length > 0 ? progression[0].value : 
+                                           (trackingMode === 'reps' ? currentReps : currentWeight);
+                      const currentValue = trackingMode === 'reps' ? currentReps : currentWeight;
+                      
+                      // Determine progression direction
                       const progressionDirection = currentValue > startingValue ? 'up' : 
-                                                   currentValue < startingValue ? 'down' : 'same';
+                                                   currentValue < startingValue ? 'down' : 'stable';
+                      
                       const unit = trackingMode === 'reps' ? 'reps' : 'lbs';
 
                       return (
                         <Box 
                           key={pinned.exerciseName}
                           sx={{
-                            p: 2,
-                            borderRadius: 2,
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            bgcolor: 'background.default',
+                            py: 1,
+                            px: 1.5,
+                            borderRadius: 1.5,
+                            bgcolor: 'action.hover',
                           }}
                         >
-                          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
-                            <Typography variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
+                          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, flex: 1, fontSize: '0.8rem' }}>
                               {pinned.exerciseName}
                             </Typography>
                             <IconButton
                               onClick={() => handleRemovePinnedExercise(pinned.exerciseName)}
                               size="small"
-                              sx={{ color: 'text.secondary' }}
+                              sx={{ color: 'text.secondary', p: 0.5 }}
                             >
-                              <Close sx={{ fontSize: 18 }} />
+                              <Close sx={{ fontSize: 14 }} />
                             </IconButton>
                           </Stack>
 
-                          {(progression.length > 0 || pinned.lastWeight !== undefined || pinned.lastReps !== undefined) ? (
-                            <Stack 
-                              direction="row" 
-                              alignItems="center" 
-                              spacing={2}
-                              sx={{ justifyContent: 'center', py: 1 }}
-                            >
-                              <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="caption" color="text.secondary">
-                                  Starting
+                          {hasData ? (
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ justifyContent: 'space-between' }}>
+                              <Box sx={{ textAlign: 'center', flex: 1 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', display: 'block' }}>
+                                  Start
                                 </Typography>
-                                <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                                <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.875rem', lineHeight: 1.2 }}>
                                   {startingValue} {unit}
                                 </Typography>
+                                {trackingMode === 'weight' && (
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                                    {currentReps}r
+                                  </Typography>
+                                )}
                               </Box>
                               
-                              <Box sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 20 }}>
                                 {progressionDirection === 'up' && (
-                                  <TrendingUp sx={{ fontSize: 40, color: 'success.main' }} />
+                                  <TrendingUp sx={{ fontSize: 20, color: 'success.main' }} />
                                 )}
                                 {progressionDirection === 'down' && (
-                                  <TrendingDown sx={{ fontSize: 40, color: 'error.main' }} />
+                                  <TrendingDown sx={{ fontSize: 20, color: 'error.main' }} />
                                 )}
-                                {progressionDirection === 'same' && (
-                                  <Remove sx={{ fontSize: 40, color: 'text.secondary' }} />
+                                {progressionDirection === 'stable' && (
+                                  <Remove sx={{ fontSize: 20, color: 'text.secondary' }} />
                                 )}
                               </Box>
 
-                              <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="caption" color="text.secondary">
-                                  Current
+                              <Box sx={{ textAlign: 'center', flex: 1 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', display: 'block' }}>
+                                  Now
                                 </Typography>
-                                <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                                <Typography variant="body2" sx={{ fontWeight: 700, color: 'secondary.main', fontSize: '0.875rem', lineHeight: 1.2 }}>
                                   {currentValue} {unit}
                                 </Typography>
+                                {trackingMode === 'weight' && (
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                                    {currentReps}r
+                                  </Typography>
+                                )}
                               </Box>
                             </Stack>
                           ) : (
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ display: 'block', textAlign: 'center', py: 2 }}
-                            >
-                              No data available
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              No data yet
                             </Typography>
                           )}
                         </Box>

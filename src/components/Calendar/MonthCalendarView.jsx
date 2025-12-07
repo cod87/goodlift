@@ -9,10 +9,12 @@ import {
   Chip,
   useTheme,
   useMediaQuery,
+  alpha,
 } from '@mui/material';
 import {
   ChevronLeft,
   ChevronRight,
+  Bookmark,
 } from '@mui/icons-material';
 import { 
   startOfMonth, 
@@ -27,6 +29,10 @@ import {
   subMonths
 } from 'date-fns';
 // getWorkoutTypeShorthand import removed - no longer needed
+
+// Cardio subtypes that should be treated as cardio for display purposes
+// These are the specific cardio activity types from manual logging
+const CARDIO_SUBTYPES = ['running', 'cycling', 'swimming', 'general'];
 
 /**
  * MonthCalendarView - Standard calendar grid view with workout indicators
@@ -73,11 +79,45 @@ const MonthCalendarView = ({
 
   // hasCompletedWorkout function removed - using getWorkoutsForDay instead
 
-  // Get primary workout type for display (if multiple workouts, show first)
+  // Check if a workout type is a strength training type
+  const isStrengthType = (type) => {
+    if (!type) return false;
+    const normalizedType = type.toLowerCase();
+    // Strength training types include: upper, lower, full, push, pull, legs, strength, hypertrophy
+    const strengthTypes = ['upper', 'lower', 'full', 'push', 'pull', 'legs', 'strength', 'hypertrophy'];
+    return strengthTypes.includes(normalizedType);
+  };
+
+  // Get primary workout type for display
+  // Priority: 1. Strength training sessions, 2. Longer session (for non-strength)
   const getPrimaryWorkoutType = (workouts) => {
     if (!workouts || workouts.length === 0) return null;
-    const workout = workouts[0];
-    return workout.type?.toLowerCase() || workout.workoutType?.toLowerCase() || 'strength';
+    
+    if (workouts.length === 1) {
+      const workout = workouts[0];
+      return workout.type?.toLowerCase() || workout.workoutType?.toLowerCase() || 'strength';
+    }
+
+    // Multiple workouts on the same day
+    // First, look for strength training sessions
+    const strengthWorkout = workouts.find(w => {
+      const type = w.type?.toLowerCase() || w.workoutType?.toLowerCase();
+      return isStrengthType(type);
+    });
+
+    if (strengthWorkout) {
+      return strengthWorkout.type?.toLowerCase() || strengthWorkout.workoutType?.toLowerCase() || 'strength';
+    }
+
+    // No strength workout found - prefer the longer session
+    // Note: If durations are equal, the first workout in the array is returned (stable selection)
+    const longestWorkout = workouts.reduce((longest, current) => {
+      const currentDuration = current.duration || 0;
+      const longestDuration = longest.duration || 0;
+      return currentDuration > longestDuration ? current : longest;
+    }, workouts[0]);
+
+    return longestWorkout.type?.toLowerCase() || longestWorkout.workoutType?.toLowerCase() || 'strength';
   };
 
   // Get workout type abbreviation for display
@@ -85,6 +125,12 @@ const MonthCalendarView = ({
     if (!type) return 'X';
     
     const normalizedType = type.toLowerCase();
+    
+    // Check if this is a cardio subtype
+    if (CARDIO_SUBTYPES.includes(normalizedType)) {
+      return 'C';
+    }
+    
     const labelMap = {
       'upper': 'UP',
       'lower': 'LO',
@@ -104,11 +150,13 @@ const MonthCalendarView = ({
   const getWorkoutColor = (type) => {
     if (!type) return 'primary.main';
     
-    if (type === 'cardio' || type === 'hiit') {
+    const normalizedType = type.toLowerCase();
+    
+    if (normalizedType === 'cardio' || normalizedType === 'hiit' || CARDIO_SUBTYPES.includes(normalizedType)) {
       return 'error.main';
-    } else if (type === 'stretch' || type === 'active_recovery' || type === 'yoga' || type === 'mobility') {
+    } else if (normalizedType === 'stretch' || normalizedType === 'active_recovery' || normalizedType === 'yoga' || normalizedType === 'mobility') {
       return 'secondary.main';
-    } else if (type === 'rest') {
+    } else if (normalizedType === 'rest') {
       return 'action.disabled';
     } else {
       return 'primary.main'; // Strength training
@@ -192,7 +240,11 @@ const MonthCalendarView = ({
           sx={{ 
             display: 'grid',
             gridTemplateColumns: 'repeat(7, 1fr)',
-            gap: { xs: 0.25, sm: 0.5 },
+            gap: 0,
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: 1,
+            overflow: 'hidden',
           }}
         >
           {cells.map((date, index) => {
@@ -201,6 +253,47 @@ const MonthCalendarView = ({
             const workoutsOnDay = getWorkoutsForDay(date);
             const isCompleted = workoutsOnDay.length > 0;
             const primaryType = getPrimaryWorkoutType(workoutsOnDay);
+            const hasStrengthTraining = isCompleted && isStrengthType(primaryType);
+            // Calculate grid position for corner radius handling
+            const totalRows = Math.ceil(cells.length / 7);
+            const isLastRow = Math.floor(index / 7) === totalRows - 1;
+            const isFirstRow = Math.floor(index / 7) === 0;
+            const isFirstColumn = index % 7 === 0;
+            const isLastColumn = index % 7 === 6;
+            // Determine if this cell is at a corner of the grid
+            const isTopLeftCorner = isFirstRow && isFirstColumn;
+            const isTopRightCorner = isFirstRow && isLastColumn;
+            const isBottomLeftCorner = isLastRow && isFirstColumn;
+            const isBottomRightCorner = isLastRow && isLastColumn;
+
+            // Strength training background colors using theme's primary color
+            const strengthBgLight = alpha(theme.palette.primary.main, 0.12);
+            const strengthBgDark = alpha(theme.palette.primary.main, 0.18);
+            const strengthHoverLight = alpha(theme.palette.primary.main, 0.20);
+            const strengthHoverDark = alpha(theme.palette.primary.main, 0.28);
+
+            // Get background color - strength training days get a prominent background
+            // Today with strength training gets the strength background (outline still shows today)
+            const getBackgroundColor = () => {
+              if (hasStrengthTraining) {
+                // Use a tinted background for strength training days
+                return theme.palette.mode === 'dark' ? strengthBgDark : strengthBgLight;
+              }
+              if (isToday) {
+                return 'action.selected';
+              }
+              return 'transparent';
+            };
+
+            // Calculate border radius for corners - matches the grid's borderRadius of 1 (4px)
+            const getBorderRadius = () => {
+              const radius = '4px';
+              if (isTopLeftCorner) return `${radius} 0 0 0`;
+              if (isTopRightCorner) return `0 ${radius} 0 0`;
+              if (isBottomLeftCorner) return `0 0 0 ${radius}`;
+              if (isBottomRightCorner) return `0 0 ${radius} 0`;
+              return 0;
+            };
 
             return (
               <Box
@@ -212,24 +305,38 @@ const MonthCalendarView = ({
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: 1,
+                  borderRadius: getBorderRadius(),
                   cursor: isCompleted ? 'pointer' : 'default',
-                  bgcolor: isToday 
-                    ? 'action.selected' 
-                    : 'transparent',
+                  bgcolor: getBackgroundColor(),
                   opacity: isCurrentMonth ? 1 : 0.3,
-                  border: isToday ? 2 : 1,
-                  borderColor: isToday ? 'primary.main' : 'transparent',
+                  // Subtle grid borders
+                  borderRight: 1,
+                  borderBottom: isLastRow ? 0 : 1,
+                  borderColor: 'divider',
+                  // Highlight today with a visible outline that respects corner radius
+                  ...(isToday && {
+                    outline: '2px solid',
+                    outlineColor: 'primary.main',
+                    outlineOffset: -2,
+                    zIndex: 1,
+                  }),
                   transition: 'all 0.2s ease',
                   minHeight: { xs: 40, sm: 52 },
                   maxHeight: { xs: 44, sm: 60 },
                   position: 'relative',
                   padding: { xs: '3px 2px', sm: '6px 4px' },
                   '&:hover': isCompleted ? {
-                    bgcolor: 'action.hover',
-                    transform: 'scale(1.05)',
+                    bgcolor: hasStrengthTraining 
+                      ? (theme.palette.mode === 'dark' ? strengthHoverDark : strengthHoverLight)
+                      : 'action.hover',
+                    transform: 'scale(1.02)',
                     boxShadow: 1,
+                    zIndex: 2,
                   } : {},
+                  // Remove right border from last column (every 7th cell in the weekly grid)
+                  '&:nth-of-type(7n)': {
+                    borderRight: 0,
+                  },
                 }}
               >
                 <Typography
@@ -263,6 +370,20 @@ const MonthCalendarView = ({
                   >
                     {getWorkoutTypeLabel(primaryType)}
                   </Typography>
+                )}
+                
+                {/* Bookmark indicator for days with multiple sessions */}
+                {workoutsOnDay.length > 1 && (
+                  <Bookmark
+                    sx={{
+                      position: 'absolute',
+                      top: { xs: 0, sm: 1 },
+                      right: { xs: 0, sm: 1 },
+                      fontSize: { xs: '0.6rem', sm: '0.75rem' },
+                      color: 'text.secondary',
+                      opacity: 0.7,
+                    }}
+                  />
                 )}
               </Box>
             );

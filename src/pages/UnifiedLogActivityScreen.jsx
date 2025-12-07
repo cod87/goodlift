@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import { 
-  FitnessCenter,
   CalendarToday,
 } from '@mui/icons-material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -256,18 +255,6 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
     }
   };
 
-  const getActivityIcon = () => {
-    return <FitnessCenter sx={{ fontSize: 48, color: 'primary.main' }} />;
-  };
-
-  const getActivityColor = () => {
-    return 'primary.main';
-  };
-
-  const getActivityBgColor = () => {
-    return 'rgba(19, 70, 134, 0.1)';
-  };
-
   const getActivityTitle = () => {
     return 'Log Activity';
   };
@@ -288,38 +275,9 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-        <Box sx={{ mb: 3, textAlign: 'center' }}>
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            mb: 2 
-          }}>
-            <Box sx={{ 
-              p: { xs: 1.5, sm: 2 }, 
-              borderRadius: '50%', 
-              bgcolor: getActivityBgColor(),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              {getActivityIcon()}
-            </Box>
-          </Box>
-          <Typography variant="h3" sx={{ 
-            fontWeight: 700, 
-            color: getActivityColor(),
-            mb: 1,
-            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
-          }}>
+        <Box sx={{ mb: 1.5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {getActivityTitle()}
-          </Typography>
-          <Typography variant="body1" sx={{ 
-            color: 'text.secondary',
-            mb: 2,
-            fontSize: { xs: '0.875rem', sm: '1rem' },
-            px: { xs: 1, sm: 0 }
-          }}>
-            Manually log your completed activities
           </Typography>
         </Box>
 
@@ -517,9 +475,9 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                       fullWidth
                       disabled={isSubmitting || !isValid || !dirty}
                       sx={{ 
-                        bgcolor: getActivityColor(),
+                        bgcolor: 'primary.main',
                         '&:hover': { 
-                          bgcolor: getActivityColor(),
+                          bgcolor: 'primary.main',
                           filter: 'brightness(0.9)'
                         },
                         py: 1.5,

@@ -20,6 +20,7 @@ import {
   loadUserDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
+import { normalizeWorkoutExercises } from './exerciseNameNormalizer';
 
 /**
  * Storage module for managing workout data in localStorage and Firebase
@@ -207,6 +208,36 @@ export const updateWorkout = async (index, updatedData) => {
 };
 
 /**
+ * Calculate total volume lifted from workout history
+ * Volume = sum of (weight * reps) for all sets in all workouts
+ * @param {Array} workoutHistory - Array of workout objects
+ * @returns {number} Total volume in lbs
+ */
+const calculateTotalVolumeFromHistory = (workoutHistory) => {
+  if (!workoutHistory || !Array.isArray(workoutHistory)) return 0;
+  
+  let totalVolume = 0;
+  
+  for (const workout of workoutHistory) {
+    if (!workout.exercises) continue;
+    
+    for (const exerciseData of Object.values(workout.exercises)) {
+      if (!exerciseData.sets || !Array.isArray(exerciseData.sets)) continue;
+      
+      for (const set of exerciseData.sets) {
+        const weight = parseFloat(set.weight) || 0;
+        const reps = parseInt(set.reps, 10) || 0;
+        if (weight > 0 && reps > 0) {
+          totalVolume += weight * reps;
+        }
+      }
+    }
+  }
+  
+  return totalVolume;
+};
+
+/**
  * Get user statistics (total workouts, time, etc.)
  * IMPORTANT: Stats are now calculated from actual session data to ensure they're always in sync
  * @returns {Promise<Object>} User stats object with totalWorkouts, totalTime, and all session type times
@@ -224,6 +255,9 @@ export const getUserStats = async () => {
     const totalWorkouts = history.length;
     const totalTime = history.reduce((sum, workout) => sum + (workout.duration || 0), 0);
     
+    // Calculate total volume from workout history
+    const totalVolume = calculateTotalVolumeFromHistory(history);
+    
     // Calculate time for each session type by summing their actual sessions
     const hiitSessions = getHiitSessions();
     const totalHiitTime = hiitSessions.reduce((sum, session) => sum + (session.duration || 0), 0);
@@ -236,7 +270,6 @@ export const getUserStats = async () => {
     
     // Get achievement-related stats
     const totalPRs = await getTotalPRs();
-    const totalVolume = await getTotalVolume();
     
     const calculatedStats = { 
       totalWorkouts, 
@@ -831,32 +864,39 @@ export const updateCardioSession = async (sessionId, updatedData) => {
 
 /**
  * Get favorite workouts from Firebase (if authenticated) or localStorage
+ * Normalizes exercise names to movement-first format for consistency
  * @returns {Promise<Array>} Array of favorite workout objects
  */
 export const getFavoriteWorkouts = async () => {
   try {
+    let favorites = [];
+    
     // Check if in guest mode first
     if (isGuestMode()) {
-      return getGuestData('favorite_workouts') || [];
-    }
-
-    // Try Firebase first if user is authenticated
-    if (currentUserId) {
+      favorites = getGuestData('favorite_workouts') || [];
+    } else if (currentUserId) {
+      // Try Firebase first if user is authenticated
       try {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
         if (firebaseData?.favoriteWorkouts) {
           // Update localStorage cache for offline access
           localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(firebaseData.favoriteWorkouts));
-          return firebaseData.favoriteWorkouts;
+          favorites = firebaseData.favoriteWorkouts;
         }
       } catch (error) {
         console.error('Firebase fetch failed for favorite workouts, using localStorage:', error);
+        // Fallback to localStorage
+        const stored = localStorage.getItem(KEYS.FAVORITE_WORKOUTS);
+        favorites = stored ? JSON.parse(stored) : [];
       }
+    } else {
+      // Fallback to localStorage
+      const stored = localStorage.getItem(KEYS.FAVORITE_WORKOUTS);
+      favorites = stored ? JSON.parse(stored) : [];
     }
     
-    // Fallback to localStorage
-    const favorites = localStorage.getItem(KEYS.FAVORITE_WORKOUTS);
-    return favorites ? JSON.parse(favorites) : [];
+    // Normalize exercise names to movement-first format
+    return favorites.map(workout => normalizeWorkoutExercises(workout));
   } catch (error) {
     console.error('Error reading favorite workouts:', error);
     return [];
@@ -955,6 +995,63 @@ export const updateFavoriteWorkoutName = async (workoutId, newName) => {
     }
   } catch (error) {
     console.error('Error updating favorite workout name:', error);
+    throw error;
+  }
+};
+
+/**
+ * Duplicate a favorite workout
+ * Creates a new copy with a unique name indicating it's a duplicate
+ * @param {string} workoutId - ID of the favorite workout to duplicate
+ * @returns {Promise<Object>} The newly created duplicate workout
+ */
+export const duplicateFavoriteWorkout = async (workoutId) => {
+  try {
+    if (!workoutId) {
+      throw new Error('Workout ID is required');
+    }
+    
+    const favorites = await getFavoriteWorkouts();
+    const originalWorkout = favorites.find(fav => fav.id === workoutId);
+    
+    if (!originalWorkout) {
+      throw new Error('Workout not found');
+    }
+    
+    // Create a deep copy of the workout with a new ID and name
+    const timestamp = new Date().toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    
+    const duplicateWorkout = {
+      ...originalWorkout,
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      name: `${originalWorkout.name || 'Workout'} (Copy - ${timestamp})`,
+      // Deep copy exercises array to avoid reference issues
+      exercises: originalWorkout.exercises ? 
+        JSON.parse(JSON.stringify(originalWorkout.exercises)) : [],
+      savedAt: new Date().toISOString(),
+    };
+    
+    favorites.unshift(duplicateWorkout);
+    
+    // Save based on mode
+    if (isGuestMode()) {
+      setGuestData('favorite_workouts', favorites);
+    } else {
+      localStorage.setItem(KEYS.FAVORITE_WORKOUTS, JSON.stringify(favorites));
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveFavoriteWorkoutsToFirebase(currentUserId, favorites);
+      }
+    }
+    
+    return duplicateWorkout;
+  } catch (error) {
+    console.error('Error duplicating favorite workout:', error);
     throw error;
   }
 };
@@ -1872,31 +1969,38 @@ export const deleteHiitPreset = async (presetId) => {
 
 /**
  * Get saved workouts from localStorage
+ * Normalizes exercise names to movement-first format for consistency
  * @returns {Promise<Array>} Array of saved workout objects
  */
 export const getSavedWorkouts = async () => {
   try {
+    let workouts = [];
+    
     if (isGuestMode()) {
-      const guestData = getGuestData('saved_workouts');
-      return guestData || [];
-    }
-
-    // Try Firebase first if user is authenticated
-    if (currentUserId) {
+      workouts = getGuestData('saved_workouts') || [];
+    } else if (currentUserId) {
+      // Try Firebase first if user is authenticated
       try {
         const firebaseData = await loadUserDataFromFirebase(currentUserId);
         if (firebaseData?.savedWorkouts) {
           // Update localStorage cache for offline access
           localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(firebaseData.savedWorkouts));
-          return firebaseData.savedWorkouts;
+          workouts = firebaseData.savedWorkouts;
         }
       } catch (error) {
         console.error('Firebase fetch failed, using localStorage:', error);
+        // Fallback to localStorage
+        const stored = localStorage.getItem(KEYS.SAVED_WORKOUTS);
+        workouts = stored ? JSON.parse(stored) : [];
       }
+    } else {
+      // Fallback to localStorage
+      const stored = localStorage.getItem(KEYS.SAVED_WORKOUTS);
+      workouts = stored ? JSON.parse(stored) : [];
     }
 
-    const workouts = localStorage.getItem(KEYS.SAVED_WORKOUTS);
-    return workouts ? JSON.parse(workouts) : [];
+    // Normalize exercise names to movement-first format
+    return workouts.map(workout => normalizeWorkoutExercises(workout));
   } catch (error) {
     console.error('Error reading saved workouts:', error);
     return [];
@@ -1996,6 +2100,66 @@ export const updateSavedWorkout = async (index, updatedWorkout) => {
     return workouts;
   } catch (error) {
     console.error('Error updating saved workout:', error);
+    throw error;
+  }
+};
+
+/**
+ * Duplicate a saved workout
+ * Creates a new copy with a unique name indicating it's a duplicate
+ * @param {number} index - Index of the saved workout to duplicate
+ * @returns {Promise<Object>} The newly created duplicate workout
+ */
+export const duplicateSavedWorkout = async (index) => {
+  try {
+    const workouts = await getSavedWorkouts();
+    
+    if (index < 0 || index >= workouts.length) {
+      throw new Error('Invalid workout index');
+    }
+    
+    const originalWorkout = workouts[index];
+    
+    // Create a deep copy of the workout with a new ID and name
+    const timestamp = new Date().toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    
+    const duplicateWorkout = {
+      ...originalWorkout,
+      id: Date.now(),
+      name: `${originalWorkout.name || 'Workout'} (Copy - ${timestamp})`,
+      // Deep copy exercises array to avoid reference issues
+      exercises: originalWorkout.exercises ? 
+        JSON.parse(JSON.stringify(originalWorkout.exercises)) : [],
+      // Deep copy supersetConfig if exists
+      supersetConfig: originalWorkout.supersetConfig ?
+        JSON.parse(JSON.stringify(originalWorkout.supersetConfig)) : undefined,
+      createdAt: new Date().toISOString(),
+      // Remove assigned day from duplicate
+      assignedDay: undefined,
+      archived: false,
+    };
+    
+    workouts.push(duplicateWorkout);
+    
+    if (isGuestMode()) {
+      setGuestData('saved_workouts', workouts);
+    } else {
+      localStorage.setItem(KEYS.SAVED_WORKOUTS, JSON.stringify(workouts));
+      
+      // Sync to Firebase if authenticated
+      if (currentUserId) {
+        await saveSavedWorkoutsToFirebase(currentUserId, workouts);
+      }
+    }
+    
+    return duplicateWorkout;
+  } catch (error) {
+    console.error('Error duplicating saved workout:', error);
     throw error;
   }
 };

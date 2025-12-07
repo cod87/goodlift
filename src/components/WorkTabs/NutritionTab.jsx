@@ -35,11 +35,12 @@ import { calculateNutrition } from '../../services/nutritionDataService';
 import RecipeBuilder from './RecipeBuilder';
 import SavedRecipes from './SavedRecipes';
 import LogMealModal from '../LogMealModal';
+import CreateRecipeModal from '../CreateRecipeModal';
 
 /**
  * NutritionTab - Component for tracking nutrition using local nutrition database
  * Features:
- * - Search foods from nutrition-700.json with ranking support
+ * - Search foods from nutrition.json with ranking support
  * - Tag-based searching (tags not visible to users)
  * - Standard portion measurements with multiple unit options
  * - Custom food support
@@ -70,6 +71,7 @@ const NutritionTab = () => {
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const [recipes, setRecipes] = useState([]);
   const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
+  const [showCreateRecipeModal, setShowCreateRecipeModal] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [showLogMealModal, setShowLogMealModal] = useState(false);
   const [favoriteFoods, setFavoriteFoods] = useState([]);
@@ -142,8 +144,7 @@ const NutritionTab = () => {
   };
 
   const handleCreateRecipe = () => {
-    setEditingRecipe(null);
-    setShowRecipeBuilder(true);
+    setShowCreateRecipeModal(true);
   };
 
   const handleEditRecipe = (recipe) => {
@@ -184,7 +185,7 @@ const NutritionTab = () => {
         foodMap.set(entry.foodName, {
           name: entry.foodName,
           grams: entry.grams,
-          // Reconstruct as nutrition-700 format
+          // Reconstruct as nutrition format
           calories: (entry.nutrition.calories / entry.grams) * 100,
           protein: (entry.nutrition.protein / entry.grams) * 100,
           carbs: (entry.nutrition.carbs / entry.grams) * 100,
@@ -611,6 +612,14 @@ const NutritionTab = () => {
             }}
             editRecipe={editingRecipe}
             onSave={handleRecipeSaved}
+          />
+
+          {/* Create Recipe Modal - Full-screen like Log Meal */}
+          <CreateRecipeModal
+            open={showCreateRecipeModal}
+            onClose={() => setShowCreateRecipeModal(false)}
+            onSave={handleRecipeSaved}
+            onFavoritesChange={loadFavorites}
           />
         </>
       )}

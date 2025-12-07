@@ -1,41 +1,42 @@
 import { memo } from 'react';
 import PropTypes from 'prop-types';
-import { useTheme } from '@mui/material';
-import { motion } from 'framer-motion';
+import { useTheme, useMediaQuery } from '@mui/material';
 import { 
   TrendingUp,
   TrendingUpOutlined,
   Settings,
   SettingsOutlined,
 } from '@mui/icons-material';
-import { touchTargets, zIndex } from '../../theme/responsive';
+import { touchTargets, zIndex, BREAKPOINTS } from '../../theme/responsive';
+
+// Single highlight color for all nav items
+const ACTIVE_COLOR = '#1db584';
 
 /**
- * BottomNav - Fixed bottom navigation for all devices
+ * BottomNav - Responsive navigation component
  * 
  * Features:
- * - Fixed position at bottom of screen
+ * - Mobile/Tablet: Fixed bottom navigation
+ * - Desktop (≥1024px): Vertical sidebar navigation on the left
  * - 3 navigation icons: Work, Progress, Settings
- * - 56-64px height for comfortable touch targets
+ * - Touch-friendly targets (56-64px)
  * - Safe area padding for devices with home indicators
  * - Active state indication with primary color
  * - Smooth transitions
- * 
- * Visible on all screen sizes
  */
 const BottomNav = memo(({ currentScreen, onNavigate }) => {
   const theme = useTheme();
+  const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
+  
   const navItems = [
     {
       id: 'home',
       label: 'Work',
       iconActive: null, // Use custom SVG
       iconInactive: null, // Use custom SVG
-      customIcon: 'work-icon.svg',
-      activeColor: '#1db584', // Green
+      customIcon: 'goodlift-favicon.svg',
       screens: [
         'home', 
-        'selection', 
         'preview', 
         'workout', 
         'customize', 
@@ -44,14 +45,13 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
         'timer',
         'cardio',
         'hiit'
-      ], // removed 'workout-plan' - no longer using workout planning
+      ],
     },
     {
       id: 'progress',
       label: 'Progress',
       iconActive: TrendingUp,
       iconInactive: TrendingUpOutlined,
-      activeColor: '#6b8a9d', // Blue accent
       screens: ['progress'],
     },
     {
@@ -59,7 +59,6 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       label: 'Settings',
       iconActive: Settings,
       iconInactive: SettingsOutlined,
-      activeColor: '#ff8c00', // Orange accent
       screens: ['settings', 'log-activity', 'exercise-list', 'profile', 'stretch', 'mobility'],
     },
   ];
@@ -72,24 +71,123 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
     return item.screens.includes(currentScreen);
   };
 
+  // Desktop sidebar navigation
+  if (isDesktop) {
+    return (
+      <nav
+        style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          width: '80px',
+          height: '100vh',
+          backgroundColor: theme.palette.background.paper,
+          borderRight: `1px solid ${theme.palette.divider}`,
+          zIndex: zIndex.navigation,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          paddingTop: '1rem',
+          gap: '0.5rem',
+        }}
+      >
+        {/* Logo at top */}
+        <div style={{
+          marginBottom: '1.5rem',
+          padding: '0.5rem',
+        }}>
+          <img 
+            src={`${import.meta.env.BASE_URL || '/'}goodlift-favicon.svg`} 
+            alt="GoodLift"
+            style={{
+              width: '40px',
+              height: '40px',
+            }}
+          />
+        </div>
+
+        {navItems.map((item) => {
+          const active = isActive(item);
+          const Icon = active ? item.iconActive : item.iconInactive;
+          const baseUrl = import.meta.env.BASE_URL || '/';
+          
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNavClick(item.id)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '64px',
+                height: '64px',
+                background: active ? `${ACTIVE_COLOR}15` : 'transparent',
+                border: 'none',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                color: active ? ACTIVE_COLOR : theme.palette.text.secondary,
+                transition: 'all 0.2s ease',
+                padding: '8px',
+              }}
+              aria-label={item.label}
+              aria-current={active ? 'page' : undefined}
+            >
+              {/* Icon */}
+              <div style={{
+                fontSize: '1.5rem',
+                marginBottom: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {item.customIcon ? (
+                  <img 
+                    src={`${baseUrl}${item.customIcon}`} 
+                    alt={item.label}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      filter: active 
+                        ? 'none' 
+                        : theme.palette.mode === 'dark'
+                          ? 'brightness(0.6)'
+                          : 'brightness(0.5)',
+                    }}
+                  />
+                ) : (
+                  <Icon sx={{ fontSize: '1.75rem' }} />
+                )}
+              </div>
+              
+              {/* Label */}
+              <span style={{
+                fontSize: '0.65rem',
+                fontWeight: active ? 600 : 400,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                lineHeight: 1,
+              }}>
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+    );
+  }
+
+  // Mobile/Tablet bottom navigation
   return (
-    <motion.nav
-      initial={{ y: 100 }}
-      animate={{ y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+    <nav
       style={{
         position: 'fixed',
         bottom: 0,
         left: 0,
         right: 0,
         height: `calc(${touchTargets.navigation} + env(safe-area-inset-bottom))`,
-        backgroundColor: theme.palette.background.paper,
-        borderTop: `1px solid ${theme.palette.mode === 'dark' 
-          ? 'rgba(29, 181, 132, 0.2)' 
-          : 'rgba(0, 0, 0, 0.12)'}`,
-        boxShadow: theme.palette.mode === 'dark' 
-          ? '0 -2px 10px rgba(0, 0, 0, 0.3)' 
-          : '0 -2px 10px rgba(0, 0, 0, 0.1)',
+        backgroundColor: theme.palette.background.default,
+        borderTop: `1px solid ${theme.palette.divider}`,
         zIndex: zIndex.navigation,
         display: 'flex',
         alignItems: 'center',
@@ -105,7 +203,7 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
         const baseUrl = import.meta.env.BASE_URL || '/';
         
         return (
-          <motion.button
+          <button
             key={item.id}
             onClick={() => handleNavClick(item.id)}
             style={{
@@ -119,14 +217,13 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              color: active ? item.activeColor : theme.palette.text.secondary,
+              color: active ? ACTIVE_COLOR : theme.palette.text.secondary,
               transition: 'color 0.2s ease, opacity 0.15s ease',
               padding: '8px 4px',
               position: 'relative',
             }}
             aria-label={item.label}
             aria-current={active ? 'page' : undefined}
-            whilePressed={{ opacity: 0.7 }}
           >
             {/* Icon */}
             <div style={{
@@ -165,27 +262,10 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
             }}>
               {item.label}
             </span>
-            
-            {/* Active indicator */}
-            {active && (
-              <motion.div
-                layoutId="bottomNavIndicator"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '3px',
-                  backgroundColor: item.activeColor,
-                  borderRadius: '0 0 3px 3px',
-                }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              />
-            )}
-          </motion.button>
+          </button>
         );
       })}
-    </motion.nav>
+    </nav>
   );
 });
 

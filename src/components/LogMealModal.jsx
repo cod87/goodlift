@@ -39,7 +39,10 @@ import {
   Tab,
   Alert,
   Chip,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
+import DialPicker from './Common/DialPicker';
 import {
   Close as CloseIcon,
   Search as SearchIcon,
@@ -49,12 +52,17 @@ import {
   StarBorder as StarBorderIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
-import { searchFoods, calculateNutrition } from '../services/nutritionDataService';
+import { searchFoods, calculateNutrition, calculateNutritionForPortion, getMeasurementOptions, decimalToFraction } from '../services/nutritionDataService';
 import {
   addFavoriteFood,
   removeFavoriteFood,
   isFavoriteFood,
 } from '../utils/nutritionStorage';
+
+// Constants for portion validation
+const MIN_PORTION_QUANTITY = 0.25;
+const MIN_GRAMS = 1;
+const DEFAULT_GRAMS = 100;
 
 const LogMealModal = ({ 
   open, 
@@ -91,11 +99,6 @@ const LogMealModal = ({
       setSelectedFoodIds(new Set());
     }
   }, [open]);
-
-  // Calculate nutrition for a food item
-  const calculateNutritionForFood = (food, grams) => {
-    return calculateNutrition(food, grams);
-  };
 
   // Add a search term (when user presses Enter or comma)
   const addSearchTerm = useCallback((term) => {
@@ -217,17 +220,30 @@ const LogMealModal = ({
   }, [searchQuery, searchTerms, searchFoodsLocal]);
 
   // Toggle food selection (multi-select pattern like workout builder)
+  // Auto-adds to meal when selected, removes when deselected
   const handleToggleFoodSelection = (food) => {
     try {
       const foodId = food.id || food.fdcId;
       const newSelectedIds = new Set(selectedFoodIds);
       
       if (newSelectedIds.has(foodId)) {
-        // Deselect - remove from selected set
+        // Deselect - remove from selected set and meal
         newSelectedIds.delete(foodId);
+        setMealItems(prevItems => prevItems.filter(item => {
+          const itemFoodId = item.food.id || item.food.fdcId;
+          return itemFoodId !== foodId;
+        }));
       } else {
-        // Select - add to selected set
+        // Select - add to selected set and meal
         newSelectedIds.add(foodId);
+        const newMealItem = {
+          id: crypto.randomUUID(),
+          food: food,
+          portionType: 'standard', // Default to standard portion
+          portionQuantity: 1, // Number of standard portions
+          grams: food.portion_grams || DEFAULT_GRAMS,
+        };
+        setMealItems(prevItems => [...prevItems, newMealItem]);
       }
       
       setSelectedFoodIds(newSelectedIds);
@@ -237,52 +253,19 @@ const LogMealModal = ({
     }
   };
 
-  // Add selected foods to meal
-  const handleAddSelectedToMeal = () => {
-    if (selectedFoodIds.size === 0) {
-      return;
-    }
-
-    try {
-      const selectedFoods = searchResults.filter(food => 
-        selectedFoodIds.has(food.id || food.fdcId)
-      );
-
-      const newMealItems = selectedFoods.map(food => ({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-        food: food,
-        grams: food.portion_grams || 100,
-      }));
-
-      setMealItems([...mealItems, ...newMealItems]);
-      setSelectedFoodIds(new Set()); // Clear selection
-      setActiveTab(1); // Switch to My Meal tab
-    } catch (error) {
-      console.error('Error adding selected foods to meal:', error);
-      setError('Failed to add foods to meal. Please try again.');
-    }
-  };
-
-  const handleSelectFood = (food) => {
-    try {
-      // For backward compatibility - directly add to meal
-      const newMealItem = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-        food: food,
-        grams: food.portion_grams || 100,
-      };
-      setMealItems([...mealItems, newMealItem]);
-      
-      // Switch to "My Meal" tab to show the added item
-      setActiveTab(1);
-    } catch (error) {
-      console.error('Error selecting food:', error);
-      setError('Failed to add food. Please try again.');
-    }
-  };
-
   const handleRemoveMealItem = (itemId) => {
     try {
+      // Find the item to get its food ID
+      const itemToRemove = mealItems.find(item => item.id === itemId);
+      if (itemToRemove) {
+        const foodId = itemToRemove.food.id || itemToRemove.food.fdcId;
+        // Remove from selected IDs as well
+        setSelectedFoodIds(prevIds => {
+          const newIds = new Set(prevIds);
+          newIds.delete(foodId);
+          return newIds;
+        });
+      }
       setMealItems(mealItems.filter(item => item.id !== itemId));
     } catch (error) {
       console.error('Error removing meal item:', error);
@@ -290,17 +273,73 @@ const LogMealModal = ({
     }
   };
 
+  // Handle changing portion type (standard, grams, volume)
+  const handleChangePortionType = (itemId, portionType) => {
+    try {
+      setMealItems(mealItems.map(item => {
+        if (item.id !== itemId) return item;
+        
+        const food = item.food;
+        let grams = item.grams;
+        let portionQuantity = 1;
+        
+        if (portionType === 'standard') {
+          grams = food.portion_grams || DEFAULT_GRAMS;
+          portionQuantity = 1;
+        } else if (portionType === 'grams') {
+          grams = DEFAULT_GRAMS;
+          portionQuantity = 1;
+        } else if (portionType === 'volume') {
+          grams = food.portion_grams || DEFAULT_GRAMS;
+          portionQuantity = 1;
+        }
+        
+        return { ...item, portionType, grams, portionQuantity };
+      }));
+    } catch (error) {
+      console.error('Error changing portion type:', error);
+      setError('Failed to change portion type. Please try again.');
+    }
+  };
+
+  // Handle changing portion quantity (for standard portions)
+  const handleChangePortionQuantity = (itemId, quantity) => {
+    try {
+      const validQuantity = Math.max(MIN_PORTION_QUANTITY, parseFloat(quantity) || 1);
+      setMealItems(mealItems.map(item => {
+        if (item.id !== itemId) return item;
+        
+        const food = item.food;
+        const grams = (food.portion_grams || DEFAULT_GRAMS) * validQuantity;
+        
+        return { ...item, portionQuantity: validQuantity, grams };
+      }));
+    } catch (error) {
+      console.error('Error updating portion quantity:', error);
+      setError('Failed to update quantity. Please try again.');
+    }
+  };
+
   const handleUpdateMealItemGrams = (itemId, grams) => {
     try {
       // Ensure grams is a valid number
-      const validGrams = Math.max(1, parseFloat(grams) || 1);
+      const validGrams = Math.max(MIN_GRAMS, parseFloat(grams) || MIN_GRAMS);
       setMealItems(mealItems.map(item => 
-        item.id === itemId ? { ...item, grams: validGrams } : item
+        item.id === itemId ? { ...item, grams: validGrams, portionType: 'grams', portionQuantity: 1 } : item
       ));
     } catch (error) {
       console.error('Error updating meal item grams:', error);
       setError('Failed to update quantity. Please try again.');
     }
+  };
+
+  // Calculate nutrition based on portion type
+  const calculateItemNutrition = (item) => {
+    const { food, grams, portionType, portionQuantity = 1 } = item;
+    if (portionType === 'standard' || portionType === 'volume') {
+      return calculateNutritionForPortion(food, portionQuantity);
+    }
+    return calculateNutrition(food, grams);
   };
 
   const handleSaveMeal = () => {
@@ -312,12 +351,14 @@ const LogMealModal = ({
       // Create entries for each meal item
       mealItems.forEach(item => {
         try {
-          const nutrition = calculateNutritionForFood(item.food, item.grams);
+          const nutrition = calculateItemNutrition(item);
           const entry = {
             id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
             date: new Date().toISOString(),
             foodName: item.food.name,
             grams: item.grams,
+            portionType: item.portionType,
+            portionQuantity: item.portionQuantity,
             nutrition,
           };
           onSave(entry);
@@ -355,9 +396,11 @@ const LogMealModal = ({
     }
   };
 
-  const renderFoodItem = (food, onClick, isSelected = false) => {
+  // Simplified search result item - compact display with only name, serving, and calories
+  const renderSearchResultItem = (food, onClick, isSelected = false) => {
     try {
-      const nutrition = calculateNutritionForFood(food, 100);
+      // Calculate nutrition for 1 standard portion (using portion_factor)
+      const nutrition = calculateNutritionForPortion(food, 1);
       const isFavorite = isFavoriteFood(food);
       
       return (
@@ -365,7 +408,7 @@ const LogMealModal = ({
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 20 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.15 }}
         >
           <ListItem
             button
@@ -374,7 +417,7 @@ const LogMealModal = ({
               onClick();
             }}
             sx={{ 
-              py: 2,
+              py: 1,
               px: 2,
               '&:hover': {
                 backgroundColor: 'action.hover',
@@ -382,63 +425,63 @@ const LogMealModal = ({
               transition: 'background-color 0.2s, border-color 0.2s, margin-left 0.3s',
               cursor: 'pointer',
               display: 'flex',
-              alignItems: 'flex-start',
+              alignItems: 'center',
               borderLeft: isSelected ? '4px solid' : 'none',
               borderLeftColor: isSelected ? 'success.main' : 'transparent',
               marginLeft: isSelected ? 1 : 0,
               backgroundColor: isSelected ? 'success.50' : 'transparent',
             }}
           >
-          <ListItemText
-            primary={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+            <ListItemText
+              primary={
                 <Typography 
-                  variant="body1" 
+                  variant="body2" 
                   sx={{ 
-                    fontWeight: 600,
+                    fontWeight: 500,
                     color: 'text.primary',
-                    flex: 1,
                   }}
                 >
                   {food.name || food.foodName || 'Unknown Food'}
                 </Typography>
-              </Box>
-            }
-            secondary={
-              <Box component="span" sx={{ display: 'flex', gap: 1, mt: 0.5, alignItems: 'center', fontSize: '0.875rem', color: 'text.secondary' }}>
-                <span>{nutrition.calories.toFixed(0)} cal</span>
-                <span>•</span>
-                <span>P: {nutrition.protein.toFixed(1)}g</span>
-                <span>•</span>
-                <span>C: {nutrition.carbs.toFixed(1)}g</span>
-                <span>•</span>
-                <span>F: {nutrition.fat.toFixed(1)}g</span>
-                <span>•</span>
-                <span>Fiber: {nutrition.fiber.toFixed(1)}g</span>
-              </Box>
-            }
-          />
-          <IconButton
-            size="small"
-            onClick={(e) => handleToggleFavorite(food, e)}
-            sx={{ 
-              ml: 1,
-              color: isFavorite ? 'warning.main' : 'action.disabled',
-              '&:hover': {
-                color: 'warning.main',
               }
-            }}
-          >
-            {isFavorite ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
-          </IconButton>
-        </ListItem>
+              secondary={
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  per one serving
+                </Typography>
+              }
+              sx={{ flex: 1 }}
+            />
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                fontWeight: 600,
+                color: 'text.primary',
+                minWidth: 60,
+                textAlign: 'right',
+                mr: 1,
+              }}
+            >
+              {nutrition.calories} cal
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={(e) => handleToggleFavorite(food, e)}
+              sx={{ 
+                color: isFavorite ? 'warning.main' : 'action.disabled',
+                '&:hover': {
+                  color: 'warning.main',
+                }
+              }}
+            >
+              {isFavorite ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
+            </IconButton>
+          </ListItem>
         </motion.div>
       );
     } catch (error) {
-      console.error('Error rendering food item:', food, error);
-      // Return a simple error item instead of breaking the UI
+      console.error('Error rendering search result item:', food, error);
       return (
-        <ListItem sx={{ py: 2, px: 2 }}>
+        <ListItem sx={{ py: 1, px: 2 }}>
           <ListItemText
             primary={
               <Typography variant="body2" color="error">
@@ -605,27 +648,14 @@ const LogMealModal = ({
                 </Box>
               )}
 
-              {/* Add Selected Button - shown when foods are selected */}
+              {/* Selection indicator - shown when foods are selected */}
               {selectedFoodIds.size > 0 && (
                 <Box sx={{ mb: 2 }}>
-                  <Button
-                    variant="contained"
-                    color="success"
-                    fullWidth
-                    onClick={handleAddSelectedToMeal}
-                    startIcon={<AddIcon />}
-                    sx={{
-                      py: 1.5,
-                      fontWeight: 600,
-                      animation: 'slideDown 0.3s ease-out',
-                      '@keyframes slideDown': {
-                        from: { opacity: 0, transform: 'translateY(-10px)' },
-                        to: { opacity: 1, transform: 'translateY(0)' },
-                      },
-                    }}
-                  >
-                    Add {selectedFoodIds.size} Selected Food{selectedFoodIds.size > 1 ? 's' : ''} to Meal
-                  </Button>
+                  <Alert severity="success" sx={{ animation: 'fadeIn 0.3s ease-out' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {selectedFoodIds.size} food{selectedFoodIds.size !== 1 ? 's' : ''} added to meal - Click on a food below to remove it
+                    </Typography>
+                  </Alert>
                 </Box>
               )}
 
@@ -633,7 +663,7 @@ const LogMealModal = ({
               {!searching && searchResults.length > 0 && (
                 <>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
-                    Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} - Click to select, then add to meal
+                    Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} - Click to add to meal
                   </Typography>
                   <Paper variant="outlined" sx={{ borderRadius: 2 }}>
                     <List disablePadding>
@@ -643,7 +673,7 @@ const LogMealModal = ({
                         return (
                           <Box key={foodId}>
                             {index > 0 && <Divider />}
-                            {renderFoodItem(food, () => handleToggleFoodSelection(food), isSelected)}
+                            {renderSearchResultItem(food, () => handleToggleFoodSelection(food), isSelected)}
                           </Box>
                         );
                       })}
@@ -687,55 +717,128 @@ const LogMealModal = ({
                 <>
                   <Paper variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
                     <List disablePadding>
-                      {mealItems.map((item, index) => (
-                        <Box key={item.id}>
-                          {index > 0 && <Divider />}
-                          <ListItem sx={{ py: 2, px: 2, alignItems: 'flex-start' }}>
-                            <ListItemText
-                              primary={
-                                <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
-                                  {item.food.name}
-                                </Typography>
-                              }
-                              secondary={
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                  <TextField
-                                    type="number"
-                                    label="Amount (grams)"
-                                    value={item.grams}
-                                    onChange={(e) => handleUpdateMealItemGrams(item.id, parseFloat(e.target.value) || 0)}
-                                    size="small"
-                                    inputProps={{ min: 1, step: 1 }}
-                                    sx={{ maxWidth: 200 }}
-                                  />
-                                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
-                                    {(() => {
-                                      const nutrition = calculateNutritionForFood(item.food, item.grams);
-                                      return (
-                                        <>
-                                          <Chip label={`${nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                          <Chip label={`P: ${nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                          <Chip label={`C: ${nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                          <Chip label={`F: ${nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                          <Chip label={`Fiber: ${nutrition.fiber.toFixed(1)}g`} size="small" color="success" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                        </>
-                                      );
-                                    })()}
+                      {mealItems.map((item, index) => {
+                        const measurementOptions = getMeasurementOptions(item.food);
+                        const volumeOption = measurementOptions.find(opt => opt.type === 'volume');
+                        const hasVolume = !!volumeOption;
+                        
+                        // Get display label for current portion
+                        const getPortionDisplayLabel = () => {
+                          if (item.portionType === 'grams') {
+                            return `${item.grams}g`;
+                          } else if (item.portionType === 'volume' && hasVolume) {
+                            const volumeDisplay = decimalToFraction(item.food.volume_amount * item.portionQuantity);
+                            return `${volumeDisplay} ${item.food.volume_unit}`;
+                          } else {
+                            // Standard portion
+                            if (item.portionQuantity === 1) {
+                              return item.food.standard_portion;
+                            }
+                            return `${item.portionQuantity} × ${item.food.standard_portion}`;
+                          }
+                        };
+                        
+                        return (
+                          <Box key={item.id}>
+                            {index > 0 && <Divider />}
+                            <ListItem sx={{ py: 1.5, px: 2, alignItems: 'flex-start' }}>
+                              <ListItemText
+                                primary={
+                                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                      {item.food.name}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                                      {getPortionDisplayLabel()}
+                                    </Typography>
                                   </Box>
-                                </Box>
-                              }
-                            />
-                            <IconButton
-                              edge="end"
-                              onClick={() => handleRemoveMealItem(item.id)}
-                              color="error"
-                              sx={{ ml: 1 }}
-                            >
-                              <CloseIcon fontSize="small" />
-                            </IconButton>
-                          </ListItem>
-                        </Box>
-                      ))}
+                                }
+                                secondary={
+                                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                    {/* Compact Portion Controls */}
+                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                                      <ToggleButtonGroup
+                                        value={item.portionType}
+                                        exclusive
+                                        onChange={(e, newType) => newType && handleChangePortionType(item.id, newType)}
+                                        size="small"
+                                        sx={{ flexWrap: 'wrap' }}
+                                      >
+                                        <ToggleButton value="standard" sx={{ px: 1, py: 0.25, fontSize: '0.7rem' }}>
+                                          {item.food.standard_portion}
+                                        </ToggleButton>
+                                        <ToggleButton value="grams" sx={{ px: 1, py: 0.25, fontSize: '0.7rem' }}>
+                                          grams
+                                        </ToggleButton>
+                                        {hasVolume && (
+                                          <ToggleButton value="volume" sx={{ px: 1, py: 0.25, fontSize: '0.7rem' }}>
+                                            {item.food.volume_unit}
+                                          </ToggleButton>
+                                        )}
+                                      </ToggleButtonGroup>
+                                      {item.portionType === 'grams' ? (
+                                        <TextField
+                                          type="number"
+                                          value={item.grams}
+                                          onChange={(e) => handleUpdateMealItemGrams(item.id, parseFloat(e.target.value) || 0)}
+                                          size="small"
+                                          inputProps={{ min: 1, step: 1, style: { padding: '4px 8px', width: '60px' } }}
+                                          sx={{ width: 80 }}
+                                        />
+                                      ) : (
+                                        <DialPicker
+                                          value={item.portionQuantity}
+                                          options={[
+                                            { label: '1/4', value: 0.25 },
+                                            { label: '1/2', value: 0.5 },
+                                            { label: '3/4', value: 0.75 },
+                                            { label: '1', value: 1 },
+                                            { label: '1.5', value: 1.5 },
+                                            { label: '2', value: 2 },
+                                            { label: '2.5', value: 2.5 },
+                                            { label: '3', value: 3 },
+                                            { label: '4', value: 4 },
+                                            { label: '5', value: 5 },
+                                          ]}
+                                          onChange={(value) => handleChangePortionQuantity(item.id, value)}
+                                          minValueWidth="40px"
+                                          useArrows={true}
+                                          sx={{ minWidth: 100 }}
+                                        />
+                                      )}
+                                    </Box>
+                                    
+                                    {/* Nutrition Display - kept detailed */}
+                                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                                      {(() => {
+                                        const nutrition = calculateItemNutrition(item);
+                                        return (
+                                          <>
+                                            <Chip label={`${nutrition.calories} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                            <Chip label={`P: ${nutrition.protein}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                            <Chip label={`C: ${nutrition.carbs}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                            <Chip label={`F: ${nutrition.fat}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                            <Chip label={`Fiber: ${nutrition.fiber}g`} size="small" color="success" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                          </>
+                                        );
+                                      })()}
+                                    </Box>
+                                  </Box>
+                                }
+                              />
+                              <IconButton
+                                edge="end"
+                                onClick={() => handleRemoveMealItem(item.id)}
+                                color="error"
+                                size="small"
+                                sx={{ ml: 1, mt: 0.5 }}
+                              >
+                                <CloseIcon fontSize="small" />
+                              </IconButton>
+                            </ListItem>
+                          </Box>
+                        );
+                      })}
                     </List>
                   </Paper>
 
@@ -747,7 +850,7 @@ const LogMealModal = ({
                     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                       {(() => {
                         const totals = mealItems.reduce((acc, item) => {
-                          const nutrition = calculateNutritionForFood(item.food, item.grams);
+                          const nutrition = calculateItemNutrition(item);
                           return {
                             calories: acc.calories + nutrition.calories,
                             protein: acc.protein + nutrition.protein,
@@ -759,11 +862,11 @@ const LogMealModal = ({
                         
                         return (
                           <>
-                            <Chip label={`${totals.calories.toFixed(0)} cal`} size="medium" sx={{ fontWeight: 600 }} />
-                            <Chip label={`P: ${totals.protein.toFixed(1)}g`} size="medium" color="primary" sx={{ fontWeight: 600 }} />
-                            <Chip label={`C: ${totals.carbs.toFixed(1)}g`} size="medium" color="secondary" sx={{ fontWeight: 600 }} />
-                            <Chip label={`F: ${totals.fat.toFixed(1)}g`} size="medium" color="warning" sx={{ fontWeight: 600 }} />
-                            <Chip label={`Fiber: ${totals.fiber.toFixed(1)}g`} size="medium" color="success" sx={{ fontWeight: 600 }} />
+                            <Chip label={`${totals.calories} cal`} size="medium" sx={{ fontWeight: 600 }} />
+                            <Chip label={`P: ${totals.protein}g`} size="medium" color="primary" sx={{ fontWeight: 600 }} />
+                            <Chip label={`C: ${totals.carbs}g`} size="medium" color="secondary" sx={{ fontWeight: 600 }} />
+                            <Chip label={`F: ${totals.fat}g`} size="medium" color="warning" sx={{ fontWeight: 600 }} />
+                            <Chip label={`Fiber: ${totals.fiber}g`} size="medium" color="success" sx={{ fontWeight: 600 }} />
                           </>
                         );
                       })()}

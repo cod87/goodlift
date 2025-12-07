@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Box,
-  Card,
   Typography,
   TextField,
   InputAdornment,
@@ -22,16 +21,16 @@ import {
   FormControl,
   InputLabel,
   Collapse,
-  Divider,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   FavoriteBorderOutlined,
   FavoriteOutlined,
-  FitnessCenter,
   FilterList as FilterListIcon,
 } from '@mui/icons-material';
 import CompactHeader from '../components/Common/CompactHeader';
+import LoadingScreen from '../components/LoadingScreen';
+import TargetRepsPicker from '../components/Common/TargetRepsPicker';
 import { useWorkoutGenerator } from '../hooks/useWorkoutGenerator';
 import {
   toggleFavoriteExercise,
@@ -42,6 +41,12 @@ import {
   setExerciseTargetReps,
 } from '../utils/storage';
 import { getMuscleCategory } from '../utils/muscleCategories';
+import { 
+  DEFAULT_TARGET_REPS, 
+  getClosestValidTargetReps,
+  roundToNearestIncrement,
+  calculateWeightForRepChange,
+} from '../utils/repRangeWeightAdjustment';
 
 /**
  * ExerciseListPage component
@@ -81,7 +86,8 @@ const ExerciseListPage = () => {
             getExerciseTargetReps(exerciseName)
           ]);
           weights[exerciseName] = weight ?? ''; // Use empty string for null/undefined
-          reps[exerciseName] = targetReps ?? ''; // Use empty string for null/undefined
+          // Convert to valid target reps or use default
+          reps[exerciseName] = targetReps ? getClosestValidTargetReps(targetReps) : DEFAULT_TARGET_REPS;
         })
       );
       
@@ -156,32 +162,37 @@ const ExerciseListPage = () => {
       setExerciseWeights(prev => ({ ...prev, [exerciseName]: '' }));
       await setExerciseWeight(exerciseName, null);
     } else {
-      const numValue = Math.max(0, Number(value));
+      // Round to nearest valid increment
+      const numValue = roundToNearestIncrement(Math.max(0, Number(value)));
       setExerciseWeights(prev => ({ ...prev, [exerciseName]: numValue }));
       await setExerciseWeight(exerciseName, numValue);
     }
   };
 
-  const handleRepsChange = async (exerciseName, value) => {
-    // Store empty string for display, null for storage
-    if (value === '') {
-      setExerciseReps(prev => ({ ...prev, [exerciseName]: '' }));
-      await setExerciseTargetReps(exerciseName, null);
-    } else {
-      const numValue = Math.max(1, Number(value));
-      setExerciseReps(prev => ({ ...prev, [exerciseName]: numValue }));
-      await setExerciseTargetReps(exerciseName, numValue);
+  const handleRepsChange = async (exerciseName, newReps) => {
+    // Get current values for this exercise
+    const currentReps = exerciseReps[exerciseName] || DEFAULT_TARGET_REPS;
+    const currentWeight = exerciseWeights[exerciseName];
+    
+    // Calculate new weight if we have a current weight and reps changed
+    let newWeight = currentWeight;
+    if (currentWeight && currentWeight > 0 && currentReps !== newReps) {
+      const adjustedWeight = calculateWeightForRepChange(currentWeight, currentReps, newReps);
+      if (adjustedWeight !== null) {
+        newWeight = adjustedWeight;
+        // Update weight in state and storage
+        setExerciseWeights(prev => ({ ...prev, [exerciseName]: newWeight }));
+        await setExerciseWeight(exerciseName, newWeight);
+      }
     }
+    
+    // Update reps in state and storage
+    setExerciseReps(prev => ({ ...prev, [exerciseName]: newReps }));
+    await setExerciseTargetReps(exerciseName, newReps);
   };
 
   if (loading) {
-    return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography variant="h5" color="text.secondary">
-          Loading exercises...
-        </Typography>
-      </Box>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -474,35 +485,13 @@ const ExerciseListPage = () => {
                       />
                     </TableCell>
 
-                    {/* Target Reps Input */}
+                    {/* Target Reps Picker */}
                     <TableCell sx={{ py: 1 }}>
-                      <TextField
-                        type="tel"
-                        inputMode="numeric"
-                        size="small"
-                        value={reps === '' ? '' : reps}
-                        onChange={(e) => handleRepsChange(exerciseName, e.target.value)}
-                        onFocus={(e) => e.target.select()}
-                        placeholder="–"
-                        inputProps={{
-                          min: 1,
-                          step: 1,
-                          pattern: '\\d*',
-                          'aria-label': `Target repetitions for ${exerciseName}`,
-                          style: { 
-                            textAlign: 'center',
-                            fontSize: '0.875rem',
-                            padding: '4px 8px'
-                          }
-                        }}
-                        sx={{
-                          width: { xs: 60, sm: 70 },
-                          '& .MuiOutlinedInput-root': {
-                            '& input': {
-                              textAlign: 'center',
-                            }
-                          }
-                        }}
+                      <TargetRepsPicker
+                        value={reps || DEFAULT_TARGET_REPS}
+                        onChange={(newReps) => handleRepsChange(exerciseName, newReps)}
+                        compact
+                        showLabel={false}
                       />
                     </TableCell>
                   </TableRow>

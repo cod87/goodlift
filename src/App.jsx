@@ -4,9 +4,7 @@ import Header from './components/Header';
 import BottomNav from './components/Navigation/BottomNav';
 import WorkTabs from './components/WorkTabs';
 import TodayView from './components/TodayView/TodayView';
-import SelectionScreen from './components/SelectionScreen';
-// UnifiedWorkoutHub removed - using SelectionScreen instead
-// WorkoutPlanScreen removed - no longer using workout planning
+// SelectionScreen removed - functionality moved to WorkTabs
 import WorkoutScreenModal from './components/WorkoutScreenModal';
 import WorkoutPreview from './components/WorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
@@ -46,10 +44,11 @@ import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Snackbar, Alert, Button } from '@mui/material';
+import { Snackbar, Alert, Button, useMediaQuery } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 import { runDataMigration } from './migrations/simplifyDataStructure';
 import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achievements';
+import { BREAKPOINTS } from './theme/responsive';
 
 /**
  * Main app component wrapped with theme
@@ -72,6 +71,9 @@ function AppContent() {
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Track superset configuration
   const [setsPerSuperset, setSetsPerSuperset] = useState(3); // Track number of sets per superset
   const { currentUser, isGuest, hasGuestData } = useAuth();
+  
+  // Desktop layout detection
+  const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
 
   const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
   const favoriteExercises = useFavoriteExercises();
@@ -649,13 +651,21 @@ function AppContent() {
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header onNavigate={handleNavigate} />
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        minHeight: '100vh',
+        // Desktop: offset for sidebar navigation
+        marginLeft: isDesktop ? '80px' : '0',
+      }}>
+        <Header currentTab={currentScreen} />
         
         <div id="app" style={{ 
           flex: 1,
-          marginTop: '60px',
-          paddingBottom: '80px', // Space for bottom nav
+          marginTop: '48px',
+          // Desktop: no bottom padding needed (no bottom nav)
+          // Mobile/Tablet: space for bottom nav
+          paddingBottom: isDesktop ? '2rem' : '80px',
         }}>
           {currentScreen === 'home' && (
             <WorkTabs
@@ -668,20 +678,6 @@ function AppContent() {
               onEquipmentChange={handleEquipmentChange}
               onStartWorkout={handleStartWorkout}
               onCustomize={handleCustomize}
-            />
-          )}
-
-          {/* SelectionScreen kept for backward compatibility but no longer in main workflow */}
-          {currentScreen === 'selection' && (
-            <SelectionScreen
-              workoutType={workoutType}
-              selectedEquipment={selectedEquipment}
-              equipmentOptions={equipmentOptions}
-              onWorkoutTypeChange={handleWorkoutTypeChange}
-              onEquipmentChange={handleEquipmentChange}
-              onStartWorkout={handleStartWorkout}
-              onCustomize={handleCustomize}
-              loading={loading}
             />
           )}
           

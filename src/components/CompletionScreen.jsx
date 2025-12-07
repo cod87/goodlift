@@ -2,8 +2,18 @@ import { memo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { formatTime, detectWorkoutType } from '../utils/helpers';
-import { Box, Card, CardContent, Typography, Button, Stack, Chip, IconButton, Snackbar, Alert } from '@mui/material';
-import { Download, Check, Celebration, Star, StarBorder, CalendarToday } from '@mui/icons-material';
+import { Box, Card, CardContent, Typography, Button, Stack, Chip, IconButton, Snackbar, Alert, keyframes } from '@mui/material';
+import { Download, Check, Star, StarBorder, CalendarToday } from '@mui/icons-material';
+
+// Spinning animation for the celebration icon (counter-clockwise like loading screen)
+const spin = keyframes`
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+`;
 import { saveFavoriteWorkout, getWorkoutHistory } from '../utils/storage';
 import { getPersonalRecords, detectNewPRs } from '../utils/trackingMetrics';
 import { PRNotification } from './CelebrationNotifications';
@@ -157,21 +167,18 @@ const CompletionScreen = memo(({ workoutData, workoutPlan, onFinish, onExportCSV
             {isFavorite ? <Star sx={{ fontSize: 32 }} /> : <StarBorder sx={{ fontSize: 32 }} />}
           </IconButton>
         </Box>
-        <motion.div
-          initial={{ y: -20 }}
-          animate={{ y: [0, -10, 0] }}
-          transition={{ 
-            repeat: Infinity,
-            duration: 2,
-            ease: 'easeInOut'
+        {/* Spinning celebration icon - uses same celebration dog as Workout Finish screen */}
+        <Box
+          component="img"
+          src={`${import.meta.env.BASE_URL}goodlift-dog-celebration.svg`}
+          alt="Celebration"
+          sx={{
+            width: { xs: '80px', sm: '100px' },
+            height: { xs: '80px', sm: '100px' },
+            marginBottom: '1rem',
+            animation: `${spin} 1.5s linear infinite`,
           }}
-        >
-          <img 
-            src={`${import.meta.env.BASE_URL}dancing-icon.svg`} 
-            alt="Celebration" 
-            style={{ width: '120px', height: '120px', marginBottom: '1rem' }}
-          />
-        </motion.div>
+        />
         <h1>Workout Complete!</h1>
         <p className="completion-time">
           Total Time: <strong>{formatTime(workoutData.duration)}</strong>

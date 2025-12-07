@@ -1,13 +1,21 @@
 import { useState, useEffect, memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
-import { Box, Typography, Card, CardContent, Button, Chip, Stack, TextField, Snackbar, Alert, IconButton } from '@mui/material';
-import { PlayArrow, Close, StarOutline, Star, Shuffle, Add, Remove } from '@mui/icons-material';
+import { Box, Typography, Card, CardContent, Button, Stack, TextField, Snackbar, Alert, IconButton, InputAdornment } from '@mui/material';
+import { PlayArrow, StarOutline, Star, Shuffle, Add, Remove } from '@mui/icons-material';
 import { getExerciseWeight, getExerciseTargetReps, setExerciseWeight, setExerciseTargetReps, saveFavoriteWorkout } from '../utils/storage';
 import { EXERCISES_DATA_PATH } from '../utils/constants';
 import ExerciseAutocomplete from './ExerciseAutocomplete';
 import { calculateBarbellPerSide } from '../utils/weightUtils';
 import { usePreferences } from '../contexts/PreferencesContext';
+import LoadingScreen from './LoadingScreen';
+import TargetRepsPicker from './Common/TargetRepsPicker';
+import { 
+  DEFAULT_TARGET_REPS, 
+  getClosestValidTargetReps, 
+  calculateWeightForRepChange,
+  roundToNearestIncrement,
+} from '../utils/repRangeWeightAdjustment';
 
 /**
  * WorkoutPreview component displays a preview of the generated workout
@@ -76,7 +84,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
         ]);
         settings[exerciseName] = {
           weight: weight ?? '', // Use empty string for null/undefined
-          targetReps: targetReps ?? '', // Use empty string for null/undefined
+          targetReps: targetReps ? getClosestValidTargetReps(targetReps) : DEFAULT_TARGET_REPS, // Convert to valid target reps
         };
       }
       setExerciseSettings(settings);
@@ -110,7 +118,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             ]);
             newSettings[exerciseName] = {
               weight: weight ?? '', // Use empty string for null/undefined
-              targetReps: targetReps ?? '', // Use empty string for null/undefined
+              targetReps: targetReps ? getClosestValidTargetReps(targetReps) : DEFAULT_TARGET_REPS, // Convert to valid target reps
             };
           }
         }
@@ -152,8 +160,8 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
     
     const numValue = parseFloat(value);
     if (!isNaN(numValue) && numValue > 0) {
-      // Round to nearest 2.5 lbs
-      const rounded = Math.round(numValue / 2.5) * 2.5;
+      // Round to nearest valid increment (2.5 lbs for ≤35, 5 lbs for >35)
+      const rounded = roundToNearestIncrement(numValue);
       if (rounded !== numValue) {
         setExerciseSettings(prev => ({
           ...prev,
@@ -163,51 +171,51 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           }
         }));
         // Show notification
+        const incrementText = rounded <= 35 ? '2.5 lb' : '5 lb';
         setSnackbar({
           open: true,
-          message: `Weight adjusted to ${rounded} lbs (nearest 2.5 lb increment)`,
+          message: `Weight adjusted to ${rounded} lbs (nearest ${incrementText} increment)`,
           severity: 'info'
         });
       }
     }
   };
 
-  const handleTargetRepsChange = (exerciseName, value) => {
-    // Allow empty state and validate: only allow positive integers
-    if (value === '' || /^\d+$/.test(value)) {
-      const numValue = value === '' ? '' : parseInt(value, 10);
-      setExerciseSettings(prev => ({
-        ...prev,
-        [exerciseName]: {
-          ...prev[exerciseName],
-          targetReps: numValue,
-        }
-      }));
-      // Track as customized
-      setCustomizedSettings(prev => ({
-        ...prev,
-        [exerciseName]: { ...prev[exerciseName], repsCustomized: true }
-      }));
-    }
-  };
-
-  const handleTargetRepsBlur = (exerciseName, value) => {
-    // If empty, keep empty on blur (don't force to default)
-    if (value === '' || value === null || value === undefined) {
-      return;
+  const handleTargetRepsChange = (exerciseName, newReps) => {
+    // Get current settings for this exercise
+    const currentSettings = exerciseSettings[exerciseName] || { weight: '', targetReps: DEFAULT_TARGET_REPS };
+    const currentReps = currentSettings.targetReps || DEFAULT_TARGET_REPS;
+    const currentWeight = currentSettings.weight;
+    
+    // Calculate new weight if we have a current weight
+    let newWeight = currentWeight;
+    if (currentWeight && currentWeight > 0 && currentReps !== newReps) {
+      const adjustedWeight = calculateWeightForRepChange(currentWeight, currentReps, newReps);
+      if (adjustedWeight !== null) {
+        newWeight = adjustedWeight;
+        // Show notification about weight adjustment
+        const direction = newReps < currentReps ? 'increased' : 'decreased';
+        setSnackbar({
+          open: true,
+          message: `Weight ${direction} to ${adjustedWeight} lbs for ${newReps} reps`,
+          severity: 'info'
+        });
+      }
     }
     
-    const numValue = parseInt(value, 10);
-    if (isNaN(numValue) || numValue < 1) {
-      // Keep empty if invalid
-      setExerciseSettings(prev => ({
-        ...prev,
-        [exerciseName]: {
-          ...prev[exerciseName],
-          targetReps: '',
-        }
-      }));
-    }
+    setExerciseSettings(prev => ({
+      ...prev,
+      [exerciseName]: {
+        ...prev[exerciseName],
+        targetReps: newReps,
+        weight: newWeight,
+      }
+    }));
+    // Track as customized
+    setCustomizedSettings(prev => ({
+      ...prev,
+      [exerciseName]: { ...prev[exerciseName], repsCustomized: true, weightCustomized: newWeight !== currentWeight }
+    }));
   };
 
   const handleRandomizeExercise = useCallback((exercise, globalIndex) => {
@@ -235,7 +243,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             ...prev,
             [exerciseName]: {
               weight: weight ?? '',
-              targetReps: targetReps ?? '',
+              targetReps: targetReps ? getClosestValidTargetReps(targetReps) : DEFAULT_TARGET_REPS,
             }
           }));
         });
@@ -314,40 +322,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
   }
 
   if (loading) {
-    return (
-      <Box sx={{ 
-        textAlign: 'center', 
-        py: 8, 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center',
-        minHeight: '400px',
-      }}>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Typography 
-            variant="h5" 
-            sx={{ 
-              color: 'text.secondary',
-              fontWeight: 500,
-            }}
-          >
-            Loading
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 1, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            >
-              ...
-            </motion.span>
-          </Typography>
-        </motion.div>
-      </Box>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -378,9 +353,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
         mb: 2,
       }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-          <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 700 }}>
-            {isCustomizeMode ? 'Customize Workout' : 'Workout Preview'}
-          </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
             {supersets.length} Supersets • {currentWorkout.filter(ex => ex !== null).length} Exercises
             {!hasIndividualSets && ` • ${setsPerSuperset} Sets Each`}
@@ -457,9 +429,6 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             </Box>
           </Box>
         )}
-        <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-          {isCustomizeMode ? 'Select exercises and set your target weight and reps for each' : 'Set your starting target weight and target reps for each exercise'}
-        </Typography>
       </Box>
 
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ px: { xs: 0.5, sm: 0 } }}>
@@ -472,42 +441,42 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           >
             <Card 
               sx={{ 
-                background: 'linear-gradient(135deg, rgba(138, 190, 185, 0.1), rgba(193, 120, 90, 0.1))',
-                border: '2px solid',
-                borderColor: 'primary.main',
-                borderRadius: 3,
-                transition: 'all 0.3s ease',
+                bgcolor: 'background.paper',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 2,
+                transition: 'all 0.2s ease',
                 maxWidth: '100%',
                 boxSizing: 'border-box',
+                boxShadow: 1,
                 '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 12px 24px rgba(48, 86, 105, 0.2)',
+                  boxShadow: 2,
                 }
               }}
             >
               <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
-                <Typography 
-                  variant="h6" 
-                  gutterBottom 
+                <Box 
                   sx={{ 
-                    color: 'secondary.main',
-                    fontWeight: 600,
-                    mb: 1.5,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    gap: 1,
+                    mb: 1.5,
+                    pb: 1,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
                   }}
                 >
-                  <Chip 
-                    label={`Superset ${idx + 1}`} 
-                    size="small" 
+                  <Typography 
+                    variant="body2" 
                     sx={{ 
-                      bgcolor: 'secondary.main',
-                      color: 'white',
-                      fontWeight: 600
-                    }} 
-                  />
-                </Typography>
+                      color: 'text.secondary',
+                      fontWeight: 600,
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                    }}
+                  >
+                    Superset {idx + 1}
+                  </Typography>
+                </Box>
                 
                 <Stack spacing={{ xs: 1, sm: 1.5 }}>
                   {superset.map((exercise, exerciseIdx) => {
@@ -524,21 +493,11 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                         sx={{ 
                           position: 'relative',
                           p: { xs: 1, sm: 1.5 },
-                          bgcolor: 'background.paper',
-                          borderRadius: 2,
-                          transition: 'all 0.3s ease',
-                          transform: focusedExerciseIndex === globalIndex ? 'translateX(8px)' : 'translateX(0)',
-                          '&::before': {
-                            content: '""',
-                            position: 'absolute',
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            width: '4px',
-                            borderRadius: '2px 0 0 2px',
-                            bgcolor: focusedExerciseIndex === globalIndex ? 'primary.main' : 'transparent',
-                            transition: 'all 0.3s ease',
-                          },
+                          bgcolor: 'background.default',
+                          borderRadius: 1.5,
+                          transition: 'all 0.2s ease',
+                          border: '1px solid',
+                          borderColor: focusedExerciseIndex === globalIndex ? 'primary.main' : 'transparent',
                         }}
                         onFocus={() => setFocusedExerciseIndex(globalIndex)}
                         onBlur={() => setFocusedExerciseIndex(null)}
@@ -551,10 +510,10 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                         }}>
                           <Typography 
                             sx={{ 
-                              fontSize: { xs: '1.25rem', sm: '1.75rem' },
-                              color: 'primary.main',
-                              fontWeight: 700,
-                              width: { xs: '28px', sm: '36px' },
+                              fontSize: { xs: '1rem', sm: '1.25rem' },
+                              color: 'text.secondary',
+                              fontWeight: 600,
+                              width: { xs: '24px', sm: '32px' },
                               textAlign: 'center',
                               flexShrink: 0,
                             }}
@@ -586,9 +545,10 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                               direction="row" 
                               spacing={{ xs: 1, sm: 1.5 }} 
                               sx={{ 
-                                pl: { xs: 3.5, sm: 5.5 },
+                                pl: { xs: 4, sm: 5.5 },
                                 flexWrap: { xs: 'wrap', sm: 'nowrap' },
-                                mb: { xs: 1, sm: 1.5 }
+                                mb: { xs: 1, sm: 1.5 },
+                                alignItems: 'center',
                               }}
                             >
                           <TextField
@@ -598,45 +558,42 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             onChange={(e) => handleWeightChange(exerciseName, e.target.value)}
                             onBlur={(e) => handleWeightBlur(exerciseName, e.target.value)}
                             onFocus={(e) => e.target.select()}
-                            placeholder={exercise['Equipment']?.toLowerCase() === 'bodyweight' ? 'N/A' : 'Weight (lbs)'}
+                            placeholder={exercise['Equipment']?.toLowerCase() === 'bodyweight' ? 'N/A' : '–'}
                             size="small"
                             disabled={exercise['Equipment']?.toLowerCase() === 'bodyweight'}
                             inputProps={{
                               min: 0,
-                              max: 500,
+                              max: 999,
                               step: 2.5,
                               pattern: '[0-9]*([.,][0-9]+)?',
                               'aria-label': `Target weight in pounds for ${exerciseName}`,
                             }}
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <Typography variant="caption" color="text.secondary">lbs</Typography>
+                                </InputAdornment>
+                              ),
+                            }}
                             sx={{ 
-                              minWidth: { xs: 100, sm: 120 },
-                              flex: { xs: '1 1 45%', sm: 'none' },
+                              width: { xs: 90, sm: 100 },
+                              minWidth: { xs: 90, sm: 100 },
+                              flex: 'none',
+                              '& .MuiInputBase-input': {
+                                textAlign: 'center',
+                                pr: 0,
+                              },
                               '& .MuiInputBase-input.Mui-disabled': {
                                 WebkitTextFillColor: 'rgba(0, 0, 0, 0.38)',
                                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
                               }
                             }}
                           />
-                          <TextField
-                            type="tel"
-                            inputMode="numeric"
-                            value={settings.targetReps === '' ? '' : settings.targetReps}
-                            onChange={(e) => handleTargetRepsChange(exerciseName, e.target.value)}
-                            onBlur={(e) => handleTargetRepsBlur(exerciseName, e.target.value)}
-                            onFocus={(e) => e.target.select()}
-                            placeholder="Reps"
-                            size="small"
-                            inputProps={{
-                              min: 1,
-                              max: 20,
-                              step: 1,
-                              pattern: '\\d*',
-                              'aria-label': `Target repetitions for ${exerciseName}`,
-                            }}
-                            sx={{ 
-                              minWidth: { xs: 100, sm: 120 },
-                              flex: { xs: '1 1 45%', sm: 'none' }
-                            }}
+                          <TargetRepsPicker
+                            value={settings.targetReps || DEFAULT_TARGET_REPS}
+                            onChange={(newReps) => handleTargetRepsChange(exerciseName, newReps)}
+                            compact
+                            showLabel
                           />
                         </Stack>
                         {/* Display per-side weight for barbell exercises */}
@@ -645,7 +602,7 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                             variant="caption" 
                             color="text.secondary" 
                             sx={{ 
-                              pl: { xs: 3.5, sm: 5.5 },
+                              pl: { xs: 4, sm: 5.5 },
                               fontStyle: 'italic',
                               fontSize: { xs: '0.65rem', sm: '0.75rem' }
                             }}
@@ -660,43 +617,61 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                         )}
                         {/* Muscle, Equipment indicators and Randomize button - Below weight/reps */}
                         <Box sx={{ 
-                          pl: { xs: 3.5, sm: 5.5 },
+                          pl: { xs: 4, sm: 5.5 },
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 1,
+                          gap: 0.5,
                           flexWrap: 'wrap'
                         }}>
-                          <Chip 
-                            label={exercise['Primary Muscle']} 
-                            size="small" 
-                            variant="outlined"
+                          <Typography
+                            variant="caption"
                             sx={{ 
-                              borderColor: 'primary.main',
-                              color: 'primary.main',
-                              fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                            }}
-                          />
-                          <Chip 
-                            label={exercise['Equipment']} 
-                            size="small" 
-                            variant="outlined"
-                            sx={{ 
-                              borderColor: 'text.secondary',
                               color: 'text.secondary',
                               fontSize: { xs: '0.65rem', sm: '0.75rem' }
                             }}
-                          />
+                          >
+                            {exercise['Primary Muscle']}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ 
+                              color: 'text.disabled',
+                              fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            }}
+                          >
+                            •
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ 
+                              color: 'text.secondary',
+                              fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            }}
+                          >
+                            {exercise['Equipment']}
+                          </Typography>
                           {typeof exercise.sets === 'number' && (
-                            <Chip 
-                              label={`${exercise.sets} Set${exercise.sets !== 1 ? 's' : ''}`}
-                              size="small" 
-                              variant="filled"
-                              sx={{ 
-                                bgcolor: 'primary.main',
-                                color: 'white',
-                                fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                              }}
-                            />
+                            <>
+                              <Typography
+                                variant="caption"
+                                sx={{ 
+                                  color: 'text.disabled',
+                                  fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                                }}
+                              >
+                                •
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{ 
+                                  color: 'primary.main',
+                                  fontWeight: 600,
+                                  fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                                }}
+                              >
+                                {exercise.sets} Set{exercise.sets !== 1 ? 's' : ''}
+                              </Typography>
+                            </>
                           )}
                           {onRandomizeExercise && !isCustomizeMode && (
                             <IconButton
@@ -706,16 +681,18 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
                                 handleRandomizeExercise(exercise, globalIndex);
                               }}
                               sx={{
-                                color: 'primary.main',
-                                minWidth: '36px',
-                                minHeight: '36px',
+                                color: 'text.secondary',
+                                minWidth: '28px',
+                                minHeight: '28px',
+                                ml: 0.5,
                                 '&:hover': {
-                                  backgroundColor: 'rgba(19, 70, 134, 0.08)',
+                                  color: 'primary.main',
+                                  backgroundColor: 'action.hover',
                                 },
                               }}
                               aria-label={`Randomize ${exerciseName}`}
                             >
-                              <Shuffle fontSize="small" />
+                              <Shuffle sx={{ fontSize: { xs: 16, sm: 18 } }} />
                             </IconButton>
                           )}
                         </Box>
@@ -743,48 +720,50 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
           justifyContent="center"
         >
           <Button
-            variant="contained"
+            variant="outlined"
             size="large"
             onClick={onCancel}
             sx={{
-              borderRadius: 2,
-              minWidth: { xs: '60px', sm: '80px' },
-              px: { xs: 1, sm: 2 },
-              py: 1.5,
-              fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              borderRadius: 1.5,
+              minWidth: { xs: '50px', sm: '60px' },
+              px: { xs: 1.5, sm: 2 },
+              py: 1,
+              fontSize: { xs: '0.9rem', sm: '1rem' },
               fontWeight: 600,
-              bgcolor: 'rgb(237, 63, 39)',
-              color: 'white',
+              borderColor: 'divider',
+              color: 'text.secondary',
               '&:hover': {
-                bgcolor: 'rgb(200, 50, 30)',
+                borderColor: 'text.secondary',
+                bgcolor: 'action.hover',
               }
             }}
           >
-            ✕
+            Cancel
           </Button>
           <Button
-            variant="contained"
+            variant="outlined"
             size="large"
             startIcon={savedToFavorites ? <Star /> : <StarOutline />}
             onClick={handleSaveToFavorites}
             disabled={savedToFavorites}
             sx={{
-              borderRadius: 2,
+              borderRadius: 1.5,
               flex: 1,
-              maxWidth: { xs: '130px', sm: '150px' },
-              px: { xs: 2, sm: 3 },
-              py: 1.5,
-              fontSize: { xs: '0.9rem', sm: '1.1rem' },
+              maxWidth: { xs: '110px', sm: '130px' },
+              px: { xs: 1.5, sm: 2 },
+              py: 1,
+              fontSize: { xs: '0.85rem', sm: '0.95rem' },
               fontWeight: 600,
-              bgcolor: savedToFavorites ? 'rgb(76, 175, 80)' : 'rgb(254, 178, 26)',
-              color: 'white',
+              borderColor: savedToFavorites ? 'success.main' : 'warning.main',
+              color: savedToFavorites ? 'success.main' : 'warning.main',
               '&:hover': {
-                bgcolor: savedToFavorites ? 'rgb(56, 142, 60)' : 'rgb(245, 158, 11)',
+                borderColor: savedToFavorites ? 'success.dark' : 'warning.dark',
+                bgcolor: 'action.hover',
               },
-              '&:disabled': {
-                bgcolor: 'rgb(76, 175, 80)',
-                color: 'white',
-                opacity: 0.8,
+              '&.Mui-disabled': {
+                borderColor: 'success.main',
+                color: 'success.main',
+                opacity: 0.7,
               }
             }}
           >
@@ -797,26 +776,23 @@ const WorkoutPreview = memo(({ workout, workoutType, onStart, onCancel, onRandom
             onClick={handleStartWorkout}
             disabled={isStarting}
             sx={{
-              borderRadius: 2,
+              borderRadius: 1.5,
               flex: 1,
-              maxWidth: { xs: '130px', sm: '150px' },
+              maxWidth: { xs: '120px', sm: '140px' },
               px: { xs: 2, sm: 3 },
-              py: 1.5,
-              fontSize: { xs: '0.9rem', sm: '1.1rem' },
+              py: 1,
+              fontSize: { xs: '0.9rem', sm: '1rem' },
               fontWeight: 600,
-              bgcolor: 'rgb(19, 70, 134)',
+              bgcolor: 'primary.main',
               color: 'white',
               '&:hover': {
-                bgcolor: 'rgb(15, 56, 107)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 16px rgba(19, 70, 134, 0.3)',
+                bgcolor: 'primary.dark',
               },
-              '&:disabled': {
-                bgcolor: 'rgb(19, 70, 134)',
+              '&.Mui-disabled': {
+                bgcolor: 'primary.main',
                 color: 'white',
                 opacity: 0.6,
               },
-              transition: 'all 0.3s ease'
             }}
           >
             {isStarting ? 'Starting...' : 'Begin'}

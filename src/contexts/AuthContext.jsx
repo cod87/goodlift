@@ -10,6 +10,7 @@ import { auth } from '../firebase';
 import { loadUserDataFromCloud, setCurrentUserId } from '../utils/storage';
 import { setCurrentUserId as setNutritionUserId, loadUserNutritionData } from '../utils/nutritionStorage';
 import { isGuestMode, enableGuestMode, disableGuestMode, getAllGuestData } from '../utils/guestStorage';
+import LoadingScreen from '../components/LoadingScreen';
 
 const AuthContext = createContext({});
 
@@ -140,7 +141,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {loading ? <LoadingScreen /> : children}
     </AuthContext.Provider>
   );
 };

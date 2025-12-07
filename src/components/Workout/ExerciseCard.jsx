@@ -10,12 +10,16 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import { 
   CheckCircle,
   TrendingUp,
   HelpOutline,
-  Save,
   ExitToApp,
   SkipNext,
   SwapHoriz,
@@ -23,6 +27,8 @@ import {
   StarBorder,
   ArrowBack,
   ArrowForward,
+  Add,
+  Remove,
 } from '@mui/icons-material';
 import ExerciseInputs from './ExerciseInputs';
 import { usePreferences } from '../../contexts/PreferencesContext';
@@ -79,6 +85,8 @@ const ExerciseCard = memo(({
   const [imageSrc, setImageSrc] = useState(demoImage);
   const [imageError, setImageError] = useState(false);
   const [workIconError, setWorkIconError] = useState(false);
+  // State for end workout confirmation dialog
+  const [endWorkoutDialogOpen, setEndWorkoutDialogOpen] = useState(false);
   
   // Detect landscape orientation on tablets (sm breakpoint and up)
   const isTabletOrLarger = useMediaQuery(theme.breakpoints.up('sm'));
@@ -189,6 +197,27 @@ const ExerciseCard = memo(({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Handle End Workout button click - show dialog if workout data exists
+  const handleEndWorkoutClick = () => {
+    if (showPartialComplete) {
+      setEndWorkoutDialogOpen(true);
+    } else if (onExit) {
+      onExit();
+    }
+  };
+
+  // Handle "End and Save as Partial" from dialog
+  const handleDialogPartialComplete = () => {
+    setEndWorkoutDialogOpen(false);
+    if (onPartialComplete) onPartialComplete();
+  };
+
+  // Handle "End Without Saving" from dialog
+  const handleDialogExit = () => {
+    setEndWorkoutDialogOpen(false);
+    if (onExit) onExit();
+  };
+
   return (
     <Box 
       className="exercise-card"
@@ -197,57 +226,359 @@ const ExerciseCard = memo(({
         flexDirection: 'column',
         height: {
           xs: 'calc(100dvh - 140px)', // Mobile (Dynamic Viewport Height - header 60px - nav 60px - padding)
-          sm: 'calc(100dvh - 140px)', // Tablet
+          sm: shouldUseTwoColumns ? 'calc(100dvh - 120px)' : 'calc(100dvh - 140px)', // Tablet landscape: more compact
           md: 'calc(100dvh - 140px)', // Desktop
         },
-        p: { xs: 2, sm: 3 },
+        p: { xs: 2, sm: shouldUseTwoColumns ? 1 : 3 }, // Reduced padding in landscape
         overflow: 'hidden', // Prevent any scrolling
         // Establish this as a container for container query units (cqw, cqi)
         containerType: 'inline-size',
       }}
     >
-      {/* Top Header Bar */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        mb: 0.3,
-        flexShrink: 0,
-      }}>
-        {elapsedTime !== null && (
-          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
-            {formatTime(elapsedTime)}
-          </Typography>
-        )}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Chip label={`Set ${setNumber} of ${totalSets}`} color="primary" size="small" sx={{ fontWeight: 600, fontSize: { xs: '0.7rem', sm: '0.85rem' } }} />
-          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
-            {currentStep}/{totalSteps}
-          </Typography>
-          {onToggleFavorite && (
-            <IconButton onClick={onToggleFavorite} size="small" sx={{ color: isFavorite ? 'warning.main' : 'action.active', '&:hover': { color: 'warning.main' }, p: { xs: 0.5, sm: 1 } }} aria-label="Toggle favorite">
-              {isFavorite ? <Star sx={{ fontSize: { xs: 20, sm: 24 } }} /> : <StarBorder sx={{ fontSize: { xs: 20, sm: 24 } }} />}
+      {/* LANDSCAPE TABLET: Horizontal layout with action buttons on right */}
+      {shouldUseTwoColumns ? (
+        <Box sx={{ display: 'flex', flexDirection: 'row', height: '100%', gap: 2 }}>
+          {/* Left section: Exercise content */}
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            {/* Top Header Bar */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              mb: 1,
+              flexShrink: 0,
+            }}>
+              {elapsedTime !== null && (
+                <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '1rem' }}>
+                  {formatTime(elapsedTime)}
+                </Typography>
+              )}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Chip label={`Set ${setNumber}/${totalSets}`} color="primary" size="medium" sx={{ fontWeight: 600, fontSize: '0.85rem' }} />
+                <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '1rem' }}>
+                  {currentStep}/{totalSteps}
+                </Typography>
+                {onToggleFavorite && (
+                  <IconButton onClick={onToggleFavorite} size="small" sx={{ color: isFavorite ? 'warning.main' : 'action.active', p: 0.5 }} aria-label="Toggle favorite">
+                    {isFavorite ? <Star sx={{ fontSize: 22 }} /> : <StarBorder sx={{ fontSize: 22 }} />}
+                  </IconButton>
+                )}
+              </Box>
+            </Box>
+
+            {/* Exercise Name and Demo Image - Side by Side with larger image */}
+            <Box sx={{ 
+              display: 'grid',
+              gridTemplateColumns: '1.5fr 1fr',
+              gap: 2,
+              flex: 1,
+              minHeight: 0,
+              mb: 1,
+            }}>
+              {/* Exercise Name */}
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography 
+                  component="div"
+                  sx={{ 
+                    fontWeight: '700 !important',
+                    color: 'primary.main',
+                    textAlign: 'left',
+                    lineHeight: '1.15 !important',
+                    fontFamily: "'Montserrat', sans-serif !important",
+                    fontSize: { sm: '1.75rem !important', md: '2.25rem !important' },
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {exerciseName}
+                </Typography>
+              </Box>
+
+              {/* Demo Image - Larger for better visibility */}
+              <Box sx={{ 
+                width: '100%',
+                height: { sm: '150px', md: '180px' },
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {imageSrc ? (
+                  <Box
+                    component="img"
+                    src={imageSrc}
+                    alt={`${exerciseName} demonstration`}
+                    onError={handleImageError}
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: 1,
+                      objectFit: 'contain',
+                    }}
+                    loading="lazy"
+                  />
+                ) : videoUrl ? (
+                  <iframe
+                    src={videoUrl}
+                    style={{ width: '100%', height: '100%', border: 'none', borderRadius: '4px' }}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={`${exerciseName} video`}
+                  />
+                ) : (
+                  <Box
+                    component="img"
+                    src={workIconUrl}
+                    alt="Exercise"
+                    onError={() => setWorkIconError(true)}
+                    sx={{ width: '60%', height: '60%', objectFit: 'contain', opacity: 0.5 }}
+                  />
+                )}
+              </Box>
+            </Box>
+
+            {/* Alerts - Compact */}
+            {setLogged && (
+              <Alert icon={<CheckCircle />} severity="success" sx={{ mb: 0.5, py: 0.25 }}>
+                Set logged! Moving to next...
+              </Alert>
+            )}
+            {shouldShowSuggestion() && (
+              <Alert icon={<TrendingUp />} severity="info" sx={{ mb: 0.5, py: 0.25, '& .MuiAlert-message': { width: '100%' } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                  <Typography variant="caption" sx={{ mr: 1 }}>
+                    💡 Try: {suggestedWeight} lbs × {suggestedReps} reps
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <Button size="small" onClick={handleAcceptSuggestion} variant="contained" sx={{ minHeight: '28px', fontSize: '0.7rem' }}>Accept</Button>
+                    <Button size="small" onClick={() => setSuggestionAccepted(true)} variant="outlined" sx={{ minHeight: '28px', fontSize: '0.7rem' }}>Skip</Button>
+                  </Box>
+                </Box>
+              </Alert>
+            )}
+
+            {/* Input Form with Target Info - Enhanced for tablet landscape */}
+            <Box component="form" onSubmit={handleSubmit} sx={{ flexShrink: 0, mt: 1 }}>
+              {/* Weight Row - Enhanced spacing and sizing */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', minWidth: '100px', fontSize: '0.95rem' }}>
+                  Weight {lastWeight !== null && <span style={{ color: theme.palette.primary.main }}>({lastWeight})</span>}:
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <IconButton 
+                    size="medium" 
+                    onClick={() => setWeight(Math.max(0, (parseFloat(weight) || 0) - 2.5))}
+                    disabled={setLogged}
+                    sx={{ border: '2px solid', borderColor: 'divider', width: '40px', height: '40px', minWidth: '40px' }}
+                  >
+                    <Remove sx={{ fontSize: 20 }} />
+                  </IconButton>
+                  <TextField 
+                    type="number" 
+                    value={weight === '' ? '' : weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                    disabled={setLogged}
+                    inputMode="decimal"
+                    size="small"
+                    sx={{ 
+                      width: '80px',
+                      '& input': { textAlign: 'center', padding: '10px 6px', fontSize: '1.1rem', fontWeight: 600, MozAppearance: 'textfield', '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 } },
+                    }}
+                  />
+                  <IconButton 
+                    size="medium" 
+                    onClick={() => setWeight((parseFloat(weight) || 0) + 2.5)}
+                    disabled={setLogged}
+                    sx={{ border: '2px solid', borderColor: 'divider', width: '40px', height: '40px', minWidth: '40px' }}
+                  >
+                    <Add sx={{ fontSize: 20 }} />
+                  </IconButton>
+                </Box>
+              </Box>
+
+              {/* Reps Row - Enhanced spacing and sizing */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', minWidth: '100px', fontSize: '0.95rem' }}>
+                  Reps {lastReps !== null && <span style={{ color: theme.palette.primary.main }}>({lastReps})</span>}:
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <IconButton 
+                    size="medium" 
+                    onClick={() => setReps(Math.max(0, (parseInt(reps) || 0) - 1))}
+                    disabled={setLogged}
+                    sx={{ border: '2px solid', borderColor: 'divider', width: '40px', height: '40px', minWidth: '40px' }}
+                  >
+                    <Remove sx={{ fontSize: 20 }} />
+                  </IconButton>
+                  <TextField 
+                    type="number" 
+                    value={reps === '' ? '' : reps}
+                    onChange={(e) => setReps(e.target.value)}
+                    disabled={setLogged}
+                    inputMode="numeric"
+                    size="small"
+                    sx={{ 
+                      width: '70px',
+                      '& input': { textAlign: 'center', padding: '10px 6px', fontSize: '1.1rem', fontWeight: 600, MozAppearance: 'textfield', '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 } },
+                    }}
+                  />
+                  <IconButton 
+                    size="medium" 
+                    onClick={() => setReps((parseInt(reps) || 0) + 1)}
+                    disabled={setLogged}
+                    sx={{ border: '2px solid', borderColor: 'divider', width: '40px', height: '40px', minWidth: '40px' }}
+                  >
+                    <Add sx={{ fontSize: 20 }} />
+                  </IconButton>
+                </Box>
+              </Box>
+
+              {/* Navigation Buttons - Enhanced size */}
+              <Stack direction="row" spacing={1.5}>
+                {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '44px', fontSize: '0.95rem', fontWeight: 600 }}>Back</Button>}
+                <Button type="submit" variant="contained" fullWidth={!showBack} disabled={setLogged} endIcon={<ArrowForward />} sx={{ minHeight: '44px', fontSize: '0.95rem', fontWeight: 600 }}>
+                  {setLogged ? 'Logging...' : 'Next'}
+                </Button>
+              </Stack>
+            </Box>
+          </Box>
+
+          {/* Right Column: Action Buttons - Vertical Stack */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: 1,
+            justifyContent: 'flex-start',
+            pt: 1,
+          }}>
+            <IconButton 
+              component="a" 
+              href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              sx={{ 
+                minWidth: '44px', minHeight: '44px', 
+                color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px',
+                '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)' }
+              }} 
+              aria-label={`Search for ${exerciseName} form guide`}
+            >
+              <HelpOutline sx={{ fontSize: 22 }} />
             </IconButton>
-          )}
+            {onSkip && (
+              <IconButton 
+                onClick={onSkip} 
+                sx={{ 
+                  minWidth: '44px', minHeight: '44px', 
+                  color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px',
+                  '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)' }
+                }} 
+                aria-label="Skip exercise"
+              >
+                <SkipNext sx={{ fontSize: 22 }} />
+              </IconButton>
+            )}
+            {onSwap && (
+              <IconButton 
+                onClick={onSwap} 
+                sx={{ 
+                  minWidth: '44px', minHeight: '44px', 
+                  color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px',
+                  '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)' }
+                }} 
+                aria-label="Swap exercise"
+              >
+                <SwapHoriz sx={{ fontSize: 22 }} />
+              </IconButton>
+            )}
+            {onExit && (
+              <IconButton 
+                onClick={handleEndWorkoutClick} 
+                sx={{ 
+                  minWidth: '44px', minHeight: '44px', 
+                  color: 'error.main', border: '2px solid', borderColor: 'error.main', borderRadius: '8px',
+                  '&:hover': { backgroundColor: 'rgba(239, 83, 80, 0.08)' },
+                  mt: 'auto', // Push to bottom
+                }} 
+                aria-label="End workout"
+              >
+                <ExitToApp sx={{ fontSize: 22 }} />
+              </IconButton>
+            )}
+          </Box>
         </Box>
-      </Box>
+      ) : (
+        /* PORTRAIT/MOBILE: Original vertical layout */
+        <>
+          {/* Top Header Bar */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            mb: 0.3,
+            flexShrink: 0,
+          }}>
+            {elapsedTime !== null && (
+              <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
+                {formatTime(elapsedTime)}
+              </Typography>
+            )}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Chip label={`Set ${setNumber} of ${totalSets}`} color="primary" size="small" sx={{ fontWeight: 600, fontSize: { xs: '0.7rem', sm: '0.85rem' } }} />
+              <Typography variant="body1" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
+                {currentStep}/{totalSteps}
+              </Typography>
+              {onToggleFavorite && (
+                <IconButton onClick={onToggleFavorite} size="small" sx={{ color: isFavorite ? 'warning.main' : 'action.active', '&:hover': { color: 'warning.main' }, p: { xs: 0.5, sm: 1 } }} aria-label="Toggle favorite">
+                  {isFavorite ? <Star sx={{ fontSize: { xs: 20, sm: 24 } }} /> : <StarBorder sx={{ fontSize: { xs: 20, sm: 24 } }} />}
+                </IconButton>
+              )}
+            </Box>
+          </Box>
 
-      {/* Action Icons Row */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, mb: 0.3, flexShrink: 0 }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton component="a" href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`} target="_blank" rel="noopener noreferrer" sx={{ minWidth: { xs: '36px', sm: '44px' }, minHeight: { xs: '36px', sm: '44px' }, color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)', } }} aria-label={`Search for ${exerciseName} form guide`}>
-            <HelpOutline sx={{ fontSize: { xs: 20, sm: 24 } }} />
-          </IconButton>
-          {onSkip && <IconButton onClick={onSkip} sx={{ minWidth: { xs: '36px', sm: '44px' }, minHeight: { xs: '36px', sm: '44px' }, color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)', } }} aria-label="Skip exercise"><SkipNext sx={{ fontSize: { xs: 20, sm: 24 } }} /></IconButton>}
-          {onSwap && <IconButton onClick={onSwap} sx={{ minWidth: { xs: '36px', sm: '44px' }, minHeight: { xs: '36px', sm: '44px' }, color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)', } }} aria-label="Swap exercise"><SwapHoriz sx={{ fontSize: { xs: 20, sm: 24 } }} /></IconButton>}
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {showPartialComplete && onPartialComplete && <IconButton onClick={onPartialComplete} sx={{ minWidth: { xs: '36px', sm: '44px' }, minHeight: { xs: '36px', sm: '44px' }, color: 'warning.main', border: '2px solid', borderColor: 'warning.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 140, 0, 0.08)' : 'rgba(255, 140, 0, 0.08)', }, }} aria-label="End and save workout"><Save sx={{ fontSize: { xs: 20, sm: 24 } }} /></IconButton>}
-          {onExit && <IconButton onClick={onExit} sx={{ minWidth: { xs: '36px', sm: '44px' }, minHeight: { xs: '36px', sm: '44px' }, color: 'error.main', border: '2px solid', borderColor: 'error.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(239, 83, 80, 0.08)' : 'rgba(239, 83, 80, 0.08)', }, }} aria-label="End workout without saving"><ExitToApp sx={{ fontSize: { xs: 20, sm: 24 } }} /></IconButton>}
-        </Box>
-      </Box>
+          {/* Action Icons Row */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, mb: 0.3, flexShrink: 0 }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <IconButton component="a" href={`https://www.google.com/search?q=${encodeURIComponent(exerciseName + ' form')}`} target="_blank" rel="noopener noreferrer" sx={{ minWidth: { xs: '36px', sm: '44px' }, minHeight: { xs: '36px', sm: '44px' }, color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)', } }} aria-label={`Search for ${exerciseName} form guide`}>
+                <HelpOutline sx={{ fontSize: { xs: 20, sm: 24 } }} />
+              </IconButton>
+              {onSkip && <IconButton onClick={onSkip} sx={{ minWidth: { xs: '36px', sm: '44px' }, minHeight: { xs: '36px', sm: '44px' }, color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)', } }} aria-label="Skip exercise"><SkipNext sx={{ fontSize: { xs: 20, sm: 24 } }} /></IconButton>}
+              {onSwap && <IconButton onClick={onSwap} sx={{ minWidth: { xs: '36px', sm: '44px' }, minHeight: { xs: '36px', sm: '44px' }, color: 'primary.main', border: '2px solid', borderColor: 'primary.main', borderRadius: '8px', '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? 'rgba(29, 181, 132, 0.08)' : 'rgba(24, 160, 113, 0.08)', } }} aria-label="Swap exercise"><SwapHoriz sx={{ fontSize: { xs: 20, sm: 24 } }} /></IconButton>}
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {onExit && (
+                <IconButton 
+                  onClick={handleEndWorkoutClick} 
+                  sx={{ 
+                    minWidth: { xs: '36px', sm: '44px' }, 
+                    minHeight: { xs: '36px', sm: '44px' }, 
+                    color: 'error.main', 
+                    border: '2px solid', 
+                    borderColor: 'error.main', 
+                    borderRadius: '8px', 
+                    '&:hover': { 
+                      backgroundColor: theme.palette.mode === 'dark' 
+                        ? 'rgba(239, 83, 80, 0.08)' 
+                        : 'rgba(239, 83, 80, 0.08)', 
+                    }, 
+                  }} 
+                  aria-label="End workout"
+                >
+                  <ExitToApp sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                </IconButton>
+              )}
+            </Box>
+          </Box>
+        </>
+      )}
 
-      {/* Main Content Area - Two Column Layout in Landscape, Single Column in Portrait */}
+      {/* Main Content Area - Only for Portrait/Mobile mode */}
+      {!shouldUseTwoColumns && (
       <Box sx={{ 
         flexGrow: 1, 
         flexShrink: 1,
@@ -349,94 +680,7 @@ const ExerciseCard = memo(({
           </Box>
         )}
 
-        {/* Landscape Mode: Two distinct columns - Exercise name (2/3) and Demo image (1/3) */}
-        {shouldUseTwoColumns && (
-          <>
-            {/* Left Column: Exercise Name (2/3 width via CSS Grid) */}
-            <Box sx={{ 
-              // CSS Grid child - column sizing handled by parent grid
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: 0,
-              justifyContent: 'center',
-              overflow: 'hidden',
-            }}>
-              <Typography 
-                component="div"
-                sx={{ 
-                  fontWeight: '700 !important',
-                  color: 'primary.main',
-                  textAlign: 'left',
-                  lineHeight: '1.05 !important',
-                  fontFamily: "'Montserrat', sans-serif !important",
-                  fontSize: {
-                    sm: '2.5rem !important', // Larger in landscape
-                    md: '3.5rem !important',
-                  },
-                  // Limit to max 2 lines with ellipsis
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  wordBreak: 'break-word',
-                }}
-              >
-                {exerciseName}
-              </Typography>
-            </Box>
-
-            {/* Right Column: Demo Image or WorkTab Icon (1/3 width via CSS Grid) */}
-            <Box sx={{ 
-              // CSS Grid child - column sizing handled by parent grid
-              position: 'relative',
-              minHeight: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              {imageSrc ? (
-                <Box
-                  component="img"
-                  src={imageSrc}
-                  alt={`${exerciseName} demonstration`}
-                  onError={handleImageError}
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 2,
-                    objectFit: 'contain',
-                  }}
-                  loading="lazy"
-                />
-              ) : videoUrl ? (
-                <iframe
-                  src={videoUrl}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    border: 'none',
-                    borderRadius: '8px',
-                  }}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={`${exerciseName} video`}
-                />
-              ) : (
-                renderAvatarFallback()
-              )}
-            </Box>
-          </>
-        )}
-
-        {/* Right Column (or bottom in portrait): Alerts and Inputs - Only show if NOT in two-column mode */}
+        {/* Portrait Mode: Alerts and Inputs - Only show if NOT in two-column mode */}
         {!shouldUseTwoColumns && (
           <Box sx={{ flexShrink: 0 }}>
             {/* Alerts */}
@@ -486,56 +730,49 @@ const ExerciseCard = memo(({
           </Box>
         )}
       </Box>
-
-      {/* Alerts and Inputs in Landscape Mode - Displayed below the two columns */}
-      {shouldUseTwoColumns && (
-        <Box sx={{ flexShrink: 0 }}>
-          {/* Alerts */}
-          {setLogged && (
-            <Alert icon={<CheckCircle />} severity="success" sx={{ mb: 0.3 }}>
-              Set logged! Moving to next...
-            </Alert>
-          )}
-          {shouldShowSuggestion() && (
-            <Alert icon={<TrendingUp />} severity="info" sx={{ mb: 0.3, '& .MuiAlert-message': { width: '100%' } }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                <Typography variant="body2" sx={{ mr: 1, flexGrow: 1 }}>
-                  💡 Try: {suggestedWeight} lbs × {suggestedReps} reps
-                  {lastWeight != null && suggestedWeight > lastWeight && ' (↑w)'}
-                  {lastWeight != null && suggestedWeight === lastWeight && suggestedReps > lastReps && ' (↑r)'}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
-                  <Button size="small" onClick={handleAcceptSuggestion} variant="contained">Accept</Button>
-                  <Button size="small" onClick={() => setSuggestionAccepted(true)} variant="outlined">Skip</Button>
-                </Box>
-              </Box>
-            </Alert>
-          )}
-          
-          {/* Input Form */}
-          <Box component="form" onSubmit={handleSubmit}>
-            <Box sx={{ mb: 2 }}>
-              <ExerciseInputs 
-                weight={weight} 
-                reps={reps} 
-                lastWeight={lastWeight} 
-                lastReps={lastReps} 
-                onWeightChange={setWeight} 
-                onRepsChange={setReps} 
-                disabled={setLogged}
-                isBarbell={isBarbell(equipment)}
-                barbellWeight={preferences.barbellWeight || 45}
-              />
-            </Box>
-            <Stack direction="row" spacing={2}>
-              {showBack && <Button type="button" variant="outlined" onClick={onBack} disabled={setLogged} startIcon={<ArrowBack />} sx={{ minHeight: '44px' }}>Back</Button>}
-              <Button type="submit" variant="contained" fullWidth={!showBack} disabled={setLogged} endIcon={<ArrowForward />} sx={{ minHeight: '44px' }}>
-                {setLogged ? 'Logging...' : 'Next'}
-              </Button>
-            </Stack>
-          </Box>
-        </Box>
       )}
+
+      {/* End Workout Confirmation Dialog */}
+      <Dialog 
+        open={endWorkoutDialogOpen} 
+        onClose={() => setEndWorkoutDialogOpen(false)}
+        aria-labelledby="end-workout-dialog-title"
+      >
+        <DialogTitle id="end-workout-dialog-title">End Workout</DialogTitle>
+        <DialogContent>
+          <Typography>
+            How would you like to end this workout?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ flexDirection: 'column', gap: 1, pb: 2, px: 2 }}>
+          <Button 
+            fullWidth
+            variant="contained" 
+            color="primary"
+            onClick={handleDialogPartialComplete}
+            sx={{ minHeight: '44px' }}
+          >
+            End and Save as Partial
+          </Button>
+          <Button 
+            fullWidth
+            variant="outlined" 
+            color="error"
+            onClick={handleDialogExit}
+            sx={{ minHeight: '44px' }}
+          >
+            End Without Saving
+          </Button>
+          <Button 
+            fullWidth
+            variant="text"
+            onClick={() => setEndWorkoutDialogOpen(false)}
+            sx={{ minHeight: '44px' }}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 });

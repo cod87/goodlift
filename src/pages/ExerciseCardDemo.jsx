@@ -12,7 +12,9 @@ const ExerciseCardDemo = () => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   const exerciseName = 'Dumbbell Incline Bench Press';
-  const demoImage = getDemoImagePath(exerciseName);
+  // Use the webp file specified in exercises.json for this exercise
+  const webpFile = 'incline-dumbbell-bench-press.webp';
+  const demoImage = getDemoImagePath(exerciseName, true, webpFile);
 
   // Simulate timer
   useState(() => {

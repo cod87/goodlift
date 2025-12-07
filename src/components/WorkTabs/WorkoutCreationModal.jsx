@@ -454,11 +454,11 @@ const WorkoutCreationModal = ({
       const rect = buttonContainer.getBoundingClientRect();
       
       // Calculate the threshold: when button is about to go out of view at the top
-      // We want it to stick when it reaches near the tabs (which are ~120px from top including header)
-      const stickyThreshold = 180; // Adjust based on header + tabs height
+      // Header (64px) + Tabs (48px) + some padding (68px) = 180px
+      const STICKY_THRESHOLD = 180;
       
       // Button should be sticky when it would scroll past the threshold
-      setIsButtonSticky(rect.top < stickyThreshold);
+      setIsButtonSticky(rect.top < STICKY_THRESHOLD);
     };
 
     contentElement.addEventListener('scroll', handleScroll);
@@ -1270,7 +1270,7 @@ const WorkoutCreationModal = ({
               
               {/* Show superset selection hint when exercises are highlighted */}
               {highlightedExercises.size > 0 && (
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, pr: 8 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, pr: 9 }}>
                   {highlightedExercises.size} exercise{highlightedExercises.size !== 1 ? 's' : ''} selected for Superset {currentSupersetNumber}
                   {highlightedExercises.size >= 2 && ` - Tap + to confirm`}
                   {highlightedExercises.size === 1 && ' - Select at least one more'}

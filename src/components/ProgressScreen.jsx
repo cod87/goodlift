@@ -588,11 +588,12 @@ const ProgressDashboard = () => {
                       const hasData = currentWeight > 0 || currentReps > 0 || progression.length > 0;
                       
                       // Calculate progression direction if we have history
+                      const hasProgression = progression.length > 1;
                       const startingValue = progression.length > 0 ? progression[0].value : 
                                            (trackingMode === 'reps' ? currentReps : currentWeight);
                       const currentValue = trackingMode === 'reps' ? currentReps : currentWeight;
-                      const progressionDirection = progression.length > 1 && currentValue > startingValue ? 'up' : 
-                                                   progression.length > 1 && currentValue < startingValue ? 'down' : 'stable';
+                      const progressionDirection = hasProgression && currentValue > startingValue ? 'up' : 
+                                                   hasProgression && currentValue < startingValue ? 'down' : 'stable';
 
                       return (
                         <Box 
@@ -626,10 +627,10 @@ const ProgressDashboard = () => {
                                 <Typography variant="body1" sx={{ fontWeight: 600 }}>
                                   {currentWeight} lbs
                                 </Typography>
-                                {progressionDirection === 'up' && progression.length > 1 && (
+                                {progressionDirection === 'up' && (
                                   <TrendingUp sx={{ fontSize: 18, color: 'success.main' }} />
                                 )}
-                                {progressionDirection === 'down' && progression.length > 1 && (
+                                {progressionDirection === 'down' && (
                                   <TrendingDown sx={{ fontSize: 18, color: 'error.main' }} />
                                 )}
                               </Stack>

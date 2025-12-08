@@ -3,7 +3,8 @@
  * 
  * Tests that exercises with multiple primary muscles (e.g., "Lats, Biceps")
  * correctly distribute set counts to all applicable muscle categories.
- * This ensures retroactive changes to exercise muscle associations are reflected.
+ * This handles exercises that work multiple primary muscles simultaneously,
+ * ensuring all muscles are properly credited in volume calculations.
  */
 
 import { 

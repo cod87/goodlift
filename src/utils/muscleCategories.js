@@ -86,9 +86,10 @@ export function categorizePrimaryMuscles(primaryMuscleString) {
   
   const categories = new Set();
   muscles.forEach(muscle => {
+    const cleanMuscle = muscle.split('(')[0].trim();
     const category = getMuscleCategory(muscle);
-    // Only add if it maps to a known category (not the original muscle string)
-    if (MUSCLE_TO_CATEGORY[muscle.split('(')[0].trim()]) {
+    // Only add if the muscle is in our known mapping
+    if (MUSCLE_TO_CATEGORY[cleanMuscle]) {
       categories.add(category);
     }
   });

@@ -69,6 +69,35 @@ export function getMuscleCategory(primaryMuscle) {
 }
 
 /**
+ * Parse and categorize multiple primary muscles from a comma-separated string
+ * Some exercises work multiple primary muscles simultaneously (e.g., "Lats, Biceps")
+ * @param {string} primaryMuscleString - Comma-separated list of primary muscles
+ * @returns {Array<string>} Array of unique simplified muscle categories
+ */
+export function categorizePrimaryMuscles(primaryMuscleString) {
+  if (!primaryMuscleString || typeof primaryMuscleString !== 'string') {
+    return [];
+  }
+  
+  const muscles = primaryMuscleString
+    .split(',')
+    .map(muscle => muscle.trim())
+    .filter(muscle => muscle.length > 0);
+  
+  const categories = new Set();
+  muscles.forEach(muscle => {
+    const cleanMuscle = muscle.split('(')[0].trim();
+    const category = getMuscleCategory(muscle);
+    // Only add if the muscle is in our known mapping
+    if (MUSCLE_TO_CATEGORY[cleanMuscle]) {
+      categories.add(category);
+    }
+  });
+  
+  return Array.from(categories);
+}
+
+/**
  * Get all simplified muscle categories in a consistent order
  * @returns {Array<string>} Array of category names
  */

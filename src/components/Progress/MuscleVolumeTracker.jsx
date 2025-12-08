@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { FitnessCenter, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import {
-  getMuscleCategory,
+  categorizePrimaryMuscles,
   categorizeSecondaryMuscles,
   getAllCategories,
 } from '../../utils/muscleCategories';
@@ -99,20 +99,24 @@ const calculateMuscleVolumeForWeek = (workoutHistory, exercisesDB, weekStart, we
       const exerciseMetadata = exercisesDB[exerciseName];
       if (!exerciseMetadata) return;
 
-      const primaryMuscle = exerciseMetadata['Primary Muscle'] || '';
+      const primaryMuscleString = exerciseMetadata['Primary Muscle'] || '';
       const secondaryMuscles = exerciseMetadata['Secondary Muscles'] || '';
 
-      // Categorize primary muscle
-      const primaryCategory = getMuscleCategory(primaryMuscle);
-      if (volumeData[primaryCategory]) {
-        volumeData[primaryCategory].primary += setCount;
-      }
+      // Categorize primary muscles (handles comma-separated values like "Lats, Biceps")
+      const primaryCategories = categorizePrimaryMuscles(primaryMuscleString);
+      
+      // Add sets to each primary muscle category
+      primaryCategories.forEach(category => {
+        if (volumeData[category]) {
+          volumeData[category].primary += setCount;
+        }
+      });
 
       // Categorize secondary muscles
       const secondaryCategories = categorizeSecondaryMuscles(secondaryMuscles);
       secondaryCategories.forEach(category => {
-        // Don't count as secondary if it's the same as primary category
-        if (category !== primaryCategory && volumeData[category]) {
+        // Don't count as secondary if it's already counted as primary
+        if (!primaryCategories.includes(category) && volumeData[category]) {
           volumeData[category].secondary += setCount;
         }
       });

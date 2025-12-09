@@ -114,7 +114,7 @@ console.log('Test 3: Retroactive awarding - partial previouslyUnlocked');
   const passed = !has1 && !has5 && has10 && has25 && !hasStreak3 && hasStreak7 && hasStreak14;
   
   console.log(`  User has 25 workouts & 25-day streak`);
-  console.log(`  Previously unlocked: first-workout, dedicated-5, streak-3`);
+  console.log(`  Previously unlocked: first-session, dedicated-5, streak-3`);
   console.log(`  Expected new workouts: 10, 25 (not 1, 5)`);
   console.log(`  Got: 1=${has1}, 5=${has5}, 10=${has10}, 25=${has25}`);
   console.log(`  Expected new streaks: 7, 14 (not 3)`);
@@ -143,7 +143,7 @@ console.log('Test 4: Normal mode - only just-crossed milestones');
   const passed = has10 && !has5 && !has1;
   
   console.log(`  User completes 10th workout, forceRetroactive=false`);
-  console.log(`  Previously unlocked: first-workout, dedicated-5`);
+  console.log(`  Previously unlocked: first-session, dedicated-5`);
   console.log(`  Expected: Only dedicated-10`);
   console.log(`  Got: 1=${has1}, 5=${has5}, 10=${has10}`);
   console.log(`  Result: ${passed ? '✓ PASS' : '✗ FAIL'}`);

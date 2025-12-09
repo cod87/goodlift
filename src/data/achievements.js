@@ -17,93 +17,95 @@ import { calculateStreak } from '../utils/trackingMetrics.js';
  * - condition: object defining unlock criteria
  */
 export const ACHIEVEMENT_BADGES = [
-  // Workout Count Achievements
+  // Total Session Count Achievements
+  // These count ALL session types: strength, cardio, HIIT, yoga, stretching, etc.
   {
-    id: 'first-workout',
+    id: 'first-session',
     name: 'First Steps',
-    description: 'Complete your first workout',
+    description: 'Complete your first training session',
     icon: '🎯',
     tier: 'bronze',
-    condition: { type: 'workoutCount', value: 1 }
+    condition: { type: 'sessionCount', value: 1 }
   },
   {
     id: 'dedicated-5',
     name: 'Getting Started',
-    description: 'Complete 5 workouts',
+    description: 'Complete 5 training sessions',
     icon: '💪',
     tier: 'bronze',
-    condition: { type: 'workoutCount', value: 5 }
+    condition: { type: 'sessionCount', value: 5 }
   },
   {
     id: 'dedicated-10',
     name: 'Committed',
-    description: 'Complete 10 workouts',
+    description: 'Complete 10 training sessions',
     icon: '🔥',
     tier: 'silver',
-    condition: { type: 'workoutCount', value: 10 }
+    condition: { type: 'sessionCount', value: 10 }
   },
   {
     id: 'dedicated-25',
     name: 'Athlete',
-    description: 'Complete 25 workouts',
+    description: 'Complete 25 training sessions',
     icon: '⭐',
     tier: 'silver',
-    condition: { type: 'workoutCount', value: 25 }
+    condition: { type: 'sessionCount', value: 25 }
   },
   {
     id: 'dedicated-50',
     name: 'Beast Mode',
-    description: 'Complete 50 workouts',
+    description: 'Complete 50 training sessions',
     icon: '🦁',
     tier: 'gold',
-    condition: { type: 'workoutCount', value: 50 }
+    condition: { type: 'sessionCount', value: 50 }
   },
   {
     id: 'dedicated-100',
     name: 'Centurion',
-    description: 'Complete 100 workouts',
+    description: 'Complete 100 training sessions',
     icon: '👑',
     tier: 'gold',
-    condition: { type: 'workoutCount', value: 100 }
+    condition: { type: 'sessionCount', value: 100 }
   },
   {
     id: 'dedicated-150',
     name: 'Elite Athlete',
-    description: 'Complete 150 workouts',
+    description: 'Complete 150 training sessions',
     icon: '🎖️',
     tier: 'gold',
-    condition: { type: 'workoutCount', value: 150 }
+    condition: { type: 'sessionCount', value: 150 }
   },
   {
     id: 'dedicated-200',
     name: 'Relentless',
-    description: 'Complete 200 workouts',
+    description: 'Complete 200 training sessions',
     icon: '🔱',
     tier: 'platinum',
-    condition: { type: 'workoutCount', value: 200 }
+    condition: { type: 'sessionCount', value: 200 }
   },
   {
     id: 'dedicated-250',
     name: 'Iron Legend',
-    description: 'Complete 250 workouts',
+    description: 'Complete 250 training sessions',
     icon: '🏆',
     tier: 'platinum',
-    condition: { type: 'workoutCount', value: 250 }
+    condition: { type: 'sessionCount', value: 250 }
   },
   {
     id: 'dedicated-500',
     name: 'Hall of Fame',
-    description: 'Complete 500 workouts',
+    description: 'Complete 500 training sessions',
     icon: '⚜️',
     tier: 'platinum',
-    condition: { type: 'workoutCount', value: 500 }
+    condition: { type: 'sessionCount', value: 500 }
   },
 
-  // Streak Achievements
+  // Streak Achievements (include ALL session types)
+  // Streaks count any training day: strength, cardio, HIIT, yoga, stretching, etc.
   {
     id: 'streak-3',
     name: 'Consistency',
-    description: 'Maintain a 3-day workout streak',
+    description: 'Maintain a 3-day training streak',
     icon: '🔗',
     tier: 'bronze',
     condition: { type: 'streak', value: 3 }
@@ -111,7 +113,7 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'streak-7',
     name: 'Week Warrior',
-    description: 'Maintain a 7-day workout streak',
+    description: 'Maintain a 7-day training streak',
     icon: '📅',
     tier: 'silver',
     condition: { type: 'streak', value: 7 }
@@ -119,7 +121,7 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'streak-14',
     name: 'Fortnight Fighter',
-    description: 'Maintain a 14-day workout streak',
+    description: 'Maintain a 14-day training streak',
     icon: '⚡',
     tier: 'silver',
     condition: { type: 'streak', value: 14 }
@@ -127,7 +129,7 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'streak-30',
     name: 'Monthly Master',
-    description: 'Maintain a 30-day workout streak',
+    description: 'Maintain a 30-day training streak',
     icon: '🌟',
     tier: 'gold',
     condition: { type: 'streak', value: 30 }
@@ -135,7 +137,7 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'streak-60',
     name: 'Unbreakable',
-    description: 'Maintain a 60-day workout streak',
+    description: 'Maintain a 60-day training streak',
     icon: '💎',
     tier: 'gold',
     condition: { type: 'streak', value: 60 }
@@ -143,7 +145,7 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'streak-100',
     name: 'Iron Will',
-    description: 'Maintain a 100-day workout streak',
+    description: 'Maintain a 100-day training streak',
     icon: '🛡️',
     tier: 'platinum',
     condition: { type: 'streak', value: 100 }
@@ -375,11 +377,11 @@ export const ACHIEVEMENT_BADGES = [
     condition: { type: 'wellnessTaskCount', value: 100 }
   },
 
-  // Strength Workout Count Achievements
+  // Strength Workout Count Achievements (strength training only)
   {
     id: 'strength-10',
     name: 'Iron Starter',
-    description: 'Complete 10 strength workouts',
+    description: 'Complete 10 strength training workouts',
     icon: '🏋️',
     tier: 'bronze',
     condition: { type: 'strengthWorkoutCount', value: 10 }
@@ -387,7 +389,7 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'strength-50',
     name: 'Iron Regular',
-    description: 'Complete 50 strength workouts',
+    description: 'Complete 50 strength training workouts',
     icon: '💪',
     tier: 'silver',
     condition: { type: 'strengthWorkoutCount', value: 50 }
@@ -395,7 +397,7 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'strength-100',
     name: 'Iron Warrior',
-    description: 'Complete 100 strength workouts',
+    description: 'Complete 100 strength training workouts',
     icon: '🦾',
     tier: 'gold',
     condition: { type: 'strengthWorkoutCount', value: 100 }
@@ -403,17 +405,17 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'strength-250',
     name: 'Iron Master',
-    description: 'Complete 250 strength workouts',
+    description: 'Complete 250 strength training workouts',
     icon: '⚔️',
     tier: 'platinum',
     condition: { type: 'strengthWorkoutCount', value: 250 }
   },
 
-  // Cardio Workout Count Achievements
+  // Cardio Workout Count Achievements (cardio & HIIT only)
   {
     id: 'cardio-10',
     name: 'Cardio Starter',
-    description: 'Complete 10 cardio workouts',
+    description: 'Complete 10 cardio or HIIT workouts',
     icon: '🏃',
     tier: 'bronze',
     condition: { type: 'cardioWorkoutCount', value: 10 }
@@ -421,7 +423,7 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'cardio-50',
     name: 'Cardio Enthusiast',
-    description: 'Complete 50 cardio workouts',
+    description: 'Complete 50 cardio or HIIT workouts',
     icon: '❤️‍🔥',
     tier: 'silver',
     condition: { type: 'cardioWorkoutCount', value: 50 }
@@ -429,7 +431,7 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'cardio-100',
     name: 'Cardio Champion',
-    description: 'Complete 100 cardio workouts',
+    description: 'Complete 100 cardio or HIIT workouts',
     icon: '🫀',
     tier: 'gold',
     condition: { type: 'cardioWorkoutCount', value: 100 }
@@ -437,13 +439,13 @@ export const ACHIEVEMENT_BADGES = [
   {
     id: 'cardio-250',
     name: 'Cardio Legend',
-    description: 'Complete 250 cardio workouts',
+    description: 'Complete 250 cardio or HIIT workouts',
     icon: '🏅',
     tier: 'platinum',
     condition: { type: 'cardioWorkoutCount', value: 250 }
   },
 
-  // Yoga/Flexibility Workout Count Achievements
+  // Yoga/Flexibility Workout Count Achievements (yoga & stretching only)
   {
     id: 'yoga-10',
     name: 'Flexibility Starter',
@@ -683,10 +685,12 @@ export const isAchievementUnlocked = (achievement, userStats, workoutHistory = [
   const { condition } = achievement;
   
   switch (condition.type) {
-    case 'workoutCount':
+    case 'sessionCount':
+      // Total sessions across ALL types
       return (userStats.totalWorkouts || 0) >= condition.value;
     
     case 'streak':
+      // Streaks include ALL session types
       return (userStats.currentStreak || 0) >= condition.value;
     
     case 'prCount':
@@ -837,7 +841,7 @@ export const getNextAchievementProgress = (categoryAchievements, userStats, work
   let currentValue = 0;
   
   switch (condition.type) {
-    case 'workoutCount':
+    case 'sessionCount':
       currentValue = userStats.totalWorkouts || 0;
       break;
     case 'streak':
@@ -947,7 +951,7 @@ export const getNewlyUnlockedAchievements = (userStats, workoutHistory, previous
     const requiredValue = condition.value;
     
     switch (condition.type) {
-      case 'workoutCount':
+      case 'sessionCount':
         return workoutsBeforeCurrent < requiredValue;
       
       case 'streak':

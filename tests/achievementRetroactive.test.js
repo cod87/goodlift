@@ -44,9 +44,9 @@ console.log('Test 1: Retroactive awarding - workout counts');
   
   // With forceRetroactive=true, should get ALL workout count achievements up to 25
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked, true);
-  const workoutAchievements = newAchievements.filter(a => a.condition.type === 'workoutCount');
+  const workoutAchievements = newAchievements.filter(a => a.condition.type === 'sessionCount');
   
-  const has1 = workoutAchievements.some(a => a.id === 'first-workout');
+  const has1 = workoutAchievements.some(a => a.id === 'first-session');
   const has5 = workoutAchievements.some(a => a.id === 'dedicated-5');
   const has10 = workoutAchievements.some(a => a.id === 'dedicated-10');
   const has25 = workoutAchievements.some(a => a.id === 'dedicated-25');
@@ -95,14 +95,14 @@ console.log('Test 3: Retroactive awarding - partial previouslyUnlocked');
   const workoutHistory = Array(25).fill(null).map((_, i) => 
     createWorkout('full', new Date(Date.now() - i * DAY_IN_MS))
   );
-  const previouslyUnlocked = ['first-workout', 'dedicated-5', 'streak-3'];
+  const previouslyUnlocked = ['first-session', 'dedicated-5', 'streak-3'];
   
   // Should get missing achievements: 10, 25 for workouts; 7, 14 for streaks
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked, true);
-  const workoutAchievements = newAchievements.filter(a => a.condition.type === 'workoutCount');
+  const workoutAchievements = newAchievements.filter(a => a.condition.type === 'sessionCount');
   const streakAchievements = newAchievements.filter(a => a.condition.type === 'streak');
   
-  const has1 = workoutAchievements.some(a => a.id === 'first-workout');
+  const has1 = workoutAchievements.some(a => a.id === 'first-session');
   const has5 = workoutAchievements.some(a => a.id === 'dedicated-5');
   const has10 = workoutAchievements.some(a => a.id === 'dedicated-10');
   const has25 = workoutAchievements.some(a => a.id === 'dedicated-25');
@@ -130,15 +130,15 @@ console.log('Test 4: Normal mode - only just-crossed milestones');
   const workoutHistory = Array(10).fill(null).map((_, i) => 
     createWorkout('full', new Date(Date.now() - i * DAY_IN_MS))
   );
-  const previouslyUnlocked = ['first-workout', 'dedicated-5'];
+  const previouslyUnlocked = ['first-session', 'dedicated-5'];
   
   // Without forceRetroactive, should only get dedicated-10 (just crossed from 9 to 10)
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked, false);
-  const workoutAchievements = newAchievements.filter(a => a.condition.type === 'workoutCount');
+  const workoutAchievements = newAchievements.filter(a => a.condition.type === 'sessionCount');
   
   const has10 = workoutAchievements.some(a => a.id === 'dedicated-10');
   const has5 = workoutAchievements.some(a => a.id === 'dedicated-5');
-  const has1 = workoutAchievements.some(a => a.id === 'first-workout');
+  const has1 = workoutAchievements.some(a => a.id === 'first-session');
   
   const passed = has10 && !has5 && !has1;
   

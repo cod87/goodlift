@@ -4,6 +4,8 @@
  * Defines all achievement badges, their unlock conditions, and visual assets
  */
 
+import { calculateStreak } from '../utils/trackingMetrics.js';
+
 /**
  * Achievement badge definitions
  * Each badge has:
@@ -891,85 +893,93 @@ export const getUnlockedAchievements = (userStats, workoutHistory = []) => {
 /**
  * Get newly unlocked achievements since last check
  * 
- * This function determines which achievements were just unlocked by the latest action.
- * It uses a two-pronged approach for reliability:
- * 1. Checks if the achievement ID is in the previouslyUnlocked list
- * 2. For workoutCount-based achievements, also verifies the achievement wasn't 
- *    unlockable before the current workout (using workout history length)
+ * **ACHIEVEMENT AWARDING RULES:**
  * 
- * This ensures achievements are only shown as "new" when they are truly first unlocked,
- * even if the previouslyUnlocked list is out of sync or empty.
+ * This function balances two competing needs:
+ * 1. **Incremental Awarding**: Award achievements as milestones are crossed
+ * 2. **Prevent Re-Awarding**: Don't re-show achievements already earned
  * 
- * @param {Object} userStats - Current user statistics
- * @param {Array} workoutHistory - Workout history (including the just-completed workout)
+ * **The Solution:**
+ * - Use `previouslyUnlocked` as the primary check (skip if already awarded)
+ * - Use "before" calculations to handle out-of-sync `previouslyUnlocked`
+ * - "Before" check: Was this achievement already unlockable BEFORE the current action?
+ *   - If YES: Skip it (prevents re-awarding)
+ *   - If NO: Award it (milestone just crossed)
+ * 
+ * **For Retroactive Awarding:**
+ * - Set `forceRetroactive` to true to award ALL currently-unlocked achievements
+ * - This bypasses the "before" check and awards all missed milestones
+ * - Used on app initialization or when recalculating achievements
+ * 
+ * @param {Object} userStats - Current user statistics  
+ * @param {Array} workoutHistory - Workout history (including just-completed action if applicable)
  * @param {Array} previouslyUnlocked - Previously unlocked achievement IDs
+ * @param {boolean} forceRetroactive - If true, award all unlocked achievements regardless of "before" state
  * @returns {Array} Newly unlocked achievements
  */
-export const getNewlyUnlockedAchievements = (userStats, workoutHistory, previouslyUnlocked = []) => {
+export const getNewlyUnlockedAchievements = (userStats, workoutHistory, previouslyUnlocked = [], forceRetroactive = false) => {
   const currentUnlocked = getUnlockedAchievements(userStats, workoutHistory);
   
-  // Calculate how many workouts existed BEFORE the current one was added
-  // This provides a fallback check in case previouslyUnlocked is not accurate
+  // If forcing retroactive awarding, just return all unlocked achievements not in previouslyUnlocked
+  if (forceRetroactive) {
+    return currentUnlocked.filter(achievement => !previouslyUnlocked.includes(achievement.id));
+  }
+  
+  // Calculate "before" values to determine if achievements were JUST unlocked
   const workoutsBeforeCurrent = Math.max(0, (workoutHistory?.length || 0) - 1);
   
-  // Calculate category-specific workout counts before current workout
   const workoutHistoryBefore = workoutHistory?.slice(1) || [];
   const strengthCountBefore = countStrengthWorkouts(workoutHistoryBefore);
   const cardioCountBefore = countCardioWorkouts(workoutHistoryBefore);
   const yogaCountBefore = countYogaWorkouts(workoutHistoryBefore);
   const strengthWeekStreakBefore = calculateStrengthWeekStreak(workoutHistoryBefore);
+  const streakBefore = calculateStreak(workoutHistoryBefore).currentStreak;
   
   return currentUnlocked.filter(achievement => {
-    // If already in the previouslyUnlocked list, it's not new
+    // Rule 1: Skip if already in previouslyUnlocked
     if (previouslyUnlocked.includes(achievement.id)) {
       return false;
     }
     
-    // Additional check for workoutCount-based achievements:
-    // If this achievement would have been unlocked with the previous workout count,
-    // then it's not truly new (the stored list was just out of sync)
-    if (achievement.condition.type === 'workoutCount') {
-      const requiredWorkouts = achievement.condition.value;
-      // If we had enough workouts BEFORE this one, the achievement was already unlockable
-      if (workoutsBeforeCurrent >= requiredWorkouts) {
-        return false;
-      }
-    }
+    // Rule 2: For progressive achievements, check if it was JUST unlocked
+    // Skip if it was already unlockable before the current action
+    const { condition } = achievement;
+    const requiredValue = condition.value;
     
-    // Additional check for strengthWorkoutCount-based achievements
-    if (achievement.condition.type === 'strengthWorkoutCount') {
-      const requiredWorkouts = achievement.condition.value;
-      if (strengthCountBefore >= requiredWorkouts) {
-        return false;
-      }
+    switch (condition.type) {
+      case 'workoutCount':
+        return workoutsBeforeCurrent < requiredValue;
+      
+      case 'streak':
+        return streakBefore < requiredValue;
+      
+      case 'strengthWorkoutCount':
+        return strengthCountBefore < requiredValue;
+      
+      case 'cardioWorkoutCount':
+        return cardioCountBefore < requiredValue;
+      
+      case 'yogaWorkoutCount':
+        return yogaCountBefore < requiredValue;
+      
+      case 'strengthWeekStreak':
+        return strengthWeekStreakBefore < requiredValue;
+      
+      case 'prCount':
+      case 'totalVolume':
+      case 'totalTime':
+      case 'wellnessTaskCount':
+        // For these, we don't have reliable "before" calculations
+        // Rely on previouslyUnlocked (already checked above)
+        return true;
+      
+      case 'special':
+        // Special achievements are one-time events
+        return true;
+      
+      default:
+        return true;
     }
-    
-    // Additional check for cardioWorkoutCount-based achievements
-    if (achievement.condition.type === 'cardioWorkoutCount') {
-      const requiredWorkouts = achievement.condition.value;
-      if (cardioCountBefore >= requiredWorkouts) {
-        return false;
-      }
-    }
-    
-    // Additional check for yogaWorkoutCount-based achievements
-    if (achievement.condition.type === 'yogaWorkoutCount') {
-      const requiredWorkouts = achievement.condition.value;
-      if (yogaCountBefore >= requiredWorkouts) {
-        return false;
-      }
-    }
-    
-    // Additional check for strengthWeekStreak-based achievements
-    if (achievement.condition.type === 'strengthWeekStreak') {
-      const requiredStreak = achievement.condition.value;
-      if (strengthWeekStreakBefore >= requiredStreak) {
-        return false;
-      }
-    }
-    
-    // Achievement is newly unlocked
-    return true;
   });
 };
 

@@ -42,9 +42,6 @@ const TimerDisplay = ({
   workIntervalNames,
   intervalNames,
   sessionName,
-  // Flow/Yoga specific
-  currentPoseIndex,
-  selectedPoses,
   // Handlers
   handleStart,
   handlePause,
@@ -155,17 +152,6 @@ const TimerDisplay = ({
             )}
           </>
         )}
-        
-        {mode === TIMER_MODES.FLOW && selectedPoses[currentPoseIndex] && (
-          <>
-            <Typography variant="h6" sx={{ mt: 2, fontWeight: 600, color: '#f7fafc' }}>
-              {selectedPoses[currentPoseIndex].name}
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 1, color: '#a0aec0' }}>
-              Pose {currentPoseIndex + 1} of {selectedPoses.length}
-            </Typography>
-          </>
-        )}
       </Box>
 
       {/* Controls */}
@@ -206,14 +192,13 @@ const TimerDisplay = ({
                 },
                 flexShrink: 0, // Prevent button from shrinking
               }}
-              disabled={mode === TIMER_MODES.FLOW && selectedPoses.length === 0}
             >
               <PlayArrow sx={{ fontSize: { xs: 40, sm: 48 } }} />
             </IconButton>
           ) : (
             <>
-              {/* Skip backward for HIIT and Yoga */}
-              {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
+              {/* Skip backward for HIIT only */}
+              {mode === TIMER_MODES.HIIT && (
                 <IconButton
                   size="large"
                   onClick={handleSkipBackward}
@@ -230,10 +215,7 @@ const TimerDisplay = ({
                     },
                     flexShrink: 0,
                   }}
-                  disabled={
-                    (mode === TIMER_MODES.HIIT && isPrepPeriod) ||
-                    (mode === TIMER_MODES.FLOW && currentPoseIndex === 0)
-                  }
+                  disabled={mode === TIMER_MODES.HIIT && isPrepPeriod}
                 >
                   <SkipPrevious sx={{ fontSize: { xs: 28, sm: 36 } }} />
                 </IconButton>
@@ -292,8 +274,8 @@ const TimerDisplay = ({
                 <Replay sx={{ fontSize: { xs: 36, sm: 40 } }} />
               </IconButton>
               
-              {/* Skip forward for HIIT and Yoga */}
-              {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
+              {/* Skip forward for HIIT only */}
+              {mode === TIMER_MODES.HIIT && (
                 <IconButton
                   size="large"
                   onClick={handleSkipForward}
@@ -310,10 +292,7 @@ const TimerDisplay = ({
                     },
                     flexShrink: 0,
                   }}
-                  disabled={
-                    (mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= roundsPerSet && currentSet >= numberOfSets) ||
-                    (mode === TIMER_MODES.FLOW && currentPoseIndex >= selectedPoses.length - 1)
-                  }
+                  disabled={mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= roundsPerSet && currentSet >= numberOfSets}
                 >
                   <SkipNext sx={{ fontSize: { xs: 28, sm: 36 } }} />
                 </IconButton>
@@ -343,8 +322,6 @@ TimerDisplay.propTypes = {
   workIntervalNames: PropTypes.array,
   intervalNames: PropTypes.object,
   sessionName: PropTypes.string,
-  currentPoseIndex: PropTypes.number,
-  selectedPoses: PropTypes.array,
   handleStart: PropTypes.func.isRequired,
   handlePause: PropTypes.func.isRequired,
   handleStop: PropTypes.func.isRequired,

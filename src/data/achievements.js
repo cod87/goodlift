@@ -1290,3 +1290,133 @@ export const calculateUserLevel = (points) => {
     currentLevelThreshold
   };
 };
+
+
+/**
+ * MIGRATION FUNCTIONS (Phase 4)
+ * Map old achievement IDs to new ones to preserve user progress
+ */
+
+/**
+ * Mapping of old achievement IDs to new achievement IDs
+ * Used to migrate users from the old system to the new system
+ */
+const ACHIEVEMENT_MIGRATION_MAP = {
+  // Old total session count -> new overall training badges
+  "first-session": null, // Not in new system (started at 25)
+  "dedicated-5": null, // Not in new system
+  "dedicated-10": null, // Not in new system
+  "dedicated-25": "training-novice", // Both at 25 total workouts
+  "dedicated-50": "training-initiate", // Both at 50 total workouts
+  "dedicated-100": null, // New system has 150 next
+  "dedicated-150": "training-enthusiast", // Both at 150 total workouts
+  "dedicated-200": null, // New system has 300 next
+  "dedicated-250": null, // New system has 300 next
+  "dedicated-500": null, // New system has 750 next
+  
+  // Old streak badges -> new streak badges
+  "streak-3": null, // Not in new system (starts at 7)
+  "streak-7": "week-streak", // Both at 7 days
+  "streak-14": "fortnight-streak", // Both at 14 days
+  "streak-30": "month-streak", // Both at 30 days
+  "streak-60": null, // New system has 90 next
+  "streak-100": null, // New system has 90 next
+  
+  // Old volume badges -> new tonnage badges
+  "volume-10k": null, // Not in new system (starts at 50k)
+  "volume-50k": "iron-beginner", // Old 50k, new 50k (but new name)
+  "volume-100k": null, // New system has 250k next
+  "volume-250k": "iron-novice", // Both at 250k
+  
+  // Old strength count badges -> new strength session count
+  "strength-10": "first-steps", // Both at 10
+  "strength-50": "building-momentum", // Both at 50
+  "strength-100": "consistent-lifter", // Both at 100
+  "strength-250": null, // New system has 150, 300 instead
+  
+  // Old cardio count badges -> new cardio session count
+  "cardio-10": "cardio-starter", // Both at 10
+  "cardio-50": null, // New system has 25, 75 instead
+  "cardio-100": null, // New system has 150 next
+  "cardio-250": null, // New system has 300 next
+  
+  // Old yoga count badges -> new yoga session count
+  "yoga-10": "yoga-newcomer", // Both at 10
+  "yoga-50": null, // New system has 30, 75 instead
+  "yoga-100": null, // New system has 150 next
+  "yoga-250": null, // New system has 150 next
+  
+  // Old strength week streak -> new strength week streak
+  "strength-week-1": "consistent-week-1", // Old 1 week -> new 4 weeks (conservative)
+  "strength-week-3": null, // Old 3 weeks -> new 4 weeks (conservative)
+  "strength-week-5": null, // Old 5 weeks -> new 12 weeks (conservative)
+  "strength-week-10": null, // Old 10 weeks -> new 12 weeks (conservative)
+  
+  // PR achievements - keep as is (not changed in new system)
+  "first-pr": null, // No PR badges in new system
+  "pr-5": null,
+  "pr-10": null,
+  "pr-25": null,
+  
+  // Time-based achievements - not in new system in same form
+  "time-1h": null,
+  "time-10h": null,
+  "time-50h": null,
+  "time-100h": null,
+  
+  // Special achievements - preserve as is
+  // (These are kept but not migrated as they are unique events)
+  
+  // Wellness achievements - preserve as is
+  // (These are unchanged)
+};
+
+/**
+ * Migrate old achievement IDs to new achievement IDs
+ * Preserves user progress by mapping old badges to their closest new equivalents
+ * @param {Array} oldAchievementIds - Array of old achievement IDs
+ * @returns {Array} Array of new achievement IDs
+ */
+export const migrateAchievements = (oldAchievementIds) => {
+  if (!oldAchievementIds || !Array.isArray(oldAchievementIds)) {
+    return [];
+  }
+  
+  const newAchievementIds = new Set();
+  
+  // Map old IDs to new IDs
+  oldAchievementIds.forEach(oldId => {
+    const newId = ACHIEVEMENT_MIGRATION_MAP[oldId];
+    if (newId) {
+      newAchievementIds.add(newId);
+    } else if (!ACHIEVEMENT_MIGRATION_MAP.hasOwnProperty(oldId)) {
+      // If the ID is not in the migration map, it might be a new badge or special badge
+      // Check if it exists in the new system
+      const exists = ACHIEVEMENT_BADGES.some(b => b.id === oldId);
+      if (exists) {
+        newAchievementIds.add(oldId);
+      }
+    }
+  });
+  
+  return Array.from(newAchievementIds);
+};
+
+/**
+ * Award retroactive badges based on current user stats and workout history
+ * This ensures users do not lose credit for milestones already achieved
+ * @param {Object} userStats - Current user statistics
+ * @param {Array} workoutHistory - Complete workout history
+ * @param {Array} currentUnlockedIds - Currently unlocked achievement IDs
+ * @returns {Array} Array of achievement IDs that should be unlocked
+ */
+export const awardRetroactiveBadges = (userStats, workoutHistory, currentUnlockedIds = []) => {
+  const allUnlocked = getUnlockedAchievements(userStats, workoutHistory);
+  const unlockedIds = allUnlocked.map(a => a.id);
+  
+  // Combine with current unlocked IDs (avoiding duplicates)
+  const combinedIds = new Set([...currentUnlockedIds, ...unlockedIds]);
+  
+  return Array.from(combinedIds);
+};
+

@@ -18,6 +18,7 @@ import {
   Tabs,
   Tab,
   Tooltip,
+  Divider,
 } from '@mui/material';
 import {
   Lock,
@@ -28,6 +29,9 @@ import {
   Whatshot,
   AccessTime,
   FitnessCenter,
+  DirectionsRun,
+  SelfImprovement,
+  Favorite,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -38,6 +42,17 @@ import {
   calculateAchievementPoints,
   calculateUserLevel,
 } from '../data/achievements';
+
+// Category color constants for consistent theming
+const CATEGORY_COLORS = {
+  overall: 'primary.main',
+  streak: '#FF6B35',
+  strength: '#4CAF50',
+  volume: '#FFD700',
+  cardio: '#2196F3',
+  yoga: '#9C27B0',
+  wellness: '#E91E63',
+};
 
 /**
  * Achievement Badge Card Component
@@ -51,6 +66,7 @@ const AchievementBadge = ({ achievement, unlocked, onClick }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
+      style={{ height: '100%' }}
     >
       <Card
         onClick={onClick}
@@ -60,16 +76,31 @@ const AchievementBadge = ({ achievement, unlocked, onClick }) => {
           position: 'relative',
           background: unlocked ? tier.gradient : 'linear-gradient(135deg, #424242 0%, #303030 100%)',
           color: unlocked ? tier.textColor : '#888',
-          transition: 'opacity 0.15s ease',
+          transition: 'all 0.2s ease',
+          display: 'flex',
+          flexDirection: 'column',
           '&:hover': {
+            transform: 'translateY(-2px)',
             opacity: 0.9,
           },
           '&:active': {
+            transform: 'translateY(0)',
             opacity: 0.8,
           },
         }}
       >
-        <CardContent sx={{ textAlign: 'center', p: 2 }}>
+        <CardContent 
+          sx={{ 
+            textAlign: 'center', 
+            p: { xs: 1.5, sm: 2 },
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexGrow: 1,
+            '&:last-child': { pb: { xs: 1.5, sm: 2 } }
+          }}
+        >
           {/* Lock overlay for locked achievements */}
           {!unlocked && (
             <Box
@@ -88,7 +119,7 @@ const AchievementBadge = ({ achievement, unlocked, onClick }) => {
           <Typography
             variant="h2"
             sx={{
-              fontSize: '3rem',
+              fontSize: { xs: '2.5rem', sm: '3rem' },
               mb: 1,
               filter: unlocked ? 'none' : 'grayscale(100%)',
               opacity: unlocked ? 1 : 0.4,
@@ -103,7 +134,8 @@ const AchievementBadge = ({ achievement, unlocked, onClick }) => {
             sx={{
               fontWeight: 700,
               mb: 0.5,
-              fontSize: '0.95rem',
+              fontSize: { xs: '0.85rem', sm: '0.95rem' },
+              lineHeight: 1.2,
             }}
           >
             {achievement.name}
@@ -271,23 +303,29 @@ AchievementDetailDialog.propTypes = {
 };
 
 /**
- * Progress Card Component
- * Shows progress toward next achievement in a category
+ * Compact Summary Card Component
+ * Minimalist display of progress toward next achievement
  */
-const ProgressCard = ({ title, icon, progressInfo }) => {
+const CompactSummaryCard = ({ title, icon, progressInfo, iconColor }) => {
   if (!progressInfo) {
     return (
-      <Card sx={{ height: '100%' }}>
-        <CardContent>
-          <Stack spacing={1}>
-            <Stack direction="row" alignItems="center" spacing={1}>
+      <Card 
+        sx={{ 
+          height: '100%',
+          background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%)',
+          border: '1px solid rgba(76, 175, 80, 0.2)',
+        }}
+      >
+        <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+          <Stack spacing={1} alignItems="center" textAlign="center">
+            <Box sx={{ color: iconColor || 'primary.main', fontSize: '1.5rem' }}>
               {icon}
-              <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-                {title}
-              </Typography>
-            </Stack>
-            <Typography variant="body2" color="text.secondary">
-              All achievements unlocked! 🎉
+            </Box>
+            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem', opacity: 0.8 }}>
+              {title}
+            </Typography>
+            <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'success.main' }}>
+              Complete ✓
             </Typography>
           </Stack>
         </CardContent>
@@ -299,41 +337,33 @@ const ProgressCard = ({ title, icon, progressInfo }) => {
   
   return (
     <Card sx={{ height: '100%' }}>
-      <CardContent>
-        <Stack spacing={2}>
-          <Stack direction="row" alignItems="center" spacing={1}>
+      <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+        <Stack spacing={1} alignItems="center" textAlign="center">
+          <Box sx={{ color: iconColor || 'primary.main', fontSize: '1.5rem' }}>
             {icon}
-            <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-              {title}
-            </Typography>
-          </Stack>
-          
-          <Box>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {achievement.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {formatValue(current, achievement.condition.type)} / {formatValue(target, achievement.condition.type)}
-              </Typography>
-            </Stack>
-            
+          </Box>
+          <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem', opacity: 0.8 }}>
+            {title}
+          </Typography>
+          <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>
+            {achievement.name}
+          </Typography>
+          <Box sx={{ width: '100%' }}>
             <LinearProgress
               variant="determinate"
               value={progress}
               sx={{
-                height: 8,
-                borderRadius: 4,
+                height: 6,
+                borderRadius: 3,
                 bgcolor: 'action.hover',
                 '& .MuiLinearProgress-bar': {
                   background: ACHIEVEMENT_TIERS[achievement.tier].gradient,
-                  borderRadius: 4,
+                  borderRadius: 3,
                 },
               }}
             />
-            
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-              {Math.round(progress)}% complete
+            <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', display: 'block', mt: 0.5 }}>
+              {formatValue(current, achievement.condition.type)} / {formatValue(target, achievement.condition.type)}
             </Typography>
           </Box>
         </Stack>
@@ -342,10 +372,11 @@ const ProgressCard = ({ title, icon, progressInfo }) => {
   );
 };
 
-ProgressCard.propTypes = {
+CompactSummaryCard.propTypes = {
   title: PropTypes.string.isRequired,
   icon: PropTypes.element.isRequired,
   progressInfo: PropTypes.object,
+  iconColor: PropTypes.string,
 };
 
 /**
@@ -427,6 +458,9 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
   const streakProgress = getNextAchievementProgress(achievementCategories.streak, userStats, workoutHistory);
   const strengthProgress = getNextAchievementProgress(achievementCategories.strength, userStats, workoutHistory);
   const volumeProgress = getNextAchievementProgress(achievementCategories.volume, userStats, workoutHistory);
+  const cardioProgress = getNextAchievementProgress(achievementCategories.cardio, userStats, workoutHistory);
+  const yogaProgress = getNextAchievementProgress(achievementCategories.yoga, userStats, workoutHistory);
+  const wellnessProgress = getNextAchievementProgress(achievementCategories.wellness, userStats, workoutHistory);
   
   const handleAchievementClick = (achievement) => {
     setSelectedAchievement(achievement);
@@ -462,91 +496,149 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
   };
   
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
-      {/* Header with Level Display */}
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+    <Box sx={{ p: { xs: 2, sm: 2, md: 3 } }}>
+      {/* Simplified Header */}
+      <Box sx={{ mb: 3, textAlign: 'center' }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
           Achievements
         </Typography>
         
-        <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" sx={{ mb: 2 }}>
+        {/* Compact Level & Progress Display */}
+        <Stack 
+          direction={{ xs: 'column', sm: 'row' }} 
+          spacing={2} 
+          justifyContent="center" 
+          alignItems="center"
+          sx={{ mb: 2 }}
+        >
           <Chip
             icon={<EmojiEvents />}
             label={`Level ${levelInfo.level}`}
             color="primary"
-            sx={{ fontSize: '1rem', fontWeight: 600, height: 36 }}
+            sx={{ fontSize: '0.95rem', fontWeight: 600, height: 32, px: 1 }}
           />
           <Chip
             label={`${unlockedAchievements.length} / ${ACHIEVEMENT_BADGES.length} Unlocked`}
             variant="outlined"
-            sx={{ fontSize: '0.9rem', height: 36 }}
+            sx={{ fontSize: '0.85rem', height: 32 }}
           />
         </Stack>
         
-        {/* Level progress bar */}
-        <Box sx={{ maxWidth: 400, margin: '0 auto' }}>
-          <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
-            <Typography variant="caption" color="text.secondary">
-              {levelInfo.currentPoints} / 100 points
+        {/* Minimalist Level Progress */}
+        <Box sx={{ maxWidth: 500, margin: '0 auto' }}>
+          <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+              {levelInfo.currentPoints} / 100 pts
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {levelInfo.pointsToNext} to Level {levelInfo.level + 1}
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+              {levelInfo.pointsToNext} to Lv {levelInfo.level + 1}
             </Typography>
           </Stack>
           <LinearProgress
             variant="determinate"
             value={(levelInfo.currentPoints / 100) * 100}
             sx={{
-              height: 10,
-              borderRadius: 5,
+              height: 6,
+              borderRadius: 3,
               bgcolor: 'action.hover',
               '& .MuiLinearProgress-bar': {
-                borderRadius: 5,
+                borderRadius: 3,
               },
             }}
           />
         </Box>
       </Box>
       
-      {/* Progress Cards */}
-      <Grid container spacing={{ xs: 1, sm: 2 }} sx={{ mb: 4 }}>
-        <Grid item xs={6} sm={6} md={3}>
-          <ProgressCard
-            title="Overall"
-            icon={<FitnessCenter color="primary" />}
-            progressInfo={overallProgress}
-          />
+      {/* Compact Summary Grid - All Categories */}
+      <Box sx={{ mb: 3 }}>
+        <Typography 
+          variant="subtitle2" 
+          sx={{ 
+            mb: 1.5, 
+            fontWeight: 600, 
+            fontSize: '0.85rem',
+            color: 'text.secondary',
+            textAlign: 'center'
+          }}
+        >
+          Progress Overview
+        </Typography>
+        <Grid container spacing={{ xs: 1, sm: 1.5 }}>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
+            <CompactSummaryCard
+              title="Overall"
+              icon={<EmojiEvents />}
+              progressInfo={overallProgress}
+              iconColor={CATEGORY_COLORS.overall}
+            />
+          </Grid>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
+            <CompactSummaryCard
+              title="Streak"
+              icon={<Whatshot />}
+              progressInfo={streakProgress}
+              iconColor={CATEGORY_COLORS.streak}
+            />
+          </Grid>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
+            <CompactSummaryCard
+              title="Strength"
+              icon={<FitnessCenter />}
+              progressInfo={strengthProgress}
+              iconColor={CATEGORY_COLORS.strength}
+            />
+          </Grid>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
+            <CompactSummaryCard
+              title="Volume"
+              icon={<TrendingUp />}
+              progressInfo={volumeProgress}
+              iconColor={CATEGORY_COLORS.volume}
+            />
+          </Grid>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
+            <CompactSummaryCard
+              title="Cardio"
+              icon={<DirectionsRun />}
+              progressInfo={cardioProgress}
+              iconColor={CATEGORY_COLORS.cardio}
+            />
+          </Grid>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
+            <CompactSummaryCard
+              title="Yoga"
+              icon={<SelfImprovement />}
+              progressInfo={yogaProgress}
+              iconColor={CATEGORY_COLORS.yoga}
+            />
+          </Grid>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
+            <CompactSummaryCard
+              title="Wellness"
+              icon={<Favorite />}
+              progressInfo={wellnessProgress}
+              iconColor={CATEGORY_COLORS.wellness}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={6} sm={6} md={3}>
-          <ProgressCard
-            title="Streak"
-            icon={<Whatshot sx={{ color: '#FF6B35' }} />}
-            progressInfo={streakProgress}
-          />
-        </Grid>
-        <Grid item xs={6} sm={6} md={3}>
-          <ProgressCard
-            title="Strength"
-            icon={<TrendingUp color="success" />}
-            progressInfo={strengthProgress}
-          />
-        </Grid>
-        <Grid item xs={6} sm={6} md={3}>
-          <ProgressCard
-            title="Volume"
-            icon={<EmojiEvents sx={{ color: '#FFD700' }} />}
-            progressInfo={volumeProgress}
-          />
-        </Grid>
-      </Grid>
+      </Box>
+      
+      <Divider sx={{ mb: 3 }} />
       
       {/* Category Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs
           value={currentTab}
           onChange={(e, newValue) => setCurrentTab(newValue)}
           variant="scrollable"
           scrollButtons="auto"
+          sx={{
+            '& .MuiTab-root': {
+              minHeight: 42,
+              fontSize: '0.8rem',
+              py: 1,
+            },
+          }}
         >
           {categories.map((category) => (
             <Tab key={category.key} label={category.label} />
@@ -554,8 +646,8 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
         </Tabs>
       </Box>
       
-      {/* Achievement Grid */}
-      <Grid container spacing={{ xs: 1, sm: 2 }}>
+      {/* Achievement Badge Grid */}
+      <Grid container spacing={{ xs: 1.5, sm: 2 }}>
         {displayedAchievements.map((achievement) => {
           const unlocked = isAchievementUnlocked(achievement, userStats, workoutHistory);
           return (

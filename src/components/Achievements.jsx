@@ -368,30 +368,32 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
   
   // Group achievements by type
   const achievementCategories = {
-    workout: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'workoutCount'),
+    overall: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'sessionCount'),
     streak: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'streak'),
-    pr: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'prCount'),
     volume: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'totalVolume'),
-    time: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'totalTime'),
-    special: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'special'),
+    singleSession: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'singleSessionVolume'),
     strength: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'strengthWorkoutCount'),
     cardio: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'cardioWorkoutCount'),
+    cardioTime: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'cardioTime'),
     yoga: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'yogaWorkoutCount'),
+    yogaTime: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'yogaTime'),
     strengthStreak: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'strengthWeekStreak'),
     wellness: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'wellnessTaskCount'),
+    special: ACHIEVEMENT_BADGES.filter(a => a.condition.type === 'special'),
   };
   
   const categories = [
     { label: 'All', key: 'all' },
-    { label: 'Workouts', key: 'workout' },
+    { label: 'Overall', key: 'overall' },
     { label: 'Strength', key: 'strength' },
     { label: 'Cardio', key: 'cardio' },
     { label: 'Yoga', key: 'yoga' },
     { label: 'Streaks', key: 'streak' },
-    { label: 'Strength Streaks', key: 'strengthStreak' },
-    { label: 'PRs', key: 'pr' },
+    { label: 'Weekly', key: 'strengthStreak' },
     { label: 'Volume', key: 'volume' },
-    { label: 'Time', key: 'time' },
+    { label: 'Heavy Sessions', key: 'singleSession' },
+    { label: 'Cardio Time', key: 'cardioTime' },
+    { label: 'Yoga Time', key: 'yogaTime' },
     { label: 'Wellness', key: 'wellness' },
     { label: 'Special', key: 'special' },
   ];
@@ -402,9 +404,9 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
     : achievementCategories[currentCategory];
   
   // Get progress for main categories
-  const workoutProgress = getNextAchievementProgress(achievementCategories.workout, userStats, workoutHistory);
+  const overallProgress = getNextAchievementProgress(achievementCategories.overall, userStats, workoutHistory);
   const streakProgress = getNextAchievementProgress(achievementCategories.streak, userStats, workoutHistory);
-  const prProgress = getNextAchievementProgress(achievementCategories.pr, userStats, workoutHistory);
+  const strengthProgress = getNextAchievementProgress(achievementCategories.strength, userStats, workoutHistory);
   const volumeProgress = getNextAchievementProgress(achievementCategories.volume, userStats, workoutHistory);
   
   const handleAchievementClick = (achievement) => {
@@ -491,9 +493,9 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
       <Grid container spacing={{ xs: 1, sm: 2 }} sx={{ mb: 4 }}>
         <Grid item xs={6} sm={6} md={3}>
           <ProgressCard
-            title="Workouts"
+            title="Overall"
             icon={<FitnessCenter color="primary" />}
-            progressInfo={workoutProgress}
+            progressInfo={overallProgress}
           />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
@@ -505,9 +507,9 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
           <ProgressCard
-            title="Personal Records"
+            title="Strength"
             icon={<TrendingUp color="success" />}
-            progressInfo={prProgress}
+            progressInfo={strengthProgress}
           />
         </Grid>
         <Grid item xs={6} sm={6} md={3}>
@@ -574,14 +576,16 @@ Achievements.propTypes = {
 // Helper functions
 const getConditionText = (condition) => {
   switch (condition.type) {
-    case 'workoutCount':
-      return `Complete ${condition.value} workout${condition.value !== 1 ? 's' : ''}`;
+    case 'sessionCount':
+      return `Complete ${condition.value} total workout${condition.value !== 1 ? 's' : ''}`;
     case 'streak':
       return `Maintain a ${condition.value}-day workout streak`;
     case 'prCount':
       return `Achieve ${condition.value} personal record${condition.value !== 1 ? 's' : ''}`;
     case 'totalVolume':
       return `Lift ${condition.value.toLocaleString()} lbs total volume`;
+    case 'singleSessionVolume':
+      return `Complete a single workout with ${condition.value.toLocaleString()} lbs volume`;
     case 'totalTime': {
       const hours = Math.floor(condition.value / 3600);
       return `Complete ${hours} hour${hours !== 1 ? 's' : ''} of total workout time`;
@@ -590,8 +594,16 @@ const getConditionText = (condition) => {
       return `Complete ${condition.value} strength workout${condition.value !== 1 ? 's' : ''}`;
     case 'cardioWorkoutCount':
       return `Complete ${condition.value} cardio workout${condition.value !== 1 ? 's' : ''}`;
+    case 'cardioTime': {
+      const hours = Math.floor(condition.value / 3600);
+      return `Complete ${hours} hour${hours !== 1 ? 's' : ''} of cardio`;
+    }
     case 'yogaWorkoutCount':
-      return `Complete ${condition.value} yoga or stretching workout${condition.value !== 1 ? 's' : ''}`;
+      return `Complete ${condition.value} yoga workout${condition.value !== 1 ? 's' : ''}`;
+    case 'yogaTime': {
+      const hours = Math.floor(condition.value / 3600);
+      return `Complete ${hours} hour${hours !== 1 ? 's' : ''} of yoga`;
+    }
     case 'strengthWeekStreak':
       return `Complete 3+ strength workouts per week for ${condition.value} consecutive week${condition.value !== 1 ? 's' : ''}`;
     case 'wellnessTaskCount':
@@ -606,8 +618,11 @@ const getConditionText = (condition) => {
 const formatValue = (value, type) => {
   switch (type) {
     case 'totalVolume':
+    case 'singleSessionVolume':
       return `${value.toLocaleString()} lbs`;
-    case 'totalTime': {
+    case 'totalTime':
+    case 'cardioTime':
+    case 'yogaTime': {
       const hours = Math.floor(value / 3600);
       const minutes = Math.floor((value % 3600) / 60);
       if (hours > 0) {

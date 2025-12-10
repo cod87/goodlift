@@ -53,19 +53,19 @@ const TimerDisplay = ({
   handleSkipForward,
   handleSkipBackward,
 }) => {
-  // Determine background color for HIIT mode
+  // Determine background color - use dark theme for all modes
   const getBackgroundColor = () => {
-    if (mode !== TIMER_MODES.HIIT) {
-      return 'background.default';
+    if (mode === TIMER_MODES.HIIT) {
+      if (isWorkPeriod) {
+        return '#1b5e20'; // Dark green for Work
+      } else if (isPrepPeriod || isRecoveryPeriod) {
+        return '#0d47a1'; // Dark blue for Set break/Prep
+      } else {
+        return '#b71c1c'; // Dark red for Rest
+      }
     }
-    
-    if (isWorkPeriod) {
-      return '#1b5e20'; // Dark green for Work
-    } else if (isPrepPeriod || isRecoveryPeriod) {
-      return '#0d47a1'; // Dark blue for Set break/Prep
-    } else {
-      return '#b71c1c'; // Dark red for Rest
-    }
+    // For Cardio and Flow/Yoga modes, use a neutral dark background
+    return '#1a202c'; // Dark slate background
   };
 
   return (
@@ -90,14 +90,7 @@ const TimerDisplay = ({
           sx={{
             fontSize: { xs: 'clamp(3rem, 15vw, 8rem)', sm: 'clamp(5rem, 20vw, 10rem)', md: '12rem' },
             fontWeight: 700,
-            color: mode === TIMER_MODES.HIIT ? '#ffffff' : 
-              mode === TIMER_MODES.HIIT && isWorkPeriod
-                ? 'success.main'
-                : mode === TIMER_MODES.HIIT && (isPrepPeriod || isRecoveryPeriod)
-                ? 'warning.main'
-                : mode === TIMER_MODES.HIIT && !isWorkPeriod
-                ? 'error.main'
-                : 'primary.main',
+            color: mode === TIMER_MODES.HIIT ? '#ffffff' : '#1db584', // White for HIIT, teal for others
             fontFamily: 'monospace',
             lineHeight: 1,
           }}
@@ -165,10 +158,10 @@ const TimerDisplay = ({
         
         {mode === TIMER_MODES.FLOW && selectedPoses[currentPoseIndex] && (
           <>
-            <Typography variant="h6" sx={{ mt: 2, fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ mt: 2, fontWeight: 600, color: '#f7fafc' }}>
               {selectedPoses[currentPoseIndex].name}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            <Typography variant="body2" sx={{ mt: 1, color: '#a0aec0' }}>
               Pose {currentPoseIndex + 1} of {selectedPoses.length}
             </Typography>
           </>

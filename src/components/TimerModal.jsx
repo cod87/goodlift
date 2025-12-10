@@ -42,7 +42,7 @@ const TimerModal = ({
       onClose={onExit}
       PaperProps={{
         sx: {
-          bgcolor: 'background.default',
+          bgcolor: '#1a202c', // Force dark theme background
           backgroundImage: 'none',
         }
       }}
@@ -53,9 +53,9 @@ const TimerModal = ({
           position: 'relative',
           top: 0,
           zIndex: 1100,
-          bgcolor: 'background.paper',
+          bgcolor: '#2d3748', // Force dark theme header background
           borderBottom: '1px solid',
-          borderColor: 'divider',
+          borderColor: 'rgba(255, 255, 255, 0.08)', // Force dark theme border
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -76,6 +76,8 @@ const TimerModal = ({
             position: 'absolute',
             left: '50%',
             transform: 'translateX(-50%)',
+            bgcolor: '#1db584', // Force primary color background
+            color: '#ffffff', // Force white text
           }}
         />
         
@@ -90,9 +92,9 @@ const TimerModal = ({
                 onClick={handleToggleWakeLock}
                 size="small"
                 sx={{
-                  color: wakeLockActive ? 'secondary.main' : 'text.secondary',
+                  color: wakeLockActive ? '#f6ad55' : '#a0aec0', // Force dark theme colors
                   '&:hover': { 
-                    bgcolor: wakeLockActive ? 'rgba(255, 140, 0, 0.08)' : 'action.hover' 
+                    bgcolor: wakeLockActive ? 'rgba(246, 173, 85, 0.12)' : 'rgba(255, 255, 255, 0.08)' 
                   },
                 }}
                 aria-label={wakeLockActive ? 'Release wake lock' : 'Keep screen awake'}

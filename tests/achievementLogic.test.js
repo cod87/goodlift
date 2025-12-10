@@ -49,7 +49,7 @@ console.log('Test 1: First workout achievement is unlocked after first workout')
   const previouslyUnlocked = [];
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
-  const firstWorkout = newAchievements.find(a => a.id === 'first-workout');
+  const firstWorkout = newAchievements.find(a => a.id === 'first-session');
   
   const passed = firstWorkout !== undefined;
   console.log(`  Stats: totalWorkouts = 1`);
@@ -64,14 +64,14 @@ console.log('Test 2: First workout achievement is NOT returned if already unlock
 {
   const stats = createUserStats(2);
   const workoutHistory = [createWorkout(), createWorkout(new Date(Date.now() - DAY_IN_MS))];
-  const previouslyUnlocked = ['first-workout']; // Already unlocked
+  const previouslyUnlocked = ['first-session']; // Already unlocked
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
-  const firstWorkout = newAchievements.find(a => a.id === 'first-workout');
+  const firstWorkout = newAchievements.find(a => a.id === 'first-session');
   
   const passed = firstWorkout === undefined;
   console.log(`  Stats: totalWorkouts = 2`);
-  console.log(`  Previously unlocked: ['first-workout']`);
+  console.log(`  Previously unlocked: ['first-session']`);
   console.log(`  Expected: first-workout to NOT be in newAchievements`);
   console.log(`  Got: ${firstWorkout ? 'first-workout FOUND (BUG!)' : 'first-workout correctly excluded'} ${passed ? '✓' : '✗ FAIL'}`);
 }
@@ -82,7 +82,7 @@ console.log('Test 3: isAchievementUnlocked correctly identifies unlocked achieve
 {
   const stats = createUserStats(1);
   const workoutHistory = [createWorkout()];
-  const firstWorkoutAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'first-workout');
+  const firstWorkoutAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'first-session');
   
   const isUnlocked = isAchievementUnlocked(firstWorkoutAchievement, stats, workoutHistory);
   
@@ -98,7 +98,7 @@ console.log('Test 4: Zero workouts should not unlock first-workout');
 {
   const stats = createUserStats(0);
   const workoutHistory = [];
-  const firstWorkoutAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'first-workout');
+  const firstWorkoutAchievement = ACHIEVEMENT_BADGES.find(a => a.id === 'first-session');
   
   const isUnlocked = isAchievementUnlocked(firstWorkoutAchievement, stats, workoutHistory);
   
@@ -119,7 +119,7 @@ console.log('Test 5: Multiple workouts with empty previouslyUnlocked - only trul
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
   
-  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
+  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-session');
   const hasDedicated5 = newAchievements.some(a => a.id === 'dedicated-5');
   
   // With the fix:
@@ -144,16 +144,16 @@ console.log('Test 6: Simulate second workout - first-workout should not appear a
     createWorkout(new Date(Date.now() - DAY_IN_MS))
   ];
   // This should be saved from the first workout
-  const previouslyUnlocked = ['first-workout'];
+  const previouslyUnlocked = ['first-session'];
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
   
   console.log(`  Stats: totalWorkouts = 2`);
   console.log(`  Workout history: 2 workouts`);
-  console.log(`  Previously unlocked: ['first-workout']`);
+  console.log(`  Previously unlocked: ['first-session']`);
   console.log(`  New achievements returned: ${JSON.stringify(newAchievements.map(a => a.id))}`);
   
-  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
+  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-session');
   const passed = !hasFirstWorkout;
   console.log(`  Expected: first-workout to NOT be in new achievements`);
   console.log(`  Got: ${hasFirstWorkout ? 'FAIL - first-workout was included' : 'Correct - first-workout excluded'} ${passed ? '✓' : '✗ FAIL'}`);
@@ -175,7 +175,7 @@ console.log('Test 7: Verify actual bug scenario - stats double counting');
   const previouslyUnlocked1 = [];
   
   const newAchievements1 = getNewlyUnlockedAchievements(statsAfterFirstWorkout, workoutHistory1, previouslyUnlocked1);
-  const firstWorkoutFound = newAchievements1.some(a => a.id === 'first-workout');
+  const firstWorkoutFound = newAchievements1.some(a => a.id === 'first-session');
   
   console.log(`  First workout scenario:`);
   console.log(`  Stats after double-increment: totalWorkouts = ${statsAfterFirstWorkout.totalWorkouts}`);
@@ -187,14 +187,14 @@ console.log('Test 7: Verify actual bug scenario - stats double counting');
   statsAfterSecondWorkout.totalWorkouts += 1;  // App.jsx line 564 (now it's 3!)
   
   const workoutHistory2 = [createWorkout(), createWorkout(new Date(Date.now() - DAY_IN_MS))];
-  const previouslyUnlocked2 = ['first-workout'];  // Should be saved from first workout
+  const previouslyUnlocked2 = ['first-session'];  // Should be saved from first workout
   
   const newAchievements2 = getNewlyUnlockedAchievements(statsAfterSecondWorkout, workoutHistory2, previouslyUnlocked2);
-  const firstWorkoutNotFound = !newAchievements2.some(a => a.id === 'first-workout');
+  const firstWorkoutNotFound = !newAchievements2.some(a => a.id === 'first-session');
   
   console.log(`  Second workout scenario:`);
   console.log(`  Stats after double-increment: totalWorkouts = ${statsAfterSecondWorkout.totalWorkouts}`);
-  console.log(`  Previously unlocked: ['first-workout']`);
+  console.log(`  Previously unlocked: ['first-session']`);
   console.log(`  first-workout should NOT be found: ${firstWorkoutNotFound ? '✓' : '✗ FAIL'}`);
   
   const passed = firstWorkoutFound && firstWorkoutNotFound;
@@ -212,7 +212,7 @@ console.log('Test 8: Bug scenario - previouslyUnlocked is empty on second workou
   const previouslyUnlocked = [];  // Empty, but there are 2 workouts, so first-workout was already earned
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
-  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
+  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-session');
   
   console.log(`  Stats: totalWorkouts = 2`);
   console.log(`  Workout history: 2 workouts`);
@@ -235,7 +235,7 @@ console.log('Test 9: First workout achievement on actual first workout');
   const previouslyUnlocked = [];
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
-  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
+  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-session');
   
   console.log(`  Stats: totalWorkouts = 1`);
   console.log(`  Workout history: 1 workout (this is the first)`);
@@ -253,15 +253,15 @@ console.log('Test 10: 5 workout achievement on exactly 5th workout');
 {
   const stats = createUserStats(5);
   const workoutHistory = createWorkoutHistory(5);
-  const previouslyUnlocked = ['first-workout']; // Already got first-workout
+  const previouslyUnlocked = ['first-session']; // Already got first-workout
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
   const hasDedicated5 = newAchievements.some(a => a.id === 'dedicated-5');
-  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
+  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-session');
   
   console.log(`  Stats: totalWorkouts = 5`);
   console.log(`  Workout history: 5 workouts`);
-  console.log(`  Previously unlocked: ['first-workout']`);
+  console.log(`  Previously unlocked: ['first-session']`);
   console.log(`  dedicated-5 in new achievements: ${hasDedicated5}`);
   console.log(`  first-workout in new achievements: ${hasFirstWorkout}`);
   
@@ -280,7 +280,7 @@ console.log('Test 11: 6th workout should not re-award dedicated-5');
   
   const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
   const hasDedicated5 = newAchievements.some(a => a.id === 'dedicated-5');
-  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-workout');
+  const hasFirstWorkout = newAchievements.some(a => a.id === 'first-session');
   
   console.log(`  Stats: totalWorkouts = 6`);
   console.log(`  Workout history: 6 workouts`);

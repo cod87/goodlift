@@ -34,7 +34,10 @@ import {
   addUnlockedAchievement,
   incrementTotalPRs,
   addToTotalVolume,
-  getWorkoutHistory
+  getWorkoutHistory,
+  getHiitSessions,
+  getCardioSessions,
+  getStretchSessions
 } from './utils/storage';
 import progressiveOverloadService from './services/ProgressiveOverloadService';
 import { cleanupExpiredBackups } from './utils/dataResetService';
@@ -579,8 +582,25 @@ function AppContent() {
     // Check for newly unlocked achievements
     try {
       const previouslyUnlocked = await getUnlockedAchievements();
-      const workoutHistory = await getWorkoutHistory();
-      const newAchievements = getNewlyUnlockedAchievements(stats, workoutHistory, previouslyUnlocked);
+      
+      // Get ALL session types for accurate achievement checking
+      // This ensures streaks and counts include cardio, HIIT, stretch, etc.
+      const [workoutHistory, hiitSessions, cardioSessions, stretchSessions] = await Promise.all([
+        getWorkoutHistory(),
+        getHiitSessions(),
+        getCardioSessions(),
+        getStretchSessions()
+      ]);
+      
+      // Merge all session types for complete history
+      const allSessions = [
+        ...workoutHistory,
+        ...hiitSessions,
+        ...cardioSessions,
+        ...stretchSessions
+      ];
+      
+      const newAchievements = getNewlyUnlockedAchievements(stats, allSessions, previouslyUnlocked);
       
       if (newAchievements.length > 0) {
         // Save newly unlocked achievements

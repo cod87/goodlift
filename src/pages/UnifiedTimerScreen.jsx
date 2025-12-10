@@ -24,6 +24,10 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Slider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -48,6 +52,10 @@ import {
   SkipNext,
   SkipPrevious,
   Save,
+  Delete,
+  Edit,
+  Favorite,
+  FavoriteBorder,
   MoreVert,
   ExpandMore,
 } from '@mui/icons-material';
@@ -79,6 +87,21 @@ const TIMER_MODES = {
 // Extended rest configuration constants
 const EXTENDED_REST_DURATION_SECONDS = 60; // Additional seconds added to rest period
 const TIME_COMPARISON_TOLERANCE = 0.5; // Tolerance in seconds for comparing elapsed time to target
+
+const YOGA_POSES = [
+  { name: 'Mountain Pose (Tadasana)', defaultDuration: 30 },
+  { name: 'Downward Dog (Adho Mukha Svanasana)', defaultDuration: 60 },
+  { name: 'Warrior I (Virabhadrasana I)', defaultDuration: 45 },
+  { name: 'Warrior II (Virabhadrasana II)', defaultDuration: 45 },
+  { name: 'Triangle Pose (Trikonasana)', defaultDuration: 45 },
+  { name: 'Tree Pose (Vrksasana)', defaultDuration: 30 },
+  { name: "Child's Pose (Balasana)", defaultDuration: 60 },
+  { name: 'Cat-Cow Pose', defaultDuration: 60 },
+  { name: 'Seated Forward Bend (Paschimottanasana)', defaultDuration: 60 },
+  { name: 'Cobra Pose (Bhujangasana)', defaultDuration: 30 },
+  { name: 'Plank Pose', defaultDuration: 30 },
+  { name: 'Bridge Pose (Setu Bandhasana)', defaultDuration: 45 },
+];
 
 const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   // Mode and configuration
@@ -127,8 +150,10 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   const [nextExtendedRestTime, setNextExtendedRestTime] = useState(null); // Time in seconds when next extended rest should occur
   const [exerciseNamesExpanded, setExerciseNamesExpanded] = useState(false); // State for collapsible exercise names
   
-  // Flow/Yoga mode state - now works like cardio with simple duration
-  const [yogaDuration, setYogaDuration] = useState(20); // minutes
+  // Flow mode state
+  const [selectedPoses, setSelectedPoses] = useState([]);
+  const [currentPoseIndex, setCurrentPoseIndex] = useState(0);
+  const [poseDuration, setPostDuration] = useState(45); // default duration per pose
   
   // Cardio mode state
   const [cardioDuration, setCardioDuration] = useState(20); // minutes
@@ -451,9 +476,17 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                 }
               }
             } else if (mode === TIMER_MODES.FLOW) {
-              // Yoga timer now works like cardio - simple completion
-              handleTimerComplete();
-              return 0;
+              // Handle Flow transitions
+              if (currentPoseIndex < selectedPoses.length - 1) {
+                setCurrentPoseIndex(currentPoseIndex + 1);
+                audioService.playTransitionBeep();
+                hasPlayedWarningRef.current = false;
+                return selectedPoses[currentPoseIndex + 1].duration;
+              } else {
+                // Flow session complete
+                handleTimerComplete();
+                return 0;
+              }
             } else {
               // Cardio complete
               handleTimerComplete();
@@ -474,7 +507,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, isPaused, mode, isWorkPeriod, isPrepPeriod, isRecoveryPeriod, currentRound, currentSet, roundsPerSet, numberOfSets, workInterval, restInterval, recoveryBetweenSets, nextExtendedRestTime, extendedRestIntervalMinutes, calculateNextExtendedRestTime, handleTimerComplete]);
+  }, [isRunning, isPaused, mode, isWorkPeriod, isPrepPeriod, isRecoveryPeriod, currentRound, currentSet, roundsPerSet, numberOfSets, currentPoseIndex, selectedPoses, workInterval, restInterval, recoveryBetweenSets, nextExtendedRestTime, extendedRestIntervalMinutes, calculateNextExtendedRestTime, handleTimerComplete]);
 
   const handleStart = () => {
     if (isConfiguring) {
@@ -514,10 +547,10 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setCurrentRound(1);
         setIsRecoveryPeriod(false);
       } else if (mode === TIMER_MODES.FLOW) {
-        // Yoga timer now works like cardio - simple countdown
-        const seconds = yogaDuration * 60;
-        setTotalTime(seconds);
-        setTimeRemaining(seconds);
+        const total = selectedPoses.reduce((sum, pose) => sum + pose.duration, 0);
+        setTotalTime(total);
+        setTimeRemaining(selectedPoses[0]?.duration || 45);
+        setCurrentPoseIndex(0);
       } else {
         const seconds = cardioDuration * 60;
         setTotalTime(seconds);
@@ -548,6 +581,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     setIsWorkPeriod(true);
     setIsPrepPeriod(false);
     setIsRecoveryPeriod(false);
+    setCurrentPoseIndex(0);
     elapsedHiitTimeRef.current = 0;
     setIsExtendedRest(false);
     setNextExtendedRestTime(null);
@@ -560,7 +594,15 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
     }
   };
 
-  // Skip forward to next interval (HIIT only)
+  const handleAddPose = (pose) => {
+    setSelectedPoses([...selectedPoses, { ...pose, duration: poseDuration }]);
+  };
+
+  const handleRemovePose = (index) => {
+    setSelectedPoses(selectedPoses.filter((_, i) => i !== index));
+  };
+
+  // Skip forward to next interval (HIIT or Yoga)
   const handleSkipForward = () => {
     if (mode === TIMER_MODES.HIIT) {
       // Skip to next phase in HIIT
@@ -631,10 +673,14 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         }
       }
       audioService.playTransitionBeep();
+    } else if (mode === TIMER_MODES.FLOW && currentPoseIndex < selectedPoses.length - 1) {
+      setCurrentPoseIndex(currentPoseIndex + 1);
+      setTimeRemaining(selectedPoses[currentPoseIndex + 1].duration);
+      audioService.playTransitionBeep();
     }
   };
 
-  // Skip backward to previous interval (HIIT only)
+  // Skip backward to previous interval (HIIT or Yoga)
   const handleSkipBackward = () => {
     if (mode === TIMER_MODES.HIIT) {
       // Skip to previous phase in HIIT
@@ -700,6 +746,10 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         setTimeRemaining(shouldExtend ? restInterval + EXTENDED_REST_DURATION_SECONDS : restInterval);
       }
       audioService.playTransitionBeep();
+    } else if (mode === TIMER_MODES.FLOW && currentPoseIndex > 0) {
+      setCurrentPoseIndex(currentPoseIndex - 1);
+      setTimeRemaining(selectedPoses[currentPoseIndex - 1].duration);
+      audioService.playTransitionBeep();
     }
   };
 
@@ -715,7 +765,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         const preset = {
           id: editingPreset?.id,
           name: presetName,
-          duration: yogaDuration,
+          poses: selectedPoses,
+          defaultDuration: poseDuration,
         };
         await saveYogaPreset(preset);
         const updatedPresets = await getYogaPresets();
@@ -757,7 +808,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
   // Load a preset
   const handleLoadPreset = (preset) => {
     if (mode === TIMER_MODES.FLOW) {
-      setYogaDuration(preset.duration || 20);
+      setSelectedPoses(preset.poses || []);
+      setPostDuration(preset.defaultDuration || 45);
     } else if (mode === TIMER_MODES.HIIT) {
       // Load new configuration options if available
       setWorkRestRatio(preset.workRestRatio || '2:1');
@@ -859,7 +911,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
         return `Round ${currentRound} of ${roundsPerSet}`;
       }
     } else if (mode === TIMER_MODES.FLOW) {
-      return 'Yoga Session';
+      return `Pose ${currentPoseIndex + 1} of ${selectedPoses.length}`;
     } else {
       return 'Cardio Session';
     }
@@ -1152,34 +1204,164 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
 
               {mode === TIMER_MODES.FLOW && (
                 <Stack spacing={3}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    Yoga Configuration
-                  </Typography>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, flex: 1 }}>
+                      Yoga Configuration
+                    </Typography>
+                    <Button
+                      size="small"
+                      startIcon={<Save />}
+                      onClick={() => {
+                        setPresetName('');
+                        setEditingPreset(null);
+                        setShowPresetDialog(true);
+                      }}
+                      disabled={selectedPoses.length === 0}
+                    >
+                      Save Preset
+                    </Button>
+                  </Stack>
+
+                  {/* Presets */}
+                  {yogaPresets.length > 0 && (
+                    <Box>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <Typography variant="subtitle2" sx={{ flex: 1 }}>
+                          Saved Presets
+                        </Typography>
+                        <Button
+                          size="small"
+                          startIcon={isEditingPresets ? <Save /> : <Edit />}
+                          onClick={() => setIsEditingPresets(!isEditingPresets)}
+                        >
+                          {isEditingPresets ? 'Done' : 'Manage'}
+                        </Button>
+                      </Stack>
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        {yogaPresets.map((preset) => (
+                          <Box key={preset.id} sx={{ position: 'relative', display: 'inline-block' }}>
+                            <Chip
+                              label={preset.name}
+                              onClick={() => !isEditingPresets && handleLoadPreset(preset)}
+                              color="primary"
+                              variant="outlined"
+                              icon={<Favorite />}
+                              sx={{ 
+                                mb: 1,
+                                cursor: isEditingPresets ? 'default' : 'pointer',
+                                opacity: isEditingPresets ? 0.7 : 1,
+                              }}
+                            />
+                            {isEditingPresets && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeletePreset(preset.id)}
+                                sx={{
+                                  position: 'absolute',
+                                  top: -8,
+                                  right: -8,
+                                  bgcolor: 'error.main',
+                                  color: 'white',
+                                  width: 20,
+                                  height: 20,
+                                  '&:hover': {
+                                    bgcolor: 'error.dark',
+                                  },
+                                }}
+                              >
+                                <Delete sx={{ fontSize: 14 }} />
+                              </IconButton>
+                            )}
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+
                   <TextField
-                    label="Duration (minutes)"
+                    label="Hold Duration per Pose (seconds)"
                     type="number"
-                    value={yogaDuration === null || yogaDuration === undefined ? '' : yogaDuration}
+                    value={poseDuration === null || poseDuration === undefined ? '' : poseDuration}
                     onChange={(e) => {
                       const val = e.target.value;
                       if (val === '' || val === null) {
-                        setYogaDuration('');
+                        setPostDuration('');
                       } else {
                         const parsed = parseInt(val);
-                        setYogaDuration(isNaN(parsed) ? '' : parsed);
+                        setPostDuration(isNaN(parsed) ? '' : parsed);
                       }
                     }}
                     onBlur={(e) => {
                       const val = e.target.value;
                       if (val === '' || val === null) {
-                        setYogaDuration(20);
+                        setPostDuration(45);
                       } else {
                         const parsed = parseInt(val);
-                        setYogaDuration(Math.max(1, Math.min(240, isNaN(parsed) ? 20 : parsed)));
+                        setPostDuration(Math.max(15, Math.min(300, isNaN(parsed) ? 45 : parsed)));
                       }
                     }}
-                    inputProps={{ min: 1, max: 240, inputMode: 'numeric' }}
+                    inputProps={{ min: 15, max: 300, inputMode: 'numeric' }}
                     fullWidth
                   />
+                  
+                  <Typography variant="subtitle2">
+                    Selected Poses ({selectedPoses.length})
+                  </Typography>
+                  {selectedPoses.length > 0 && (
+                    <Stack spacing={1}>
+                      {selectedPoses.map((pose, index) => (
+                        <Box
+                          key={index}
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            p: 1.5,
+                            bgcolor: 'background.paper',
+                            borderRadius: 1,
+                          }}
+                        >
+                          <Typography variant="body2">{pose.name}</Typography>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography variant="caption" color="text.secondary">
+                              {pose.duration}s
+                            </Typography>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleRemovePose(index)}
+                              sx={{ color: 'error.main' }}
+                            >
+                              <Remove fontSize="small" />
+                            </IconButton>
+                          </Stack>
+                        </Box>
+                      ))}
+                    </Stack>
+                  )}
+                  
+                  <FormControl fullWidth>
+                    <InputLabel>Add Pose</InputLabel>
+                    <Select
+                      value=""
+                      label="Add Pose"
+                      onChange={(e) => {
+                        const pose = YOGA_POSES.find(p => p.name === e.target.value);
+                        if (pose) handleAddPose(pose);
+                      }}
+                    >
+                      {YOGA_POSES.map((pose) => (
+                        <MenuItem key={pose.name} value={pose.name}>
+                          {pose.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  {selectedPoses.length > 0 && (
+                    <Typography variant="body2" color="text.secondary">
+                      Total Duration: {Math.floor(selectedPoses.reduce((sum, p) => sum + p.duration, 0) / 60)} minutes {selectedPoses.reduce((sum, p) => sum + p.duration, 0) % 60} seconds
+                    </Typography>
+                  )}
                 </Stack>
               )}
 
@@ -1243,6 +1425,8 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
             workIntervalNames={workIntervalNames}
             intervalNames={intervalNames}
             sessionName={sessionName}
+            currentPoseIndex={currentPoseIndex}
+            selectedPoses={selectedPoses}
             handleStart={handleStart}
             handlePause={handlePause}
             handleStop={handleStop}
@@ -1259,9 +1443,12 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
             size="large"
             fullWidth
             onClick={handleStart}
+            disabled={mode === TIMER_MODES.FLOW && selectedPoses.length === 0}
             sx={{ mb: 2, py: 2 }}
           >
-            Start Session
+            {mode === TIMER_MODES.FLOW && selectedPoses.length === 0
+              ? 'Add at least one pose to start'
+              : 'Start Session'}
           </Button>
         )}
 
@@ -1357,7 +1544,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
               />
               <Typography variant="body2" color="text.secondary">
                 {mode === TIMER_MODES.FLOW 
-                  ? `This will save your yoga session duration (${yogaDuration} minutes)`
+                  ? `This will save your current pose sequence (${selectedPoses.length} poses)`
                   : 'This will save your current interval configuration'}
               </Typography>
             </Stack>

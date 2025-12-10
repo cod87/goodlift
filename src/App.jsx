@@ -53,6 +53,7 @@ import { runDataMigration } from './migrations/simplifyDataStructure';
 import { runExerciseNameMigration } from './utils/exerciseNameMigration';
 import { runAchievementsMigration } from './migrations/achievementsMigration';
 import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achievements';
+import { awardSessionPoints, awardBadgePoints, evaluateWeeklyPerformance, initializePointsForExistingUser } from './utils/pointsTracking';
 import { BREAKPOINTS } from './theme/responsive';
 
 /**
@@ -126,12 +127,76 @@ function AppContent() {
         } else {
           console.log('Achievements migration skipped (already completed)');
         }
+        
+        // Initialize points system for existing users
+        console.log('Initializing points system...');
+        const unlockedAchievements = await getUnlockedAchievements();
+        const unlockedBadgeObjects = ACHIEVEMENT_BADGES.filter(badge => 
+          unlockedAchievements.includes(badge.id)
+        );
+        initializePointsForExistingUser(unlockedBadgeObjects);
+        console.log('Points system initialized');
       } catch (error) {
         console.error('Error running migration:', error);
       }
     };
     
     initializeMigration();
+  }, []); // Run once on mount
+  
+  // Check for weekly evaluation on app load
+  useEffect(() => {
+    const checkWeeklyEvaluation = async () => {
+      try {
+        // Import here to avoid circular dependency
+        const { getUserPoints, getLastRecordedStreak, saveCurrentStreak, checkAndApplyStreakBreakPenalty } = await import('./utils/pointsTracking');
+        const pointsData = getUserPoints();
+        
+        // Get current stats to check streak
+        const userStats = await getUserStats();
+        const lastStreak = getLastRecordedStreak();
+        
+        // Check for streak break
+        if (lastStreak > 0) {
+          const streakBreakResult = checkAndApplyStreakBreakPenalty(userStats.currentStreak, lastStreak);
+          if (streakBreakResult.streakBroken) {
+            console.log(`[Points] Streak break detected and penalty applied`);
+          }
+        }
+        
+        // Save current streak for next time
+        saveCurrentStreak(userStats.currentStreak);
+        
+        // Check if we're in a new week
+        const getCurrentWeekStart = () => {
+          const now = new Date();
+          const day = now.getDay();
+          const diff = now.getDate() - day;
+          const weekStart = new Date(now.setDate(diff));
+          weekStart.setHours(0, 0, 0, 0);
+          return weekStart;
+        };
+        
+        const currentWeekStart = getCurrentWeekStart();
+        const lastWeekStart = new Date(pointsData.currentWeekStart);
+        
+        // If we're in a new week and have previous week data
+        if (currentWeekStart > lastWeekStart) {
+          const strengthSessionsLastWeek = pointsData.weeklyStrengthSessions;
+          const result = evaluateWeeklyPerformance(strengthSessionsLastWeek);
+          
+          if (result.evaluated && result.penalty < 0) {
+            console.log(`[Points] Weekly evaluation: ${result.penalty} penalty for ${strengthSessionsLastWeek} strength sessions`);
+          } else if (result.evaluated) {
+            console.log(`[Points] Weekly evaluation: Goal met with ${strengthSessionsLastWeek} strength sessions`);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking weekly evaluation:', error);
+      }
+    };
+    
+    checkWeeklyEvaluation();
   }, []); // Run once on mount
 
   // Cleanup expired backups on app initialization
@@ -621,11 +686,24 @@ function AppContent() {
       
       const newAchievements = getNewlyUnlockedAchievements(stats, allSessions, previouslyUnlocked);
       
+      // Award session points (Section 3 of rewards-system.md)
+      const sessionPointsResult = awardSessionPoints(
+        workoutData.type,
+        stats.currentStreak,
+        allSessions
+      );
+      
+      console.log(`[Points] Awarded ${sessionPointsResult.pointsAwarded} points for ${workoutData.type} session`);
+      
       if (newAchievements.length > 0) {
         // Save newly unlocked achievements
         for (const achievement of newAchievements) {
           await addUnlockedAchievement(achievement.id);
         }
+        
+        // Award badge points (500 per badge)
+        const badgePoints = awardBadgePoints(newAchievements.length);
+        console.log(`[Points] Awarded ${badgePoints} points for ${newAchievements.length} new badge(s)`);
         
         // Show the first achievement (can be enhanced to queue multiple)
         setNewAchievement(newAchievements[0]);

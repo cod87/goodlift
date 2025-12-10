@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -362,8 +362,27 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
     isAchievementUnlocked(achievement, userStats, workoutHistory)
   );
   
-  // Calculate points and level
-  const totalPoints = calculateAchievementPoints(unlockedAchievements);
+  // Calculate points and level from new points tracking system
+  // Import getTotalPoints dynamically to get accurate point total
+  const [totalPoints, setTotalPoints] = useState(0);
+  
+  useEffect(() => {
+    const loadPoints = async () => {
+      try {
+        const { getTotalPoints } = await import('../utils/pointsTracking');
+        const points = getTotalPoints(unlockedAchievements);
+        setTotalPoints(points);
+      } catch (error) {
+        console.error('Error loading points:', error);
+        // Fallback to badge-only points
+        const badgePoints = calculateAchievementPoints(unlockedAchievements);
+        setTotalPoints(badgePoints);
+      }
+    };
+    
+    loadPoints();
+  }, [unlockedAchievements.length]); // Re-calculate when achievements change
+  
   const levelInfo = calculateUserLevel(totalPoints);
   
   // Group achievements by type

@@ -42,6 +42,9 @@ const TimerDisplay = ({
   workIntervalNames,
   intervalNames,
   sessionName,
+  // Flow/Yoga specific
+  currentPoseIndex,
+  selectedPoses,
   // Handlers
   handleStart,
   handlePause,
@@ -50,19 +53,19 @@ const TimerDisplay = ({
   handleSkipForward,
   handleSkipBackward,
 }) => {
-  // Determine background color - use dark theme for all modes
+  // Determine background color for HIIT mode
   const getBackgroundColor = () => {
-    if (mode === TIMER_MODES.HIIT) {
-      if (isWorkPeriod) {
-        return '#1b5e20'; // Dark green for Work
-      } else if (isPrepPeriod || isRecoveryPeriod) {
-        return '#0d47a1'; // Dark blue for Set break/Prep
-      } else {
-        return '#b71c1c'; // Dark red for Rest
-      }
+    if (mode !== TIMER_MODES.HIIT) {
+      return 'background.default';
     }
-    // For Cardio and Flow/Yoga modes, use a neutral dark background
-    return '#1a202c'; // Dark slate background
+    
+    if (isWorkPeriod) {
+      return '#1b5e20'; // Dark green for Work
+    } else if (isPrepPeriod || isRecoveryPeriod) {
+      return '#0d47a1'; // Dark blue for Set break/Prep
+    } else {
+      return '#b71c1c'; // Dark red for Rest
+    }
   };
 
   return (
@@ -87,7 +90,14 @@ const TimerDisplay = ({
           sx={{
             fontSize: { xs: 'clamp(3rem, 15vw, 8rem)', sm: 'clamp(5rem, 20vw, 10rem)', md: '12rem' },
             fontWeight: 700,
-            color: mode === TIMER_MODES.HIIT ? '#ffffff' : '#1db584', // White for HIIT, teal for others
+            color: mode === TIMER_MODES.HIIT ? '#ffffff' : 
+              mode === TIMER_MODES.HIIT && isWorkPeriod
+                ? 'success.main'
+                : mode === TIMER_MODES.HIIT && (isPrepPeriod || isRecoveryPeriod)
+                ? 'warning.main'
+                : mode === TIMER_MODES.HIIT && !isWorkPeriod
+                ? 'error.main'
+                : 'primary.main',
             fontFamily: 'monospace',
             lineHeight: 1,
           }}
@@ -152,6 +162,17 @@ const TimerDisplay = ({
             )}
           </>
         )}
+        
+        {mode === TIMER_MODES.FLOW && selectedPoses[currentPoseIndex] && (
+          <>
+            <Typography variant="h6" sx={{ mt: 2, fontWeight: 600 }}>
+              {selectedPoses[currentPoseIndex].name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Pose {currentPoseIndex + 1} of {selectedPoses.length}
+            </Typography>
+          </>
+        )}
       </Box>
 
       {/* Controls */}
@@ -192,13 +213,14 @@ const TimerDisplay = ({
                 },
                 flexShrink: 0, // Prevent button from shrinking
               }}
+              disabled={mode === TIMER_MODES.FLOW && selectedPoses.length === 0}
             >
               <PlayArrow sx={{ fontSize: { xs: 40, sm: 48 } }} />
             </IconButton>
           ) : (
             <>
-              {/* Skip backward for HIIT only */}
-              {mode === TIMER_MODES.HIIT && (
+              {/* Skip backward for HIIT and Yoga */}
+              {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
                 <IconButton
                   size="large"
                   onClick={handleSkipBackward}
@@ -215,7 +237,10 @@ const TimerDisplay = ({
                     },
                     flexShrink: 0,
                   }}
-                  disabled={mode === TIMER_MODES.HIIT && isPrepPeriod}
+                  disabled={
+                    (mode === TIMER_MODES.HIIT && isPrepPeriod) ||
+                    (mode === TIMER_MODES.FLOW && currentPoseIndex === 0)
+                  }
                 >
                   <SkipPrevious sx={{ fontSize: { xs: 28, sm: 36 } }} />
                 </IconButton>
@@ -274,8 +299,8 @@ const TimerDisplay = ({
                 <Replay sx={{ fontSize: { xs: 36, sm: 40 } }} />
               </IconButton>
               
-              {/* Skip forward for HIIT only */}
-              {mode === TIMER_MODES.HIIT && (
+              {/* Skip forward for HIIT and Yoga */}
+              {(mode === TIMER_MODES.HIIT || mode === TIMER_MODES.FLOW) && (
                 <IconButton
                   size="large"
                   onClick={handleSkipForward}
@@ -292,7 +317,10 @@ const TimerDisplay = ({
                     },
                     flexShrink: 0,
                   }}
-                  disabled={mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= roundsPerSet && currentSet >= numberOfSets}
+                  disabled={
+                    (mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= roundsPerSet && currentSet >= numberOfSets) ||
+                    (mode === TIMER_MODES.FLOW && currentPoseIndex >= selectedPoses.length - 1)
+                  }
                 >
                   <SkipNext sx={{ fontSize: { xs: 28, sm: 36 } }} />
                 </IconButton>
@@ -322,6 +350,8 @@ TimerDisplay.propTypes = {
   workIntervalNames: PropTypes.array,
   intervalNames: PropTypes.object,
   sessionName: PropTypes.string,
+  currentPoseIndex: PropTypes.number,
+  selectedPoses: PropTypes.array,
   handleStart: PropTypes.func.isRequired,
   handlePause: PropTypes.func.isRequired,
   handleStop: PropTypes.func.isRequired,

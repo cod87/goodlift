@@ -43,6 +43,17 @@ import {
   calculateUserLevel,
 } from '../data/achievements';
 
+// Category color constants for consistent theming
+const CATEGORY_COLORS = {
+  overall: 'primary.main',
+  streak: '#FF6B35',
+  strength: '#4CAF50',
+  volume: '#FFD700',
+  cardio: '#2196F3',
+  yoga: '#9C27B0',
+  wellness: '#E91E63',
+};
+
 /**
  * Achievement Badge Card Component
  * Displays a single achievement with unlock status
@@ -553,60 +564,60 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
           Progress Overview
         </Typography>
         <Grid container spacing={{ xs: 1, sm: 1.5 }}>
-          <Grid item xs={6} sm={4} md={3}>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
             <CompactSummaryCard
               title="Overall"
               icon={<EmojiEvents />}
               progressInfo={overallProgress}
-              iconColor="primary.main"
+              iconColor={CATEGORY_COLORS.overall}
             />
           </Grid>
-          <Grid item xs={6} sm={4} md={3}>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
             <CompactSummaryCard
               title="Streak"
               icon={<Whatshot />}
               progressInfo={streakProgress}
-              iconColor="#FF6B35"
+              iconColor={CATEGORY_COLORS.streak}
             />
           </Grid>
-          <Grid item xs={6} sm={4} md={3}>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
             <CompactSummaryCard
               title="Strength"
               icon={<FitnessCenter />}
               progressInfo={strengthProgress}
-              iconColor="#4CAF50"
+              iconColor={CATEGORY_COLORS.strength}
             />
           </Grid>
-          <Grid item xs={6} sm={4} md={3}>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
             <CompactSummaryCard
               title="Volume"
               icon={<TrendingUp />}
               progressInfo={volumeProgress}
-              iconColor="#FFD700"
+              iconColor={CATEGORY_COLORS.volume}
             />
           </Grid>
-          <Grid item xs={6} sm={4} md={3}>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
             <CompactSummaryCard
               title="Cardio"
               icon={<DirectionsRun />}
               progressInfo={cardioProgress}
-              iconColor="#2196F3"
+              iconColor={CATEGORY_COLORS.cardio}
             />
           </Grid>
-          <Grid item xs={6} sm={4} md={3}>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
             <CompactSummaryCard
               title="Yoga"
               icon={<SelfImprovement />}
               progressInfo={yogaProgress}
-              iconColor="#9C27B0"
+              iconColor={CATEGORY_COLORS.yoga}
             />
           </Grid>
-          <Grid item xs={6} sm={4} md={3}>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
             <CompactSummaryCard
               title="Wellness"
               icon={<Favorite />}
               progressInfo={wellnessProgress}
-              iconColor="#E91E63"
+              iconColor={CATEGORY_COLORS.wellness}
             />
           </Grid>
         </Grid>

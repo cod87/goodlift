@@ -37,8 +37,17 @@ const markMigrationComplete = () => {
 /**
  * Run achievements migration
  * Maps old badge IDs to new ones and awards retroactive badges
- * @param {Object} userStats - Current user statistics
- * @param {Array} workoutHistory - Complete workout history
+ * @param {Object} userStats - Current user statistics object containing:
+ *   - totalWorkouts: number of total workouts
+ *   - currentStreak: current streak in days
+ *   - totalVolume: total weight lifted in lbs
+ *   - totalPRs: total personal records
+ *   - completedWellnessTasks: number of wellness tasks completed
+ * @param {Array<Object>} workoutHistory - Complete workout history array, where each workout contains:
+ *   - date: Date or timestamp
+ *   - type: workout type (strength, cardio, yoga, etc.)
+ *   - duration: workout duration (in seconds or minutes depending on type)
+ *   - exercises: object containing exercise data (for strength workouts)
  * @returns {Promise<boolean>} True if migration was run, false if already completed
  */
 export const runAchievementsMigration = async (userStats, workoutHistory) => {

@@ -652,6 +652,13 @@ const getWeekStart = (date) => {
 };
 
 /**
+ * Threshold in seconds to distinguish between duration formats
+ * Durations < 5 minutes (300 seconds) are assumed to be in minutes
+ * Durations >= 5 minutes are assumed to be in seconds
+ */
+const DURATION_FORMAT_THRESHOLD_SECONDS = 300;
+
+/**
  * Calculate total cardio time in seconds
  * @param {Array} workoutHistory - Array of completed workouts
  * @returns {number} Total cardio time in seconds
@@ -665,8 +672,8 @@ const calculateCardioTime = (workoutHistory) => {
       const duration = workout.duration || 0;
       // If duration is very small, it's likely in minutes (convert to seconds)
       // If duration is large, it's already in seconds
-      // Most cardio sessions are 10-120 minutes, so if duration < 300, assume minutes
-      return total + (duration < 300 ? duration * 60 : duration);
+      // Most cardio sessions are 10-120 minutes, so if duration < DURATION_FORMAT_THRESHOLD_SECONDS, assume minutes
+      return total + (duration < DURATION_FORMAT_THRESHOLD_SECONDS ? duration * 60 : duration);
     }, 0);
 };
 
@@ -682,7 +689,7 @@ const calculateYogaTime = (workoutHistory) => {
     .reduce((total, workout) => {
       const duration = workout.duration || 0;
       // Same logic as cardio time
-      return total + (duration < 300 ? duration * 60 : duration);
+      return total + (duration < DURATION_FORMAT_THRESHOLD_SECONDS ? duration * 60 : duration);
     }, 0);
 };
 
@@ -1259,6 +1266,12 @@ const LEVEL_THRESHOLDS = [
 ];
 
 /**
+ * Points increment for levels beyond defined thresholds
+ * Used to calculate thresholds for levels 31+
+ */
+const LEVEL_THRESHOLD_INCREMENT_BEYOND_30 = 100000;
+
+/**
  * Calculate user level based on total points
  * Uses new threshold system per rewards-system.md Section 4
  * @param {number} points - Total points (from sessions + badges - penalties)
@@ -1276,7 +1289,17 @@ export const calculateUserLevel = (points) => {
   
   // Calculate points in current level and points to next level
   const currentLevelThreshold = LEVEL_THRESHOLDS[level - 1] || 0;
-  const nextLevelThreshold = LEVEL_THRESHOLDS[level] || (currentLevelThreshold + 100000);
+  
+  // For levels beyond defined thresholds, calculate based on increment
+  let nextLevelThreshold;
+  if (level <= LEVEL_THRESHOLDS.length) {
+    nextLevelThreshold = LEVEL_THRESHOLDS[level];
+  } else {
+    // For levels 31+, calculate based on Level 30 threshold + increments
+    const levelsAbove30 = level - LEVEL_THRESHOLDS.length;
+    nextLevelThreshold = LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1] + 
+                         (levelsAbove30 * LEVEL_THRESHOLD_INCREMENT_BEYOND_30);
+  }
   
   const currentPoints = points - currentLevelThreshold;
   const pointsToNext = nextLevelThreshold - points;

@@ -51,6 +51,7 @@ import { Snackbar, Alert, Button, useMediaQuery } from '@mui/material';
 import { shouldShowGuestSnackbar, dismissGuestSnackbar, disableGuestMode } from './utils/guestStorage';
 import { runDataMigration } from './migrations/simplifyDataStructure';
 import { runExerciseNameMigration } from './utils/exerciseNameMigration';
+import { runAchievementsMigration } from './migrations/achievementsMigration';
 import { getNewlyUnlockedAchievements, ACHIEVEMENT_BADGES } from './data/achievements';
 import { BREAKPOINTS } from './theme/responsive';
 
@@ -106,6 +107,24 @@ function AppContent() {
           console.log('Exercise name migration skipped:', exerciseNameMigrationResult.reason);
         } else {
           console.error('Exercise name migration failed:', exerciseNameMigrationResult);
+        }
+        
+        // Run achievements migration
+        console.log('Running achievements migration...');
+        const userStats = await getUserStats();
+        const [workoutHistory, hiitSessions, cardioSessions, stretchSessions] = await Promise.all([
+          getWorkoutHistory(),
+          getHiitSessions(),
+          getCardioSessions(),
+          getStretchSessions()
+        ]);
+        const allSessions = [...workoutHistory, ...hiitSessions, ...cardioSessions, ...stretchSessions];
+        
+        const achievementsMigrationRan = await runAchievementsMigration(userStats, allSessions);
+        if (achievementsMigrationRan) {
+          console.log('Achievements migration completed successfully');
+        } else {
+          console.log('Achievements migration skipped (already completed)');
         }
       } catch (error) {
         console.error('Error running migration:', error);

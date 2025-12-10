@@ -1,7 +1,12 @@
 /**
- * Achievements Data
+ * Achievements Data - Refactored per rewards-system.md
  * 
  * Defines all achievement badges, their unlock conditions, and visual assets
+ * New system focuses on:
+ * - Strength training frequency (3+ sessions per week)
+ * - Progressive overload (cumulative tonnage)
+ * - Long-term consistency (streaks, weekly adherence)
+ * - Cardio and yoga for health and recovery
  */
 
 import { calculateStreak } from '../utils/trackingMetrics.js';
@@ -13,505 +18,528 @@ import { calculateStreak } from '../utils/trackingMetrics.js';
  * - name: display name
  * - description: what the achievement represents
  * - icon: emoji or icon identifier
- * - tier: bronze, silver, gold, platinum
+ * - tier: bronze, silver, gold, platinum (kept for visual styling)
  * - condition: object defining unlock criteria
+ * - points: bonus points awarded when unlocked (500 per badge as per spec)
  */
 export const ACHIEVEMENT_BADGES = [
-  // Total Session Count Achievements
-  // These count ALL session types: strength, cardio, HIIT, yoga, stretching, etc.
+  // ====================================================================
+  // STRENGTH TRAINING BADGES (per rewards-system.md Section 2.1)
+  // ====================================================================
+  
+  // 2.1.1. Lifetime Strength Volume (Tonnage) Badges
   {
-    id: 'first-session',
-    name: 'First Steps',
-    description: 'Complete your first training session',
-    icon: '🎯',
-    tier: 'bronze',
-    condition: { type: 'sessionCount', value: 1 }
-  },
-  {
-    id: 'dedicated-5',
-    name: 'Getting Started',
-    description: 'Complete 5 training sessions',
-    icon: '💪',
-    tier: 'bronze',
-    condition: { type: 'sessionCount', value: 5 }
-  },
-  {
-    id: 'dedicated-10',
-    name: 'Committed',
-    description: 'Complete 10 training sessions',
-    icon: '🔥',
-    tier: 'silver',
-    condition: { type: 'sessionCount', value: 10 }
-  },
-  {
-    id: 'dedicated-25',
-    name: 'Athlete',
-    description: 'Complete 25 training sessions',
-    icon: '⭐',
-    tier: 'silver',
-    condition: { type: 'sessionCount', value: 25 }
-  },
-  {
-    id: 'dedicated-50',
-    name: 'Beast Mode',
-    description: 'Complete 50 training sessions',
-    icon: '🦁',
-    tier: 'gold',
-    condition: { type: 'sessionCount', value: 50 }
-  },
-  {
-    id: 'dedicated-100',
-    name: 'Centurion',
-    description: 'Complete 100 training sessions',
-    icon: '👑',
-    tier: 'gold',
-    condition: { type: 'sessionCount', value: 100 }
-  },
-  {
-    id: 'dedicated-150',
-    name: 'Elite Athlete',
-    description: 'Complete 150 training sessions',
-    icon: '🎖️',
-    tier: 'gold',
-    condition: { type: 'sessionCount', value: 150 }
-  },
-  {
-    id: 'dedicated-200',
-    name: 'Relentless',
-    description: 'Complete 200 training sessions',
-    icon: '🔱',
-    tier: 'platinum',
-    condition: { type: 'sessionCount', value: 200 }
-  },
-  {
-    id: 'dedicated-250',
-    name: 'Iron Legend',
-    description: 'Complete 250 training sessions',
-    icon: '🏆',
-    tier: 'platinum',
-    condition: { type: 'sessionCount', value: 250 }
-  },
-  {
-    id: 'dedicated-500',
-    name: 'Hall of Fame',
-    description: 'Complete 500 training sessions',
-    icon: '⚜️',
-    tier: 'platinum',
-    condition: { type: 'sessionCount', value: 500 }
-  },
-
-  // Streak Achievements (include ALL session types)
-  // Streaks count any training day: strength, cardio, HIIT, yoga, stretching, etc.
-  {
-    id: 'streak-3',
-    name: 'Consistency',
-    description: 'Maintain a 3-day training streak',
-    icon: '🔗',
-    tier: 'bronze',
-    condition: { type: 'streak', value: 3 }
-  },
-  {
-    id: 'streak-7',
-    name: 'Week Warrior',
-    description: 'Maintain a 7-day training streak',
-    icon: '📅',
-    tier: 'silver',
-    condition: { type: 'streak', value: 7 }
-  },
-  {
-    id: 'streak-14',
-    name: 'Fortnight Fighter',
-    description: 'Maintain a 14-day training streak',
-    icon: '⚡',
-    tier: 'silver',
-    condition: { type: 'streak', value: 14 }
-  },
-  {
-    id: 'streak-30',
-    name: 'Monthly Master',
-    description: 'Maintain a 30-day training streak',
-    icon: '🌟',
-    tier: 'gold',
-    condition: { type: 'streak', value: 30 }
-  },
-  {
-    id: 'streak-60',
-    name: 'Unbreakable',
-    description: 'Maintain a 60-day training streak',
-    icon: '💎',
-    tier: 'gold',
-    condition: { type: 'streak', value: 60 }
-  },
-  {
-    id: 'streak-100',
-    name: 'Iron Will',
-    description: 'Maintain a 100-day training streak',
-    icon: '🛡️',
-    tier: 'platinum',
-    condition: { type: 'streak', value: 100 }
-  },
-
-  // PR (Personal Record) Achievements
-  {
-    id: 'first-pr',
-    name: 'New Heights',
-    description: 'Achieve your first personal record',
-    icon: '📈',
-    tier: 'bronze',
-    condition: { type: 'prCount', value: 1 }
-  },
-  {
-    id: 'pr-5',
-    name: 'Record Breaker',
-    description: 'Achieve 5 personal records',
-    icon: '🎖️',
-    tier: 'silver',
-    condition: { type: 'prCount', value: 5 }
-  },
-  {
-    id: 'pr-10',
-    name: 'Powerhouse',
-    description: 'Achieve 10 personal records',
-    icon: '💥',
-    tier: 'gold',
-    condition: { type: 'prCount', value: 10 }
-  },
-  {
-    id: 'pr-25',
-    name: 'Peak Performance',
-    description: 'Achieve 25 personal records',
-    icon: '🚀',
-    tier: 'platinum',
-    condition: { type: 'prCount', value: 25 }
-  },
-
-  // Volume Achievements (total weight lifted)
-  {
-    id: 'volume-10k',
-    name: 'Moving Iron',
-    description: 'Lift 10,000 lbs total volume',
+    id: 'iron-beginner',
+    name: 'Iron Beginner',
+    description: 'Lift 50,000 lbs total volume across all strength sessions',
     icon: '🏋️',
     tier: 'bronze',
-    condition: { type: 'totalVolume', value: 10000 }
+    condition: { type: 'totalVolume', value: 50000 },
+    points: 500
   },
   {
-    id: 'volume-50k',
-    name: 'Heavy Lifter',
-    description: 'Lift 50,000 lbs total volume',
+    id: 'iron-novice',
+    name: 'Iron Novice',
+    description: 'Lift 250,000 lbs total volume',
     icon: '⚙️',
     tier: 'silver',
-    condition: { type: 'totalVolume', value: 50000 }
+    condition: { type: 'totalVolume', value: 250000 },
+    points: 500
   },
   {
-    id: 'volume-100k',
-    name: 'Tonnage Master',
-    description: 'Lift 100,000 lbs total volume',
+    id: 'iron-intermediate',
+    name: 'Iron Intermediate',
+    description: 'Lift 1,000,000 lbs total volume - serious long-term commitment',
     icon: '🏗️',
     tier: 'gold',
-    condition: { type: 'totalVolume', value: 100000 }
+    condition: { type: 'totalVolume', value: 1000000 },
+    points: 500
   },
   {
-    id: 'volume-250k',
-    name: 'Moving Mountains',
-    description: 'Lift 250,000 lbs total volume',
+    id: 'iron-veteran',
+    name: 'Iron Veteran',
+    description: 'Lift 2,500,000 lbs total volume - years of accumulated work',
     icon: '⛰️',
     tier: 'platinum',
-    condition: { type: 'totalVolume', value: 250000 }
-  },
-
-  // Time-based Achievements
-  {
-    id: 'time-1h',
-    name: 'First Hour',
-    description: 'Complete 1 hour of total workout time',
-    icon: '⏱️',
-    tier: 'bronze',
-    condition: { type: 'totalTime', value: 3600 }
+    condition: { type: 'totalVolume', value: 2500000 },
+    points: 500
   },
   {
-    id: 'time-10h',
-    name: 'Time Investment',
-    description: 'Complete 10 hours of total workout time',
-    icon: '⌚',
-    tier: 'silver',
-    condition: { type: 'totalTime', value: 36000 }
-  },
-  {
-    id: 'time-50h',
-    name: 'Dedicated',
-    description: 'Complete 50 hours of total workout time',
-    icon: '⏰',
-    tier: 'gold',
-    condition: { type: 'totalTime', value: 180000 }
-  },
-  {
-    id: 'time-100h',
-    name: 'Time Master',
-    description: 'Complete 100 hours of total workout time',
-    icon: '🕐',
-    tier: 'platinum',
-    condition: { type: 'totalTime', value: 360000 }
-  },
-
-  // Special Achievements
-  {
-    id: 'early-bird',
-    name: 'Early Bird',
-    description: 'Complete a workout before 7 AM',
-    icon: '🌅',
-    tier: 'bronze',
-    condition: { type: 'special', value: 'earlyMorning' }
-  },
-  {
-    id: 'morning-person',
-    name: 'Morning Person',
-    description: 'Complete 10 workouts in the morning (7 AM - 12 PM)',
-    icon: '☀️',
-    tier: 'silver',
-    condition: { type: 'special', value: 'morningWorkouts', count: 10 }
-  },
-  {
-    id: 'afternoon-warrior',
-    name: 'Afternoon Warrior',
-    description: 'Complete 10 workouts in the afternoon (12 PM - 5 PM)',
-    icon: '🌤️',
-    tier: 'silver',
-    condition: { type: 'special', value: 'afternoonWorkouts', count: 10 }
-  },
-  {
-    id: 'evening-grinder',
-    name: 'Evening Grinder',
-    description: 'Complete 10 workouts in the evening (5 PM - 10 PM)',
-    icon: '🌆',
-    tier: 'silver',
-    condition: { type: 'special', value: 'eveningWorkouts', count: 10 }
-  },
-  {
-    id: 'night-owl',
-    name: 'Night Owl',
-    description: 'Complete a workout after 10 PM',
-    icon: '🌙',
-    tier: 'bronze',
-    condition: { type: 'special', value: 'lateNight' }
-  },
-  {
-    id: 'consecutive-3',
-    name: 'Back to Back',
-    description: 'Complete 3 consecutive workouts within an hour of each other',
-    icon: '⏱️',
-    tier: 'bronze',
-    condition: { type: 'special', value: 'consecutiveWorkouts', count: 3 }
-  },
-  {
-    id: 'consecutive-5',
-    name: 'Chain Reaction',
-    description: 'Complete 5 consecutive workouts within an hour of each other',
-    icon: '🔗',
-    tier: 'silver',
-    condition: { type: 'special', value: 'consecutiveWorkouts', count: 5 }
-  },
-  {
-    id: 'consecutive-10',
-    name: 'Unstoppable',
-    description: 'Complete 10 consecutive workouts within an hour of each other',
-    icon: '⚡',
-    tier: 'gold',
-    condition: { type: 'special', value: 'consecutiveWorkouts', count: 10 }
-  },
-  {
-    id: 'weekend-warrior',
-    name: 'Weekend Warrior',
-    description: 'Complete 10 weekend workouts',
-    icon: '🎯',
-    tier: 'silver',
-    condition: { type: 'special', value: 'weekendWorkouts', count: 10 }
-  },
-  {
-    id: 'variety-seeker',
-    name: 'Variety Seeker',
-    description: 'Complete all workout types (Full Body, Upper, Lower, Push, Pull, Legs)',
-    icon: '🎨',
-    tier: 'gold',
-    condition: { type: 'special', value: 'allWorkoutTypes' }
-  },
-
-  // Wellness Task Achievements
-  {
-    id: 'wellness-first',
-    name: 'Wellness Beginner',
-    description: 'Complete your first wellness task',
-    icon: '🌱',
-    tier: 'bronze',
-    condition: { type: 'wellnessTaskCount', value: 1 }
-  },
-  {
-    id: 'wellness-10',
-    name: 'Wellness Explorer',
-    description: 'Complete 10 wellness tasks',
-    icon: '🌿',
-    tier: 'bronze',
-    condition: { type: 'wellnessTaskCount', value: 10 }
-  },
-  {
-    id: 'wellness-25',
-    name: 'Wellness Enthusiast',
-    description: 'Complete 25 wellness tasks',
-    icon: '🍀',
-    tier: 'silver',
-    condition: { type: 'wellnessTaskCount', value: 25 }
-  },
-  {
-    id: 'wellness-50',
-    name: 'Wellness Champion',
-    description: 'Complete 50 wellness tasks',
-    icon: '🌺',
-    tier: 'gold',
-    condition: { type: 'wellnessTaskCount', value: 50 }
-  },
-  {
-    id: 'wellness-100',
-    name: 'Wellness Master',
-    description: 'Complete 100 wellness tasks',
-    icon: '🌸',
-    tier: 'platinum',
-    condition: { type: 'wellnessTaskCount', value: 100 }
-  },
-
-  // Strength Workout Count Achievements (strength training only)
-  {
-    id: 'strength-10',
-    name: 'Iron Starter',
-    description: 'Complete 10 strength training workouts',
-    icon: '🏋️',
-    tier: 'bronze',
-    condition: { type: 'strengthWorkoutCount', value: 10 }
-  },
-  {
-    id: 'strength-50',
-    name: 'Iron Regular',
-    description: 'Complete 50 strength training workouts',
-    icon: '💪',
-    tier: 'silver',
-    condition: { type: 'strengthWorkoutCount', value: 50 }
-  },
-  {
-    id: 'strength-100',
-    name: 'Iron Warrior',
-    description: 'Complete 100 strength training workouts',
-    icon: '🦾',
-    tier: 'gold',
-    condition: { type: 'strengthWorkoutCount', value: 100 }
-  },
-  {
-    id: 'strength-250',
+    id: 'iron-master',
     name: 'Iron Master',
-    description: 'Complete 250 strength training workouts',
+    description: 'Lift 5,000,000 lbs total volume - elite lifetime achievement',
+    icon: '👑',
+    tier: 'platinum',
+    condition: { type: 'totalVolume', value: 5000000 },
+    points: 500
+  },
+
+  // 2.1.2. Strength Session Count Badges
+  {
+    id: 'first-steps',
+    name: 'First Steps',
+    description: 'Complete 10 strength training sessions',
+    icon: '🎯',
+    tier: 'bronze',
+    condition: { type: 'strengthWorkoutCount', value: 10 },
+    points: 500
+  },
+  {
+    id: 'finding-rhythm',
+    name: 'Finding Rhythm',
+    description: 'Complete 25 strength training sessions',
+    icon: '💪',
+    tier: 'bronze',
+    condition: { type: 'strengthWorkoutCount', value: 25 },
+    points: 500
+  },
+  {
+    id: 'building-momentum',
+    name: 'Building Momentum',
+    description: 'Complete 50 strength training sessions',
+    icon: '🔥',
+    tier: 'silver',
+    condition: { type: 'strengthWorkoutCount', value: 50 },
+    points: 500
+  },
+  {
+    id: 'consistent-lifter',
+    name: 'Consistent Lifter',
+    description: 'Complete 100 strength training sessions',
+    icon: '💎',
+    tier: 'silver',
+    condition: { type: 'strengthWorkoutCount', value: 100 },
+    points: 500
+  },
+  {
+    id: 'dedicated-lifter',
+    name: 'Dedicated Lifter',
+    description: 'Complete 150 strength training sessions',
+    icon: '🎖️',
+    tier: 'gold',
+    condition: { type: 'strengthWorkoutCount', value: 150 },
+    points: 500
+  },
+  {
+    id: 'committed-lifter',
+    name: 'Committed Lifter',
+    description: 'Complete 300 strength training sessions',
+    icon: '🔱',
+    tier: 'gold',
+    condition: { type: 'strengthWorkoutCount', value: 300 },
+    points: 500
+  },
+  {
+    id: 'unwavering-lifter',
+    name: 'Unwavering Lifter',
+    description: 'Complete 500 strength training sessions',
     icon: '⚔️',
     tier: 'platinum',
-    condition: { type: 'strengthWorkoutCount', value: 250 }
-  },
-
-  // Cardio Workout Count Achievements (cardio & HIIT only)
-  {
-    id: 'cardio-10',
-    name: 'Cardio Starter',
-    description: 'Complete 10 cardio or HIIT workouts',
-    icon: '🏃',
-    tier: 'bronze',
-    condition: { type: 'cardioWorkoutCount', value: 10 }
+    condition: { type: 'strengthWorkoutCount', value: 500 },
+    points: 500
   },
   {
-    id: 'cardio-50',
-    name: 'Cardio Enthusiast',
-    description: 'Complete 50 cardio or HIIT workouts',
-    icon: '❤️‍🔥',
-    tier: 'silver',
-    condition: { type: 'cardioWorkoutCount', value: 50 }
-  },
-  {
-    id: 'cardio-100',
-    name: 'Cardio Champion',
-    description: 'Complete 100 cardio or HIIT workouts',
-    icon: '🫀',
-    tier: 'gold',
-    condition: { type: 'cardioWorkoutCount', value: 100 }
-  },
-  {
-    id: 'cardio-250',
-    name: 'Cardio Legend',
-    description: 'Complete 250 cardio or HIIT workouts',
-    icon: '🏅',
-    tier: 'platinum',
-    condition: { type: 'cardioWorkoutCount', value: 250 }
-  },
-
-  // Yoga/Flexibility Workout Count Achievements (yoga & stretching only)
-  {
-    id: 'yoga-10',
-    name: 'Flexibility Starter',
-    description: 'Complete 10 yoga or stretching workouts',
-    icon: '🧘',
-    tier: 'bronze',
-    condition: { type: 'yogaWorkoutCount', value: 10 }
-  },
-  {
-    id: 'yoga-50',
-    name: 'Flexibility Enthusiast',
-    description: 'Complete 50 yoga or stretching workouts',
-    icon: '🌺',
-    tier: 'silver',
-    condition: { type: 'yogaWorkoutCount', value: 50 }
-  },
-  {
-    id: 'yoga-100',
-    name: 'Flexibility Master',
-    description: 'Complete 100 yoga or stretching workouts',
-    icon: '🪷',
-    tier: 'gold',
-    condition: { type: 'yogaWorkoutCount', value: 100 }
-  },
-  {
-    id: 'yoga-250',
-    name: 'Zen Master',
-    description: 'Complete 250 yoga or stretching workouts',
-    icon: '☯️',
-    tier: 'platinum',
-    condition: { type: 'yogaWorkoutCount', value: 250 }
-  },
-
-  // Strength Weekly Streak Achievements (3+ strength workouts per week)
-  {
-    id: 'strength-week-1',
-    name: 'Strong Week',
-    description: 'Complete 3+ strength workouts in a single week',
-    icon: '📅',
-    tier: 'bronze',
-    condition: { type: 'strengthWeekStreak', value: 1 }
-  },
-  {
-    id: 'strength-week-3',
-    name: 'Strength Streak',
-    description: 'Complete 3+ strength workouts per week for 3 consecutive weeks',
-    icon: '🔗',
-    tier: 'silver',
-    condition: { type: 'strengthWeekStreak', value: 3 }
-  },
-  {
-    id: 'strength-week-5',
-    name: 'Strength Warrior',
-    description: 'Complete 3+ strength workouts per week for 5 consecutive weeks',
-    icon: '⚡',
-    tier: 'gold',
-    condition: { type: 'strengthWeekStreak', value: 5 }
-  },
-  {
-    id: 'strength-week-10',
-    name: 'Strength Legend',
-    description: 'Complete 3+ strength workouts per week for 10 consecutive weeks',
+    id: 'lifetime-lifter',
+    name: 'Lifetime Lifter',
+    description: 'Complete 1,000 strength training sessions',
     icon: '🏆',
     tier: 'platinum',
-    condition: { type: 'strengthWeekStreak', value: 10 }
-  }
+    condition: { type: 'strengthWorkoutCount', value: 1000 },
+    points: 500
+  },
+
+  // 2.1.3. Heavy Single-Session Volume Badges
+  {
+    id: 'heavy-session-1',
+    name: 'Heavy Session I',
+    description: 'Complete a single strength workout with 20,000+ lbs volume',
+    icon: '💥',
+    tier: 'bronze',
+    condition: { type: 'singleSessionVolume', value: 20000 },
+    points: 500
+  },
+  {
+    id: 'heavy-session-2',
+    name: 'Heavy Session II',
+    description: 'Complete a single strength workout with 30,000+ lbs volume',
+    icon: '⚡',
+    tier: 'silver',
+    condition: { type: 'singleSessionVolume', value: 30000 },
+    points: 500
+  },
+  {
+    id: 'heavy-session-3',
+    name: 'Heavy Session III',
+    description: 'Complete a single strength workout with 40,000+ lbs volume',
+    icon: '🚀',
+    tier: 'gold',
+    condition: { type: 'singleSessionVolume', value: 40000 },
+    points: 500
+  },
+
+  // ====================================================================
+  // CARDIO BADGES (per rewards-system.md Section 2.2)
+  // ====================================================================
+  
+  // 2.2.1. Cardio Session Count Badges
+  {
+    id: 'cardio-starter',
+    name: 'Cardio Starter',
+    description: 'Complete 10 cardio sessions',
+    icon: '🏃',
+    tier: 'bronze',
+    condition: { type: 'cardioWorkoutCount', value: 10 },
+    points: 500
+  },
+  {
+    id: 'cardio-regular',
+    name: 'Cardio Regular',
+    description: 'Complete 25 cardio sessions',
+    icon: '❤️‍🔥',
+    tier: 'bronze',
+    condition: { type: 'cardioWorkoutCount', value: 25 },
+    points: 500
+  },
+  {
+    id: 'cardio-habit',
+    name: 'Cardio Habit',
+    description: 'Complete 75 cardio sessions',
+    icon: '🫀',
+    tier: 'silver',
+    condition: { type: 'cardioWorkoutCount', value: 75 },
+    points: 500
+  },
+  {
+    id: 'cardio-enthusiast',
+    name: 'Cardio Enthusiast',
+    description: 'Complete 150 cardio sessions',
+    icon: '💓',
+    tier: 'gold',
+    condition: { type: 'cardioWorkoutCount', value: 150 },
+    points: 500
+  },
+  {
+    id: 'cardio-master',
+    name: 'Cardio Master',
+    description: 'Complete 300 cardio sessions',
+    icon: '🏅',
+    tier: 'platinum',
+    condition: { type: 'cardioWorkoutCount', value: 300 },
+    points: 500
+  },
+
+  // 2.2.2. Cardio Time Accumulation Badges
+  {
+    id: 'cardio-5h',
+    name: '5 Hours Logged',
+    description: 'Complete 5 hours of cumulative cardio',
+    icon: '⏱️',
+    tier: 'bronze',
+    condition: { type: 'cardioTime', value: 18000 }, // 5 hours in seconds
+    points: 500
+  },
+  {
+    id: 'cardio-10h',
+    name: '10 Hours Logged',
+    description: 'Complete 10 hours of cumulative cardio',
+    icon: '⌚',
+    tier: 'bronze',
+    condition: { type: 'cardioTime', value: 36000 },
+    points: 500
+  },
+  {
+    id: 'cardio-30h',
+    name: '30 Hours Logged',
+    description: 'Complete 30 hours of cumulative cardio',
+    icon: '⏰',
+    tier: 'silver',
+    condition: { type: 'cardioTime', value: 108000 },
+    points: 500
+  },
+  {
+    id: 'cardio-50h',
+    name: '50 Hours Logged',
+    description: 'Complete 50 hours of cumulative cardio',
+    icon: '🕐',
+    tier: 'silver',
+    condition: { type: 'cardioTime', value: 180000 },
+    points: 500
+  },
+  {
+    id: 'cardio-100h',
+    name: '100 Hours Logged',
+    description: 'Complete 100 hours of cumulative cardio',
+    icon: '🕒',
+    tier: 'gold',
+    condition: { type: 'cardioTime', value: 360000 },
+    points: 500
+  },
+  {
+    id: 'cardio-250h',
+    name: '250 Hours Logged',
+    description: 'Complete 250 hours of cumulative cardio',
+    icon: '⏳',
+    tier: 'platinum',
+    condition: { type: 'cardioTime', value: 900000 },
+    points: 500
+  },
+
+  // ====================================================================
+  // YOGA BADGES (per rewards-system.md Section 2.3)
+  // ====================================================================
+  
+  // 2.3.1. Yoga Session Count Badges
+  {
+    id: 'yoga-beginner',
+    name: 'Yoga Beginner',
+    description: 'Complete 5 yoga sessions',
+    icon: '🧘',
+    tier: 'bronze',
+    condition: { type: 'yogaWorkoutCount', value: 5 },
+    points: 500
+  },
+  {
+    id: 'yoga-newcomer',
+    name: 'Yoga Newcomer',
+    description: 'Complete 10 yoga sessions',
+    icon: '🌱',
+    tier: 'bronze',
+    condition: { type: 'yogaWorkoutCount', value: 10 },
+    points: 500
+  },
+  {
+    id: 'yoga-regular',
+    name: 'Yoga Regular',
+    description: 'Complete 30 yoga sessions',
+    icon: '🌿',
+    tier: 'silver',
+    condition: { type: 'yogaWorkoutCount', value: 30 },
+    points: 500
+  },
+  {
+    id: 'yoga-devotee',
+    name: 'Yoga Devotee',
+    description: 'Complete 75 yoga sessions',
+    icon: '🌺',
+    tier: 'gold',
+    condition: { type: 'yogaWorkoutCount', value: 75 },
+    points: 500
+  },
+  {
+    id: 'yoga-master',
+    name: 'Yoga Master',
+    description: 'Complete 150 yoga sessions',
+    icon: '🪷',
+    tier: 'platinum',
+    condition: { type: 'yogaWorkoutCount', value: 150 },
+    points: 500
+  },
+
+  // 2.3.2. Yoga Time Accumulation Badges
+  {
+    id: 'yoga-5h',
+    name: '5 Hours Logged',
+    description: 'Complete 5 hours of cumulative yoga',
+    icon: '🕉️',
+    tier: 'bronze',
+    condition: { type: 'yogaTime', value: 18000 },
+    points: 500
+  },
+  {
+    id: 'yoga-10h',
+    name: '10 Hours Logged',
+    description: 'Complete 10 hours of cumulative yoga',
+    icon: '☮️',
+    tier: 'bronze',
+    condition: { type: 'yogaTime', value: 36000 },
+    points: 500
+  },
+  {
+    id: 'yoga-25h',
+    name: '25 Hours Logged',
+    description: 'Complete 25 hours of cumulative yoga',
+    icon: '🍀',
+    tier: 'silver',
+    condition: { type: 'yogaTime', value: 90000 },
+    points: 500
+  },
+  {
+    id: 'yoga-50h',
+    name: '50 Hours Logged',
+    description: 'Complete 50 hours of cumulative yoga',
+    icon: '🌸',
+    tier: 'gold',
+    condition: { type: 'yogaTime', value: 180000 },
+    points: 500
+  },
+  {
+    id: 'yoga-100h',
+    name: '100 Hours Logged',
+    description: 'Complete 100 hours of cumulative yoga',
+    icon: '☯️',
+    tier: 'platinum',
+    condition: { type: 'yogaTime', value: 360000 },
+    points: 500
+  },
+
+  // ====================================================================
+  // OVERALL TRAINING BADGES (per rewards-system.md Section 2.4)
+  // ====================================================================
+  
+  {
+    id: 'training-novice',
+    name: 'Training Novice',
+    description: 'Complete 25 total workouts (all types)',
+    icon: '⭐',
+    tier: 'bronze',
+    condition: { type: 'sessionCount', value: 25 },
+    points: 500
+  },
+  {
+    id: 'training-initiate',
+    name: 'Training Initiate',
+    description: 'Complete 50 total workouts',
+    icon: '🌟',
+    tier: 'bronze',
+    condition: { type: 'sessionCount', value: 50 },
+    points: 500
+  },
+  {
+    id: 'training-enthusiast',
+    name: 'Training Enthusiast',
+    description: 'Complete 150 total workouts',
+    icon: '✨',
+    tier: 'silver',
+    condition: { type: 'sessionCount', value: 150 },
+    points: 500
+  },
+  {
+    id: 'training-veteran',
+    name: 'Training Veteran',
+    description: 'Complete 300 total workouts',
+    icon: '🌠',
+    tier: 'gold',
+    condition: { type: 'sessionCount', value: 300 },
+    points: 500
+  },
+  {
+    id: 'training-legend',
+    name: 'Training Legend',
+    description: 'Complete 750 total workouts',
+    icon: '💫',
+    tier: 'platinum',
+    condition: { type: 'sessionCount', value: 750 },
+    points: 500
+  },
+  {
+    id: 'training-immortal',
+    name: 'Training Immortal',
+    description: 'Complete 1,500 total workouts',
+    icon: '⚜️',
+    tier: 'platinum',
+    condition: { type: 'sessionCount', value: 1500 },
+    points: 500
+  },
+
+  // ====================================================================
+  // WEEKLY CONSISTENCY BADGES (per rewards-system.md Section 2.5)
+  // ====================================================================
+  
+  {
+    id: 'consistent-week-1',
+    name: 'Consistent Week I',
+    description: 'Complete 3+ strength sessions per week for 4 consecutive weeks',
+    icon: '📅',
+    tier: 'bronze',
+    condition: { type: 'strengthWeekStreak', value: 4 },
+    points: 500
+  },
+  {
+    id: 'consistent-week-2',
+    name: 'Consistent Week II',
+    description: 'Complete 3+ strength sessions per week for 12 consecutive weeks (~3 months)',
+    icon: '📆',
+    tier: 'silver',
+    condition: { type: 'strengthWeekStreak', value: 12 },
+    points: 500
+  },
+  {
+    id: 'consistent-week-3',
+    name: 'Consistent Week III',
+    description: 'Complete 3+ strength sessions per week for 26 consecutive weeks (~6 months)',
+    icon: '🗓️',
+    tier: 'gold',
+    condition: { type: 'strengthWeekStreak', value: 26 },
+    points: 500
+  },
+  {
+    id: 'consistent-week-4',
+    name: 'Consistent Week IV',
+    description: 'Complete 3+ strength sessions per week for 52 consecutive weeks (1 year)',
+    icon: '📋',
+    tier: 'platinum',
+    condition: { type: 'strengthWeekStreak', value: 52 },
+    points: 500
+  },
+  {
+    id: 'consistent-week-5',
+    name: 'Consistent Week V',
+    description: 'Complete 3+ strength sessions per week for 104 consecutive weeks (2 years)',
+    icon: '📜',
+    tier: 'platinum',
+    condition: { type: 'strengthWeekStreak', value: 104 },
+    points: 500
+  },
+
+  // ====================================================================
+  // STREAK BADGES (per rewards-system.md Section 2.6)
+  // ====================================================================
+  
+  {
+    id: 'week-streak',
+    name: 'Week Streak',
+    description: 'Maintain a 7-day training streak',
+    icon: '🔗',
+    tier: 'bronze',
+    condition: { type: 'streak', value: 7 },
+    points: 500
+  },
+  {
+    id: 'fortnight-streak',
+    name: 'Fortnight Streak',
+    description: 'Maintain a 14-day training streak',
+    icon: '⚡',
+    tier: 'bronze',
+    condition: { type: 'streak', value: 14 },
+    points: 500
+  },
+  {
+    id: 'month-streak',
+    name: 'Month Streak',
+    description: 'Maintain a 30-day training streak',
+    icon: '🔥',
+    tier: 'silver',
+    condition: { type: 'streak', value: 30 },
+    points: 500
+  },
+  {
+    id: 'quarterly-streak',
+    name: 'Quarterly Streak',
+    description: 'Maintain a 90-day training streak',
+    icon: '💎',
+    tier: 'gold',
+    condition: { type: 'streak', value: 90 },
+    points: 500
+  },
+  {
+    id: 'biannual-streak',
+    name: 'Biannual Streak',
+    description: 'Maintain a 180-day training streak',
+    icon: '🛡️',
+    tier: 'platinum',
+    condition: { type: 'streak', value: 180 },
+    points: 500
+  },
 ];
 
 /**
@@ -609,19 +637,86 @@ const countYogaWorkouts = (workoutHistory) => {
 };
 
 /**
- * Get the start of the week (Monday) for a given date
+ * Get the start of the week (Sunday) for a given date
+ * Per rewards-system.md: Week is Sunday-Saturday
  * @param {Date} date - Date to get week start for
- * @returns {Date} Start of the week (Monday at 00:00:00)
+ * @returns {Date} Start of the week (Sunday at 00:00:00)
  */
 const getWeekStart = (date) => {
   const d = new Date(date);
   const day = d.getDay();
-  // Calculate days to subtract to get to Monday
-  // Sunday (0) needs to go back 6 days, other days go back (day - 1) days
-  const diff = day === 0 ? 6 : day - 1;
-  d.setDate(d.getDate() - diff);
+  // Sunday is 0, so subtract 'day' to get to Sunday
+  d.setDate(d.getDate() - day);
   d.setHours(0, 0, 0, 0);
   return d;
+};
+
+/**
+ * Calculate total cardio time in seconds
+ * @param {Array} workoutHistory - Array of completed workouts
+ * @returns {number} Total cardio time in seconds
+ */
+const calculateCardioTime = (workoutHistory) => {
+  if (!workoutHistory || !Array.isArray(workoutHistory)) return 0;
+  return workoutHistory
+    .filter(w => isCardioType(w.type))
+    .reduce((total, workout) => {
+      // duration can be in seconds or minutes depending on session type
+      const duration = workout.duration || 0;
+      // If duration is very small, it's likely in minutes (convert to seconds)
+      // If duration is large, it's already in seconds
+      // Most cardio sessions are 10-120 minutes, so if duration < 300, assume minutes
+      return total + (duration < 300 ? duration * 60 : duration);
+    }, 0);
+};
+
+/**
+ * Calculate total yoga time in seconds
+ * @param {Array} workoutHistory - Array of completed workouts
+ * @returns {number} Total yoga time in seconds
+ */
+const calculateYogaTime = (workoutHistory) => {
+  if (!workoutHistory || !Array.isArray(workoutHistory)) return 0;
+  return workoutHistory
+    .filter(w => isYogaType(w.type))
+    .reduce((total, workout) => {
+      const duration = workout.duration || 0;
+      // Same logic as cardio time
+      return total + (duration < 300 ? duration * 60 : duration);
+    }, 0);
+};
+
+/**
+ * Calculate volume for a single workout session
+ * @param {Object} workout - Workout object with exercises
+ * @returns {number} Total volume in lbs for this session
+ */
+const calculateSessionVolume = (workout) => {
+  if (!workout || !workout.exercises) return 0;
+  let volume = 0;
+  Object.values(workout.exercises).forEach(exerciseData => {
+    exerciseData.sets?.forEach(set => {
+      if (set.weight && set.reps) {
+        volume += set.weight * set.reps;
+      }
+    });
+  });
+  return volume;
+};
+
+/**
+ * Get maximum single-session volume from workout history
+ * @param {Array} workoutHistory - Array of completed workouts
+ * @returns {number} Maximum volume from any single session
+ */
+const getMaxSingleSessionVolume = (workoutHistory) => {
+  if (!workoutHistory || !Array.isArray(workoutHistory)) return 0;
+  return workoutHistory
+    .filter(w => isStrengthType(w.type))
+    .reduce((max, workout) => {
+      const volume = calculateSessionVolume(workout);
+      return Math.max(max, volume);
+    }, 0);
 };
 
 /**
@@ -716,6 +811,15 @@ export const isAchievementUnlocked = (achievement, userStats, workoutHistory = [
     
     case 'strengthWeekStreak':
       return calculateStrengthWeekStreak(workoutHistory) >= condition.value;
+    
+    case 'cardioTime':
+      return calculateCardioTime(workoutHistory) >= condition.value;
+    
+    case 'yogaTime':
+      return calculateYogaTime(workoutHistory) >= condition.value;
+    
+    case 'singleSessionVolume':
+      return getMaxSingleSessionVolume(workoutHistory) >= condition.value;
     
     case 'special':
       return checkSpecialCondition(condition, userStats, workoutHistory);
@@ -868,6 +972,15 @@ export const getNextAchievementProgress = (categoryAchievements, userStats, work
     case 'strengthWeekStreak':
       currentValue = calculateStrengthWeekStreak(workoutHistory);
       break;
+    case 'cardioTime':
+      currentValue = calculateCardioTime(workoutHistory);
+      break;
+    case 'yogaTime':
+      currentValue = calculateYogaTime(workoutHistory);
+      break;
+    case 'singleSessionVolume':
+      currentValue = getMaxSingleSessionVolume(workoutHistory);
+      break;
     default:
       currentValue = 0;
   }
@@ -938,6 +1051,9 @@ export const getNewlyUnlockedAchievements = (userStats, workoutHistory, previous
   const yogaCountBefore = countYogaWorkouts(workoutHistoryBefore);
   const strengthWeekStreakBefore = calculateStrengthWeekStreak(workoutHistoryBefore);
   const streakBefore = calculateStreak(workoutHistoryBefore).currentStreak;
+  const cardioTimeBefore = calculateCardioTime(workoutHistoryBefore);
+  const yogaTimeBefore = calculateYogaTime(workoutHistoryBefore);
+  const maxSessionVolumeBefore = getMaxSingleSessionVolume(workoutHistoryBefore);
   
   return currentUnlocked.filter(achievement => {
     // Rule 1: Skip if already in previouslyUnlocked
@@ -969,6 +1085,15 @@ export const getNewlyUnlockedAchievements = (userStats, workoutHistory, previous
       case 'strengthWeekStreak':
         return strengthWeekStreakBefore < requiredValue;
       
+      case 'cardioTime':
+        return cardioTimeBefore < requiredValue;
+      
+      case 'yogaTime':
+        return yogaTimeBefore < requiredValue;
+      
+      case 'singleSessionVolume':
+        return maxSessionVolumeBefore < requiredValue;
+      
       case 'prCount':
       case 'totalVolume':
       case 'totalTime':
@@ -988,40 +1113,180 @@ export const getNewlyUnlockedAchievements = (userStats, workoutHistory, previous
 };
 
 /**
- * Calculate total achievement points
- * Bronze: 10, Silver: 25, Gold: 50, Platinum: 100
- * @param {Array} unlockedAchievements - Array of unlocked achievements
- * @returns {number} Total points
+ * NEW POINTS SYSTEM (per rewards-system.md Section 3)
+ * 
+ * Points are now the primary driver for levels and come from:
+ * 1. Session completion (base points)
+ * 2. Weekly consistency bonus (20% after 3+ strength sessions)
+ * 3. Streak multiplier (1.10x to 1.40x based on streak length)
+ * 4. Badge milestone bonuses (500 points per badge)
+ * 5. Penalties (streak break: -100, weekly failure: -150)
  */
-export const calculateAchievementPoints = (unlockedAchievements) => {
-  const tierPoints = {
-    bronze: 10,
-    silver: 25,
-    gold: 50,
-    platinum: 100
-  };
+
+/**
+ * Calculate base points for a session
+ * @param {string} sessionType - Type of session (strength, cardio, yoga, etc.)
+ * @returns {number} Base points for this session type
+ */
+export const getBaseSessionPoints = (sessionType) => {
+  const type = (sessionType || '').toLowerCase();
   
-  return unlockedAchievements.reduce((total, achievement) => {
-    return total + (tierPoints[achievement.tier] || 0);
-  }, 0);
+  // Strength types: 100 points
+  if (isStrengthType(type)) {
+    return 100;
+  }
+  
+  // Cardio types: 50 points
+  if (isCardioType(type)) {
+    return 50;
+  }
+  
+  // Yoga types: 40 points
+  if (isYogaType(type)) {
+    return 40;
+  }
+  
+  // Default for any other session type
+  return 50;
 };
 
 /**
- * Calculate user level based on achievement points
- * Each level requires 100 points
- * @param {number} points - Total achievement points
- * @returns {Object} { level, pointsToNext }
+ * Get streak multiplier based on current streak length
+ * @param {number} streakDays - Current streak in days
+ * @returns {number} Multiplier (1.0 to 1.40)
+ */
+export const getStreakMultiplier = (streakDays) => {
+  if (streakDays >= 365) return 1.40; // +40%
+  if (streakDays >= 180) return 1.35; // +35%
+  if (streakDays >= 90) return 1.30;  // +30%
+  if (streakDays >= 60) return 1.25;  // +25%
+  if (streakDays >= 30) return 1.20;  // +20%
+  if (streakDays >= 14) return 1.15;  // +15%
+  if (streakDays >= 7) return 1.10;   // +10%
+  return 1.0; // No bonus
+};
+
+/**
+ * Check if user has completed 3+ strength sessions in the current week
+ * Week is Sunday-Saturday per rewards-system.md
+ * @param {Array} workoutHistory - Array of all workouts
+ * @param {Date} currentDate - Current date/time
+ * @returns {boolean} True if 3+ strength sessions completed this week
+ */
+export const hasWeeklyConsistencyBonus = (workoutHistory, currentDate = new Date()) => {
+  const weekStart = getWeekStart(currentDate);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+  
+  const strengthThisWeek = workoutHistory.filter(w => {
+    if (!isStrengthType(w.type)) return false;
+    const workoutDate = new Date(w.date);
+    return workoutDate >= weekStart && workoutDate < weekEnd;
+  });
+  
+  return strengthThisWeek.length >= 3;
+};
+
+/**
+ * Calculate points earned for a session
+ * Applies base points, weekly bonus, and streak multiplier
+ * @param {string} sessionType - Type of session
+ * @param {number} currentStreak - Current streak in days
+ * @param {boolean} weeklyBonusActive - Whether 3+ strength sessions completed this week
+ * @returns {number} Total points for this session
+ */
+export const calculateSessionPoints = (sessionType, currentStreak, weeklyBonusActive) => {
+  let points = getBaseSessionPoints(sessionType);
+  
+  // Apply weekly consistency bonus (20% if 3+ strength sessions this week)
+  if (weeklyBonusActive) {
+    points *= 1.20;
+  }
+  
+  // Apply streak multiplier
+  const streakMultiplier = getStreakMultiplier(currentStreak);
+  points *= streakMultiplier;
+  
+  return Math.round(points);
+};
+
+/**
+ * Calculate total achievement points
+ * Now returns 500 points per badge (flat rate)
+ * @param {Array} unlockedAchievements - Array of unlocked achievements
+ * @returns {number} Total badge bonus points
+ */
+export const calculateAchievementPoints = (unlockedAchievements) => {
+  // Each badge awards 500 points (per rewards-system.md Section 3.4)
+  return unlockedAchievements.length * 500;
+};
+
+/**
+ * Level thresholds per rewards-system.md Section 4.2
+ * Early levels come quickly, later levels spread out for long-term engagement
+ */
+const LEVEL_THRESHOLDS = [
+  0,        // Level 1 (starting point)
+  2000,     // Level 2
+  4500,     // Level 3
+  7500,     // Level 4
+  11500,    // Level 5
+  16500,    // Level 6
+  22500,    // Level 7
+  29500,    // Level 8
+  37500,    // Level 9
+  47500,    // Level 10
+  59000,    // Level 11
+  72000,    // Level 12
+  87000,    // Level 13
+  104500,   // Level 14
+  125000,   // Level 15
+  148000,   // Level 16
+  173500,   // Level 17
+  201500,   // Level 18
+  232000,   // Level 19
+  265000,   // Level 20
+  301000,   // Level 21
+  340000,   // Level 22
+  382500,   // Level 23
+  428500,   // Level 24
+  478000,   // Level 25
+  531500,   // Level 26
+  589000,   // Level 27
+  651000,   // Level 28
+  717500,   // Level 29
+  789000,   // Level 30
+];
+
+/**
+ * Calculate user level based on total points
+ * Uses new threshold system per rewards-system.md Section 4
+ * @param {number} points - Total points (from sessions + badges - penalties)
+ * @returns {Object} { level, currentPoints, pointsToNext, totalPoints }
  */
 export const calculateUserLevel = (points) => {
-  const pointsPerLevel = 100;
-  const level = Math.floor(points / pointsPerLevel) + 1;
-  const pointsInCurrentLevel = points % pointsPerLevel;
-  const pointsToNext = pointsPerLevel - pointsInCurrentLevel;
+  // Find the highest level threshold the user has reached
+  let level = 1;
+  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (points >= LEVEL_THRESHOLDS[i]) {
+      level = i + 1;
+      break;
+    }
+  }
+  
+  // Calculate points in current level and points to next level
+  const currentLevelThreshold = LEVEL_THRESHOLDS[level - 1] || 0;
+  const nextLevelThreshold = LEVEL_THRESHOLDS[level] || (currentLevelThreshold + 100000);
+  
+  const currentPoints = points - currentLevelThreshold;
+  const pointsToNext = nextLevelThreshold - points;
   
   return {
     level,
-    currentPoints: pointsInCurrentLevel,
+    currentPoints,
     pointsToNext,
-    totalPoints: points
+    totalPoints: points,
+    nextLevelThreshold,
+    currentLevelThreshold
   };
 };

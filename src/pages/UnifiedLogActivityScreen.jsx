@@ -39,6 +39,7 @@ const SESSION_TYPES = {
   STRENGTH: 'strength',
   CARDIO: 'cardio',
   YOGA: 'yoga',
+  ACTIVE_RECOVERY: 'active_recovery',
   REST: 'rest',
 };
 
@@ -235,6 +236,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
     
     const typeMap = {
       [SESSION_TYPES.YOGA]: 'Yoga',
+      [SESSION_TYPES.ACTIVE_RECOVERY]: 'Active Recovery',
       [SESSION_TYPES.REST]: 'Rest',
     };
     return typeMap[sessionType] || sessionType;
@@ -344,6 +346,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                         <MenuItem value={SESSION_TYPES.STRENGTH}>Strength</MenuItem>
                         <MenuItem value={SESSION_TYPES.CARDIO}>Cardio</MenuItem>
                         <MenuItem value={SESSION_TYPES.YOGA}>Yoga</MenuItem>
+                        <MenuItem value={SESSION_TYPES.ACTIVE_RECOVERY}>Active Recovery</MenuItem>
                         <MenuItem value={SESSION_TYPES.REST}>Rest Day</MenuItem>
                       </Select>
                     </FormControl>

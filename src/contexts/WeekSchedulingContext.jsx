@@ -204,12 +204,16 @@ export const WeekSchedulingProvider = ({ children }) => {
     return weekState.currentWeek === 1;
   }, [weekState.currentWeek]);
 
-  // Assign workout to a day of the week
-  const assignWorkoutToDay = useCallback(async (dayOfWeek, sessionData) => {
-    const updatedSchedule = {
-      ...weekState.weeklySchedule,
-      [dayOfWeek]: sessionData,
-    };
+  // Assign workout to one or multiple days of the week
+  const assignWorkoutToDay = useCallback(async (daysOfWeek, sessionData) => {
+    // Support both single day (string) and multiple days (array)
+    const days = Array.isArray(daysOfWeek) ? daysOfWeek : [daysOfWeek];
+    
+    // Create updated schedule with session assigned to all selected days
+    const updatedSchedule = { ...weekState.weeklySchedule };
+    days.forEach(day => {
+      updatedSchedule[day] = sessionData;
+    });
     
     const updatedState = {
       ...weekState,

@@ -39,6 +39,7 @@ const SESSION_TYPES = {
   STRENGTH: 'strength',
   CARDIO: 'cardio',
   YOGA: 'yoga',
+  ACTIVE_RECOVERY: 'active_recovery',
   REST: 'rest',
 };
 
@@ -90,8 +91,8 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
       errors.date = 'Date is required';
     }
     
-    // Only validate duration for non-rest sessions
-    if (values.sessionType !== SESSION_TYPES.REST) {
+    // Only validate duration for non-rest and non-active-recovery sessions
+    if (values.sessionType !== SESSION_TYPES.REST && values.sessionType !== SESSION_TYPES.ACTIVE_RECOVERY) {
       if (!values.duration) {
         errors.duration = 'Duration is required';
       } else if (isNaN(values.duration) || parseFloat(values.duration) <= 0) {
@@ -120,8 +121,8 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       const timestamp = values.date.getTime();
-      // For rest days, set duration to 0 if not provided
-      const duration = values.sessionType === SESSION_TYPES.REST && !values.duration 
+      // For rest days and active recovery, set duration to 0 if not provided
+      const duration = (values.sessionType === SESSION_TYPES.REST || values.sessionType === SESSION_TYPES.ACTIVE_RECOVERY) && !values.duration 
         ? 0 
         : parseFloat(values.duration) * SECONDS_PER_MINUTE;
 
@@ -235,6 +236,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
     
     const typeMap = {
       [SESSION_TYPES.YOGA]: 'Yoga',
+      [SESSION_TYPES.ACTIVE_RECOVERY]: 'Active Recovery',
       [SESSION_TYPES.REST]: 'Rest',
     };
     return typeMap[sessionType] || sessionType;
@@ -344,6 +346,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                         <MenuItem value={SESSION_TYPES.STRENGTH}>Strength</MenuItem>
                         <MenuItem value={SESSION_TYPES.CARDIO}>Cardio</MenuItem>
                         <MenuItem value={SESSION_TYPES.YOGA}>Yoga</MenuItem>
+                        <MenuItem value={SESSION_TYPES.ACTIVE_RECOVERY}>Active Recovery</MenuItem>
                         <MenuItem value={SESSION_TYPES.REST}>Rest Day</MenuItem>
                       </Select>
                     </FormControl>

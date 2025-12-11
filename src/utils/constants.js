@@ -32,7 +32,6 @@ export const HIIT_EXERCISES_DATA_PATH = import.meta.env.BASE_URL + 'data/hiit-ex
 
 /** Screen route identifiers */
 export const SCREENS = {
-  PREVIEW: 'preview',
   WORKOUT: 'workout',
   COMPLETION: 'completion',
   PROGRESS: 'progress',

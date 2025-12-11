@@ -6,7 +6,6 @@ import WorkTabs from './components/WorkTabs';
 import TodayView from './components/TodayView/TodayView';
 // SelectionScreen removed - functionality moved to WorkTabs
 import WorkoutScreenModal from './components/WorkoutScreenModal';
-import WorkoutPreview from './components/WorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import AuthScreen from './components/AuthScreen';
@@ -67,13 +66,11 @@ function AppContent() {
   const [equipmentOptions, setEquipmentOptions] = useState([]);
   const [completedWorkoutData, setCompletedWorkoutData] = useState(null);
   const [loading] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const [showGuestSnackbar, setShowGuestSnackbar] = useState(false);
   const [showMigrationDialog, setShowMigrationDialog] = useState(false);
   const [newAchievement, setNewAchievement] = useState(null);
   const [showAchievementDialog, setShowAchievementDialog] = useState(false);
-  const [isCustomizeMode, setIsCustomizeMode] = useState(false);
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Track superset configuration
   const [setsPerSuperset, setSetsPerSuperset] = useState(3); // Track number of sets per superset
   const { currentUser, isGuest, hasGuestData } = useAuth();
@@ -335,10 +332,8 @@ function AppContent() {
     setCurrentWorkout(workout);
     setWorkoutType(type);
     
-    // Show preview screen instead of going directly to workout
-    setIsCustomizeMode(false);
-    setShowPreview(true);
-    setCurrentScreen('preview');
+    // Go directly to workout screen
+    setCurrentScreen('workout');
   };
 
   const handleCustomize = (type, equipmentFilter, supersetConfigParam = [2, 2, 2, 2]) => {
@@ -349,33 +344,9 @@ function AppContent() {
     const totalExercises = supersetConfigParam.reduce((sum, count) => sum + count, 0);
     const emptyWorkout = Array(totalExercises).fill(null);
     setCurrentWorkout(emptyWorkout);
-    setIsCustomizeMode(true);
-    setShowPreview(true);
-    setCurrentScreen('preview');
-  };
-
-  const handleBeginWorkout = (workout, workoutSupersetConfig, workoutSetsPerSuperset) => {
-    // If workout is passed from WorkoutPreview, update it
-    if (workout) {
-      setCurrentWorkout(workout);
-    }
-    // Store superset config and sets per superset if provided
-    if (workoutSupersetConfig) {
-      setSupersetConfig(workoutSupersetConfig);
-    }
-    if (workoutSetsPerSuperset !== undefined) {
-      setSetsPerSuperset(workoutSetsPerSuperset);
-    }
-    setShowPreview(false);
-    setIsCustomizeMode(false);
+    
+    // Go directly to workout screen in customize mode
     setCurrentScreen('workout');
-  };
-
-  const handleCancelPreview = () => {
-    setShowPreview(false);
-    setIsCustomizeMode(false);
-    // Return to home instead of selection
-    setCurrentScreen('home');
   };
 
   /**
@@ -808,20 +779,6 @@ function AppContent() {
               onEquipmentChange={handleEquipmentChange}
               onStartWorkout={handleStartWorkout}
               onCustomize={handleCustomize}
-            />
-          )}
-          
-          {currentScreen === 'preview' && showPreview && (
-            <WorkoutPreview
-              workout={currentWorkout}
-              workoutType={workoutType}
-              onStart={handleBeginWorkout}
-              onCancel={handleCancelPreview}
-              onRandomizeExercise={handleRandomizeExercise}
-              equipmentFilter={Array.from(selectedEquipment)}
-              isCustomizeMode={isCustomizeMode}
-              supersetConfig={supersetConfig}
-              setsPerSuperset={setsPerSuperset}
             />
           )}
           

@@ -1274,7 +1274,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       key={index}
                       label={`${phase.name} (minutes)`}
                       type="number"
-                      value={phase.duration === null || phase.duration === undefined ? '' : phase.duration}
+                      value={phase.duration ?? ''}
                       onChange={(e) => {
                         const val = e.target.value;
                         if (val === '' || val === null) {
@@ -1328,7 +1328,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                   <TextField
                     label="Duration (minutes)"
                     type="number"
-                    value={cardioDuration === null || cardioDuration === undefined ? '' : cardioDuration}
+                    value={cardioDuration ?? ''}
                     onChange={(e) => {
                       const val = e.target.value;
                       if (val === '' || val === null) {

@@ -14,7 +14,7 @@ import {
   FitnessCenter,
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
-import { getSessionTypeDisplayName, isTimerType } from '../../utils/sessionTemplates';
+import { getSessionTypeDisplayName } from '../../utils/sessionTemplates';
 
 /**
  * TodaysWorkoutSection - Minimalist section showing today's assigned workout

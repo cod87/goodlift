@@ -1,6 +1,7 @@
 import { memo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@mui/material';
+import TodaysWorkoutSection from './TodaysWorkoutSection';
 import SavedWorkoutsList from './SavedWorkoutsList';
 import WorkoutCreationModal from './WorkoutCreationModal';
 import { saveSavedWorkout, updateSavedWorkout } from '../../utils/storage';
@@ -9,12 +10,14 @@ import { EXERCISES_DATA_PATH } from '../../utils/constants';
 /**
  * StrengthTab - Simplified strength workout tab showing only saved workouts list
  * Features:
+ * - Today's Workout section (if workout assigned)
  * - List of saved workouts
  * - Create new workout button
  * - Edit existing workouts
  */
 const StrengthTab = memo(({ 
   onStartWorkout,
+  onNavigate,
 }) => {
   const [showWorkoutCreator, setShowWorkoutCreator] = useState(false);
   const [exercises, setExercises] = useState([]);
@@ -76,6 +79,12 @@ const StrengthTab = memo(({
 
   return (
     <Box>
+      {/* Today's Workout Section */}
+      <TodaysWorkoutSection 
+        onStartWorkout={onStartWorkout}
+        onNavigate={onNavigate}
+      />
+      
       <SavedWorkoutsList 
         key={workoutListKey}
         onCreateWorkout={handleCreateWorkout}
@@ -98,6 +107,7 @@ StrengthTab.displayName = 'StrengthTab';
 
 StrengthTab.propTypes = {
   onStartWorkout: PropTypes.func,
+  onNavigate: PropTypes.func,
 };
 
 export default StrengthTab;

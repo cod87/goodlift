@@ -43,8 +43,8 @@ const TimerDisplay = ({
   intervalNames,
   sessionName,
   // Flow/Yoga specific
-  currentPoseIndex,
-  selectedPoses,
+  currentPhaseIndex,
+  yogaPhases,
   // Handlers
   handleStart,
   handlePause,
@@ -163,13 +163,13 @@ const TimerDisplay = ({
           </>
         )}
         
-        {mode === TIMER_MODES.FLOW && selectedPoses[currentPoseIndex] && (
+        {mode === TIMER_MODES.FLOW && yogaPhases[currentPhaseIndex] && (
           <>
             <Typography variant="h6" sx={{ mt: 2, fontWeight: 600 }}>
-              {selectedPoses[currentPoseIndex].name}
+              {yogaPhases[currentPhaseIndex].name}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Pose {currentPoseIndex + 1} of {selectedPoses.length}
+              Phase {currentPhaseIndex + 1} of {yogaPhases.length}
             </Typography>
           </>
         )}
@@ -213,7 +213,7 @@ const TimerDisplay = ({
                 },
                 flexShrink: 0, // Prevent button from shrinking
               }}
-              disabled={mode === TIMER_MODES.FLOW && selectedPoses.length === 0}
+              disabled={mode === TIMER_MODES.FLOW && yogaPhases.length === 0}
             >
               <PlayArrow sx={{ fontSize: { xs: 40, sm: 48 } }} />
             </IconButton>
@@ -239,7 +239,7 @@ const TimerDisplay = ({
                   }}
                   disabled={
                     (mode === TIMER_MODES.HIIT && isPrepPeriod) ||
-                    (mode === TIMER_MODES.FLOW && currentPoseIndex === 0)
+                    (mode === TIMER_MODES.FLOW && currentPhaseIndex === 0)
                   }
                 >
                   <SkipPrevious sx={{ fontSize: { xs: 28, sm: 36 } }} />
@@ -319,7 +319,7 @@ const TimerDisplay = ({
                   }}
                   disabled={
                     (mode === TIMER_MODES.HIIT && !isPrepPeriod && !isRecoveryPeriod && !isWorkPeriod && currentRound >= roundsPerSet && currentSet >= numberOfSets) ||
-                    (mode === TIMER_MODES.FLOW && currentPoseIndex >= selectedPoses.length - 1)
+                    (mode === TIMER_MODES.FLOW && currentPhaseIndex >= yogaPhases.length - 1)
                   }
                 >
                   <SkipNext sx={{ fontSize: { xs: 28, sm: 36 } }} />
@@ -350,8 +350,8 @@ TimerDisplay.propTypes = {
   workIntervalNames: PropTypes.array,
   intervalNames: PropTypes.object,
   sessionName: PropTypes.string,
-  currentPoseIndex: PropTypes.number,
-  selectedPoses: PropTypes.array,
+  currentPhaseIndex: PropTypes.number,
+  yogaPhases: PropTypes.array,
   handleStart: PropTypes.func.isRequired,
   handlePause: PropTypes.func.isRequired,
   handleStop: PropTypes.func.isRequired,

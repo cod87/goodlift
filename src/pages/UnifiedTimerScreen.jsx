@@ -1276,10 +1276,15 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       type="number"
                       value={phase.duration}
                       onChange={(e) => {
-                        const val = parseInt(e.target.value);
+                        const val = parseInt(e.target.value, 10);
                         if (!isNaN(val) && val > 0 && val <= 60) {
                           const newPhases = [...yogaPhases];
                           newPhases[index] = { ...phase, duration: val };
+                          setYogaPhases(newPhases);
+                        } else if (e.target.value === '') {
+                          // Allow clearing the field
+                          const newPhases = [...yogaPhases];
+                          newPhases[index] = { ...phase, duration: phase.defaultDuration };
                           setYogaPhases(newPhases);
                         }
                       }}

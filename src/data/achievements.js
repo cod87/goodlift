@@ -575,6 +575,7 @@ export const ACHIEVEMENT_TIERS = {
 const STRENGTH_TYPES = ['full', 'upper', 'lower', 'push', 'pull', 'legs', 'core', 'strength'];
 const CARDIO_TYPES = ['cardio', 'hiit'];
 const YOGA_TYPES = ['yoga', 'stretch', 'mobility', 'flexibility'];
+const ACTIVE_RECOVERY_TYPES = ['active_recovery'];
 
 /**
  * Check if a workout type belongs to strength category
@@ -604,6 +605,16 @@ const isCardioType = (type) => {
 const isYogaType = (type) => {
   if (!type) return false;
   return YOGA_TYPES.includes(type.toLowerCase());
+};
+
+/**
+ * Check if a workout type belongs to active recovery category
+ * @param {string} type - Workout type
+ * @returns {boolean} True if active recovery type
+ */
+const isActiveRecoveryType = (type) => {
+  if (!type) return false;
+  return ACTIVE_RECOVERY_TYPES.includes(type.toLowerCase());
 };
 
 /**
@@ -1151,6 +1162,11 @@ export const getBaseSessionPoints = (sessionType) => {
   // Yoga types: 40 points
   if (isYogaType(type)) {
     return 40;
+  }
+  
+  // Active Recovery: 10 points
+  if (isActiveRecoveryType(type)) {
+    return 10;
   }
   
   // Default for any other session type

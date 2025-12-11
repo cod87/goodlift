@@ -303,83 +303,6 @@ AchievementDetailDialog.propTypes = {
 };
 
 /**
- * Compact Summary Card Component
- * Minimalist display of progress toward next achievement
- */
-const CompactSummaryCard = ({ title, icon, progressInfo, iconColor }) => {
-  if (!progressInfo) {
-    return (
-      <Card 
-        sx={{ 
-          height: '100%',
-          background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%)',
-          border: '1px solid rgba(76, 175, 80, 0.2)',
-        }}
-      >
-        <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
-          <Stack spacing={1} alignItems="center" textAlign="center">
-            <Box sx={{ color: iconColor || 'primary.main', fontSize: '1.5rem' }}>
-              {icon}
-            </Box>
-            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem', opacity: 0.8 }}>
-              {title}
-            </Typography>
-            <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'success.main' }}>
-              Complete ✓
-            </Typography>
-          </Stack>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  const { achievement, current, target, progress } = progressInfo;
-  
-  return (
-    <Card sx={{ height: '100%' }}>
-      <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
-        <Stack spacing={1} alignItems="center" textAlign="center">
-          <Box sx={{ color: iconColor || 'primary.main', fontSize: '1.5rem' }}>
-            {icon}
-          </Box>
-          <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem', opacity: 0.8 }}>
-            {title}
-          </Typography>
-          <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>
-            {achievement.name}
-          </Typography>
-          <Box sx={{ width: '100%' }}>
-            <LinearProgress
-              variant="determinate"
-              value={progress}
-              sx={{
-                height: 6,
-                borderRadius: 3,
-                bgcolor: 'action.hover',
-                '& .MuiLinearProgress-bar': {
-                  background: ACHIEVEMENT_TIERS[achievement.tier].gradient,
-                  borderRadius: 3,
-                },
-              }}
-            />
-            <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', display: 'block', mt: 0.5 }}>
-              {formatValue(current, achievement.condition.type)} / {formatValue(target, achievement.condition.type)}
-            </Typography>
-          </Box>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-};
-
-CompactSummaryCard.propTypes = {
-  title: PropTypes.string.isRequired,
-  icon: PropTypes.element.isRequired,
-  progressInfo: PropTypes.object,
-  iconColor: PropTypes.string,
-};
-
-/**
  * Main Achievements Component
  * Displays achievement grid, progress, and user level
  */
@@ -528,15 +451,17 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
         <Box sx={{ maxWidth: 500, margin: '0 auto' }}>
           <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-              {levelInfo.currentPoints} / 100 pts
+              {levelInfo.currentPoints} pts
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-              {levelInfo.pointsToNext} to Lv {levelInfo.level + 1}
+              {levelInfo.pointsToNext} pts to Lv {levelInfo.level + 1}
             </Typography>
           </Stack>
           <LinearProgress
             variant="determinate"
-            value={(levelInfo.currentPoints / 100) * 100}
+            value={levelInfo.currentPoints + levelInfo.pointsToNext > 0 
+              ? (levelInfo.currentPoints / (levelInfo.currentPoints + levelInfo.pointsToNext)) * 100 
+              : 0}
             sx={{
               height: 6,
               borderRadius: 3,
@@ -549,79 +474,477 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
         </Box>
       </Box>
       
-      {/* Compact Summary Grid - All Categories */}
-      <Box sx={{ mb: 3 }}>
-        <Typography 
-          variant="subtitle2" 
-          sx={{ 
-            mb: 1.5, 
-            fontWeight: 600, 
-            fontSize: '0.85rem',
-            color: 'text.secondary',
-            textAlign: 'center'
-          }}
-        >
-          Progress Overview
-        </Typography>
-        <Grid container spacing={{ xs: 1, sm: 1.5 }}>
-          <Grid item xs={6} sm={4} md={3} lg={2}>
-            <CompactSummaryCard
-              title="Overall"
-              icon={<EmojiEvents />}
-              progressInfo={overallProgress}
-              iconColor={CATEGORY_COLORS.overall}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg={2}>
-            <CompactSummaryCard
-              title="Streak"
-              icon={<Whatshot />}
-              progressInfo={streakProgress}
-              iconColor={CATEGORY_COLORS.streak}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg={2}>
-            <CompactSummaryCard
-              title="Strength"
-              icon={<FitnessCenter />}
-              progressInfo={strengthProgress}
-              iconColor={CATEGORY_COLORS.strength}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg={2}>
-            <CompactSummaryCard
-              title="Volume"
-              icon={<TrendingUp />}
-              progressInfo={volumeProgress}
-              iconColor={CATEGORY_COLORS.volume}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg={2}>
-            <CompactSummaryCard
-              title="Cardio"
-              icon={<DirectionsRun />}
-              progressInfo={cardioProgress}
-              iconColor={CATEGORY_COLORS.cardio}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg={2}>
-            <CompactSummaryCard
-              title="Yoga"
-              icon={<SelfImprovement />}
-              progressInfo={yogaProgress}
-              iconColor={CATEGORY_COLORS.yoga}
-            />
-          </Grid>
-          <Grid item xs={6} sm={4} md={3} lg={2}>
-            <CompactSummaryCard
-              title="Wellness"
-              icon={<Favorite />}
-              progressInfo={wellnessProgress}
-              iconColor={CATEGORY_COLORS.wellness}
-            />
-          </Grid>
-        </Grid>
-      </Box>
+      {/* Progress Overview - Flat Panel Style (like MuscleVolumeTracker) */}
+      <Card sx={{ mb: 3, bgcolor: 'background.paper' }}>
+        <CardContent sx={{ p: 2 }}>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              mb: 2, 
+              fontWeight: 600,
+            }}
+          >
+            Progress Overview
+          </Typography>
+          
+          <Stack spacing={1}>
+            {/* Overall Progress */}
+            {overallProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'background.default',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.overall, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <EmojiEvents />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Overall - {overallProgress.achievement.name}
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={overallProgress.progress}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: 'action.hover',
+                        '& .MuiLinearProgress-bar': {
+                          background: ACHIEVEMENT_TIERS[overallProgress.achievement.tier].gradient,
+                          borderRadius: 3,
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                      {formatValue(overallProgress.current, overallProgress.achievement.condition.type)} / {formatValue(overallProgress.target, overallProgress.achievement.condition.type)}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            {!overallProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'success.main',
+                  bgcolor: 'rgba(76, 175, 80, 0.05)',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.overall, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <EmojiEvents />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Overall
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'success.main' }}>
+                      Complete ✓
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            
+            {/* Streak Progress */}
+            {streakProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'background.default',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.streak, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <Whatshot />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Streak - {streakProgress.achievement.name}
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={streakProgress.progress}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: 'action.hover',
+                        '& .MuiLinearProgress-bar': {
+                          background: ACHIEVEMENT_TIERS[streakProgress.achievement.tier].gradient,
+                          borderRadius: 3,
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                      {formatValue(streakProgress.current, streakProgress.achievement.condition.type)} / {formatValue(streakProgress.target, streakProgress.achievement.condition.type)}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            {!streakProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'success.main',
+                  bgcolor: 'rgba(76, 175, 80, 0.05)',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.streak, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <Whatshot />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Streak
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'success.main' }}>
+                      Complete ✓
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            
+            {/* Strength Progress */}
+            {strengthProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'background.default',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.strength, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <FitnessCenter />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Strength - {strengthProgress.achievement.name}
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={strengthProgress.progress}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: 'action.hover',
+                        '& .MuiLinearProgress-bar': {
+                          background: ACHIEVEMENT_TIERS[strengthProgress.achievement.tier].gradient,
+                          borderRadius: 3,
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                      {formatValue(strengthProgress.current, strengthProgress.achievement.condition.type)} / {formatValue(strengthProgress.target, strengthProgress.achievement.condition.type)}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            {!strengthProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'success.main',
+                  bgcolor: 'rgba(76, 175, 80, 0.05)',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.strength, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <FitnessCenter />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Strength
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'success.main' }}>
+                      Complete ✓
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            
+            {/* Volume Progress */}
+            {volumeProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'background.default',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.volume, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <TrendingUp />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Volume - {volumeProgress.achievement.name}
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={volumeProgress.progress}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: 'action.hover',
+                        '& .MuiLinearProgress-bar': {
+                          background: ACHIEVEMENT_TIERS[volumeProgress.achievement.tier].gradient,
+                          borderRadius: 3,
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                      {formatValue(volumeProgress.current, volumeProgress.achievement.condition.type)} / {formatValue(volumeProgress.target, volumeProgress.achievement.condition.type)}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            {!volumeProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'success.main',
+                  bgcolor: 'rgba(76, 175, 80, 0.05)',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.volume, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <TrendingUp />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Volume
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'success.main' }}>
+                      Complete ✓
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            
+            {/* Cardio Progress */}
+            {cardioProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'background.default',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.cardio, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <DirectionsRun />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Cardio - {cardioProgress.achievement.name}
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={cardioProgress.progress}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: 'action.hover',
+                        '& .MuiLinearProgress-bar': {
+                          background: ACHIEVEMENT_TIERS[cardioProgress.achievement.tier].gradient,
+                          borderRadius: 3,
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                      {formatValue(cardioProgress.current, cardioProgress.achievement.condition.type)} / {formatValue(cardioProgress.target, cardioProgress.achievement.condition.type)}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            {!cardioProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'success.main',
+                  bgcolor: 'rgba(76, 175, 80, 0.05)',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.cardio, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <DirectionsRun />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Cardio
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'success.main' }}>
+                      Complete ✓
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            
+            {/* Yoga Progress */}
+            {yogaProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'background.default',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.yoga, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <SelfImprovement />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Yoga - {yogaProgress.achievement.name}
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={yogaProgress.progress}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: 'action.hover',
+                        '& .MuiLinearProgress-bar': {
+                          background: ACHIEVEMENT_TIERS[yogaProgress.achievement.tier].gradient,
+                          borderRadius: 3,
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                      {formatValue(yogaProgress.current, yogaProgress.achievement.condition.type)} / {formatValue(yogaProgress.target, yogaProgress.achievement.condition.type)}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            {!yogaProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'success.main',
+                  bgcolor: 'rgba(76, 175, 80, 0.05)',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.yoga, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <SelfImprovement />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Yoga
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'success.main' }}>
+                      Complete ✓
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            
+            {/* Wellness Progress */}
+            {wellnessProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'background.default',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.wellness, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <Favorite />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Wellness - {wellnessProgress.achievement.name}
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={wellnessProgress.progress}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: 'action.hover',
+                        '& .MuiLinearProgress-bar': {
+                          background: ACHIEVEMENT_TIERS[wellnessProgress.achievement.tier].gradient,
+                          borderRadius: 3,
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                      {formatValue(wellnessProgress.current, wellnessProgress.achievement.condition.type)} / {formatValue(wellnessProgress.target, wellnessProgress.achievement.condition.type)}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+            {!wellnessProgress && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'success.main',
+                  bgcolor: 'rgba(76, 175, 80, 0.05)',
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box sx={{ color: CATEGORY_COLORS.wellness, fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>
+                    <Favorite />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Wellness
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'success.main' }}>
+                      Complete ✓
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+          </Stack>
+        </CardContent>
+      </Card>
       
       <Divider sx={{ mb: 3 }} />
       
@@ -651,7 +974,22 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
         {displayedAchievements.map((achievement) => {
           const unlocked = isAchievementUnlocked(achievement, userStats, workoutHistory);
           return (
-            <Grid item xs={6} sm={4} md={3} lg={2} key={achievement.id}>
+            <Grid 
+              item 
+              xs={12} 
+              sm={6} 
+              md={3} 
+              lg={2} 
+              key={achievement.id}
+              sx={{
+                // Mobile landscape: 2 per row
+                '@media (max-width: 599px) and (orientation: landscape)': {
+                  width: '50%',
+                  flexBasis: '50%',
+                  maxWidth: '50%',
+                },
+              }}
+            >
               <AchievementBadge
                 achievement={achievement}
                 unlocked={unlocked}

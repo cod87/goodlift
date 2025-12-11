@@ -90,7 +90,7 @@ const TIME_COMPARISON_TOLERANCE = 0.5; // Tolerance in seconds for comparing ela
 
 // Yoga phase definitions
 const YOGA_PHASES = [
-  { name: 'Grounding & Warm-Up', defaultDuration: 3 }, // minutes
+  { name: 'Grounding & Warm-Up', defaultDuration: 5 }, // minutes
   { name: 'Vinyasa', defaultDuration: 15 }, // minutes
   { name: 'Cool Down', defaultDuration: 5 }, // minutes
 ];
@@ -1274,19 +1274,34 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       key={index}
                       label={`${phase.name} (minutes)`}
                       type="number"
-                      value={phase.duration}
+                      value={phase.duration === null || phase.duration === undefined ? '' : phase.duration}
                       onChange={(e) => {
-                        const val = parseInt(e.target.value, 10);
-                        if (!isNaN(val) && val > 0 && val <= 60) {
+                        const val = e.target.value;
+                        if (val === '' || val === null) {
+                          // Allow clearing the field - set to null for easier editing
                           const newPhases = [...yogaPhases];
-                          newPhases[index] = { ...phase, duration: val };
+                          newPhases[index] = { ...phase, duration: null };
                           setYogaPhases(newPhases);
-                        } else if (e.target.value === '') {
-                          // Allow clearing the field
+                        } else {
+                          const parsed = parseInt(val, 10);
+                          if (!isNaN(parsed) && parsed > 0 && parsed <= 60) {
+                            const newPhases = [...yogaPhases];
+                            newPhases[index] = { ...phase, duration: parsed };
+                            setYogaPhases(newPhases);
+                          }
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // Restore default value if left empty
+                        if (e.target.value === '' || phase.duration === null) {
                           const newPhases = [...yogaPhases];
                           newPhases[index] = { ...phase, duration: phase.defaultDuration };
                           setYogaPhases(newPhases);
                         }
+                      }}
+                      onFocus={(e) => {
+                        // Auto-select the value when focused for easier editing
+                        e.target.select();
                       }}
                       inputProps={{ min: 1, max: 60, inputMode: 'numeric' }}
                       fullWidth
@@ -1299,7 +1314,7 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                       Session Summary
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Total Duration: {yogaPhases.reduce((sum, p) => sum + p.duration, 0)} minutes
+                      Total Duration: {yogaPhases.reduce((sum, p) => sum + (p.duration || p.defaultDuration || 0), 0)} minutes
                     </Typography>
                   </Box>
                 </Stack>
@@ -1322,6 +1337,10 @@ const UnifiedTimerScreen = ({ onNavigate, hideBackButton = false }) => {
                         const parsed = parseInt(val);
                         setCardioDuration(isNaN(parsed) ? '' : parsed);
                       }
+                    }}
+                    onFocus={(e) => {
+                      // Auto-select the value when focused for easier editing
+                      e.target.select();
                     }}
                     onBlur={(e) => {
                       const val = e.target.value;

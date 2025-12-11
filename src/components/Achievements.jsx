@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   Typography,
-  Grid,
   LinearProgress,
   Stack,
   Chip,
@@ -970,35 +969,33 @@ const Achievements = ({ userStats, workoutHistory = [] }) => {
       </Box>
       
       {/* Achievement Badge Grid */}
-      <Grid container spacing={{ xs: 1.5, sm: 2 }}>
+      <Box 
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr', // Mobile portrait: 1 per row
+            sm: 'repeat(2, 1fr)', // Tablet: 2 per row
+            md: 'repeat(4, 1fr)', // Desktop: 4 per row
+            lg: 'repeat(6, 1fr)', // Wide: 6 per row
+          },
+          gap: { xs: 1.5, sm: 2 },
+          '@media (max-width: 599px) and (orientation: landscape)': {
+            gridTemplateColumns: 'repeat(2, 1fr)', // Mobile landscape: 2 per row
+          },
+        }}
+      >
         {displayedAchievements.map((achievement) => {
           const unlocked = isAchievementUnlocked(achievement, userStats, workoutHistory);
           return (
-            <Grid 
-              item 
-              xs={12} 
-              sm={6} 
-              md={3} 
-              lg={2} 
+            <AchievementBadge
               key={achievement.id}
-              sx={{
-                // Mobile landscape: 2 per row
-                '@media (max-width: 599px) and (orientation: landscape)': {
-                  width: '50%',
-                  flexBasis: '50%',
-                  maxWidth: '50%',
-                },
-              }}
-            >
-              <AchievementBadge
-                achievement={achievement}
-                unlocked={unlocked}
-                onClick={() => handleAchievementClick(achievement)}
-              />
-            </Grid>
+              achievement={achievement}
+              unlocked={unlocked}
+              onClick={() => handleAchievementClick(achievement)}
+            />
           );
         })}
-      </Grid>
+      </Box>
       
       {/* Achievement Detail Dialog */}
       <AchievementDetailDialog

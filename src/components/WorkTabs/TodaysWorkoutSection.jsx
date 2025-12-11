@@ -178,6 +178,53 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
               </Stack>
             </CardContent>
           </CardActionArea>
+        ) : todaysWorkout && todaysWorkout.sessionType === 'rest' ? (
+          // Rest day - clickable area to go to log activity
+          <CardActionArea onClick={handleStartToday}>
+            <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+              {/* Header */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <FitnessCenter sx={{ fontSize: '1rem', color: 'primary.main' }} />
+                <Typography 
+                  variant="overline" 
+                  sx={{ 
+                    color: 'primary.main',
+                    fontWeight: 600,
+                    fontSize: '0.75rem',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Today&apos;s Workout
+                </Typography>
+              </Box>
+
+              <Stack spacing={1}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    fontSize: '0.95rem',
+                  }}
+                >
+                  Rest Day
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <PlayArrow sx={{ fontSize: '1.2rem', color: 'primary.main' }} />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'primary.main',
+                      fontWeight: 600,
+                      fontSize: '0.85rem',
+                    }}
+                  >
+                    Log a light activity
+                  </Typography>
+                </Box>
+              </Stack>
+            </CardContent>
+          </CardActionArea>
         ) : (
           // No workout assigned or rest day - show suggestions
           <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
@@ -206,9 +253,7 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
                   mb: 0.5,
                 }}
               >
-                {todaysWorkout && todaysWorkout.sessionType === 'rest' 
-                  ? 'Rest day - or try a light activity:' 
-                  : 'No workout assigned. Consider:'}
+                No workout assigned. Consider:
               </Typography>
               <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
                 <Chip 

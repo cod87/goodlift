@@ -50,10 +50,10 @@ export const getWorkoutTypeDisplayName = (type) => {
     hiit: 'HIIT',
     rest: 'Rest',
     cardio: 'Cardio',
-    active_recovery: 'Active Recovery',
     // Day types (from session-based plans)
     strength: 'Strength',
     hypertrophy: 'Hypertrophy',
+    active_recovery: 'Active Recovery',
   };
   return displayNames[type] || type.charAt(0).toUpperCase() + type.slice(1);
 };

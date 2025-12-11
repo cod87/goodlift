@@ -168,6 +168,8 @@ const SavedWorkoutsList = memo(({
           sessionName: workout.name || `${workout.type || 'Custom'} Workout`,
           exercises: workout.exercises,
           supersetConfig: workout.supersetConfig || [2, 2, 2, 2],
+          workoutId: workout.id, // Include workout ID to link to saved workout
+          isSavedWorkout: true, // Flag to indicate this is a saved workout
         });
         
         // Reload workouts

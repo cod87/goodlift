@@ -99,22 +99,19 @@ const SavedWorkoutsList = memo(({
 
   // Sort workouts: assigned workouts first (Sunday-Saturday order), then unassigned
   const sortedWorkouts = [...savedWorkouts].sort((a, b) => {
-    // Support both old single day (assignedDay) and new multi-day (assignedDays) format
-    const aDays = a.assignedDays || (a.assignedDay ? [a.assignedDay] : []);
-    const bDays = b.assignedDays || (b.assignedDay ? [b.assignedDay] : []);
+    const aDay = a.assignedDay;
+    const bDay = b.assignedDay;
     
-    // If both have assignments, sort by the first day assigned
-    if (aDays.length > 0 && bDays.length > 0) {
-      const aFirstDay = Math.min(...aDays.map(d => DAYS_OF_WEEK.indexOf(d)));
-      const bFirstDay = Math.min(...bDays.map(d => DAYS_OF_WEEK.indexOf(d)));
-      return aFirstDay - bFirstDay;
+    // Both assigned - sort by day of week
+    if (aDay && bDay) {
+      return DAYS_OF_WEEK.indexOf(aDay) - DAYS_OF_WEEK.indexOf(bDay);
     }
     
     // Only a assigned - a comes first
-    if (aDays.length > 0 && bDays.length === 0) return -1;
+    if (aDay && !bDay) return -1;
     
     // Only b assigned - b comes first
-    if (aDays.length === 0 && bDays.length > 0) return 1;
+    if (!aDay && bDay) return 1;
     
     // Neither assigned - maintain original order
     return 0;
@@ -159,34 +156,32 @@ const SavedWorkoutsList = memo(({
     setSelectedWorkoutForDay(null);
   };
 
-  const handleAssignDay = async (days) => {
+  const handleAssignDay = async (day) => {
     if (selectedWorkoutForDay !== null) {
       try {
         const workout = savedWorkouts[selectedWorkoutForDay];
         
-        // Update the saved workout with the assigned days (array)
+        // Update the saved workout with the assigned day
         const updatedWorkout = {
           ...workout,
-          assignedDays: days, // Now supports multiple days
+          assignedDay: day,
         };
         
         await updateSavedWorkout(selectedWorkoutForDay, updatedWorkout);
         
-        // Sync with weekly schedule for each day
-        for (const day of days) {
-          await assignWorkoutToDay(day, {
-            sessionType: workout.type || 'full',
-            sessionName: workout.name || `${workout.type || 'Custom'} Workout`,
-            exercises: workout.exercises,
-            supersetConfig: workout.supersetConfig || [2, 2, 2, 2],
-          });
-        }
+        // Sync with weekly schedule
+        await assignWorkoutToDay(day, {
+          sessionType: workout.type || 'full',
+          sessionName: workout.name || `${workout.type || 'Custom'} Workout`,
+          exercises: workout.exercises,
+          supersetConfig: workout.supersetConfig || [2, 2, 2, 2],
+        });
         
         // Reload workouts
         const workouts = await getSavedWorkouts();
         setSavedWorkouts(workouts || []);
       } catch (error) {
-        console.error('Error assigning workout to days:', error);
+        console.error('Error assigning workout to day:', error);
       }
     }
     handleCloseDayPicker();
@@ -197,10 +192,10 @@ const SavedWorkoutsList = memo(({
       try {
         const workout = savedWorkouts[selectedWorkoutForDay];
         
-        // Update the saved workout to remove the assigned days
+        // Update the saved workout to remove the assigned day
         const updatedWorkout = {
           ...workout,
-          assignedDays: undefined,
+          assignedDay: undefined,
         };
         
         await updateSavedWorkout(selectedWorkoutForDay, updatedWorkout);
@@ -209,7 +204,7 @@ const SavedWorkoutsList = memo(({
         const workouts = await getSavedWorkouts();
         setSavedWorkouts(workouts || []);
       } catch (error) {
-        console.error('Error unassigning workout from days:', error);
+        console.error('Error unassigning workout from day:', error);
       }
     }
     handleCloseDayPicker();
@@ -356,26 +351,18 @@ const SavedWorkoutsList = memo(({
                           </Box>
                         )}
                         
-                        {/* Assigned days - support both single day and multi-day assignments */}
-                        {(() => {
-                          const assignedDays = workout.assignedDays || (workout.assignedDay ? [workout.assignedDay] : []);
-                          if (assignedDays.length > 0) {
-                            return (
-                              <Box sx={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: 0.5,
-                                color: 'primary.main',
-                              }}>
-                                <CalendarMonth sx={{ fontSize: '0.875rem' }} />
-                                <span style={{ fontWeight: 500 }}>
-                                  {assignedDays.map(d => d.substring(0, 3)).join(', ')}
-                                </span>
-                              </Box>
-                            );
-                          }
-                          return null;
-                        })()}
+                        {/* Assigned day */}
+                        {workout.assignedDay && (
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 0.5,
+                            color: 'primary.main',
+                          }}>
+                            <CalendarMonth sx={{ fontSize: '0.875rem' }} />
+                            <span style={{ fontWeight: 500 }}>{workout.assignedDay.substring(0, 3)}</span>
+                          </Box>
+                        )}
                       </Box>
                     }
                   />

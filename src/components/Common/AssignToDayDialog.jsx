@@ -24,13 +24,13 @@ const AssignToDayDialog = ({ open, onClose, onAssign, workoutData, currentSchedu
   const [selectedDays, setSelectedDays] = useState([]);
 
   const daysOfWeek = [
+    'Sunday',
     'Monday',
     'Tuesday',
     'Wednesday',
     'Thursday',
     'Friday',
     'Saturday',
-    'Sunday',
   ];
 
   const handleDaySelect = (day) => {

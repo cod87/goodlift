@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { 
   Box, 
   Card, 
+  CardActionArea,
   CardContent, 
   Typography, 
-  Button, 
   Stack,
   Chip,
 } from '@mui/material';
@@ -14,14 +14,16 @@ import {
   FitnessCenter,
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
-import { getSessionTypeDisplayName } from '../../utils/sessionTemplates';
+import { getSessionTypeDisplayName, isTimerType } from '../../utils/sessionTemplates';
 
 /**
  * TodaysWorkoutSection - Minimalist section showing today's assigned workout
  * Features:
  * - Display today's assigned workout if available
+ * - Show exact saved workout name for saved workouts
+ * - Full-area clickable button that launches the assigned workout
+ * - Navigate to appropriate screen for special session types (Cardio→timer, Yoga→stretch, etc.)
  * - Show suggestion chips (Cardio, Yoga, Active Recovery) if no workout assigned
- * - Small, styled "Start Workout" button
  * - Robust error handling for missing/incomplete data
  */
 const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
@@ -51,8 +53,43 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
   }
 
   const handleStartToday = () => {
-    if (todaysWorkout && onStartWorkout) {
-      const sessionType = (todaysWorkout.sessionType || 'full').toLowerCase();
+    if (!todaysWorkout) return;
+    
+    const sessionType = (todaysWorkout.sessionType || 'full').toLowerCase();
+    
+    // Navigate to appropriate screen based on session type
+    if (sessionType === 'cardio' || sessionType === 'hiit') {
+      // Cardio and HIIT go to timer screen
+      if (onNavigate) {
+        onNavigate('cardio');
+      }
+    } else if (sessionType === 'yoga' || sessionType === 'stretch' || sessionType === 'mobility') {
+      // Yoga, stretch, and mobility go to stretch/mobility screen
+      if (onNavigate) {
+        onNavigate('stretch');
+      }
+    } else if (sessionType === 'active_recovery') {
+      // Active Recovery goes to log activity screen
+      if (onNavigate) {
+        onNavigate('log-activity');
+      }
+    } else if (sessionType === 'rest') {
+      // Rest day goes to log activity screen
+      if (onNavigate) {
+        onNavigate('log-activity');
+      }
+    } else if (todaysWorkout.isSavedWorkout && todaysWorkout.exercises) {
+      // For saved workouts, launch exactly as if from saved workouts list
+      if (onStartWorkout) {
+        onStartWorkout(
+          sessionType, 
+          new Set(['all']), 
+          todaysWorkout.exercises, 
+          todaysWorkout.supersetConfig || [2, 2, 2, 2]
+        );
+      }
+    } else if (onStartWorkout) {
+      // Fallback for other session types
       onStartWorkout(sessionType, new Set(['all']), null, [2, 2, 2, 2]);
     }
   };
@@ -70,6 +107,19 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
     }
   };
 
+  // Determine the display name for today's workout
+  const getWorkoutDisplayName = () => {
+    if (!todaysWorkout) return '';
+    
+    // If it's a saved workout with a name, show the exact name
+    if (todaysWorkout.isSavedWorkout && todaysWorkout.sessionName) {
+      return todaysWorkout.sessionName;
+    }
+    
+    // Otherwise, show the session type display name
+    return getSessionTypeDisplayName(todaysWorkout.sessionType);
+  };
+
   return (
     <Box sx={{ mb: 2 }}>
       <Card 
@@ -80,55 +130,73 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
           borderColor: 'divider',
         }}
       >
-        <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
-          {/* Header */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <FitnessCenter sx={{ fontSize: '1rem', color: 'primary.main' }} />
-            <Typography 
-              variant="overline" 
-              sx={{ 
-                color: 'primary.main',
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                letterSpacing: 0.5,
-              }}
-            >
-              Today&apos;s Workout
-            </Typography>
-          </Box>
+        {todaysWorkout && todaysWorkout.sessionType && todaysWorkout.sessionType !== 'rest' ? (
+          // Display assigned workout as full-area clickable button
+          <CardActionArea onClick={handleStartToday}>
+            <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+              {/* Header */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <FitnessCenter sx={{ fontSize: '1rem', color: 'primary.main' }} />
+                <Typography 
+                  variant="overline" 
+                  sx={{ 
+                    color: 'primary.main',
+                    fontWeight: 600,
+                    fontSize: '0.75rem',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Today&apos;s Workout
+                </Typography>
+              </Box>
 
-          {todaysWorkout && todaysWorkout.sessionType && todaysWorkout.sessionType !== 'rest' ? (
-            // Display assigned workout
-            <Stack spacing={1}>
+              {/* Workout Name and Start Button */}
+              <Stack spacing={1}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    fontSize: '0.95rem',
+                  }}
+                >
+                  {getWorkoutDisplayName()}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <PlayArrow sx={{ fontSize: '1.2rem', color: 'primary.main' }} />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'primary.main',
+                      fontWeight: 600,
+                      fontSize: '0.85rem',
+                    }}
+                  >
+                    Tap to start
+                  </Typography>
+                </Box>
+              </Stack>
+            </CardContent>
+          </CardActionArea>
+        ) : (
+          // No workout assigned or rest day - show suggestions
+          <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+            {/* Header */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <FitnessCenter sx={{ fontSize: '1rem', color: 'primary.main' }} />
               <Typography 
-                variant="body1" 
+                variant="overline" 
                 sx={{ 
+                  color: 'primary.main',
                   fontWeight: 600,
-                  color: 'text.primary',
-                  fontSize: '0.95rem',
+                  fontSize: '0.75rem',
+                  letterSpacing: 0.5,
                 }}
               >
-                {getSessionTypeDisplayName(todaysWorkout.sessionType)}
+                Today&apos;s Workout
               </Typography>
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={<PlayArrow sx={{ fontSize: '1rem' }} />}
-                onClick={handleStartToday}
-                sx={{ 
-                  alignSelf: 'flex-start',
-                  fontSize: '0.8rem',
-                  py: 0.5,
-                  px: 1.5,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                }}
-              >
-                Start Workout
-              </Button>
-            </Stack>
-          ) : (
-            // No workout assigned - show suggestions
+            </Box>
+
             <Stack spacing={1}>
               <Typography 
                 variant="body2" 
@@ -181,8 +249,8 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
                 />
               </Stack>
             </Stack>
-          )}
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
     </Box>
   );

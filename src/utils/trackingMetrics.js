@@ -11,13 +11,12 @@
 /**
  * Calculate current workout streak in days.
  * 
- * NEW RULE: For any given standard week block (Sunday through Saturday), users are allowed 
- * only ONE day that counts as either an "unlogged day" (no session logged) or a "rest day" 
- * (session with type 'rest') without breaking their consecutive days streak.
- * 
- * - If a user does not log any session for TWO days in the same week block, the streak breaks.
- * - If a user logs a rest day AND has an unlogged day in the same week block, the streak breaks.
- * - Multiple rest/unlogged days across different week blocks are allowed (one per week).
+ * NEW RULE: For any given standard week block (Sunday through Saturday):
+ * - Unlogged days are treated as Rest days
+ * - Allow up to 2 Active Recovery days per week WITHOUT breaking streak
+ * - BUT only if there are NO rest days (logged or unlogged) in that week
+ * - If there is any rest day (logged or unlogged), then only 1 Active Recovery is allowed
+ * - More than 1 rest day (including unlogged) breaks the streak
  * 
  * Date handling: All dates are normalized to local midnight (00:00:00) for consistency.
  * This ensures workouts at different times of day (e.g., 11:30 PM vs 12:05 AM) are 
@@ -52,6 +51,12 @@ export const calculateStreak = (workoutHistory = []) => {
   const isRestSession = (session) => {
     const type = session.type || session.sessionType || '';
     return type.toLowerCase() === 'rest';
+  };
+
+  // Helper function to check if a session is an active recovery day
+  const isActiveRecoverySession = (session) => {
+    const type = session.type || session.sessionType || '';
+    return type.toLowerCase() === 'active_recovery';
   };
 
   // Helper function to get the Sunday (start) of a week for any date
@@ -105,36 +110,64 @@ export const calculateStreak = (workoutHistory = []) => {
   };
 
   /**
+   * Helper function to check if a day is an active recovery day
+   * @param {number} dateTime - Timestamp of the date to check
+   * @returns {boolean} True if this is an active recovery day (session with type 'active_recovery')
+   */
+  const isActiveRecoveryDay = (dateTime) => {
+    const sessions = dateToSessions.get(dateTime) || [];
+    // An active recovery day is when there's a session and at least one is active recovery type
+    return sessions.length > 0 && sessions.some(s => isActiveRecoverySession(s));
+  };
+
+  /**
    * Helper function to validate a streak range
-   * Checks that each week block (Sun-Sat) within the range has at most 1 skip day
-   * (either unlogged day or rest day).
+   * Checks that each week block (Sun-Sat) within the range follows the rules:
+   * - Unlogged days count as rest days
+   * - Allow up to 2 Active Recovery days per week if NO rest days (logged or unlogged)
+   * - If there is any rest day (logged or unlogged), only 1 Active Recovery is allowed
+   * - More than 1 rest day (including unlogged) breaks the streak
    * 
    * @param {number} startDate - Start date timestamp of the streak
    * @param {number} endDate - End date timestamp of the streak
    * @returns {boolean} True if the streak is valid
    */
   const isValidStreakRange = (startDate, endDate) => {
-    // Group days by week block and count skip days per week
-    const weekSkipDays = new Map(); // weekStart -> count of skip days
+    // Group days by week block and count rest/recovery days per week
+    const weekRestDays = new Map(); // weekStart -> count of rest days (including unlogged)
+    const weekRecoveryDays = new Map(); // weekStart -> count of active recovery days
     
     // Iterate through each day in the range
     let currentDay = startDate;
     while (currentDay <= endDate) {
       const weekStart = getWeekStart(currentDay);
       const hasSessions = dateToSessions.has(currentDay);
-      const isRest = isRestDay(currentDay);
       
-      // A skip day is either:
-      // 1. No session logged (unlogged day)
-      // 2. Session is a rest day
-      const isSkipDay = !hasSessions || isRest;
-      
-      if (isSkipDay) {
-        const currentCount = weekSkipDays.get(weekStart) || 0;
-        weekSkipDays.set(weekStart, currentCount + 1);
+      // Count rest days (including unlogged days which are treated as rest)
+      if (!hasSessions || isRestDay(currentDay)) {
+        const currentCount = weekRestDays.get(weekStart) || 0;
+        weekRestDays.set(weekStart, currentCount + 1);
         
-        // If any week has more than 1 skip day, the streak is invalid
+        // If any week has more than 1 rest day (including unlogged), the streak is invalid
         if (currentCount + 1 > 1) {
+          return false;
+        }
+      }
+      
+      // Count active recovery days (only if there are sessions)
+      if (hasSessions && isActiveRecoveryDay(currentDay)) {
+        const currentCount = weekRecoveryDays.get(weekStart) || 0;
+        weekRecoveryDays.set(weekStart, currentCount + 1);
+        
+        const restCountInWeek = weekRestDays.get(weekStart) || 0;
+        
+        // If there are any rest days in this week, only 1 active recovery is allowed
+        if (restCountInWeek > 0 && currentCount + 1 > 1) {
+          return false;
+        }
+        
+        // If there are no rest days, up to 2 active recovery days are allowed
+        if (restCountInWeek === 0 && currentCount + 1 > 2) {
           return false;
         }
       }
@@ -148,7 +181,8 @@ export const calculateStreak = (workoutHistory = []) => {
 
   /**
    * Find the longest valid streak ending at or before endDate
-   * A valid streak allows at most 1 rest/unlogged day per week block.
+   * A valid streak follows the rules: unlogged days count as rest, 
+   * max 1 rest day per week, and up to 2 active recovery days if no rest.
    * 
    * @param {number} endDate - The end date of the potential streak
    * @returns {number} Length of the longest valid streak in days

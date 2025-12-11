@@ -14,10 +14,6 @@ import {
   ListItemButton,
   Menu,
   MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Collapse,
 } from '@mui/material';
 import { 
@@ -37,6 +33,7 @@ import {
 import { getSavedWorkouts, deleteSavedWorkout, updateSavedWorkout, duplicateSavedWorkout } from '../../utils/storage';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
 import { getWorkoutTypeShorthand } from '../../utils/workoutTypeHelpers';
+import AssignToDayDialog from '../Common/AssignToDayDialog';
 
 // Days of the week in order
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -74,7 +71,7 @@ const SavedWorkoutsList = memo(({
   onStartWorkout,
   onEditWorkout, // Add edit callback
 }) => {
-  const { assignWorkoutToDay } = useWeekScheduling();
+  const { assignWorkoutToDay, weeklySchedule } = useWeekScheduling();
   const [savedWorkouts, setSavedWorkouts] = useState([]);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [selectedWorkoutIndex, setSelectedWorkoutIndex] = useState(null);
@@ -156,21 +153,17 @@ const SavedWorkoutsList = memo(({
     setSelectedWorkoutForDay(null);
   };
 
-  const handleAssignDay = async (day) => {
+  const handleAssignDay = async (days) => {
     if (selectedWorkoutForDay !== null) {
       try {
         const workout = savedWorkouts[selectedWorkoutForDay];
         
-        // Update the saved workout with the assigned day
-        const updatedWorkout = {
-          ...workout,
-          assignedDay: day,
-        };
+        // Note: We don't update the assignedDay field on the saved workout anymore
+        // This is because a workout can now be assigned to multiple days
+        // The source of truth for day assignments is the weeklySchedule in WeekSchedulingContext
         
-        await updateSavedWorkout(selectedWorkoutForDay, updatedWorkout);
-        
-        // Sync with weekly schedule
-        await assignWorkoutToDay(day, {
+        // Sync with weekly schedule - pass array of days
+        await assignWorkoutToDay(days, {
           sessionType: workout.type || 'full',
           sessionName: workout.name || `${workout.type || 'Custom'} Workout`,
           exercises: workout.exercises,
@@ -181,7 +174,7 @@ const SavedWorkoutsList = memo(({
         const workouts = await getSavedWorkouts();
         setSavedWorkouts(workouts || []);
       } catch (error) {
-        console.error('Error assigning workout to day:', error);
+        console.error('Error assigning workout to day(s):', error);
       }
     }
     handleCloseDayPicker();
@@ -493,41 +486,15 @@ const SavedWorkoutsList = memo(({
         </MenuItem>
       </Menu>
 
-      {/* Day Picker Dialog */}
-      <Dialog
+      {/* Day Assignment Dialog */}
+      <AssignToDayDialog
         open={dayPickerOpen}
         onClose={handleCloseDayPicker}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>Assign to Day</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Select which day of the week this workout should be assigned to
-          </Typography>
-          <Stack spacing={1}>
-            {DAYS_OF_WEEK.map((day) => (
-              <Button
-                key={day}
-                variant="outlined"
-                fullWidth
-                onClick={() => handleAssignDay(day)}
-                sx={{ justifyContent: 'flex-start' }}
-              >
-                {day}
-              </Button>
-            ))}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          {selectedWorkoutForDay !== null && savedWorkouts[selectedWorkoutForDay]?.assignedDay && (
-            <Button onClick={handleUnassignDay} color="warning">
-              Unassign
-            </Button>
-          )}
-          <Button onClick={handleCloseDayPicker}>Cancel</Button>
-        </DialogActions>
-      </Dialog>
+        onAssign={handleAssignDay}
+        workoutData={selectedWorkoutForDay !== null ? savedWorkouts[selectedWorkoutForDay] : null}
+        currentSchedule={weeklySchedule}
+        allowMultiple={true}
+      />
     </Box>
   );
 });

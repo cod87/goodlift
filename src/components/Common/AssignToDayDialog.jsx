@@ -17,11 +17,11 @@ import {
 import { CalendarToday, CheckCircle } from '@mui/icons-material';
 
 /**
- * AssignToDayDialog - Modal for assigning completed workout to a specific day of the week
- * Used in manual assignment workflow (weeks 2+)
+ * AssignToDayDialog - Modal for assigning workout to one or multiple days of the week
+ * Supports both single-day and multi-day assignment
  */
-const AssignToDayDialog = ({ open, onClose, onAssign, workoutData, currentSchedule }) => {
-  const [selectedDay, setSelectedDay] = useState(null);
+const AssignToDayDialog = ({ open, onClose, onAssign, workoutData, currentSchedule, allowMultiple = true }) => {
+  const [selectedDays, setSelectedDays] = useState([]);
 
   const daysOfWeek = [
     'Monday',
@@ -34,18 +34,31 @@ const AssignToDayDialog = ({ open, onClose, onAssign, workoutData, currentSchedu
   ];
 
   const handleDaySelect = (day) => {
-    setSelectedDay(day);
+    if (allowMultiple) {
+      setSelectedDays((prev) => {
+        if (prev.includes(day)) {
+          // Deselect if already selected
+          return prev.filter(d => d !== day);
+        } else {
+          // Add to selection
+          return [...prev, day];
+        }
+      });
+    } else {
+      // Single select mode
+      setSelectedDays([day]);
+    }
   };
 
   const handleConfirm = () => {
-    if (selectedDay && onAssign) {
-      onAssign(selectedDay, workoutData);
+    if (selectedDays.length > 0 && onAssign) {
+      onAssign(selectedDays, workoutData);
       handleClose();
     }
   };
 
   const handleClose = () => {
-    setSelectedDay(null);
+    setSelectedDays([]);
     onClose();
   };
 
@@ -92,13 +105,15 @@ const AssignToDayDialog = ({ open, onClose, onAssign, workoutData, currentSchedu
       
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Select which day of the week to assign this workout to. It will be suggested when you visit that day next week.
+          {allowMultiple 
+            ? 'Select one or more days to assign this workout. Selected days will show this workout when you visit them.'
+            : 'Select which day of the week to assign this workout to. It will be suggested when you visit that day next week.'}
         </Typography>
 
         <List sx={{ pt: 0 }}>
           {daysOfWeek.map((day) => {
             const isAssigned = isDayAssigned(day);
-            const isSelected = selectedDay === day;
+            const isSelected = selectedDays.includes(day);
             const existingSession = currentSchedule?.[day];
 
             return (
@@ -155,9 +170,9 @@ const AssignToDayDialog = ({ open, onClose, onAssign, workoutData, currentSchedu
         <Button
           onClick={handleConfirm}
           variant="contained"
-          disabled={!selectedDay}
+          disabled={selectedDays.length === 0}
         >
-          Assign to {selectedDay}
+          Assign to {selectedDays.length === 1 ? selectedDays[0] : `${selectedDays.length} days`}
         </Button>
       </DialogActions>
     </Dialog>
@@ -170,6 +185,7 @@ AssignToDayDialog.propTypes = {
   onAssign: PropTypes.func.isRequired,
   workoutData: PropTypes.object,
   currentSchedule: PropTypes.object,
+  allowMultiple: PropTypes.bool,
 };
 
 export default AssignToDayDialog;

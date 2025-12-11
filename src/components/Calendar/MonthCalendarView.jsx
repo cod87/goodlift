@@ -141,6 +141,8 @@ const MonthCalendarView = ({
       'yoga': 'Y',
       'hiit': 'H',
       'cardio': 'C',
+      'rest': 'R',
+      'active_recovery': 'A',
     };
     
     return labelMap[normalizedType] || 'X';

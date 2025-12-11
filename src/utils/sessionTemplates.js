@@ -26,7 +26,7 @@ export const getDefaultSessionData = (sessionType) => {
   }
   
   // Timer-based session types
-  const timerTypes = ['cardio', 'hiit', 'yoga', 'mobility', 'stretch'];
+  const timerTypes = ['cardio', 'hiit', 'yoga', 'mobility', 'stretch', 'active_recovery'];
   if (timerTypes.includes(type)) {
     return {
       sessionType: type,
@@ -78,6 +78,7 @@ export const getSessionTypeDisplayName = (type) => {
     yoga: 'Yoga',
     mobility: 'Mobility',
     stretch: 'Stretching',
+    active_recovery: 'Active Recovery',
     rest: 'Rest Day',
   };
   return displayNames[type] || type.charAt(0).toUpperCase() + type.slice(1);
@@ -95,6 +96,7 @@ const getDefaultDuration = (type) => {
     yoga: 45,
     mobility: 20,
     stretch: 15,
+    active_recovery: 20,
   };
   return durations[type] || 30;
 };
@@ -111,6 +113,7 @@ const getTimerInstructions = (type) => {
     yoga: 'Flow through poses with controlled breathing. Focus on alignment and balance.',
     mobility: 'Move through your full range of motion. Hold stretches for 30-60 seconds.',
     stretch: 'Gently stretch each muscle group. Hold each stretch for 20-30 seconds without bouncing.',
+    active_recovery: 'Low-intensity movement to promote blood flow and recovery. Focus on gentle stretching, walking, or light yoga.',
   };
   return instructions[type] || 'Follow your workout plan and listen to your body.';
 };
@@ -133,7 +136,7 @@ export const isStrengthType = (type) => {
  */
 export const isTimerType = (type) => {
   if (!type) return false;
-  const timerTypes = ['cardio', 'hiit', 'yoga', 'mobility', 'stretch'];
+  const timerTypes = ['cardio', 'hiit', 'yoga', 'mobility', 'stretch', 'active_recovery'];
   return timerTypes.includes(type.toLowerCase());
 };
 
@@ -164,6 +167,7 @@ export const getAllSessionTypes = () => {
     { value: 'yoga', label: 'Yoga', category: 'flexibility' },
     { value: 'mobility', label: 'Mobility', category: 'flexibility' },
     { value: 'stretch', label: 'Stretching', category: 'flexibility' },
+    { value: 'active_recovery', label: 'Active Recovery', category: 'recovery' },
     { value: 'rest', label: 'Rest Day', category: 'rest' },
   ];
 };

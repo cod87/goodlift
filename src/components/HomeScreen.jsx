@@ -155,9 +155,6 @@ const HomeScreen = memo(({
   };
 
   const hasToday = todaysWorkout && todaysWorkout.type !== 'rest';
-  const planName = currentPlan?.planStyle 
-    ? currentPlan.planStyle.toUpperCase().replace('_', ' ')
-    : 'Weekly Plan';
 
   return (
     <Box 

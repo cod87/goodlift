@@ -1332,27 +1332,32 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                   >
                     {isSvgDataUrl(demoImageSrc) ? (
                       // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
-                      <Box
-                        sx={{
-                          maxWidth: '100%',
-                          maxHeight: shouldUseTwoColumns 
-                            ? { sm: 'calc(40vh - 100px)', md: 'calc(45vh - 100px)' }
-                            : { xs: '150px', sm: '200px' },
-                          width: 'auto',
-                          height: 'auto',
-                          borderRadius: 1,
-                          '& svg': {
-                            maxWidth: '100%',
-                            maxHeight: shouldUseTwoColumns 
-                              ? 'calc(40vh - 100px)'
-                              : '200px',
-                            width: 'auto',
-                            height: 'auto',
-                            objectFit: 'contain',
-                          },
-                        }}
-                        dangerouslySetInnerHTML={{ __html: extractSvgFromDataUrl(demoImageSrc) }}
-                      />
+                      (() => {
+                        const svgContent = extractSvgFromDataUrl(demoImageSrc);
+                        return svgContent ? (
+                          <Box
+                            sx={{
+                              maxWidth: '100%',
+                              maxHeight: shouldUseTwoColumns 
+                                ? { sm: 'calc(40vh - 100px)', md: 'calc(45vh - 100px)' }
+                                : { xs: '150px', sm: '200px' },
+                              width: 'auto',
+                              height: 'auto',
+                              borderRadius: 1,
+                              '& svg': {
+                                maxWidth: '100%',
+                                maxHeight: shouldUseTwoColumns 
+                                  ? 'calc(40vh - 100px)'
+                                  : '200px',
+                                width: 'auto',
+                                height: 'auto',
+                                objectFit: 'contain',
+                              },
+                            }}
+                            dangerouslySetInnerHTML={{ __html: svgContent }}
+                          />
+                        ) : null; // Don't render anything if extraction fails
+                      })()
                     ) : (
                       // Render regular image
                       <Box

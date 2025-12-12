@@ -314,19 +314,33 @@ const ExerciseCard = memo(({
                 {imageSrc ? (
                   isSvgDataUrl(imageSrc) ? (
                     // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
-                    <Box
-                      sx={{
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: 1,
-                        '& svg': {
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain',
-                        },
-                      }}
-                      dangerouslySetInnerHTML={{ __html: extractSvgFromDataUrl(imageSrc) }}
-                    />
+                    (() => {
+                      const svgContent = extractSvgFromDataUrl(imageSrc);
+                      return svgContent ? (
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: 1,
+                            '& svg': {
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                            },
+                          }}
+                          dangerouslySetInnerHTML={{ __html: svgContent }}
+                        />
+                      ) : (
+                        // Fallback if SVG extraction fails
+                        <Box
+                          component="img"
+                          src={workIconUrl}
+                          alt="Exercise"
+                          onError={() => setWorkIconError(true)}
+                          sx={{ width: '60%', height: '60%', objectFit: 'contain', opacity: 0.5 }}
+                        />
+                      );
+                    })()
                   ) : (
                     // Render regular image
                     <Box
@@ -664,22 +678,30 @@ const ExerciseCard = memo(({
               {imageSrc ? (
                 isSvgDataUrl(imageSrc) ? (
                   // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: 2,
-                      '& svg': {
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                      },
-                    }}
-                    dangerouslySetInnerHTML={{ __html: extractSvgFromDataUrl(imageSrc) }}
-                  />
+                  (() => {
+                    const svgContent = extractSvgFromDataUrl(imageSrc);
+                    return svgContent ? (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: 2,
+                          '& svg': {
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain',
+                          },
+                        }}
+                        dangerouslySetInnerHTML={{ __html: svgContent }}
+                      />
+                    ) : (
+                      // Fallback if SVG extraction fails
+                      renderAvatarFallback()
+                    );
+                  })()
                 ) : (
                   // Render regular image
                   <Box

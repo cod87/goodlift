@@ -108,18 +108,37 @@ const WorkoutExerciseCard = memo(({
             >
               {isSvgDataUrl(imagePath) ? (
                 // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    '& svg': {
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
-                    },
-                  }}
-                  dangerouslySetInnerHTML={{ __html: extractSvgFromDataUrl(imagePath) }}
-                />
+                (() => {
+                  const svgContent = extractSvgFromDataUrl(imagePath);
+                  return svgContent ? (
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        '& svg': {
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain',
+                        },
+                      }}
+                      dangerouslySetInnerHTML={{ __html: svgContent }}
+                    />
+                  ) : (
+                    // Fallback if SVG extraction fails
+                    <Box
+                      component="img"
+                      src={getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles)}
+                      alt={exerciseName}
+                      onError={() => setImageError(true)}
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                      }}
+                      loading="lazy"
+                    />
+                  );
+                })()
               ) : (
                 // Render regular image
                 <Box

@@ -28,6 +28,7 @@ import {
 import ExerciseOptionsMenu from './ExerciseOptionsMenu';
 import { getSupersetColor } from '../../utils/supersetColors';
 import { getDemoImagePath } from '../../utils/exerciseDemoImages';
+import { isSvgDataUrl, extractSvgFromDataUrl } from '../../utils/muscleHighlightSvg';
 
 const WorkoutExerciseCard = memo(({
   exercise,
@@ -105,18 +106,53 @@ const WorkoutExerciseCard = memo(({
                 justifyContent: 'center',
               }}
             >
-              <Box
-                component="img"
-                src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
-                alt={exerciseName}
-                onError={() => setImageError(true)}
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                }}
-                loading="lazy"
-              />
+              {isSvgDataUrl(imagePath) ? (
+                // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
+                (() => {
+                  const svgContent = extractSvgFromDataUrl(imagePath);
+                  return svgContent ? (
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        '& svg': {
+                          width: '100%',
+                          height: '100%',
+                        },
+                      }}
+                      dangerouslySetInnerHTML={{ __html: svgContent }}
+                    />
+                  ) : (
+                    // Fallback if SVG extraction fails
+                    <Box
+                      component="img"
+                      src={getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles)}
+                      alt={exerciseName}
+                      onError={() => setImageError(true)}
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                      }}
+                      loading="lazy"
+                    />
+                  );
+                })()
+              ) : (
+                // Render regular image
+                <Box
+                  component="img"
+                  src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
+                  alt={exerciseName}
+                  onError={() => setImageError(true)}
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                  }}
+                  loading="lazy"
+                />
+              )}
             </Box>
             
             {/* Exercise Info */}

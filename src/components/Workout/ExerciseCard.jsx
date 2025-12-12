@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import ExerciseInputs from './ExerciseInputs';
 import { usePreferences } from '../../contexts/PreferencesContext';
+import { isSvgDataUrl, extractSvgFromDataUrl } from '../../utils/muscleHighlightSvg';
 
 /**
  * Helper function to check if equipment is barbell
@@ -311,19 +312,50 @@ const ExerciseCard = memo(({
                 justifyContent: 'center',
               }}>
                 {imageSrc ? (
-                  <Box
-                    component="img"
-                    src={imageSrc}
-                    alt={`${exerciseName} demonstration`}
-                    onError={handleImageError}
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: 1,
-                      objectFit: 'contain',
-                    }}
-                    loading="lazy"
-                  />
+                  isSvgDataUrl(imageSrc) ? (
+                    // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
+                    (() => {
+                      const svgContent = extractSvgFromDataUrl(imageSrc);
+                      return svgContent ? (
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: 1,
+                            '& svg': {
+                              width: '100%',
+                              height: '100%',
+                            },
+                          }}
+                          dangerouslySetInnerHTML={{ __html: svgContent }}
+                        />
+                      ) : (
+                        // Fallback if SVG extraction fails
+                        <Box
+                          component="img"
+                          src={workIconUrl}
+                          alt="Exercise"
+                          onError={() => setWorkIconError(true)}
+                          sx={{ width: '60%', height: '60%', objectFit: 'contain', opacity: 0.5 }}
+                        />
+                      );
+                    })()
+                  ) : (
+                    // Render regular image
+                    <Box
+                      component="img"
+                      src={imageSrc}
+                      alt={`${exerciseName} demonstration`}
+                      onError={handleImageError}
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: 1,
+                        objectFit: 'contain',
+                      }}
+                      loading="lazy"
+                    />
+                  )
                 ) : videoUrl ? (
                   <iframe
                     src={videoUrl}
@@ -643,22 +675,50 @@ const ExerciseCard = memo(({
               justifyContent: 'center',
             }}>
               {imageSrc ? (
-                <Box
-                  component="img"
-                  src={imageSrc}
-                  alt={`${exerciseName} demonstration`}
-                  onError={handleImageError}
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 2,
-                    objectFit: 'contain',
-                  }}
-                  loading="lazy"
-                />
+                isSvgDataUrl(imageSrc) ? (
+                  // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
+                  (() => {
+                    const svgContent = extractSvgFromDataUrl(imageSrc);
+                    return svgContent ? (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: 2,
+                          '& svg': {
+                            width: '100%',
+                            height: '100%',
+                          },
+                        }}
+                        dangerouslySetInnerHTML={{ __html: svgContent }}
+                      />
+                    ) : (
+                      // Fallback if SVG extraction fails
+                      renderAvatarFallback()
+                    );
+                  })()
+                ) : (
+                  // Render regular image
+                  <Box
+                    component="img"
+                    src={imageSrc}
+                    alt={`${exerciseName} demonstration`}
+                    onError={handleImageError}
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: 2,
+                      objectFit: 'contain',
+                    }}
+                    loading="lazy"
+                  />
+                )
               ) : videoUrl ? (
                 <iframe
                   src={videoUrl}

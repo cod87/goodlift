@@ -318,14 +318,29 @@ const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
   return modifiedSvg;
 };
 
+// Validation constants for muscle highlight SVG structure
+// These define the expected structure of our generated muscle highlight SVGs
+const EXPECTED_SVG_VIEWBOX = '0 0 122.04 117.09';
+const EXPECTED_LAYER_ID = 'Layer_1-2';
+const EXPECTED_LAYER_NAME = 'Layer 1';
+const EXPECTED_CSS_CLASSES = ['cls-1', 'cls-primary', 'cls-secondary'];
+
 /**
  * Converts SVG string to a data URL
  * @param {string} svgString - SVG markup
  * @returns {string} Data URL
  */
 export const svgToDataUrl = (svgString) => {
+  // Strip XML declaration if present for better cross-browser compatibility
+  let cleanedSvg = svgString.trim();
+  // Match properly formed XML declarations that start with <?xml and end with ?>
+  if (cleanedSvg.startsWith('<?xml ')) {
+    cleanedSvg = cleanedSvg.replace(/<\?xml\s[^?]*\?>\s*/i, '');
+  }
+  
   // Encode the SVG for use in a data URL
-  const encoded = encodeURIComponent(svgString)
+  // Use encodeURIComponent for full percent-encoding
+  const encoded = encodeURIComponent(cleanedSvg)
     .replace(/'/g, '%27')
     .replace(/"/g, '%22');
   return `data:image/svg+xml,${encoded}`;
@@ -340,4 +355,69 @@ export const svgToDataUrl = (svgString) => {
 export const getMuscleHighlightDataUrl = (primaryMuscle, secondaryMuscles) => {
   const svg = generateMuscleHighlightSvg(primaryMuscle, secondaryMuscles);
   return svgToDataUrl(svg);
+};
+
+/**
+ * Checks if a given image path is an SVG data URL
+ * @param {string} imagePath - The image path to check
+ * @returns {boolean} True if the path is an SVG data URL
+ */
+export const isSvgDataUrl = (imagePath) => {
+  return imagePath && typeof imagePath === 'string' && imagePath.startsWith('data:image/svg+xml');
+};
+
+/**
+ * Validates that SVG content is safe for rendering
+ * Ensures the SVG only contains expected structure from our muscle highlight generator
+ * @param {string} svgContent - The SVG markup to validate
+ * @returns {boolean} True if the SVG appears to be safe
+ */
+const isValidMuscleSvg = (svgContent) => {
+  if (!svgContent || typeof svgContent !== 'string') return false;
+  
+  // Check that it starts with an SVG element
+  if (!svgContent.trim().startsWith('<svg')) return false;
+  
+  // Check for the expected muscle highlight SVG structure
+  // Our generated SVGs should have these characteristics:
+  // 1. Contains our canonical SVG viewBox
+  // 2. Contains our style classes (cls-1, cls-primary, cls-secondary)
+  // 3. Contains muscle group layer structure (e.g., id="Layer_1-2" or data-name="Layer 1")
+  const hasExpectedViewBox = svgContent.includes(`viewBox="${EXPECTED_SVG_VIEWBOX}"`);
+  const hasExpectedClasses = EXPECTED_CSS_CLASSES.some(cls => svgContent.includes(cls));
+  const hasMuscleLayers = svgContent.includes(`id="${EXPECTED_LAYER_ID}"`) || 
+                          svgContent.includes(`data-name="${EXPECTED_LAYER_NAME}"`);
+  
+  // If it has our expected structure, it's likely our generated SVG
+  return hasExpectedViewBox && (hasExpectedClasses || hasMuscleLayers);
+};
+
+/**
+ * Extracts the SVG markup from a data URL
+ * Only returns content if it passes validation checks
+ * @param {string} dataUrl - The SVG data URL
+ * @returns {string} The decoded SVG markup, or empty string if invalid
+ */
+export const extractSvgFromDataUrl = (dataUrl) => {
+  if (!isSvgDataUrl(dataUrl)) return '';
+  
+  // Extract the encoded part after the comma
+  const encodedSvg = dataUrl.split(',')[1];
+  if (!encodedSvg) return '';
+  
+  // Decode the percent-encoded SVG
+  try {
+    const decodedSvg = decodeURIComponent(encodedSvg);
+    
+    // Validate that it's our muscle highlight SVG before returning
+    if (!isValidMuscleSvg(decodedSvg)) {
+      console.warn('SVG content does not match expected muscle highlight structure');
+      return '';
+    }
+    
+    return decodedSvg;
+  } catch (error) {
+    console.error('Failed to decode SVG data URL:', error, 'First 50 chars:', dataUrl.substring(0, 50));
+    return '';
+  }
 };

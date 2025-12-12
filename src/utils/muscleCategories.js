@@ -9,18 +9,17 @@
 /**
  * Mapping of simplified muscle categories to their constituent detailed muscles
  * Order: Chest, Back, Shoulders, Quads, Hamstrings, Triceps, Biceps, Calves, Core, Glutes
- * Updated to include muscle names from update.json (e.g., "Front delts", "Lower back", "Abs")
  */
 export const MUSCLE_CATEGORY_MAP = {
   'Chest': ['Chest'],
-  'Back': ['Lats', 'Traps', 'Back', 'Upper Back', 'Lower back', 'Lower Back', 'Rhomboids', 'Erector Spinae'],
-  'Shoulders': ['Shoulders', 'Delts', 'Front delts', 'Front Delts', 'Rear delts', 'Rear Delts', 'Side Delts'],
+  'Back': ['Lats', 'Traps', 'Back', 'Upper Back', 'Lower Back', 'Rhomboids', 'Erector Spinae'],
+  'Shoulders': ['Shoulders', 'Delts', 'Front Delts', 'Rear Delts', 'Side Delts'],
   'Quads': ['Quads'],
   'Hamstrings': ['Hamstrings'],
   'Triceps': ['Triceps'],
   'Biceps': ['Biceps', 'Forearms'],
   'Calves': ['Calves'],
-  'Core': ['Core', 'Abs', 'Obliques', 'Hip Flexors'],
+  'Core': ['Core', 'Obliques', 'Hip Flexors'],
   'Glutes': ['Glutes', 'Adductors'],
 };
 
@@ -33,18 +32,17 @@ export const MUSCLE_CATEGORY_MAP = {
  * reflect how muscles function as secondary movers in compound exercises.
  * For example, Hip Flexors are categorized under 'Quads' for secondary muscles
  * (as they assist in leg exercises) but under 'Core' for primary muscles.
- * Updated to include muscle names from update.json (e.g., "Front delts", "Lower back", "Abs")
  */
 export const SECONDARY_MUSCLE_CATEGORY_MAP = {
   'Chest': ['Chest'],
-  'Back': ['Back', 'Lats', 'Lower back', 'Lower Back', 'Rhomboids', 'Traps', 'Upper Back'],
-  'Shoulders': ['Shoulders', 'Delts', 'Front delts', 'Front Delts', 'Rear delts', 'Rear Delts', 'Side Delts'],
+  'Back': ['Back', 'Lats', 'Lower Back', 'Rhomboids', 'Traps', 'Upper Back'],
+  'Shoulders': ['Shoulders', 'Delts', 'Front Delts', 'Rear Delts', 'Side Delts'],
   'Quads': ['Hip Flexors', 'Quads'],
   'Hamstrings': ['Hamstrings'],
-  'Triceps': ['Triceps'], // Triceps appear as secondary in many exercises (e.g., Bench Press, Overhead Press)
+  'Triceps': [], // Triceps rarely appear as secondary muscles in exercises
   'Biceps': ['Biceps', 'Forearms'],
   'Calves': ['Calves'],
-  'Core': ['Core', 'Abs', 'Obliques'],
+  'Core': ['Core', 'Obliques'],
   'Glutes': ['Adductors', 'Glutes'],
 };
 

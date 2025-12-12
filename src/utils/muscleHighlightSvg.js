@@ -54,12 +54,7 @@ export const musclesToSvgIds = (muscleString) => {
   for (const muscle of muscles) {
     const svgId = MUSCLE_TO_SVG_ID[muscle];
     if (svgId) {
-      // Handle multiple IDs (e.g., "lats,biceps")
-      if (svgId.includes(',')) {
-        svgIds.push(...svgId.split(','));
-      } else {
-        svgIds.push(svgId);
-      }
+      svgIds.push(svgId);
     }
   }
   
@@ -135,9 +130,13 @@ const generateCustomMusclesSvg = (primaryIds, secondaryIds) => {
  * @param {string[]} primaryIds - Primary muscle group IDs
  * @param {string[]} secondaryIds - Secondary muscle group IDs  
  * @returns {string} SVG group elements
+ * 
+ * Note: SVG coordinates use a simplified front-view body diagram with viewBox="0 0 190.56 233.14"
+ * Positioning roughly maps to anatomical locations on a centered human figure
  */
 const generateMuscleGroups = (primaryIds, secondaryIds) => {
   // Define simplified muscle shapes (front view of body)
+  // Coordinates are positioned to represent a centered human figure
   const muscleShapes = {
     'traps': '<path d="M70,35 Q95,30 120,35 L115,50 Q95,45 75,50 Z"/>',
     'front_delts': '<path d="M50,45 L65,55 L65,75 L55,70 Z M125,45 L110,55 L110,75 L120,70 Z"/>',

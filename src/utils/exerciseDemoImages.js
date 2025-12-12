@@ -123,6 +123,25 @@ export const normalizeExerciseName = (exerciseName) => {
 };
 
 /**
+ * Returns appropriate fallback image based on available data
+ * @param {boolean} usePlaceholder - Whether to return a placeholder
+ * @param {string} primaryMuscle - Primary muscle for custom SVG
+ * @param {string} secondaryMuscles - Secondary muscles for custom SVG
+ * @returns {string|null} Fallback image path or null
+ */
+const getFallbackImage = (usePlaceholder, primaryMuscle, secondaryMuscles) => {
+  if (!usePlaceholder) return null;
+  
+  // If we have muscle data, generate custom SVG highlighting those muscles
+  if (primaryMuscle) {
+    return getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
+  }
+  
+  // Otherwise use the generic work icon
+  return `${getBaseUrl()}work-icon.svg`;
+};
+
+/**
  * Gets the demo image path for a given exercise name or webp file
  * Returns a custom muscle highlight SVG if no matching image is found
  * 
@@ -146,11 +165,7 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
   }
   
   if (!exerciseName) {
-    // If we have muscle data, generate custom SVG
-    if (usePlaceholder && primaryMuscle) {
-      return getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
-    }
-    return usePlaceholder ? `${getBaseUrl()}work-icon.svg` : null;
+    return getFallbackImage(usePlaceholder, primaryMuscle, secondaryMuscles);
   }
   
   const normalized = normalizeExerciseName(exerciseName);
@@ -174,13 +189,8 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
     return `${getBaseUrl()}demos/${fuzzyMatch}.webp`;
   }
   
-  // If we have muscle data, generate custom SVG highlighting those muscles
-  if (usePlaceholder && primaryMuscle) {
-    return getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
-  }
-  
-  // Return placeholder if enabled, otherwise null
-  return usePlaceholder ? `${getBaseUrl()}work-icon.svg` : null;
+  // No webp image found, return fallback
+  return getFallbackImage(usePlaceholder, primaryMuscle, secondaryMuscles);
 };
 
 /**

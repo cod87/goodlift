@@ -1400,7 +1400,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
               </Box>
               
               {/* Muscle Highlight SVG - ALWAYS show for exercises with muscle data */}
-              {primaryMuscle && (
+              {primaryMuscle && primaryMuscle.trim() && (
                 <Box 
                   sx={{ 
                     display: 'flex',
@@ -1413,8 +1413,9 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                   }}
                 >
                   {(() => {
-                    // Generate muscle highlight SVG
+                    // Generate muscle highlight SVG with validated muscle data
                     const muscleSvgDataUrl = getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
+                    // Extract and validate SVG content (security: prevents XSS via structure validation)
                     const svgContent = extractSvgFromDataUrl(muscleSvgDataUrl);
                     
                     return svgContent ? (
@@ -1434,6 +1435,10 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                             height: 'auto',
                           },
                         }}
+                        // Safe to use dangerouslySetInnerHTML here because:
+                        // 1. SVG content is generated internally (not user input)
+                        // 2. extractSvgFromDataUrl validates SVG structure
+                        // 3. Only renders SVGs with expected viewBox and CSS classes
                         dangerouslySetInnerHTML={{ __html: svgContent }}
                       />
                     ) : null;

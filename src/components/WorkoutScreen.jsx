@@ -478,6 +478,10 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
         secondaryMuscles
       );
       
+      console.log('[WorkoutScreen] Demo image for', exerciseName, ':', imagePath ? imagePath.substring(0, 100) : 'null');
+      console.log('[WorkoutScreen] Primary muscle:', primaryMuscle, 'Secondary:', secondaryMuscles);
+      console.log('[WorkoutScreen] Is SVG?:', isSvgDataUrl(imagePath));
+      
       setDemoImageSrc(imagePath);
       setImageError(false);
     }
@@ -1321,6 +1325,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                 </Box>
                 
                 {/* Demo Image - Shows if available */}
+                {console.log('[WorkoutScreen Render] demoImageSrc:', demoImageSrc ? 'EXISTS' : 'NULL')}
                 {demoImageSrc && (
                   <Box 
                     sx={{ 

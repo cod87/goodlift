@@ -119,12 +119,12 @@ export const normalizeExerciseName = (exerciseName) => {
 
 /**
  * Gets the demo image path for a given exercise name or webp file
- * Returns a customized SVG demo if no webp is found, or placeholder as fallback
+ * Returns a placeholder image path if no matching image is found
  * 
  * @param {string} exerciseName - The exercise name to find an image for
  * @param {boolean} usePlaceholder - Whether to return placeholder if no match (default: true)
  * @param {string} webpFile - Optional webp filename from exercise data (e.g., 'back-squat.webp')
- * @returns {string|null} Path to the demo image, SVG demo, placeholder, or null if not found
+ * @returns {string|null} Path to the demo image, placeholder, or null if not found
  */
 export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile = null) => {
   // If webpFile is explicitly provided, validate and use it directly
@@ -142,12 +142,12 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
   
   const normalized = normalizeExerciseName(exerciseName);
   
-  // Check if we have an exact match for webp
+  // Check if we have an exact match
   if (AVAILABLE_DEMO_IMAGES.includes(normalized)) {
     return `${getBaseUrl()}demos/${normalized}.webp`;
   }
   
-  // Check for common variations/aliases for webp
+  // Check for common variations/aliases
   const variations = getExerciseVariations(normalized);
   for (const variation of variations) {
     if (AVAILABLE_DEMO_IMAGES.includes(variation)) {
@@ -155,23 +155,14 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
     }
   }
   
-  // Try fuzzy matching as a last resort for webp
+  // Try fuzzy matching as a last resort
   const fuzzyMatch = findFuzzyMatch(normalized);
   if (fuzzyMatch) {
     return `${getBaseUrl()}demos/${fuzzyMatch}.webp`;
   }
   
-  // If no webp found, try SVG demo (muscle-worked diagram)
-  // SVG demos are generated for exercises without webp demos
-  if (usePlaceholder) {
-    const svgPath = `${getBaseUrl()}demos/${normalized}.svg`;
-    // We assume SVG exists for exercises without webp - return it optimistically
-    // The browser will handle 404 if it doesn't exist and fall back gracefully
-    return svgPath;
-  }
-  
-  // If usePlaceholder is false, return null (no match found)
-  return null;
+  // Return placeholder if enabled, otherwise null
+  return usePlaceholder ? `${getBaseUrl()}work-icon.svg` : null;
 };
 
 /**

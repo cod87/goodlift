@@ -167,8 +167,8 @@ Error generating stack: `+u.message+`
       }
     </style>`),XR=(e,t,s)=>{let a=e;return a=a.replace(/<style>[\s\S]*?<\/style>/,`<style>
       .cls-1 {
-        fill: #e0e0e0;
-        opacity: 0.3;
+        fill: #808080;
+        opacity: 0.5;
       }
       .cls-primary {
         fill: #1db584;

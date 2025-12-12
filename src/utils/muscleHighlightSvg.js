@@ -259,7 +259,7 @@ const highlightAllMuscles = (svgTemplate) => {
  * Highlights specific muscle groups in the canonical SVG
  * Primary muscles are highlighted with full opacity (#1db584)
  * Secondary muscles are highlighted with reduced opacity (#1db584 at 60%)
- * Non-targeted muscles are shown with low opacity (#e0e0e0 at 30%)
+ * Non-targeted muscles are shown with improved contrast (#808080 at 50%)
  * @param {string} svgTemplate - The canonical SVG template
  * @param {string[]} primaryIds - Array of primary muscle SVG IDs
  * @param {string[]} secondaryIds - Array of secondary muscle SVG IDs
@@ -274,8 +274,8 @@ const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
     /<style>[\s\S]*?<\/style>/,
     `<style>
       .cls-1 {
-        fill: #e0e0e0;
-        opacity: 0.3;
+        fill: #808080;
+        opacity: 0.5;
       }
       .cls-primary {
         fill: #1db584;

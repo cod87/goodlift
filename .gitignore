@@ -30,3 +30,6 @@ tmp/
 # Build artifacts
 docs/test.html
 docs/goodlift/
+
+# Generated SVG files subdirectory (SVGs should be in public/demos/ directly)
+public/demos/generated/

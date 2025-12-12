@@ -8,7 +8,6 @@ import { BREAKPOINTS } from '../theme/responsive';
 // Tab name mapping - defined outside component for performance
 const TAB_DISPLAY_NAMES = {
   'home': 'Work',
-  'preview': 'Workout Preview',
   'workout': 'Workout',
   'completion': 'Workout Complete',
   'progress': 'Progress',

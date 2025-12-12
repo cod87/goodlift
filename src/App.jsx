@@ -6,7 +6,6 @@ import WorkTabs from './components/WorkTabs';
 import TodayView from './components/TodayView/TodayView';
 // SelectionScreen removed - functionality moved to WorkTabs
 import WorkoutScreenModal from './components/WorkoutScreenModal';
-import WorkoutPreview from './components/WorkoutPreview';
 import CompletionScreen from './components/CompletionScreen';
 import ProgressScreen from './components/ProgressScreen';
 import AuthScreen from './components/AuthScreen';
@@ -21,7 +20,6 @@ import ExerciseCardDemo from './pages/ExerciseCardDemo';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import AchievementUnlockedDialog from './components/AchievementUnlockedDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
-import { useFavoriteExercises } from './hooks/useFavoriteExercises';
 // usePlanIntegration hook removed - no longer using workout planning
 import { 
   saveWorkout, 
@@ -67,22 +65,18 @@ function AppContent() {
   const [equipmentOptions, setEquipmentOptions] = useState([]);
   const [completedWorkoutData, setCompletedWorkoutData] = useState(null);
   const [loading] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const [showGuestSnackbar, setShowGuestSnackbar] = useState(false);
   const [showMigrationDialog, setShowMigrationDialog] = useState(false);
   const [newAchievement, setNewAchievement] = useState(null);
   const [showAchievementDialog, setShowAchievementDialog] = useState(false);
-  const [isCustomizeMode, setIsCustomizeMode] = useState(false);
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Track superset configuration
-  const [setsPerSuperset, setSetsPerSuperset] = useState(3); // Track number of sets per superset
   const { currentUser, isGuest, hasGuestData } = useAuth();
   
   // Desktop layout detection
   const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
 
-  const { generateWorkout, allExercises, exerciseDB } = useWorkoutGenerator();
-  const favoriteExercises = useFavoriteExercises();
+  const { generateWorkout, allExercises } = useWorkoutGenerator();
 
   // Run data migration on app initialization
   useEffect(() => {
@@ -335,10 +329,8 @@ function AppContent() {
     setCurrentWorkout(workout);
     setWorkoutType(type);
     
-    // Show preview screen instead of going directly to workout
-    setIsCustomizeMode(false);
-    setShowPreview(true);
-    setCurrentScreen('preview');
+    // Go directly to workout screen
+    setCurrentScreen('workout');
   };
 
   const handleCustomize = (type, equipmentFilter, supersetConfigParam = [2, 2, 2, 2]) => {
@@ -349,133 +341,10 @@ function AppContent() {
     const totalExercises = supersetConfigParam.reduce((sum, count) => sum + count, 0);
     const emptyWorkout = Array(totalExercises).fill(null);
     setCurrentWorkout(emptyWorkout);
-    setIsCustomizeMode(true);
-    setShowPreview(true);
-    setCurrentScreen('preview');
-  };
-
-  const handleBeginWorkout = (workout, workoutSupersetConfig, workoutSetsPerSuperset) => {
-    // If workout is passed from WorkoutPreview, update it
-    if (workout) {
-      setCurrentWorkout(workout);
-    }
-    // Store superset config and sets per superset if provided
-    if (workoutSupersetConfig) {
-      setSupersetConfig(workoutSupersetConfig);
-    }
-    if (workoutSetsPerSuperset !== undefined) {
-      setSetsPerSuperset(workoutSetsPerSuperset);
-    }
-    setShowPreview(false);
-    setIsCustomizeMode(false);
+    
+    // Go directly to workout screen in customize mode
     setCurrentScreen('workout');
   };
-
-  const handleCancelPreview = () => {
-    setShowPreview(false);
-    setIsCustomizeMode(false);
-    // Return to home instead of selection
-    setCurrentScreen('home');
-  };
-
-  /**
-   * Randomize a single exercise in the workout with enhanced logic
-   * - Filters by Primary Muscle, Equipment, Exercise Type
-   * - Applies 2x bias to favorited exercises
-   * - Retries up to 3 times if no alternatives or duplicates found
-   * - Preserves customized weight/reps settings
-   * @param {Object} exercise - The current exercise object
-   * @param {number} globalIndex - Index in the workout array
-   */
-  const handleRandomizeExercise = useCallback((exercise, globalIndex) => {
-    if (!exerciseDB || Object.keys(exerciseDB).length === 0) {
-      console.error('Exercise database not available');
-      setNotification({
-        open: true,
-        message: 'Exercise database not loaded',
-        severity: 'error'
-      });
-      return;
-    }
-
-    const primaryMuscle = exercise['Primary Muscle'];
-    const exerciseType = exercise['Exercise Type'];
-    const currentExerciseName = exercise['Exercise Name'];
-    
-    // Get exercises for the same primary muscle
-    const muscleExercises = exerciseDB[primaryMuscle] || [];
-    
-    let attempts = 0;
-    const maxAttempts = 3;
-    let selectedExercise = null;
-
-    while (attempts < maxAttempts && !selectedExercise) {
-      attempts++;
-      
-      // Apply equipment filter
-      let filteredExercises = muscleExercises;
-      const equipmentFilter = Array.from(selectedEquipment);
-      
-      if (!equipmentFilter.includes('all')) {
-        filteredExercises = muscleExercises.filter(ex => {
-          const equipment = ex.Equipment;
-          return equipmentFilter.some(filter => {
-            if (filter === 'Cable Machine') return equipment.includes('Cable');
-            if (filter === 'Dumbbells') return equipment.includes('Dumbbell');
-            return equipment.includes(filter);
-          });
-        });
-      }
-
-      // Filter by Exercise Type to maintain compound/isolation balance
-      filteredExercises = filteredExercises.filter(ex => 
-        ex['Exercise Type'] === exerciseType
-      );
-
-      // Remove current exercise and any duplicates already in workout
-      const workoutExerciseNames = currentWorkout.map(ex => ex['Exercise Name']);
-      let availableExercises = filteredExercises.filter(
-        ex => ex['Exercise Name'] !== currentExerciseName && 
-              !workoutExerciseNames.includes(ex['Exercise Name'])
-      );
-
-      if (availableExercises.length === 0) {
-        // Relax duplicate constraint on retry
-        availableExercises = filteredExercises.filter(
-          ex => ex['Exercise Name'] !== currentExerciseName
-        );
-      }
-
-      if (availableExercises.length === 0) {
-        continue; // Try again with next attempt
-      }
-
-      // Apply favorite bias: include favorites twice in the pool
-      const exercisePool = [...availableExercises];
-      availableExercises.forEach(ex => {
-        if (favoriteExercises.has(ex['Exercise Name'])) {
-          exercisePool.push(ex); // Add favorite a second time for 2x probability
-        }
-      });
-
-      // Select random exercise from biased pool
-      selectedExercise = exercisePool[Math.floor(Math.random() * exercisePool.length)];
-    }
-
-    if (!selectedExercise) {
-      setNotification({
-        open: true,
-        message: 'No alternative exercises available',
-        severity: 'warning'
-      });
-      return;
-    }
-
-    // Update the workout array
-    const updatedWorkout = [...currentWorkout];
-    updatedWorkout[globalIndex] = selectedExercise;
-    setCurrentWorkout(updatedWorkout);
-  }, [exerciseDB, currentWorkout, selectedEquipment, favoriteExercises]);
 
   /**
    * Calculate weight increase for progressive overload based on muscle group and equipment
@@ -811,20 +680,6 @@ function AppContent() {
             />
           )}
           
-          {currentScreen === 'preview' && showPreview && (
-            <WorkoutPreview
-              workout={currentWorkout}
-              workoutType={workoutType}
-              onStart={handleBeginWorkout}
-              onCancel={handleCancelPreview}
-              onRandomizeExercise={handleRandomizeExercise}
-              equipmentFilter={Array.from(selectedEquipment)}
-              isCustomizeMode={isCustomizeMode}
-              supersetConfig={supersetConfig}
-              setsPerSuperset={setsPerSuperset}
-            />
-          )}
-          
           {currentScreen === 'workout' && currentWorkout.length > 0 && (
             <WorkoutScreenModal
               open={true}
@@ -832,7 +687,6 @@ function AppContent() {
               onComplete={handleWorkoutComplete}
               onExit={handleWorkoutExit}
               supersetConfig={supersetConfig}
-              setsPerSuperset={setsPerSuperset}
             />
           )}
           

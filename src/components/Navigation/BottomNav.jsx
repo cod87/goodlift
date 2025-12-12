@@ -37,10 +37,8 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       customIcon: 'goodlift-favicon.svg',
       screens: [
         'home', 
-        'preview', 
         'workout', 
         'customize', 
-        'custom-preview',
         'completion',
         'timer',
         'cardio',

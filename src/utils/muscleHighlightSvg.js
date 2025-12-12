@@ -324,8 +324,15 @@ const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
  * @returns {string} Data URL
  */
 export const svgToDataUrl = (svgString) => {
+  // Strip XML declaration if present for better cross-browser compatibility
+  let cleanedSvg = svgString.trim();
+  if (cleanedSvg.startsWith('<?xml')) {
+    cleanedSvg = cleanedSvg.replace(/<\?xml[^?]*\?>\s*/i, '');
+  }
+  
   // Encode the SVG for use in a data URL
-  const encoded = encodeURIComponent(svgString)
+  // Use encodeURIComponent for full percent-encoding
+  const encoded = encodeURIComponent(cleanedSvg)
     .replace(/'/g, '%27')
     .replace(/"/g, '%22');
   return `data:image/svg+xml,${encoded}`;
@@ -340,4 +347,34 @@ export const svgToDataUrl = (svgString) => {
 export const getMuscleHighlightDataUrl = (primaryMuscle, secondaryMuscles) => {
   const svg = generateMuscleHighlightSvg(primaryMuscle, secondaryMuscles);
   return svgToDataUrl(svg);
+};
+
+/**
+ * Checks if a given image path is an SVG data URL
+ * @param {string} imagePath - The image path to check
+ * @returns {boolean} True if the path is an SVG data URL
+ */
+export const isSvgDataUrl = (imagePath) => {
+  return imagePath && typeof imagePath === 'string' && imagePath.startsWith('data:image/svg+xml');
+};
+
+/**
+ * Extracts the SVG markup from a data URL
+ * @param {string} dataUrl - The SVG data URL
+ * @returns {string} The decoded SVG markup
+ */
+export const extractSvgFromDataUrl = (dataUrl) => {
+  if (!isSvgDataUrl(dataUrl)) return '';
+  
+  // Extract the encoded part after the comma
+  const encodedSvg = dataUrl.split(',')[1];
+  if (!encodedSvg) return '';
+  
+  // Decode the percent-encoded SVG
+  try {
+    return decodeURIComponent(encodedSvg);
+  } catch (error) {
+    console.error('Failed to decode SVG data URL:', error);
+    return '';
+  }
 };

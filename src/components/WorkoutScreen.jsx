@@ -12,6 +12,7 @@ import SwapExerciseDialog from './Common/SwapExerciseDialog';
 import SaveModifiedWorkoutDialog from './Common/SaveModifiedWorkoutDialog';
 import TargetRepsPicker from './Common/TargetRepsPicker';
 import { getDemoImagePath } from '../utils/exerciseDemoImages';
+import { isSvgDataUrl, extractSvgFromDataUrl } from '../utils/muscleHighlightSvg';
 import { 
   DEFAULT_TARGET_REPS, 
   getClosestValidTargetReps, 
@@ -1329,24 +1330,50 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                       flex: shouldUseTwoColumns ? 1 : 'none',
                     }}
                   >
-                    <Box
-                      component="img"
-                      src={demoImageSrc}
-                      alt={`${exerciseName} demonstration`}
-                      onError={handleImageError}
-                      sx={{
-                        maxWidth: '100%',
-                        // Significantly larger image in landscape tablet mode
-                        maxHeight: shouldUseTwoColumns 
-                          ? { sm: 'calc(40vh - 100px)', md: 'calc(45vh - 100px)' }
-                          : { xs: '150px', sm: '200px' },
-                        width: 'auto',
-                        height: 'auto',
-                        borderRadius: 1,
-                        objectFit: 'contain',
-                      }}
-                      loading="lazy"
-                    />
+                    {isSvgDataUrl(demoImageSrc) ? (
+                      // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
+                      <Box
+                        sx={{
+                          maxWidth: '100%',
+                          maxHeight: shouldUseTwoColumns 
+                            ? { sm: 'calc(40vh - 100px)', md: 'calc(45vh - 100px)' }
+                            : { xs: '150px', sm: '200px' },
+                          width: 'auto',
+                          height: 'auto',
+                          borderRadius: 1,
+                          '& svg': {
+                            maxWidth: '100%',
+                            maxHeight: shouldUseTwoColumns 
+                              ? 'calc(40vh - 100px)'
+                              : '200px',
+                            width: 'auto',
+                            height: 'auto',
+                            objectFit: 'contain',
+                          },
+                        }}
+                        dangerouslySetInnerHTML={{ __html: extractSvgFromDataUrl(demoImageSrc) }}
+                      />
+                    ) : (
+                      // Render regular image
+                      <Box
+                        component="img"
+                        src={demoImageSrc}
+                        alt={`${exerciseName} demonstration`}
+                        onError={handleImageError}
+                        sx={{
+                          maxWidth: '100%',
+                          // Significantly larger image in landscape tablet mode
+                          maxHeight: shouldUseTwoColumns 
+                            ? { sm: 'calc(40vh - 100px)', md: 'calc(45vh - 100px)' }
+                            : { xs: '150px', sm: '200px' },
+                          width: 'auto',
+                          height: 'auto',
+                          borderRadius: 1,
+                          objectFit: 'contain',
+                        }}
+                        loading="lazy"
+                      />
+                    )}
                   </Box>
                 )}
               </Box>

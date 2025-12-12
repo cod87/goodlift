@@ -13,6 +13,7 @@ import { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, ListItemButton } from '@mui/material';
 import { getDemoImagePath } from '../../utils/exerciseDemoImages';
+import { isSvgDataUrl, extractSvgFromDataUrl } from '../../utils/muscleHighlightSvg';
 
 const ExerciseListItem = memo(({
   exercise,
@@ -89,18 +90,35 @@ const ExerciseListItem = memo(({
           justifyContent: 'center',
         }}
       >
-        <Box
-          component="img"
-          src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
-          alt={exerciseName}
-          onError={() => setImageError(true)}
-          sx={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-          }}
-          loading="lazy"
-        />
+        {isSvgDataUrl(imagePath) ? (
+          // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
+          <Box
+            sx={{
+              width: '100%',
+              height: '100%',
+              '& svg': {
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              },
+            }}
+            dangerouslySetInnerHTML={{ __html: extractSvgFromDataUrl(imagePath) }}
+          />
+        ) : (
+          // Render regular image
+          <Box
+            component="img"
+            src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
+            alt={exerciseName}
+            onError={() => setImageError(true)}
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+            }}
+            loading="lazy"
+          />
+        )}
       </Box>
       
       {/* Exercise Info */}

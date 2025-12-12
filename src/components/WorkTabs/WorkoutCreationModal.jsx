@@ -38,6 +38,7 @@ import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 import { generateStandardWorkout } from '../../utils/workoutGenerator';
 import { getAllCategories, filterExercisesByCategory } from '../../utils/muscleCategories';
 import { getDemoImagePath } from '../../utils/exerciseDemoImages';
+import { isSvgDataUrl, extractSvgFromDataUrl } from '../../utils/muscleHighlightSvg';
 import TargetRepsPicker from '../Common/TargetRepsPicker';
 import ExerciseListItem from '../Common/ExerciseListItem';
 import FilterBottomSheet from '../Common/FilterBottomSheet';
@@ -174,18 +175,35 @@ const MyWorkoutExerciseItem = ({
             justifyContent: 'center',
           }}
         >
-          <Box
-            component="img"
-            src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
-            alt={exerciseName}
-            onError={() => setImageError(true)}
-            sx={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-            }}
-            loading="lazy"
-          />
+          {isSvgDataUrl(imagePath) ? (
+            // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                '& svg': {
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                },
+              }}
+              dangerouslySetInnerHTML={{ __html: extractSvgFromDataUrl(imagePath) }}
+            />
+          ) : (
+            // Render regular image
+            <Box
+              component="img"
+              src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
+              alt={exerciseName}
+              onError={() => setImageError(true)}
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              }}
+              loading="lazy"
+            />
+          )}
         </Box>
         
         {/* Exercise Info */}

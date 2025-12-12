@@ -28,6 +28,7 @@ import {
 import ExerciseOptionsMenu from './ExerciseOptionsMenu';
 import { getSupersetColor } from '../../utils/supersetColors';
 import { getDemoImagePath } from '../../utils/exerciseDemoImages';
+import { isSvgDataUrl, extractSvgFromDataUrl } from '../../utils/muscleHighlightSvg';
 
 const WorkoutExerciseCard = memo(({
   exercise,
@@ -105,18 +106,35 @@ const WorkoutExerciseCard = memo(({
                 justifyContent: 'center',
               }}
             >
-              <Box
-                component="img"
-                src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
-                alt={exerciseName}
-                onError={() => setImageError(true)}
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                }}
-                loading="lazy"
-              />
+              {isSvgDataUrl(imagePath) ? (
+                // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    '& svg': {
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                    },
+                  }}
+                  dangerouslySetInnerHTML={{ __html: extractSvgFromDataUrl(imagePath) }}
+                />
+              ) : (
+                // Render regular image
+                <Box
+                  component="img"
+                  src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
+                  alt={exerciseName}
+                  onError={() => setImageError(true)}
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                  }}
+                  loading="lazy"
+                />
+              )}
             </Box>
             
             {/* Exercise Info */}

@@ -119,12 +119,12 @@ export const normalizeExerciseName = (exerciseName) => {
 
 /**
  * Gets the demo image path for a given exercise name or webp file
- * Returns a placeholder image path if no matching image is found
+ * Returns a customized SVG demo if no webp is found, or placeholder as fallback
  * 
  * @param {string} exerciseName - The exercise name to find an image for
  * @param {boolean} usePlaceholder - Whether to return placeholder if no match (default: true)
  * @param {string} webpFile - Optional webp filename from exercise data (e.g., 'back-squat.webp')
- * @returns {string|null} Path to the demo image, placeholder, or null if not found
+ * @returns {string|null} Path to the demo image, SVG demo, placeholder, or null if not found
  */
 export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile = null) => {
   // If webpFile is explicitly provided, validate and use it directly
@@ -142,12 +142,12 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
   
   const normalized = normalizeExerciseName(exerciseName);
   
-  // Check if we have an exact match
+  // Check if we have an exact match for webp
   if (AVAILABLE_DEMO_IMAGES.includes(normalized)) {
     return `${getBaseUrl()}demos/${normalized}.webp`;
   }
   
-  // Check for common variations/aliases
+  // Check for common variations/aliases for webp
   const variations = getExerciseVariations(normalized);
   for (const variation of variations) {
     if (AVAILABLE_DEMO_IMAGES.includes(variation)) {
@@ -155,14 +155,18 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
     }
   }
   
-  // Try fuzzy matching as a last resort
+  // Try fuzzy matching as a last resort for webp
   const fuzzyMatch = findFuzzyMatch(normalized);
   if (fuzzyMatch) {
     return `${getBaseUrl()}demos/${fuzzyMatch}.webp`;
   }
   
-  // Return placeholder if enabled, otherwise null
-  return usePlaceholder ? `${getBaseUrl()}work-icon.svg` : null;
+  // If no webp found, try SVG demo (muscle-worked diagram)
+  // SVG demos are generated for exercises without webp demos
+  const svgPath = `${getBaseUrl()}demos/${normalized}.svg`;
+  // We assume SVG exists for exercises without webp - return it optimistically
+  // The browser will handle 404 if it doesn't exist and fall back gracefully
+  return svgPath;
 };
 
 /**

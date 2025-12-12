@@ -356,15 +356,6 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const primaryMuscle = currentStep?.exercise?.['Primary Muscle'];
   const secondaryMuscles = currentStep?.exercise?.['Secondary Muscles'];
   
-  // DEBUG: Log exercise data structure
-  console.log('[WorkoutScreen] Current exercise:', {
-    name: exerciseName,
-    webpFile,
-    primaryMuscle,
-    secondaryMuscles,
-    hasAllFields: !!(exerciseName && primaryMuscle)
-  });
-  
   // Calculate barbell weight per side for barbell exercises
   const barbellPerSide = useMemo(() => {
     if (isBarbell && currentWeight && parseFloat(currentWeight) > 0) {
@@ -486,10 +477,6 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
         primaryMuscle,
         secondaryMuscles
       );
-      
-      console.log('[WorkoutScreen] Demo image for', exerciseName, ':', imagePath ? imagePath.substring(0, 100) : 'null');
-      console.log('[WorkoutScreen] Primary muscle:', primaryMuscle, 'Secondary:', secondaryMuscles);
-      console.log('[WorkoutScreen] Is SVG?:', isSvgDataUrl(imagePath));
       
       setDemoImageSrc(imagePath);
       setImageError(false);
@@ -1334,7 +1321,6 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                 </Box>
                 
                 {/* Demo Image - Shows if available */}
-                {console.log('[WorkoutScreen Render] demoImageSrc:', demoImageSrc ? 'EXISTS' : 'NULL')}
                 {demoImageSrc && (
                   <Box 
                     sx={{ 

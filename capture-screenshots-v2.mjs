@@ -20,7 +20,7 @@ async function captureWorkoutScreenshots() {
 
   try {
     console.log('Navigating to the app...');
-    await page.goto('http://localhost:5174/goodlift/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5175/goodlift/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     
     console.log('Clicking Continue as Guest...');

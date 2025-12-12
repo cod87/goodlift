@@ -318,6 +318,13 @@ const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
   return modifiedSvg;
 };
 
+// Validation constants for muscle highlight SVG structure
+// These define the expected structure of our generated muscle highlight SVGs
+const EXPECTED_SVG_VIEWBOX = '0 0 122.04 117.09';
+const EXPECTED_LAYER_ID = 'Layer_1-2';
+const EXPECTED_LAYER_NAME = 'Layer 1';
+const EXPECTED_CSS_CLASSES = ['cls-1', 'cls-primary', 'cls-secondary'];
+
 /**
  * Converts SVG string to a data URL
  * @param {string} svgString - SVG markup
@@ -326,9 +333,9 @@ const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
 export const svgToDataUrl = (svgString) => {
   // Strip XML declaration if present for better cross-browser compatibility
   let cleanedSvg = svgString.trim();
-  if (cleanedSvg.startsWith('<?xml')) {
-    // Match properly formed XML declarations that end with ?>
-    cleanedSvg = cleanedSvg.replace(/<\?xml[^>]*\?>\s*/i, '');
+  // Match properly formed XML declarations that start with <?xml and end with ?>
+  if (cleanedSvg.startsWith('<?xml ')) {
+    cleanedSvg = cleanedSvg.replace(/<\?xml\s[^?]*\?>\s*/i, '');
   }
   
   // Encode the SVG for use in a data URL
@@ -375,10 +382,11 @@ const isValidMuscleSvg = (svgContent) => {
   // Our generated SVGs should have these characteristics:
   // 1. Contains our canonical SVG viewBox
   // 2. Contains our style classes (cls-1, cls-primary, cls-secondary)
-  // 3. Contains muscle group IDs (e.g., id="biceps", id="chest")
-  const hasExpectedViewBox = svgContent.includes('viewBox="0 0 122.04 117.09"');
-  const hasExpectedClasses = svgContent.includes('cls-1') || svgContent.includes('cls-primary');
-  const hasMuscleLayers = svgContent.includes('id="Layer_1-2"') || svgContent.includes('data-name="Layer 1"');
+  // 3. Contains muscle group layer structure (e.g., id="Layer_1-2" or data-name="Layer 1")
+  const hasExpectedViewBox = svgContent.includes(`viewBox="${EXPECTED_SVG_VIEWBOX}"`);
+  const hasExpectedClasses = EXPECTED_CSS_CLASSES.some(cls => svgContent.includes(cls));
+  const hasMuscleLayers = svgContent.includes(`id="${EXPECTED_LAYER_ID}"`) || 
+                          svgContent.includes(`data-name="${EXPECTED_LAYER_NAME}"`);
   
   // If it has our expected structure, it's likely our generated SVG
   return hasExpectedViewBox && (hasExpectedClasses || hasMuscleLayers);

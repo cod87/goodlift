@@ -105,6 +105,10 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   // Get user preferences for barbell weight
   const { preferences } = usePreferences();
   
+  // Construct Work Icon URL with robust path handling
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
+  
   // Track workoutData length to avoid excessive re-renders 
   // (workoutData array changes frequently during workout)
   const workoutDataLength = workoutData.length;
@@ -1351,12 +1355,24 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                                   : '200px',
                                 width: 'auto',
                                 height: 'auto',
-                                objectFit: 'contain',
                               },
                             }}
                             dangerouslySetInnerHTML={{ __html: svgContent }}
                           />
-                        ) : null; // Don't render anything if extraction fails
+                        ) : (
+                          // Fallback if SVG extraction fails
+                          <Box
+                            component="img"
+                            src={workIconUrl}
+                            alt="Exercise"
+                            sx={{ 
+                              width: '60%', 
+                              height: '60%', 
+                              objectFit: 'contain', 
+                              opacity: 0.5 
+                            }}
+                          />
+                        );
                       })()
                     ) : (
                       // Render regular image

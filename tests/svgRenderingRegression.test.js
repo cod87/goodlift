@@ -270,23 +270,34 @@ describe('SVG Rendering Regression Tests', () => {
       const endTime = Date.now();
       const duration = endTime - startTime;
       
-      // Should complete reasonably quickly (less than 1 second for 5 exercises)
-      expect(duration).toBeLessThan(1000);
+      // Should complete quickly (less than 500ms for 5 exercises)
+      // This threshold allows for CI/CD environment variations
+      expect(duration).toBeLessThan(500);
     });
   });
 
   describe('Error handling', () => {
     test('should handle invalid webp file paths gracefully', () => {
-      const imagePath = getDemoImagePath(
-        'Test Exercise',
-        true,
-        '../../../etc/passwd', // Path traversal attempt
-        'Chest',
-        'Triceps'
-      );
+      // Test various path traversal attempts
+      const pathTraversalAttempts = [
+        '../../../etc/passwd',           // Unix-style
+        '..\\..\\..\\windows\\system32', // Windows-style
+        '%2e%2e%2f%2e%2e%2f',           // URL-encoded
+        '....//....//etc/passwd',        // Double encoding attempt
+      ];
       
-      // Should fallback to SVG, not allow path traversal
-      expect(isSvgDataUrl(imagePath)).toBe(true);
+      pathTraversalAttempts.forEach(maliciousPath => {
+        const imagePath = getDemoImagePath(
+          'Test Exercise',
+          true,
+          maliciousPath,
+          'Chest',
+          'Triceps'
+        );
+        
+        // Should fallback to SVG, not allow path traversal
+        expect(isSvgDataUrl(imagePath)).toBe(true);
+      });
     });
 
     test('should handle undefined exercise name', () => {

@@ -18,9 +18,10 @@ This PR enhances the test coverage for the SVG muscle highlight rendering featur
 ### Security Measures in Place
 
 #### 1. SVG Content Validation
-The `isValidMuscleSvg()` function in `src/utils/muscleHighlightSvg.js` validates all SVG content before rendering:
+The `isValidMuscleSvg()` function (internal to `src/utils/muscleHighlightSvg.js`) validates all SVG content before rendering:
 
 ```javascript
+// Note: This is an internal function used by extractSvgFromDataUrl()
 const isValidMuscleSvg = (svgContent) => {
   // Check SVG structure
   if (!svgContent.trim().startsWith('<svg')) return false;

@@ -10,7 +10,7 @@ const path = require('path');
 
 const EXERCISES_JSON_PATH = path.join(__dirname, '../public/data/exercises.json');
 const BASE_SVG_PATH = path.join(__dirname, '../public/demos/muscles-worked.svg');
-const OUTPUT_DIR = path.join(__dirname, '../public/demos/generated');
+const OUTPUT_DIR = path.join(__dirname, '../public/demos');
 
 // Theme colors (from ThemeContext.jsx)
 const PRIMARY_COLOR = '#1db584';  // Bright teal for primary muscles

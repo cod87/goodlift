@@ -290,17 +290,28 @@ const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
   
   // Update the class for primary muscle groups
   primaryIds.forEach(muscleId => {
-    // Match the group with this ID and replace its class
-    const regex = new RegExp(`(<g id="${muscleId}"[^>]*class=")cls-1(")`, 'g');
-    modifiedSvg = modifiedSvg.replace(regex, '$1cls-primary$2');
+    // Match all path elements within the group with this ID and replace their class
+    // The regex captures the group opening tag, then replaces all cls-1 classes within that group
+    const groupRegex = new RegExp(`(<g id="${muscleId}"[^>]*>[\\s\\S]*?)<\\/g>`, '');
+    const match = modifiedSvg.match(groupRegex);
+    if (match) {
+      const groupContent = match[1];
+      const updatedGroupContent = groupContent.replace(/class="cls-1"/g, 'class="cls-primary"');
+      modifiedSvg = modifiedSvg.replace(groupContent, updatedGroupContent);
+    }
   });
   
   // Update the class for secondary muscle groups
   secondaryIds.forEach(muscleId => {
     // Only update if not already marked as primary
     if (!primaryIds.includes(muscleId)) {
-      const regex = new RegExp(`(<g id="${muscleId}"[^>]*class=")cls-1(")`, 'g');
-      modifiedSvg = modifiedSvg.replace(regex, '$1cls-secondary$2');
+      const groupRegex = new RegExp(`(<g id="${muscleId}"[^>]*>[\\s\\S]*?)<\\/g>`, '');
+      const match = modifiedSvg.match(groupRegex);
+      if (match) {
+        const groupContent = match[1];
+        const updatedGroupContent = groupContent.replace(/class="cls-1"/g, 'class="cls-secondary"');
+        modifiedSvg = modifiedSvg.replace(groupContent, updatedGroupContent);
+      }
     }
   });
   

@@ -15,12 +15,12 @@ const createInitialWorkoutProgress = () => ({
   currentStepIndex: 0,
   workoutData: [],
   elapsedTime: 0,
-  currentPhase: 'warmup', // Should start with warmup
+  currentPhase: 'warmup',
 });
 
 // Helper to simulate workout screen component state
 const createWorkoutScreenState = (initialProgress = null) => {
-  // Match the logic from WorkoutScreen.jsx line 90
+  // Match the initialization logic: defaults to warmup if no saved progress
   const currentPhase = initialProgress?.currentPhase ?? 'warmup';
   return {
     currentPhase,

@@ -12,7 +12,7 @@ import SwapExerciseDialog from './Common/SwapExerciseDialog';
 import SaveModifiedWorkoutDialog from './Common/SaveModifiedWorkoutDialog';
 import TargetRepsPicker from './Common/TargetRepsPicker';
 import { getDemoImagePath } from '../utils/exerciseDemoImages';
-import { isSvgDataUrl, extractSvgFromDataUrl } from '../utils/muscleHighlightSvg';
+import { isSvgDataUrl, extractSvgFromDataUrl, getMuscleHighlightDataUrl } from '../utils/muscleHighlightSvg';
 import { 
   DEFAULT_TARGET_REPS, 
   getClosestValidTargetReps, 
@@ -355,6 +355,15 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const webpFile = currentStep?.exercise?.['Webp File'];
   const primaryMuscle = currentStep?.exercise?.['Primary Muscle'];
   const secondaryMuscles = currentStep?.exercise?.['Secondary Muscles'];
+  
+  // DEBUG: Log exercise data structure
+  console.log('[WorkoutScreen] Current exercise:', {
+    name: exerciseName,
+    webpFile,
+    primaryMuscle,
+    secondaryMuscles,
+    hasAllFields: !!(exerciseName && primaryMuscle)
+  });
   
   // Calculate barbell weight per side for barbell exercises
   const barbellPerSide = useMemo(() => {
@@ -1403,6 +1412,48 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                   </Box>
                 )}
               </Box>
+              
+              {/* Muscle Highlight SVG - ALWAYS show for exercises with muscle data */}
+              {primaryMuscle && (
+                <Box 
+                  sx={{ 
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: '100%',
+                    mt: 1,
+                    mb: 1,
+                    px: { xs: 2, sm: 3 },
+                  }}
+                >
+                  {(() => {
+                    // Generate muscle highlight SVG
+                    const muscleSvgDataUrl = getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
+                    const svgContent = extractSvgFromDataUrl(muscleSvgDataUrl);
+                    
+                    return svgContent ? (
+                      <Box
+                        sx={{
+                          maxWidth: shouldUseTwoColumns ? '200px' : '180px',
+                          maxHeight: shouldUseTwoColumns ? '200px' : '180px',
+                          width: '100%',
+                          height: 'auto',
+                          borderRadius: 1,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          bgcolor: 'background.paper',
+                          p: 1,
+                          '& svg': {
+                            width: '100%',
+                            height: 'auto',
+                          },
+                        }}
+                        dangerouslySetInnerHTML={{ __html: svgContent }}
+                      />
+                    ) : null;
+                  })()}
+                </Box>
+              )}
               
               {/* Portrait/Mobile: Separate rows for target info, inputs, and nav buttons */}
               {!shouldUseTwoColumns && (

@@ -327,7 +327,8 @@ export const svgToDataUrl = (svgString) => {
   // Strip XML declaration if present for better cross-browser compatibility
   let cleanedSvg = svgString.trim();
   if (cleanedSvg.startsWith('<?xml')) {
-    cleanedSvg = cleanedSvg.replace(/<\?xml[^?]*\?>\s*/i, '');
+    // Match properly formed XML declarations that end with ?>
+    cleanedSvg = cleanedSvg.replace(/<\?xml[^>]*\?>\s*/i, '');
   }
   
   // Encode the SVG for use in a data URL
@@ -359,9 +360,35 @@ export const isSvgDataUrl = (imagePath) => {
 };
 
 /**
+ * Validates that SVG content is safe for rendering
+ * Ensures the SVG only contains expected structure from our muscle highlight generator
+ * @param {string} svgContent - The SVG markup to validate
+ * @returns {boolean} True if the SVG appears to be safe
+ */
+const isValidMuscleSvg = (svgContent) => {
+  if (!svgContent || typeof svgContent !== 'string') return false;
+  
+  // Check that it starts with an SVG element
+  if (!svgContent.trim().startsWith('<svg')) return false;
+  
+  // Check for the expected muscle highlight SVG structure
+  // Our generated SVGs should have these characteristics:
+  // 1. Contains our canonical SVG viewBox
+  // 2. Contains our style classes (cls-1, cls-primary, cls-secondary)
+  // 3. Contains muscle group IDs (e.g., id="biceps", id="chest")
+  const hasExpectedViewBox = svgContent.includes('viewBox="0 0 122.04 117.09"');
+  const hasExpectedClasses = svgContent.includes('cls-1') || svgContent.includes('cls-primary');
+  const hasMuscleLayers = svgContent.includes('id="Layer_1-2"') || svgContent.includes('data-name="Layer 1"');
+  
+  // If it has our expected structure, it's likely our generated SVG
+  return hasExpectedViewBox && (hasExpectedClasses || hasMuscleLayers);
+};
+
+/**
  * Extracts the SVG markup from a data URL
+ * Only returns content if it passes validation checks
  * @param {string} dataUrl - The SVG data URL
- * @returns {string} The decoded SVG markup
+ * @returns {string} The decoded SVG markup, or empty string if invalid
  */
 export const extractSvgFromDataUrl = (dataUrl) => {
   if (!isSvgDataUrl(dataUrl)) return '';
@@ -372,9 +399,17 @@ export const extractSvgFromDataUrl = (dataUrl) => {
   
   // Decode the percent-encoded SVG
   try {
-    return decodeURIComponent(encodedSvg);
+    const decodedSvg = decodeURIComponent(encodedSvg);
+    
+    // Validate that it's our muscle highlight SVG before returning
+    if (!isValidMuscleSvg(decodedSvg)) {
+      console.warn('SVG content does not match expected muscle highlight structure');
+      return '';
+    }
+    
+    return decodedSvg;
   } catch (error) {
-    console.error('Failed to decode SVG data URL:', error);
+    console.error('Failed to decode SVG data URL:', error, 'First 50 chars:', dataUrl.substring(0, 50));
     return '';
   }
 };

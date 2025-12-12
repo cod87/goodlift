@@ -337,8 +337,8 @@ describe('Workout Session SVG Rendering', () => {
       const validSvg = extractSvgFromDataUrl(validDataUrl);
       expect(validSvg).toBeTruthy();
       
-      // Invalid SVG should be rejected
-      const invalidDataUrl = 'data:image/svg+xml,%3Csvg%3E%3Cscript%3Ealert(1)%3C%2Fscript%3E%3C%2Fsvg%3E';
+      // Invalid SVG missing expected viewBox should be rejected
+      const invalidDataUrl = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%22%20height%3D%22100%22%2F%3E%3C%2Fsvg%3E';
       const invalidSvg = extractSvgFromDataUrl(invalidDataUrl);
       expect(invalidSvg).toBe(''); // Should be rejected due to validation
     });

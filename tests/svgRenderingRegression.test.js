@@ -153,7 +153,7 @@ describe('SVG Rendering Regression Tests', () => {
         expect(svgContent).toContain('viewBox=');
       } else {
         // This path should not be taken for exercises without webp
-        expect(true).toBe(false);
+        throw new Error('Expected SVG data URL but got regular image path');
       }
     });
 
@@ -370,13 +370,17 @@ describe('SVG Rendering Regression Tests', () => {
 
     test('should handle image load errors with fallback', () => {
       // Simulate image error scenario where webp fails to load
-      // The webp path would initially be generated
-      getDemoImagePath('Exercise', true, 'non-existent.webp', 'Chest', 'Triceps');
+      // The webp path would initially be generated (but file doesn't exist)
+      const initialPath = getDemoImagePath('Exercise', true, 'non-existent.webp', 'Chest', 'Triceps');
       
-      // Even with webp file specified, if it doesn't exist, the error handler
-      // in the component would call getDemoImagePath again with null webp
+      // Initial path should point to non-existent webp
+      expect(isSvgDataUrl(initialPath)).toBe(false);
+      expect(initialPath).toContain('non-existent.webp');
+      
+      // When image fails to load, the error handler calls getDemoImagePath again with null webp
       const fallbackPath = getDemoImagePath('Exercise', true, null, 'Chest', 'Triceps');
       
+      // Fallback should generate SVG
       expect(isSvgDataUrl(fallbackPath)).toBe(true);
     });
   });

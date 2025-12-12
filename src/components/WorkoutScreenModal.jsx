@@ -34,7 +34,7 @@ const WorkoutScreenModal = ({
     currentStepIndex: 0,
     workoutData: [],
     elapsedTime: 0,
-    currentPhase: 'exercise', // 'warmup', 'exercise', 'cooldown', 'complete'
+    currentPhase: 'warmup', // 'warmup', 'exercise', 'cooldown', 'complete'
   });
 
   // Session state for persistence - memoized to prevent unnecessary saves

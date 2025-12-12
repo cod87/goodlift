@@ -2,7 +2,10 @@
   {
     "Exercise Name": "Archer Push-Up",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Lats, Triceps",
+    "Secondary Muscles": [
+      "Lats",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
@@ -10,8 +13,11 @@
   },
   {
     "Exercise Name": "Arnold Press, Dumbbell",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Chest"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -19,8 +25,12 @@
   },
   {
     "Exercise Name": "Back Lever",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Back, Shoulders",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Chest",
+      "Lats",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -29,17 +39,25 @@
   {
     "Exercise Name": "Back Squat",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Full Body Strength, Lower Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "back-squat.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Bear Crawl",
-    "Primary Muscle": "Shoulders",
-    "Secondary Muscles": "Triceps, Core, Quads",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Abs",
+      "Quads",
+      "Lower back"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT",
@@ -48,7 +66,11 @@
   {
     "Exercise Name": "Belt Squat, Barbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
@@ -57,7 +79,10 @@
   {
     "Exercise Name": "Bench Dip",
     "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Chest, Front Delts",
+    "Secondary Muscles": [
+      "Chest",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
@@ -66,57 +91,71 @@
   {
     "Exercise Name": "Bench Press, Barbell",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
+    "Secondary Muscles": [
+      "Front delts",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Full Body Strength, Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-bench-press.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Bench Press, Dumbbell",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
+    "Secondary Muscles": [
+      "Front delts",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-bench-press.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Bent-Over Row, Barbell",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Lower Back, Core",
+    "Secondary Muscles": [
+      "Biceps",
+      "Lower back",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Full Body Strength, Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-bent-over-row.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Bent-Over Row, Dumbbell",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core",
+    "Secondary Muscles": [
+      "Biceps",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-bent-over-row.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Bicep Curl, Barbell",
     "Primary Muscle": "Biceps",
-    "Secondary Muscles": "Front Delts, Forearms",
+    "Secondary Muscles": [
+      "Front delts",
+      "Forearms"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-bicep-curl.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Bicep Curl, Dumbbell",
     "Primary Muscle": "Biceps",
-    "Secondary Muscles": "Front Delts, Forearms",
+    "Secondary Muscles": [
+      "Front delts",
+      "Forearms"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -124,8 +163,11 @@
   },
   {
     "Exercise Name": "Bicycle Crunch",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Obliques, Hip Flexors",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Obliques",
+      "Others"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -133,8 +175,11 @@
   },
   {
     "Exercise Name": "Bird Dog",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Glutes, Lower Back",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Glutes",
+      "Lower back"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -143,7 +188,10 @@
   {
     "Exercise Name": "Box Jump",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Calves",
+    "Secondary Muscles": [
+      "Glutes",
+      "Calves"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, HIIT",
@@ -152,7 +200,11 @@
   {
     "Exercise Name": "Box Squat, Barbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
@@ -161,7 +213,11 @@
   {
     "Exercise Name": "Bulgarian Split Squat",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
@@ -170,7 +226,11 @@
   {
     "Exercise Name": "Bulgarian Split Squat, Dumbbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
@@ -179,17 +239,21 @@
   {
     "Exercise Name": "Burpee",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Triceps, Quads, Glutes, Core",
+    "Secondary Muscles": [
+      "Triceps",
+      "Quads",
+      "Glutes",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
-    "Progression": "Power Development",
-    "Webp File": "burpee.webp"
+    "Progression": "Power Development"
   },
   {
     "Exercise Name": "Burpee to Box Jump",
-    "Primary Muscle": "Full Body",
-    "Secondary Muscles": "All",
+    "Primary Muscle": "Others",
+    "Secondary Muscles": [],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
@@ -198,7 +262,10 @@
   {
     "Exercise Name": "Butt Kicks",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
@@ -207,7 +274,9 @@
   {
     "Exercise Name": "Calf Raise",
     "Primary Muscle": "Calves",
-    "Secondary Muscles": "Core",
+    "Secondary Muscles": [
+      "Abs"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
@@ -216,7 +285,10 @@
   {
     "Exercise Name": "Chest Throw, Slam Ball",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Triceps, Delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
     "Workout Type": "Upper Body Strength, HIIT",
@@ -225,7 +297,11 @@
   {
     "Exercise Name": "Chin-Up",
     "Primary Muscle": "Biceps",
-    "Secondary Muscles": "Lats, Core, Delts",
+    "Secondary Muscles": [
+      "Lats",
+      "Abs",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
@@ -234,7 +310,12 @@
   {
     "Exercise Name": "Clean, Barbell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Delts, Core, Traps",
+    "Secondary Muscles": [
+      "Glutes",
+      "Front delts",
+      "Abs",
+      "Traps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Full Body Strength",
@@ -243,7 +324,11 @@
   {
     "Exercise Name": "Clean, Kettlebell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Delts, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Front delts",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Full Body Strength",
@@ -252,7 +337,11 @@
   {
     "Exercise Name": "Climb, Rope",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Grip, Core, Hamstrings",
+    "Secondary Muscles": [
+      "Grip",
+      "Abs",
+      "Hamstrings"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT",
@@ -261,7 +350,10 @@
   {
     "Exercise Name": "Close Grip Bench Press, Barbell",
     "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Chest, Front Delts",
+    "Secondary Muscles": [
+      "Chest",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
@@ -270,7 +362,11 @@
   {
     "Exercise Name": "Close Grip Lat Pulldown",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Rhomboids, Traps",
+    "Secondary Muscles": [
+      "Biceps",
+      "Rear delts",
+      "Traps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
@@ -279,7 +375,11 @@
   {
     "Exercise Name": "Crab Walk",
     "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Shoulders, Core, Glutes",
+    "Secondary Muscles": [
+      "Front delts",
+      "Abs",
+      "Glutes"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength, HIIT",
@@ -287,8 +387,10 @@
   },
   {
     "Exercise Name": "Crunch",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Hip Flexors",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Others"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -296,8 +398,10 @@
   },
   {
     "Exercise Name": "Dead Bug",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Hip Flexors",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Others"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -306,27 +410,37 @@
   {
     "Exercise Name": "Deadlift, Barbell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Lower Back, Quads",
+    "Secondary Muscles": [
+      "Glutes",
+      "Lower back",
+      "Quads"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Full Body Strength, Lower Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-deadlift.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Deadlift, Dumbbell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Quads, Lower Back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Quads",
+      "Lower back"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-deadlift.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Deadlift, Landmine",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Lower Back, Quads",
+    "Secondary Muscles": [
+      "Glutes",
+      "Lower back",
+      "Quads"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "Workout Type": "Lower Body Strength",
@@ -335,7 +449,10 @@
   {
     "Exercise Name": "Decline Bench Press, Barbell",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
+    "Secondary Muscles": [
+      "Front delts",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
@@ -344,7 +461,10 @@
   {
     "Exercise Name": "Decline Bench Press, Dumbbell",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
+    "Secondary Muscles": [
+      "Front delts",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -353,7 +473,10 @@
   {
     "Exercise Name": "Decline Push-Up",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
+    "Secondary Muscles": [
+      "Front delts",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
@@ -362,7 +485,10 @@
   {
     "Exercise Name": "Diamond Push-Up",
     "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Chest, Front Delts",
+    "Secondary Muscles": [
+      "Chest",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
@@ -371,7 +497,10 @@
   {
     "Exercise Name": "Dip",
     "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Chest, Front Delts",
+    "Secondary Muscles": [
+      "Chest",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
@@ -379,8 +508,11 @@
   },
   {
     "Exercise Name": "Dragon Flag",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Chest, Shoulders",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Chest",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -388,8 +520,11 @@
   },
   {
     "Exercise Name": "Farmer Carry, Dumbbell",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Traps, Forearms",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Traps",
+      "Forearms"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Core",
@@ -397,8 +532,10 @@
   },
   {
     "Exercise Name": "Flutter Kicks",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Hip Flexors",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Others"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -407,17 +544,22 @@
   {
     "Exercise Name": "Fly, Dumbbell",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts",
+    "Secondary Muscles": [
+      "Front delts"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-fly.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Front Lever",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Chest, Shoulders, Lats",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Chest",
+      "Front delts",
+      "Lats"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -425,18 +567,24 @@
   },
   {
     "Exercise Name": "Front Raise, Dumbbell",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Chest",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Chest"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-front-raise.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Front Squat, Barbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Core, Glutes, Upper Back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs",
+      "Traps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength, Push/Pull/Legs",
@@ -445,7 +593,12 @@
   {
     "Exercise Name": "Front Squat, Dumbbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core, Upper Back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs",
+      "Traps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
@@ -454,7 +607,12 @@
   {
     "Exercise Name": "Front Squat, Kettlebell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core, Upper Back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs",
+      "Traps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Lower Body Strength",
@@ -463,7 +621,10 @@
   {
     "Exercise Name": "Glute Bridge",
     "Primary Muscle": "Glutes",
-    "Secondary Muscles": "Hamstrings, Core",
+    "Secondary Muscles": [
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
@@ -472,17 +633,22 @@
   {
     "Exercise Name": "Goblet Squat, Dumbbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-goblet-squat.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Goblet Squat, Kettlebell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Lower Body Strength",
@@ -491,7 +657,11 @@
   {
     "Exercise Name": "Good Morning, Barbell",
     "Primary Muscle": "Glutes",
-    "Secondary Muscles": "Hamstrings, Lower Back, Core",
+    "Secondary Muscles": [
+      "Hamstrings",
+      "Lower back",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
@@ -500,7 +670,10 @@
   {
     "Exercise Name": "Hack Squat, Barbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
@@ -509,7 +682,9 @@
   {
     "Exercise Name": "Hammer Curl, Dumbbell",
     "Primary Muscle": "Biceps",
-    "Secondary Muscles": "Forearms",
+    "Secondary Muscles": [
+      "Forearms"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -517,8 +692,12 @@
   },
   {
     "Exercise Name": "Handstand Hold",
-    "Primary Muscle": "Shoulders",
-    "Secondary Muscles": "Core, Chest, Triceps",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Abs",
+      "Chest",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
@@ -526,8 +705,12 @@
   },
   {
     "Exercise Name": "Handstand Push-Up",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Core, Chest",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Abs",
+      "Chest"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
@@ -535,8 +718,11 @@
   },
   {
     "Exercise Name": "Hanging Knee Raise",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Hip Flexors, Chest",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Others",
+      "Chest"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -544,8 +730,12 @@
   },
   {
     "Exercise Name": "High Knees",
-    "Primary Muscle": "Hip Flexors",
-    "Secondary Muscles": "Quads, Core, Glutes",
+    "Primary Muscle": "Others",
+    "Secondary Muscles": [
+      "Quads",
+      "Abs",
+      "Glutes"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
@@ -554,7 +744,10 @@
   {
     "Exercise Name": "High Pull, Barbell",
     "Primary Muscle": "Traps",
-    "Secondary Muscles": "Delts, Hamstrings",
+    "Secondary Muscles": [
+      "Front delts",
+      "Hamstrings"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Cardio, HIIT",
@@ -562,8 +755,11 @@
   },
   {
     "Exercise Name": "Hollow Body Hold",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Shoulders, Back",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Front delts",
+      "Lats"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -571,8 +767,12 @@
   },
   {
     "Exercise Name": "Inchworm",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Chest, Shoulders, Hamstrings",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Chest",
+      "Front delts",
+      "Hamstrings"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT",
@@ -581,7 +781,10 @@
   {
     "Exercise Name": "Incline Bench Press, Barbell",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
+    "Secondary Muscles": [
+      "Front delts",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
@@ -590,7 +793,10 @@
   {
     "Exercise Name": "Incline Bench Press, Dumbbell",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
+    "Secondary Muscles": [
+      "Front delts",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -599,7 +805,9 @@
   {
     "Exercise Name": "Incline Curl, Dumbbell",
     "Primary Muscle": "Biceps",
-    "Secondary Muscles": "Front Delts",
+    "Secondary Muscles": [
+      "Front delts"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -608,7 +816,11 @@
   {
     "Exercise Name": "Jump Lunge",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, HIIT",
@@ -617,17 +829,24 @@
   {
     "Exercise Name": "Jump Squat",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core, Calves",
+    "Secondary Muscles": [
+      "Glutes",
+      "Abs",
+      "Calves"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, HIIT",
-    "Progression": "Power Development",
-    "Webp File": "jump-squat.webp"
+    "Progression": "Power Development"
   },
   {
     "Exercise Name": "Jump Squat, Dumbbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core, Calves",
+    "Secondary Muscles": [
+      "Glutes",
+      "Abs",
+      "Calves"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength, HIIT",
@@ -636,7 +855,11 @@
   {
     "Exercise Name": "Jumping Jacks",
     "Primary Muscle": "Glutes",
-    "Secondary Muscles": "Quads, Chest, Shoulders",
+    "Secondary Muscles": [
+      "Quads",
+      "Chest",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
@@ -645,7 +868,9 @@
   {
     "Exercise Name": "Kickback, Dumbbell",
     "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Shoulders",
+    "Secondary Muscles": [
+      "Front delts"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -653,8 +878,12 @@
   },
   {
     "Exercise Name": "L-Sit",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Shoulders, Triceps, Hip Flexors",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Front delts",
+      "Triceps",
+      "Others"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -663,17 +892,24 @@
   {
     "Exercise Name": "Lat Pulldown",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Rear Delts, Traps",
+    "Secondary Muscles": [
+      "Biceps",
+      "Rear delts",
+      "Traps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "lat-pulldown.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Lateral Bound",
     "Primary Muscle": "Glutes",
-    "Secondary Muscles": "Adductors, Abductors, Core",
+    "Secondary Muscles": [
+      "Adductors",
+      "Others",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
@@ -682,7 +918,11 @@
   {
     "Exercise Name": "Lateral Lunge",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Adductors, Abductors, Glutes",
+    "Secondary Muscles": [
+      "Adductors",
+      "Others",
+      "Glutes"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
@@ -690,18 +930,21 @@
   },
   {
     "Exercise Name": "Lateral Raise, Dumbbell",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Traps",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Traps"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-lateral-raise.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Leg Raise",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Hip Flexors",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Others"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -709,8 +952,11 @@
   },
   {
     "Exercise Name": "Leopard Crawl",
-    "Primary Muscle": "Shoulders",
-    "Secondary Muscles": "Triceps, Core",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT",
@@ -719,17 +965,24 @@
   {
     "Exercise Name": "Lunge",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "lunge.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Lunge, Dumbbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
@@ -738,7 +991,11 @@
   {
     "Exercise Name": "Lunge, Kettlebell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Lower Body Strength",
@@ -746,8 +1003,12 @@
   },
   {
     "Exercise Name": "Mountain Climber",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Shoulders, Hip Flexors, Quads",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Front delts",
+      "Others",
+      "Quads"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
@@ -756,7 +1017,11 @@
   {
     "Exercise Name": "Muscle-Up",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Triceps, Core, Chest",
+    "Secondary Muscles": [
+      "Triceps",
+      "Abs",
+      "Chest"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
@@ -765,7 +1030,9 @@
   {
     "Exercise Name": "Oblique Crunch",
     "Primary Muscle": "Obliques",
-    "Secondary Muscles": "Core",
+    "Secondary Muscles": [
+      "Abs"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -773,18 +1040,25 @@
   },
   {
     "Exercise Name": "Overhead Press, Barbell",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest, Core",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Chest",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-overhead-press.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Overhead Press, Kettlebell",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest, Core",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Chest",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Upper Body Strength",
@@ -793,7 +1067,10 @@
   {
     "Exercise Name": "Overhead Tricep Extension, Dumbbell",
     "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Shoulders, Chest",
+    "Secondary Muscles": [
+      "Front delts",
+      "Chest"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -802,17 +1079,22 @@
   {
     "Exercise Name": "Paused Bench Press, Barbell",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Front Delts, Triceps",
+    "Secondary Muscles": [
+      "Front delts",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-paused-bench-press.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Pendlay Row, Dumbbell",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core",
+    "Secondary Muscles": [
+      "Biceps",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -821,7 +1103,10 @@
   {
     "Exercise Name": "Pendulum Squat, Barbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
@@ -829,8 +1114,12 @@
   },
   {
     "Exercise Name": "Pike Push-Up",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Core, Chest",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Abs",
+      "Chest"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
@@ -839,7 +1128,11 @@
   {
     "Exercise Name": "Pistol Squat",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core, Hip Flexors",
+    "Secondary Muscles": [
+      "Glutes",
+      "Abs",
+      "Others"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
@@ -847,8 +1140,12 @@
   },
   {
     "Exercise Name": "Plank",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Shoulders, Chest, Triceps",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Front delts",
+      "Chest",
+      "Triceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -856,8 +1153,12 @@
   },
   {
     "Exercise Name": "Plank Jack",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Shoulders, Quads, Glutes",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Front delts",
+      "Quads",
+      "Glutes"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core, HIIT",
@@ -866,7 +1167,10 @@
   {
     "Exercise Name": "Plyometric Push-Up",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Triceps, Front Delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength, HIIT",
@@ -875,7 +1179,10 @@
   {
     "Exercise Name": "Pogo Hop",
     "Primary Muscle": "Calves",
-    "Secondary Muscles": "Quads, Core",
+    "Secondary Muscles": [
+      "Quads",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
@@ -883,8 +1190,12 @@
   },
   {
     "Exercise Name": "Press, Landmine",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest, Core",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Chest",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "Workout Type": "Upper Body Strength",
@@ -893,17 +1204,23 @@
   {
     "Exercise Name": "Pull-Up",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core, Delts",
+    "Secondary Muscles": [
+      "Biceps",
+      "Abs",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "pull-up.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Pull-Up, Cable",
-    "Primary Muscle": "Lats, Biceps",
-    "Secondary Muscles": "Rear Delts, Core",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": [
+      "Rear delts",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Full Body Strength",
@@ -912,37 +1229,46 @@
   {
     "Exercise Name": "Pullover, Dumbbell",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Lats, Triceps",
+    "Secondary Muscles": [
+      "Lats",
+      "Triceps"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-pullover.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Push Press, Barbell",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest, Core",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Chest",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-push-press.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Push-Up",
     "Primary Muscle": "Chest",
-    "Secondary Muscles": "Triceps, Front Delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "push-up.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Rainbow Crunches",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Obliques",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Obliques"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -950,8 +1276,12 @@
   },
   {
     "Exercise Name": "Renegade Row, Dumbbell",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Lats, Triceps, Shoulders",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Lats",
+      "Triceps",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Full Body Strength, HIIT",
@@ -959,8 +1289,11 @@
   },
   {
     "Exercise Name": "Reverse Fly, Dumbbell",
-    "Primary Muscle": "Rear Delts",
-    "Secondary Muscles": "Upper Back",
+    "Primary Muscle": "Rear delts",
+    "Secondary Muscles": [
+      "Traps",
+      "Forearms"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -969,7 +1302,11 @@
   {
     "Exercise Name": "Reverse Lunge",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
@@ -978,7 +1315,11 @@
   {
     "Exercise Name": "Reverse Lunge, Dumbbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
@@ -987,27 +1328,34 @@
   {
     "Exercise Name": "Romanian Deadlift, Barbell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Lower Back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Lower back"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-romanian-deadlift.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Romanian Deadlift, Dumbbell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Lower Back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Lower back"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-romanian-deadlift.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Rotation, Landmine",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Obliques, Shoulders",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Obliques",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "Workout Type": "Core, HIIT",
@@ -1015,8 +1363,12 @@
   },
   {
     "Exercise Name": "Rotational Slam, Slam Ball",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Obliques, Delts, Hamstrings",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Obliques",
+      "Front delts",
+      "Hamstrings"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
     "Workout Type": "Core, HIIT, Cardio",
@@ -1025,7 +1377,10 @@
   {
     "Exercise Name": "Row, Landmine",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core",
+    "Secondary Muscles": [
+      "Biceps",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "Workout Type": "Upper Body Strength",
@@ -1033,8 +1388,11 @@
   },
   {
     "Exercise Name": "Russian Twist",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Obliques, Hip Flexors",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Obliques",
+      "Others"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -1042,8 +1400,10 @@
   },
   {
     "Exercise Name": "Scissor Kicks",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Hip Flexors",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Others"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -1052,27 +1412,36 @@
   {
     "Exercise Name": "Seated Cable Row",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Traps, Rhomboids, Biceps, Rear Delts",
+    "Secondary Muscles": [
+      "Traps",
+      "Rear delts",
+      "Biceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload",
-    "Webp File": "seated-cable-row.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Shoulder Press, Dumbbell",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Chest, Core",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Chest",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "dumbbell-shoulder-press.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Shrug, Barbell",
     "Primary Muscle": "Traps",
-    "Secondary Muscles": "Upper Back",
+    "Secondary Muscles": [
+      "Forearms",
+      "Lower back"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
@@ -1081,7 +1450,10 @@
   {
     "Exercise Name": "Side Plank",
     "Primary Muscle": "Obliques",
-    "Secondary Muscles": "Core, Shoulders",
+    "Secondary Muscles": [
+      "Abs",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -1090,7 +1462,11 @@
   {
     "Exercise Name": "Single-Arm Row, Dumbbell",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core, Obliques",
+    "Secondary Muscles": [
+      "Biceps",
+      "Abs",
+      "Obliques"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -1099,7 +1475,11 @@
   {
     "Exercise Name": "Single-Arm Row, Kettlebell",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Biceps, Core, Obliques",
+    "Secondary Muscles": [
+      "Biceps",
+      "Abs",
+      "Obliques"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Upper Body Strength",
@@ -1107,8 +1487,12 @@
   },
   {
     "Exercise Name": "Single-Arm Shoulder Press, Dumbbell",
-    "Primary Muscle": "Delts",
-    "Secondary Muscles": "Triceps, Core, Obliques",
+    "Primary Muscle": "Front delts",
+    "Secondary Muscles": [
+      "Triceps",
+      "Abs",
+      "Obliques"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
@@ -1117,7 +1501,11 @@
   {
     "Exercise Name": "Single-Leg Deadlift, Dumbbell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Core, Balance",
+    "Secondary Muscles": [
+      "Glutes",
+      "Abs",
+      "Others"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
@@ -1126,7 +1514,10 @@
   {
     "Exercise Name": "Single-Leg Glute Bridge",
     "Primary Muscle": "Glutes",
-    "Secondary Muscles": "Hamstrings, Core",
+    "Secondary Muscles": [
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
@@ -1135,7 +1526,11 @@
   {
     "Exercise Name": "Single-Leg Hop",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Calves, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Calves",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
@@ -1143,8 +1538,10 @@
   },
   {
     "Exercise Name": "Sit-Up",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Hip Flexors",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Others"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -1153,7 +1550,11 @@
   {
     "Exercise Name": "Skater Hops",
     "Primary Muscle": "Glutes",
-    "Secondary Muscles": "Adductors, Abductors, Core",
+    "Secondary Muscles": [
+      "Adductors",
+      "Others",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
@@ -1162,7 +1563,10 @@
   {
     "Exercise Name": "Skull Crusher, Cable",
     "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Front Delts, Chest",
+    "Secondary Muscles": [
+      "Front delts",
+      "Chest"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength",
@@ -1170,8 +1574,12 @@
   },
   {
     "Exercise Name": "Slam, Slam Ball",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Delts, Hamstrings, Glutes",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Front delts",
+      "Hamstrings",
+      "Glutes"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
@@ -1180,7 +1588,12 @@
   {
     "Exercise Name": "Snatch, Barbell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Delts, Core, Traps",
+    "Secondary Muscles": [
+      "Glutes",
+      "Front delts",
+      "Abs",
+      "Traps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Full Body Strength",
@@ -1189,7 +1602,11 @@
   {
     "Exercise Name": "Snatch, Kettlebell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Delts, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Front delts",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Full Body Strength",
@@ -1198,7 +1615,11 @@
   {
     "Exercise Name": "Squat",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, Full Body Strength",
@@ -1207,7 +1628,13 @@
   {
     "Exercise Name": "Squat (High Bar), Barbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core, Upper Back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs",
+      "Traps",
+      "Lower back"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength, Full Body Strength",
@@ -1216,7 +1643,12 @@
   {
     "Exercise Name": "Squat, Landmine",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core, Upper Back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs",
+      "Traps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "Workout Type": "Lower Body Strength",
@@ -1225,7 +1657,10 @@
   {
     "Exercise Name": "Squat, Slam Ball",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
     "Workout Type": "Lower Body Strength",
@@ -1234,7 +1669,10 @@
   {
     "Exercise Name": "Step-Up",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
@@ -1243,7 +1681,10 @@
   {
     "Exercise Name": "Step-Up, Dumbbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
@@ -1251,8 +1692,12 @@
   },
   {
     "Exercise Name": "Suitcase Deadlift, Dumbbell",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Obliques, Lower Back, Glutes",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Obliques",
+      "Lower back",
+      "Glutes"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Core",
@@ -1261,17 +1706,24 @@
   {
     "Exercise Name": "Sumo Deadlift, Barbell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Quads, Lower Back, Adductors",
+    "Secondary Muscles": [
+      "Glutes",
+      "Quads",
+      "Lower back",
+      "Adductors"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-sumo-deadlift.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Superman",
-    "Primary Muscle": "Erector Spinae",
-    "Secondary Muscles": "Glutes, Rear Delts",
+    "Primary Muscle": "Lower back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Rear delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
@@ -1280,17 +1732,26 @@
   {
     "Exercise Name": "Swing, Kettlebell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Core, Upper Back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Forearms",
+      "Abs",
+      "Traps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Lower Body Strength, Cardio, HIIT",
-    "Progression": "Power Development",
-    "Webp File": "kettlebell-swing.webp"
+    "Progression": "Power Development"
   },
   {
     "Exercise Name": "Thruster, Barbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Delts, Triceps, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Front delts",
+      "Triceps",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Full Body Strength, HIIT",
@@ -1299,7 +1760,12 @@
   {
     "Exercise Name": "Thruster, Dumbbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Delts, Triceps, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Front delts",
+      "Triceps",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Full Body Strength, HIIT",
@@ -1308,7 +1774,12 @@
   {
     "Exercise Name": "Thruster, Kettlebell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Delts, Triceps, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Front delts",
+      "Triceps",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Full Body Strength, HIIT",
@@ -1317,7 +1788,11 @@
   {
     "Exercise Name": "Trap Bar Deadlift, Barbell",
     "Primary Muscle": "Hamstrings",
-    "Secondary Muscles": "Glutes, Quads, Lower Back",
+    "Secondary Muscles": [
+      "Glutes",
+      "Quads",
+      "Lower back"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength, Full Body Strength",
@@ -1326,7 +1801,10 @@
   {
     "Exercise Name": "Tricep Extension, Cable",
     "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Front Delts, Chest",
+    "Secondary Muscles": [
+      "Front delts",
+      "Chest"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength",
@@ -1335,7 +1813,10 @@
   {
     "Exercise Name": "Tricep Extension, Rope",
     "Primary Muscle": "Triceps",
-    "Secondary Muscles": "Chest, Front Delts",
+    "Secondary Muscles": [
+      "Chest",
+      "Front delts"
+    ],
     "Exercise Type": "Isolation",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength",
@@ -1344,7 +1825,11 @@
   {
     "Exercise Name": "Tuck Jump",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hip Flexors, Calves",
+    "Secondary Muscles": [
+      "Glutes",
+      "Others",
+      "Calves"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, HIIT",
@@ -1352,8 +1837,13 @@
   },
   {
     "Exercise Name": "Turkish Get-Up, Kettlebell",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Shoulders, Chest, Triceps, Glutes",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Front delts",
+      "Chest",
+      "Triceps",
+      "Glutes"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Full Body Strength",
@@ -1362,17 +1852,23 @@
   {
     "Exercise Name": "Upright Row, Barbell",
     "Primary Muscle": "Traps",
-    "Secondary Muscles": "Delts, Biceps",
+    "Secondary Muscles": [
+      "Front delts",
+      "Biceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "barbell-upright-row.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "V-Bar Pulldown",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Traps, Rhomboids, Biceps, Rear Delts",
+    "Secondary Muscles": [
+      "Traps",
+      "Rear delts",
+      "Biceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
@@ -1381,7 +1877,11 @@
   {
     "Exercise Name": "V-Bar Seated Cable Row",
     "Primary Muscle": "Lats",
-    "Secondary Muscles": "Traps, Rhomboids, Biceps, Rear Delts",
+    "Secondary Muscles": [
+      "Traps",
+      "Rear delts",
+      "Biceps"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
@@ -1389,8 +1889,11 @@
   },
   {
     "Exercise Name": "V-Up",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Hip Flexors, Chest",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Others",
+      "Chest"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
@@ -1399,7 +1902,11 @@
   {
     "Exercise Name": "Walking Lunge",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, HIIT",
@@ -1408,7 +1915,11 @@
   {
     "Exercise Name": "Walking Lunge, Dumbbell",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Hamstrings, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Hamstrings",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength, HIIT",
@@ -1417,17 +1928,22 @@
   {
     "Exercise Name": "Wall Sit",
     "Primary Muscle": "Quads",
-    "Secondary Muscles": "Glutes, Core",
+    "Secondary Muscles": [
+      "Glutes",
+      "Abs"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload",
-    "Webp File": "wall-sit.webp"
+    "Progression": "Progressive Overload"
   },
   {
     "Exercise Name": "Woodchopper",
-    "Primary Muscle": "Core",
-    "Secondary Muscles": "Obliques, Delts",
+    "Primary Muscle": "Abs",
+    "Secondary Muscles": [
+      "Obliques",
+      "Front delts"
+    ],
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",

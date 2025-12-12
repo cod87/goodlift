@@ -4,7 +4,12 @@
  * Maps exercise names to their corresponding demo images in public/demos/
  * Uses case-insensitive, normalized mapping (e.g., "Dumbbell Incline Bench Press" 
  * maps to "dumbbell-incline-bench-press.webp")
+ * 
+ * For exercises without demo images, generates custom muscle highlight SVGs
+ * based on the exercise's primary and secondary muscles.
  */
+
+import { getMuscleHighlightDataUrl } from './muscleHighlightSvg.js';
 
 /**
  * Get the base URL for the application
@@ -119,14 +124,16 @@ export const normalizeExerciseName = (exerciseName) => {
 
 /**
  * Gets the demo image path for a given exercise name or webp file
- * Returns a placeholder image path if no matching image is found
+ * Returns a custom muscle highlight SVG if no matching image is found
  * 
  * @param {string} exerciseName - The exercise name to find an image for
  * @param {boolean} usePlaceholder - Whether to return placeholder if no match (default: true)
  * @param {string} webpFile - Optional webp filename from exercise data (e.g., 'back-squat.webp')
- * @returns {string|null} Path to the demo image, placeholder, or null if not found
+ * @param {string} primaryMuscle - Optional primary muscle for generating custom SVG
+ * @param {string} secondaryMuscles - Optional secondary muscles for generating custom SVG
+ * @returns {string|null} Path to the demo image, custom SVG data URL, placeholder, or null
  */
-export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile = null) => {
+export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile = null, primaryMuscle = null, secondaryMuscles = null) => {
   // If webpFile is explicitly provided, validate and use it directly
   if (webpFile) {
     // Basic validation: only allow safe filenames (alphanumeric, hyphens, and .webp extension)
@@ -138,7 +145,13 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
     // If webpFile is invalid, fall through to name-based matching
   }
   
-  if (!exerciseName) return usePlaceholder ? `${getBaseUrl()}work-icon.svg` : null;
+  if (!exerciseName) {
+    // If we have muscle data, generate custom SVG
+    if (usePlaceholder && primaryMuscle) {
+      return getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
+    }
+    return usePlaceholder ? `${getBaseUrl()}work-icon.svg` : null;
+  }
   
   const normalized = normalizeExerciseName(exerciseName);
   
@@ -159,6 +172,11 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
   const fuzzyMatch = findFuzzyMatch(normalized);
   if (fuzzyMatch) {
     return `${getBaseUrl()}demos/${fuzzyMatch}.webp`;
+  }
+  
+  // If we have muscle data, generate custom SVG highlighting those muscles
+  if (usePlaceholder && primaryMuscle) {
+    return getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
   }
   
   // Return placeholder if enabled, otherwise null
@@ -383,6 +401,7 @@ export const hasDemoImage = (exerciseName, webpFile = null) => {
  * Maps an array of exercise objects to include demo image paths
  * Adds a `demoImage` property to each exercise
  * Uses the 'Webp File' property if available, otherwise falls back to name-based matching
+ * If no image is found, generates a custom muscle highlight SVG
  * 
  * @param {Array} exercises - Array of exercise objects with `name` or `Exercise Name` property
  * @returns {Array} Array of exercises with added `demoImage` property
@@ -395,7 +414,9 @@ export const mapExercisesWithDemoImages = (exercises) => {
     demoImage: getDemoImagePath(
       exercise.name || exercise['Exercise Name'],
       true,
-      exercise['Webp File'] || null
+      exercise['Webp File'] || null,
+      exercise['Primary Muscle'] || null,
+      exercise['Secondary Muscles'] || null
     ),
   }));
 };

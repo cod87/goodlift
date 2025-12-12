@@ -37,6 +37,7 @@ import {
 import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 import { generateStandardWorkout } from '../../utils/workoutGenerator';
 import { getAllCategories, filterExercisesByCategory } from '../../utils/muscleCategories';
+import { getDemoImagePath } from '../../utils/exerciseDemoImages';
 import TargetRepsPicker from '../Common/TargetRepsPicker';
 import ExerciseListItem from '../Common/ExerciseListItem';
 import FilterBottomSheet from '../Common/FilterBottomSheet';
@@ -90,14 +91,18 @@ const MyWorkoutExerciseItem = ({
   
   const exerciseName = exercise?.['Exercise Name'] || exercise?.name || 'Unknown Exercise';
   const primaryMuscle = exercise?.['Primary Muscle'] || '';
+  const secondaryMuscles = exercise?.['Secondary Muscles'] || '';
   const webpFile = exercise?.['Webp File'];
   const equipment = exercise?.['Equipment'] || '';
   
-  // Construct image path
-  const baseUrl = import.meta.env.BASE_URL || '/';
-  const imagePath = webpFile 
-    ? `${baseUrl}demos/${webpFile}`
-    : `${baseUrl}work-icon.svg`;
+  // Get image path using utility (supports webp files and custom muscle SVGs)
+  const imagePath = getDemoImagePath(
+    exerciseName,
+    true,
+    webpFile,
+    primaryMuscle,
+    secondaryMuscles
+  );
 
   // Check if this exercise is in a superset group
   const supersetGroupId = exercise.supersetGroup;
@@ -171,7 +176,7 @@ const MyWorkoutExerciseItem = ({
         >
           <Box
             component="img"
-            src={imageError ? `${baseUrl}work-icon.svg` : imagePath}
+            src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
             alt={exerciseName}
             onError={() => setImageError(true)}
             sx={{

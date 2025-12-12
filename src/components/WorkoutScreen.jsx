@@ -11,6 +11,7 @@ import progressiveOverloadService from '../services/ProgressiveOverloadService';
 import SwapExerciseDialog from './Common/SwapExerciseDialog';
 import SaveModifiedWorkoutDialog from './Common/SaveModifiedWorkoutDialog';
 import TargetRepsPicker from './Common/TargetRepsPicker';
+import { getDemoImagePath } from '../utils/exerciseDemoImages';
 import { 
   DEFAULT_TARGET_REPS, 
   getClosestValidTargetReps, 
@@ -347,6 +348,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
   const isBarbell = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'barbell';
   const webpFile = currentStep?.exercise?.['Webp File'];
+  const primaryMuscle = currentStep?.exercise?.['Primary Muscle'];
+  const secondaryMuscles = currentStep?.exercise?.['Secondary Muscles'];
   
   // Calculate barbell weight per side for barbell exercises
   const barbellPerSide = useMemo(() => {
@@ -461,29 +464,32 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   // Update demo image when exercise changes
   useEffect(() => {
     if (exerciseName) {
-      // Use 'Webp File' property from exercise data if available, otherwise use placeholder
-      const baseUrl = import.meta.env.BASE_URL || '/';
-      let imagePath;
-      
-      if (webpFile) {
-        // Directly use the Webp File property from exercises.json
-        imagePath = `${baseUrl}demos/${webpFile}`;
-      } else {
-        // Use placeholder SVG for exercises without Webp File property
-        imagePath = `${baseUrl}work-icon.svg`;
-      }
+      // Use getDemoImagePath utility which supports webp files and custom muscle SVGs
+      const imagePath = getDemoImagePath(
+        exerciseName,
+        true,
+        webpFile,
+        primaryMuscle,
+        secondaryMuscles
+      );
       
       setDemoImageSrc(imagePath);
       setImageError(false);
     }
-  }, [exerciseName, webpFile]);
+  }, [exerciseName, webpFile, primaryMuscle, secondaryMuscles]);
 
   const handleImageError = () => {
     if (!imageError) {
       setImageError(true);
-      // Fall back to placeholder if image fails to load
-      const baseUrl = import.meta.env.BASE_URL || '/';
-      setDemoImageSrc(`${baseUrl}work-icon.svg`);
+      // Fall back to custom muscle SVG if image fails to load
+      const fallbackImage = getDemoImagePath(
+        exerciseName,
+        true,
+        null,
+        primaryMuscle,
+        secondaryMuscles
+      );
+      setDemoImageSrc(fallbackImage);
     }
   };
 

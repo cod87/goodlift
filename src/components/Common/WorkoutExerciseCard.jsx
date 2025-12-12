@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import ExerciseOptionsMenu from './ExerciseOptionsMenu';
 import { getSupersetColor } from '../../utils/supersetColors';
+import { getDemoImagePath } from '../../utils/exerciseDemoImages';
 
 const WorkoutExerciseCard = memo(({
   exercise,
@@ -50,14 +51,18 @@ const WorkoutExerciseCard = memo(({
   
   const exerciseName = exercise?.['Exercise Name'] || exercise?.name || 'Unknown Exercise';
   const primaryMuscle = exercise?.['Primary Muscle'] || '';
+  const secondaryMuscles = exercise?.['Secondary Muscles'] || '';
   const webpFile = exercise?.['Webp File'];
   const supersetGroup = exercise?.supersetGroup;
   
-  // Construct image path
-  const baseUrl = import.meta.env.BASE_URL || '/';
-  const imagePath = webpFile 
-    ? `${baseUrl}demos/${webpFile}`
-    : `${baseUrl}work-icon.svg`;
+  // Get image path using utility (supports webp files and custom muscle SVGs)
+  const imagePath = getDemoImagePath(
+    exerciseName, 
+    true, 
+    webpFile,
+    primaryMuscle,
+    secondaryMuscles
+  );
 
   const supersetColor = getSupersetColor(supersetGroup);
 
@@ -102,7 +107,7 @@ const WorkoutExerciseCard = memo(({
             >
               <Box
                 component="img"
-                src={imageError ? `${baseUrl}work-icon.svg` : imagePath}
+                src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
                 alt={exerciseName}
                 onError={() => setImageError(true)}
                 sx={{

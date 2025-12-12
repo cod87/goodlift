@@ -93,13 +93,16 @@ const ExerciseCard = memo(({
   const isLandscape = useMediaQuery('(orientation: landscape)');
   const shouldUseTwoColumns = isTabletOrLarger && isLandscape;
 
-  // Construct WorkTab Icon URL with robust path handling
+  // Construct Work Icon URL with robust path handling
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
-  // Check if the provided demoImage is a real demo image (not the fallback icon)
+  // Check if the provided demoImage is a real demo image (webp or custom muscle SVG)
   const hasValidDemoImage = (imagePath) => {
     if (!imagePath) return false;
+    // Accept webp images, data URLs (custom muscle SVGs), and anything that's not the work-icon
+    if (imagePath.startsWith('data:image/svg')) return true; // Custom muscle SVG
+    if (imagePath.includes('.webp')) return true; // Webp demo image
     // If the image path contains 'work-icon.svg', it's a fallback, not an actual demo
     return !imagePath.includes('work-icon.svg');
   };

@@ -17,14 +17,8 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Mock import.meta.env for Node.js environment
-if (!globalThis.import) {
-  globalThis.import = { meta: { env: { BASE_URL: '/' } } };
-} else if (!globalThis.import.meta) {
-  globalThis.import.meta = { env: { BASE_URL: '/' } };
-} else if (!globalThis.import.meta.env) {
-  globalThis.import.meta.env = { BASE_URL: '/' };
-}
+// NOTE: import.meta.env is only available in Vite/browser environments
+// Some tests that depend on BASE_URL are skipped in Node.js execution
 
 // Main test execution
 (async () => {
@@ -48,9 +42,16 @@ if (!globalThis.import) {
   }
 
   // Test 1: Exercise without demo image should generate SVG
-  console.log('Test 1: Exercise without demo image (Archer Push-Up)');
-  const svgPath1 = getDemoImagePath('Archer Push-Up', true, null, 'Chest', 'Lats, Triceps');
-  assert(svgPath1, 'Returns a path');
+  console.log('Test 1: Exercise without demo image');
+  // Load exercise data to get a real exercise without webp
+  const exercises = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/data/exercises.json'), 'utf8'));
+  const exerciseWithoutWebp = exercises.find(ex => !ex['Webp File']);
+  const testExerciseName = exerciseWithoutWebp['Exercise Name'];
+  const testPrimaryMuscle = exerciseWithoutWebp['Primary Muscle'];
+  const testSecondaryMuscles = exerciseWithoutWebp['Secondary Muscles'];
+  
+  const svgPath1 = getDemoImagePath(testExerciseName, true, null, testPrimaryMuscle, testSecondaryMuscles);
+  assert(svgPath1, `Returns a path for "${testExerciseName}"`);
   assert(isSvgDataUrl(svgPath1), 'Returns SVG data URL');
   assert(svgPath1.startsWith('data:image/svg+xml'), 'Starts with correct prefix');
   console.log('');
@@ -113,7 +114,6 @@ if (!globalThis.import) {
 
   // Test 9: Check exercise data
   console.log('Test 9: Exercise data integrity');
-  const exercises = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/data/exercises.json'), 'utf8'));
   const withMuscleData = exercises.filter(ex => ex['Primary Muscle']);
   const withoutWebp = exercises.filter(ex => !ex['Webp File']);
   assert(exercises.length > 0, `Loaded ${exercises.length} exercises`);

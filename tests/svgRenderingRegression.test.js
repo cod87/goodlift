@@ -150,7 +150,7 @@ describe('SVG Rendering Regression Tests', () => {
         // In the actual component, this would be rendered via:
         // <Box dangerouslySetInnerHTML={{ __html: svgContent }} />
         expect(svgContent).toMatch(/^<svg/);
-        expect(svgContent).toContain('viewBox='));
+        expect(svgContent).toContain('viewBox=');
       } else {
         // This path should not be taken for exercises without webp
         expect(true).toBe(false);
@@ -370,7 +370,8 @@ describe('SVG Rendering Regression Tests', () => {
 
     test('should handle image load errors with fallback', () => {
       // Simulate image error scenario where webp fails to load
-      const imagePath = getDemoImagePath('Exercise', true, 'non-existent.webp', 'Chest', 'Triceps');
+      // The webp path would initially be generated
+      getDemoImagePath('Exercise', true, 'non-existent.webp', 'Chest', 'Triceps');
       
       // Even with webp file specified, if it doesn't exist, the error handler
       // in the component would call getDemoImagePath again with null webp

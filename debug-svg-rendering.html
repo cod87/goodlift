@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Rendering Debug</title>
+    <!-- 
+        NOTE: This debug file must be placed in the project root directory
+        to maintain correct relative import paths to src/ and utils/ folders.
+        If moved, update the import paths below accordingly.
+    -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .test-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+        .test-card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .svg-container {
+            width: 200px;
+            height: 200px;
+            border: 2px solid #ccc;
+            margin: 10px 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .svg-container svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .status {
+            font-weight: bold;
+        }
+        .status.success {
+            color: green;
+        }
+        .status.error {
+            color: red;
+        }
+        pre {
+            background: #eee;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>SVG Muscle Highlight Rendering Debug</h1>
+    <p>This page tests the SVG rendering functionality used in workout sessions.</p>
+    
+    <div id="test-results"></div>
+    
+    <script type="module">
+        import { getDemoImagePath } from './src/utils/exerciseDemoImages.js';
+        import { isSvgDataUrl, extractSvgFromDataUrl } from './src/utils/muscleHighlightSvg.js';
+        
+        const resultsContainer = document.getElementById('test-results');
+        
+        // Test cases
+        const testCases = [
+            {
+                name: 'Exercise without webp (Chest)',
+                exerciseName: 'Archer Push-Up',
+                primaryMuscle: 'Chest',
+                secondaryMuscles: 'Lats, Triceps',
+                webpFile: null
+            },
+            {
+                name: 'Exercise without webp (Quads)',
+                exerciseName: 'Goblet Squat',
+                primaryMuscle: 'Quads',
+                secondaryMuscles: 'Glutes, Hamstrings',
+                webpFile: null
+            },
+            {
+                name: 'Exercise without webp (Back)',
+                exerciseName: 'Face Pull',
+                primaryMuscle: 'Rear Delts',
+                secondaryMuscles: 'Traps, Rhomboids',
+                webpFile: null
+            },
+            {
+                name: 'Exercise with webp file',
+                exerciseName: 'Barbell Bench Press',
+                primaryMuscle: 'Chest',
+                secondaryMuscles: 'Triceps, Front Delts',
+                webpFile: 'barbell-bench-press.webp'
+            }
+        ];
+        
+        testCases.forEach((testCase, index) => {
+            const card = document.createElement('div');
+            card.className = 'test-card';
+            
+            const title = document.createElement('h3');
+            title.textContent = `Test ${index + 1}: ${testCase.name}`;
+            card.appendChild(title);
+            
+            const details = document.createElement('p');
+            details.innerHTML = `
+                <strong>Exercise:</strong> ${testCase.exerciseName}<br>
+                <strong>Primary Muscle:</strong> ${testCase.primaryMuscle}<br>
+                <strong>Secondary Muscles:</strong> ${testCase.secondaryMuscles || 'None'}<br>
+                <strong>Webp File:</strong> ${testCase.webpFile || 'None'}
+            `;
+            card.appendChild(details);
+            
+            try {
+                // Get the image path
+                const imagePath = getDemoImagePath(
+                    testCase.exerciseName,
+                    true,
+                    testCase.webpFile,
+                    testCase.primaryMuscle,
+                    testCase.secondaryMuscles
+                );
+                
+                const pathInfo = document.createElement('p');
+                pathInfo.innerHTML = `<strong>Generated Path:</strong> ${imagePath.substring(0, 100)}...`;
+                card.appendChild(pathInfo);
+                
+                const isSvg = isSvgDataUrl(imagePath);
+                const typeInfo = document.createElement('p');
+                typeInfo.innerHTML = `<strong>Is SVG Data URL:</strong> <span class="status ${isSvg ? 'success' : 'error'}">${isSvg ? 'Yes ✓' : 'No (regular image)'}</span>`;
+                card.appendChild(typeInfo);
+                
+                if (isSvg) {
+                    // Extract and render SVG
+                    const svgContent = extractSvgFromDataUrl(imagePath);
+                    
+                    if (svgContent) {
+                        const extractStatus = document.createElement('p');
+                        extractStatus.innerHTML = `<strong>SVG Extraction:</strong> <span class="status success">Success ✓</span> (${svgContent.length} characters)`;
+                        card.appendChild(extractStatus);
+                        
+                        // Render the SVG
+                        const svgContainer = document.createElement('div');
+                        svgContainer.className = 'svg-container';
+                        svgContainer.innerHTML = svgContent;
+                        card.appendChild(svgContainer);
+                        
+                        // Show first 500 chars of SVG
+                        const svgPreview = document.createElement('details');
+                        const summary = document.createElement('summary');
+                        summary.textContent = 'View SVG Source (first 500 chars)';
+                        svgPreview.appendChild(summary);
+                        const pre = document.createElement('pre');
+                        pre.textContent = svgContent.substring(0, 500) + '...';
+                        svgPreview.appendChild(pre);
+                        card.appendChild(svgPreview);
+                    } else {
+                        const extractStatus = document.createElement('p');
+                        extractStatus.innerHTML = `<strong>SVG Extraction:</strong> <span class="status error">Failed ✗</span>`;
+                        card.appendChild(extractStatus);
+                    }
+                } else {
+                    // Try to load as regular image
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'svg-container';
+                    const img = document.createElement('img');
+                    img.src = imagePath;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '100%';
+                    img.onerror = () => {
+                        imgContainer.innerHTML = '<span style="color: red;">Image failed to load</span>';
+                    };
+                    imgContainer.appendChild(img);
+                    card.appendChild(imgContainer);
+                }
+            } catch (error) {
+                const errorInfo = document.createElement('p');
+                errorInfo.innerHTML = `<strong>Error:</strong> <span class="status error">${error.message}</span>`;
+                card.appendChild(errorInfo);
+                console.error('Test case error:', error);
+            }
+            
+            resultsContainer.appendChild(card);
+        });
+    </script>
+</body>
+</html>

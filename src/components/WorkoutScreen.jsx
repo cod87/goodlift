@@ -18,6 +18,8 @@ import {
   getNextWeight,
   getPreviousWeight,
 } from '../utils/repRangeWeightAdjustment';
+import { calculateBarbellPerSide } from '../utils/weightUtils';
+import { usePreferences } from '../contexts/PreferencesContext';
 
 // Spinning animation for finish celebration (counter-clockwise like loading screen)
 const spin = keyframes`
@@ -97,6 +99,9 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const isTabletOrLarger = useMediaQuery(theme.breakpoints.up('sm'));
   const isLandscape = useMediaQuery('(orientation: landscape)');
   const shouldUseTwoColumns = isTabletOrLarger && isLandscape;
+  
+  // Get user preferences for barbell weight
+  const { preferences } = usePreferences();
   
   // Track workoutData length to avoid excessive re-renders 
   // (workoutData array changes frequently during workout)
@@ -340,7 +345,16 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const currentStep = workoutSequence[currentStepIndex];
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
   const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
+  const isBarbell = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'barbell';
   const webpFile = currentStep?.exercise?.['Webp File'];
+  
+  // Calculate barbell weight per side for barbell exercises
+  const barbellPerSide = useMemo(() => {
+    if (isBarbell && currentWeight && parseFloat(currentWeight) > 0) {
+      return calculateBarbellPerSide(parseFloat(currentWeight), preferences.barbellWeight || 45);
+    }
+    return null;
+  }, [isBarbell, currentWeight, preferences.barbellWeight]);
 
   // Calculate responsive font size for exercise name
   // Ensures text is large and readable but always fits within available space
@@ -1513,6 +1527,22 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                           <Add sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Box>
+                      {/* Display per-side weight for barbell exercises */}
+                      {isBarbell && barbellPerSide !== null && barbellPerSide >= 0 && (
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            color: 'text.secondary',
+                            fontStyle: 'italic',
+                            fontSize: '0.75rem',
+                            mt: 0.5,
+                            display: 'block',
+                            textAlign: 'center'
+                          }}
+                        >
+                          {barbellPerSide} lbs per side
+                        </Typography>
+                      )}
                     </div>
                     <div className="input-group">
                       <label htmlFor="reps-select">Reps</label>
@@ -1704,6 +1734,20 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                     >
                       <Add sx={{ fontSize: 20 }} />
                     </IconButton>
+                    {/* Display per-side weight for barbell exercises */}
+                    {isBarbell && barbellPerSide !== null && barbellPerSide >= 0 && (
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: 'text.secondary',
+                          fontStyle: 'italic',
+                          fontSize: '0.75rem',
+                          ml: 1
+                        }}
+                      >
+                        ({barbellPerSide} lbs per side)
+                      </Typography>
+                    )}
                   </Box>
                   
                   {/* Reps Input - larger and more accessible */}

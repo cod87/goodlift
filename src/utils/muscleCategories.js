@@ -41,7 +41,7 @@ export const SECONDARY_MUSCLE_CATEGORY_MAP = {
   'Shoulders': ['Shoulders', 'Delts', 'Front delts', 'Front Delts', 'Rear delts', 'Rear Delts', 'Side Delts'],
   'Quads': ['Hip Flexors', 'Quads'],
   'Hamstrings': ['Hamstrings'],
-  'Triceps': ['Triceps'],
+  'Triceps': ['Triceps'], // Triceps appear as secondary in many exercises (e.g., Bench Press, Overhead Press)
   'Biceps': ['Biceps', 'Forearms'],
   'Calves': ['Calves'],
   'Core': ['Core', 'Abs', 'Obliques'],

@@ -163,10 +163,15 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
   
   // If no webp found, try SVG demo (muscle-worked diagram)
   // SVG demos are generated for exercises without webp demos
-  const svgPath = `${getBaseUrl()}demos/${normalized}.svg`;
-  // We assume SVG exists for exercises without webp - return it optimistically
-  // The browser will handle 404 if it doesn't exist and fall back gracefully
-  return svgPath;
+  if (usePlaceholder) {
+    const svgPath = `${getBaseUrl()}demos/${normalized}.svg`;
+    // We assume SVG exists for exercises without webp - return it optimistically
+    // The browser will handle 404 if it doesn't exist and fall back gracefully
+    return svgPath;
+  }
+  
+  // If usePlaceholder is false, return null (no match found)
+  return null;
 };
 
 /**

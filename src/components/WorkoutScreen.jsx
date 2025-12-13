@@ -1400,7 +1400,17 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
               </Box>
               
               {/* Muscle Highlight SVG - Only show as fallback when no webp demo image exists */}
-              {primaryMuscle && primaryMuscle.trim() && (!demoImageSrc || (!demoImageSrc.includes('.webp') && !isSvgDataUrl(demoImageSrc))) && (
+              {(() => {
+                // Determine if muscle SVG should be shown as fallback
+                // Show muscle SVG only when:
+                // 1. Exercise has muscle data (primaryMuscle exists)
+                // 2. No demo image exists OR demo image is neither a webp nor an SVG data URL
+                const shouldShowMuscleSvg = primaryMuscle && 
+                                           primaryMuscle.trim() && 
+                                           (!demoImageSrc || 
+                                            (!demoImageSrc.includes('.webp') && !isSvgDataUrl(demoImageSrc)));
+                
+                return shouldShowMuscleSvg && (
                 <Box 
                   sx={{ 
                     display: 'flex',
@@ -1440,7 +1450,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                     ) : null;
                   })()}
                 </Box>
-              )}
+              );
+              })()}
               
               {/* Portrait/Mobile: Separate rows for target info, inputs, and nav buttons */}
               {!shouldUseTwoColumns && (

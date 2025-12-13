@@ -468,7 +468,9 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     };
   }, [exerciseName]);
 
-  // Update demo image when exercise changes - simply use the image field from exercise
+  // Fixed: Update demo image when exercise changes - use the image field from exercise data
+  // The exercise.image field contains the raw path from exercises.json (e.g., 'demos/file.webp' or 'svg-muscles/file.svg')
+  // constructImageUrl() will prepend the base URL (e.g., '/goodlift/') to create the full path
   useEffect(() => {
     if (currentStep?.exercise?.image) {
       const imagePath = constructImageUrl(currentStep.exercise.image);
@@ -477,6 +479,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
       setImageError(false); // Reset error state for new image
     } else {
       // No image field - will show fallback icon
+      console.log('[WorkoutScreen] No image field found for exercise:', currentStep?.exercise?.['Exercise Name']);
       setDemoImageSrc(null);
       setImageError(true); // Set error to trigger fallback display
     }

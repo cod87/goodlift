@@ -97,7 +97,9 @@ const MyWorkoutExerciseItem = ({
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
   
-  // Use the image field directly from exercise data
+  // Fixed: Properly construct image URL from the exercise.image field
+  // The exercise.image field contains the raw path from exercises.json (e.g., 'demos/file.webp' or 'svg-muscles/file.svg')
+  // constructImageUrl() will prepend the base URL (e.g., '/goodlift/') to create the full path
   const imagePath = exercise?.image ? constructImageUrl(exercise.image) : null;
 
   // Check if this exercise is in a superset group

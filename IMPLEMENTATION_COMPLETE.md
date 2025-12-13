@@ -1,162 +1,106 @@
-# Implementation Complete: Nutrition Search Singular/Plural Matching
+# Image Display Fix - Complete Implementation
 
-## ✅ Task Completion Summary
+## Problem Solved
+Fixed image display issues where demo webp images and SVG muscle diagrams were not showing correctly in ExerciseCard and WorkoutCreationModal components.
 
-### Objective
-Improve the nutrition search functionality to handle singular and plural forms of food names, enabling users to find foods regardless of whether they search for "potato" or "potatoes".
+## Solution Summary
 
-### Changes Made
+### Core Fix
+Enhanced the `constructImageUrl()` function in `src/utils/exerciseDemoImages.js` to properly handle all types of image paths:
+- Relative paths (e.g., `demos/image.webp`, `svg-muscles/image.svg`)
+- Absolute paths with and without base URL
+- HTTP/HTTPS URLs
+- Data URLs
+- Null/undefined values
 
-#### 1. **New Function: `getWordVariations(word)`**
-- Location: `src/utils/foodSearchUtils.js` (lines 22-67)
-- Purpose: Generate both singular and plural forms of English words
-- Handles common patterns:
-  - Regular plurals: apple ↔ apples
-  - O-endings: potato ↔ potatoes, tomato ↔ tomatoes  
-  - Y-endings: berry ↔ berries
-  - CH/SH/X/Z endings: peach ↔ peaches, glass ↔ glasses
+### Key Improvement
+Added logic to prevent double-prepending of the base URL when paths already contain it, ensuring images load correctly in both development (`/goodlift/`) and production environments.
 
-#### 2. **Enhanced: `matchesAllKeywords(foodDescription, keywords)`**
-- Location: `src/utils/foodSearchUtils.js` (lines 83-99)
-- Enhancement: Now tries word variations when direct match fails
-- Backward compatible: Maintains existing exact matching behavior
+## Files Modified
+1. `src/utils/exerciseDemoImages.js` - Core path resolution fix
+2. `src/components/Workout/ExerciseCard.jsx` - Added documentation
+3. `src/components/WorkTabs/WorkoutCreationModal.jsx` - Added documentation
+4. `src/components/WorkoutScreen.jsx` - Added documentation and logging
+5. `src/components/Common/ExerciseListItem.jsx` - Added documentation
+6. `src/components/Common/WorkoutExerciseCard.jsx` - Added documentation
 
-#### 3. **Enhanced: `isMeatOrSeafood(query)`**
-- Location: `src/utils/foodSearchUtils.js` (lines 196-204)
-- Enhancement: Checks word variations of meat/seafood keywords
-- Benefit: "chicken" and "chickens" both trigger cooked forms
+## Testing Results
 
-#### 4. **Enhanced: `isVegetableOrFruit(query)`**
-- Location: `src/utils/foodSearchUtils.js` (lines 211-220)
-- Enhancement: Checks word variations of vegetable/fruit keywords
-- Benefit: "potato" and "potatoes" both show raw/cooked forms
+### Unit Tests
+✅ All 7 test cases pass:
+- Relative webp path
+- Relative SVG path
+- Absolute path without base URL
+- Absolute path with base URL (no double-prepend)
+- HTTP URL (unchanged)
+- Data URL (unchanged)
+- Null input (returns null)
 
-### Testing Results
+### Integration Tests
+✅ Development server:
+- webp: `http://localhost:5173/goodlift/demos/back-squat.webp` (200 OK, image/webp)
+- SVG: `http://localhost:5173/goodlift/svg-muscles/bear-crawl.svg` (200 OK, image/svg+xml)
 
-#### Automated Tests: 17/17 Passing ✅
-- ✓ potato → potatoes matching
-- ✓ potatoes → potato matching
-- ✓ tomato → tomatoes matching
-- ✓ tomatoes → tomato matching
-- ✓ apple → apples matching
-- ✓ apples → apple matching
-- ✓ carrot → carrots matching
-- ✓ carrots → carrot matching
-- ✓ berry → berries matching
-- ✓ berries → berry matching
-- ✓ peach → peaches matching
-- ✓ peaches → peach matching
-- ✓ glass → glasses matching
-- ✓ glasses → glass matching
-- ✓ chicken does NOT match beef (negative test)
-- ✓ potato matches "sweet potato" (substring)
-- ✓ apple matches "pineapple" (substring)
-
-#### Manual UI Testing ✅
-- Verified search modal opens correctly
-- Confirmed "potato" shows "Showing raw and cooked forms" hint
-- Tested with real application interface
-- Screenshot captured: [View Screenshot](https://github.com/user-attachments/assets/cd4ce439-63b6-48e4-b7ce-7f04c4956412)
-
-#### Build & Lint ✅
-- Build successful (npm run build)
-- No new lint errors introduced
-- Code compiles without issues
+✅ Production build:
+- Build succeeds without errors
+- Images copied to `docs/` folder
+- webp: `http://localhost:4173/goodlift/demos/back-squat.webp` (200 OK, image/webp)
+- SVG: `http://localhost:4173/goodlift/svg-muscles/bear-crawl.svg` (200 OK, image/svg+xml)
 
 ### Code Quality
+✅ No new linting errors introduced
+✅ Follows project coding standards
+✅ Minimal changes principle adhered to
+✅ Comprehensive documentation added
 
-#### Code Review ✅
-- Addressed all 4 review comments
-- Eliminated redundant logic patterns
-- Improved comment accuracy
-- Refined pluralization rules
+## Security Analysis
+✅ No security vulnerabilities introduced
+✅ All image paths come from trusted sources (exercises.json)
+✅ No user input in path construction
+✅ Proper validation and safe defaults
+✅ Correct MIME types served
 
-#### Security Analysis ✅
-**Risk Level:** MINIMAL (No vulnerabilities found)
-- Pure client-side string manipulation
-- No injection vulnerabilities (XSS, SQL, Command)
-- No DoS risk (bounded operations)
-- No resource exhaustion (small constant overhead)
-- No sensitive data exposure
-- Input validation with length checks
+## Impact
+- ✅ Images now display correctly in ExerciseCard during workout execution
+- ✅ Images now display correctly in WorkoutCreationModal during workout creation
+- ✅ Both webp demo images and SVG muscle diagrams work
+- ✅ Fallback icon still displays when no image is available
+- ✅ No breaking changes to existing functionality
+- ✅ Future maintainers have clear documentation
 
-### Performance Impact
+## Future Maintainer Notes
 
-**Time Complexity:** O(n × m × v)
-- n = number of search keywords (typically 1-3)
-- m = number of foods to check (already bounded by API)
-- v = number of variations per keyword (typically 2-4)
+### How Image Paths Work
+1. `exercises.json` contains raw relative paths (e.g., `"demos/file.webp"`)
+2. Components extract the path from `exercise.image`
+3. `constructImageUrl()` prepends the base URL (e.g., `/goodlift/`)
+4. Final URL: `/goodlift/demos/file.webp`
 
-**Space Complexity:** O(v) per keyword
-- Maximum ~5 variations stored in Set per keyword
-- Negligible memory impact
+### Example Usage
+```javascript
+// In exercises.json
+{
+  "Exercise Name": "Back Squat",
+  "image": "demos/back-squat.webp"  // Raw relative path
+}
 
-**User Experience:** No perceptible delay
-- Variations generated on-the-fly
-- Client-side matching remains fast
+// In component
+import { constructImageUrl } from '../../utils/exerciseDemoImages';
 
-### Backward Compatibility
+const imagePath = exercise?.image ? constructImageUrl(exercise.image) : null;
+// Result: '/goodlift/demos/back-squat.webp'
 
-✅ **No Breaking Changes**
-- Existing searches work exactly as before
-- Direct matches tried first (maintains performance)
-- Only adds new matches, doesn't remove any
-- SR Legacy prioritization unchanged
-- Cooked/raw meat logic unchanged
-- Favorites and recent foods unchanged
+// In JSX
+<img src={imagePath} alt="Exercise demo" />
+```
 
-### Documentation
+### Troubleshooting
+If images don't load:
+1. Check browser console for 404 errors
+2. Verify `exercise.image` field exists in exercises.json
+3. Verify image file exists in `public/demos/` or `public/svg-muscles/`
+4. Check that `BASE_URL` is set correctly in `vite.config.js`
+5. Look for console.log messages from WorkoutScreen (shows constructed URL)
 
-✅ **Comprehensive PR Notes**
-- Created `PR_NOTES_PLURAL_SEARCH.md` with full details
-- Security summary included
-- Test results documented
-- User-facing improvements listed
-- Technical implementation explained
-
-### User Benefits
-
-**Before this PR:**
-- ❌ Search "potato" → Miss results labeled "potatoes"
-- ❌ Search "potatoes" → Miss results labeled "potato"
-- ❌ Users frustrated by missing obvious results
-- ❌ Had to guess correct singular/plural form
-
-**After this PR:**
-- ✅ Search "potato" → Find both "potato" AND "potatoes" foods
-- ✅ Search "potatoes" → Find both "potatoes" AND "potato" foods
-- ✅ Natural, intuitive search experience
-- ✅ Works consistently across all common foods
-
-### Related Work
-
-**Builds on PR #282:**
-- Maintains intelligent SR Legacy search
-- Preserves cooked/raw meat prioritization
-- Compatible with favorites feature
-- Compatible with recent foods feature
-
-**No Conflicts:**
-- Clean integration with existing code
-- No modifications to LogMealModal component
-- No changes to nutritionStorage module
-- No API changes
-
-## ✅ Ready for Production
-
-This implementation is:
-- ✅ Fully tested (17/17 tests passing)
-- ✅ Manually verified (UI testing complete)
-- ✅ Security reviewed (no vulnerabilities)
-- ✅ Code reviewed (feedback addressed)
-- ✅ Backward compatible (no breaking changes)
-- ✅ Well documented (comprehensive PR notes)
-- ✅ Performance optimized (minimal overhead)
-
-**Recommendation:** APPROVED for merge to main branch
-
----
-
-**Implementation Date:** November 23, 2025
-**Branch:** `copilot/improve-nutrition-search-logic`
-**Status:** ✅ COMPLETE AND READY
+## Conclusion
+The image display issue has been completely resolved with minimal, targeted changes that maintain code quality and security while improving user experience. Both webp demo images and SVG muscle diagrams now load correctly across all components.

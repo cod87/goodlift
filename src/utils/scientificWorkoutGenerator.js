@@ -51,8 +51,8 @@ export const generateScientificWorkout = async (params) => {
     return {
       'Exercise Name': exercise['Exercise Name'],
       'Primary Muscle': exercise['Primary Muscle'],
-      'Secondary Muscles': exercise['Secondary Muscles'],
-      'Webp File': exercise['Webp File'],
+      'Secondary Muscles': exercise['Secondary Muscles'] || '',
+      'Webp File': exercise['Webp File'] || null,
       'Equipment': exercise.Equipment,
       'Type': exercise.Type,
       name: exercise['Exercise Name'],

@@ -31,7 +31,20 @@ const rootDir = path.join(__dirname, '..');
 
 // Import the muscle SVG generation utility
 // We need to use dynamic import since it's an ESM module
-const { generateMuscleHighlightSvg } = await import('../src/utils/muscleHighlightSvg.js');
+let generateMuscleHighlightSvg;
+try {
+  const module = await import('../src/utils/muscleHighlightSvg.js');
+  generateMuscleHighlightSvg = module.generateMuscleHighlightSvg;
+  
+  if (!generateMuscleHighlightSvg || typeof generateMuscleHighlightSvg !== 'function') {
+    throw new Error('generateMuscleHighlightSvg function not found in module');
+  }
+} catch (error) {
+  console.error('❌ Failed to import muscle SVG utility:', error.message);
+  console.error('Make sure the file exists at: src/utils/muscleHighlightSvg.js');
+  console.error('And exports a function named: generateMuscleHighlightSvg');
+  process.exit(1);
+}
 
 /**
  * Normalizes an exercise name to create a safe filename

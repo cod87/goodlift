@@ -128,6 +128,24 @@ This repository is configured for deployment to GitHub Pages from the `docs/` di
 
 ## Usage
 
+### SVG Muscle Diagrams
+
+GoodLift includes pre-generated SVG muscle diagrams for all exercises without demo images. These SVGs show which muscles are worked by each exercise:
+
+- **Primary muscles**: Shown in cherry red (#ce1034)
+- **Secondary muscles**: Shown in vivid pink (#ec5998)
+- **Inactive muscles**: Shown in dark gray at 50% opacity
+
+To regenerate the SVG files (if exercise data or muscle mappings change):
+
+```bash
+npm run generate:svgs
+```
+
+For visual verification of all generated SVGs during development, access the verification page by navigating to the app and setting the screen to 'svg-verification' (or add a route in the UI).
+
+For detailed information about the SVG generation system, see [SVG_GENERATION.md](./SVG_GENERATION.md).
+
 ### Starting a Workout
 
 1. Navigate to the "Work" tab

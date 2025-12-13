@@ -13,7 +13,6 @@ import { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, ListItemButton } from '@mui/material';
 import { constructImageUrl } from '../../utils/exerciseDemoImages';
-import { isSvgDataUrl, extractSvgFromDataUrl } from '../../utils/muscleHighlightSvg';
 
 const ExerciseListItem = memo(({
   exercise,
@@ -88,7 +87,7 @@ const ExerciseListItem = memo(({
         },
       }}
     >
-      {/* Demo Image - transparent background */}
+      {/* Demo Image - Show exercise.image or fallback icon */}
       <Box
         sx={{
           width: 56,
@@ -102,69 +101,19 @@ const ExerciseListItem = memo(({
           justifyContent: 'center',
         }}
       >
-        {imagePath && !imageError ? (
-          isSvgDataUrl(imagePath) ? (
-            // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
-            (() => {
-              const svgContent = extractSvgFromDataUrl(imagePath);
-              return svgContent ? (
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    '& svg': {
-                      width: '100%',
-                      height: '100%',
-                    },
-                  }}
-                  dangerouslySetInnerHTML={{ __html: svgContent }}
-                />
-              ) : (
-                // Fallback if SVG extraction fails
-                <Box
-                  component="img"
-                  src={workIconUrl}
-                  alt={exerciseName}
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    opacity: 0.5,
-                  }}
-                  loading="lazy"
-                />
-              );
-            })()
-          ) : (
-            // Render regular image (webp or SVG file)
-            <Box
-              component="img"
-              src={imagePath}
-              alt={exerciseName}
-              onError={() => setImageError(true)}
-              sx={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-              }}
-              loading="lazy"
-            />
-          )
-        ) : (
-          // Fallback when no image or error
-          <Box
-            component="img"
-            src={workIconUrl}
-            alt={exerciseName}
-            sx={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              opacity: 0.5,
-            }}
-            loading="lazy"
-          />
-        )}
+        <Box
+          component="img"
+          src={(!imagePath || imageError) ? workIconUrl : imagePath}
+          alt={exerciseName}
+          onError={() => setImageError(true)}
+          sx={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            opacity: (!imagePath || imageError) ? 0.5 : 1,
+          }}
+          loading="lazy"
+        />
       </Box>
       
       {/* Exercise Info */}

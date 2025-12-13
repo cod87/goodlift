@@ -103,14 +103,14 @@ const ExerciseCard = memo(({
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
-  // Enhanced debug logging for investigation
-  console.log('[ExerciseCard] Received props:', {
-    exerciseName,
-    webpFile,
-    primaryMuscle,
-    secondaryMuscles,
-    demoImage
-  });
+  // Debug logging for investigation (can be removed once SVG rendering is verified)
+  // console.log('[ExerciseCard] Received props:', {
+  //   exerciseName,
+  //   webpFile,
+  //   primaryMuscle,
+  //   secondaryMuscles,
+  //   demoImage
+  // });
 
   // Get image path using utility (supports webp files and custom muscle SVGs)
   // This matches the logic in WorkoutExerciseCard for consistent SVG generation
@@ -122,15 +122,15 @@ const ExerciseCard = memo(({
     secondaryMuscles
   );
 
-  console.log('[ExerciseCard] getDemoImagePath returned:', {
-    imagePath: imagePath?.substring(0, 100),
-    isSvgDataUrl: imagePath ? isSvgDataUrl(imagePath) : false,
-    length: imagePath?.length
-  });
+  // console.log('[ExerciseCard] getDemoImagePath returned:', {
+  //   imagePath: imagePath?.substring(0, 100),
+  //   isSvgDataUrl: imagePath ? isSvgDataUrl(imagePath) : false,
+  //   length: imagePath?.length
+  // });
 
   // Update image source when exercise changes
   useEffect(() => {
-    console.log('[ExerciseCard] useEffect updating imageSrc:', imagePath?.substring(0, 100));
+    // console.log('[ExerciseCard] useEffect updating imageSrc:', imagePath?.substring(0, 100));
     setImageSrc(imagePath);
     setImageError(false);
   }, [imagePath]);

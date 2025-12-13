@@ -213,12 +213,24 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
     }
   }
   
-  // PRIORITY 4: No webp image found, return fallback (muscle SVG or work icon)
+  // PRIORITY 4: Check for pre-generated static SVG file
+  // These are stored in /public/svg-muscles/ and provide muscle diagrams
+  // without requiring runtime generation
+  if (normalized && primaryMuscle) {
+    const staticSvgPath = `${getBaseUrl()}svg-muscles/${normalized}.svg`;
+    // console.log('[getDemoImagePath] PRIORITY 4: Checking for static SVG:', staticSvgPath);
+    // Note: We return the path here. The browser will try to load it.
+    // If it doesn't exist, the component's onError handler will fall back
+    // to generating a dynamic SVG.
+    return staticSvgPath;
+  }
+  
+  // PRIORITY 5: No webp or static SVG found, return fallback (dynamic muscle SVG or work icon)
   // Fuzzy matching is intentionally disabled to prevent incorrect demo image matches.
   // The muscle SVG provides accurate visual representation of which muscles
   // are targeted by the exercise, which is more useful than showing the wrong demo.
   const fallback = getFallbackImage(usePlaceholder, primaryMuscle, secondaryMuscles);
-  // console.log('[getDemoImagePath] PRIORITY 4: No webp for "' + exerciseName + '", primaryMuscle:', primaryMuscle, 'fallback type:', fallback?.startsWith('data:image/svg') ? 'SVG' : fallback?.includes('work-icon') ? 'work-icon' : 'other', 'result length:', fallback?.length);
+  // console.log('[getDemoImagePath] PRIORITY 5: No webp or static SVG for "' + exerciseName + '", primaryMuscle:', primaryMuscle, 'fallback type:', fallback?.startsWith('data:image/svg') ? 'SVG' : fallback?.includes('work-icon') ? 'work-icon' : 'other', 'result length:', fallback?.length);
   return fallback;
 };
 

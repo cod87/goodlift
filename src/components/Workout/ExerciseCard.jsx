@@ -33,7 +33,7 @@ import {
 import ExerciseInputs from './ExerciseInputs';
 import { usePreferences } from '../../contexts/PreferencesContext';
 import { getDemoImagePath } from '../../utils/exerciseDemoImages';
-import { isSvgDataUrl, extractSvgFromDataUrl } from '../../utils/muscleHighlightSvg';
+import { isSvgDataUrl, extractSvgFromDataUrl, getMuscleHighlightDataUrl } from '../../utils/muscleHighlightSvg';
 
 /**
  * Helper function to check if equipment is barbell
@@ -138,8 +138,14 @@ const ExerciseCard = memo(({
   const handleImageError = () => {
     if (!imageError) {
       setImageError(true);
-      // Set to null to trigger WorkTab Icon display
-      setImageSrc(null);
+      // If static SVG failed to load, fall back to dynamic SVG generation
+      if (imageSrc?.includes('svg-muscles/') && primaryMuscle) {
+        const dynamicSvg = getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
+        setImageSrc(dynamicSvg);
+      } else {
+        // Set to null to trigger WorkTab Icon display
+        setImageSrc(null);
+      }
     }
   };
   

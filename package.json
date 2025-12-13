@@ -14,7 +14,8 @@
     "convert:wellness": "node scripts/convert-wellness-tasks.js",
     "merge:cable": "node scripts/merge-cable-exercises.js",
     "test:cable": "node scripts/test-cable-integration.js",
-    "convert:all": "npm run convert:exercises && npm run convert:hiit && npm run convert:wellness"
+    "convert:all": "npm run convert:exercises && npm run convert:hiit && npm run convert:wellness",
+    "generate:svgs": "node scripts/generate-muscle-svgs.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

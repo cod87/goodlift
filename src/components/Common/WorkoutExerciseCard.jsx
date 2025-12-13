@@ -28,7 +28,7 @@ import {
 import ExerciseOptionsMenu from './ExerciseOptionsMenu';
 import { getSupersetColor } from '../../utils/supersetColors';
 import { getDemoImagePath } from '../../utils/exerciseDemoImages';
-import { isSvgDataUrl, extractSvgFromDataUrl } from '../../utils/muscleHighlightSvg';
+import { isSvgDataUrl, extractSvgFromDataUrl, getMuscleHighlightDataUrl } from '../../utils/muscleHighlightSvg';
 
 const WorkoutExerciseCard = memo(({
   exercise,
@@ -153,12 +153,16 @@ const WorkoutExerciseCard = memo(({
                   );
                 })()
               ) : (
-                // Render regular image
+                // Render regular image (webp or static SVG file)
                 <Box
                   component="img"
-                  src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
+                  src={imageError ? getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '') : imagePath}
                   alt={exerciseName}
-                  onError={() => setImageError(true)}
+                  onError={() => {
+                    if (!imageError) {
+                      setImageError(true);
+                    }
+                  }}
                   sx={{
                     width: '100%',
                     height: '100%',

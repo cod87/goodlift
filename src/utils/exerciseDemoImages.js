@@ -21,7 +21,11 @@ const getBaseUrl = () => {
  * Constructs full image URL from relative path
  * Handles absolute URLs, data URLs, and relative paths
  * 
- * @param {string|null} imagePath - Relative or absolute image path
+ * Fixed: Properly handles absolute paths that start with '/' by checking if they 
+ * already include the base URL. This ensures images work correctly in both development
+ * and production builds where the base URL may be '/goodlift/' or another path.
+ * 
+ * @param {string|null} imagePath - Relative or absolute image path from exercise.image field
  * @returns {string|null} Full URL or null
  */
 export const constructImageUrl = (imagePath) => {
@@ -29,13 +33,30 @@ export const constructImageUrl = (imagePath) => {
     return null;
   }
   
-  // Already absolute URL or data URL
-  if (imagePath.startsWith('http') || imagePath.startsWith('/') || imagePath.startsWith('data:')) {
+  // Already absolute HTTP/HTTPS URL or data URL - return as-is
+  if (imagePath.startsWith('http') || imagePath.startsWith('data:')) {
     return imagePath;
   }
   
-  // Prepend base URL
+  // Get the base URL (e.g., '/goodlift/' or '/')
   const baseUrl = getBaseUrl();
+  
+  // If path starts with '/', check if it already includes the base URL
+  if (imagePath.startsWith('/')) {
+    // If base URL is not just '/' and the path already starts with base URL, return as-is
+    if (baseUrl !== '/' && imagePath.startsWith(baseUrl)) {
+      return imagePath;
+    }
+    // If base URL is '/' or path doesn't include base URL, return as-is (it's already absolute)
+    if (baseUrl === '/') {
+      return imagePath;
+    }
+    // Path starts with '/' but doesn't include base URL - prepend it
+    // Remove leading '/' from imagePath to avoid double slashes
+    return `${baseUrl}${imagePath.substring(1)}`;
+  }
+  
+  // Relative path (like 'demos/image.webp' or 'svg-muscles/image.svg') - prepend base URL
   return `${baseUrl}${imagePath}`;
 };
 

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Image Loading</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .test-case {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+        img {
+            max-width: 200px;
+            max-height: 200px;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            display: block;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .success {
+            background-color: #4caf50;
+            color: white;
+        }
+        .error {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Loading Test</h1>
+    
+    <div class="test-case">
+        <h2>Test 1: WebP Demo Image (Back Squat)</h2>
+        <p>URL: /goodlift/demos/back-squat.webp</p>
+        <img id="img1" src="/goodlift/demos/back-squat.webp" alt="Back Squat">
+        <div id="status1" class="status">Loading...</div>
+    </div>
+    
+    <div class="test-case">
+        <h2>Test 2: SVG Muscle Diagram (Bear Crawl)</h2>
+        <p>URL: /goodlift/svg-muscles/bear-crawl.svg</p>
+        <img id="img2" src="/goodlift/svg-muscles/bear-crawl.svg" alt="Bear Crawl">
+        <div id="status2" class="status">Loading...</div>
+    </div>
+    
+    <div class="test-case">
+        <h2>Test 3: Fallback Icon</h2>
+        <p>URL: /goodlift/work-icon.svg</p>
+        <img id="img3" src="/goodlift/work-icon.svg" alt="Work Icon">
+        <div id="status3" class="status">Loading...</div>
+    </div>
+
+    <script>
+        function setupImageTest(imgId, statusId) {
+            const img = document.getElementById(imgId);
+            const status = document.getElementById(statusId);
+            
+            img.onload = function() {
+                status.textContent = 'Loaded successfully! (' + img.naturalWidth + ' x ' + img.naturalHeight + ')';
+                status.className = 'status success';
+            };
+            
+            img.onerror = function() {
+                status.textContent = 'Failed to load';
+                status.className = 'status error';
+            };
+        }
+        
+        setupImageTest('img1', 'status1');
+        setupImageTest('img2', 'status2');
+        setupImageTest('img3', 'status3');
+    </script>
+</body>
+</html>

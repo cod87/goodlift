@@ -98,7 +98,9 @@ const ExerciseCard = memo(({
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
-  // Use the new image prop (from exercise.image field), fall back to legacy demoImage prop
+  // Fixed: Properly construct image URL from the exercise.image field
+  // The 'image' prop should contain the raw path from exercises.json (e.g., 'demos/file.webp' or 'svg-muscles/file.svg')
+  // constructImageUrl() will prepend the base URL (e.g., '/goodlift/') to create the full path
   const imagePath = image || demoImage;
   const imageSrc = imagePath && !imageError ? constructImageUrl(imagePath) : null;
 

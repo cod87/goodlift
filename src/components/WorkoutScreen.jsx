@@ -364,16 +364,11 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     return null;
   }, [isBarbell, currentWeight, preferences.barbellWeight]);
 
-  // Determine if muscle SVG should be shown as fallback
-  // Show muscle SVG only when:
-  // 1. Exercise has muscle data (primaryMuscle exists)
-  // 2. No demo image exists OR demo image is neither a webp nor an SVG data URL
+  // Simplified fallback logic: only show muscle SVG if no demo image loaded
+  // Never show both demo image and muscle SVG at the same time
   const shouldShowMuscleSvg = useMemo(() => {
-    return primaryMuscle && 
-           primaryMuscle.trim() && 
-           (!demoImageSrc || 
-            (!demoImageSrc.endsWith('.webp') && !isSvgDataUrl(demoImageSrc)));
-  }, [primaryMuscle, demoImageSrc]);
+    return !demoImageSrc && !imageError && primaryMuscle && primaryMuscle.trim();
+  }, [demoImageSrc, imageError, primaryMuscle]);
 
   // Calculate responsive font size for exercise name
   // Ensures text is large and readable but always fits within available space
@@ -479,35 +474,22 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
 
   // Update demo image when exercise changes
   useEffect(() => {
-    if (exerciseName) {
-      console.log('[WorkoutScreen] Exercise changed:', exerciseName, 'webpFile:', webpFile, 'primaryMuscle:', primaryMuscle);
-      // Use getDemoImagePath utility which supports webp files and custom muscle SVGs
-      const imagePath = getDemoImagePath(
-        exerciseName,
-        true,
-        webpFile,
-        primaryMuscle,
-        secondaryMuscles
-      );
+    if (currentStep?.exercise) {
+      console.log('[WorkoutScreen] Exercise changed:', exerciseName, 'image field:', currentStep.exercise.image);
+      // Use the image field from the exercise object
+      const imagePath = getDemoImagePath(currentStep.exercise);
       
       console.log('[WorkoutScreen] getDemoImagePath returned:', imagePath?.substring(0, 100));
       setDemoImageSrc(imagePath);
       setImageError(false);
     }
-  }, [exerciseName, webpFile, primaryMuscle, secondaryMuscles]);
+  }, [currentStep, exerciseName]);
 
   const handleImageError = () => {
     if (!imageError) {
       setImageError(true);
-      // Fall back to custom muscle SVG if image fails to load
-      const fallbackImage = getDemoImagePath(
-        exerciseName,
-        true,
-        null,
-        primaryMuscle,
-        secondaryMuscles
-      );
-      setDemoImageSrc(fallbackImage);
+      // On error, just set imageError flag to show fallback icon
+      setDemoImageSrc(null);
     }
   };
 
@@ -1333,16 +1315,16 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                   </Typography>
                 </Box>
                 
-                {/* Demo Image - Shows if available */}
-                {demoImageSrc && (
+                {/* Demo Image / Muscle SVG / Fallback Icon - Show only ONE at a time */}
+                {demoImageSrc ? (
+                  /* Show demo image (webp or SVG file) */
                   <Box 
                     sx={{ 
                       display: 'flex',
-                      justifyContent: shouldUseTwoColumns ? 'center' : 'center',
+                      justifyContent: 'center',
                       alignItems: 'center',
                       width: '100%',
                       height: shouldUseTwoColumns ? '100%' : 'auto',
-                      // In landscape tablet, allow more vertical space for the image
                       minHeight: shouldUseTwoColumns ? { sm: '150px', md: '200px' } : 0,
                       flex: shouldUseTwoColumns ? 1 : 'none',
                     }}
@@ -1388,7 +1370,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                         );
                       })()
                     ) : (
-                      // Render regular image
+                      // Render regular image (webp or other)
                       <Box
                         component="img"
                         src={demoImageSrc}
@@ -1396,7 +1378,6 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                         onError={handleImageError}
                         sx={{
                           maxWidth: '100%',
-                          // Significantly larger image in landscape tablet mode
                           maxHeight: shouldUseTwoColumns 
                             ? { sm: 'calc(40vh - 100px)', md: 'calc(45vh - 100px)' }
                             : { xs: '150px', sm: '200px' },
@@ -1409,51 +1390,86 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                       />
                     )}
                   </Box>
-                )}
-              </Box>
-              
-              {/* Muscle Highlight SVG - Only show as fallback when no webp demo image exists */}
-              {shouldShowMuscleSvg && (
-                <Box 
-                  sx={{ 
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                    mt: 1,
-                    mb: 1,
-                    px: { xs: 2, sm: 3 },
-                  }}
-                >
-                  {(() => {
-                    // Generate muscle highlight SVG with validated muscle data
-                    const muscleSvgDataUrl = getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
-                    // Extract and validate SVG content (security: prevents XSS via structure validation)
-                    const svgContent = extractSvgFromDataUrl(muscleSvgDataUrl);
-                    
-                    return svgContent ? (
-                      <Box
-                        sx={{
-                          maxWidth: shouldUseTwoColumns ? '200px' : '180px',
-                          maxHeight: shouldUseTwoColumns ? '200px' : '180px',
-                          width: '100%',
-                          height: 'auto',
-                          p: 1,
-                          '& svg': {
+                ) : shouldShowMuscleSvg ? (
+                  /* Show muscle diagram SVG only if no demo image */
+                  <Box 
+                    sx={{ 
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      mt: 1,
+                      mb: 1,
+                      px: { xs: 2, sm: 3 },
+                    }}
+                  >
+                    {(() => {
+                      // Generate muscle highlight SVG with validated muscle data
+                      const muscleSvgDataUrl = getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
+                      // Extract and validate SVG content (security: prevents XSS via structure validation)
+                      const svgContent = extractSvgFromDataUrl(muscleSvgDataUrl);
+                      
+                      return svgContent ? (
+                        <Box
+                          sx={{
+                            maxWidth: shouldUseTwoColumns ? '200px' : '180px',
+                            maxHeight: shouldUseTwoColumns ? '200px' : '180px',
                             width: '100%',
                             height: 'auto',
-                          },
-                        }}
-                        // Safe to use dangerouslySetInnerHTML here because:
-                        // 1. SVG content is generated internally (not user input)
-                        // 2. extractSvgFromDataUrl validates SVG structure
-                        // 3. Only renders SVGs with expected viewBox and CSS classes
-                        dangerouslySetInnerHTML={{ __html: svgContent }}
-                      />
-                    ) : null;
-                  })()}
-                </Box>
-              )}
+                            p: 1,
+                            '& svg': {
+                              width: '100%',
+                              height: 'auto',
+                            },
+                          }}
+                          // Safe to use dangerouslySetInnerHTML here because:
+                          // 1. SVG content is generated internally (not user input)
+                          // 2. extractSvgFromDataUrl validates SVG structure
+                          // 3. Only renders SVGs with expected viewBox and CSS classes
+                          dangerouslySetInnerHTML={{ __html: svgContent }}
+                        />
+                      ) : (
+                        // Fallback if muscle SVG generation fails
+                        <Box
+                          component="img"
+                          src={workIconUrl}
+                          alt="Exercise"
+                          sx={{ 
+                            width: '60%', 
+                            height: '60%', 
+                            objectFit: 'contain', 
+                            opacity: 0.5 
+                          }}
+                        />
+                      );
+                    })()}
+                  </Box>
+                ) : (
+                  /* Show fallback work icon if no image and no muscle SVG */
+                  <Box 
+                    sx={{ 
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      mt: 1,
+                      mb: 1,
+                      px: { xs: 2, sm: 3 },
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={workIconUrl}
+                      alt="Exercise"
+                      sx={{ 
+                        width: '60%', 
+                        height: '60%', 
+                        objectFit: 'contain', 
+                        opacity: 0.5 
+                      }}
+                    />
+                  </Box>
+                )}
               
               {/* Portrait/Mobile: Separate rows for target info, inputs, and nav buttons */}
               {!shouldUseTwoColumns && (

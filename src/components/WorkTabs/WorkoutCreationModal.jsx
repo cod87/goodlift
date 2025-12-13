@@ -37,7 +37,7 @@ import {
 import { getExerciseWeight, getExerciseTargetReps } from '../../utils/storage';
 import { generateStandardWorkout } from '../../utils/workoutGenerator';
 import { getAllCategories, filterExercisesByCategory } from '../../utils/muscleCategories';
-import { getDemoImagePath } from '../../utils/exerciseDemoImages';
+import { constructImageUrl } from '../../utils/exerciseDemoImages';
 import { isSvgDataUrl, extractSvgFromDataUrl } from '../../utils/muscleHighlightSvg';
 import TargetRepsPicker from '../Common/TargetRepsPicker';
 import ExerciseListItem from '../Common/ExerciseListItem';
@@ -92,18 +92,14 @@ const MyWorkoutExerciseItem = ({
   
   const exerciseName = exercise?.['Exercise Name'] || exercise?.name || 'Unknown Exercise';
   const primaryMuscle = exercise?.['Primary Muscle'] || '';
-  const secondaryMuscles = exercise?.['Secondary Muscles'] || '';
-  const webpFile = exercise?.['Webp File'];
   const equipment = exercise?.['Equipment'] || '';
   
-  // Get image path using utility (supports webp files and custom muscle SVGs)
-  const imagePath = getDemoImagePath(
-    exerciseName,
-    true,
-    webpFile,
-    primaryMuscle,
-    secondaryMuscles
-  );
+  // Get base URL for work icon fallback
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
+  
+  // Use the image field directly from exercise data
+  const imagePath = exercise?.image ? constructImageUrl(exercise.image) : null;
 
   // Check if this exercise is in a superset group
   const supersetGroupId = exercise.supersetGroup;
@@ -175,49 +171,65 @@ const MyWorkoutExerciseItem = ({
             justifyContent: 'center',
           }}
         >
-          {isSvgDataUrl(imagePath) ? (
-            // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
-            (() => {
-              const svgContent = extractSvgFromDataUrl(imagePath);
-              return svgContent ? (
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    '& svg': {
+          {imagePath && !imageError ? (
+            isSvgDataUrl(imagePath) ? (
+              // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
+              (() => {
+                const svgContent = extractSvgFromDataUrl(imagePath);
+                return svgContent ? (
+                  <Box
+                    sx={{
                       width: '100%',
                       height: '100%',
-                    },
-                  }}
-                  dangerouslySetInnerHTML={{ __html: svgContent }}
-                />
-              ) : (
-                // Fallback if SVG extraction fails
-                <Box
-                  component="img"
-                  src={getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles)}
-                  alt={exerciseName}
-                  onError={() => setImageError(true)}
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                  }}
-                  loading="lazy"
-                />
-              );
-            })()
+                      '& svg': {
+                        width: '100%',
+                        height: '100%',
+                      },
+                    }}
+                    dangerouslySetInnerHTML={{ __html: svgContent }}
+                  />
+                ) : (
+                  // Fallback if SVG extraction fails
+                  <Box
+                    component="img"
+                    src={workIconUrl}
+                    alt={exerciseName}
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      opacity: 0.5,
+                    }}
+                    loading="lazy"
+                  />
+                );
+              })()
+            ) : (
+              // Render regular image (webp or SVG file)
+              <Box
+                component="img"
+                src={imagePath}
+                alt={exerciseName}
+                onError={() => setImageError(true)}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                }}
+                loading="lazy"
+              />
+            )
           ) : (
-            // Render regular image
+            // Fallback when no image or error
             <Box
               component="img"
-              src={imageError ? getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles) : imagePath}
+              src={workIconUrl}
               alt={exerciseName}
-              onError={() => setImageError(true)}
               sx={{
                 width: '100%',
                 height: '100%',
                 objectFit: 'contain',
+                opacity: 0.5,
               }}
               loading="lazy"
             />

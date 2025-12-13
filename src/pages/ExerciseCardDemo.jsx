@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Box, Container } from '@mui/material';
 import ExerciseCard from '../components/Workout/ExerciseCard';
-import { getDemoImagePath } from '../utils/exerciseDemoImages';
 
 /**
  * Demo page for the revamped ExerciseCard component
@@ -12,11 +11,8 @@ const ExerciseCardDemo = () => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   const exerciseName = 'Dumbbell Incline Bench Press';
-  // Use the webp file specified in exercises.json for this exercise
-  const webpFile = 'incline-dumbbell-bench-press.webp';
-  const primaryMuscle = 'Chest';
-  const secondaryMuscles = 'Front Delts, Triceps';
-  const demoImage = getDemoImagePath(exerciseName, true, webpFile, primaryMuscle, secondaryMuscles);
+  // Use the image field directly as it would be in exercises.json
+  const imageUrl = 'demos/incline-dumbbell-bench-press.webp';
 
   // Simulate timer
   useState(() => {
@@ -76,7 +72,7 @@ const ExerciseCardDemo = () => {
         <Box sx={{ flex: 1, overflow: 'auto', pb: '60px' }}>
           <ExerciseCard
             exerciseName={exerciseName}
-            demoImage={demoImage}
+            image={imageUrl}
             setNumber={2}
             totalSets={3}
             lastWeight={65}
@@ -97,10 +93,6 @@ const ExerciseCardDemo = () => {
             onPartialComplete={handlePartialComplete}
             onExit={handleExit}
             showPartialComplete={true}
-            // Muscle data for SVG generation
-            primaryMuscle={primaryMuscle}
-            secondaryMuscles={secondaryMuscles}
-            webpFile={webpFile}
           />
         </Box>
       </Box>

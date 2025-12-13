@@ -1,199 +1,191 @@
-# Static SVG Muscle Diagrams
+# Exercise Image System
 
 ## Overview
 
-This system pre-generates static SVG muscle diagram files for exercises that don't have demo webp images. The SVGs are created using the existing muscle highlight utility and stored in `/public/svg-muscles/` for efficient serving without runtime generation.
+Every exercise in `exercises.json` now has an explicit `image` field that points directly to either:
+- A webp photo demonstration in `/public/demos/`
+- A static SVG muscle diagram in `/public/svg-muscles/`
+
+This direct mapping approach eliminates broken images, complex fallback chains, and dynamic SVG generation during render.
 
 ## Architecture
 
+### Data Structure
+
+Each exercise in `public/data/exercises.json` includes an `image` field:
+
+```json
+{
+  "Exercise Name": "Back Squat",
+  "Primary Muscle": "Quads",
+  "Secondary Muscles": "Glutes, Hamstrings, Core",
+  "Webp File": "back-squat.webp",
+  "image": "demos/back-squat.webp"
+}
+```
+
+```json
+{
+  "Exercise Name": "Archer Push-Up",
+  "Primary Muscle": "Chest",
+  "Secondary Muscles": "Lats, Triceps",
+  "image": "svg-muscles/archer-push-up.svg"
+}
+```
+
 ### Components
 
-1. **Generation Script**: `scripts/generate-muscle-svgs.js`
-   - Reads exercises from `public/data/exercises.json`
-   - Filters exercises without 'Webp File' property
-   - Generates SVG for each using `generateMuscleHighlightSvg()`
-   - Saves to `/public/svg-muscles/{normalized-name}.svg`
-   - Creates a manifest file for verification
+1. **Updated Components**:
+   - `ExerciseCard.jsx` - Uses `image` prop directly, shows work icon on error
+   - `WorkoutExerciseCard.jsx` - Uses `exercise.image` directly, shows work icon on error
+   - No more dynamic SVG generation or complex fallback chains
 
-2. **Utility Updates**: `src/utils/exerciseDemoImages.js`
-   - Updated `getDemoImagePath()` with new priority:
-     1. Explicit webp file (highest priority)
-     2. Exact name match from available webp demos
-     3. Known variations/aliases of webp demos
-     4. Pre-generated static SVG file
-     5. Dynamic SVG generation (fallback)
-
-3. **Component Updates**: 
-   - `WorkoutExerciseCard.jsx` - Updated error handling to fall back to dynamic SVG
-   - `ExerciseCard.jsx` - Updated error handling to fall back to dynamic SVG
-
-4. **Verification Page**: `src/pages/SVGVerification.jsx`
-   - Visual grid displaying all generated SVGs
-   - Shows exercise name, muscles, and filename
-   - Can be accessed during development for visual QA
+2. **Simplified Utility**: `src/utils/exerciseDemoImages.js`
+   - `getDemoImagePath(exercise)` - Returns full path from exercise.image field
+   - Prepends base URL for deployment path handling
+   - Returns null if no image field (triggers fallback icon)
 
 ### File Structure
 
 ```
 /public/
-  /svg-muscles/           # Generated SVG files
-    archer-push-up.svg
-    barbell-clean.svg
+  /demos/                   # Webp photo demonstrations (60 files)
+    back-squat.webp
+    barbell-bench-press.webp
     ...
-    manifest.json         # Metadata for all generated SVGs
+  /svg-muscles/            # Pre-generated SVG muscle diagrams (103 files)
+    archer-push-up.svg
+    back-lever.svg
+    ...
+  work-icon.svg            # Fallback icon for missing/failed images
 ```
 
 ## Usage
 
-### Generating SVGs
+### Adding New Exercises
 
-To generate all SVG files for exercises without webp images:
+When adding a new exercise to `exercises.json`:
+
+1. **If you have a webp demo image**:
+   - Place the file in `/public/demos/`
+   - Add `"Webp File": "filename.webp"` to the exercise
+   - Run the update script (see below)
+
+2. **If you don't have a webp demo**:
+   - Generate a static SVG using the generation script (see below)
+   - Run the update script (see below)
+
+### Updating Image Mappings
+
+After adding or removing images, run the image field update script:
+
+```bash
+node scripts/add-image-field.js
+```
+
+This script:
+- Reads all exercises from `public/data/exercises.json`
+- Maps each to its corresponding image file:
+  - Uses `Webp File` if present → `demos/{filename}`
+  - Otherwise uses static SVG → `svg-muscles/{normalized-name}.svg`
+- Updates `exercises.json` with the `image` field
+
+### Generating Static SVGs
+
+To generate SVG muscle diagrams for exercises without webp images:
 
 ```bash
 npm run generate:svgs
 ```
 
-This will:
-- Process all exercises from `exercises.json`
-- Generate 103+ SVG files (as of current data)
-- Save them to `/public/svg-muscles/`
-- Create/update the manifest file
-- Report success/failure statistics
+This script:
+- Reads exercises from `public/data/exercises.json`
+- Filters exercises without 'Webp File' property
+- Generates SVG for each using muscle highlight utility
+- Saves to `/public/svg-muscles/{normalized-name}.svg`
+- Reports success/failure statistics
 
 ### When to Regenerate
 
-You should regenerate the SVGs when:
-
+Generate new SVGs when:
 1. **New exercises are added** without demo webp images
-2. **Exercise data changes** (muscle groups updated)
+2. **Exercise muscle data changes** (primary/secondary muscles updated)
 3. **SVG template is modified** (in `muscleHighlightSvg.js`)
-4. **Color scheme is updated** (primary/secondary muscle colors)
-5. **Exercise names are changed** (normalization logic)
 
-### Verification
+After regeneration, run `node scripts/add-image-field.js` to update image mappings.
 
-To visually verify all generated SVGs:
+## Benefits of New System
 
-1. Start the development server: `npm run dev`
-2. Navigate to the SVG verification page by setting `currentScreen: 'svg-verification'`
-3. Review the grid of all SVG diagrams
-4. Check for:
-   - Correct muscle highlighting
-   - Proper exercise name display
-   - Missing or broken images
-   - Color accuracy (primary: cherry red, secondary: pink)
+### Before (Complex Fallback Chain)
+- ❌ Dynamic SVG generation during render
+- ❌ Multiple fallback attempts per image
+- ❌ Broken image boxes appeared
+- ❌ Complex logic in components
+- ❌ Difficult to debug image issues
 
-## Implementation Details
-
-### Priority System
-
-The `getDemoImagePath()` function uses this priority order:
-
-```
-1. Webp File (explicit) → /demos/{webp-file}
-2. Exact webp match   → /demos/{normalized-name}.webp
-3. Webp variations    → /demos/{variation}.webp
-4. Static SVG         → /svg-muscles/{normalized-name}.svg
-5. Dynamic SVG        → data:image/svg+xml,... (fallback)
-6. Work icon          → /work-icon.svg (ultimate fallback)
-```
-
-### Fallback Behavior
-
-If a static SVG file fails to load (404), the component automatically falls back to generating a dynamic SVG data URL using the exercise's muscle data.
-
-### Name Normalization
-
-Exercise names are normalized consistently:
-- Convert to lowercase
-- Replace spaces with hyphens
-- Remove special characters
-- Handle "Movement, Equipment" format
-- Examples:
-  - "Bench Press, Barbell" → "barbell-bench-press"
-  - "Arnold Press, Dumbbell" → "dumbbell-arnold-press"
-
-## Maintenance
-
-### Adding New Exercises
-
-1. Add exercise to `public/data/exercises.json`
-2. If no webp demo exists, leave 'Webp File' property empty
-3. Run `npm run generate:svgs`
-4. The SVG will be automatically generated and ready to use
-
-### Updating the SVG Template
-
-If you modify the SVG template in `src/utils/muscleHighlightSvg.js`:
-
-1. Test your changes with dynamic generation first
-2. Run `npm run generate:svgs` to regenerate all static SVGs
-3. Verify the changes on the SVG verification page
-4. Commit both the updated utility and regenerated SVG files
-
-### Updating Colors or Styles
-
-The SVG colors are defined in `muscleHighlightSvg.js`:
-- Primary muscles: `#ce1034` (cherry red)
-- Secondary muscles: `#ec5998` (vivid pink)
-- Inactive muscles: `#3a3a3a` at 50% opacity (dark gray)
-
-After updating colors, regenerate all SVGs.
-
-## Performance Benefits
-
-### Before (Dynamic Generation)
-- SVG generated on every component render
-- ~39KB string processing per exercise
-- Potential performance impact with many exercises
-- Inconsistent rendering across contexts
-
-### After (Static SVGs)
-- SVG loaded as a static file
-- Browser caching enabled
-- No runtime generation overhead
-- Consistent representation everywhere
-- Fallback to dynamic generation only when needed
-
-## Files Modified
-
-- `scripts/generate-muscle-svgs.js` (new)
-- `src/utils/exerciseDemoImages.js` (updated)
-- `src/components/Common/WorkoutExerciseCard.jsx` (updated)
-- `src/components/Workout/ExerciseCard.jsx` (updated)
-- `src/pages/SVGVerification.jsx` (new)
-- `package.json` (added script)
+### After (Direct Mapping)
+- ✅ Every exercise has explicit image path
+- ✅ Single image load per card
+- ✅ Never shows broken image box
+- ✅ Simple component logic
+- ✅ Easy to debug - just check exercise.image field
+- ✅ Faster rendering (no fallback attempts)
 
 ## Troubleshooting
 
-### SVGs not displaying
+### Image Not Showing
 
-1. Check if the SVG file exists: `ls public/svg-muscles/`
-2. Verify the filename matches normalized exercise name
-3. Check browser console for 404 errors
-4. Ensure fallback to dynamic SVG is working
+1. **Check the exercise data**:
+   ```bash
+   jq '.[] | select(.["Exercise Name"] == "Your Exercise")' public/data/exercises.json
+   ```
+   Verify the `image` field exists and points to correct path
 
-### Incorrect muscle highlighting
+2. **Check if file exists**:
+   ```bash
+   ls public/demos/your-image.webp
+   # or
+   ls public/svg-muscles/your-exercise.svg
+   ```
 
-1. Verify exercise data in `exercises.json`
-2. Check muscle mapping in `muscleHighlightSvg.js`
-3. Regenerate SVGs with updated data
-4. Review on verification page
+3. **Re-run image mapping**:
+   ```bash
+   node scripts/add-image-field.js
+   ```
 
-### Generation script fails
+### Adding New Demo Images
 
-1. Check Node.js version (requires ESM support)
-2. Verify `exercises.json` is valid JSON
-3. Check file permissions on `/public/svg-muscles/`
-4. Review error message for specific issues
+1. Add webp file to `/public/demos/`
+2. Update exercise in `exercises.json` with `"Webp File": "filename.webp"`
+3. Run: `node scripts/add-image-field.js`
+4. Commit both `exercises.json` and the webp file
 
-## Future Enhancements
+### Name Normalization
 
-Possible improvements to consider:
+Exercise names are normalized for file matching:
+- Convert to lowercase
+- Replace spaces with hyphens
+- Remove special characters
+- Handle "Movement, Equipment" → "equipment-movement" format
 
-1. **Automatic regeneration** on build (add to prebuild script)
-2. **Incremental updates** (only regenerate changed exercises)
-3. **SVG optimization** (minification, compression)
-4. **Alternative color schemes** (light/dark mode variants)
-5. **Interactive verification** (click to see muscle data)
-6. **Diff tool** (compare before/after regeneration)
+Examples:
+- "Bench Press, Barbell" → "barbell-bench-press"
+- "Arnold Press, Dumbbell" → "dumbbell-arnold-press.svg"
+
+## Statistics
+
+Current image distribution:
+- Total exercises: 156
+- Webp photo demos: 53 (34%)
+- Static SVG diagrams: 103 (66%)
+- Coverage: 100%
+
+## Files Modified
+
+Key files in this image system:
+- `public/data/exercises.json` - Exercise data with image fields
+- `scripts/add-image-field.js` - Adds/updates image field mapping
+- `scripts/generate-muscle-svgs.js` - Generates static SVG files
+- `src/utils/exerciseDemoImages.js` - Simplified image path utility
+- `src/components/Workout/ExerciseCard.jsx` - Updated to use image field
+- `src/components/Common/WorkoutExerciseCard.jsx` - Updated to use image field

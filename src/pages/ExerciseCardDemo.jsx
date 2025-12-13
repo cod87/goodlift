@@ -14,7 +14,9 @@ const ExerciseCardDemo = () => {
   const exerciseName = 'Dumbbell Incline Bench Press';
   // Use the webp file specified in exercises.json for this exercise
   const webpFile = 'incline-dumbbell-bench-press.webp';
-  const demoImage = getDemoImagePath(exerciseName, true, webpFile);
+  const primaryMuscle = 'Chest';
+  const secondaryMuscles = 'Front Delts, Triceps';
+  const demoImage = getDemoImagePath(exerciseName, true, webpFile, primaryMuscle, secondaryMuscles);
 
   // Simulate timer
   useState(() => {
@@ -95,6 +97,10 @@ const ExerciseCardDemo = () => {
             onPartialComplete={handlePartialComplete}
             onExit={handleExit}
             showPartialComplete={true}
+            // Muscle data for SVG generation
+            primaryMuscle={primaryMuscle}
+            secondaryMuscles={secondaryMuscles}
+            webpFile={webpFile}
           />
         </Box>
       </Box>

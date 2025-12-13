@@ -363,8 +363,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     return null;
   }, [isBarbell, currentWeight, preferences.barbellWeight]);
 
-  // Simplified fallback logic: only show work icon if image fails or doesn't exist
-  const shouldShowFallback = !demoImageSrc || imageError;
+  // Show fallback icon if no image or image failed to load
+  const showFallbackIcon = !demoImageSrc || imageError;
 
   // Calculate responsive font size for exercise name
   // Ensures text is large and readable but always fits within available space
@@ -474,10 +474,11 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
       const imagePath = constructImageUrl(currentStep.exercise.image);
       console.log('[WorkoutScreen] Loading image:', imagePath);
       setDemoImageSrc(imagePath);
-      setImageError(false);
+      setImageError(false); // Reset error state for new image
     } else {
+      // No image field - will show fallback icon
       setDemoImageSrc(null);
-      setImageError(false);
+      setImageError(true); // Set error to trigger fallback display
     }
   }, [currentStep]);
 
@@ -1309,7 +1310,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                 </Box>
                 
                 {/* Demo Image or Fallback Icon - Simple, foolproof logic */}
-                {shouldShowFallback ? (
+                {showFallbackIcon ? (
                   /* Show fallback work icon if no image or load error */
                   <Box 
                     sx={{ 

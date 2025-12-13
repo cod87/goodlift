@@ -1425,10 +1425,6 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                           maxHeight: shouldUseTwoColumns ? '200px' : '180px',
                           width: '100%',
                           height: 'auto',
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          bgcolor: 'background.paper',
                           p: 1,
                           '& svg': {
                             width: '100%',

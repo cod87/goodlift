@@ -146,10 +146,11 @@ describe('Workout Session SVG Rendering', () => {
       expect(svgContent).toContain('.cls-primary'); // Primary muscles
       expect(svgContent).toContain('.cls-secondary'); // Secondary muscles
       
-      // Verify contrast colors from PR #383
-      expect(svgContent).toContain('#808080'); // Gray for non-targeted
-      expect(svgContent).toContain('opacity: 0.5');
-      expect(svgContent).toContain('#1db584'); // Highlight color
+      // Verify improved color palette
+      expect(svgContent).toContain('#e5e7eb'); // Light gray for non-targeted
+      expect(svgContent).toContain('opacity: 0.7');
+      expect(svgContent).toContain('#2563eb'); // Bold blue for primary
+      expect(svgContent).toContain('#60a5fa'); // Light blue for secondary
     });
 
     test('should properly encode SVG into data URL', () => {
@@ -201,7 +202,7 @@ describe('Workout Session SVG Rendering', () => {
       // Check that style includes cls-1 for non-targeted muscles
       const styleSection = svgContent.match(/<style>[\s\S]*?<\/style>/)[0];
       expect(styleSection).toContain('.cls-1');
-      expect(styleSection).toContain('opacity: 0.5');
+      expect(styleSection).toContain('opacity: 0.7');
     });
 
     test('should handle multiple secondary muscles', () => {
@@ -374,13 +375,19 @@ describe('Workout Session SVG Rendering', () => {
   });
 
   describe('Regression tests', () => {
-    test('should maintain PR #383 contrast improvements', () => {
+    test('should maintain improved contrast and clarity', () => {
       const svgContent = generateMuscleHighlightSvg('Chest', 'Triceps');
       
-      // Verify non-targeted muscles use #808080 at 0.5 opacity (PR #383)
+      // Verify non-targeted muscles use #e5e7eb at 0.7 opacity
       const styleSection = svgContent.match(/<style>[\s\S]*?<\/style>/)[0];
-      expect(styleSection).toContain('#808080');
-      expect(styleSection).toMatch(/opacity:\s*0\.5/);
+      expect(styleSection).toContain('#e5e7eb');
+      expect(styleSection).toMatch(/opacity:\s*0\.7/);
+      
+      // Verify primary muscles use bold blue
+      expect(styleSection).toContain('#2563eb');
+      
+      // Verify secondary muscles use lighter blue
+      expect(styleSection).toContain('#60a5fa');
     });
 
     test('should preserve SVG structure from canonical template', () => {

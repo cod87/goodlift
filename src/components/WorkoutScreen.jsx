@@ -364,6 +364,17 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     return null;
   }, [isBarbell, currentWeight, preferences.barbellWeight]);
 
+  // Determine if muscle SVG should be shown as fallback
+  // Show muscle SVG only when:
+  // 1. Exercise has muscle data (primaryMuscle exists)
+  // 2. No demo image exists OR demo image is neither a webp nor an SVG data URL
+  const shouldShowMuscleSvg = useMemo(() => {
+    return primaryMuscle && 
+           primaryMuscle.trim() && 
+           (!demoImageSrc || 
+            (!demoImageSrc.endsWith('.webp') && !isSvgDataUrl(demoImageSrc)));
+  }, [primaryMuscle, demoImageSrc]);
+
   // Calculate responsive font size for exercise name
   // Ensures text is large and readable but always fits within available space
   // Text scales down for long names while maintaining readability
@@ -1399,8 +1410,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                 )}
               </Box>
               
-              {/* Muscle Highlight SVG - ALWAYS show for exercises with muscle data */}
-              {primaryMuscle && primaryMuscle.trim() && (
+              {/* Muscle Highlight SVG - Only show as fallback when no webp demo image exists */}
+              {shouldShowMuscleSvg && (
                 <Box 
                   sx={{ 
                     display: 'flex',

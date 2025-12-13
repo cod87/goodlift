@@ -124,7 +124,7 @@ const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
   
   // Update the class for primary muscle groups
   primaryIds.forEach(muscleId => {
-    const groupRegex = new RegExp(`(<g id="${muscleId}"[^>]*>[\\s\\S]*?)<\\/g>`, '');
+    const groupRegex = new RegExp(`(<g id="${muscleId}"[^>]*>[\\s\\S]*?)<\\/g>`);
     const match = modifiedSvg.match(groupRegex);
     if (match) {
       const groupContent = match[1];
@@ -136,7 +136,7 @@ const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
   // Update the class for secondary muscle groups
   secondaryIds.forEach(muscleId => {
     if (!primaryIds.includes(muscleId)) {
-      const groupRegex = new RegExp(`(<g id="${muscleId}"[^>]*>[\\s\\S]*?)<\\/g>`, '');
+      const groupRegex = new RegExp(`(<g id="${muscleId}"[^>]*>[\\s\\S]*?)<\\/g>`);
       const match = modifiedSvg.match(groupRegex);
       if (match) {
         const groupContent = match[1];

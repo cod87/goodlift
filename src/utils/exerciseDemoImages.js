@@ -124,8 +124,8 @@ export const normalizeExerciseName = (exerciseName) => {
  * @param {string} exerciseName - The exercise name to find an image for
  * @param {boolean} usePlaceholder - Whether to return placeholder if no match (default: true)
  * @param {string} webpFile - Optional webp filename from exercise data (e.g., 'back-squat.webp')
- * @param {string} primaryMuscle - Optional primary muscle (not used for SVG generation anymore)
- * @param {string} secondaryMuscles - Optional secondary muscles (not used for SVG generation anymore)
+ * @param {string} primaryMuscle - Optional primary muscle (kept for backward compatibility, not used in explicit SVG approach)
+ * @param {string} secondaryMuscles - Optional secondary muscles (kept for backward compatibility, not used in explicit SVG approach)
  * @param {string} svgFile - Optional svg filename from exercise data (e.g., 'archer-push-up.svg')
  * @returns {string|null} Path to the demo image, SVG file, placeholder, or null
  */

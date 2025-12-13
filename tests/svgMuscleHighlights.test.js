@@ -117,13 +117,15 @@ describe('SVG Muscle Highlight Integration', () => {
       expect(svgContent).toContain('cls-secondary');
     });
 
-    test('should use contrast-enhanced colors from PR #383', () => {
+    test('should use modern darker theme with accessible colors', () => {
       const svgDataUrl = getMuscleHighlightDataUrl('Chest', 'Triceps');
       const svgContent = extractSvgFromDataUrl(svgDataUrl);
       
-      // Check for updated contrast values from PR #383
-      expect(svgContent).toContain('#808080'); // New non-selected muscle color
-      expect(svgContent).toContain('opacity: 0.5'); // New opacity
+      // Check for updated color values
+      expect(svgContent).toContain('#3a3a3a'); // Non-targeted muscle color
+      expect(svgContent).toContain('#ce1034'); // Primary muscle color (rich cherry red)
+      expect(svgContent).toContain('#ec5998'); // Secondary muscle color (vivid pink)
+      expect(svgContent).toContain('opacity: 0.5'); // Non-targeted opacity
     });
   });
 
@@ -185,6 +187,16 @@ describe('SVG Muscle Highlight Integration', () => {
       // Should pass validation and return content
       expect(extracted).toBeTruthy();
       expect(extracted.length).toBeGreaterThan(0);
+    });
+
+    test('should include accessibility attributes', () => {
+      const dataUrl = getMuscleHighlightDataUrl('Chest', 'Triceps');
+      const extracted = extractSvgFromDataUrl(dataUrl);
+      
+      // Should have role and aria-label for screen readers
+      expect(extracted).toContain('role="img"');
+      expect(extracted).toContain('aria-label=');
+      expect(extracted).toContain('Muscle diagram');
     });
 
     test('should reject invalid SVG data URLs', () => {

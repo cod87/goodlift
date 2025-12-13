@@ -430,7 +430,7 @@ describe('SVG Rendering Regression Tests', () => {
       
       // Should have fill colors
       expect(svgContent).toContain('fill:');
-      expect(svgContent).toContain('#1db584'); // Highlight color
+      expect(svgContent).toContain('#ce1034'); // Primary muscle color (rich cherry red)
     });
   });
 });

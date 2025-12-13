@@ -1,7 +1,7 @@
 // Auto-generated service worker version
-// Generated at: 2025-12-13T06:43:29.118Z
-const SW_VERSION = '1765608209118';
-const SW_BUILD_DATE = '2025-12-13T06:43:29.118Z';
+// Generated at: 2025-12-13T06:47:14.254Z
+const SW_VERSION = '1765608434254';
+const SW_BUILD_DATE = '2025-12-13T06:47:14.254Z';
 
 // Export for service worker
 if (typeof self !== 'undefined') {

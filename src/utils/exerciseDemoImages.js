@@ -190,17 +190,10 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
     }
   }
   
-  // PRIORITY 4: Fuzzy matching is DISABLED to prevent incorrect demo images
-  // Showing the wrong exercise demo is worse than showing a muscle SVG
-  // which accurately represents the muscles worked by the exercise.
-  // const fuzzyMatch = findFuzzyMatch(normalized);
-  // if (fuzzyMatch) {
-  //   return `${getBaseUrl()}demos/${fuzzyMatch}.webp`;
-  // }
-  
-  // PRIORITY 5: No webp image found, return fallback (muscle SVG or work icon)
+  // PRIORITY 4: No webp image found, return fallback (muscle SVG or work icon)
+  // Fuzzy matching is intentionally disabled to prevent incorrect demo image matches.
   // The muscle SVG provides accurate visual representation of which muscles
-  // are targeted by the exercise, which is more useful than a wrong demo.
+  // are targeted by the exercise, which is more useful than showing the wrong demo.
   return getFallbackImage(usePlaceholder, primaryMuscle, secondaryMuscles);
 };
 

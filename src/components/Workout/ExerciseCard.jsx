@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import ExerciseInputs from './ExerciseInputs';
 import { usePreferences } from '../../contexts/PreferencesContext';
+import { constructImageUrl } from '../../utils/exerciseDemoImages';
 
 /**
  * Helper function to check if equipment is barbell
@@ -99,11 +100,7 @@ const ExerciseCard = memo(({
 
   // Use the new image prop (from exercise.image field), fall back to legacy demoImage prop
   const imagePath = image || demoImage;
-  const imageSrc = imagePath && !imageError 
-    ? (imagePath.startsWith('http') || imagePath.startsWith('/') || imagePath.startsWith('data:')) 
-      ? imagePath 
-      : `${baseUrl}${imagePath}`
-    : null;
+  const imageSrc = imagePath && !imageError ? constructImageUrl(imagePath) : null;
 
   const handleImageError = () => {
     // On error, simply set imageError to true which will show the fallback icon

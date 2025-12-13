@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import ExerciseOptionsMenu from './ExerciseOptionsMenu';
 import { getSupersetColor } from '../../utils/supersetColors';
+import { constructImageUrl } from '../../utils/exerciseDemoImages';
 
 const WorkoutExerciseCard = memo(({
   exercise,
@@ -52,16 +53,12 @@ const WorkoutExerciseCard = memo(({
   const primaryMuscle = exercise?.['Primary Muscle'] || '';
   const supersetGroup = exercise?.supersetGroup;
   
-  // Get base URL for constructing image path
+  // Get base URL for constructing work icon fallback
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
   
   // Use the explicit image field from exercise data
-  const imagePath = exercise?.image 
-    ? (exercise.image.startsWith('http') || exercise.image.startsWith('/') || exercise.image.startsWith('data:')) 
-      ? exercise.image 
-      : `${baseUrl}${exercise.image}`
-    : null;
+  const imagePath = constructImageUrl(exercise?.image);
 
   const supersetColor = getSupersetColor(supersetGroup);
 

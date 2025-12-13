@@ -18,6 +18,28 @@ const getBaseUrl = () => {
 };
 
 /**
+ * Constructs full image URL from relative path
+ * Handles absolute URLs, data URLs, and relative paths
+ * 
+ * @param {string|null} imagePath - Relative or absolute image path
+ * @returns {string|null} Full URL or null
+ */
+export const constructImageUrl = (imagePath) => {
+  if (!imagePath) {
+    return null;
+  }
+  
+  // Already absolute URL or data URL
+  if (imagePath.startsWith('http') || imagePath.startsWith('/') || imagePath.startsWith('data:')) {
+    return imagePath;
+  }
+  
+  // Prepend base URL
+  const baseUrl = getBaseUrl();
+  return `${baseUrl}${imagePath}`;
+};
+
+/**
  * Gets the demo image path for a given exercise
  * 
  * New simplified approach:
@@ -34,17 +56,25 @@ export const getDemoImagePath = (exercise) => {
     return null;
   }
   
-  // Return the full path with base URL
-  return `${getBaseUrl()}${exercise.image}`;
+  // Use the shared helper to construct URL
+  return constructImageUrl(exercise.image);
 };
 
 /**
  * Legacy function signature for backward compatibility
- * @deprecated Use getDemoImagePath(exercise) instead
+ * @deprecated Use getDemoImagePath(exercise) instead where exercise has an 'image' field
+ * 
+ * Migration guide:
+ * Old: getDemoImagePath(exerciseName, true, webpFile, primaryMuscle, secondaryMuscles)
+ * New: getDemoImagePath(exercise) where exercise = { image: "demos/file.webp" or "svg-muscles/file.svg" }
  */
 // eslint-disable-next-line no-unused-vars
 export const getDemoImagePathLegacy = (exerciseName, usePlaceholder = true, webpFile = null, primaryMuscle = null, secondaryMuscles = null) => {
-  console.warn('getDemoImagePathLegacy is deprecated. Use exercise.image field directly.');
+  console.warn(
+    'getDemoImagePathLegacy is deprecated. ' +
+    'Update exercises.json to include explicit "image" field and use getDemoImagePath(exercise) instead. ' +
+    'See SVG_GENERATION.md for migration guide.'
+  );
   return null;
 };
 

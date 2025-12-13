@@ -32,8 +32,6 @@ import {
 } from '@mui/icons-material';
 import ExerciseInputs from './ExerciseInputs';
 import { usePreferences } from '../../contexts/PreferencesContext';
-import { getDemoImagePath } from '../../utils/exerciseDemoImages';
-import { isSvgDataUrl, extractSvgFromDataUrl, getMuscleHighlightDataUrl } from '../../utils/muscleHighlightSvg';
 
 /**
  * Helper function to check if equipment is barbell
@@ -57,6 +55,7 @@ const ExerciseCard = memo(({
   totalSets,
   videoUrl,
   demoImage = null,
+  image = null, // New: direct image path from exercise.image field
   lastWeight = null,
   lastReps = null,
   onSubmit,
@@ -77,10 +76,6 @@ const ExerciseCard = memo(({
   onExit = null,
   showPartialComplete = false,
   equipment = null, // Equipment type (e.g., 'Barbell', 'Dumbbell')
-  // Muscle data for SVG generation
-  primaryMuscle = null,
-  secondaryMuscles = null,
-  webpFile = null,
 }) => {
   const theme = useTheme();
   const { preferences } = usePreferences();
@@ -88,7 +83,6 @@ const ExerciseCard = memo(({
   const [reps, setReps] = useState(lastReps || '');
   const [setLogged, setSetLogged] = useState(false);
   const [suggestionAccepted, setSuggestionAccepted] = useState(false);
-  const [imageSrc, setImageSrc] = useState(demoImage);
   const [imageError, setImageError] = useState(false);
   const [workIconError, setWorkIconError] = useState(false);
   // State for end workout confirmation dialog
@@ -103,50 +97,17 @@ const ExerciseCard = memo(({
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
-  // Debug logging for investigation (can be removed once SVG rendering is verified)
-  // console.log('[ExerciseCard] Received props:', {
-  //   exerciseName,
-  //   webpFile,
-  //   primaryMuscle,
-  //   secondaryMuscles,
-  //   demoImage
-  // });
-
-  // Get image path using utility (supports webp files and custom muscle SVGs)
-  // This matches the logic in WorkoutExerciseCard for consistent SVG generation
-  const imagePath = getDemoImagePath(
-    exerciseName,
-    true,
-    webpFile,
-    primaryMuscle,
-    secondaryMuscles
-  );
-
-  // console.log('[ExerciseCard] getDemoImagePath returned:', {
-  //   imagePath: imagePath?.substring(0, 100),
-  //   isSvgDataUrl: imagePath ? isSvgDataUrl(imagePath) : false,
-  //   length: imagePath?.length
-  // });
-
-  // Update image source when exercise changes
-  useEffect(() => {
-    // console.log('[ExerciseCard] useEffect updating imageSrc:', imagePath?.substring(0, 100));
-    setImageSrc(imagePath);
-    setImageError(false);
-  }, [imagePath]);
+  // Use the new image prop (from exercise.image field), fall back to legacy demoImage prop
+  const imagePath = image || demoImage;
+  const imageSrc = imagePath && !imageError 
+    ? (imagePath.startsWith('http') || imagePath.startsWith('/') || imagePath.startsWith('data:')) 
+      ? imagePath 
+      : `${baseUrl}${imagePath}`
+    : null;
 
   const handleImageError = () => {
-    if (!imageError) {
-      setImageError(true);
-      // If static SVG failed to load, fall back to dynamic SVG generation
-      if (imageSrc?.includes('svg-muscles/') && primaryMuscle) {
-        const dynamicSvg = getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
-        setImageSrc(dynamicSvg);
-      } else {
-        // Set to null to trigger WorkTab Icon display
-        setImageSrc(null);
-      }
-    }
+    // On error, simply set imageError to true which will show the fallback icon
+    setImageError(true);
   };
   
   // Render WorkTab Icon as fallback when no demo image is available
@@ -334,50 +295,20 @@ const ExerciseCard = memo(({
                 justifyContent: 'center',
               }}>
                 {imageSrc ? (
-                  isSvgDataUrl(imageSrc) ? (
-                    // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
-                    (() => {
-                      const svgContent = extractSvgFromDataUrl(imageSrc);
-                      return svgContent ? (
-                        <Box
-                          sx={{
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: 1,
-                            '& svg': {
-                              width: '100%',
-                              height: '100%',
-                            },
-                          }}
-                          dangerouslySetInnerHTML={{ __html: svgContent }}
-                        />
-                      ) : (
-                        // Fallback if SVG extraction fails
-                        <Box
-                          component="img"
-                          src={workIconUrl}
-                          alt="Exercise"
-                          onError={() => setWorkIconError(true)}
-                          sx={{ width: '60%', height: '60%', objectFit: 'contain', opacity: 0.5 }}
-                        />
-                      );
-                    })()
-                  ) : (
-                    // Render regular image
-                    <Box
-                      component="img"
-                      src={imageSrc}
-                      alt={`${exerciseName} demonstration`}
-                      onError={handleImageError}
-                      sx={{
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: 1,
-                        objectFit: 'contain',
-                      }}
-                      loading="lazy"
-                    />
-                  )
+                  // Render image (webp or SVG file)
+                  <Box
+                    component="img"
+                    src={imageSrc}
+                    alt={`${exerciseName} demonstration`}
+                    onError={handleImageError}
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: 1,
+                      objectFit: 'contain',
+                    }}
+                    loading="lazy"
+                  />
                 ) : videoUrl ? (
                   <iframe
                     src={videoUrl}
@@ -697,50 +628,23 @@ const ExerciseCard = memo(({
               justifyContent: 'center',
             }}>
               {imageSrc ? (
-                isSvgDataUrl(imageSrc) ? (
-                  // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
-                  (() => {
-                    const svgContent = extractSvgFromDataUrl(imageSrc);
-                    return svgContent ? (
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          borderRadius: 2,
-                          '& svg': {
-                            width: '100%',
-                            height: '100%',
-                          },
-                        }}
-                        dangerouslySetInnerHTML={{ __html: svgContent }}
-                      />
-                    ) : (
-                      // Fallback if SVG extraction fails
-                      renderAvatarFallback()
-                    );
-                  })()
-                ) : (
-                  // Render regular image
-                  <Box
-                    component="img"
-                    src={imageSrc}
-                    alt={`${exerciseName} demonstration`}
-                    onError={handleImageError}
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: 2,
-                      objectFit: 'contain',
-                    }}
-                    loading="lazy"
-                  />
-                )
+                // Render image (webp or SVG file)
+                <Box
+                  component="img"
+                  src={imageSrc}
+                  alt={`${exerciseName} demonstration`}
+                  onError={handleImageError}
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 2,
+                    objectFit: 'contain',
+                  }}
+                  loading="lazy"
+                />
               ) : videoUrl ? (
                 <iframe
                   src={videoUrl}
@@ -889,9 +793,7 @@ ExerciseCard.propTypes = {
   onExit: PropTypes.func,
   showPartialComplete: PropTypes.bool,
   equipment: PropTypes.string,
-  primaryMuscle: PropTypes.string,
-  secondaryMuscles: PropTypes.string,
-  webpFile: PropTypes.string,
+  image: PropTypes.string, // New: direct image path from exercise.image field
 };
 
 export default ExerciseCard;

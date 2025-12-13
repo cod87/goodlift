@@ -27,8 +27,6 @@ import {
 } from '@mui/icons-material';
 import ExerciseOptionsMenu from './ExerciseOptionsMenu';
 import { getSupersetColor } from '../../utils/supersetColors';
-import { getDemoImagePath } from '../../utils/exerciseDemoImages';
-import { isSvgDataUrl, extractSvgFromDataUrl, getMuscleHighlightDataUrl } from '../../utils/muscleHighlightSvg';
 
 const WorkoutExerciseCard = memo(({
   exercise,
@@ -52,32 +50,18 @@ const WorkoutExerciseCard = memo(({
   
   const exerciseName = exercise?.['Exercise Name'] || exercise?.name || 'Unknown Exercise';
   const primaryMuscle = exercise?.['Primary Muscle'] || '';
-  const secondaryMuscles = exercise?.['Secondary Muscles'] || '';
-  const webpFile = exercise?.['Webp File'];
   const supersetGroup = exercise?.supersetGroup;
   
-  // Debug logging for investigation (can be removed once SVG rendering is verified)
-  // console.log('[WorkoutExerciseCard] Exercise data:', {
-  //   exerciseName,
-  //   primaryMuscle,
-  //   secondaryMuscles,
-  //   webpFile
-  // });
+  // Get base URL for constructing image path
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
   
-  // Get image path using utility (supports webp files and custom muscle SVGs)
-  const imagePath = getDemoImagePath(
-    exerciseName, 
-    true, 
-    webpFile,
-    primaryMuscle,
-    secondaryMuscles
-  );
-  
-  // console.log('[WorkoutExerciseCard] getDemoImagePath returned:', {
-  //   imagePath: imagePath?.substring(0, 100),
-  //   isSvgDataUrl: imagePath ? isSvgDataUrl(imagePath) : false,
-  //   length: imagePath?.length
-  // });
+  // Use the explicit image field from exercise data
+  const imagePath = exercise?.image 
+    ? (exercise.image.startsWith('http') || exercise.image.startsWith('/') || exercise.image.startsWith('data:')) 
+      ? exercise.image 
+      : `${baseUrl}${exercise.image}`
+    : null;
 
   const supersetColor = getSupersetColor(supersetGroup);
 
@@ -120,57 +104,18 @@ const WorkoutExerciseCard = memo(({
                 justifyContent: 'center',
               }}
             >
-              {isSvgDataUrl(imagePath) ? (
-                // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
-                (() => {
-                  const svgContent = extractSvgFromDataUrl(imagePath);
-                  return svgContent ? (
-                    <Box
-                      sx={{
-                        width: '100%',
-                        height: '100%',
-                        '& svg': {
-                          width: '100%',
-                          height: '100%',
-                        },
-                      }}
-                      dangerouslySetInnerHTML={{ __html: svgContent }}
-                    />
-                  ) : (
-                    // Fallback if SVG extraction fails
-                    <Box
-                      component="img"
-                      src={getDemoImagePath(exerciseName, true, null, primaryMuscle, secondaryMuscles)}
-                      alt={exerciseName}
-                      onError={() => setImageError(true)}
-                      sx={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                      }}
-                      loading="lazy"
-                    />
-                  );
-                })()
-              ) : (
-                // Render regular image (webp or static SVG file)
-                <Box
-                  component="img"
-                  src={imageError ? getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '') : imagePath}
-                  alt={exerciseName}
-                  onError={() => {
-                    if (!imageError) {
-                      setImageError(true);
-                    }
-                  }}
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                  }}
-                  loading="lazy"
-                />
-              )}
+              <Box
+                component="img"
+                src={imageError || !imagePath ? workIconUrl : imagePath}
+                alt={exerciseName}
+                onError={() => setImageError(true)}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                }}
+                loading="lazy"
+              />
             </Box>
             
             {/* Exercise Info */}

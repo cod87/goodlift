@@ -219,7 +219,7 @@ const CANONICAL_SVG_TEMPLATE = `
  * Returns the canonical SVG with dynamic CSS styling for muscle highlighting
  * @param {string} primaryMuscle - Primary muscle(s) for the exercise
  * @param {string} secondaryMuscles - Secondary muscles for the exercise
- * @returns {string} SVG markup as a string with inline styles
+ * @returns {string} SVG markup as a string with inline styles and accessibility attributes
  */
 export const generateMuscleHighlightSvg = (primaryMuscle, secondaryMuscles) => {
   // Get SVG IDs for primary and secondary muscles
@@ -228,29 +228,40 @@ export const generateMuscleHighlightSvg = (primaryMuscle, secondaryMuscles) => {
   
   // If "all-muscles" is included, highlight everything
   if (primaryIds.includes('all-muscles') || secondaryIds.includes('all-muscles')) {
-    return highlightAllMuscles(CANONICAL_SVG_TEMPLATE);
+    return highlightAllMuscles(CANONICAL_SVG_TEMPLATE, primaryMuscle, secondaryMuscles);
   }
   
   // Generate SVG with highlighted muscle groups
-  return highlightSpecificMuscles(CANONICAL_SVG_TEMPLATE, primaryIds, secondaryIds);
+  return highlightSpecificMuscles(CANONICAL_SVG_TEMPLATE, primaryIds, secondaryIds, primaryMuscle, secondaryMuscles);
 };
 
 /**
  * Highlights all muscle groups in the canonical SVG
  * @param {string} svgTemplate - The canonical SVG template
+ * @param {string} primaryMuscle - Primary muscle(s) for accessibility label
+ * @param {string} secondaryMuscles - Secondary muscles for accessibility label
  * @returns {string} SVG markup with all muscles highlighted
  */
-const highlightAllMuscles = (svgTemplate) => {
+const highlightAllMuscles = (svgTemplate, primaryMuscle, secondaryMuscles) => {
   // Replace the style block to highlight all muscles
-  // Using a darker theme with red shades for better visual engagement
-  const highlightedSvg = svgTemplate.replace(
+  // Using a modern darker theme with rich cherry red for all muscles
+  let highlightedSvg = svgTemplate.replace(
     /<style>[\s\S]*?<\/style>/,
     `<style>
       .cls-1 {
-        fill: #dc2626;
+        fill: #ce1034;
         opacity: 1;
       }
     </style>`
+  );
+  
+  // Add accessibility attributes to the SVG element
+  const musclesList = [primaryMuscle, secondaryMuscles].filter(Boolean).join(', ');
+  const ariaLabel = musclesList ? `Muscle diagram highlighting ${musclesList}` : 'Full body muscle diagram';
+  
+  highlightedSvg = highlightedSvg.replace(
+    /<svg/,
+    `<svg role="img" aria-label="${ariaLabel.replace(/"/g, '&quot;')}"`
   );
   
   return highlightedSvg;
@@ -258,34 +269,36 @@ const highlightAllMuscles = (svgTemplate) => {
 
 /**
  * Highlights specific muscle groups in the canonical SVG
- * Using a darker theme with red shades for improved visual engagement:
- * - Primary muscles: Deep red (#dc2626) at full opacity - clearly shows main muscles worked
- * - Secondary muscles: Lighter red (#ef4444) at full opacity - shows supporting muscles
- * - Non-targeted muscles: Dark gray (#404040) at 60% opacity - provides context without distraction
+ * Using a modern darker theme with intuitive, accessible color palettes:
+ * - Primary muscles: Rich cherry red (#ce1034) at full opacity - clearly shows main muscles worked
+ * - Secondary muscles: Vivid pink (#ec5998) at full opacity - shows supporting muscles
+ * - Non-targeted muscles: Dark gray (#3a3a3a) at 50% opacity - provides context without distraction
  * @param {string} svgTemplate - The canonical SVG template
  * @param {string[]} primaryIds - Array of primary muscle SVG IDs
  * @param {string[]} secondaryIds - Array of secondary muscle SVG IDs
+ * @param {string} primaryMuscle - Primary muscle(s) for accessibility label
+ * @param {string} secondaryMuscles - Secondary muscles for accessibility label
  * @returns {string} SVG markup with specific muscles highlighted
  */
-const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
+const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds, primaryMuscle, secondaryMuscles) => {
   // Create a modified SVG with CSS classes for different highlight levels
   let modifiedSvg = svgTemplate;
   
   // Replace the original style with our custom highlighting styles
-  // Using darker theme with red shades for better visual engagement
+  // Using modern darker theme with accessible color palettes
   modifiedSvg = modifiedSvg.replace(
     /<style>[\s\S]*?<\/style>/,
     `<style>
       .cls-1 {
-        fill: #404040;
-        opacity: 0.6;
+        fill: #3a3a3a;
+        opacity: 0.5;
       }
       .cls-primary {
-        fill: #dc2626;
+        fill: #ce1034;
         opacity: 1;
       }
       .cls-secondary {
-        fill: #ef4444;
+        fill: #ec5998;
         opacity: 1;
       }
     </style>`
@@ -317,6 +330,15 @@ const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
       }
     }
   });
+  
+  // Add accessibility attributes to the SVG element
+  const musclesList = [primaryMuscle, secondaryMuscles].filter(Boolean).join(', ');
+  const ariaLabel = musclesList ? `Muscle diagram highlighting ${musclesList}` : 'Muscle diagram';
+  
+  modifiedSvg = modifiedSvg.replace(
+    /<svg/,
+    `<svg role="img" aria-label="${ariaLabel.replace(/"/g, '&quot;')}"`
+  );
   
   return modifiedSvg;
 };

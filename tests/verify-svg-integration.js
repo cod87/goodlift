@@ -72,10 +72,19 @@ const __dirname = path.dirname(__filename);
   assert(svgContent.includes('cls-primary'), 'Contains cls-primary style');
   console.log('');
 
-  // Test 4: Contrast updates from PR #383
-  console.log('Test 4: PR #383 contrast updates');
-  assert(svgContent.includes('#808080'), 'Contains new contrast color #808080');
+  // Test 4: Modern color scheme updates
+  console.log('Test 4: Modern color scheme updates');
+  assert(svgContent.includes('#3a3a3a'), 'Contains new non-targeted muscle color #3a3a3a');
+  assert(svgContent.includes('#ce1034'), 'Contains primary muscle color #ce1034 (rich cherry red)');
+  assert(svgContent.includes('#ec5998'), 'Contains secondary muscle color #ec5998 (vivid pink)');
   assert(svgContent.includes('opacity: 0.5'), 'Contains new opacity value 0.5');
+  console.log('');
+
+  // Test 4b: Accessibility attributes
+  console.log('Test 4b: Accessibility attributes');
+  assert(svgContent.includes('role="img"'), 'Contains role="img" for screen readers');
+  assert(svgContent.includes('aria-label='), 'Contains aria-label attribute');
+  assert(svgContent.includes('Muscle diagram'), 'Contains descriptive aria-label text');
   console.log('');
 
   // Test 5: Different muscles generate different SVGs

@@ -1399,8 +1399,8 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                 )}
               </Box>
               
-              {/* Muscle Highlight SVG - ALWAYS show for exercises with muscle data */}
-              {primaryMuscle && primaryMuscle.trim() && (
+              {/* Muscle Highlight SVG - Only show as fallback when no webp demo image exists */}
+              {primaryMuscle && primaryMuscle.trim() && !demoImageSrc?.includes('.webp') && (
                 <Box 
                   sx={{ 
                     display: 'flex',

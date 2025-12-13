@@ -56,6 +56,14 @@ const WorkoutExerciseCard = memo(({
   const webpFile = exercise?.['Webp File'];
   const supersetGroup = exercise?.supersetGroup;
   
+  // Debug logging for investigation (can be removed once SVG rendering is verified)
+  // console.log('[WorkoutExerciseCard] Exercise data:', {
+  //   exerciseName,
+  //   primaryMuscle,
+  //   secondaryMuscles,
+  //   webpFile
+  // });
+  
   // Get image path using utility (supports webp files and custom muscle SVGs)
   const imagePath = getDemoImagePath(
     exerciseName, 
@@ -64,6 +72,12 @@ const WorkoutExerciseCard = memo(({
     primaryMuscle,
     secondaryMuscles
   );
+  
+  // console.log('[WorkoutExerciseCard] getDemoImagePath returned:', {
+  //   imagePath: imagePath?.substring(0, 100),
+  //   isSvgDataUrl: imagePath ? isSvgDataUrl(imagePath) : false,
+  //   length: imagePath?.length
+  // });
 
   const supersetColor = getSupersetColor(supersetGroup);
 

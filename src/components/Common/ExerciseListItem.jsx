@@ -30,6 +30,14 @@ const ExerciseListItem = memo(({
   const webpFile = exercise?.['Webp File'];
   const equipment = exercise?.['Equipment'] || '';
   
+  // Debug logging for investigation (can be removed once SVG rendering is verified)
+  // console.log('[ExerciseListItem] Exercise data:', {
+  //   exerciseName,
+  //   primaryMuscle,
+  //   secondaryMuscles,
+  //   webpFile
+  // });
+  
   // Get image path using utility (supports webp files and custom muscle SVGs)
   const imagePath = getDemoImagePath(
     exerciseName,
@@ -38,6 +46,12 @@ const ExerciseListItem = memo(({
     primaryMuscle,
     secondaryMuscles
   );
+  
+  // console.log('[ExerciseListItem] getDemoImagePath returned:', {
+  //   imagePath: imagePath?.substring(0, 100),
+  //   isSvgDataUrl: imagePath ? isSvgDataUrl(imagePath) : false,
+  //   length: imagePath?.length
+  // });
 
   const handleClick = () => {
     if (!disabled && onClick) {

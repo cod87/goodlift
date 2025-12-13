@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import ExerciseInputs from './ExerciseInputs';
 import { usePreferences } from '../../contexts/PreferencesContext';
+import { getDemoImagePath } from '../../utils/exerciseDemoImages';
 import { isSvgDataUrl, extractSvgFromDataUrl } from '../../utils/muscleHighlightSvg';
 
 /**
@@ -76,6 +77,10 @@ const ExerciseCard = memo(({
   onExit = null,
   showPartialComplete = false,
   equipment = null, // Equipment type (e.g., 'Barbell', 'Dumbbell')
+  // Muscle data for SVG generation
+  primaryMuscle = null,
+  secondaryMuscles = null,
+  webpFile = null,
 }) => {
   const theme = useTheme();
   const { preferences } = usePreferences();
@@ -98,26 +103,21 @@ const ExerciseCard = memo(({
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
-  // Check if the provided demoImage is a real demo image (webp or custom muscle SVG)
-  const hasValidDemoImage = (imagePath) => {
-    if (!imagePath) return false;
-    // Accept webp images, data URLs (custom muscle SVGs), and anything that's not the work-icon
-    if (imagePath.startsWith('data:image/svg')) return true; // Custom muscle SVG
-    if (imagePath.includes('.webp')) return true; // Webp demo image
-    // If the image path contains 'work-icon.svg', it's a fallback, not an actual demo
-    return !imagePath.includes('work-icon.svg');
-  };
+  // Get image path using utility (supports webp files and custom muscle SVGs)
+  // This matches the logic in WorkoutExerciseCard for consistent SVG generation
+  const imagePath = getDemoImagePath(
+    exerciseName,
+    true,
+    webpFile,
+    primaryMuscle,
+    secondaryMuscles
+  );
 
-  // Update image source when demoImage prop changes
-  // Only use demoImage if it's a valid demo image, not the fallback
+  // Update image source when exercise changes
   useEffect(() => {
-    if (hasValidDemoImage(demoImage)) {
-      setImageSrc(demoImage);
-    } else {
-      setImageSrc(null);
-    }
+    setImageSrc(imagePath);
     setImageError(false);
-  }, [demoImage]);
+  }, [imagePath]);
 
   const handleImageError = () => {
     if (!imageError) {
@@ -867,6 +867,9 @@ ExerciseCard.propTypes = {
   onExit: PropTypes.func,
   showPartialComplete: PropTypes.bool,
   equipment: PropTypes.string,
+  primaryMuscle: PropTypes.string,
+  secondaryMuscles: PropTypes.string,
+  webpFile: PropTypes.string,
 };
 
 export default ExerciseCard;

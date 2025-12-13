@@ -1400,7 +1400,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
               </Box>
               
               {/* Muscle Highlight SVG - Only show as fallback when no webp demo image exists */}
-              {primaryMuscle && primaryMuscle.trim() && !demoImageSrc?.includes('.webp') && (
+              {primaryMuscle && primaryMuscle.trim() && (!demoImageSrc || (!demoImageSrc.includes('.webp') && !isSvgDataUrl(demoImageSrc))) && (
                 <Box 
                   sx={{ 
                     display: 'flex',

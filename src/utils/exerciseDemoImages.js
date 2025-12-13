@@ -42,6 +42,7 @@ export const getDemoImagePath = (exercise) => {
  * Legacy function signature for backward compatibility
  * @deprecated Use getDemoImagePath(exercise) instead
  */
+// eslint-disable-next-line no-unused-vars
 export const getDemoImagePathLegacy = (exerciseName, usePlaceholder = true, webpFile = null, primaryMuscle = null, secondaryMuscles = null) => {
   console.warn('getDemoImagePathLegacy is deprecated. Use exercise.image field directly.');
   return null;

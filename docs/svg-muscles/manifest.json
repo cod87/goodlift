@@ -1,0 +1,723 @@
+[
+  {
+    "exerciseName": "Archer Push-Up",
+    "filename": "archer-push-up.svg",
+    "primaryMuscle": "Chest",
+    "secondaryMuscles": "Lats, Triceps",
+    "normalizedName": "archer-push-up"
+  },
+  {
+    "exerciseName": "Arnold Press, Dumbbell",
+    "filename": "dumbbell-arnold-press.svg",
+    "primaryMuscle": "Delts",
+    "secondaryMuscles": "Triceps, Chest",
+    "normalizedName": "dumbbell-arnold-press"
+  },
+  {
+    "exerciseName": "Back Lever",
+    "filename": "back-lever.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Back, Shoulders",
+    "normalizedName": "back-lever"
+  },
+  {
+    "exerciseName": "Bear Crawl",
+    "filename": "bear-crawl.svg",
+    "primaryMuscle": "Shoulders",
+    "secondaryMuscles": "Triceps, Core, Quads",
+    "normalizedName": "bear-crawl"
+  },
+  {
+    "exerciseName": "Belt Squat, Barbell",
+    "filename": "barbell-belt-squat.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings, Core",
+    "normalizedName": "barbell-belt-squat"
+  },
+  {
+    "exerciseName": "Bench Dip",
+    "filename": "bench-dip.svg",
+    "primaryMuscle": "Triceps",
+    "secondaryMuscles": "Chest, Front Delts",
+    "normalizedName": "bench-dip"
+  },
+  {
+    "exerciseName": "Bicep Curl, Dumbbell",
+    "filename": "dumbbell-bicep-curl.svg",
+    "primaryMuscle": "Biceps",
+    "secondaryMuscles": "Front Delts, Forearms",
+    "normalizedName": "dumbbell-bicep-curl"
+  },
+  {
+    "exerciseName": "Bicycle Crunch",
+    "filename": "bicycle-crunch.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Obliques, Hip Flexors",
+    "normalizedName": "bicycle-crunch"
+  },
+  {
+    "exerciseName": "Bird Dog",
+    "filename": "bird-dog.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Glutes, Lower Back",
+    "normalizedName": "bird-dog"
+  },
+  {
+    "exerciseName": "Box Jump",
+    "filename": "box-jump.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Calves",
+    "normalizedName": "box-jump"
+  },
+  {
+    "exerciseName": "Box Squat, Barbell",
+    "filename": "barbell-box-squat.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings, Core",
+    "normalizedName": "barbell-box-squat"
+  },
+  {
+    "exerciseName": "Burpee to Box Jump",
+    "filename": "burpee-to-box-jump.svg",
+    "primaryMuscle": "Full Body",
+    "secondaryMuscles": "All",
+    "normalizedName": "burpee-to-box-jump"
+  },
+  {
+    "exerciseName": "Butt Kicks",
+    "filename": "butt-kicks.svg",
+    "primaryMuscle": "Hamstrings",
+    "secondaryMuscles": "Glutes, Core",
+    "normalizedName": "butt-kicks"
+  },
+  {
+    "exerciseName": "Calf Raise",
+    "filename": "calf-raise.svg",
+    "primaryMuscle": "Calves",
+    "secondaryMuscles": "Core",
+    "normalizedName": "calf-raise"
+  },
+  {
+    "exerciseName": "Chest Throw, Slam Ball",
+    "filename": "slam-ball-chest-throw.svg",
+    "primaryMuscle": "Chest",
+    "secondaryMuscles": "Triceps, Delts",
+    "normalizedName": "slam-ball-chest-throw"
+  },
+  {
+    "exerciseName": "Chin-Up",
+    "filename": "chin-up.svg",
+    "primaryMuscle": "Biceps",
+    "secondaryMuscles": "Lats, Core, Delts",
+    "normalizedName": "chin-up"
+  },
+  {
+    "exerciseName": "Clean, Barbell",
+    "filename": "barbell-clean.svg",
+    "primaryMuscle": "Hamstrings",
+    "secondaryMuscles": "Glutes, Delts, Core, Traps",
+    "normalizedName": "barbell-clean"
+  },
+  {
+    "exerciseName": "Clean, Kettlebell",
+    "filename": "kettlebell-clean.svg",
+    "primaryMuscle": "Hamstrings",
+    "secondaryMuscles": "Glutes, Delts, Core",
+    "normalizedName": "kettlebell-clean"
+  },
+  {
+    "exerciseName": "Climb, Rope",
+    "filename": "rope-climb.svg",
+    "primaryMuscle": "Lats",
+    "secondaryMuscles": "Grip, Core, Hamstrings",
+    "normalizedName": "rope-climb"
+  },
+  {
+    "exerciseName": "Crab Walk",
+    "filename": "crab-walk.svg",
+    "primaryMuscle": "Triceps",
+    "secondaryMuscles": "Shoulders, Core, Glutes",
+    "normalizedName": "crab-walk"
+  },
+  {
+    "exerciseName": "Crunch",
+    "filename": "crunch.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Hip Flexors",
+    "normalizedName": "crunch"
+  },
+  {
+    "exerciseName": "Dead Bug",
+    "filename": "dead-bug.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Hip Flexors",
+    "normalizedName": "dead-bug"
+  },
+  {
+    "exerciseName": "Deadlift, Landmine",
+    "filename": "landmine-deadlift.svg",
+    "primaryMuscle": "Hamstrings",
+    "secondaryMuscles": "Glutes, Lower Back, Quads",
+    "normalizedName": "landmine-deadlift"
+  },
+  {
+    "exerciseName": "Decline Push-Up",
+    "filename": "decline-push-up.svg",
+    "primaryMuscle": "Chest",
+    "secondaryMuscles": "Front Delts, Triceps",
+    "normalizedName": "decline-push-up"
+  },
+  {
+    "exerciseName": "Diamond Push-Up",
+    "filename": "diamond-push-up.svg",
+    "primaryMuscle": "Triceps",
+    "secondaryMuscles": "Chest, Front Delts",
+    "normalizedName": "diamond-push-up"
+  },
+  {
+    "exerciseName": "Dip",
+    "filename": "dip.svg",
+    "primaryMuscle": "Triceps",
+    "secondaryMuscles": "Chest, Front Delts",
+    "normalizedName": "dip"
+  },
+  {
+    "exerciseName": "Dragon Flag",
+    "filename": "dragon-flag.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Chest, Shoulders",
+    "normalizedName": "dragon-flag"
+  },
+  {
+    "exerciseName": "Farmer Carry, Dumbbell",
+    "filename": "dumbbell-farmer-carry.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Traps, Forearms",
+    "normalizedName": "dumbbell-farmer-carry"
+  },
+  {
+    "exerciseName": "Flutter Kicks",
+    "filename": "flutter-kicks.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Hip Flexors",
+    "normalizedName": "flutter-kicks"
+  },
+  {
+    "exerciseName": "Front Lever",
+    "filename": "front-lever.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Chest, Shoulders, Lats",
+    "normalizedName": "front-lever"
+  },
+  {
+    "exerciseName": "Glute Bridge",
+    "filename": "glute-bridge.svg",
+    "primaryMuscle": "Glutes",
+    "secondaryMuscles": "Hamstrings, Core",
+    "normalizedName": "glute-bridge"
+  },
+  {
+    "exerciseName": "Goblet Squat, Kettlebell",
+    "filename": "kettlebell-goblet-squat.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Core",
+    "normalizedName": "kettlebell-goblet-squat"
+  },
+  {
+    "exerciseName": "Hack Squat, Barbell",
+    "filename": "barbell-hack-squat.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings",
+    "normalizedName": "barbell-hack-squat"
+  },
+  {
+    "exerciseName": "Handstand Hold",
+    "filename": "handstand-hold.svg",
+    "primaryMuscle": "Shoulders",
+    "secondaryMuscles": "Core, Chest, Triceps",
+    "normalizedName": "handstand-hold"
+  },
+  {
+    "exerciseName": "Handstand Push-Up",
+    "filename": "handstand-push-up.svg",
+    "primaryMuscle": "Delts",
+    "secondaryMuscles": "Triceps, Core, Chest",
+    "normalizedName": "handstand-push-up"
+  },
+  {
+    "exerciseName": "Hanging Knee Raise",
+    "filename": "hanging-knee-raise.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Hip Flexors, Chest",
+    "normalizedName": "hanging-knee-raise"
+  },
+  {
+    "exerciseName": "High Knees",
+    "filename": "high-knees.svg",
+    "primaryMuscle": "Hip Flexors",
+    "secondaryMuscles": "Quads, Core, Glutes",
+    "normalizedName": "high-knees"
+  },
+  {
+    "exerciseName": "High Pull, Barbell",
+    "filename": "barbell-high-pull.svg",
+    "primaryMuscle": "Traps",
+    "secondaryMuscles": "Delts, Hamstrings",
+    "normalizedName": "barbell-high-pull"
+  },
+  {
+    "exerciseName": "Hollow Body Hold",
+    "filename": "hollow-body-hold.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Shoulders, Back",
+    "normalizedName": "hollow-body-hold"
+  },
+  {
+    "exerciseName": "Inchworm",
+    "filename": "inchworm.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Chest, Shoulders, Hamstrings",
+    "normalizedName": "inchworm"
+  },
+  {
+    "exerciseName": "Jump Lunge",
+    "filename": "jump-lunge.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings, Core",
+    "normalizedName": "jump-lunge"
+  },
+  {
+    "exerciseName": "Jumping Jacks",
+    "filename": "jumping-jacks.svg",
+    "primaryMuscle": "Glutes",
+    "secondaryMuscles": "Quads, Chest, Shoulders",
+    "normalizedName": "jumping-jacks"
+  },
+  {
+    "exerciseName": "Kickback, Dumbbell",
+    "filename": "dumbbell-kickback.svg",
+    "primaryMuscle": "Triceps",
+    "secondaryMuscles": "Shoulders",
+    "normalizedName": "dumbbell-kickback"
+  },
+  {
+    "exerciseName": "L-Sit",
+    "filename": "l-sit.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Shoulders, Triceps, Hip Flexors",
+    "normalizedName": "l-sit"
+  },
+  {
+    "exerciseName": "Lateral Bound",
+    "filename": "lateral-bound.svg",
+    "primaryMuscle": "Glutes",
+    "secondaryMuscles": "Adductors, Abductors, Core",
+    "normalizedName": "lateral-bound"
+  },
+  {
+    "exerciseName": "Lateral Lunge",
+    "filename": "lateral-lunge.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Adductors, Abductors, Glutes",
+    "normalizedName": "lateral-lunge"
+  },
+  {
+    "exerciseName": "Leg Raise",
+    "filename": "leg-raise.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Hip Flexors",
+    "normalizedName": "leg-raise"
+  },
+  {
+    "exerciseName": "Leopard Crawl",
+    "filename": "leopard-crawl.svg",
+    "primaryMuscle": "Shoulders",
+    "secondaryMuscles": "Triceps, Core",
+    "normalizedName": "leopard-crawl"
+  },
+  {
+    "exerciseName": "Mountain Climber",
+    "filename": "mountain-climber.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Shoulders, Hip Flexors, Quads",
+    "normalizedName": "mountain-climber"
+  },
+  {
+    "exerciseName": "Muscle-Up",
+    "filename": "muscle-up.svg",
+    "primaryMuscle": "Lats",
+    "secondaryMuscles": "Triceps, Core, Chest",
+    "normalizedName": "muscle-up"
+  },
+  {
+    "exerciseName": "Oblique Crunch",
+    "filename": "oblique-crunch.svg",
+    "primaryMuscle": "Obliques",
+    "secondaryMuscles": "Core",
+    "normalizedName": "oblique-crunch"
+  },
+  {
+    "exerciseName": "Overhead Press, Kettlebell",
+    "filename": "kettlebell-overhead-press.svg",
+    "primaryMuscle": "Delts",
+    "secondaryMuscles": "Triceps, Chest, Core",
+    "normalizedName": "kettlebell-overhead-press"
+  },
+  {
+    "exerciseName": "Overhead Tricep Extension, Dumbbell",
+    "filename": "dumbbell-overhead-tricep-extension.svg",
+    "primaryMuscle": "Triceps",
+    "secondaryMuscles": "Shoulders, Chest",
+    "normalizedName": "dumbbell-overhead-tricep-extension"
+  },
+  {
+    "exerciseName": "Pendlay Row, Dumbbell",
+    "filename": "dumbbell-pendlay-row.svg",
+    "primaryMuscle": "Lats",
+    "secondaryMuscles": "Biceps, Core",
+    "normalizedName": "dumbbell-pendlay-row"
+  },
+  {
+    "exerciseName": "Pendulum Squat, Barbell",
+    "filename": "barbell-pendulum-squat.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings",
+    "normalizedName": "barbell-pendulum-squat"
+  },
+  {
+    "exerciseName": "Pike Push-Up",
+    "filename": "pike-push-up.svg",
+    "primaryMuscle": "Delts",
+    "secondaryMuscles": "Triceps, Core, Chest",
+    "normalizedName": "pike-push-up"
+  },
+  {
+    "exerciseName": "Pistol Squat",
+    "filename": "pistol-squat.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Core, Hip Flexors",
+    "normalizedName": "pistol-squat"
+  },
+  {
+    "exerciseName": "Plank",
+    "filename": "plank.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Shoulders, Chest, Triceps",
+    "normalizedName": "plank"
+  },
+  {
+    "exerciseName": "Plank Jack",
+    "filename": "plank-jack.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Shoulders, Quads, Glutes",
+    "normalizedName": "plank-jack"
+  },
+  {
+    "exerciseName": "Plyometric Push-Up",
+    "filename": "plyometric-push-up.svg",
+    "primaryMuscle": "Chest",
+    "secondaryMuscles": "Triceps, Front Delts",
+    "normalizedName": "plyometric-push-up"
+  },
+  {
+    "exerciseName": "Pogo Hop",
+    "filename": "pogo-hop.svg",
+    "primaryMuscle": "Calves",
+    "secondaryMuscles": "Quads, Core",
+    "normalizedName": "pogo-hop"
+  },
+  {
+    "exerciseName": "Press, Landmine",
+    "filename": "landmine-press.svg",
+    "primaryMuscle": "Delts",
+    "secondaryMuscles": "Triceps, Chest, Core",
+    "normalizedName": "landmine-press"
+  },
+  {
+    "exerciseName": "Rainbow Crunches",
+    "filename": "rainbow-crunches.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Obliques",
+    "normalizedName": "rainbow-crunches"
+  },
+  {
+    "exerciseName": "Renegade Row, Dumbbell",
+    "filename": "dumbbell-renegade-row.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Lats, Triceps, Shoulders",
+    "normalizedName": "dumbbell-renegade-row"
+  },
+  {
+    "exerciseName": "Reverse Fly, Dumbbell",
+    "filename": "dumbbell-reverse-fly.svg",
+    "primaryMuscle": "Rear Delts",
+    "secondaryMuscles": "Upper Back",
+    "normalizedName": "dumbbell-reverse-fly"
+  },
+  {
+    "exerciseName": "Reverse Lunge",
+    "filename": "reverse-lunge.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings, Core",
+    "normalizedName": "reverse-lunge"
+  },
+  {
+    "exerciseName": "Reverse Lunge, Dumbbell",
+    "filename": "dumbbell-reverse-lunge.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings, Core",
+    "normalizedName": "dumbbell-reverse-lunge"
+  },
+  {
+    "exerciseName": "Rotation, Landmine",
+    "filename": "landmine-rotation.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Obliques, Shoulders",
+    "normalizedName": "landmine-rotation"
+  },
+  {
+    "exerciseName": "Rotational Slam, Slam Ball",
+    "filename": "slam-ball-rotational-slam.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Obliques, Delts, Hamstrings",
+    "normalizedName": "slam-ball-rotational-slam"
+  },
+  {
+    "exerciseName": "Row, Landmine",
+    "filename": "landmine-row.svg",
+    "primaryMuscle": "Lats",
+    "secondaryMuscles": "Biceps, Core",
+    "normalizedName": "landmine-row"
+  },
+  {
+    "exerciseName": "Russian Twist",
+    "filename": "russian-twist.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Obliques, Hip Flexors",
+    "normalizedName": "russian-twist"
+  },
+  {
+    "exerciseName": "Scissor Kicks",
+    "filename": "scissor-kicks.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Hip Flexors",
+    "normalizedName": "scissor-kicks"
+  },
+  {
+    "exerciseName": "Side Plank",
+    "filename": "side-plank.svg",
+    "primaryMuscle": "Obliques",
+    "secondaryMuscles": "Core, Shoulders",
+    "normalizedName": "side-plank"
+  },
+  {
+    "exerciseName": "Single-Arm Row, Kettlebell",
+    "filename": "kettlebell-single-arm-row.svg",
+    "primaryMuscle": "Lats",
+    "secondaryMuscles": "Biceps, Core, Obliques",
+    "normalizedName": "kettlebell-single-arm-row"
+  },
+  {
+    "exerciseName": "Single-Leg Deadlift, Dumbbell",
+    "filename": "dumbbell-single-leg-deadlift.svg",
+    "primaryMuscle": "Hamstrings",
+    "secondaryMuscles": "Glutes, Core, Balance",
+    "normalizedName": "dumbbell-single-leg-deadlift"
+  },
+  {
+    "exerciseName": "Single-Leg Glute Bridge",
+    "filename": "single-leg-glute-bridge.svg",
+    "primaryMuscle": "Glutes",
+    "secondaryMuscles": "Hamstrings, Core",
+    "normalizedName": "single-leg-glute-bridge"
+  },
+  {
+    "exerciseName": "Single-Leg Hop",
+    "filename": "single-leg-hop.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Calves, Core",
+    "normalizedName": "single-leg-hop"
+  },
+  {
+    "exerciseName": "Sit-Up",
+    "filename": "sit-up.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Hip Flexors",
+    "normalizedName": "sit-up"
+  },
+  {
+    "exerciseName": "Skater Hops",
+    "filename": "skater-hops.svg",
+    "primaryMuscle": "Glutes",
+    "secondaryMuscles": "Adductors, Abductors, Core",
+    "normalizedName": "skater-hops"
+  },
+  {
+    "exerciseName": "Skull Crusher, Cable",
+    "filename": "cable-skull-crusher.svg",
+    "primaryMuscle": "Triceps",
+    "secondaryMuscles": "Front Delts, Chest",
+    "normalizedName": "cable-skull-crusher"
+  },
+  {
+    "exerciseName": "Slam, Slam Ball",
+    "filename": "slam-ball-slam.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Delts, Hamstrings, Glutes",
+    "normalizedName": "slam-ball-slam"
+  },
+  {
+    "exerciseName": "Snatch, Barbell",
+    "filename": "barbell-snatch.svg",
+    "primaryMuscle": "Hamstrings",
+    "secondaryMuscles": "Glutes, Delts, Core, Traps",
+    "normalizedName": "barbell-snatch"
+  },
+  {
+    "exerciseName": "Snatch, Kettlebell",
+    "filename": "kettlebell-snatch.svg",
+    "primaryMuscle": "Hamstrings",
+    "secondaryMuscles": "Glutes, Delts, Core",
+    "normalizedName": "kettlebell-snatch"
+  },
+  {
+    "exerciseName": "Squat (High Bar), Barbell",
+    "filename": "barbell-squat-high-bar.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings, Core, Upper Back",
+    "normalizedName": "barbell-squat-high-bar"
+  },
+  {
+    "exerciseName": "Squat, Landmine",
+    "filename": "landmine-squat.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Core, Upper Back",
+    "normalizedName": "landmine-squat"
+  },
+  {
+    "exerciseName": "Squat, Slam Ball",
+    "filename": "slam-ball-squat.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Core",
+    "normalizedName": "slam-ball-squat"
+  },
+  {
+    "exerciseName": "Step-Up",
+    "filename": "step-up.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings",
+    "normalizedName": "step-up"
+  },
+  {
+    "exerciseName": "Step-Up, Dumbbell",
+    "filename": "dumbbell-step-up.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings",
+    "normalizedName": "dumbbell-step-up"
+  },
+  {
+    "exerciseName": "Suitcase Deadlift, Dumbbell",
+    "filename": "dumbbell-suitcase-deadlift.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Obliques, Lower Back, Glutes",
+    "normalizedName": "dumbbell-suitcase-deadlift"
+  },
+  {
+    "exerciseName": "Superman",
+    "filename": "superman.svg",
+    "primaryMuscle": "Erector Spinae",
+    "secondaryMuscles": "Glutes, Rear Delts",
+    "normalizedName": "superman"
+  },
+  {
+    "exerciseName": "Thruster, Barbell",
+    "filename": "barbell-thruster.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Delts, Triceps, Core",
+    "normalizedName": "barbell-thruster"
+  },
+  {
+    "exerciseName": "Thruster, Dumbbell",
+    "filename": "dumbbell-thruster.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Delts, Triceps, Core",
+    "normalizedName": "dumbbell-thruster"
+  },
+  {
+    "exerciseName": "Thruster, Kettlebell",
+    "filename": "kettlebell-thruster.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Delts, Triceps, Core",
+    "normalizedName": "kettlebell-thruster"
+  },
+  {
+    "exerciseName": "Tricep Extension, Cable",
+    "filename": "cable-tricep-extension.svg",
+    "primaryMuscle": "Triceps",
+    "secondaryMuscles": "Front Delts, Chest",
+    "normalizedName": "cable-tricep-extension"
+  },
+  {
+    "exerciseName": "Tricep Extension, Rope",
+    "filename": "rope-tricep-extension.svg",
+    "primaryMuscle": "Triceps",
+    "secondaryMuscles": "Chest, Front Delts",
+    "normalizedName": "rope-tricep-extension"
+  },
+  {
+    "exerciseName": "Tuck Jump",
+    "filename": "tuck-jump.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hip Flexors, Calves",
+    "normalizedName": "tuck-jump"
+  },
+  {
+    "exerciseName": "Turkish Get-Up, Kettlebell",
+    "filename": "kettlebell-turkish-get-up.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Shoulders, Chest, Triceps, Glutes",
+    "normalizedName": "kettlebell-turkish-get-up"
+  },
+  {
+    "exerciseName": "V-Bar Pulldown",
+    "filename": "v-bar-pulldown.svg",
+    "primaryMuscle": "Lats",
+    "secondaryMuscles": "Traps, Rhomboids, Biceps, Rear Delts",
+    "normalizedName": "v-bar-pulldown"
+  },
+  {
+    "exerciseName": "V-Bar Seated Cable Row",
+    "filename": "v-bar-seated-cable-row.svg",
+    "primaryMuscle": "Lats",
+    "secondaryMuscles": "Traps, Rhomboids, Biceps, Rear Delts",
+    "normalizedName": "v-bar-seated-cable-row"
+  },
+  {
+    "exerciseName": "V-Up",
+    "filename": "v-up.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Hip Flexors, Chest",
+    "normalizedName": "v-up"
+  },
+  {
+    "exerciseName": "Walking Lunge",
+    "filename": "walking-lunge.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings, Core",
+    "normalizedName": "walking-lunge"
+  },
+  {
+    "exerciseName": "Walking Lunge, Dumbbell",
+    "filename": "dumbbell-walking-lunge.svg",
+    "primaryMuscle": "Quads",
+    "secondaryMuscles": "Glutes, Hamstrings, Core",
+    "normalizedName": "dumbbell-walking-lunge"
+  },
+  {
+    "exerciseName": "Woodchopper",
+    "filename": "woodchopper.svg",
+    "primaryMuscle": "Core",
+    "secondaryMuscles": "Obliques, Delts",
+    "normalizedName": "woodchopper"
+  }
+]

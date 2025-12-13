@@ -17,6 +17,7 @@ import SettingsScreen from './pages/SettingsScreen';
 import UserProfileScreen from './pages/UserProfileScreen';
 import EditWeeklyScheduleScreen from './pages/EditWeeklyScheduleScreen';
 import ExerciseCardDemo from './pages/ExerciseCardDemo';
+import SVGVerification from './pages/SVGVerification';
 import GuestDataMigrationDialog from './components/GuestDataMigrationDialog';
 import AchievementUnlockedDialog from './components/AchievementUnlockedDialog';
 import { useWorkoutGenerator } from './hooks/useWorkoutGenerator';
@@ -720,6 +721,8 @@ function AppContent() {
           {currentScreen === 'edit-weekly-schedule' && <EditWeeklyScheduleScreen onNavigate={handleNavigate} />}
           
           {currentScreen === 'exercise-card-demo' && <ExerciseCardDemo />}
+          
+          {currentScreen === 'svg-verification' && <SVGVerification />}
         </div>
         
         {/* Bottom Navigation - Always visible */}

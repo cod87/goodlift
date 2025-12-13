@@ -145,6 +145,12 @@ const getFallbackImage = (usePlaceholder, primaryMuscle, secondaryMuscles) => {
  * Gets the demo image path for a given exercise name or webp file
  * Returns a custom muscle highlight SVG if no matching image is found
  * 
+ * Priority order for demo images:
+ * 1. Explicit webpFile parameter (from exercise's "Webp File" property)
+ * 2. Exact name match from AVAILABLE_DEMO_IMAGES
+ * 3. Known variations (e.g., equipment prefix order differences)
+ * 4. Fallback to custom muscle highlight SVG (NOT fuzzy match to avoid incorrect demos)
+ * 
  * @param {string} exerciseName - The exercise name to find an image for
  * @param {boolean} usePlaceholder - Whether to return placeholder if no match (default: true)
  * @param {string} webpFile - Optional webp filename from exercise data (e.g., 'back-squat.webp')
@@ -153,7 +159,8 @@ const getFallbackImage = (usePlaceholder, primaryMuscle, secondaryMuscles) => {
  * @returns {string|null} Path to the demo image, custom SVG data URL, placeholder, or null
  */
 export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile = null, primaryMuscle = null, secondaryMuscles = null) => {
-  // If webpFile is explicitly provided, validate and use it directly
+  // PRIORITY 1: If webpFile is explicitly provided, validate and use it directly
+  // This takes highest priority as it's explicitly defined in the exercise data
   if (webpFile) {
     // Basic validation: only allow safe filenames (alphanumeric, hyphens, and .webp extension)
     // This prevents path traversal attacks (e.g., '../../../sensitive-file')
@@ -170,12 +177,12 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
   
   const normalized = normalizeExerciseName(exerciseName);
   
-  // Check if we have an exact match
+  // PRIORITY 2: Check if we have an exact match
   if (AVAILABLE_DEMO_IMAGES.includes(normalized)) {
     return `${getBaseUrl()}demos/${normalized}.webp`;
   }
   
-  // Check for common variations/aliases
+  // PRIORITY 3: Check for common variations/aliases (known, safe transformations)
   const variations = getExerciseVariations(normalized);
   for (const variation of variations) {
     if (AVAILABLE_DEMO_IMAGES.includes(variation)) {
@@ -183,23 +190,34 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
     }
   }
   
-  // Try fuzzy matching as a last resort
-  const fuzzyMatch = findFuzzyMatch(normalized);
-  if (fuzzyMatch) {
-    return `${getBaseUrl()}demos/${fuzzyMatch}.webp`;
-  }
+  // PRIORITY 4: Fuzzy matching is DISABLED to prevent incorrect demo images
+  // Showing the wrong exercise demo is worse than showing a muscle SVG
+  // which accurately represents the muscles worked by the exercise.
+  // const fuzzyMatch = findFuzzyMatch(normalized);
+  // if (fuzzyMatch) {
+  //   return `${getBaseUrl()}demos/${fuzzyMatch}.webp`;
+  // }
   
-  // No webp image found, return fallback
+  // PRIORITY 5: No webp image found, return fallback (muscle SVG or work icon)
+  // The muscle SVG provides accurate visual representation of which muscles
+  // are targeted by the exercise, which is more useful than a wrong demo.
   return getFallbackImage(usePlaceholder, primaryMuscle, secondaryMuscles);
 };
 
 /**
- * Find a fuzzy match for an exercise name
- * Uses word-based matching with scoring to find the best matching demo image
+ * DISABLED: Fuzzy matching for exercise names
+ * 
+ * This function is intentionally disabled to prevent incorrect demo image matches.
+ * Showing the wrong exercise demo is worse than showing a muscle SVG that accurately
+ * represents the muscles worked by the exercise.
+ * 
+ * Kept here for reference and potential future use if the matching logic is improved
+ * to be more conservative and accurate.
  * 
  * @param {string} normalized - Normalized exercise name
  * @returns {string|null} Best matching image filename or null
  */
+// eslint-disable-next-line no-unused-vars
 const findFuzzyMatch = (normalized) => {
   const words = normalized.split('-').filter(w => w.length > 2);
   if (words.length === 0) return null;

@@ -134,10 +134,13 @@ const getFallbackImage = (usePlaceholder, primaryMuscle, secondaryMuscles) => {
   
   // If we have muscle data, generate custom SVG highlighting those muscles
   if (primaryMuscle) {
-    return getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
+    const svgUrl = getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
+    console.log('[getFallbackImage] Generating SVG for primaryMuscle:', primaryMuscle, 'secondary:', secondaryMuscles, 'result length:', svgUrl?.length);
+    return svgUrl;
   }
   
   // Otherwise use the generic work icon
+  console.log('[getFallbackImage] No primaryMuscle, returning work-icon');
   return `${getBaseUrl()}work-icon.svg`;
 };
 
@@ -172,7 +175,9 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
   }
   
   if (!exerciseName) {
-    return getFallbackImage(usePlaceholder, primaryMuscle, secondaryMuscles);
+    const fallback = getFallbackImage(usePlaceholder, primaryMuscle, secondaryMuscles);
+    console.log('[getDemoImagePath] No exercise name, returning fallback:', fallback?.substring(0, 50));
+    return fallback;
   }
   
   const normalized = normalizeExerciseName(exerciseName);
@@ -194,7 +199,9 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
   // Fuzzy matching is intentionally disabled to prevent incorrect demo image matches.
   // The muscle SVG provides accurate visual representation of which muscles
   // are targeted by the exercise, which is more useful than showing the wrong demo.
-  return getFallbackImage(usePlaceholder, primaryMuscle, secondaryMuscles);
+  const fallback = getFallbackImage(usePlaceholder, primaryMuscle, secondaryMuscles);
+  console.log('[getDemoImagePath] No webp for "' + exerciseName + '", primaryMuscle:', primaryMuscle, 'fallback type:', fallback?.startsWith('data:image/svg') ? 'SVG' : fallback?.includes('work-icon') ? 'work-icon' : 'other');
+  return fallback;
 };
 
 /**

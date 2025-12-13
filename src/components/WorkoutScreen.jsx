@@ -480,6 +480,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   // Update demo image when exercise changes
   useEffect(() => {
     if (exerciseName) {
+      console.log('[WorkoutScreen] Exercise changed:', exerciseName, 'webpFile:', webpFile, 'primaryMuscle:', primaryMuscle);
       // Use getDemoImagePath utility which supports webp files and custom muscle SVGs
       const imagePath = getDemoImagePath(
         exerciseName,
@@ -489,6 +490,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
         secondaryMuscles
       );
       
+      console.log('[WorkoutScreen] getDemoImagePath returned:', imagePath?.substring(0, 100));
       setDemoImageSrc(imagePath);
       setImageError(false);
     }

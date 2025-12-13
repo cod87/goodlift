@@ -6,7 +6,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "archer-push-up.svg"
   },
   {
     "Exercise Name": "Arnold Press, Dumbbell",
@@ -15,7 +16,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-arnold-press.svg"
   },
   {
     "Exercise Name": "Back Lever",
@@ -24,7 +26,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "back-lever.svg"
   },
   {
     "Exercise Name": "Back Squat",
@@ -43,7 +46,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "bear-crawl.svg"
   },
   {
     "Exercise Name": "Belt Squat, Barbell",
@@ -52,7 +56,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-belt-squat.svg"
   },
   {
     "Exercise Name": "Bench Dip",
@@ -61,7 +66,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "bench-dip.svg"
   },
   {
     "Exercise Name": "Bench Press, Barbell",
@@ -120,7 +126,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-bicep-curl.svg"
   },
   {
     "Exercise Name": "Bicycle Crunch",
@@ -129,7 +136,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "bicycle-crunch.svg"
   },
   {
     "Exercise Name": "Bird Dog",
@@ -138,7 +146,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "bird-dog.svg"
   },
   {
     "Exercise Name": "Box Jump",
@@ -147,7 +156,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "box-jump.svg"
   },
   {
     "Exercise Name": "Box Squat, Barbell",
@@ -156,7 +166,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-box-squat.svg"
   },
   {
     "Exercise Name": "Bulgarian Split Squat",
@@ -165,7 +176,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "bulgarian-split-squat.svg"
   },
   {
     "Exercise Name": "Bulgarian Split Squat, Dumbbell",
@@ -174,7 +186,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-bulgarian-split-squat.svg"
   },
   {
     "Exercise Name": "Burpee",
@@ -193,7 +206,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "burpee-to-box-jump.svg"
   },
   {
     "Exercise Name": "Butt Kicks",
@@ -202,7 +216,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "butt-kicks.svg"
   },
   {
     "Exercise Name": "Calf Raise",
@@ -211,7 +226,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "calf-raise.svg"
   },
   {
     "Exercise Name": "Chest Throw, Slam Ball",
@@ -220,7 +236,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
     "Workout Type": "Upper Body Strength, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "slam-ball-chest-throw.svg"
   },
   {
     "Exercise Name": "Chin-Up",
@@ -229,7 +246,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "chin-up.svg"
   },
   {
     "Exercise Name": "Clean, Barbell",
@@ -238,7 +256,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Full Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-clean.svg"
   },
   {
     "Exercise Name": "Clean, Kettlebell",
@@ -247,7 +266,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Full Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "kettlebell-clean.svg"
   },
   {
     "Exercise Name": "Climb, Rope",
@@ -256,7 +276,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "rope-climb.svg"
   },
   {
     "Exercise Name": "Close Grip Bench Press, Barbell",
@@ -265,7 +286,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-close-grip-bench-press.svg"
   },
   {
     "Exercise Name": "Close Grip Lat Pulldown",
@@ -274,7 +296,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "close-grip-lat-pulldown.svg"
   },
   {
     "Exercise Name": "Crab Walk",
@@ -283,7 +306,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength, HIIT",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "crab-walk.svg"
   },
   {
     "Exercise Name": "Crunch",
@@ -292,7 +316,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "crunch.svg"
   },
   {
     "Exercise Name": "Dead Bug",
@@ -301,7 +326,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dead-bug.svg"
   },
   {
     "Exercise Name": "Deadlift, Barbell",
@@ -330,7 +356,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "landmine-deadlift.svg"
   },
   {
     "Exercise Name": "Decline Bench Press, Barbell",
@@ -339,7 +366,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-decline-bench-press.svg"
   },
   {
     "Exercise Name": "Decline Bench Press, Dumbbell",
@@ -348,7 +376,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-decline-bench-press.svg"
   },
   {
     "Exercise Name": "Decline Push-Up",
@@ -357,7 +386,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "decline-push-up.svg"
   },
   {
     "Exercise Name": "Diamond Push-Up",
@@ -366,7 +396,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "diamond-push-up.svg"
   },
   {
     "Exercise Name": "Dip",
@@ -375,7 +406,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dip.svg"
   },
   {
     "Exercise Name": "Dragon Flag",
@@ -384,7 +416,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dragon-flag.svg"
   },
   {
     "Exercise Name": "Farmer Carry, Dumbbell",
@@ -393,7 +426,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-farmer-carry.svg"
   },
   {
     "Exercise Name": "Flutter Kicks",
@@ -402,7 +436,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "flutter-kicks.svg"
   },
   {
     "Exercise Name": "Fly, Dumbbell",
@@ -421,7 +456,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "front-lever.svg"
   },
   {
     "Exercise Name": "Front Raise, Dumbbell",
@@ -440,7 +476,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-front-squat.svg"
   },
   {
     "Exercise Name": "Front Squat, Dumbbell",
@@ -449,7 +486,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-front-squat.svg"
   },
   {
     "Exercise Name": "Front Squat, Kettlebell",
@@ -458,7 +496,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "kettlebell-front-squat.svg"
   },
   {
     "Exercise Name": "Glute Bridge",
@@ -467,7 +506,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "glute-bridge.svg"
   },
   {
     "Exercise Name": "Goblet Squat, Dumbbell",
@@ -486,7 +526,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "kettlebell-goblet-squat.svg"
   },
   {
     "Exercise Name": "Good Morning, Barbell",
@@ -495,7 +536,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-good-morning.svg"
   },
   {
     "Exercise Name": "Hack Squat, Barbell",
@@ -504,7 +546,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-hack-squat.svg"
   },
   {
     "Exercise Name": "Hammer Curl, Dumbbell",
@@ -513,7 +556,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-hammer-curl.svg"
   },
   {
     "Exercise Name": "Handstand Hold",
@@ -522,7 +566,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "handstand-hold.svg"
   },
   {
     "Exercise Name": "Handstand Push-Up",
@@ -531,7 +576,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "handstand-push-up.svg"
   },
   {
     "Exercise Name": "Hanging Knee Raise",
@@ -540,7 +586,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "hanging-knee-raise.svg"
   },
   {
     "Exercise Name": "High Knees",
@@ -549,7 +596,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "high-knees.svg"
   },
   {
     "Exercise Name": "High Pull, Barbell",
@@ -558,7 +606,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Cardio, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "barbell-high-pull.svg"
   },
   {
     "Exercise Name": "Hollow Body Hold",
@@ -567,7 +616,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "hollow-body-hold.svg"
   },
   {
     "Exercise Name": "Inchworm",
@@ -576,7 +626,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "inchworm.svg"
   },
   {
     "Exercise Name": "Incline Bench Press, Barbell",
@@ -585,7 +636,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-incline-bench-press.svg"
   },
   {
     "Exercise Name": "Incline Bench Press, Dumbbell",
@@ -594,7 +646,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-incline-bench-press.svg"
   },
   {
     "Exercise Name": "Incline Curl, Dumbbell",
@@ -603,7 +656,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-incline-curl.svg"
   },
   {
     "Exercise Name": "Jump Lunge",
@@ -612,7 +666,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "jump-lunge.svg"
   },
   {
     "Exercise Name": "Jump Squat",
@@ -631,7 +686,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "dumbbell-jump-squat.svg"
   },
   {
     "Exercise Name": "Jumping Jacks",
@@ -640,7 +696,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "jumping-jacks.svg"
   },
   {
     "Exercise Name": "Kickback, Dumbbell",
@@ -649,7 +706,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-kickback.svg"
   },
   {
     "Exercise Name": "L-Sit",
@@ -658,7 +716,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "l-sit.svg"
   },
   {
     "Exercise Name": "Lat Pulldown",
@@ -677,7 +736,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "lateral-bound.svg"
   },
   {
     "Exercise Name": "Lateral Lunge",
@@ -686,7 +746,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "lateral-lunge.svg"
   },
   {
     "Exercise Name": "Lateral Raise, Dumbbell",
@@ -705,7 +766,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "leg-raise.svg"
   },
   {
     "Exercise Name": "Leopard Crawl",
@@ -714,7 +776,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "leopard-crawl.svg"
   },
   {
     "Exercise Name": "Lunge",
@@ -733,7 +796,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-lunge.svg"
   },
   {
     "Exercise Name": "Lunge, Kettlebell",
@@ -742,7 +806,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "kettlebell-lunge.svg"
   },
   {
     "Exercise Name": "Mountain Climber",
@@ -751,7 +816,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "mountain-climber.svg"
   },
   {
     "Exercise Name": "Muscle-Up",
@@ -760,7 +826,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "muscle-up.svg"
   },
   {
     "Exercise Name": "Oblique Crunch",
@@ -769,7 +836,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "oblique-crunch.svg"
   },
   {
     "Exercise Name": "Overhead Press, Barbell",
@@ -788,7 +856,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "kettlebell-overhead-press.svg"
   },
   {
     "Exercise Name": "Overhead Tricep Extension, Dumbbell",
@@ -797,7 +866,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-overhead-tricep-extension.svg"
   },
   {
     "Exercise Name": "Paused Bench Press, Barbell",
@@ -816,7 +886,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-pendlay-row.svg"
   },
   {
     "Exercise Name": "Pendulum Squat, Barbell",
@@ -825,7 +896,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-pendulum-squat.svg"
   },
   {
     "Exercise Name": "Pike Push-Up",
@@ -834,7 +906,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "pike-push-up.svg"
   },
   {
     "Exercise Name": "Pistol Squat",
@@ -843,7 +916,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "pistol-squat.svg"
   },
   {
     "Exercise Name": "Plank",
@@ -852,7 +926,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "plank.svg"
   },
   {
     "Exercise Name": "Plank Jack",
@@ -861,7 +936,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core, HIIT",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "plank-jack.svg"
   },
   {
     "Exercise Name": "Plyometric Push-Up",
@@ -870,7 +946,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Upper Body Strength, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "plyometric-push-up.svg"
   },
   {
     "Exercise Name": "Pogo Hop",
@@ -879,7 +956,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "pogo-hop.svg"
   },
   {
     "Exercise Name": "Press, Landmine",
@@ -888,7 +966,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "landmine-press.svg"
   },
   {
     "Exercise Name": "Pull-Up",
@@ -907,7 +986,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "cable-pull-up.svg"
   },
   {
     "Exercise Name": "Pullover, Dumbbell",
@@ -946,7 +1026,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "rainbow-crunches.svg"
   },
   {
     "Exercise Name": "Renegade Row, Dumbbell",
@@ -955,7 +1036,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-renegade-row.svg"
   },
   {
     "Exercise Name": "Reverse Fly, Dumbbell",
@@ -964,7 +1046,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-reverse-fly.svg"
   },
   {
     "Exercise Name": "Reverse Lunge",
@@ -973,7 +1056,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "reverse-lunge.svg"
   },
   {
     "Exercise Name": "Reverse Lunge, Dumbbell",
@@ -982,7 +1066,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-reverse-lunge.svg"
   },
   {
     "Exercise Name": "Romanian Deadlift, Barbell",
@@ -1011,7 +1096,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "Workout Type": "Core, HIIT",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "landmine-rotation.svg"
   },
   {
     "Exercise Name": "Rotational Slam, Slam Ball",
@@ -1020,7 +1106,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
     "Workout Type": "Core, HIIT, Cardio",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "slam-ball-rotational-slam.svg"
   },
   {
     "Exercise Name": "Row, Landmine",
@@ -1029,7 +1116,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "landmine-row.svg"
   },
   {
     "Exercise Name": "Russian Twist",
@@ -1038,7 +1126,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "russian-twist.svg"
   },
   {
     "Exercise Name": "Scissor Kicks",
@@ -1047,7 +1136,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "scissor-kicks.svg"
   },
   {
     "Exercise Name": "Seated Cable Row",
@@ -1076,7 +1166,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-shrug.svg"
   },
   {
     "Exercise Name": "Side Plank",
@@ -1085,7 +1176,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "side-plank.svg"
   },
   {
     "Exercise Name": "Single-Arm Row, Dumbbell",
@@ -1094,7 +1186,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-single-arm-row.svg"
   },
   {
     "Exercise Name": "Single-Arm Row, Kettlebell",
@@ -1103,7 +1196,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "kettlebell-single-arm-row.svg"
   },
   {
     "Exercise Name": "Single-Arm Shoulder Press, Dumbbell",
@@ -1112,7 +1206,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-single-arm-shoulder-press.svg"
   },
   {
     "Exercise Name": "Single-Leg Deadlift, Dumbbell",
@@ -1121,7 +1216,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-single-leg-deadlift.svg"
   },
   {
     "Exercise Name": "Single-Leg Glute Bridge",
@@ -1130,7 +1226,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "single-leg-glute-bridge.svg"
   },
   {
     "Exercise Name": "Single-Leg Hop",
@@ -1139,7 +1236,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "single-leg-hop.svg"
   },
   {
     "Exercise Name": "Sit-Up",
@@ -1148,7 +1246,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "sit-up.svg"
   },
   {
     "Exercise Name": "Skater Hops",
@@ -1157,7 +1256,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Cardio, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "skater-hops.svg"
   },
   {
     "Exercise Name": "Skull Crusher, Cable",
@@ -1166,7 +1266,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "cable-skull-crusher.svg"
   },
   {
     "Exercise Name": "Slam, Slam Ball",
@@ -1175,7 +1276,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
     "Workout Type": "Full Body Strength, HIIT, Cardio",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "slam-ball-slam.svg"
   },
   {
     "Exercise Name": "Snatch, Barbell",
@@ -1184,7 +1286,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Full Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-snatch.svg"
   },
   {
     "Exercise Name": "Snatch, Kettlebell",
@@ -1193,7 +1296,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Full Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "kettlebell-snatch.svg"
   },
   {
     "Exercise Name": "Squat",
@@ -1202,7 +1306,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "squat.svg"
   },
   {
     "Exercise Name": "Squat (High Bar), Barbell",
@@ -1211,7 +1316,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-squat-high-bar.svg"
   },
   {
     "Exercise Name": "Squat, Landmine",
@@ -1220,7 +1326,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Landmine",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "landmine-squat.svg"
   },
   {
     "Exercise Name": "Squat, Slam Ball",
@@ -1229,7 +1336,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Slam Ball",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "slam-ball-squat.svg"
   },
   {
     "Exercise Name": "Step-Up",
@@ -1238,7 +1346,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "step-up.svg"
   },
   {
     "Exercise Name": "Step-Up, Dumbbell",
@@ -1247,7 +1356,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-step-up.svg"
   },
   {
     "Exercise Name": "Suitcase Deadlift, Dumbbell",
@@ -1256,7 +1366,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-suitcase-deadlift.svg"
   },
   {
     "Exercise Name": "Sumo Deadlift, Barbell",
@@ -1275,7 +1386,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "superman.svg"
   },
   {
     "Exercise Name": "Swing, Kettlebell",
@@ -1294,7 +1406,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "barbell-thruster.svg"
   },
   {
     "Exercise Name": "Thruster, Dumbbell",
@@ -1303,7 +1416,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "dumbbell-thruster.svg"
   },
   {
     "Exercise Name": "Thruster, Kettlebell",
@@ -1312,7 +1426,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Full Body Strength, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "kettlebell-thruster.svg"
   },
   {
     "Exercise Name": "Trap Bar Deadlift, Barbell",
@@ -1321,7 +1436,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Barbell",
     "Workout Type": "Lower Body Strength, Full Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "barbell-trap-bar-deadlift.svg"
   },
   {
     "Exercise Name": "Tricep Extension, Cable",
@@ -1330,7 +1446,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "cable-tricep-extension.svg"
   },
   {
     "Exercise Name": "Tricep Extension, Rope",
@@ -1339,7 +1456,8 @@
     "Exercise Type": "Isolation",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "rope-tricep-extension.svg"
   },
   {
     "Exercise Name": "Tuck Jump",
@@ -1348,7 +1466,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, HIIT",
-    "Progression": "Power Development"
+    "Progression": "Power Development",
+    "Svg File": "tuck-jump.svg"
   },
   {
     "Exercise Name": "Turkish Get-Up, Kettlebell",
@@ -1357,7 +1476,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Kettlebell",
     "Workout Type": "Full Body Strength",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "kettlebell-turkish-get-up.svg"
   },
   {
     "Exercise Name": "Upright Row, Barbell",
@@ -1376,7 +1496,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "v-bar-pulldown.svg"
   },
   {
     "Exercise Name": "V-Bar Seated Cable Row",
@@ -1385,7 +1506,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Cable Machine",
     "Workout Type": "Upper Body Strength, Push/Pull/Legs",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "v-bar-seated-cable-row.svg"
   },
   {
     "Exercise Name": "V-Up",
@@ -1394,7 +1516,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "v-up.svg"
   },
   {
     "Exercise Name": "Walking Lunge",
@@ -1403,7 +1526,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Lower Body Strength, HIIT",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "walking-lunge.svg"
   },
   {
     "Exercise Name": "Walking Lunge, Dumbbell",
@@ -1412,7 +1536,8 @@
     "Exercise Type": "Compound",
     "Equipment": "Dumbbell",
     "Workout Type": "Lower Body Strength, HIIT",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "dumbbell-walking-lunge.svg"
   },
   {
     "Exercise Name": "Wall Sit",
@@ -1431,6 +1556,7 @@
     "Exercise Type": "Compound",
     "Equipment": "Bodyweight",
     "Workout Type": "Core",
-    "Progression": "Progressive Overload"
+    "Progression": "Progressive Overload",
+    "Svg File": "woodchopper.svg"
   }
 ]

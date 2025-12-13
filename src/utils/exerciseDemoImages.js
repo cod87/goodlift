@@ -162,6 +162,15 @@ const getFallbackImage = (usePlaceholder, primaryMuscle, secondaryMuscles) => {
  * @returns {string|null} Path to the demo image, custom SVG data URL, placeholder, or null
  */
 export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile = null, primaryMuscle = null, secondaryMuscles = null) => {
+  // Enhanced debug logging for investigation
+  console.log('[getDemoImagePath] CALLED with:', {
+    exerciseName,
+    usePlaceholder,
+    webpFile,
+    primaryMuscle,
+    secondaryMuscles
+  });
+  
   // PRIORITY 1: If webpFile is explicitly provided, validate and use it directly
   // This takes highest priority as it's explicitly defined in the exercise data
   if (webpFile) {
@@ -169,9 +178,12 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
     // This prevents path traversal attacks (e.g., '../../../sensitive-file')
     const safeFilenamePattern = /^[a-zA-Z0-9-]+\.webp$/;
     if (safeFilenamePattern.test(webpFile)) {
-      return `${getBaseUrl()}demos/${webpFile}`;
+      const result = `${getBaseUrl()}demos/${webpFile}`;
+      console.log('[getDemoImagePath] PRIORITY 1: Using webpFile:', result);
+      return result;
     }
     // If webpFile is invalid, fall through to name-based matching
+    console.log('[getDemoImagePath] PRIORITY 1: webpFile invalid, falling through:', webpFile);
   }
   
   if (!exerciseName) {
@@ -181,17 +193,23 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
   }
   
   const normalized = normalizeExerciseName(exerciseName);
+  console.log('[getDemoImagePath] Normalized name:', normalized);
   
   // PRIORITY 2: Check if we have an exact match
   if (AVAILABLE_DEMO_IMAGES.includes(normalized)) {
-    return `${getBaseUrl()}demos/${normalized}.webp`;
+    const result = `${getBaseUrl()}demos/${normalized}.webp`;
+    console.log('[getDemoImagePath] PRIORITY 2: Exact match found:', result);
+    return result;
   }
   
   // PRIORITY 3: Check for common variations/aliases (known, safe transformations)
   const variations = getExerciseVariations(normalized);
+  console.log('[getDemoImagePath] PRIORITY 3: Checking variations:', variations);
   for (const variation of variations) {
     if (AVAILABLE_DEMO_IMAGES.includes(variation)) {
-      return `${getBaseUrl()}demos/${variation}.webp`;
+      const result = `${getBaseUrl()}demos/${variation}.webp`;
+      console.log('[getDemoImagePath] PRIORITY 3: Variation match found:', result);
+      return result;
     }
   }
   
@@ -200,7 +218,7 @@ export const getDemoImagePath = (exerciseName, usePlaceholder = true, webpFile =
   // The muscle SVG provides accurate visual representation of which muscles
   // are targeted by the exercise, which is more useful than showing the wrong demo.
   const fallback = getFallbackImage(usePlaceholder, primaryMuscle, secondaryMuscles);
-  console.log('[getDemoImagePath] No webp for "' + exerciseName + '", primaryMuscle:', primaryMuscle, 'fallback type:', fallback?.startsWith('data:image/svg') ? 'SVG' : fallback?.includes('work-icon') ? 'work-icon' : 'other');
+  console.log('[getDemoImagePath] PRIORITY 4: No webp for "' + exerciseName + '", primaryMuscle:', primaryMuscle, 'fallback type:', fallback?.startsWith('data:image/svg') ? 'SVG' : fallback?.includes('work-icon') ? 'work-icon' : 'other', 'result length:', fallback?.length);
   return fallback;
 };
 

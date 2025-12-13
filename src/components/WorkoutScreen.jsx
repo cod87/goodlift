@@ -12,7 +12,6 @@ import SwapExerciseDialog from './Common/SwapExerciseDialog';
 import SaveModifiedWorkoutDialog from './Common/SaveModifiedWorkoutDialog';
 import TargetRepsPicker from './Common/TargetRepsPicker';
 import { getDemoImagePath } from '../utils/exerciseDemoImages';
-import { isSvgDataUrl, extractSvgFromDataUrl, getMuscleHighlightDataUrl } from '../utils/muscleHighlightSvg';
 import { 
   DEFAULT_TARGET_REPS, 
   getClosestValidTargetReps, 
@@ -353,6 +352,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
   const isBarbell = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'barbell';
   const webpFile = currentStep?.exercise?.['Webp File'];
+  const svgFile = currentStep?.exercise?.['Svg File'];
   const primaryMuscle = currentStep?.exercise?.['Primary Muscle'];
   const secondaryMuscles = currentStep?.exercise?.['Secondary Muscles'];
   
@@ -469,30 +469,32 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   // Update demo image when exercise changes
   useEffect(() => {
     if (exerciseName) {
-      // Use getDemoImagePath utility which supports webp files and custom muscle SVGs
+      // Use getDemoImagePath utility which supports webp files and explicit SVG files
       const imagePath = getDemoImagePath(
         exerciseName,
         true,
         webpFile,
         primaryMuscle,
-        secondaryMuscles
+        secondaryMuscles,
+        svgFile
       );
       
       setDemoImageSrc(imagePath);
       setImageError(false);
     }
-  }, [exerciseName, webpFile, primaryMuscle, secondaryMuscles]);
+  }, [exerciseName, webpFile, svgFile, primaryMuscle, secondaryMuscles]);
 
   const handleImageError = () => {
     if (!imageError) {
       setImageError(true);
-      // Fall back to custom muscle SVG if image fails to load
+      // Fall back to placeholder icon if image fails to load
       const fallbackImage = getDemoImagePath(
         exerciseName,
         true,
         null,
         primaryMuscle,
-        secondaryMuscles
+        secondaryMuscles,
+        null
       );
       setDemoImageSrc(fallbackImage);
     }
@@ -1334,114 +1336,27 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                       flex: shouldUseTwoColumns ? 1 : 'none',
                     }}
                   >
-                    {isSvgDataUrl(demoImageSrc) ? (
-                      // Render SVG data URL as inline SVG using dangerouslySetInnerHTML
-                      (() => {
-                        const svgContent = extractSvgFromDataUrl(demoImageSrc);
-                        return svgContent ? (
-                          <Box
-                            sx={{
-                              maxWidth: '100%',
-                              maxHeight: shouldUseTwoColumns 
-                                ? { sm: 'calc(40vh - 100px)', md: 'calc(45vh - 100px)' }
-                                : { xs: '150px', sm: '200px' },
-                              width: 'auto',
-                              height: 'auto',
-                              borderRadius: 1,
-                              '& svg': {
-                                maxWidth: '100%',
-                                maxHeight: shouldUseTwoColumns 
-                                  ? 'calc(40vh - 100px)'
-                                  : '200px',
-                                width: 'auto',
-                                height: 'auto',
-                              },
-                            }}
-                            dangerouslySetInnerHTML={{ __html: svgContent }}
-                          />
-                        ) : (
-                          // Fallback if SVG extraction fails
-                          <Box
-                            component="img"
-                            src={workIconUrl}
-                            alt="Exercise"
-                            sx={{ 
-                              width: '60%', 
-                              height: '60%', 
-                              objectFit: 'contain', 
-                              opacity: 0.5 
-                            }}
-                          />
-                        );
-                      })()
-                    ) : (
-                      // Render regular image
-                      <Box
-                        component="img"
-                        src={demoImageSrc}
-                        alt={`${exerciseName} demonstration`}
-                        onError={handleImageError}
-                        sx={{
-                          maxWidth: '100%',
-                          // Significantly larger image in landscape tablet mode
-                          maxHeight: shouldUseTwoColumns 
-                            ? { sm: 'calc(40vh - 100px)', md: 'calc(45vh - 100px)' }
-                            : { xs: '150px', sm: '200px' },
-                          width: 'auto',
-                          height: 'auto',
-                          borderRadius: 1,
-                          objectFit: 'contain',
-                        }}
-                        loading="lazy"
-                      />
-                    )}
+                    <Box
+                      component="img"
+                      src={demoImageSrc}
+                      alt={`${exerciseName} demonstration`}
+                      onError={handleImageError}
+                      sx={{
+                        maxWidth: '100%',
+                        // Significantly larger image in landscape tablet mode
+                        maxHeight: shouldUseTwoColumns 
+                          ? { sm: 'calc(40vh - 100px)', md: 'calc(45vh - 100px)' }
+                          : { xs: '150px', sm: '200px' },
+                        width: 'auto',
+                        height: 'auto',
+                        borderRadius: 1,
+                        objectFit: 'contain',
+                      }}
+                      loading="lazy"
+                    />
                   </Box>
                 )}
               </Box>
-              
-              {/* Muscle Highlight SVG - ALWAYS show for exercises with muscle data */}
-              {primaryMuscle && primaryMuscle.trim() && (
-                <Box 
-                  sx={{ 
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                    mt: 1,
-                    mb: 1,
-                    px: { xs: 2, sm: 3 },
-                  }}
-                >
-                  {(() => {
-                    // Generate muscle highlight SVG with validated muscle data
-                    const muscleSvgDataUrl = getMuscleHighlightDataUrl(primaryMuscle, secondaryMuscles || '');
-                    // Extract and validate SVG content (security: prevents XSS via structure validation)
-                    const svgContent = extractSvgFromDataUrl(muscleSvgDataUrl);
-                    
-                    return svgContent ? (
-                      <Box
-                        sx={{
-                          maxWidth: shouldUseTwoColumns ? '200px' : '180px',
-                          maxHeight: shouldUseTwoColumns ? '200px' : '180px',
-                          width: '100%',
-                          height: 'auto',
-                          p: 1,
-                          '& svg': {
-                            width: '100%',
-                            height: 'auto',
-                          },
-                        }}
-                        // Safe to use dangerouslySetInnerHTML here because:
-                        // 1. SVG content is generated internally (not user input)
-                        // 2. extractSvgFromDataUrl validates SVG structure
-                        // 3. Only renders SVGs with expected viewBox and CSS classes
-                        dangerouslySetInnerHTML={{ __html: svgContent }}
-                      />
-                    ) : null;
-                  })()}
-                </Box>
-              )}
-              
               {/* Portrait/Mobile: Separate rows for target info, inputs, and nav buttons */}
               {!shouldUseTwoColumns && (
                 <>

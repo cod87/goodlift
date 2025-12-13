@@ -71,7 +71,7 @@ const CANONICAL_SVG_TEMPLATE = `
   <defs>
     <style>
       .cls-1 {
-        fill: #134686;
+        fill: #2d2d2d;
       }
     </style>
   </defs>
@@ -242,11 +242,12 @@ export const generateMuscleHighlightSvg = (primaryMuscle, secondaryMuscles) => {
  */
 const highlightAllMuscles = (svgTemplate) => {
   // Replace the style block to highlight all muscles
+  // Using a darker theme with red shades for better visual engagement
   const highlightedSvg = svgTemplate.replace(
     /<style>[\s\S]*?<\/style>/,
     `<style>
       .cls-1 {
-        fill: #2563eb;
+        fill: #dc2626;
         opacity: 1;
       }
     </style>`
@@ -257,9 +258,10 @@ const highlightAllMuscles = (svgTemplate) => {
 
 /**
  * Highlights specific muscle groups in the canonical SVG
- * Primary muscles are highlighted with full opacity (#2563eb - bold blue)
- * Secondary muscles are highlighted with reduced opacity (#60a5fa - lighter blue)
- * Non-targeted muscles are shown with neutral subtle shading (#e5e7eb at 70%)
+ * Using a darker theme with red shades for improved visual engagement:
+ * - Primary muscles: Deep red (#dc2626) at full opacity - clearly shows main muscles worked
+ * - Secondary muscles: Lighter red (#ef4444) at full opacity - shows supporting muscles
+ * - Non-targeted muscles: Dark gray (#404040) at 60% opacity - provides context without distraction
  * @param {string} svgTemplate - The canonical SVG template
  * @param {string[]} primaryIds - Array of primary muscle SVG IDs
  * @param {string[]} secondaryIds - Array of secondary muscle SVG IDs
@@ -270,19 +272,20 @@ const highlightSpecificMuscles = (svgTemplate, primaryIds, secondaryIds) => {
   let modifiedSvg = svgTemplate;
   
   // Replace the original style with our custom highlighting styles
+  // Using darker theme with red shades for better visual engagement
   modifiedSvg = modifiedSvg.replace(
     /<style>[\s\S]*?<\/style>/,
     `<style>
       .cls-1 {
-        fill: #e5e7eb;
-        opacity: 0.7;
+        fill: #404040;
+        opacity: 0.6;
       }
       .cls-primary {
-        fill: #2563eb;
+        fill: #dc2626;
         opacity: 1;
       }
       .cls-secondary {
-        fill: #60a5fa;
+        fill: #ef4444;
         opacity: 1;
       }
     </style>`

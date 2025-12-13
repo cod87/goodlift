@@ -25,7 +25,6 @@ const manualAssociations = {
   "Bent-Over Row, Dumbbell": "dumbbell-bent-over-row-single-arm.webp",
   "Concentration Curl, Dumbbell": "dumbbell-concentration-curl.webp",
   "Shoulder Press, Dumbbell": "dumbbell-shoulder-press.webp",
-  "Fly, Dumbbell": "incline-dumbbell-fly.webp",
   "Behind the Neck Pulldown": "behind-neck-pulldown.webp",
   "Bent Over Lateral Raise": "bent-over-lateral-raise.webp",
   "Lateral Raise, Bent Over": "bent-over-lateral-raise.webp",
@@ -41,7 +40,6 @@ const manualAssociations = {
   "Slamball Squat": "slamball-squat.webp",
   "Squat, Slamball": "slamball-squat.webp",
   "Single-Arm Row, Dumbbell": "dumbbell-bent-over-row-single-arm.webp",
-  "Pullover, Dumbbell": "incline-dumbbell-fly.webp",
 };
 
 console.log('Reading exercises.json...');

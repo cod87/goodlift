@@ -45,18 +45,26 @@ const isBarbell = (equipment) => {
 
 /**
  * ExerciseCard - Enhanced exercise display with improved layout
+ * 
+ * Displays exercise demonstration images from the exercise.image field.
+ * Images are sourced from public/demos/*.webp (photos) or public/svg-muscles/*.svg (diagrams).
+ * Falls back to work-icon.svg if image fails to load or is unavailable.
+ * 
+ * Features:
  * - Header bar with timer, step counter, set indicator, and favorite star
  * - Skip/swap/help icons in top left corner
  * - Responsive font sizing for exercise name (max 2 lines)
  * - Extended card height close to bottom navigation
+ * - Support for video URLs (optional, not currently used)
+ * 
+ * See docs/EXERCISE_IMAGE_SYSTEM.md for complete documentation.
  */
 const ExerciseCard = memo(({ 
   exerciseName,
   setNumber,
   totalSets,
-  videoUrl,
-  demoImage = null,
-  image = null, // New: direct image path from exercise.image field
+  videoUrl, // Optional: YouTube/video URL (not currently used by any exercises)
+  image = null, // Image path from exercise.image field (demos/*.webp or svg-muscles/*.svg)
   lastWeight = null,
   lastReps = null,
   onSubmit,
@@ -99,8 +107,7 @@ const ExerciseCard = memo(({
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
   // Construct image URL from the exercise.image field
-  const imagePath = image || demoImage;
-  const imageSrc = imagePath && !imageError ? constructImageUrl(imagePath) : null;
+  const imageSrc = image && !imageError ? constructImageUrl(image) : null;
 
   const handleImageError = () => {
     // On error, simply set imageError to true which will show the fallback icon
@@ -769,8 +776,7 @@ ExerciseCard.propTypes = {
   exerciseName: PropTypes.string.isRequired,
   setNumber: PropTypes.number.isRequired,
   totalSets: PropTypes.number.isRequired,
-  videoUrl: PropTypes.string,
-  demoImage: PropTypes.string,
+  videoUrl: PropTypes.string, // Optional: not currently used
   lastWeight: PropTypes.number,
   lastReps: PropTypes.number,
   onSubmit: PropTypes.func.isRequired,

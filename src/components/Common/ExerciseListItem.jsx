@@ -1,12 +1,18 @@
 /**
  * ExerciseListItem - A minimalist exercise list item component
  * 
+ * Displays 56x56px exercise images from exercise.image field.
+ * Images are automatically loaded from public/demos/ or public/svg-muscles/.
+ * Falls back to work-icon.svg if image is unavailable.
+ * 
  * Displays:
  * - Mini demo image on the left (transparent background)
  * - Exercise name (larger text)
  * - Primary muscle below in smaller text
  * - Selection indicated by colored left bar and right indent
  * - Optional color-coded left bar for superset grouping
+ * 
+ * See docs/EXERCISE_IMAGE_SYSTEM.md for complete documentation.
  */
 
 import { memo, useState } from 'react';

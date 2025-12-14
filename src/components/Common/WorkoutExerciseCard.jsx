@@ -1,12 +1,18 @@
 /**
  * WorkoutExerciseCard - A minimalist exercise card for the workout builder
  * 
+ * Displays 60x60px exercise images from exercise.image field.
+ * Images are automatically loaded from public/demos/ or public/svg-muscles/.
+ * Falls back to work-icon.svg if image is unavailable.
+ * 
  * Features (as per design inspiration):
  * - Demo image, exercise name, primary muscle
  * - Note entry field
  * - Sets management with "Add Set" button
  * - Three-dots menu for options (reorder, replace, superset, remove)
  * - Color-coded left bar for superset grouping
+ * 
+ * See docs/EXERCISE_IMAGE_SYSTEM.md for complete documentation.
  */
 
 import { memo, useState } from 'react';

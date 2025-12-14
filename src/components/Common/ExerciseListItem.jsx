@@ -25,32 +25,14 @@ const ExerciseListItem = memo(({
   
   const exerciseName = exercise?.['Exercise Name'] || exercise?.name || 'Unknown Exercise';
   const primaryMuscle = exercise?.['Primary Muscle'] || '';
-  const secondaryMuscles = exercise?.['Secondary Muscles'] || '';
-  const webpFile = exercise?.['Webp File'];
   const equipment = exercise?.['Equipment'] || '';
-  
-  // Debug logging for investigation (can be removed once SVG rendering is verified)
-  // console.log('[ExerciseListItem] Exercise data:', {
-  //   exerciseName,
-  //   primaryMuscle,
-  //   secondaryMuscles,
-  //   webpFile
-  // });
   
   // Get base URL for work icon fallback
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
   
-  // Fixed: Properly construct image URL from the exercise.image field
-  // The exercise.image field contains the raw path from exercises.json (e.g., 'demos/file.webp' or 'svg-muscles/file.svg')
-  // constructImageUrl() will prepend the base URL (e.g., '/goodlift/') to create the full path
+  // Construct image URL from the exercise.image field
   const imagePath = exercise?.image ? constructImageUrl(exercise.image) : null;
-  
-  // console.log('[ExerciseListItem] getDemoImagePath returned:', {
-  //   imagePath: imagePath?.substring(0, 100),
-  //   isSvgDataUrl: imagePath ? isSvgDataUrl(imagePath) : false,
-  //   length: imagePath?.length
-  // });
 
   const handleClick = () => {
     if (!disabled && onClick) {

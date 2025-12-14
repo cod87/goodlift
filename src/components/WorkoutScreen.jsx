@@ -86,7 +86,6 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   // Demo image state
   const [demoImageSrc, setDemoImageSrc] = useState(null);
   const [imageError, setImageError] = useState(false);
-  
   // Stretching phase state - initialize from saved progress if available
   const [currentPhase, setCurrentPhase] = useState(initialProgress?.currentPhase ?? 'warmup'); // 'warmup', 'exercise', 'cooldown', 'complete'
   const [warmupCompleted, setWarmupCompleted] = useState(false);
@@ -351,9 +350,6 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const exerciseName = currentStep?.exercise?.['Exercise Name'];
   const isBodyweight = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'bodyweight';
   const isBarbell = currentStep?.exercise?.['Equipment']?.toLowerCase() === 'barbell';
-  const webpFile = currentStep?.exercise?.['Webp File'];
-  const primaryMuscle = currentStep?.exercise?.['Primary Muscle'];
-  const secondaryMuscles = currentStep?.exercise?.['Secondary Muscles'];
   
   // Calculate barbell weight per side for barbell exercises
   const barbellPerSide = useMemo(() => {
@@ -469,19 +465,15 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   }, [exerciseName]);
 
   // Fixed: Update demo image when exercise changes - use the image field from exercise data
-  // The exercise.image field contains the raw path from exercises.json (e.g., 'demos/file.webp' or 'svg-muscles/file.svg')
-  // constructImageUrl() will prepend the base URL (e.g., '/goodlift/') to create the full path
+  // Update demo image when exercise changes
   useEffect(() => {
     if (currentStep?.exercise?.image) {
       const imagePath = constructImageUrl(currentStep.exercise.image);
-      console.log('[WorkoutScreen] Loading image:', imagePath);
       setDemoImageSrc(imagePath);
-      setImageError(false); // Reset error state for new image
+      setImageError(false);
     } else {
-      // No image field - will show fallback icon
-      console.log('[WorkoutScreen] No image field found for exercise:', currentStep?.exercise?.['Exercise Name']);
       setDemoImageSrc(null);
-      setImageError(true); // Set error to trigger fallback display
+      setImageError(true);
     }
   }, [currentStep]);
 

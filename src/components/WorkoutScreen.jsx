@@ -1723,6 +1723,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                       <Remove sx={{ fontSize: 20 }} />
                     </IconButton>
                     <input
+                      id="weight-select"
                       type="tel"
                       inputMode="decimal"
                       value={currentWeight}
@@ -1786,6 +1787,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
                       <Remove sx={{ fontSize: 20 }} />
                     </IconButton>
                     <input
+                      id="reps-select"
                       type="number"
                       inputMode="numeric"
                       value={currentReps}

@@ -467,19 +467,13 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   // Fixed: Update demo image when exercise changes - use the image field from exercise data
   // Update demo image when exercise changes
   useEffect(() => {
-    console.log('[WorkoutScreen] Current step changed:', {
-      hasExercise: !!currentStep?.exercise,
-      exerciseName: currentStep?.exercise?.['Exercise Name'],
-      imageField: currentStep?.exercise?.image,
-    });
-    
     if (currentStep?.exercise?.image) {
       const imagePath = constructImageUrl(currentStep.exercise.image);
-      console.log('[WorkoutScreen] Constructed image path:', imagePath);
+      console.log('[WorkoutScreen] Loading exercise image:', currentStep.exercise['Exercise Name'], '→', imagePath);
       setDemoImageSrc(imagePath);
       setImageError(false);
     } else {
-      console.log('[WorkoutScreen] No image field found in exercise data');
+      console.warn('[WorkoutScreen] No image field found for exercise:', currentStep?.exercise?.['Exercise Name']);
       setDemoImageSrc(null);
       setImageError(true);
     }

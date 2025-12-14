@@ -89,8 +89,13 @@ export const enrichExerciseWithImageData = (exercise, exerciseDB) => {
   // Find the exercise in the database
   const dbExercise = findExerciseByName(exerciseDB, exerciseName);
   if (!dbExercise) {
-    console.warn(`[enrichExerciseWithImageData] Could not find exercise in database: ${exerciseName}`);
+    console.warn(`[enrichExerciseWithImageData] Exercise not found in database: "${exerciseName}"`);
     return exercise;
+  }
+  
+  // Log successful enrichment
+  if (dbExercise.image) {
+    console.log(`[enrichExerciseWithImageData] Added image for "${exerciseName}": ${dbExercise.image}`);
   }
   
   // Enrich with image field and any other missing fields

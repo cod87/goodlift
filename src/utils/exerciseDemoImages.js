@@ -1,12 +1,22 @@
 /**
  * Exercise Demo Image Utility
  * 
- * Simplified utility that constructs image URLs from the explicit image field in exercises.json.
- * Each exercise has a direct image field pointing to either:
- * - demos/{filename}.webp for photo demonstrations
- * - svg-muscles/{filename}.svg for muscle diagrams
+ * Provides URL construction for exercise demonstration images.
  * 
- * No fallback mechanisms or dynamic generation - just direct path construction.
+ * The Good Lift app stores exercise images in two directories:
+ * - public/demos/*.webp - Photo demonstrations (62 images)
+ * - public/svg-muscles/*.svg - Muscle diagram SVGs (104 images)
+ * 
+ * Each exercise in exercises.json has an 'image' field pointing to its image:
+ *   { "Exercise Name": "Back Squat", "image": "demos/back-squat.webp" }
+ * 
+ * This utility constructs the full URL including Vite's BASE_URL for deployment.
+ * 
+ * Usage:
+ *   import { constructImageUrl } from './utils/exerciseDemoImages';
+ *   const imageUrl = constructImageUrl(exercise.image);
+ * 
+ * See docs/EXERCISE_IMAGE_SYSTEM.md for complete documentation.
  */
 
 /**

@@ -29,6 +29,10 @@ import {
   TrendingUp,
   MenuBook,
   Restaurant,
+  LightMode as BreakfastIcon,
+  WbSunny as LunchIcon,
+  NightsStay as DinnerIcon,
+  Cookie as SnackIcon,
 } from '@mui/icons-material';
 import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes, getFavoriteFoods } from '../../utils/nutritionStorage';
 import { calculateNutrition } from '../../services/nutritionDataService';
@@ -209,6 +213,48 @@ const NutritionTab = () => {
       }),
       { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
     );
+  };
+  
+  // Group entries by meal type
+  const getEntriesByMealType = () => {
+    const grouped = {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snack: [],
+    };
+    
+    todayEntries.forEach(entry => {
+      const mealType = entry.mealType || 'snack'; // Default to snack if not set
+      if (grouped[mealType]) {
+        grouped[mealType].push(entry);
+      } else {
+        grouped.snack.push(entry); // Fallback to snack
+      }
+    });
+    
+    return grouped;
+  };
+  
+  // Get icon for meal type
+  const getMealIcon = (mealType) => {
+    switch (mealType) {
+      case 'breakfast':
+        return <BreakfastIcon fontSize="small" />;
+      case 'lunch':
+        return <LunchIcon fontSize="small" />;
+      case 'dinner':
+        return <DinnerIcon fontSize="small" />;
+      case 'snack':
+        return <SnackIcon fontSize="small" />;
+      default:
+        return <Restaurant fontSize="small" />;
+    }
+  };
+  
+  // Get display name for meal type
+  const getMealDisplayName = (mealType) => {
+    return mealType.charAt(0).toUpperCase() + mealType.slice(1);
   };
 
   const totals = getTodayTotals();
@@ -424,7 +470,7 @@ const NutritionTab = () => {
         </CardContent>
       </Card>
 
-      {/* Today's Entries - More Compact */}
+      {/* Today's Entries - Grouped by Meal Type */}
       <Card>
         <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
           <Typography variant="h6" gutterBottom>
@@ -432,40 +478,81 @@ const NutritionTab = () => {
           </Typography>
           {todayEntries.length === 0 ? (
             <Typography color="text.secondary" align="center" sx={{ py: 2, fontSize: '0.9rem' }}>
-              No entries yet. Type in the search box above to add foods.
+              No entries yet. Click "Log a Meal" above to add foods.
             </Typography>
           ) : (
-            <List disablePadding>
-              {todayEntries.map((entry, index) => (
-                <Box key={entry.id}>
-                  {index > 0 && <Divider sx={{ my: 0.5 }} />}
-                  <ListItem
-                    sx={{ px: 0, py: 1 }}
-                    secondaryAction={
-                      <IconButton edge="end" onClick={() => handleDeleteEntry(entry.id)} color="error" size="small">
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    }
-                  >
-                    <ListItemText
-                      primary={
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {entry.foodName} ({entry.grams}g)
-                        </Typography>
-                      }
-                      secondary={
-                        <Box component="span" sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
-                          <Chip label={`${entry.nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
-                          <Chip label={`P: ${entry.nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                          <Chip label={`C: ${entry.nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                          <Chip label={`F: ${entry.nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+            <Box>
+              {Object.entries(getEntriesByMealType()).map(([mealType, entries]) => {
+                if (entries.length === 0) return null;
+                
+                // Calculate totals for this meal type
+                const mealTotals = entries.reduce(
+                  (totals, entry) => ({
+                    calories: totals.calories + entry.nutrition.calories,
+                    protein: totals.protein + entry.nutrition.protein,
+                    carbs: totals.carbs + entry.nutrition.carbs,
+                    fat: totals.fat + entry.nutrition.fat,
+                  }),
+                  { calories: 0, protein: 0, carbs: 0, fat: 0 }
+                );
+                
+                return (
+                  <Box key={mealType} sx={{ mb: 2 }}>
+                    {/* Meal Type Header */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1, 
+                      mb: 1,
+                      pb: 0.5,
+                      borderBottom: 1,
+                      borderColor: 'divider',
+                    }}>
+                      {getMealIcon(mealType)}
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, flex: 1 }}>
+                        {getMealDisplayName(mealType)}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {mealTotals.calories.toFixed(0)} cal
+                      </Typography>
+                    </Box>
+                    
+                    {/* Meal Entries */}
+                    <List disablePadding>
+                      {entries.map((entry, index) => (
+                        <Box key={entry.id}>
+                          {index > 0 && <Divider sx={{ my: 0.5 }} />}
+                          <ListItem
+                            sx={{ px: 0, py: 1, pl: 3 }}
+                            secondaryAction={
+                              <IconButton edge="end" onClick={() => handleDeleteEntry(entry.id)} color="error" size="small">
+                                <Delete fontSize="small" />
+                              </IconButton>
+                            }
+                          >
+                            <ListItemText
+                              primary={
+                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                  {entry.foodName} ({entry.grams}g)
+                                </Typography>
+                              }
+                              secondary={
+                                <Box component="span" sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+                                  <Chip label={`${entry.nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                  <Chip label={`P: ${entry.nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                  <Chip label={`C: ${entry.nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                  <Chip label={`F: ${entry.nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                </Box>
+                              }
+                            />
+                          </ListItem>
                         </Box>
-                      }
-                    />
-                  </ListItem>
-                </Box>
-              ))}
-            </List>
+                      ))}
+                    </List>
+                  </Box>
+                );
+              })}
+            </Box>
           )}
         </CardContent>
       </Card>

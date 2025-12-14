@@ -79,6 +79,26 @@ const SavedWorkoutsList = memo(({
   const [selectedWorkoutForDay, setSelectedWorkoutForDay] = useState(null);
   const [showArchived, setShowArchived] = useState(false);
 
+  // Helper function to get assigned days for a workout from weeklySchedule
+  const getAssignedDays = (workout) => {
+    if (!weeklySchedule || !workout) return [];
+    
+    const assignedDays = [];
+    DAYS_OF_WEEK.forEach(day => {
+      const dayWorkout = weeklySchedule[day];
+      if (dayWorkout && dayWorkout.workoutId === workout.id) {
+        assignedDays.push(day);
+      } else if (dayWorkout && dayWorkout.exercises && workout.exercises) {
+        // Fallback: check if exercises match (for workouts assigned before workoutId was added)
+        if (JSON.stringify(dayWorkout.exercises) === JSON.stringify(workout.exercises)) {
+          assignedDays.push(day);
+        }
+      }
+    });
+    
+    return assignedDays;
+  };
+
   // Load saved workouts
   useEffect(() => {
     const loadSavedWorkouts = async () => {
@@ -94,10 +114,12 @@ const SavedWorkoutsList = memo(({
     loadSavedWorkouts();
   }, []);
 
-  // Sort workouts: assigned workouts first (Sunday-Saturday order), then unassigned
+  // Sort workouts: assigned workouts first (by first assigned day), then unassigned
   const sortedWorkouts = [...savedWorkouts].sort((a, b) => {
-    const aDay = a.assignedDay;
-    const bDay = b.assignedDay;
+    const aDays = getAssignedDays(a);
+    const bDays = getAssignedDays(b);
+    const aDay = aDays.length > 0 ? aDays[0] : null;
+    const bDay = bDays.length > 0 ? bDays[0] : null;
     
     // Both assigned - sort by day of week
     if (aDay && bDay) {
@@ -346,18 +368,23 @@ const SavedWorkoutsList = memo(({
                           </Box>
                         )}
                         
-                        {/* Assigned day */}
-                        {workout.assignedDay && (
-                          <Box sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: 0.5,
-                            color: 'primary.main',
-                          }}>
-                            <CalendarMonth sx={{ fontSize: '0.875rem' }} />
-                            <span style={{ fontWeight: 500 }}>{workout.assignedDay.substring(0, 3)}</span>
-                          </Box>
-                        )}
+                        {/* Assigned days - check weeklySchedule for current assignments */}
+                        {(() => {
+                          const assignedDays = getAssignedDays(workout);
+                          return assignedDays.length > 0 && (
+                            <Box sx={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: 0.5,
+                              color: 'primary.main',
+                            }}>
+                              <CalendarMonth sx={{ fontSize: '0.875rem' }} />
+                              <span style={{ fontWeight: 500 }}>
+                                {assignedDays.map(day => day.substring(0, 3)).join(', ')}
+                              </span>
+                            </Box>
+                          );
+                        })()}
                       </Box>
                     }
                   />

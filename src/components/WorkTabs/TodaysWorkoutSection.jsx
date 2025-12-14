@@ -58,13 +58,13 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
     const sessionType = (todaysWorkout.sessionType || 'full').toLowerCase();
     
     // Navigate to appropriate screen based on session type
-    if (sessionType === 'cardio' || sessionType === 'hiit') {
-      // Cardio and HIIT go to timer screen
+    if (sessionType === 'cardio' || sessionType === 'hiit' || sessionType === 'yoga') {
+      // Cardio, HIIT, and Yoga go to timer screen
       if (onNavigate) {
         onNavigate('cardio');
       }
-    } else if (sessionType === 'yoga' || sessionType === 'stretch' || sessionType === 'mobility') {
-      // Yoga, stretch, and mobility go to stretch/mobility screen
+    } else if (sessionType === 'stretch' || sessionType === 'mobility') {
+      // Stretch and mobility go to stretch/mobility screen
       if (onNavigate) {
         onNavigate('stretch');
       }
@@ -100,7 +100,7 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
       if (type === 'cardio') {
         onNavigate('cardio');
       } else if (type === 'yoga') {
-        onNavigate('stretch');
+        onNavigate('cardio'); // Yoga uses timer screen, not stretch screen
       } else if (type === 'active_recovery') {
         onNavigate('log-activity');
       }

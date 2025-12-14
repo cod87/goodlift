@@ -227,9 +227,13 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
       sessionName: workout.name || `${(currentType || workout.type || 'full').charAt(0).toUpperCase() + (currentType || workout.type || 'full').slice(1)} Body Workout`,
       exercises: workout.exercises,
       supersetConfig: workout.supersetConfig || [2, 2, 2, 2],
-      workoutId: workout.id,
       isSavedWorkout: true, // Flag for TodaysWorkoutSection to identify saved workouts
     };
+
+    // Include workoutId only if it exists
+    if (workout.id) {
+      updatedWorkout.workoutId = workout.id;
+    }
 
     setDayWorkouts(prev => ({
       ...prev,

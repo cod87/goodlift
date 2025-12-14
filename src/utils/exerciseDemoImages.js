@@ -39,6 +39,10 @@ export const constructImageUrl = (imagePath) => {
     return null;
   }
   
+  // Sanitize the image path: remove leading/trailing whitespace
+  // This ensures SVG files display correctly even if they have whitespace in the path
+  imagePath = imagePath.trim();
+  
   // Already absolute HTTP/HTTPS URL or data URL - return as-is
   if (imagePath.startsWith('http') || imagePath.startsWith('data:')) {
     return imagePath;

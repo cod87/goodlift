@@ -113,7 +113,11 @@ async function generateAllSVGs() {
     
     try {
       // Generate the SVG content
-      const svgContent = generateMuscleHighlightSvg(primaryMuscle, secondaryMuscles);
+      let svgContent = generateMuscleHighlightSvg(primaryMuscle, secondaryMuscles);
+      
+      // Sanitize SVG content: remove leading/trailing whitespace and newlines
+      // This ensures consistent rendering across all components and contexts
+      svgContent = svgContent.trim();
       
       // Create normalized filename
       const normalizedName = normalizeExerciseName(exerciseName);

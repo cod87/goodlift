@@ -51,8 +51,14 @@ import {
   Star as StarIcon,
   StarBorder as StarBorderIcon,
   Add as AddIcon,
+  LightMode as BreakfastIcon,
+  WbSunny as LunchIcon,
+  NightsStay as DinnerIcon,
+  Cookie as SnackIcon,
 } from '@mui/icons-material';
-import { searchFoods, calculateNutrition, calculateNutritionForPortion, getMeasurementOptions, decimalToFraction } from '../services/nutritionDataService';
+import { searchFoods, calculateNutrition, calculateNutritionForPortion, getMeasurementOptions, decimalToFraction, addCustomFood, loadCustomFoods, loadNutritionDatabase } from '../services/nutritionDataService';
+import AddCustomFoodDialog from './AddCustomFoodDialog';
+import { getCurrentMealType } from '../utils/nutritionUtils';
 import {
   addFavoriteFood,
   removeFavoriteFood,
@@ -86,6 +92,13 @@ const LogMealModal = ({
   
   // Selected foods (for multi-select pattern)
   const [selectedFoodIds, setSelectedFoodIds] = useState(new Set());
+  
+  // Meal type selection
+  const [selectedMealType, setSelectedMealType] = useState('breakfast');
+  
+  // Custom food dialog
+  const [showCustomFoodDialog, setShowCustomFoodDialog] = useState(false);
+  const [allFoods, setAllFoods] = useState([]);
 
   // Reset state when modal opens
   useEffect(() => {
@@ -97,8 +110,23 @@ const LogMealModal = ({
       setActiveTab(0);
       setMealItems([]);
       setSelectedFoodIds(new Set());
+      // Set default meal type based on current time
+      setSelectedMealType(getCurrentMealType());
+      // Load all foods for custom food validation
+      loadAllFoods();
     }
   }, [open]);
+  
+  // Load all foods from database and custom foods
+  const loadAllFoods = async () => {
+    try {
+      const database = await loadNutritionDatabase();
+      const custom = loadCustomFoods();
+      setAllFoods([...database, ...custom]);
+    } catch (error) {
+      console.error('Error loading foods:', error);
+    }
+  };
 
   // Add a search term (when user presses Enter or comma)
   const addSearchTerm = useCallback((term) => {
@@ -359,6 +387,7 @@ const LogMealModal = ({
             grams: item.grams,
             portionType: item.portionType,
             portionQuantity: item.portionQuantity,
+            mealType: selectedMealType, // Add meal type
             nutrition,
           };
           onSave(entry);
@@ -393,6 +422,21 @@ const LogMealModal = ({
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
+    }
+  };
+  
+  // Handle custom food creation
+  const handleSaveCustomFood = (customFoodData) => {
+    try {
+      const newFood = addCustomFood(customFoodData);
+      // Reload all foods to include the new custom food
+      loadAllFoods();
+      // Optionally, automatically add it to the search results or meal
+      setSearchResults(prevResults => [newFood, ...prevResults]);
+      setShowCustomFoodDialog(false);
+    } catch (error) {
+      console.error('Error adding custom food:', error);
+      setError('Failed to add custom food. Please try again.');
     }
   };
 
@@ -528,6 +572,63 @@ const LogMealModal = ({
       </DialogTitle>
 
       <DialogContent sx={{ p: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* Meal Type Selection - Clean, icon-based design */}
+        <Box sx={{ 
+          px: 3, 
+          pt: 2, 
+          pb: 1.5,
+          borderBottom: 1,
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+        }}>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', fontWeight: 600 }}>
+            MEAL TYPE
+          </Typography>
+          <ToggleButtonGroup
+            value={selectedMealType}
+            exclusive
+            onChange={(e, newType) => newType && setSelectedMealType(newType)}
+            fullWidth
+            sx={{ 
+              '& .MuiToggleButton-root': {
+                py: 1.5,
+                px: 2,
+                border: 1,
+                borderColor: 'divider',
+                '&.Mui-selected': {
+                  borderColor: 'primary.main',
+                  bgcolor: 'primary.50',
+                  color: 'primary.main',
+                  fontWeight: 600,
+                  '&:hover': {
+                    bgcolor: 'primary.100',
+                  },
+                },
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                },
+              },
+            }}
+          >
+            <ToggleButton value="breakfast" sx={{ flexDirection: 'column', gap: 0.5 }}>
+              <BreakfastIcon fontSize="small" />
+              <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>Breakfast</Typography>
+            </ToggleButton>
+            <ToggleButton value="lunch" sx={{ flexDirection: 'column', gap: 0.5 }}>
+              <LunchIcon fontSize="small" />
+              <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>Lunch</Typography>
+            </ToggleButton>
+            <ToggleButton value="dinner" sx={{ flexDirection: 'column', gap: 0.5 }}>
+              <DinnerIcon fontSize="small" />
+              <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>Dinner</Typography>
+            </ToggleButton>
+            <ToggleButton value="snack" sx={{ flexDirection: 'column', gap: 0.5 }}>
+              <SnackIcon fontSize="small" />
+              <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>Snack</Typography>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+
         {/* Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3, pt: 2 }}>
           <Tabs 
@@ -688,9 +789,18 @@ const LogMealModal = ({
                   <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
                     No foods found{searchQuery ? ` for "${searchQuery}"` : ''}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                     Try simpler terms or check for spelling mistakes
                   </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={() => setShowCustomFoodDialog(true)}
+                    fullWidth
+                  >
+                    Add as Custom Food
+                  </Button>
                 </Alert>
               )}
             </Box>
@@ -901,6 +1011,14 @@ const LogMealModal = ({
           </Button>
         </Box>
       </DialogContent>
+      
+      {/* Add Custom Food Dialog */}
+      <AddCustomFoodDialog
+        open={showCustomFoodDialog}
+        onClose={() => setShowCustomFoodDialog(false)}
+        onSave={handleSaveCustomFood}
+        existingFoods={allFoods}
+      />
     </Dialog>
   );
 };

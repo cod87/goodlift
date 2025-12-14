@@ -94,13 +94,11 @@ const ExerciseCard = memo(({
   const isLandscape = useMediaQuery('(orientation: landscape)');
   const shouldUseTwoColumns = isTabletOrLarger && isLandscape;
 
-  // Construct Work Icon URL with robust path handling
+  // Construct Work Icon URL
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
 
-  // Fixed: Properly construct image URL from the exercise.image field
-  // The 'image' prop should contain the raw path from exercises.json (e.g., 'demos/file.webp' or 'svg-muscles/file.svg')
-  // constructImageUrl() will prepend the base URL (e.g., '/goodlift/') to create the full path
+  // Construct image URL from the exercise.image field
   const imagePath = image || demoImage;
   const imageSrc = imagePath && !imageError ? constructImageUrl(imagePath) : null;
 

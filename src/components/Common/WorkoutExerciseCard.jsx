@@ -53,13 +53,11 @@ const WorkoutExerciseCard = memo(({
   const primaryMuscle = exercise?.['Primary Muscle'] || '';
   const supersetGroup = exercise?.supersetGroup;
   
-  // Get base URL for constructing work icon fallback
+  // Get base URL for work icon fallback
   const baseUrl = import.meta.env.BASE_URL || '/';
   const workIconUrl = baseUrl.endsWith('/') ? `${baseUrl}work-icon.svg` : `${baseUrl}/work-icon.svg`;
   
-  // Fixed: Properly construct image URL from the exercise.image field
-  // The exercise.image field contains the raw path from exercises.json (e.g., 'demos/file.webp' or 'svg-muscles/file.svg')
-  // constructImageUrl() will prepend the base URL (e.g., '/goodlift/') to create the full path
+  // Construct image URL from the exercise.image field
   const imagePath = constructImageUrl(exercise?.image);
 
   const supersetColor = getSupersetColor(supersetGroup);

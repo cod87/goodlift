@@ -28,15 +28,13 @@ import {
   ArrowBack,
   Save,
   HotelOutlined,
-  Edit,
+  FitnessCenter,
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
 import SessionTypeQuickToggle from '../components/SessionTypeQuickToggle';
-import { getSavedWorkouts, updateSavedWorkout } from '../utils/storage';
+import { getSavedWorkouts } from '../utils/storage';
 import { getDefaultSessionData } from '../utils/sessionTemplates';
-import WorkoutCreationModal from '../components/WorkTabs/WorkoutCreationModal';
 import LoadingScreen from '../components/LoadingScreen';
-import { EXERCISES_DATA_PATH } from '../utils/constants';
 
 // Days of the week constant - Sunday through Saturday
 const DAYS_OF_WEEK = [
@@ -50,8 +48,12 @@ const DAYS_OF_WEEK = [
 ];
 
 /**
- * EditWeeklyScheduleScreen - Dedicated screen for editing weekly workout schedules
- * Features day-of-week tabs, superset management, exercise editing, and timer configuration
+ * EditWeeklyScheduleScreen - Minimalist screen for editing weekly workout schedules
+ * Features:
+ * - Day-of-week tabs for navigation
+ * - Session type selection (strength, cardio, yoga, etc.)
+ * - Saved workout assignment for strength sessions
+ * - Simple assignment interface - no exercise editing
  */
 const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   const { weeklySchedule, assignWorkoutToDay, loading } = useWeekScheduling();
@@ -62,28 +64,16 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [pendingDayChange, setPendingDayChange] = useState(null);
-  
-  // Workout editor modal state
-  const [showWorkoutEditor, setShowWorkoutEditor] = useState(false);
-  const [editingWorkout, setEditingWorkout] = useState(null);
-  const [editingWorkoutIndex, setEditingWorkoutIndex] = useState(null);
-  const [availableExercises, setAvailableExercises] = useState([]);
 
-  // Load saved workouts and exercises
+  // Load saved workouts
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [workouts, exercisesResponse] = await Promise.all([
-          getSavedWorkouts(),
-          fetch(EXERCISES_DATA_PATH),
-        ]);
-        const exercisesData = await exercisesResponse.json();
+        const workouts = await getSavedWorkouts();
         setSavedWorkouts(workouts || []);
-        setAvailableExercises(exercisesData);
       } catch (error) {
         console.error('Error loading data:', error);
         setSavedWorkouts([]);
-        setAvailableExercises([]);
       }
     };
     loadData();
@@ -231,12 +221,19 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
     const currentType = getWorkoutType(currentWorkout);
 
     // Create updated workout data with the selected workout's exercises
+    // Include isSavedWorkout flag for synchronicity with TodaysWorkoutSection
     const updatedWorkout = {
       sessionType: currentType || workout.type || 'full',
       sessionName: workout.name || `${(currentType || workout.type || 'full').charAt(0).toUpperCase() + (currentType || workout.type || 'full').slice(1)} Body Workout`,
       exercises: workout.exercises,
       supersetConfig: workout.supersetConfig || [2, 2, 2, 2],
+      isSavedWorkout: true, // Flag for TodaysWorkoutSection to identify saved workouts
     };
+
+    // Include workoutId only if it exists
+    if (workout.id) {
+      updatedWorkout.workoutId = workout.id;
+    }
 
     setDayWorkouts(prev => ({
       ...prev,
@@ -249,87 +246,6 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
       message: `Loaded workout: ${workout.name}`,
       severity: 'success',
     });
-  };
-
-  // Handle editing the currently assigned workout for the selected day
-  const handleEditCurrentWorkout = () => {
-    const currentWorkout = dayWorkouts[selectedDay];
-    if (!currentWorkout || !currentWorkout.exercises) return;
-
-    // Find the workout in savedWorkouts by matching exercises
-    const workoutIndex = savedWorkouts.findIndex(sw => 
-      sw.exercises === currentWorkout.exercises ||
-      JSON.stringify(sw.exercises) === JSON.stringify(currentWorkout.exercises)
-    );
-
-    if (workoutIndex >= 0) {
-      setEditingWorkout(savedWorkouts[workoutIndex]);
-      setEditingWorkoutIndex(workoutIndex);
-      setShowWorkoutEditor(true);
-    } else {
-      // If not found in saved workouts, create a temporary workout object to edit
-      setEditingWorkout({
-        name: currentWorkout.sessionName || 'Custom Workout',
-        type: currentWorkout.sessionType || 'full',
-        exercises: currentWorkout.exercises,
-        supersetConfig: currentWorkout.supersetConfig || [2, 2, 2, 2],
-      });
-      setEditingWorkoutIndex(null); // null means it's not saved yet
-      setShowWorkoutEditor(true);
-    }
-  };
-
-  // Handle saving edited workout
-  const handleSaveEditedWorkout = async (workout) => {
-    try {
-      if (editingWorkoutIndex !== null) {
-        // Update existing saved workout
-        await updateSavedWorkout(editingWorkoutIndex, workout);
-        
-        // Refresh saved workouts list
-        const workouts = await getSavedWorkouts();
-        setSavedWorkouts(workouts || []);
-        
-        // Update the day's workout with the edited version
-        const currentWorkout = dayWorkouts[selectedDay];
-        if (currentWorkout) {
-          setDayWorkouts(prev => ({
-            ...prev,
-            [selectedDay]: {
-              ...currentWorkout,
-              exercises: workout.exercises,
-              supersetConfig: workout.supersetConfig || [2, 2, 2, 2],
-              sessionName: workout.name,
-            },
-          }));
-          setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
-        }
-        
-        setSnackbar({
-          open: true,
-          message: 'Workout updated successfully',
-          severity: 'success',
-        });
-      }
-      
-      setShowWorkoutEditor(false);
-      setEditingWorkout(null);
-      setEditingWorkoutIndex(null);
-    } catch (error) {
-      console.error('Error saving workout:', error);
-      setSnackbar({
-        open: true,
-        message: 'Failed to save workout changes',
-        severity: 'error',
-      });
-    }
-  };
-
-  // Handle closing workout editor
-  const handleCloseWorkoutEditor = () => {
-    setShowWorkoutEditor(false);
-    setEditingWorkout(null);
-    setEditingWorkoutIndex(null);
   };
 
   // Save all changes
@@ -423,7 +339,6 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   const currentWorkout = dayWorkouts[selectedDay];
   const workoutType = getWorkoutType(currentWorkout);
   const isStrength = isStrengthWorkout(workoutType);
-  const isTimer = isTimerWorkout(workoutType);
   const isRest = isRestDay(workoutType);
 
   const hasAnyUnsavedChanges = Object.values(hasUnsavedChanges).some(v => v);
@@ -457,7 +372,7 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
               Edit Weekly Schedule
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Customize your workouts for each day of the week
+              Assign sessions to each day of your week
             </Typography>
           </Box>
           {hasAnyUnsavedChanges && (
@@ -513,10 +428,10 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
         <Box sx={{ maxWidth: 900, mx: 'auto' }}>
           {/* Session Type Selection */}
           {currentWorkout && (
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                  Session Type for {selectedDay}
+            <Card sx={{ mb: 2, bgcolor: 'background.paper' }}>
+              <CardContent sx={{ p: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.secondary' }}>
+                  Session Type
                 </Typography>
                 <SessionTypeQuickToggle
                   currentType={workoutType || 'full'}
@@ -524,13 +439,8 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
                   compact={true}
                 />
                 {isStrength && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                    💡 For strength days, select a saved workout below to assign exercises.
-                  </Typography>
-                )}
-                {isTimer && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                    ✓ {currentWorkout.sessionName || workoutType} session assigned. Use the timer when you&apos;re ready to start.
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>
+                    Select a saved workout below
                   </Typography>
                 )}
               </CardContent>
@@ -539,21 +449,22 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
 
           {/* Saved Workout Selector - shown for strength workouts */}
           {currentWorkout && isStrength && (
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <FormControl fullWidth>
-                  <InputLabel shrink sx={{ backgroundColor: (theme) => theme.palette.background.paper, px: 1 }}>
-                    Select Saved Workout
+            <Card sx={{ mb: 2, bgcolor: 'background.paper' }}>
+              <CardContent sx={{ p: 2 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel shrink sx={{ backgroundColor: (theme) => theme.palette.background.paper, px: 0.5 }}>
+                    Saved Workout
                   </InputLabel>
                   <Select
                     value=""
-                    label="Select Saved Workout"
+                    label="Saved Workout"
                     onChange={(e) => handleSelectSavedWorkout(e.target.value)}
                     displayEmpty
                     notched
+                    size="small"
                   >
                     <MenuItem value="" disabled>
-                      Choose a workout to load exercises...
+                      Choose a workout...
                     </MenuItem>
                     {savedWorkouts.map((workout, index) => (
                       <MenuItem key={index} value={index}>
@@ -565,7 +476,7 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
                 </FormControl>
                 {savedWorkouts.length === 0 && (
                   <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    No saved workouts available. Create one from the Work tab.
+                    No saved workouts. Create one from the Work tab.
                   </Typography>
                 )}
               </CardContent>
@@ -573,14 +484,11 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
           )}
 
           {!currentWorkout && (
-            <Card sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="h6" color="text.secondary">
+            <Card sx={{ p: 3, textAlign: 'center', bgcolor: 'background.paper' }}>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
                 No session assigned for {selectedDay}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 3 }}>
-                Choose a session type to assign to this day
-              </Typography>
-              <Box sx={{ mt: 3, maxWidth: 600, mx: 'auto' }}>
+              <Box sx={{ mt: 2, maxWidth: 600, mx: 'auto' }}>
                 <SessionTypeQuickToggle
                   currentType="full"
                   onChange={handleSessionTypeChange}
@@ -592,87 +500,49 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
 
           {/* Rest Day */}
           {isRest && (
-            <Card sx={{ p: 6, textAlign: 'center' }}>
-              <HotelOutlined sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary' }}>
+            <Card sx={{ p: 4, textAlign: 'center', bgcolor: 'background.paper' }}>
+              <HotelOutlined sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
+              <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary' }}>
                 Rest Day
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-                Take a break and recover. Your body needs rest to grow stronger!
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Recovery is essential for growth
               </Typography>
             </Card>
           )}
 
-          {/* Strength Workouts - Exercise List (Read-only) */}
+          {/* Strength Workouts - Minimalist Summary */}
           {isStrength && (
-            <Stack spacing={3}>
-              {/* Exercise List Header with Edit Button */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    Exercises
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    Exercises from the selected saved workout
-                  </Typography>
-                </Box>
-                {currentWorkout.exercises && currentWorkout.exercises.length > 0 && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<Edit />}
-                    onClick={handleEditCurrentWorkout}
-                    size="small"
-                  >
-                    Edit Workout
-                  </Button>
-                )}
-              </Box>
-
-              {/* Exercise List */}
+            <Stack spacing={2}>
+              {/* Workout Summary */}
               {currentWorkout.exercises && currentWorkout.exercises.length > 0 ? (
-                currentWorkout.exercises.map((exercise, idx) => (
-                  <Card key={exercise.id || idx} sx={{ borderLeft: 3, borderColor: 'primary.main' }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                        <Typography
-                          sx={{
-                            fontSize: '1.25rem',
-                            color: 'primary.main',
-                            fontWeight: 700,
-                            minWidth: '32px',
-                            textAlign: 'center',
-                          }}
-                        >
-                          {idx + 1}
-                        </Typography>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {exercise.name || exercise.exerciseName || 'Unnamed Exercise'}
-                          </Typography>
-                          {exercise.muscleGroup && (
-                            <Typography variant="body2" color="text.secondary">
-                              {exercise.muscleGroup}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Box>
-
-                      {/* Sets Display */}
-                      {exercise.sets && exercise.sets.length > 0 && (
-                        <Box sx={{ pl: 5, mt: 2 }}>
-                          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                            Sets: {exercise.sets.length} × {exercise.sets[0]?.reps || 0} reps 
-                            {exercise.sets[0]?.weight > 0 ? ` @ ${exercise.sets[0].weight} lbs` : ''}
-                          </Typography>
-                        </Box>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))
+                <Card 
+                  sx={{ 
+                    p: 2.5, 
+                    textAlign: 'center',
+                    bgcolor: 'background.paper',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                >
+                  <FitnessCenter sx={{ fontSize: 40, color: 'primary.main', mb: 1.5 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    {currentWorkout.sessionName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                    {currentWorkout.exercises.length} exercises
+                  </Typography>
+                  <Chip 
+                    label={`${currentWorkout.sessionType?.toUpperCase() || 'FULL'} BODY`}
+                    color="primary"
+                    size="small"
+                    sx={{ fontWeight: 600, fontSize: '0.7rem' }}
+                  />
+                </Card>
               ) : (
-                <Card sx={{ p: 4, textAlign: 'center' }}>
-                  <Typography variant="body1" color="text.secondary">
-                    No exercises in this workout. Select a saved workout above to assign exercises.
+                <Card sx={{ p: 3, textAlign: 'center', bgcolor: 'background.paper' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Select a saved workout above
                   </Typography>
                 </Card>
               )}
@@ -681,21 +551,23 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
 
           {/* Action Buttons */}
           {currentWorkout && !isRest && (
-            <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Box sx={{ mt: 3, display: 'flex', gap: 1.5, justifyContent: 'center' }}>
               <Button
                 variant="outlined"
                 onClick={handleDiscardChanges}
                 disabled={!hasAnyUnsavedChanges}
+                size="medium"
               >
-                Discard Changes
+                Discard
               </Button>
               <Button
                 variant="contained"
                 startIcon={<Save />}
                 onClick={handleSaveAll}
                 disabled={!hasAnyUnsavedChanges}
+                size="medium"
               >
-                Save All Changes
+                Save Changes
               </Button>
             </Box>
           )}
@@ -734,15 +606,6 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-
-      {/* Workout Editor Modal */}
-      <WorkoutCreationModal
-        open={showWorkoutEditor}
-        onClose={handleCloseWorkoutEditor}
-        onSave={handleSaveEditedWorkout}
-        exercises={availableExercises}
-        existingWorkout={editingWorkout}
-      />
     </Box>
   );
 };

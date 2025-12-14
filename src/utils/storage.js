@@ -21,6 +21,7 @@ import {
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
 import { normalizeWorkoutExercises } from './exerciseNameNormalizer';
+import { enrichWorkoutExercises } from './enrichExerciseData';
 
 /**
  * Storage module for managing workout data in localStorage and Firebase
@@ -896,7 +897,14 @@ export const getFavoriteWorkouts = async () => {
     }
     
     // Normalize exercise names to movement-first format
-    return favorites.map(workout => normalizeWorkoutExercises(workout));
+    const normalizedFavorites = favorites.map(workout => normalizeWorkoutExercises(workout));
+    
+    // Enrich exercises with image data from exercises.json
+    const enrichedFavorites = await Promise.all(
+      normalizedFavorites.map(workout => enrichWorkoutExercises(workout))
+    );
+    
+    return enrichedFavorites;
   } catch (error) {
     console.error('Error reading favorite workouts:', error);
     return [];
@@ -2000,7 +2008,14 @@ export const getSavedWorkouts = async () => {
     }
 
     // Normalize exercise names to movement-first format
-    return workouts.map(workout => normalizeWorkoutExercises(workout));
+    const normalizedWorkouts = workouts.map(workout => normalizeWorkoutExercises(workout));
+    
+    // Enrich exercises with image data from exercises.json
+    const enrichedWorkouts = await Promise.all(
+      normalizedWorkouts.map(workout => enrichWorkoutExercises(workout))
+    );
+    
+    return enrichedWorkouts;
   } catch (error) {
     console.error('Error reading saved workouts:', error);
     return [];

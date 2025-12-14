@@ -469,9 +469,11 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   useEffect(() => {
     if (currentStep?.exercise?.image) {
       const imagePath = constructImageUrl(currentStep.exercise.image);
+      console.log('[WorkoutScreen] Loading exercise image:', currentStep.exercise['Exercise Name'], '→', imagePath);
       setDemoImageSrc(imagePath);
       setImageError(false);
     } else {
+      console.warn('[WorkoutScreen] No image field found for exercise:', currentStep?.exercise?.['Exercise Name']);
       setDemoImageSrc(null);
       setImageError(true);
     }

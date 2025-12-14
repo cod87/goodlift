@@ -335,7 +335,6 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
   const currentWorkout = dayWorkouts[selectedDay];
   const workoutType = getWorkoutType(currentWorkout);
   const isStrength = isStrengthWorkout(workoutType);
-  const isTimer = isTimerWorkout(workoutType);
   const isRest = isRestDay(workoutType);
 
   const hasAnyUnsavedChanges = Object.values(hasUnsavedChanges).some(v => v);

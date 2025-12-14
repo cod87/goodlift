@@ -22,6 +22,7 @@ import {
   Divider,
   Tabs,
   Tab,
+  Collapse,
 } from '@mui/material';
 import {
   Add,
@@ -33,6 +34,8 @@ import {
   WbSunny as LunchIcon,
   NightsStay as DinnerIcon,
   Cookie as SnackIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material';
 import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes, getFavoriteFoods } from '../../utils/nutritionStorage';
 import { calculateNutrition } from '../../services/nutritionDataService';
@@ -79,6 +82,14 @@ const NutritionTab = () => {
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [showLogMealModal, setShowLogMealModal] = useState(false);
   const [favoriteFoods, setFavoriteFoods] = useState([]);
+  
+  // Expanded state for meal type sections
+  const [expandedMealTypes, setExpandedMealTypes] = useState({
+    breakfast: false,
+    lunch: false,
+    dinner: false,
+    snack: false,
+  });
 
   // Load today's entries, goals, recipes, and favorites on mount
   useEffect(() => {
@@ -256,6 +267,14 @@ const NutritionTab = () => {
   const getMealDisplayName = (mealType) => {
     return mealType.charAt(0).toUpperCase() + mealType.slice(1);
   };
+  
+  // Toggle meal type expansion
+  const toggleMealType = (mealType) => {
+    setExpandedMealTypes(prev => ({
+      ...prev,
+      [mealType]: !prev[mealType],
+    }));
+  };
 
   const totals = getTodayTotals();
 
@@ -391,7 +410,7 @@ const NutritionTab = () => {
         >
           <Tab 
             icon={<Restaurant fontSize="small" />} 
-            label="Food Diary"
+            label="Nutrition Log"
             iconPosition="start"
           />
           <Tab 
@@ -470,7 +489,7 @@ const NutritionTab = () => {
         </CardContent>
       </Card>
 
-      {/* Today's Entries - Grouped by Meal Type */}
+      {/* Today's Entries - Collapsible by Meal Type */}
       <Card>
         <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
           <Typography variant="h6" gutterBottom>
@@ -492,63 +511,125 @@ const NutritionTab = () => {
                     protein: totals.protein + entry.nutrition.protein,
                     carbs: totals.carbs + entry.nutrition.carbs,
                     fat: totals.fat + entry.nutrition.fat,
+                    fiber: totals.fiber + entry.nutrition.fiber,
                   }),
-                  { calories: 0, protein: 0, carbs: 0, fat: 0 }
+                  { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
                 );
                 
+                const isExpanded = expandedMealTypes[mealType];
+                
                 return (
-                  <Box key={mealType} sx={{ mb: 2 }}>
-                    {/* Meal Type Header */}
-                    <Box sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 1, 
-                      mb: 1,
-                      pb: 0.5,
-                      borderBottom: 1,
-                      borderColor: 'divider',
-                    }}>
+                  <Box key={mealType} sx={{ mb: 1.5 }}>
+                    {/* Meal Type Header - Clickable to expand/collapse */}
+                    <Box 
+                      sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 1, 
+                        py: 1.5,
+                        px: 1.5,
+                        borderRadius: 1,
+                        cursor: 'pointer',
+                        bgcolor: 'action.hover',
+                        '&:hover': {
+                          bgcolor: 'action.selected',
+                        },
+                        transition: 'background-color 0.2s',
+                      }}
+                      onClick={() => toggleMealType(mealType)}
+                    >
                       {getMealIcon(mealType)}
                       <Typography variant="subtitle2" sx={{ fontWeight: 600, flex: 1 }}>
-                        {getMealDisplayName(mealType)}
+                        {getMealDisplayName(mealType)} ({entries.length})
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {mealTotals.calories.toFixed(0)} cal
-                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mr: 1 }}>
+                        <Chip 
+                          label={`${mealTotals.calories.toFixed(0)} cal`} 
+                          size="small" 
+                          sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600 }}
+                        />
+                        <Chip 
+                          label={`P: ${mealTotals.protein.toFixed(0)}g`} 
+                          size="small" 
+                          color="primary"
+                          sx={{ height: 22, fontSize: '0.75rem' }}
+                        />
+                        <Chip 
+                          label={`C: ${mealTotals.carbs.toFixed(0)}g`} 
+                          size="small" 
+                          color="secondary"
+                          sx={{ height: 22, fontSize: '0.75rem' }}
+                        />
+                        <Chip 
+                          label={`F: ${mealTotals.fat.toFixed(0)}g`} 
+                          size="small" 
+                          color="warning"
+                          sx={{ height: 22, fontSize: '0.75rem' }}
+                        />
+                      </Box>
+                      <IconButton size="small" sx={{ p: 0.5 }}>
+                        {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      </IconButton>
                     </Box>
                     
-                    {/* Meal Entries */}
-                    <List disablePadding>
-                      {entries.map((entry, index) => (
-                        <Box key={entry.id}>
-                          {index > 0 && <Divider sx={{ my: 0.5 }} />}
-                          <ListItem
-                            sx={{ px: 0, py: 1, pl: 3 }}
-                            secondaryAction={
-                              <IconButton edge="end" onClick={() => handleDeleteEntry(entry.id)} color="error" size="small">
-                                <Delete fontSize="small" />
-                              </IconButton>
-                            }
-                          >
-                            <ListItemText
-                              primary={
-                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                  {entry.foodName} ({entry.grams}g)
-                                </Typography>
+                    {/* Collapsible Meal Entries */}
+                    <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                      <List disablePadding sx={{ mt: 0.5 }}>
+                        {entries.map((entry, index) => (
+                          <Box key={entry.id}>
+                            {index > 0 && <Divider sx={{ my: 0.5, ml: 3 }} />}
+                            <ListItem
+                              sx={{ px: 0, py: 1, pl: 4 }}
+                              secondaryAction={
+                                <IconButton 
+                                  edge="end" 
+                                  onClick={() => handleDeleteEntry(entry.id)} 
+                                  color="error" 
+                                  size="small"
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
                               }
-                              secondary={
-                                <Box component="span" sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
-                                  <Chip label={`${entry.nutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                  <Chip label={`P: ${entry.nutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                  <Chip label={`C: ${entry.nutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                  <Chip label={`F: ${entry.nutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
-                                </Box>
-                              }
-                            />
-                          </ListItem>
-                        </Box>
-                      ))}
-                    </List>
+                            >
+                              <ListItemText
+                                primary={
+                                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                    {entry.foodName} ({entry.grams}g)
+                                  </Typography>
+                                }
+                                secondary={
+                                  <Box component="span" sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+                                    <Chip 
+                                      label={`${entry.nutrition.calories.toFixed(0)} cal`} 
+                                      size="small" 
+                                      sx={{ height: 20, fontSize: '0.7rem' }}
+                                    />
+                                    <Chip 
+                                      label={`P: ${entry.nutrition.protein.toFixed(1)}g`} 
+                                      size="small" 
+                                      color="primary" 
+                                      sx={{ height: 20, fontSize: '0.7rem' }}
+                                    />
+                                    <Chip 
+                                      label={`C: ${entry.nutrition.carbs.toFixed(1)}g`} 
+                                      size="small" 
+                                      color="secondary" 
+                                      sx={{ height: 20, fontSize: '0.7rem' }}
+                                    />
+                                    <Chip 
+                                      label={`F: ${entry.nutrition.fat.toFixed(1)}g`} 
+                                      size="small" 
+                                      color="warning" 
+                                      sx={{ height: 20, fontSize: '0.7rem' }}
+                                    />
+                                  </Box>
+                                }
+                              />
+                            </ListItem>
+                          </Box>
+                        ))}
+                      </List>
+                    </Collapse>
                   </Box>
                 );
               })}

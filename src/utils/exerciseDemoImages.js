@@ -4,8 +4,8 @@
  * Provides URL construction for exercise demonstration images.
  * 
  * The Good Lift app stores exercise images in two directories:
- * - public/demos/*.webp - Photo demonstrations (62 images)
- * - public/svg-muscles/*.svg - Muscle diagram SVGs (104 images)
+ * - public/demos/*.webp - Photo demonstrations (60 files, 53 exercises use them)
+ * - public/svg-muscles/*.svg - Muscle diagram SVGs (103 files, all used)
  * 
  * Each exercise in exercises.json has an 'image' field pointing to its image:
  *   { "Exercise Name": "Back Squat", "image": "demos/back-squat.webp" }

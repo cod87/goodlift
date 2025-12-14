@@ -10,13 +10,13 @@ Exercise images are stored in two directories under `public/`:
 
 ### 1. Photo Demonstrations (`public/demos/`)
 - Format: WebP (`.webp`)
-- Count: 62 images
+- Count: 60 files on disk, 53 exercises use them
 - Content: Real-world exercise demonstrations
 - Example: `back-squat.webp`, `barbell-bench-press.webp`
 
 ### 2. Muscle Diagrams (`public/svg-muscles/`)
 - Format: SVG (`.svg`)
-- Count: 104 images
+- Count: 103 files, all used by exercises
 - Content: Anatomical muscle group diagrams
 - Example: `archer-push-up.svg`, `dumbbell-arnold-press.svg`
 

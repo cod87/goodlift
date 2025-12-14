@@ -159,7 +159,7 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <FoodIcon color="primary" />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Add Custom Food
+            Add Custom Ingredient
           </Typography>
         </Box>
         <IconButton onClick={handleClose} size="small">
@@ -178,11 +178,11 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
           {/* Food Name */}
           <TextField
             fullWidth
-            label="Food Name"
+            label="Ingredient Name"
             value={formData.name}
             onChange={handleChange('name')}
             error={!!errors.name}
-            helperText={errors.name || 'Enter a unique name for this food'}
+            helperText={errors.name || 'Enter a unique name for this ingredient'}
             required
             autoFocus
           />
@@ -284,7 +284,7 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
           Cancel
         </Button>
         <Button onClick={handleSubmit} variant="contained">
-          Add Food
+          Add Ingredient
         </Button>
       </DialogActions>
     </Dialog>

@@ -77,6 +77,7 @@ const LogMealModal = ({
   // recentFoods = [], // Not used yet
   // favoriteFoods = [], // Not used yet
   onFavoritesChange,
+  initialMealType = null, // New prop to set initial meal type
 }) => {
   // 0: Search Food, 1: My Meal
   const [activeTab, setActiveTab] = useState(0);
@@ -110,12 +111,12 @@ const LogMealModal = ({
       setActiveTab(0);
       setMealItems([]);
       setSelectedFoodIds(new Set());
-      // Set default meal type based on current time
-      setSelectedMealType(getCurrentMealType());
+      // Set default meal type based on initialMealType or current time
+      setSelectedMealType(initialMealType || getCurrentMealType());
       // Load all foods for custom food validation
       loadAllFoods();
     }
-  }, [open]);
+  }, [open, initialMealType]);
   
   // Load all foods from database and custom foods
   const loadAllFoods = async () => {
@@ -581,7 +582,7 @@ const LogMealModal = ({
           borderColor: 'divider',
           bgcolor: 'background.paper',
         }}>
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', fontWeight: 600 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', fontWeight: 600, letterSpacing: '0.5px' }}>
             MEAL TYPE
           </Typography>
           <ToggleButtonGroup
@@ -595,6 +596,7 @@ const LogMealModal = ({
                 px: 2,
                 border: 1,
                 borderColor: 'divider',
+                color: 'text.secondary',
                 '&.Mui-selected': {
                   borderColor: 'primary.main',
                   bgcolor: 'primary.50',
@@ -1030,6 +1032,7 @@ LogMealModal.propTypes = {
   recentFoods: PropTypes.array,
   favoriteFoods: PropTypes.array,
   onFavoritesChange: PropTypes.func,
+  initialMealType: PropTypes.string, // New prop type
 };
 
 export default LogMealModal;

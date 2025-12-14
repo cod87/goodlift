@@ -17,9 +17,20 @@ import {
   DialogActions,
   Button,
   TextField,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
-import { Delete, Edit, Add } from '@mui/icons-material';
+import { 
+  Delete, 
+  Edit, 
+  Add,
+  LightMode as BreakfastIcon,
+  WbSunny as LunchIcon,
+  NightsStay as DinnerIcon,
+  Cookie as SnackIcon,
+} from '@mui/icons-material';
 import { deleteRecipe } from '../../utils/nutritionStorage';
+import { getCurrentMealType } from '../../utils/nutritionUtils';
 
 /**
  * SavedRecipes - Component to display and manage saved recipes
@@ -35,6 +46,7 @@ const SavedRecipes = ({ recipes, onEdit, onRecipesUpdate, onAddToLog }) => {
   const [addPortionDialogOpen, setAddPortionDialogOpen] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [portionSize, setPortionSize] = useState(1);
+  const [selectedMealType, setSelectedMealType] = useState('breakfast');
 
   const handleDeleteClick = (recipe) => {
     setRecipeToDelete(recipe);
@@ -59,6 +71,7 @@ const SavedRecipes = ({ recipes, onEdit, onRecipesUpdate, onAddToLog }) => {
   const handleAddPortionClick = (recipe) => {
     setSelectedRecipe(recipe);
     setPortionSize(1);
+    setSelectedMealType(getCurrentMealType()); // Set default meal type based on current time
     setAddPortionDialogOpen(true);
   };
 
@@ -82,6 +95,7 @@ const SavedRecipes = ({ recipes, onEdit, onRecipesUpdate, onAddToLog }) => {
         isRecipe: true,
         recipeId: selectedRecipe.id,
         portionSize,
+        mealType: selectedMealType, // Add meal type to entry
       };
 
       if (onAddToLog) {
@@ -91,6 +105,7 @@ const SavedRecipes = ({ recipes, onEdit, onRecipesUpdate, onAddToLog }) => {
       setAddPortionDialogOpen(false);
       setSelectedRecipe(null);
       setPortionSize(1);
+      setSelectedMealType('breakfast');
     }
   };
 
@@ -195,6 +210,37 @@ const SavedRecipes = ({ recipes, onEdit, onRecipesUpdate, onAddToLog }) => {
               <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
                 Full recipe: {selectedRecipe.totalWeight}g
               </Typography>
+              
+              {/* Meal Type Selection */}
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', fontWeight: 600 }}>
+                  MEAL TYPE
+                </Typography>
+                <ToggleButtonGroup
+                  value={selectedMealType}
+                  exclusive
+                  onChange={(e, newType) => newType && setSelectedMealType(newType)}
+                  fullWidth
+                  size="small"
+                >
+                  <ToggleButton value="breakfast" sx={{ flexDirection: 'column', gap: 0.5, py: 1 }}>
+                    <BreakfastIcon fontSize="small" />
+                    <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>Breakfast</Typography>
+                  </ToggleButton>
+                  <ToggleButton value="lunch" sx={{ flexDirection: 'column', gap: 0.5, py: 1 }}>
+                    <LunchIcon fontSize="small" />
+                    <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>Lunch</Typography>
+                  </ToggleButton>
+                  <ToggleButton value="dinner" sx={{ flexDirection: 'column', gap: 0.5, py: 1 }}>
+                    <DinnerIcon fontSize="small" />
+                    <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>Dinner</Typography>
+                  </ToggleButton>
+                  <ToggleButton value="snack" sx={{ flexDirection: 'column', gap: 0.5, py: 1 }}>
+                    <SnackIcon fontSize="small" />
+                    <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>Snack</Typography>
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
               
               <TextField
                 fullWidth

@@ -81,6 +81,7 @@ const NutritionTab = () => {
   const [showCreateRecipeModal, setShowCreateRecipeModal] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [showLogMealModal, setShowLogMealModal] = useState(false);
+  const [initialMealType, setInitialMealType] = useState(null); // Track which meal type was clicked
   const [favoriteFoods, setFavoriteFoods] = useState([]);
   
   // Expanded state for meal type sections
@@ -181,6 +182,12 @@ const NutritionTab = () => {
   const handleLogMealModalSave = (entry) => {
     saveNutritionEntry(entry);
     loadTodayEntries();
+  };
+  
+  // Open log meal modal for specific meal type
+  const handleOpenLogMeal = (mealType) => {
+    setInitialMealType(mealType);
+    setShowLogMealModal(true);
   };
 
   const getRecentFoods = () => {
@@ -316,7 +323,7 @@ const NutritionTab = () => {
     const remaining = Math.max(goal - current, 0);
     
     return (
-      <Card sx={{ mb: 2 }}>
+      <Card sx={{ mb: 2, boxShadow: 1 }}>
         <CardContent sx={{ py: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Box sx={{ position: 'relative', display: 'inline-flex', mb: 2 }}>
             <CircularProgress
@@ -354,13 +361,13 @@ const NutritionTab = () => {
               <Typography variant="h5" component="div" sx={{ fontWeight: 700 }}>
                 {current.toFixed(0)}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                of {goal} kcal
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                of {goal}
               </Typography>
             </Box>
           </Box>
-          <Typography variant="body2" color="text.secondary">
-            {remaining.toFixed(0)} kcal remaining
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+            {remaining.toFixed(0)} calories remaining
           </Typography>
         </CardContent>
       </Card>
@@ -374,28 +381,6 @@ const NutritionTab = () => {
 
   return (
     <Box>
-      {/* Log Meal Button - Prominent at top */}
-      <Box sx={{ mb: 2 }}>
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          startIcon={<Add />}
-          onClick={() => setShowLogMealModal(true)}
-          sx={{
-            py: 1.5,
-            fontWeight: 600,
-            fontSize: '1rem',
-            boxShadow: 2,
-            '&:hover': {
-              boxShadow: 4,
-            },
-          }}
-        >
-          Log a Meal
-        </Button>
-      </Box>
-
       {/* Sub-tabs for Diary and Recipes */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs 
@@ -428,8 +413,107 @@ const NutritionTab = () => {
           {/* Calorie Progress Ring */}
           <CalorieProgressRing current={totals.calories} goal={goals.calories} />
 
+          {/* Meal Type Quick Action Buttons - Minimalist Design */}
+          <Card sx={{ mb: 2, boxShadow: 1 }}>
+            <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block', fontWeight: 600, letterSpacing: '0.5px' }}>
+                LOG A MEAL
+              </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1 }}>
+                <Button
+                  onClick={() => handleOpenLogMeal('breakfast')}
+                  sx={{
+                    flexDirection: 'column',
+                    gap: 0.5,
+                    py: 1.5,
+                    px: 1,
+                    borderRadius: 2,
+                    bgcolor: 'background.default',
+                    color: 'text.secondary',
+                    '&:hover': {
+                      bgcolor: 'action.hover',
+                      color: 'text.primary',
+                    },
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <BreakfastIcon fontSize="medium" />
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500 }}>
+                    Breakfast
+                  </Typography>
+                </Button>
+                <Button
+                  onClick={() => handleOpenLogMeal('lunch')}
+                  sx={{
+                    flexDirection: 'column',
+                    gap: 0.5,
+                    py: 1.5,
+                    px: 1,
+                    borderRadius: 2,
+                    bgcolor: 'background.default',
+                    color: 'text.secondary',
+                    '&:hover': {
+                      bgcolor: 'action.hover',
+                      color: 'text.primary',
+                    },
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <LunchIcon fontSize="medium" />
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500 }}>
+                    Lunch
+                  </Typography>
+                </Button>
+                <Button
+                  onClick={() => handleOpenLogMeal('dinner')}
+                  sx={{
+                    flexDirection: 'column',
+                    gap: 0.5,
+                    py: 1.5,
+                    px: 1,
+                    borderRadius: 2,
+                    bgcolor: 'background.default',
+                    color: 'text.secondary',
+                    '&:hover': {
+                      bgcolor: 'action.hover',
+                      color: 'text.primary',
+                    },
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <DinnerIcon fontSize="medium" />
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500 }}>
+                    Dinner
+                  </Typography>
+                </Button>
+                <Button
+                  onClick={() => handleOpenLogMeal('snack')}
+                  sx={{
+                    flexDirection: 'column',
+                    gap: 0.5,
+                    py: 1.5,
+                    px: 1,
+                    borderRadius: 2,
+                    bgcolor: 'background.default',
+                    color: 'text.secondary',
+                    '&:hover': {
+                      bgcolor: 'action.hover',
+                      color: 'text.primary',
+                    },
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <SnackIcon fontSize="medium" />
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500 }}>
+                    Snack
+                  </Typography>
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+
           {/* Daily Summary - More Compact */}
-      <Card sx={{ mb: 2 }}>
+      <Card sx={{ mb: 2, boxShadow: 1 }}>
         <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
             <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -491,14 +575,14 @@ const NutritionTab = () => {
       </Card>
 
       {/* Today's Entries - Collapsible by Meal Type */}
-      <Card>
+      <Card sx={{ boxShadow: 1 }}>
         <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
           <Typography variant="h6" gutterBottom>
             Today&apos;s Entries
           </Typography>
           {todayEntries.length === 0 ? (
             <Typography color="text.secondary" align="center" sx={{ py: 2, fontSize: '0.9rem' }}>
-              No entries yet. Click "Log a Meal" above to add foods.
+              No entries yet. Select a meal type above to add foods.
             </Typography>
           ) : (
             <Box>
@@ -529,11 +613,11 @@ const NutritionTab = () => {
                         gap: 1, 
                         py: 1.5,
                         px: 1.5,
-                        borderRadius: 1,
+                        borderRadius: 2,
                         cursor: 'pointer',
-                        bgcolor: 'action.hover',
+                        bgcolor: 'background.default',
                         '&:hover': {
-                          bgcolor: 'action.selected',
+                          bgcolor: 'action.hover',
                         },
                         transition: 'background-color 0.2s',
                       }}
@@ -547,25 +631,22 @@ const NutritionTab = () => {
                         <Chip 
                           label={`${mealTotals.calories.toFixed(0)} cal`} 
                           size="small" 
-                          sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600 }}
+                          sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600, bgcolor: 'background.paper' }}
                         />
                         <Chip 
                           label={`P: ${mealTotals.protein.toFixed(0)}g`} 
-                          size="small" 
-                          color="primary"
-                          sx={{ height: 22, fontSize: '0.75rem' }}
+                          size="small"
+                          sx={{ height: 22, fontSize: '0.75rem', bgcolor: 'background.paper', color: 'text.secondary' }}
                         />
                         <Chip 
                           label={`C: ${mealTotals.carbs.toFixed(0)}g`} 
-                          size="small" 
-                          color="secondary"
-                          sx={{ height: 22, fontSize: '0.75rem' }}
+                          size="small"
+                          sx={{ height: 22, fontSize: '0.75rem', bgcolor: 'background.paper', color: 'text.secondary' }}
                         />
                         <Chip 
                           label={`F: ${mealTotals.fat.toFixed(0)}g`} 
-                          size="small" 
-                          color="warning"
-                          sx={{ height: 22, fontSize: '0.75rem' }}
+                          size="small"
+                          sx={{ height: 22, fontSize: '0.75rem', bgcolor: 'background.paper', color: 'text.secondary' }}
                         />
                       </Box>
                       <IconButton size="small" sx={{ p: 0.5 }}>
@@ -603,25 +684,22 @@ const NutritionTab = () => {
                                     <Chip 
                                       label={`${entry.nutrition.calories.toFixed(0)} cal`} 
                                       size="small" 
-                                      sx={{ height: 20, fontSize: '0.7rem' }}
+                                      sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper' }}
                                     />
                                     <Chip 
                                       label={`P: ${entry.nutrition.protein.toFixed(1)}g`} 
-                                      size="small" 
-                                      color="primary" 
-                                      sx={{ height: 20, fontSize: '0.7rem' }}
+                                      size="small"
+                                      sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper', color: 'text.secondary' }}
                                     />
                                     <Chip 
                                       label={`C: ${entry.nutrition.carbs.toFixed(1)}g`} 
-                                      size="small" 
-                                      color="secondary" 
-                                      sx={{ height: 20, fontSize: '0.7rem' }}
+                                      size="small"
+                                      sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper', color: 'text.secondary' }}
                                     />
                                     <Chip 
                                       label={`F: ${entry.nutrition.fat.toFixed(1)}g`} 
-                                      size="small" 
-                                      color="warning" 
-                                      sx={{ height: 20, fontSize: '0.7rem' }}
+                                      size="small"
+                                      sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper', color: 'text.secondary' }}
                                     />
                                   </Box>
                                 }
@@ -796,11 +874,15 @@ const NutritionTab = () => {
       {/* Log Meal Modal */}
       <LogMealModal
         open={showLogMealModal}
-        onClose={() => setShowLogMealModal(false)}
+        onClose={() => {
+          setShowLogMealModal(false);
+          setInitialMealType(null);
+        }}
         onSave={handleLogMealModalSave}
         recentFoods={getRecentFoods()}
         favoriteFoods={favoriteFoods}
         onFavoritesChange={loadFavorites}
+        initialMealType={initialMealType}
       />
     </Box>
   );

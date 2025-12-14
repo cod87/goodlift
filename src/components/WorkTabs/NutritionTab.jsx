@@ -237,10 +237,11 @@ const NutritionTab = () => {
     
     todayEntries.forEach(entry => {
       const mealType = entry.mealType || 'snack'; // Default to snack if not set
+      // Only add to group if it's a valid meal type, otherwise default to snack
       if (grouped[mealType]) {
         grouped[mealType].push(entry);
       } else {
-        grouped.snack.push(entry); // Fallback to snack
+        grouped.snack.push(entry);
       }
     });
     

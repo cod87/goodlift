@@ -58,6 +58,7 @@ import {
 } from '@mui/icons-material';
 import { searchFoods, calculateNutrition, calculateNutritionForPortion, getMeasurementOptions, decimalToFraction, addCustomFood, loadCustomFoods, loadNutritionDatabase } from '../services/nutritionDataService';
 import AddCustomFoodDialog from './AddCustomFoodDialog';
+import { getCurrentMealType } from '../utils/nutritionUtils';
 import {
   addFavoriteFood,
   removeFavoriteFood,
@@ -110,16 +111,7 @@ const LogMealModal = ({
       setMealItems([]);
       setSelectedFoodIds(new Set());
       // Set default meal type based on current time
-      const hour = new Date().getHours();
-      if (hour < 11) {
-        setSelectedMealType('breakfast');
-      } else if (hour < 16) {
-        setSelectedMealType('lunch');
-      } else if (hour < 21) {
-        setSelectedMealType('dinner');
-      } else {
-        setSelectedMealType('snack');
-      }
+      setSelectedMealType(getCurrentMealType());
       // Load all foods for custom food validation
       loadAllFoods();
     }

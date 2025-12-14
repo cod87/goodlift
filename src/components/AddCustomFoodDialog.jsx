@@ -273,7 +273,7 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
 
           <Alert severity="info" sx={{ mt: 1 }}>
             <Typography variant="caption">
-              💡 Enter nutrition values for 100g. The standard portion is how you typically measure this food.
+              Tip: Enter nutrition values for 100g. The standard portion is how you typically measure this food.
             </Typography>
           </Alert>
         </Box>

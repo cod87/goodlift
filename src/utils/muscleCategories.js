@@ -8,25 +8,25 @@
 
 /**
  * Mapping of simplified muscle categories to their constituent detailed muscles
- * Order: Chest, Back, Shoulders, Quads, Hamstrings, Triceps, Biceps, Calves, Core, Glutes
+ * Order: Chest, Back, Quads, Hamstrings, Triceps, Biceps, Shoulders, Core, Glutes, Calves
  */
 export const MUSCLE_CATEGORY_MAP = {
   'Chest': ['Chest'],
   'Back': ['Lats', 'Traps', 'Back', 'Upper Back', 'Lower Back', 'Rhomboids', 'Erector Spinae'],
-  'Shoulders': ['Shoulders', 'Delts', 'Front Delts', 'Rear Delts', 'Side Delts'],
   'Quads': ['Quads'],
   'Hamstrings': ['Hamstrings'],
   'Triceps': ['Triceps'],
   'Biceps': ['Biceps', 'Forearms'],
-  'Calves': ['Calves'],
+  'Shoulders': ['Shoulders', 'Delts', 'Front Delts', 'Rear Delts', 'Side Delts'],
   'Core': ['Core', 'Obliques', 'Hip Flexors'],
   'Glutes': ['Glutes', 'Adductors'],
+  'Calves': ['Calves'],
 };
 
 /**
  * Mapping of simplified muscle categories for secondary muscles
  * Each muscle is only assigned once (no duplicates between categories)
- * Order: Chest, Back, Shoulders, Quads, Hamstrings, Triceps, Biceps, Calves, Core, Glutes
+ * Order: Chest, Back, Quads, Hamstrings, Triceps, Biceps, Shoulders, Core, Glutes, Calves
  * 
  * Note: This mapping differs from MUSCLE_CATEGORY_MAP in some cases to better
  * reflect how muscles function as secondary movers in compound exercises.
@@ -36,14 +36,14 @@ export const MUSCLE_CATEGORY_MAP = {
 export const SECONDARY_MUSCLE_CATEGORY_MAP = {
   'Chest': ['Chest'],
   'Back': ['Back', 'Lats', 'Lower Back', 'Rhomboids', 'Traps', 'Upper Back'],
-  'Shoulders': ['Shoulders', 'Delts', 'Front Delts', 'Rear Delts', 'Side Delts'],
   'Quads': ['Hip Flexors', 'Quads'],
   'Hamstrings': ['Hamstrings'],
   'Triceps': [], // Triceps rarely appear as secondary muscles in exercises
   'Biceps': ['Biceps', 'Forearms'],
-  'Calves': ['Calves'],
+  'Shoulders': ['Shoulders', 'Delts', 'Front Delts', 'Rear Delts', 'Side Delts'],
   'Core': ['Core', 'Obliques'],
   'Glutes': ['Adductors', 'Glutes'],
+  'Calves': ['Calves'],
 };
 
 /**

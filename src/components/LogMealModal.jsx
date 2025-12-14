@@ -432,9 +432,31 @@ const LogMealModal = ({
       const newFood = addCustomFood(customFoodData);
       // Reload all foods to include the new custom food
       loadAllFoods();
-      // Optionally, automatically add it to the search results or meal
+      // Add to search results at the top
       setSearchResults(prevResults => [newFood, ...prevResults]);
+      
+      // Automatically add the custom ingredient to the meal
+      const newMealItem = {
+        id: crypto.randomUUID(),
+        food: newFood,
+        portionType: 'standard',
+        portionQuantity: 1,
+        grams: newFood.portion_grams || 100,
+      };
+      setMealItems(prevItems => [...prevItems, newMealItem]);
+      
+      // Add to selected foods
+      const foodId = newFood.id || newFood.fdcId;
+      setSelectedFoodIds(prevIds => {
+        const newIds = new Set(prevIds);
+        newIds.add(foodId);
+        return newIds;
+      });
+      
       setShowCustomFoodDialog(false);
+      
+      // Switch to My Meal tab to show the added ingredient
+      setActiveTab(1);
     } catch (error) {
       console.error('Error adding custom food:', error);
       setError('Failed to add custom food. Please try again.');
@@ -707,6 +729,30 @@ const LogMealModal = ({
                   }}
                 />
                 
+                {/* Add Custom Ingredient Button - Always visible */}
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCustomFoodDialog(true)}
+                  fullWidth
+                  sx={{ 
+                    mt: 1.5,
+                    borderStyle: 'dashed',
+                    borderColor: 'divider',
+                    color: 'text.secondary',
+                    '&:hover': {
+                      borderStyle: 'dashed',
+                      borderColor: 'primary.main',
+                      bgcolor: 'action.hover',
+                      color: 'primary.main',
+                    },
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  Add Custom Ingredient
+                </Button>
+                
                 {/* Search term chips */}
                 {searchTerms.length > 0 && (
                   <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
@@ -792,7 +838,7 @@ const LogMealModal = ({
                     No foods found{searchQuery ? ` for "${searchQuery}"` : ''}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                    Try simpler terms or check for spelling mistakes
+                    Try simpler terms, check for spelling mistakes, or add it as a custom ingredient
                   </Typography>
                   <Button
                     variant="outlined"
@@ -801,7 +847,7 @@ const LogMealModal = ({
                     onClick={() => setShowCustomFoodDialog(true)}
                     fullWidth
                   >
-                    Add as Custom Food
+                    Add as Custom Ingredient
                   </Button>
                 </Alert>
               )}

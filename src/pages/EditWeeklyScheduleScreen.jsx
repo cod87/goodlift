@@ -12,7 +12,6 @@ import {
   Stack,
   IconButton,
   Chip,
-  TextField,
   Select,
   MenuItem,
   FormControl,
@@ -29,7 +28,6 @@ import {
   ArrowBack,
   Save,
   HotelOutlined,
-  Timer,
   Edit,
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
@@ -160,24 +158,7 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
     setPendingDayChange(null);
   };
 
-  // Add a new superset to the current day
-  // Update timer configuration
-  const handleUpdateTimer = (field, value) => {
-    const currentWorkout = dayWorkouts[selectedDay];
-    if (!currentWorkout) return;
-
-    setDayWorkouts(prev => ({
-      ...prev,
-      [selectedDay]: {
-        ...currentWorkout,
-        timerConfig: {
-          ...currentWorkout.timerConfig,
-          [field]: value,
-        },
-      },
-    }));
-    setHasUnsavedChanges(prev => ({ ...prev, [selectedDay]: true }));
-  };
+  // Removed: Timer configuration - no longer needed for simplified schedule
 
   // Handle session type change via quick toggle
   const handleSessionTypeChange = (newType) => {
@@ -530,19 +511,28 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
 
         {/* Content Area */}
         <Box sx={{ maxWidth: 900, mx: 'auto' }}>
-          {/* Quick Toggle for Session Type - shown when a workout exists */}
+          {/* Session Type Selection */}
           {currentWorkout && (
             <Card sx={{ mb: 3 }}>
               <CardContent>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  💡 This sets the <strong>suggested workout type</strong> for the day. 
-                  {isStrength && ' For strength workouts, select a saved workout below to assign exercises.'}
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                  Session Type for {selectedDay}
                 </Typography>
                 <SessionTypeQuickToggle
                   currentType={workoutType || 'full'}
                   onChange={handleSessionTypeChange}
                   compact={true}
                 />
+                {isStrength && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                    💡 For strength days, select a saved workout below to assign exercises.
+                  </Typography>
+                )}
+                {isTimer && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                    ✓ {currentWorkout.sessionName || workoutType} session assigned. Use the timer when you&apos;re ready to start.
+                  </Typography>
+                )}
               </CardContent>
             </Card>
           )}
@@ -585,17 +575,11 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
           {!currentWorkout && (
             <Card sx={{ p: 4, textAlign: 'center' }}>
               <Typography variant="h6" color="text.secondary">
-                No workout assigned for {selectedDay}
+                No session assigned for {selectedDay}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
-                Select a workout type below to get started
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 3 }}>
+                Choose a session type to assign to this day
               </Typography>
-              <Alert severity="info" sx={{ mb: 3, textAlign: 'left' }}>
-                <Typography variant="body2">
-                  💡 <strong>Note:</strong> Selecting a workout type sets the suggested type for the day. 
-                  For strength workouts, you'll need to select a saved workout to assign specific exercises.
-                </Typography>
-              </Alert>
               <Box sx={{ mt: 3, maxWidth: 600, mx: 'auto' }}>
                 <SessionTypeQuickToggle
                   currentType="full"
@@ -616,64 +600,6 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
               <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
                 Take a break and recover. Your body needs rest to grow stronger!
               </Typography>
-            </Card>
-          )}
-
-          {/* Timer-based Workouts (Yoga, Cardio, etc.) */}
-          {isTimer && (
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                  <Timer sx={{ fontSize: 40, color: 'primary.main' }} />
-                  <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                      Timer Configuration
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Set duration for your {currentWorkout.sessionName || workoutType} session
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Stack spacing={3}>
-                  <FormControl fullWidth>
-                    <InputLabel>Duration (minutes)</InputLabel>
-                    <Select
-                      value={currentWorkout.timerConfig?.duration || 30}
-                      label="Duration (minutes)"
-                      onChange={(e) => handleUpdateTimer('duration', e.target.value)}
-                    >
-                      <MenuItem value={15}>15 minutes</MenuItem>
-                      <MenuItem value={20}>20 minutes</MenuItem>
-                      <MenuItem value={30}>30 minutes</MenuItem>
-                      <MenuItem value={45}>45 minutes</MenuItem>
-                      <MenuItem value={60}>60 minutes</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth>
-                    <InputLabel>Intensity</InputLabel>
-                    <Select
-                      value={currentWorkout.timerConfig?.intensity || 'moderate'}
-                      label="Intensity"
-                      onChange={(e) => handleUpdateTimer('intensity', e.target.value)}
-                    >
-                      <MenuItem value="light">Light</MenuItem>
-                      <MenuItem value="moderate">Moderate</MenuItem>
-                      <MenuItem value="vigorous">Vigorous</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <TextField
-                    label="Notes (optional)"
-                    multiline
-                    rows={3}
-                    value={currentWorkout.timerConfig?.notes || ''}
-                    onChange={(e) => handleUpdateTimer('notes', e.target.value)}
-                    placeholder="Add any notes or goals for this session..."
-                  />
-                </Stack>
-              </CardContent>
             </Card>
           )}
 

@@ -8,7 +8,7 @@
  * - Clean, minimalist design matching app style
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -27,7 +27,7 @@ import {
   RestaurantMenu as FoodIcon,
 } from '@mui/icons-material';
 
-const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
+const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [], editingFood = null }) => {
   const [formData, setFormData] = useState({
     name: '',
     calories: '',
@@ -35,12 +35,44 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
     carbs: '',
     fat: '',
     fiber: '',
-    standard_portion: '100g',
+    standard_portion: '1 serving',
     portion_grams: '100',
   });
   
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
+
+  // Load editing food data when editingFood prop changes
+  useEffect(() => {
+    if (editingFood && open) {
+      // When editing, we need to denormalize the values back to the serving size
+      const portionGrams = editingFood.portion_grams || 100;
+      const denormalizationFactor = portionGrams / 100;
+      
+      setFormData({
+        name: editingFood.name || '',
+        calories: Math.round(editingFood.calories * denormalizationFactor).toString(),
+        protein: (editingFood.protein * denormalizationFactor).toFixed(1),
+        carbs: (editingFood.carbs * denormalizationFactor).toFixed(1),
+        fat: (editingFood.fat * denormalizationFactor).toFixed(1),
+        fiber: (editingFood.fiber * denormalizationFactor).toFixed(1),
+        standard_portion: editingFood.standard_portion || '1 serving',
+        portion_grams: portionGrams.toString(),
+      });
+    } else if (!editingFood && open) {
+      // Reset to default when creating new
+      setFormData({
+        name: '',
+        calories: '',
+        protein: '',
+        carbs: '',
+        fat: '',
+        fiber: '',
+        standard_portion: '1 serving',
+        portion_grams: '100',
+      });
+    }
+  }, [editingFood, open]);
 
   // Reset form when dialog opens/closes
   const handleClose = () => {
@@ -51,7 +83,7 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
       carbs: '',
       fat: '',
       fiber: '',
-      standard_portion: '100g',
+      standard_portion: '1 serving',
       portion_grams: '100',
     });
     setErrors({});
@@ -69,10 +101,10 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
     } else if (formData.name.trim().length < 2) {
       newErrors.name = 'Food name must be at least 2 characters';
     } else {
-      // Check for duplicate names (case-insensitive)
+      // Check for duplicate names (case-insensitive), excluding current food when editing
       const nameLower = formData.name.trim().toLowerCase();
       const isDuplicate = existingFoods.some(
-        food => food.name.toLowerCase() === nameLower
+        food => food.name.toLowerCase() === nameLower && food.id !== editingFood?.id
       );
       if (isDuplicate) {
         newErrors.name = 'A food with this name already exists';
@@ -85,6 +117,10 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
       const value = parseFloat(formData[field]);
       if (formData[field] === '' || isNaN(value) || value < 0) {
         newErrors[field] = 'Must be a positive number';
+      }
+      // Special validation for portion_grams - must be greater than 0
+      if (field === 'portion_grams' && value === 0) {
+        newErrors[field] = 'Serving size must be greater than 0';
       }
     });
 
@@ -105,15 +141,26 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
     }
 
     try {
+      const portionGrams = parseFloat(formData.portion_grams);
+      
+      // Safety check: ensure portionGrams is valid before division
+      if (!portionGrams || portionGrams <= 0) {
+        setSubmitError('Invalid serving size. Please enter a positive number.');
+        return;
+      }
+      
+      const normalizationFactor = 100 / portionGrams;
+      
+      // Normalize all nutrition values to per-100g
       const customFood = {
         name: formData.name.trim(),
-        calories: parseFloat(formData.calories),
-        protein: parseFloat(formData.protein),
-        carbs: parseFloat(formData.carbs),
-        fat: parseFloat(formData.fat),
-        fiber: parseFloat(formData.fiber),
+        calories: Math.round(parseFloat(formData.calories) * normalizationFactor),
+        protein: Math.round(parseFloat(formData.protein) * normalizationFactor * 10) / 10,
+        carbs: Math.round(parseFloat(formData.carbs) * normalizationFactor * 10) / 10,
+        fat: Math.round(parseFloat(formData.fat) * normalizationFactor * 10) / 10,
+        fiber: Math.round(parseFloat(formData.fiber) * normalizationFactor * 10) / 10,
         standard_portion: formData.standard_portion.trim(),
-        portion_grams: parseFloat(formData.portion_grams),
+        portion_grams: portionGrams,
       };
 
       onSave(customFood);
@@ -159,7 +206,7 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <FoodIcon color="primary" />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Add Custom Ingredient
+            {editingFood ? 'Edit Custom Ingredient' : 'Add Custom Ingredient'}
           </Typography>
         </Box>
         <IconButton onClick={handleClose} size="small">
@@ -187,9 +234,35 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
             autoFocus
           />
 
-          {/* Nutrition values per 100g */}
+          {/* Serving Size - Show prominently first */}
           <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1, mb: -1 }}>
-            Nutrition per 100g
+            Serving Size
+          </Typography>
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 2 }}>
+            <TextField
+              label="Serving Description"
+              value={formData.standard_portion}
+              onChange={handleChange('standard_portion')}
+              error={!!errors.standard_portion}
+              helperText={errors.standard_portion || 'e.g., "1 cup", "1 medium apple", "1 scoop"'}
+              required
+            />
+            <TextField
+              label="Grams"
+              type="number"
+              value={formData.portion_grams}
+              onChange={handleChange('portion_grams')}
+              error={!!errors.portion_grams}
+              helperText={errors.portion_grams}
+              required
+              inputProps={{ min: 1, step: 1 }}
+            />
+          </Box>
+
+          {/* Nutrition values per serving */}
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 2, mb: -1 }}>
+            Nutrition per Serving ({formData.portion_grams}g)
           </Typography>
 
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
@@ -245,35 +318,9 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
             />
           </Box>
 
-          {/* Portion information */}
-          <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1, mb: -1 }}>
-            Standard Portion
-          </Typography>
-
-          <Box sx={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 2 }}>
-            <TextField
-              label="Portion Description"
-              value={formData.standard_portion}
-              onChange={handleChange('standard_portion')}
-              error={!!errors.standard_portion}
-              helperText={errors.standard_portion || 'e.g., "1 cup", "1 medium apple"'}
-              required
-            />
-            <TextField
-              label="Grams"
-              type="number"
-              value={formData.portion_grams}
-              onChange={handleChange('portion_grams')}
-              error={!!errors.portion_grams}
-              helperText={errors.portion_grams}
-              required
-              inputProps={{ min: 1, step: 1 }}
-            />
-          </Box>
-
           <Alert severity="info" sx={{ mt: 1 }}>
             <Typography variant="caption">
-              Tip: Enter nutrition values for 100g. The standard portion is how you typically measure this food.
+              💡 Tip: First set your serving size, then enter nutrition values for that serving. They will be automatically calculated per 100g for consistency.
             </Typography>
           </Alert>
         </Box>
@@ -284,7 +331,7 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
           Cancel
         </Button>
         <Button onClick={handleSubmit} variant="contained">
-          Add Ingredient
+          {editingFood ? 'Save Changes' : 'Add Ingredient'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -296,6 +343,7 @@ AddCustomFoodDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   existingFoods: PropTypes.array,
+  editingFood: PropTypes.object,
 };
 
 export default AddCustomFoodDialog;

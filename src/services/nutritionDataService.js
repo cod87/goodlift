@@ -6,12 +6,17 @@
  * - Search with ranking (higher rank = more relevant)
  * - Tag-based search (tags not visible to users)
  * - Standard portions with multiple measurement options
- * - Custom food persistence
+ * - Custom food persistence with Firebase sync
  */
+
+import { 
+  getCustomIngredients,
+  addCustomIngredient as addCustomIngredientToStorage,
+  deleteCustomIngredient as deleteCustomIngredientFromStorage 
+} from '../utils/nutritionStorage';
 
 // Cache for loaded nutrition data
 let nutritionDatabase = null;
-let customFoods = [];
 
 const CUSTOM_FOODS_KEY = 'goodlift_custom_foods';
 
@@ -50,22 +55,19 @@ export const loadNutritionDatabase = async () => {
 };
 
 /**
- * Load custom foods from localStorage
+ * Load custom foods from storage (with Firebase sync)
  * @returns {Array} Array of custom food items
  */
 export const loadCustomFoods = () => {
   try {
-    const stored = localStorage.getItem(CUSTOM_FOODS_KEY);
-    const rawFoods = stored ? JSON.parse(stored) : [];
+    const rawFoods = getCustomIngredients();
     
     // Pre-compute lowercase fields for faster searching if not already present
-    customFoods = rawFoods.map(food => ({
+    return rawFoods.map(food => ({
       ...food,
       _nameLower: food._nameLower || food.name.toLowerCase(),
       _tagsLower: food._tagsLower || (food.tags || '').toLowerCase(),
     }));
-    
-    return customFoods;
   } catch (error) {
     console.error('Error loading custom foods:', error);
     return [];
@@ -73,65 +75,53 @@ export const loadCustomFoods = () => {
 };
 
 /**
- * Save custom foods to localStorage
- * @param {Array} foods - Array of custom food items
+ * Add a custom food (with Firebase sync)
+ * @param {Object} food - Food object with name, calories, protein, carbs, fat, fiber, standard_portion, portion_grams
+ * @returns {Object} The added food with generated ID
  */
-const saveCustomFoods = (foods) => {
+export const addCustomFood = async (food) => {
   try {
-    localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(foods));
-    customFoods = foods;
+    // Prepare custom food object
+    const customFood = {
+      name: food.name,
+      rank: 50, // Custom foods have medium rank
+      category: 'Custom',
+      calories: food.calories || 0,
+      protein: food.protein || 0,
+      carbs: food.carbs || 0,
+      fat: food.fat || 0,
+      fiber: food.fiber || 0,
+      tags: food.tags || '',
+      standard_portion: food.standard_portion || '1 serving',
+      portion_grams: food.portion_grams || 100,
+      portion_factor: (food.portion_grams || 100) / 100,
+      volume_amount: food.volume_amount || 1,
+      volume_unit: food.volume_unit || 'serving',
+      // Pre-compute lowercase fields for search performance
+      _nameLower: food.name.toLowerCase(),
+      _tagsLower: (food.tags || '').toLowerCase(),
+    };
+
+    // Use storage function which handles Firebase sync
+    const savedFood = await addCustomIngredientToStorage(customFood);
+    return savedFood;
   } catch (error) {
-    console.error('Error saving custom foods:', error);
+    console.error('Error adding custom food:', error);
+    throw error;
   }
 };
 
 /**
- * Add a custom food
- * @param {Object} food - Food object with name, calories, protein, carbs, fat, fiber, standard_portion, portion_grams
- * @returns {Object} The added food with generated ID
- */
-export const addCustomFood = (food) => {
-  const foods = loadCustomFoods();
-  
-  // Generate a more robust ID using timestamp and random component
-  const randomPart = Math.random().toString(36).slice(2, 11);
-  const customFood = {
-    id: `custom_${Date.now()}_${randomPart}`,
-    name: food.name,
-    rank: 50, // Custom foods have medium rank
-    category: 'Custom',
-    calories: food.calories || 0,
-    protein: food.protein || 0,
-    carbs: food.carbs || 0,
-    fat: food.fat || 0,
-    fiber: food.fiber || 0,
-    tags: food.tags || '',
-    standard_portion: food.standard_portion || '100g',
-    portion_grams: food.portion_grams || 100,
-    portion_factor: (food.portion_grams || 100) / 100,
-    volume_amount: food.volume_amount || 1,
-    volume_unit: food.volume_unit || 'serving',
-    isCustom: true,
-    createdAt: new Date().toISOString(),
-    // Pre-compute lowercase fields for search performance
-    _nameLower: food.name.toLowerCase(),
-    _tagsLower: (food.tags || '').toLowerCase(),
-  };
-
-  foods.push(customFood);
-  saveCustomFoods(foods);
-  
-  return customFood;
-};
-
-/**
- * Delete a custom food
+ * Delete a custom food (with Firebase sync)
  * @param {string} foodId - ID of the custom food to delete
  */
-export const deleteCustomFood = (foodId) => {
-  const foods = loadCustomFoods();
-  const filtered = foods.filter(f => f.id !== foodId);
-  saveCustomFoods(filtered);
+export const deleteCustomFood = async (foodId) => {
+  try {
+    await deleteCustomIngredientFromStorage(foodId);
+  } catch (error) {
+    console.error('Error deleting custom food:', error);
+    throw error;
+  }
 };
 
 /**

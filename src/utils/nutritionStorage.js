@@ -2,6 +2,7 @@ import {
   saveNutritionEntriesToFirebase,
   saveNutritionGoalsToFirebase,
   saveNutritionRecipesToFirebase,
+  saveCustomIngredientsToFirebase,
   loadNutritionDataFromFirebase
 } from './firebaseStorage';
 import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
@@ -18,6 +19,7 @@ const KEYS = {
   NUTRITION_GOALS: 'goodlift_nutrition_goals',
   NUTRITION_RECIPES: 'goodlift_nutrition_recipes',
   FAVORITE_FOODS: 'goodlift_favorite_foods',
+  CUSTOM_INGREDIENTS: 'goodlift_custom_foods', // Reusing existing key for backward compatibility
 };
 
 /** Current authenticated user ID for Firebase sync */
@@ -195,6 +197,9 @@ export const loadUserNutritionData = async (userId) => {
       }
       if (firebaseData.nutritionRecipes) {
         localStorage.setItem(KEYS.NUTRITION_RECIPES, JSON.stringify(firebaseData.nutritionRecipes));
+      }
+      if (firebaseData.customIngredients) {
+        localStorage.setItem(KEYS.CUSTOM_INGREDIENTS, JSON.stringify(firebaseData.customIngredients));
       }
     }
   } catch (error) {
@@ -407,5 +412,125 @@ export const isFavoriteFood = (food) => {
   } catch (error) {
     console.error('Error checking favorite food:', error);
     return false;
+  }
+};
+
+/**
+ * Get custom ingredients from localStorage or guest storage
+ * @returns {Array} Array of custom ingredient objects
+ */
+export const getCustomIngredients = () => {
+  try {
+    // Check if in guest mode first
+    if (isGuestMode()) {
+      const guestData = getGuestData('custom_ingredients');
+      return guestData || [];
+    }
+
+    // Try localStorage
+    const stored = localStorage.getItem(KEYS.CUSTOM_INGREDIENTS);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Error getting custom ingredients:', error);
+    return [];
+  }
+};
+
+/**
+ * Save custom ingredients to localStorage and Firebase
+ * @param {Array} ingredients - Array of custom ingredient objects
+ * @returns {Promise<void>}
+ */
+export const saveCustomIngredients = async (ingredients) => {
+  try {
+    // Save to guest mode if applicable
+    if (isGuestMode()) {
+      setGuestData('custom_ingredients', ingredients);
+      return;
+    }
+
+    // Save to localStorage
+    localStorage.setItem(KEYS.CUSTOM_INGREDIENTS, JSON.stringify(ingredients));
+
+    // Save to Firebase if user is authenticated
+    if (currentUserId) {
+      try {
+        await saveCustomIngredientsToFirebase(currentUserId, ingredients);
+      } catch (error) {
+        console.error('Error syncing custom ingredients to Firebase:', error);
+      }
+    }
+  } catch (error) {
+    console.error('Error saving custom ingredients:', error);
+    throw error;
+  }
+};
+
+/**
+ * Add a custom ingredient
+ * @param {Object} ingredient - Custom ingredient object
+ * @returns {Promise<Object>} The added ingredient with ID
+ */
+export const addCustomIngredient = async (ingredient) => {
+  try {
+    const ingredients = getCustomIngredients();
+    
+    // Generate unique ID
+    const randomPart = Math.random().toString(36).slice(2, 11);
+    const newIngredient = {
+      id: `custom_${Date.now()}_${randomPart}`,
+      ...ingredient,
+      isCustom: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    ingredients.push(newIngredient);
+    await saveCustomIngredients(ingredients);
+    
+    return newIngredient;
+  } catch (error) {
+    console.error('Error adding custom ingredient:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update a custom ingredient
+ * @param {string} ingredientId - ID of the ingredient to update
+ * @param {Object} updates - Fields to update
+ * @returns {Promise<void>}
+ */
+export const updateCustomIngredient = async (ingredientId, updates) => {
+  try {
+    const ingredients = getCustomIngredients();
+    const index = ingredients.findIndex(i => i.id === ingredientId);
+    
+    if (index >= 0) {
+      ingredients[index] = {
+        ...ingredients[index],
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      await saveCustomIngredients(ingredients);
+    }
+  } catch (error) {
+    console.error('Error updating custom ingredient:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a custom ingredient
+ * @param {string} ingredientId - ID of the ingredient to delete
+ * @returns {Promise<void>}
+ */
+export const deleteCustomIngredient = async (ingredientId) => {
+  try {
+    const ingredients = getCustomIngredients();
+    const filtered = ingredients.filter(i => i.id !== ingredientId);
+    await saveCustomIngredients(filtered);
+  } catch (error) {
+    console.error('Error deleting custom ingredient:', error);
+    throw error;
   }
 };

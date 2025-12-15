@@ -24,8 +24,6 @@ import {
   ListItemText,
   Tabs,
   Tab,
-  ToggleButtonGroup,
-  ToggleButton,
   Divider,
   LinearProgress,
   Snackbar,
@@ -45,12 +43,8 @@ import {
   Timer,
   Close,
   Whatshot,
-  FilterList,
   HelpOutline,
 } from '@mui/icons-material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Achievements from './Achievements';
 import WeightTracker from './WeightTracker';
 import MonthCalendarView from './Calendar/MonthCalendarView';
@@ -93,16 +87,16 @@ const ProgressDashboard = () => {
   const [addExerciseDialogOpen, setAddExerciseDialogOpen] = useState(false);
   const [exerciseSearchQuery, setExerciseSearchQuery] = useState('');
   const [currentTab, setCurrentTab] = useState(0);
-  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [streakInfoOpen, setStreakInfoOpen] = useState(false);
   
   // Desktop layout detection
   const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.desktop}px)`);
+  const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.tablet - 1}px)`);
   
-  // Time frame filter state
-  const [timeFrame, setTimeFrame] = useState('all'); // '7days', '30days', '3months', 'year', 'custom', 'all'
-  const [customStartDate, setCustomStartDate] = useState(null);
-  const [customEndDate, setCustomEndDate] = useState(null);
+  // Time frame filter state - defaulting to 'all' and hidden from UI
+  const [timeFrame] = useState('all'); // Always 'all' - filter UI removed
+  const [customStartDate] = useState(null);
+  const [customEndDate] = useState(null);
   
   // User profile context for weight tracking
   const { profile, addWeightEntry } = useUserProfile();
@@ -457,27 +451,6 @@ const ProgressDashboard = () => {
               />
             </Box>
 
-            {/* Time Frame Filter - Icon Button */}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                startIcon={<FilterList />}
-                onClick={() => setFilterDialogOpen(true)}
-                variant="outlined"
-                size="small"
-                sx={{ 
-                  textTransform: 'none',
-                  borderRadius: 2,
-                }}
-              >
-                {timeFrame === 'all' ? 'All Time' : 
-                 timeFrame === '7days' ? '7 Days' :
-                 timeFrame === '30days' ? '30 Days' :
-                 timeFrame === '3months' ? '3 Months' :
-                 timeFrame === 'year' ? 'Year' :
-                 timeFrame === 'custom' ? 'Custom' : 'Filter'}
-              </Button>
-            </Box>
-
             {/* Streak and Adherence - side by side on desktop */}
             <Box sx={{ 
               display: isDesktop ? 'grid' : 'block',
@@ -566,6 +539,76 @@ const ProgressDashboard = () => {
                 </CardContent>
               </Card>
             </Box>
+
+            {/* Workout Summary - Shown here in mobile view, after Streak/Adherence */}
+            {isMobile && (
+              <Card sx={{ bgcolor: 'background.paper' }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                    Workout Summary
+                  </Typography>
+                  <Stack spacing={2.5}>
+                    {/* Total Workouts */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <FitnessCenter sx={{ fontSize: 28, color: 'primary.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          Total Workouts
+                        </Typography>
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                        {filteredStats.totalWorkouts}
+                      </Typography>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Total Strength */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <FitnessCenter sx={{ fontSize: 28, color: 'error.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          Total Strength
+                        </Typography>
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'error.main' }}>
+                        {filteredStats.strengthSessions}
+                      </Typography>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Total Cardio */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <DirectionsRun sx={{ fontSize: 28, color: 'success.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          Total Cardio
+                        </Typography>
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
+                        {filteredStats.cardioSessions}
+                      </Typography>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Total Yoga */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <SelfImprovement sx={{ fontSize: 28, color: 'secondary.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          Total Yoga
+                        </Typography>
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                        {filteredStats.yogaSessions}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Muscle Volume Tracker */}
             {history.length > 0 && (
@@ -714,73 +757,75 @@ const ProgressDashboard = () => {
             </Card>
           )}
 
-            {/* Combined Workouts Stats - Stylized table without lines */}
-            <Card sx={{ bgcolor: 'background.paper' }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                  Workout Summary
-                </Typography>
-                <Stack spacing={2.5}>
-                  {/* Total Workouts */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <FitnessCenter sx={{ fontSize: 28, color: 'primary.main' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        Total Workouts
+            {/* Workout Summary - Shown here in tablet/desktop view, after Progressive Overload */}
+            {!isMobile && (
+              <Card sx={{ bgcolor: 'background.paper' }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                    Workout Summary
+                  </Typography>
+                  <Stack spacing={2.5}>
+                    {/* Total Workouts */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <FitnessCenter sx={{ fontSize: 28, color: 'primary.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          Total Workouts
+                        </Typography>
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                        {filteredStats.totalWorkouts}
                       </Typography>
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                      {filteredStats.totalWorkouts}
-                    </Typography>
-                  </Box>
 
-                  <Divider />
+                    <Divider />
 
-                  {/* Total Strength */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <FitnessCenter sx={{ fontSize: 28, color: 'error.main' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        Total Strength
+                    {/* Total Strength */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <FitnessCenter sx={{ fontSize: 28, color: 'error.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          Total Strength
+                        </Typography>
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'error.main' }}>
+                        {filteredStats.strengthSessions}
                       </Typography>
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'error.main' }}>
-                      {filteredStats.strengthSessions}
-                    </Typography>
-                  </Box>
 
-                  <Divider />
+                    <Divider />
 
-                  {/* Total Cardio */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <DirectionsRun sx={{ fontSize: 28, color: 'success.main' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        Total Cardio
+                    {/* Total Cardio */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <DirectionsRun sx={{ fontSize: 28, color: 'success.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          Total Cardio
+                        </Typography>
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
+                        {filteredStats.cardioSessions}
                       </Typography>
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
-                      {filteredStats.cardioSessions}
-                    </Typography>
-                  </Box>
 
-                  <Divider />
+                    <Divider />
 
-                  {/* Total Yoga */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <SelfImprovement sx={{ fontSize: 28, color: 'secondary.main' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        Total Yoga
+                    {/* Total Yoga */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <SelfImprovement sx={{ fontSize: 28, color: 'secondary.main' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          Total Yoga
+                        </Typography>
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                        {filteredStats.yogaSessions}
                       </Typography>
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-                      {filteredStats.yogaSessions}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
+                  </Stack>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Weight Tracking */}
             <WeightTracker
@@ -866,82 +911,6 @@ const ProgressDashboard = () => {
               setAddExerciseDialogOpen(false);
               setExerciseSearchQuery('');
             }}>Cancel</Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Filter Dialog */}
-        <Dialog
-          open={filterDialogOpen}
-          onClose={() => setFilterDialogOpen(false)}
-          maxWidth="xs"
-          fullWidth
-        >
-          <DialogTitle>Time Frame Filter</DialogTitle>
-          <DialogContent>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <ToggleButtonGroup
-                value={timeFrame}
-                exclusive
-                onChange={(e, newValue) => {
-                  if (newValue !== null) {
-                    setTimeFrame(newValue);
-                  }
-                }}
-                orientation="vertical"
-                fullWidth
-              >
-                <ToggleButton value="all">All Time</ToggleButton>
-                <ToggleButton value="7days">Last 7 Days</ToggleButton>
-                <ToggleButton value="30days">Last 30 Days</ToggleButton>
-                <ToggleButton value="3months">Last 3 Months</ToggleButton>
-                <ToggleButton value="year">Last Year</ToggleButton>
-                <ToggleButton value="custom">Custom Range</ToggleButton>
-              </ToggleButtonGroup>
-
-              {timeFrame === 'custom' && (
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <Stack spacing={2}>
-                    <DatePicker
-                      label="Start Date"
-                      value={customStartDate}
-                      onChange={(newValue) => setCustomStartDate(newValue)}
-                      slotProps={{ 
-                        textField: { 
-                          fullWidth: true 
-                        } 
-                      }}
-                    />
-                    <DatePicker
-                      label="End Date"
-                      value={customEndDate}
-                      onChange={(newValue) => setCustomEndDate(newValue)}
-                      slotProps={{ 
-                        textField: { 
-                          fullWidth: true 
-                        } 
-                      }}
-                    />
-                  </Stack>
-                </LocalizationProvider>
-              )}
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button 
-              onClick={() => {
-                setTimeFrame('all');
-                setCustomStartDate(null);
-                setCustomEndDate(null);
-              }}
-            >
-              Clear Filters
-            </Button>
-            <Button 
-              onClick={() => setFilterDialogOpen(false)}
-              variant="contained"
-            >
-              Apply
-            </Button>
           </DialogActions>
         </Dialog>
 

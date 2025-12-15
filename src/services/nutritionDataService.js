@@ -10,8 +10,7 @@
  */
 
 import { 
-  getCustomIngredients, 
-  saveCustomIngredients, 
+  getCustomIngredients,
   addCustomIngredient as addCustomIngredientToStorage,
   deleteCustomIngredient as deleteCustomIngredientFromStorage 
 } from '../utils/nutritionStorage';

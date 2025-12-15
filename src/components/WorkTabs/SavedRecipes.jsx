@@ -131,15 +131,15 @@ const SavedRecipes = ({ recipes, onEdit, onRecipesUpdate, onAddToLog }) => {
           <List disablePadding>
             {recipes.map((recipe, index) => (
               <Box key={recipe.id}>
-                {index > 0 && <Divider sx={{ my: 1 }} />}
+                {index > 0 && <Divider sx={{ my: 0.5 }} />}
                 <ListItem
-                  sx={{ px: 0, py: 1 }}
+                  sx={{ px: 0, py: 1.5 }}
                   secondaryAction={
-                    <Box>
-                      <IconButton edge="end" onClick={() => handleAddPortionClick(recipe)} color="primary" size="small" sx={{ mr: 0.5 }}>
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      <IconButton edge="end" onClick={() => handleAddPortionClick(recipe)} color="primary" size="small">
                         <Add fontSize="small" />
                       </IconButton>
-                      <IconButton edge="end" onClick={() => onEdit(recipe)} size="small" sx={{ mr: 0.5 }}>
+                      <IconButton edge="end" onClick={() => onEdit(recipe)} size="small">
                         <Edit fontSize="small" />
                       </IconButton>
                       <IconButton edge="end" onClick={() => handleDeleteClick(recipe)} color="error" size="small">
@@ -150,27 +150,41 @@ const SavedRecipes = ({ recipes, onEdit, onRecipesUpdate, onAddToLog }) => {
                 >
                   <ListItemText
                     primary={
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {recipe.name}
-                        </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        {recipe.name}
+                      </Typography>
+                    }
+                    secondary={
+                      <Box component="span">
                         {recipe.description && (
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                             {recipe.description}
                           </Typography>
                         )}
-                      </Box>
-                    }
-                    secondary={
-                      <Box component="span" sx={{ mt: 0.5, display: 'block' }}>
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                           {recipe.foods?.length || 0} ingredient{recipe.foods?.length !== 1 ? 's' : ''} • {recipe.totalWeight}g total
                         </Typography>
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                          <Chip label={`${recipe.totalNutrition.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
-                          <Chip label={`P: ${recipe.totalNutrition.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                          <Chip label={`C: ${recipe.totalNutrition.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                          <Chip label={`F: ${recipe.totalNutrition.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+                          <Chip 
+                            label={`${recipe.totalNutrition.calories.toFixed(0)} cal`} 
+                            size="small" 
+                            sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper' }}
+                          />
+                          <Chip 
+                            label={`P: ${recipe.totalNutrition.protein.toFixed(1)}g`} 
+                            size="small" 
+                            sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper', color: 'text.secondary' }}
+                          />
+                          <Chip 
+                            label={`C: ${recipe.totalNutrition.carbs.toFixed(1)}g`} 
+                            size="small" 
+                            sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper', color: 'text.secondary' }}
+                          />
+                          <Chip 
+                            label={`F: ${recipe.totalNutrition.fat.toFixed(1)}g`} 
+                            size="small" 
+                            sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper', color: 'text.secondary' }}
+                          />
                         </Box>
                       </Box>
                     }

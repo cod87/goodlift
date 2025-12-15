@@ -35,7 +35,7 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
     carbs: '',
     fat: '',
     fiber: '',
-    standard_portion: '100g',
+    standard_portion: '1 serving',
     portion_grams: '100',
   });
   
@@ -51,7 +51,7 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
       carbs: '',
       fat: '',
       fiber: '',
-      standard_portion: '100g',
+      standard_portion: '1 serving',
       portion_grams: '100',
     });
     setErrors({});
@@ -105,15 +105,19 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
     }
 
     try {
+      const portionGrams = parseFloat(formData.portion_grams);
+      const normalizationFactor = 100 / portionGrams;
+      
+      // Normalize all nutrition values to per-100g
       const customFood = {
         name: formData.name.trim(),
-        calories: parseFloat(formData.calories),
-        protein: parseFloat(formData.protein),
-        carbs: parseFloat(formData.carbs),
-        fat: parseFloat(formData.fat),
-        fiber: parseFloat(formData.fiber),
+        calories: Math.round(parseFloat(formData.calories) * normalizationFactor),
+        protein: Math.round(parseFloat(formData.protein) * normalizationFactor * 10) / 10,
+        carbs: Math.round(parseFloat(formData.carbs) * normalizationFactor * 10) / 10,
+        fat: Math.round(parseFloat(formData.fat) * normalizationFactor * 10) / 10,
+        fiber: Math.round(parseFloat(formData.fiber) * normalizationFactor * 10) / 10,
         standard_portion: formData.standard_portion.trim(),
-        portion_grams: parseFloat(formData.portion_grams),
+        portion_grams: portionGrams,
       };
 
       onSave(customFood);
@@ -187,9 +191,35 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
             autoFocus
           />
 
-          {/* Nutrition values per 100g */}
+          {/* Serving Size - Show prominently first */}
           <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1, mb: -1 }}>
-            Nutrition per 100g
+            Serving Size
+          </Typography>
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 2 }}>
+            <TextField
+              label="Serving Description"
+              value={formData.standard_portion}
+              onChange={handleChange('standard_portion')}
+              error={!!errors.standard_portion}
+              helperText={errors.standard_portion || 'e.g., "1 cup", "1 medium apple", "1 scoop"'}
+              required
+            />
+            <TextField
+              label="Grams"
+              type="number"
+              value={formData.portion_grams}
+              onChange={handleChange('portion_grams')}
+              error={!!errors.portion_grams}
+              helperText={errors.portion_grams}
+              required
+              inputProps={{ min: 1, step: 1 }}
+            />
+          </Box>
+
+          {/* Nutrition values per serving */}
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 2, mb: -1 }}>
+            Nutrition per Serving ({formData.portion_grams}g)
           </Typography>
 
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
@@ -245,35 +275,9 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
             />
           </Box>
 
-          {/* Portion information */}
-          <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1, mb: -1 }}>
-            Standard Portion
-          </Typography>
-
-          <Box sx={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 2 }}>
-            <TextField
-              label="Portion Description"
-              value={formData.standard_portion}
-              onChange={handleChange('standard_portion')}
-              error={!!errors.standard_portion}
-              helperText={errors.standard_portion || 'e.g., "1 cup", "1 medium apple"'}
-              required
-            />
-            <TextField
-              label="Grams"
-              type="number"
-              value={formData.portion_grams}
-              onChange={handleChange('portion_grams')}
-              error={!!errors.portion_grams}
-              helperText={errors.portion_grams}
-              required
-              inputProps={{ min: 1, step: 1 }}
-            />
-          </Box>
-
           <Alert severity="info" sx={{ mt: 1 }}>
             <Typography variant="caption">
-              Tip: Enter nutrition values for 100g. The standard portion is how you typically measure this food.
+              💡 Tip: First set your serving size, then enter nutrition values for that serving. They will be automatically calculated per 100g for consistency.
             </Typography>
           </Alert>
         </Box>

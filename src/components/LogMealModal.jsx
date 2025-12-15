@@ -427,9 +427,9 @@ const LogMealModal = ({
   };
   
   // Handle custom food creation
-  const handleSaveCustomFood = (customFoodData) => {
+  const handleSaveCustomFood = async (customFoodData) => {
     try {
-      const newFood = addCustomFood(customFoodData);
+      const newFood = await addCustomFood(customFoodData);
       // Reload all foods to include the new custom food
       loadAllFoods();
       // Add to search results at the top

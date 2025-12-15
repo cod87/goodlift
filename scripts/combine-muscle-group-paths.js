@@ -34,6 +34,14 @@ const svgDir = path.join(rootDir, 'public/svg-muscles');
 /**
  * Combines multiple path elements within a muscle group into a single compound path
  * 
+ * NOTE: This function uses line-based parsing which works for the specific format
+ * of SVG files in this project. It assumes:
+ * - Consistent formatting (one element per line)
+ * - Specific attribute order in path elements (class before d)
+ * - Self-closing path tags
+ * 
+ * For more complex or varied SVG formats, consider using a proper XML/DOM parser.
+ * 
  * @param {string} svgContent - The complete SVG file content
  * @returns {string} - Modified SVG content with combined paths
  */
@@ -90,6 +98,8 @@ function combineMuscleGroupPaths(svgContent) {
     
     // Inside muscle group, collect path elements
     if (insideMuscleGroup && line.includes('<path')) {
+      // NOTE: This regex assumes a specific format: class attribute before d attribute
+      // and self-closing tags. It works for the SVG files in this project.
       const pathMatch = line.match(/<path\s+class="([^"]+)"\s+d="([^"]+)"\s*\/>/);
       if (pathMatch) {
         const pathClass = pathMatch[1];
@@ -109,6 +119,9 @@ function combineMuscleGroupPaths(svgContent) {
       
       // Combine paths and create the new group
       if (pathsInGroup.length > 0) {
+        // NOTE: Joining path data with spaces works for SVG compound paths.
+        // Each path's d attribute contains complete path commands that can be
+        // concatenated. SVG parsers treat spaces between commands as delimiters.
         const combinedPathData = pathsInGroup.join(' ');
         
         // Write the combined group

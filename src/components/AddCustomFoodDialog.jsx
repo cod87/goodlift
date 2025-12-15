@@ -86,6 +86,10 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
       if (formData[field] === '' || isNaN(value) || value < 0) {
         newErrors[field] = 'Must be a positive number';
       }
+      // Special validation for portion_grams - must be greater than 0
+      if (field === 'portion_grams' && value === 0) {
+        newErrors[field] = 'Serving size must be greater than 0';
+      }
     });
 
     // Portion validation
@@ -106,6 +110,13 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
 
     try {
       const portionGrams = parseFloat(formData.portion_grams);
+      
+      // Safety check: ensure portionGrams is valid before division
+      if (!portionGrams || portionGrams <= 0) {
+        setSubmitError('Invalid serving size. Please enter a positive number.');
+        return;
+      }
+      
       const normalizationFactor = 100 / portionGrams;
       
       // Normalize all nutrition values to per-100g

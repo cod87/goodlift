@@ -78,12 +78,12 @@ const CustomIngredientsList = ({ customIngredients, onEdit, onIngredientsUpdate 
           <List disablePadding>
             {customIngredients.map((ingredient, index) => (
               <Box key={ingredient.id}>
-                {index > 0 && <Divider sx={{ my: 1 }} />}
+                {index > 0 && <Divider sx={{ my: 0.5 }} />}
                 <ListItem
-                  sx={{ px: 0, py: 1 }}
+                  sx={{ px: 0, py: 1.5 }}
                   secondaryAction={
-                    <Box>
-                      <IconButton edge="end" onClick={() => onEdit(ingredient)} size="small" sx={{ mr: 0.5 }}>
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      <IconButton edge="end" onClick={() => onEdit(ingredient)} size="small">
                         <Edit fontSize="small" />
                       </IconButton>
                       <IconButton edge="end" onClick={() => handleDeleteClick(ingredient)} color="error" size="small">
@@ -94,22 +94,36 @@ const CustomIngredientsList = ({ customIngredients, onEdit, onIngredientsUpdate 
                 >
                   <ListItemText
                     primary={
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {ingredient.name}
-                        </Typography>
-                      </Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        {ingredient.name}
+                      </Typography>
                     }
                     secondary={
-                      <Box component="span" sx={{ mt: 0.5, display: 'block' }}>
+                      <Box component="span">
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                           {ingredient.standard_portion} ({ingredient.portion_grams}g)
                         </Typography>
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                          <Chip label={`${ingredient.calories.toFixed(0)} cal`} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
-                          <Chip label={`P: ${ingredient.protein.toFixed(1)}g`} size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                          <Chip label={`C: ${ingredient.carbs.toFixed(1)}g`} size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                          <Chip label={`F: ${ingredient.fat.toFixed(1)}g`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+                          <Chip 
+                            label={`${ingredient.calories.toFixed(0)} cal`} 
+                            size="small" 
+                            sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper' }}
+                          />
+                          <Chip 
+                            label={`P: ${ingredient.protein.toFixed(1)}g`} 
+                            size="small" 
+                            sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper', color: 'text.secondary' }}
+                          />
+                          <Chip 
+                            label={`C: ${ingredient.carbs.toFixed(1)}g`} 
+                            size="small" 
+                            sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper', color: 'text.secondary' }}
+                          />
+                          <Chip 
+                            label={`F: ${ingredient.fat.toFixed(1)}g`} 
+                            size="small" 
+                            sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'background.paper', color: 'text.secondary' }}
+                          />
                         </Box>
                       </Box>
                     }

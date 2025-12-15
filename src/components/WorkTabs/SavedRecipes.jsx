@@ -111,7 +111,7 @@ const SavedRecipes = ({ recipes, onEdit, onRecipesUpdate, onAddToLog }) => {
 
   if (recipes.length === 0) {
     return (
-      <Card>
+      <Card sx={{ mb: 2, boxShadow: 1 }}>
         <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
           <Typography color="text.secondary" align="center" sx={{ py: 2, fontSize: '0.9rem' }}>
             No saved recipes yet. Click &quot;Create New Recipe&quot; to get started.
@@ -123,7 +123,7 @@ const SavedRecipes = ({ recipes, onEdit, onRecipesUpdate, onAddToLog }) => {
 
   return (
     <>
-      <Card>
+      <Card sx={{ mb: 2, boxShadow: 1 }}>
         <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
           <Typography variant="h6" gutterBottom>
             Saved Recipes ({recipes.length})

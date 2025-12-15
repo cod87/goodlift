@@ -37,12 +37,14 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material';
-import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes, getFavoriteFoods } from '../../utils/nutritionStorage';
+import { getNutritionEntries, saveNutritionEntry, deleteNutritionEntry, getNutritionGoals, saveNutritionGoals, getRecipes, getFavoriteFoods, getCustomIngredients } from '../../utils/nutritionStorage';
 import { calculateNutrition } from '../../services/nutritionDataService';
 import RecipeBuilder from './RecipeBuilder';
 import SavedRecipes from './SavedRecipes';
+import CustomIngredientsList from './CustomIngredientsList';
 import LogMealModal from '../LogMealModal';
 import CreateRecipeModal from '../CreateRecipeModal';
+import AddCustomFoodDialog from '../AddCustomFoodDialog';
 
 /**
  * NutritionTab - Component for tracking nutrition using local nutrition database
@@ -83,6 +85,10 @@ const NutritionTab = () => {
   const [showLogMealModal, setShowLogMealModal] = useState(false);
   const [initialMealType, setInitialMealType] = useState(null); // Track which meal type was clicked
   const [favoriteFoods, setFavoriteFoods] = useState([]);
+  const [customIngredients, setCustomIngredients] = useState([]);
+  const [showCustomFoodDialog, setShowCustomFoodDialog] = useState(false);
+  const [editingCustomIngredient, setEditingCustomIngredient] = useState(null);
+  const [myFoodSubTab, setMyFoodSubTab] = useState(0); // 0: Recipes, 1: Custom Ingredients
   
   // Expanded state for meal type sections
   const [expandedMealTypes, setExpandedMealTypes] = useState({
@@ -98,11 +104,17 @@ const NutritionTab = () => {
     loadGoals();
     loadRecipes();
     loadFavorites();
+    loadCustomIngredients();
   }, []);
 
   const loadRecipes = () => {
     const savedRecipes = getRecipes();
     setRecipes(savedRecipes);
+  };
+
+  const loadCustomIngredients = () => {
+    const savedIngredients = getCustomIngredients();
+    setCustomIngredients(savedIngredients);
   };
 
   const loadFavorites = () => {
@@ -170,6 +182,26 @@ const NutritionTab = () => {
 
   const handleRecipeSaved = () => {
     loadRecipes();
+  };
+
+  const handleEditCustomIngredient = (ingredient) => {
+    setEditingCustomIngredient(ingredient);
+    setShowCustomFoodDialog(true);
+  };
+
+  const handleCustomIngredientSaved = async (ingredientData) => {
+    try {
+      if (editingCustomIngredient) {
+        // Update existing ingredient
+        const { updateCustomIngredient } = await import('../../utils/nutritionStorage');
+        await updateCustomIngredient(editingCustomIngredient.id, ingredientData);
+      }
+      loadCustomIngredients();
+      setShowCustomFoodDialog(false);
+      setEditingCustomIngredient(null);
+    } catch (error) {
+      console.error('Error saving custom ingredient:', error);
+    }
   };
 
   const handleAddRecipeToLog = (entry) => {
@@ -401,7 +433,7 @@ const NutritionTab = () => {
           />
           <Tab 
             icon={<MenuBook fontSize="small" />} 
-            label="My Recipes"
+            label="My Food"
             iconPosition="start"
           />
         </Tabs>
@@ -830,44 +862,90 @@ const NutritionTab = () => {
         </>
       )}
 
-      {/* Recipes Tab */}
+      {/* My Food Tab */}
       {activeSubTab === 1 && (
         <>
-          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={handleCreateRecipe}
-              size="small"
+          {/* Sub-tabs for Recipes and Custom Ingredients */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+            <Tabs 
+              value={myFoodSubTab} 
+              onChange={(e, newValue) => setMyFoodSubTab(newValue)}
+              sx={{
+                '& .MuiTab-root': {
+                  minHeight: 44,
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                },
+              }}
             >
-              Create New Recipe
-            </Button>
+              <Tab label="Recipes" />
+              <Tab label="Custom Ingredients" />
+            </Tabs>
           </Box>
-          
-          <SavedRecipes
-            recipes={recipes}
-            onEdit={handleEditRecipe}
-            onRecipesUpdate={loadRecipes}
-            onAddToLog={handleAddRecipeToLog}
-          />
 
-          <RecipeBuilder
-            open={showRecipeBuilder}
-            onClose={() => {
-              setShowRecipeBuilder(false);
-              setEditingRecipe(null);
-            }}
-            editRecipe={editingRecipe}
-            onSave={handleRecipeSaved}
-          />
+          {/* Recipes Sub-tab */}
+          {myFoodSubTab === 0 && (
+            <>
+              <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={handleCreateRecipe}
+                  size="small"
+                >
+                  Create New Recipe
+                </Button>
+              </Box>
+              
+              <SavedRecipes
+                recipes={recipes}
+                onEdit={handleEditRecipe}
+                onRecipesUpdate={loadRecipes}
+                onAddToLog={handleAddRecipeToLog}
+              />
 
-          {/* Create Recipe Modal - Full-screen like Log Meal */}
-          <CreateRecipeModal
-            open={showCreateRecipeModal}
-            onClose={() => setShowCreateRecipeModal(false)}
-            onSave={handleRecipeSaved}
-            onFavoritesChange={loadFavorites}
-          />
+              <RecipeBuilder
+                open={showRecipeBuilder}
+                onClose={() => {
+                  setShowRecipeBuilder(false);
+                  setEditingRecipe(null);
+                }}
+                editRecipe={editingRecipe}
+                onSave={handleRecipeSaved}
+              />
+
+              {/* Create Recipe Modal - Full-screen like Log Meal */}
+              <CreateRecipeModal
+                open={showCreateRecipeModal}
+                onClose={() => setShowCreateRecipeModal(false)}
+                onSave={handleRecipeSaved}
+                onFavoritesChange={loadFavorites}
+              />
+            </>
+          )}
+
+          {/* Custom Ingredients Sub-tab */}
+          {myFoodSubTab === 1 && (
+            <>
+              <CustomIngredientsList
+                customIngredients={customIngredients}
+                onEdit={handleEditCustomIngredient}
+                onIngredientsUpdate={loadCustomIngredients}
+              />
+              
+              {/* Edit Custom Ingredient Dialog */}
+              <AddCustomFoodDialog
+                open={showCustomFoodDialog}
+                onClose={() => {
+                  setShowCustomFoodDialog(false);
+                  setEditingCustomIngredient(null);
+                }}
+                onSave={handleCustomIngredientSaved}
+                existingFoods={customIngredients}
+                editingFood={editingCustomIngredient}
+              />
+            </>
+          )}
         </>
       )}
 

@@ -9,7 +9,7 @@
  * - Ranking-based search (higher rank = more relevant)
  * - Tag-based searching (tags not visible to users)
  * - Support for multiple measurement units
- * - Saves recipe to "My Recipes" for later logging as meals
+ * - Saves recipe to "My Food" for later logging as meals
  * - Smooth animations matching workout builder experience
  * - Clean, minimalist interface with clear sections
  */

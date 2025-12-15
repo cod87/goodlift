@@ -8,7 +8,7 @@
  * - Clean, minimalist design matching app style
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -27,7 +27,7 @@ import {
   RestaurantMenu as FoodIcon,
 } from '@mui/icons-material';
 
-const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
+const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [], editingFood = null }) => {
   const [formData, setFormData] = useState({
     name: '',
     calories: '',
@@ -41,6 +41,38 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
   
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
+
+  // Load editing food data when editingFood prop changes
+  useEffect(() => {
+    if (editingFood && open) {
+      // When editing, we need to denormalize the values back to the serving size
+      const portionGrams = editingFood.portion_grams || 100;
+      const denormalizationFactor = portionGrams / 100;
+      
+      setFormData({
+        name: editingFood.name || '',
+        calories: Math.round(editingFood.calories * denormalizationFactor).toString(),
+        protein: (editingFood.protein * denormalizationFactor).toFixed(1),
+        carbs: (editingFood.carbs * denormalizationFactor).toFixed(1),
+        fat: (editingFood.fat * denormalizationFactor).toFixed(1),
+        fiber: (editingFood.fiber * denormalizationFactor).toFixed(1),
+        standard_portion: editingFood.standard_portion || '1 serving',
+        portion_grams: portionGrams.toString(),
+      });
+    } else if (!editingFood && open) {
+      // Reset to default when creating new
+      setFormData({
+        name: '',
+        calories: '',
+        protein: '',
+        carbs: '',
+        fat: '',
+        fiber: '',
+        standard_portion: '1 serving',
+        portion_grams: '100',
+      });
+    }
+  }, [editingFood, open]);
 
   // Reset form when dialog opens/closes
   const handleClose = () => {
@@ -69,10 +101,10 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
     } else if (formData.name.trim().length < 2) {
       newErrors.name = 'Food name must be at least 2 characters';
     } else {
-      // Check for duplicate names (case-insensitive)
+      // Check for duplicate names (case-insensitive), excluding current food when editing
       const nameLower = formData.name.trim().toLowerCase();
       const isDuplicate = existingFoods.some(
-        food => food.name.toLowerCase() === nameLower
+        food => food.name.toLowerCase() === nameLower && food.id !== editingFood?.id
       );
       if (isDuplicate) {
         newErrors.name = 'A food with this name already exists';
@@ -174,7 +206,7 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <FoodIcon color="primary" />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Add Custom Ingredient
+            {editingFood ? 'Edit Custom Ingredient' : 'Add Custom Ingredient'}
           </Typography>
         </Box>
         <IconButton onClick={handleClose} size="small">
@@ -299,7 +331,7 @@ const AddCustomFoodDialog = ({ open, onClose, onSave, existingFoods = [] }) => {
           Cancel
         </Button>
         <Button onClick={handleSubmit} variant="contained">
-          Add Ingredient
+          {editingFood ? 'Save Changes' : 'Add Ingredient'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -311,6 +343,7 @@ AddCustomFoodDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   existingFoods: PropTypes.array,
+  editingFood: PropTypes.object,
 };
 
 export default AddCustomFoodDialog;

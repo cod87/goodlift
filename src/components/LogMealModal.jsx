@@ -55,6 +55,8 @@ import {
   WbSunny as LunchIcon,
   NightsStay as DinnerIcon,
   Cookie as SnackIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { searchFoods, calculateNutrition, calculateNutritionForPortion, getMeasurementOptions, decimalToFraction, addCustomFood, loadCustomFoods, loadNutritionDatabase } from '../services/nutritionDataService';
 import AddCustomFoodDialog from './AddCustomFoodDialog';
@@ -63,6 +65,8 @@ import {
   addFavoriteFood,
   removeFavoriteFood,
   isFavoriteFood,
+  updateCustomIngredient,
+  deleteCustomIngredient,
 } from '../utils/nutritionStorage';
 
 // Constants for portion validation
@@ -100,6 +104,8 @@ const LogMealModal = ({
   // Custom food dialog
   const [showCustomFoodDialog, setShowCustomFoodDialog] = useState(false);
   const [allFoods, setAllFoods] = useState([]);
+  const [editingCustomFood, setEditingCustomFood] = useState(null);
+  const [deleteConfirmFood, setDeleteConfirmFood] = useState(null);
 
   // Reset state when modal opens
   useEffect(() => {
@@ -429,37 +435,110 @@ const LogMealModal = ({
   // Handle custom food creation
   const handleSaveCustomFood = async (customFoodData) => {
     try {
-      const newFood = await addCustomFood(customFoodData);
-      // Reload all foods to include the new custom food
-      loadAllFoods();
-      // Add to search results at the top
-      setSearchResults(prevResults => [newFood, ...prevResults]);
+      let savedFood;
       
-      // Automatically add the custom ingredient to the meal
-      const newMealItem = {
-        id: crypto.randomUUID(),
-        food: newFood,
-        portionType: 'standard',
-        portionQuantity: 1,
-        grams: newFood.portion_grams || 100,
-      };
-      setMealItems(prevItems => [...prevItems, newMealItem]);
+      if (editingCustomFood) {
+        // Update existing custom food
+        await updateCustomIngredient(editingCustomFood.id, customFoodData);
+        // Reload to get updated data
+        await loadAllFoods();
+        const updatedFoods = loadCustomFoods();
+        savedFood = updatedFoods.find(f => f.id === editingCustomFood.id);
+        
+        // Update in search results if present
+        setSearchResults(prevResults => 
+          prevResults.map(f => f.id === editingCustomFood.id ? savedFood : f)
+        );
+        
+        setEditingCustomFood(null);
+      } else {
+        // Create new custom food
+        savedFood = await addCustomFood(customFoodData);
+        // Reload all foods to include the new custom food
+        loadAllFoods();
+        // Add to search results at the top
+        setSearchResults(prevResults => [savedFood, ...prevResults]);
+        
+        // Automatically add the custom ingredient to the meal
+        const newMealItem = {
+          id: crypto.randomUUID(),
+          food: savedFood,
+          portionType: 'standard',
+          portionQuantity: 1,
+          grams: savedFood.portion_grams || 100,
+        };
+        setMealItems(prevItems => [...prevItems, newMealItem]);
+        
+        // Add to selected foods
+        const foodId = savedFood.id || savedFood.fdcId;
+        setSelectedFoodIds(prevIds => {
+          const newIds = new Set(prevIds);
+          newIds.add(foodId);
+          return newIds;
+        });
+        
+        // Switch to My Meal tab to show the added ingredient
+        setActiveTab(1);
+      }
       
-      // Add to selected foods
-      const foodId = newFood.id || newFood.fdcId;
+      setShowCustomFoodDialog(false);
+    } catch (error) {
+      console.error('Error saving custom food:', error);
+      setError('Failed to save custom food. Please try again.');
+    }
+  };
+
+  // Handle custom food edit
+  const handleEditCustomFood = (food, event) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    setEditingCustomFood(food);
+    setShowCustomFoodDialog(true);
+  };
+
+  // Handle custom food delete
+  const handleDeleteCustomFood = async (food, event) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    setDeleteConfirmFood(food);
+  };
+
+  // Confirm delete custom food
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmFood) return;
+    
+    try {
+      await deleteCustomIngredient(deleteConfirmFood.id);
+      
+      // Reload all foods
+      await loadAllFoods();
+      
+      // Remove from search results
+      setSearchResults(prevResults => 
+        prevResults.filter(f => f.id !== deleteConfirmFood.id)
+      );
+      
+      // Remove from meal items if present
+      setMealItems(prevItems => 
+        prevItems.filter(item => {
+          const itemFoodId = item.food.id || item.food.fdcId;
+          return itemFoodId !== deleteConfirmFood.id;
+        })
+      );
+      
+      // Remove from selected foods
       setSelectedFoodIds(prevIds => {
         const newIds = new Set(prevIds);
-        newIds.add(foodId);
+        newIds.delete(deleteConfirmFood.id);
         return newIds;
       });
       
-      setShowCustomFoodDialog(false);
-      
-      // Switch to My Meal tab to show the added ingredient
-      setActiveTab(1);
+      setDeleteConfirmFood(null);
     } catch (error) {
-      console.error('Error adding custom food:', error);
-      setError('Failed to add custom food. Please try again.');
+      console.error('Error deleting custom food:', error);
+      setError('Failed to delete custom ingredient. Please try again.');
     }
   };
 
@@ -469,6 +548,7 @@ const LogMealModal = ({
       // Calculate nutrition for 1 standard portion (using portion_factor)
       const nutrition = calculateNutritionForPortion(food, 1);
       const isFavorite = isFavoriteFood(food);
+      const isCustom = food.isCustom || food.id?.toString().startsWith('custom_');
       
       return (
         <motion.div
@@ -501,15 +581,29 @@ const LogMealModal = ({
           >
             <ListItemText
               primary={
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    fontWeight: 500,
-                    color: 'text.primary',
-                  }}
-                >
-                  {food.name || food.foodName || 'Unknown Food'}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      fontWeight: 500,
+                      color: 'text.primary',
+                    }}
+                  >
+                    {food.name || food.foodName || 'Unknown Food'}
+                  </Typography>
+                  {isCustom && (
+                    <Chip 
+                      label="Custom" 
+                      size="small" 
+                      sx={{ 
+                        height: 16, 
+                        fontSize: '0.65rem',
+                        bgcolor: 'primary.50',
+                        color: 'primary.main',
+                      }} 
+                    />
+                  )}
+                </Box>
               }
               secondary={
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -530,18 +624,49 @@ const LogMealModal = ({
             >
               {nutrition.calories} cal
             </Typography>
-            <IconButton
-              size="small"
-              onClick={(e) => handleToggleFavorite(food, e)}
-              sx={{ 
-                color: isFavorite ? 'warning.main' : 'action.disabled',
-                '&:hover': {
-                  color: 'warning.main',
-                }
-              }}
-            >
-              {isFavorite ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
-            </IconButton>
+            {isCustom ? (
+              <>
+                <IconButton
+                  size="small"
+                  onClick={(e) => handleEditCustomFood(food, e)}
+                  sx={{ 
+                    color: 'action.disabled',
+                    '&:hover': {
+                      color: 'primary.main',
+                    }
+                  }}
+                  title="Edit custom ingredient"
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={(e) => handleDeleteCustomFood(food, e)}
+                  sx={{ 
+                    color: 'action.disabled',
+                    '&:hover': {
+                      color: 'error.main',
+                    }
+                  }}
+                  title="Delete custom ingredient"
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </>
+            ) : (
+              <IconButton
+                size="small"
+                onClick={(e) => handleToggleFavorite(food, e)}
+                sx={{ 
+                  color: isFavorite ? 'warning.main' : 'action.disabled',
+                  '&:hover': {
+                    color: 'warning.main',
+                  }
+                }}
+              >
+                {isFavorite ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
+              </IconButton>
+            )}
           </ListItem>
         </motion.div>
       );
@@ -1063,10 +1188,37 @@ const LogMealModal = ({
       {/* Add Custom Food Dialog */}
       <AddCustomFoodDialog
         open={showCustomFoodDialog}
-        onClose={() => setShowCustomFoodDialog(false)}
+        onClose={() => {
+          setShowCustomFoodDialog(false);
+          setEditingCustomFood(null);
+        }}
         onSave={handleSaveCustomFood}
         existingFoods={allFoods}
+        editingFood={editingCustomFood}
       />
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={!!deleteConfirmFood}
+        onClose={() => setDeleteConfirmFood(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete Custom Ingredient?</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete "{deleteConfirmFood?.name}"? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmFood(null)}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };

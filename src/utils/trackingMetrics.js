@@ -208,7 +208,11 @@ export const calculateStreak = (workoutHistory = []) => {
       }
       
       // Count rest days (including unlogged days which are treated as rest)
-      if (!hasSessions || isRestDay(currentDay)) {
+      // BUT: days with sick day sessions should NOT be counted as unlogged
+      const allSessions = dateToAllSessions.get(currentDay) || [];
+      const dayHasSickDay = allSessions.some(s => isSickDaySession(s));
+      
+      if ((!hasSessions && !dayHasSickDay) || isRestDay(currentDay)) {
         const currentCount = weekRestDays.get(weekStart) || 0;
         weekRestDays.set(weekStart, currentCount + 1);
         

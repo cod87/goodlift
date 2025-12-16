@@ -51,6 +51,16 @@ export const getDefaultSessionData = (sessionType) => {
     };
   }
   
+  // Sick day - neutral day that doesn't affect streak
+  if (type === 'sick_day') {
+    return {
+      sessionType: 'sick_day',
+      sessionName: 'Sick Day',
+      assignedDate: new Date().toISOString(),
+      instructions: 'Rest and recover from illness. Sick days do not break your streak.',
+    };
+  }
+  
   // Default fallback
   return {
     sessionType: type,
@@ -80,6 +90,7 @@ export const getSessionTypeDisplayName = (type) => {
     stretch: 'Stretching',
     active_recovery: 'Active Recovery',
     rest: 'Rest Day',
+    sick_day: 'Sick Day',
   };
   return displayNames[type] || type.charAt(0).toUpperCase() + type.slice(1);
 };
@@ -150,6 +161,15 @@ export const isRestType = (type) => {
 };
 
 /**
+ * Check if session type is sick day
+ * @param {string} type - Session type
+ * @returns {boolean} True if sick day
+ */
+export const isSickDayType = (type) => {
+  return type?.toLowerCase() === 'sick_day';
+};
+
+/**
  * Get all available session types
  * @returns {Array} Array of session type objects
  */
@@ -169,6 +189,7 @@ export const getAllSessionTypes = () => {
     { value: 'stretch', label: 'Stretching', category: 'flexibility' },
     { value: 'active_recovery', label: 'Active Recovery', category: 'recovery' },
     { value: 'rest', label: 'Rest Day', category: 'rest' },
+    { value: 'sick_day', label: 'Sick Day', category: 'sick' },
   ];
 };
 
@@ -178,5 +199,6 @@ export default {
   isStrengthType,
   isTimerType,
   isRestType,
+  isSickDayType,
   getAllSessionTypes,
 };

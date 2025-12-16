@@ -59,6 +59,12 @@ export const calculateStreak = (workoutHistory = []) => {
     return type.toLowerCase() === 'active_recovery';
   };
 
+  // Helper function to check if a session is a sick day
+  const isSickDaySession = (session) => {
+    const type = session.type || session.sessionType || '';
+    return type.toLowerCase() === 'sick_day';
+  };
+
   // Helper function to get the Sunday (start) of a week for any date
   // Returns timestamp at midnight of the Sunday that starts the week
   const getWeekStart = (date) => {
@@ -70,8 +76,14 @@ export const calculateStreak = (workoutHistory = []) => {
   };
 
   // Build a map of normalized dates to sessions for quick lookup
+  // Filter out sick days as they should not be considered in streak calculations
   const dateToSessions = new Map();
   sortedWorkouts.forEach(workout => {
+    // Skip sick days entirely - they don't count towards or against streaks
+    if (isSickDaySession(workout)) {
+      return;
+    }
+    
     const d = new Date(workout.date);
     d.setHours(0, 0, 0, 0); // Normalize to local midnight
     const timestamp = d.getTime();
@@ -82,11 +94,16 @@ export const calculateStreak = (workoutHistory = []) => {
   });
 
   // Get unique workout dates, normalized to midnight
-  const uniqueDatesArray = Array.from(new Set(sortedWorkouts.map(w => {
-    const d = new Date(w.date);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
-  }).filter(timestamp => !isNaN(timestamp)))).sort((a, b) => a - b);
+  // Filter out sick days as they should not be considered in streak calculations
+  const uniqueDatesArray = Array.from(new Set(sortedWorkouts
+    .filter(w => !isSickDaySession(w)) // Exclude sick days
+    .map(w => {
+      const d = new Date(w.date);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    })
+    .filter(timestamp => !isNaN(timestamp))
+  )).sort((a, b) => a - b);
 
   // If no valid dates found, return empty streak
   if (uniqueDatesArray.length === 0) {

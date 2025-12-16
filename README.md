@@ -42,7 +42,7 @@ GoodLift focuses on logging what you've actually done rather than planning futur
 
 The app tracks several key metrics:
 
-- **Current Streak**: Consecutive days with logged activities
+- **Current Streak**: Consecutive days with logged activities (allows up to 1 rest/unlogged day per week without breaking the streak; sick days are ignored and don't affect streaks)
 - **Total Workouts**: Lifetime workout count
 - **Personal Records**: Track weight progression per exercise
 - **Total Volume**: Cumulative weight × reps across all workouts
@@ -172,6 +172,8 @@ The app supports logging various activity types:
 - **HIIT**: High-intensity interval training sessions
 - **Mobility**: Joint mobility and flexibility work
 - **Stretching**: Static and dynamic stretching sessions
+- **Rest Day**: Planned rest days that count as a "skip day" for streak purposes (max 1 per week)
+- **Sick Day**: Days when you're unable to work out due to illness. Sick days are treated as neutral and do not affect your streak - they neither break it nor count towards it. This allows you to maintain your streak even when circumstances prevent you from exercising.
 
 ## Exercise Database
 

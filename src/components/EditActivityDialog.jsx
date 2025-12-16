@@ -22,6 +22,7 @@ const SESSION_TYPES = {
   CARDIO: 'cardio',
   YOGA: 'yoga',
   REST: 'rest',
+  SICK_DAY: 'sick_day',
 };
 
 const WORKOUT_TYPES = {
@@ -92,7 +93,7 @@ const EditActivityDialog = ({ open, onClose, activity, onSave }) => {
 
   const isValid = () => {
     if (!formData.date) return false;
-    if (formData.sessionType !== SESSION_TYPES.REST && (!formData.duration || parseFloat(formData.duration) <= 0)) {
+    if (formData.sessionType !== SESSION_TYPES.REST && formData.sessionType !== SESSION_TYPES.SICK_DAY && (!formData.duration || parseFloat(formData.duration) <= 0)) {
       return false;
     }
     if (formData.sessionType === SESSION_TYPES.STRENGTH) {
@@ -137,6 +138,7 @@ const EditActivityDialog = ({ open, onClose, activity, onSave }) => {
                 <MenuItem value={SESSION_TYPES.CARDIO}>Cardio</MenuItem>
                 <MenuItem value={SESSION_TYPES.YOGA}>Yoga</MenuItem>
                 <MenuItem value={SESSION_TYPES.REST}>Rest Day</MenuItem>
+                <MenuItem value={SESSION_TYPES.SICK_DAY}>Sick Day</MenuItem>
               </Select>
             </FormControl>
 
@@ -159,8 +161,8 @@ const EditActivityDialog = ({ open, onClose, activity, onSave }) => {
               </FormControl>
             )}
 
-            {/* Duration Field - Hide for Rest Days */}
-            {formData.sessionType !== SESSION_TYPES.REST && (
+            {/* Duration Field - Hide for Rest Days and Sick Days */}
+            {formData.sessionType !== SESSION_TYPES.REST && formData.sessionType !== SESSION_TYPES.SICK_DAY && (
               <TextField
                 fullWidth
                 type="number"

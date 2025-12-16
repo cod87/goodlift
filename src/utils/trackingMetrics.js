@@ -84,7 +84,8 @@ export const calculateStreak = (workoutHistory = []) => {
   };
 
   // Build a map of normalized dates to sessions for quick lookup
-  // Filter out sick days as they should not be considered in streak calculations
+  // dateToSessions: Excludes sick days - used for normal streak processing (sick days don't count as active workout days)
+  // dateToAllSessions: Includes ALL sessions including sick days - used for weekly calculations (counting sick days and strength sessions)
   const dateToSessions = new Map();
   sortedWorkouts.forEach(workout => {
     // Skip sick days entirely - they don't count towards or against streaks
@@ -245,10 +246,14 @@ export const calculateStreak = (workoutHistory = []) => {
     }
     
     // After processing all days, check sick day requirements per week
+    // Sick day to minimum strength session requirements:
+    // - 2 sick days → minimum 2 strength sessions
+    // - 3 sick days → minimum 1 strength session
+    // - 4+ sick days → no minimum (any amount of strength training is acceptable)
     for (const [weekStart, sickDayCount] of weekSickDays.entries()) {
       const strengthCount = weekStrengthDays.get(weekStart) || 0;
       
-      // Apply minimum strength training requirements based on sick day count
+      // Check minimum strength training requirements based on sick day count
       if (sickDayCount === 2 && strengthCount < 2) {
         return false; // Need at least 2 strength sessions with 2 sick days
       }

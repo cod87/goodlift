@@ -41,6 +41,7 @@ const SESSION_TYPES = {
   YOGA: 'yoga',
   ACTIVE_RECOVERY: 'active_recovery',
   REST: 'rest',
+  SICK_DAY: 'sick_day',
 };
 
 const WORKOUT_TYPES = {
@@ -91,8 +92,8 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
       errors.date = 'Date is required';
     }
     
-    // Only validate duration for non-rest sessions
-    if (values.sessionType !== SESSION_TYPES.REST) {
+    // Only validate duration for non-rest and non-sick-day sessions
+    if (values.sessionType !== SESSION_TYPES.REST && values.sessionType !== SESSION_TYPES.SICK_DAY) {
       if (!values.duration) {
         errors.duration = 'Duration is required';
       } else if (isNaN(values.duration) || parseFloat(values.duration) <= 0) {
@@ -121,8 +122,8 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       const timestamp = values.date.getTime();
-      // For rest days, set duration to 0 if not provided
-      const duration = values.sessionType === SESSION_TYPES.REST && !values.duration 
+      // For rest days and sick days, set duration to 0 if not provided
+      const duration = (values.sessionType === SESSION_TYPES.REST || values.sessionType === SESSION_TYPES.SICK_DAY) && !values.duration 
         ? 0 
         : parseFloat(values.duration) * SECONDS_PER_MINUTE;
 
@@ -150,16 +151,16 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
 
       await saveWorkout(workoutData);
       
-      // Update stats only for non-rest sessions
-      if (values.sessionType !== SESSION_TYPES.REST) {
+      // Update stats only for non-rest and non-sick-day sessions
+      if (values.sessionType !== SESSION_TYPES.REST && values.sessionType !== SESSION_TYPES.SICK_DAY) {
         const stats = await getUserStats();
         stats.totalWorkouts += 1;
         stats.totalTime += workoutData.duration;
         await saveUserStats(stats);
       }
 
-      // Handle assignment workflow
-      if (isAutoAssignWeek() && values.sessionType !== SESSION_TYPES.REST) {
+      // Handle assignment workflow (exclude rest and sick days from auto-assignment)
+      if (isAutoAssignWeek() && values.sessionType !== SESSION_TYPES.REST && values.sessionType !== SESSION_TYPES.SICK_DAY) {
         // Auto-assign in Week 1
         const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(timestamp).getDay()];
         const sessionData = {
@@ -238,6 +239,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
       [SESSION_TYPES.YOGA]: 'Yoga',
       [SESSION_TYPES.ACTIVE_RECOVERY]: 'Active Recovery',
       [SESSION_TYPES.REST]: 'Rest',
+      [SESSION_TYPES.SICK_DAY]: 'Sick Day',
     };
     return typeMap[sessionType] || sessionType;
   };
@@ -348,6 +350,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                         <MenuItem value={SESSION_TYPES.YOGA}>Yoga</MenuItem>
                         <MenuItem value={SESSION_TYPES.ACTIVE_RECOVERY}>Active Recovery</MenuItem>
                         <MenuItem value={SESSION_TYPES.REST}>Rest Day</MenuItem>
+                        <MenuItem value={SESSION_TYPES.SICK_DAY}>Sick Day</MenuItem>
                       </Select>
                     </FormControl>
 
@@ -388,8 +391,8 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
                       </FormControl>
                     )}
 
-                    {/* Duration Field - Hide for Rest Days */}
-                    {values.sessionType !== SESSION_TYPES.REST && (
+                    {/* Duration Field - Hide for Rest Days and Sick Days */}
+                    {values.sessionType !== SESSION_TYPES.REST && values.sessionType !== SESSION_TYPES.SICK_DAY && (
                       <Field name="duration">
                         {({ field }) => (
                           <TextField

@@ -49,6 +49,9 @@ const SessionTypeQuickToggle = ({ currentType, onChange, compact = false }) => {
     rest: [
       { value: 'rest', label: 'Rest Day', shortLabel: 'Rest' },
     ],
+    sick: [
+      { value: 'sick_day', label: 'Sick Day', shortLabel: 'Sick' },
+    ],
   };
 
   // Get icon for category
@@ -58,6 +61,7 @@ const SessionTypeQuickToggle = ({ currentType, onChange, compact = false }) => {
       cardio: <DirectionsRun fontSize="small" />,
       flexibility: <SelfImprovement fontSize="small" />,
       rest: <HotelOutlined fontSize="small" />,
+      sick: <HotelOutlined fontSize="small" />,
     };
     return icons[category];
   };

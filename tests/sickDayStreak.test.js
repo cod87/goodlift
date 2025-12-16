@@ -92,11 +92,11 @@ console.log('Test 3: Week with two consecutive sick days (Wednesday and Thursday
   
   const result = calculateStreak(sessions);
   
-  // Both sick days should be ignored, so it's like having 5 days with 2 unlogged days
-  // This should break the streak since more than 1 unlogged day per week
-  const passed = result.longestStreak < 7;
+  // 2 sick days + 5 strength sessions = meets minimum requirement (2 strength needed for 2 sick days)
+  // Since we have 5 strength sessions, the requirement is more than met, streak continues
+  const passed = result.longestStreak === 7;
   console.log(`  Sessions: 5 strength days + 2 sick days`);
-  console.log(`  Expected longestStreak < 7 (2 unlogged days after sick days ignored), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
+  console.log(`  Expected longestStreak: 7 (5 strength exceeds minimum of 2 for 2 sick days), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
 }
 console.log('');
 
@@ -169,11 +169,13 @@ console.log('Test 6: Week with sick day, rest day, and active days');
   
   const result = calculateStreak(sessions);
   
-  // Sick day ignored, so we have: 5 strength days + 1 rest day + 1 unlogged (where sick was)
-  // That's 2 "skip days" (1 rest + 1 unlogged) which breaks the streak
-  const passed = result.longestStreak < 7;
+  // 1 sick day + 1 rest day + 5 strength sessions
+  // Sick days don't count as rest, so we only have 1 rest day (within limit)
+  // With 1 sick day, there's no minimum strength requirement change
+  // Streak should be valid
+  const passed = result.longestStreak === 7;
   console.log(`  Sessions: 5 strength + 1 sick + 1 rest`);
-  console.log(`  Expected longestStreak < 7 (sick ignored = 1 rest + 1 unlogged = too many), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
+  console.log(`  Expected longestStreak: 7 (sick day doesn't count as rest, only 1 rest day), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
 }
 console.log('');
 
@@ -271,6 +273,185 @@ console.log('Test 10: Sick day yesterday, checking current streak');
   console.log(`  Sessions: strength 2 days ago, sick day yesterday`);
   console.log(`  Expected currentStreak: 0 (beyond grace period), longestStreak: 1`);
   console.log(`  Got currentStreak: ${result.currentStreak}, longestStreak: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+console.log('=== Sick Day Strength Training Requirements Tests ===\n');
+
+// Test 11: Week with 2 sick days and 2 strength sessions - streak should continue
+console.log('Test 11: Week with 2 sick days and 2 strength sessions (minimum met)');
+{
+  const sunday = getSunday(new Date());
+  sunday.setDate(sunday.getDate() - 7); // Last week's Sunday
+  const weekDates = getWeekDates(sunday);
+  
+  // Sun-Mon: strength, Tue-Wed: sick, Thu-Sat: cardio
+  const sessions = weekDates.map((d, i) => {
+    if (i === 0 || i === 1) return createSession(d, 'upper'); // strength
+    if (i === 2 || i === 3) return createSession(d, 'sick_day');
+    return createSession(d, 'cardio');
+  });
+  
+  const result = calculateStreak(sessions);
+  
+  // 2 sick days + 2 strength sessions = minimum requirement met, streak should continue
+  const passed = result.longestStreak === 7;
+  console.log(`  Sessions: 2 strength + 2 sick + 3 cardio`);
+  console.log(`  Expected longestStreak: 7 (2 strength meets minimum for 2 sick days), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 12: Week with 2 sick days and only 1 strength session - streak should break
+console.log('Test 12: Week with 2 sick days and 1 strength session (minimum not met)');
+{
+  const sunday = getSunday(new Date());
+  sunday.setDate(sunday.getDate() - 7); // Last week's Sunday
+  const weekDates = getWeekDates(sunday);
+  
+  // Sun: strength, Mon-Tue: sick, Wed-Sat: cardio
+  const sessions = weekDates.map((d, i) => {
+    if (i === 0) return createSession(d, 'lower'); // strength
+    if (i === 1 || i === 2) return createSession(d, 'sick_day');
+    return createSession(d, 'cardio');
+  });
+  
+  const result = calculateStreak(sessions);
+  
+  // 2 sick days + 1 strength session = minimum NOT met (need 2), streak should break
+  const passed = result.longestStreak < 7;
+  console.log(`  Sessions: 1 strength + 2 sick + 4 cardio`);
+  console.log(`  Expected longestStreak < 7 (need 2 strength for 2 sick days), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 13: Week with 3 sick days and 1 strength session - streak should continue
+console.log('Test 13: Week with 3 sick days and 1 strength session (minimum met)');
+{
+  const sunday = getSunday(new Date());
+  sunday.setDate(sunday.getDate() - 7); // Last week's Sunday
+  const weekDates = getWeekDates(sunday);
+  
+  // Sun: strength, Mon-Wed: sick, Thu-Sat: yoga
+  const sessions = weekDates.map((d, i) => {
+    if (i === 0) return createSession(d, 'full'); // strength
+    if (i === 1 || i === 2 || i === 3) return createSession(d, 'sick_day');
+    return createSession(d, 'yoga');
+  });
+  
+  const result = calculateStreak(sessions);
+  
+  // 3 sick days + 1 strength session = minimum requirement met, streak should continue
+  const passed = result.longestStreak === 7;
+  console.log(`  Sessions: 1 strength + 3 sick + 3 yoga`);
+  console.log(`  Expected longestStreak: 7 (1 strength meets minimum for 3 sick days), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 14: Week with 3 sick days and 0 strength sessions - streak should break
+console.log('Test 14: Week with 3 sick days and 0 strength sessions (minimum not met)');
+{
+  const sunday = getSunday(new Date());
+  sunday.setDate(sunday.getDate() - 7); // Last week's Sunday
+  const weekDates = getWeekDates(sunday);
+  
+  // Sun-Wed: sick (3 days), Thu-Sat: cardio
+  const sessions = weekDates.map((d, i) => {
+    if (i === 0 || i === 1 || i === 2) return createSession(d, 'sick_day');
+    return createSession(d, 'cardio');
+  });
+  
+  const result = calculateStreak(sessions);
+  
+  // 3 sick days + 0 strength sessions = minimum NOT met (need 1), streak should break
+  const passed = result.longestStreak < 7;
+  console.log(`  Sessions: 3 sick + 4 cardio`);
+  console.log(`  Expected longestStreak < 7 (need 1 strength for 3 sick days), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 15: Week with 4 sick days and 0 strength sessions - streak should continue (no minimum)
+console.log('Test 15: Week with 4 sick days and 0 strength sessions (no minimum required)');
+{
+  const sunday = getSunday(new Date());
+  sunday.setDate(sunday.getDate() - 7); // Last week's Sunday
+  const weekDates = getWeekDates(sunday);
+  
+  // Sun-Wed: sick (4 days), Thu-Sat: yoga
+  const sessions = weekDates.map((d, i) => {
+    if (i === 0 || i === 1 || i === 2 || i === 3) return createSession(d, 'sick_day');
+    return createSession(d, 'yoga');
+  });
+  
+  const result = calculateStreak(sessions);
+  
+  // 4+ sick days = no minimum requirement
+  // But streak only counts active workout days (yoga on Thu-Sat = 3 days)
+  const passed = result.longestStreak === 3;
+  console.log(`  Sessions: 4 sick + 3 yoga`);
+  console.log(`  Expected longestStreak: 3 (no minimum for 4+ sick days, but only 3 active days), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 16: Week with 5 sick days - streak should continue (no minimum)
+console.log('Test 16: Week with 5 sick days and 0 strength sessions (no minimum required)');
+{
+  const sunday = getSunday(new Date());
+  sunday.setDate(sunday.getDate() - 7); // Last week's Sunday
+  const weekDates = getWeekDates(sunday);
+  
+  // Sun-Thu: sick (5 days), Fri-Sat: cardio
+  const sessions = weekDates.map((d, i) => {
+    if (i <= 4) return createSession(d, 'sick_day');
+    return createSession(d, 'cardio');
+  });
+  
+  const result = calculateStreak(sessions);
+  
+  // 5 sick days = no minimum requirement
+  // But streak only counts active workout days (cardio on Fri-Sat = 2 days)
+  const passed = result.longestStreak === 2;
+  console.log(`  Sessions: 5 sick + 2 cardio`);
+  console.log(`  Expected longestStreak: 2 (no minimum for 4+ sick days, but only 2 active days), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
+}
+console.log('');
+
+// Test 17: Multi-week streak with varying sick days and strength sessions
+console.log('Test 17: Multi-week streak with varying sick/strength combinations');
+{
+  const sunday = getSunday(new Date());
+  sunday.setDate(sunday.getDate() - 21); // Three weeks ago
+  
+  // Week 1: 7 strength sessions (normal week)
+  const week1Dates = getWeekDates(sunday);
+  const week1Sessions = week1Dates.map(d => createSession(d, 'upper'));
+  
+  // Week 2: 2 sick days + 2 strength sessions (minimum met)
+  const week2Sunday = new Date(sunday);
+  week2Sunday.setDate(week2Sunday.getDate() + 7);
+  const week2Dates = getWeekDates(week2Sunday);
+  const week2Sessions = week2Dates.map((d, i) => {
+    if (i === 0 || i === 1) return createSession(d, 'push'); // strength
+    if (i === 2 || i === 3) return createSession(d, 'sick_day');
+    return createSession(d, 'yoga');
+  });
+  
+  // Week 3: 3 sick days + 1 strength session (minimum met)
+  const week3Sunday = new Date(week2Sunday);
+  week3Sunday.setDate(week3Sunday.getDate() + 7);
+  const week3Dates = getWeekDates(week3Sunday);
+  const week3Sessions = week3Dates.map((d, i) => {
+    if (i === 0) return createSession(d, 'legs'); // strength
+    if (i === 1 || i === 2 || i === 3) return createSession(d, 'sick_day');
+    return createSession(d, 'cardio');
+  });
+  
+  const sessions = [...week1Sessions, ...week2Sessions, ...week3Sessions];
+  const result = calculateStreak(sessions);
+  
+  // All weeks meet minimum requirements, streak should be 21 days
+  const passed = result.longestStreak === 21;
+  console.log(`  Week 1: 7 strength | Week 2: 2 strength + 2 sick + 3 yoga | Week 3: 1 strength + 3 sick + 3 cardio`);
+  console.log(`  Expected longestStreak: 21 (all minimums met), Got: ${result.longestStreak} ${passed ? '✓' : '✗ FAIL'}`);
 }
 console.log('');
 

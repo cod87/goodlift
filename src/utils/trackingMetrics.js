@@ -65,6 +65,14 @@ export const calculateStreak = (workoutHistory = []) => {
     return type.toLowerCase() === 'sick_day';
   };
 
+  // Helper function to check if a session is a strength training type
+  const isStrengthTrainingSession = (session) => {
+    const type = session.type || session.sessionType || '';
+    const normalizedType = type.toLowerCase();
+    const strengthTypes = ['upper', 'lower', 'full', 'push', 'pull', 'legs', 'strength', 'hypertrophy'];
+    return strengthTypes.includes(normalizedType);
+  };
+
   // Helper function to get the Sunday (start) of a week for any date
   // Returns timestamp at midnight of the Sunday that starts the week
   const getWeekStart = (date) => {
@@ -76,7 +84,8 @@ export const calculateStreak = (workoutHistory = []) => {
   };
 
   // Build a map of normalized dates to sessions for quick lookup
-  // Filter out sick days as they should not be considered in streak calculations
+  // dateToSessions: Excludes sick days - used for normal streak processing (sick days don't count as active workout days)
+  // dateToAllSessions: Includes ALL sessions including sick days - used for weekly calculations (counting sick days and strength sessions)
   const dateToSessions = new Map();
   sortedWorkouts.forEach(workout => {
     // Skip sick days entirely - they don't count towards or against streaks
@@ -91,6 +100,18 @@ export const calculateStreak = (workoutHistory = []) => {
       dateToSessions.set(timestamp, []);
     }
     dateToSessions.get(timestamp).push(workout);
+  });
+
+  // Build a separate map that includes ALL sessions (including sick days) for counting strength and sick days per week
+  const dateToAllSessions = new Map();
+  sortedWorkouts.forEach(workout => {
+    const d = new Date(workout.date);
+    d.setHours(0, 0, 0, 0); // Normalize to local midnight
+    const timestamp = d.getTime();
+    if (!dateToAllSessions.has(timestamp)) {
+      dateToAllSessions.set(timestamp, []);
+    }
+    dateToAllSessions.get(timestamp).push(workout);
   });
 
   // Get unique workout dates, normalized to midnight
@@ -144,24 +165,55 @@ export const calculateStreak = (workoutHistory = []) => {
    * - Allow up to 2 Active Recovery days per week if NO rest days (logged or unlogged)
    * - If there is any rest day (logged or unlogged), only 1 Active Recovery is allowed
    * - More than 1 rest day (including unlogged) breaks the streak
+   * - NEW: Sick day requirements:
+   *   - 2 sick days in a week → minimum 2 strength training sessions required
+   *   - 3 sick days in a week → minimum 1 strength training session required
+   *   - 4+ sick days in a week → no minimum requirement
    * 
    * @param {number} startDate - Start date timestamp of the streak
    * @param {number} endDate - End date timestamp of the streak
    * @returns {boolean} True if the streak is valid
    */
   const isValidStreakRange = (startDate, endDate) => {
-    // Group days by week block and count rest/recovery days per week
+    // Group days by week block and count rest/recovery/sick/strength days per week
     const weekRestDays = new Map(); // weekStart -> count of rest days (including unlogged)
     const weekRecoveryDays = new Map(); // weekStart -> count of active recovery days
+    const weekSickDays = new Map(); // weekStart -> count of sick days
+    const weekStrengthDays = new Map(); // weekStart -> count of strength training days
     
     // Iterate through each day in the range
     let currentDay = startDate;
     while (currentDay <= endDate) {
       const weekStart = getWeekStart(currentDay);
       const hasSessions = dateToSessions.has(currentDay);
+      const hasAnySessions = dateToAllSessions.has(currentDay);
+      
+      // Count sick days (from the complete sessions map)
+      if (hasAnySessions) {
+        const allSessions = dateToAllSessions.get(currentDay) || [];
+        const hasSickDay = allSessions.some(s => isSickDaySession(s));
+        if (hasSickDay) {
+          const currentCount = weekSickDays.get(weekStart) || 0;
+          weekSickDays.set(weekStart, currentCount + 1);
+        }
+        
+        // Count strength training days (from the filtered sessions map, excluding sick days)
+        if (hasSessions) {
+          const sessions = dateToSessions.get(currentDay) || [];
+          const hasStrength = sessions.some(s => isStrengthTrainingSession(s));
+          if (hasStrength) {
+            const currentCount = weekStrengthDays.get(weekStart) || 0;
+            weekStrengthDays.set(weekStart, currentCount + 1);
+          }
+        }
+      }
       
       // Count rest days (including unlogged days which are treated as rest)
-      if (!hasSessions || isRestDay(currentDay)) {
+      // BUT: days with sick day sessions should NOT be counted as unlogged
+      const allSessions = dateToAllSessions.get(currentDay) || [];
+      const dayHasSickDay = allSessions.some(s => isSickDaySession(s));
+      
+      if ((!hasSessions && !dayHasSickDay) || isRestDay(currentDay)) {
         const currentCount = weekRestDays.get(weekStart) || 0;
         weekRestDays.set(weekStart, currentCount + 1);
         
@@ -191,6 +243,24 @@ export const calculateStreak = (workoutHistory = []) => {
       
       // Move to next day
       currentDay += MS_PER_DAY;
+    }
+    
+    // After processing all days, check sick day requirements per week
+    // Sick day to minimum strength session requirements:
+    // - 2 sick days → minimum 2 strength sessions
+    // - 3 sick days → minimum 1 strength session
+    // - 4+ sick days → no minimum (any amount of strength training is acceptable)
+    for (const [weekStart, sickDayCount] of weekSickDays.entries()) {
+      const strengthCount = weekStrengthDays.get(weekStart) || 0;
+      
+      // Check minimum strength training requirements based on sick day count
+      if (sickDayCount === 2 && strengthCount < 2) {
+        return false; // Need at least 2 strength sessions with 2 sick days
+      }
+      if (sickDayCount === 3 && strengthCount < 1) {
+        return false; // Need at least 1 strength session with 3 sick days
+      }
+      // 4+ sick days have no minimum requirement (continue streak)
     }
     
     return true;

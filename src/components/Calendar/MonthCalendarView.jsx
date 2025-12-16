@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Bookmark,
+  Thermostat,
 } from '@mui/icons-material';
 import { 
   startOfMonth, 
@@ -78,6 +79,13 @@ const MonthCalendarView = ({
   };
 
   // hasCompletedWorkout function removed - using getWorkoutsForDay instead
+
+  // Check if a workout type is a sick day
+  const isSickDayType = (type) => {
+    if (!type) return false;
+    const normalizedType = type.toLowerCase();
+    return normalizedType === 'sick_day';
+  };
 
   // Check if a workout type is a strength training type
   const isStrengthType = (type) => {
@@ -154,7 +162,9 @@ const MonthCalendarView = ({
     
     const normalizedType = type.toLowerCase();
     
-    if (normalizedType === 'cardio' || normalizedType === 'hiit' || CARDIO_SUBTYPES.includes(normalizedType)) {
+    if (normalizedType === 'sick_day') {
+      return 'action.disabled'; // Grey color for sick days
+    } else if (normalizedType === 'cardio' || normalizedType === 'hiit' || CARDIO_SUBTYPES.includes(normalizedType)) {
       return 'error.main';
     } else if (normalizedType === 'stretch' || normalizedType === 'active_recovery' || normalizedType === 'yoga' || normalizedType === 'mobility') {
       return 'secondary.main';
@@ -256,6 +266,7 @@ const MonthCalendarView = ({
             const isCompleted = workoutsOnDay.length > 0;
             const primaryType = getPrimaryWorkoutType(workoutsOnDay);
             const hasStrengthTraining = isCompleted && isStrengthType(primaryType);
+            const isSickDay = isCompleted && isSickDayType(primaryType);
             // Calculate grid position for corner radius handling
             const totalRows = Math.ceil(cells.length / 7);
             const isLastRow = Math.floor(index / 7) === totalRows - 1;
@@ -310,7 +321,7 @@ const MonthCalendarView = ({
                   borderRadius: getBorderRadius(),
                   cursor: isCompleted ? 'pointer' : 'default',
                   bgcolor: getBackgroundColor(),
-                  opacity: isCurrentMonth ? 1 : 0.3,
+                  opacity: isCurrentMonth ? (isSickDay ? 0.5 : 1) : 0.3,
                   // Subtle grid borders
                   borderRight: 1,
                   borderBottom: isLastRow ? 0 : 1,
@@ -358,20 +369,31 @@ const MonthCalendarView = ({
                 
                 {/* Workout type label for completed workouts */}
                 {isCompleted && (
-                  <Typography
-                    sx={{
-                      fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                      fontWeight: 900,
-                      color: getWorkoutColor(primaryType),
-                      lineHeight: 1,
-                      textShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                      marginTop: 'auto',
-                      marginBottom: { xs: '1px', sm: '4px' },
-                      letterSpacing: '0.5px',
-                    }}
-                  >
-                    {getWorkoutTypeLabel(primaryType)}
-                  </Typography>
+                  isSickDay ? (
+                    <Thermostat
+                      sx={{
+                        fontSize: { xs: '1rem', sm: '1.25rem' },
+                        color: getWorkoutColor(primaryType),
+                        marginTop: 'auto',
+                        marginBottom: { xs: '1px', sm: '4px' },
+                      }}
+                    />
+                  ) : (
+                    <Typography
+                      sx={{
+                        fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                        fontWeight: 900,
+                        color: getWorkoutColor(primaryType),
+                        lineHeight: 1,
+                        textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                        marginTop: 'auto',
+                        marginBottom: { xs: '1px', sm: '4px' },
+                        letterSpacing: '0.5px',
+                      }}
+                    >
+                      {getWorkoutTypeLabel(primaryType)}
+                    </Typography>
+                  )
                 )}
                 
                 {/* Bookmark indicator for days with multiple sessions */}

@@ -660,7 +660,10 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     
     if (currentStepIndex + 1 >= workoutSequence.length) {
       // Exercises complete - check if cooldown is enabled, otherwise complete
-      await applyConditionalPersistRules(updatedWorkoutData);
+      // Skip saving weights/reps if in deload mode
+      if (!deloadMode) {
+        await applyConditionalPersistRules(updatedWorkoutData);
+      }
       
       const prefs = localStorage.getItem('goodlift_stretch_prefs');
       const preferences = prefs ? JSON.parse(prefs) : { showCooldown: true };
@@ -710,7 +713,10 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
   const handleDialogPartialComplete = async () => {
     setEndWorkoutDialogOpen(false);
     // Apply conditional persist rules for partial workout
-    await applyConditionalPersistRules(workoutData);
+    // Skip saving weights/reps if in deload mode
+    if (!deloadMode) {
+      await applyConditionalPersistRules(workoutData);
+    }
     
     const totalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
     if (timerRef.current) {

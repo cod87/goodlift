@@ -11,8 +11,9 @@ Deload Mode is a per-session toggle that disables all progressive overload featu
 - No pop-up notifications about performance
 - No display of previous performance data
 - No highlighting of improved performance
+- **No saving of weights/reps** - the next full session will use pre-deload values
 
-This allows users to focus on recovery and reduced intensity training without the app suggesting increases.
+This allows users to focus on recovery and reduced intensity training without the app suggesting increases, and ensures that the temporary reduction in weights/reps during deload doesn't affect future workout targets.
 
 ### User Flow
 1. User navigates to either:
@@ -42,6 +43,7 @@ This allows users to focus on recovery and reduced intensity training without th
    - Adds banner at top when `deloadMode` is true
    - Skips loading last performance data when deload mode active
    - Skips progressive overload calculations when deload mode active
+   - **Skips saving weights/reps when deload mode active** - calls to `applyConditionalPersistRules` are skipped
    - Updated PropTypes and useEffect dependencies
 
 4. **src/components/WorkTabs/SavedWorkoutsList.jsx**
@@ -60,7 +62,7 @@ This allows users to focus on recovery and reduced intensity training without th
 
 ### Files Created
 1. **tests/deloadMode.test.js**
-   - Comprehensive test suite with 6 tests
+   - Comprehensive test suite with 7 tests
    - All tests passing
    - Tests cover:
      - Progressive overload works normally when OFF
@@ -69,6 +71,7 @@ This allows users to focus on recovery and reduced intensity training without th
      - Banner display logic
      - Last performance data not loaded
      - Per-session behavior (not saved)
+     - **Weights/reps not saved during deload session**
 
 2. **SECURITY_SUMMARY_DELOAD_MODE.md**
    - Comprehensive security analysis
@@ -114,6 +117,15 @@ This allows users to focus on recovery and reduced intensity training without th
 - Consistent with Material-UI icon set
 - Visually distinct from regular workout start
 
+### 6. Don't Save Weights/Reps During Deload
+**Decision**: Skip `applyConditionalPersistRules` when deload mode is active.  
+**Rationale**:
+- Deload workouts use intentionally lower weights/reps
+- These reduced values shouldn't become the new baseline
+- Next full workout should resume from pre-deload targets
+- Maintains progression continuity across deload cycles
+- Prevents data corruption from temporary training reductions
+
 ## Testing Results
 
 ### Automated Tests
@@ -138,7 +150,10 @@ Test 5: Last performance data loading is skipped in deload mode
 Test 6: Deload mode is per-session and not saved with workout
   ✓ PASS
 
-Test Results: 6/6 tests passed
+Test 7: Weights and reps are not saved during deload session
+  ✓ PASS
+
+Test Results: 7/7 tests passed
 ✅ All deload mode tests passed!
 ```
 

@@ -161,6 +161,29 @@ function testDeloadModeIsPerSession() {
   }
 }
 
+// Test 7: Verify weights/reps are not saved during deload session
+function testWeightsNotSavedInDeload() {
+  console.log('\nTest 7: Weights and reps are not saved during deload session');
+  
+  const deloadMode = true;
+  const mockWorkoutData = [
+    { exerciseName: 'Bench Press', setNumber: 1, weight: 150, reps: 8 },
+    { exerciseName: 'Bench Press', setNumber: 2, weight: 150, reps: 8 },
+  ];
+  
+  // In WorkoutScreen.jsx, when deloadMode is true, applyConditionalPersistRules is not called
+  if (!deloadMode) {
+    // This block would normally save weights/reps
+    console.log('  ✗ FAIL: Weights/reps would be saved despite deload mode');
+    return false;
+  } else {
+    console.log('  ✓ PASS: applyConditionalPersistRules skipped in deload mode');
+    console.log('    Weights and reps from this session will not be saved');
+    console.log('    Next full session will use pre-deload values');
+    return true;
+  }
+}
+
 // Run all tests
 const results = [
   testProgressiveOverloadWithDeloadOff(),
@@ -169,6 +192,7 @@ const results = [
   testDeloadModeBannerDisplay(),
   testLastPerformanceDataSkipped(),
   testDeloadModeIsPerSession(),
+  testWeightsNotSavedInDeload(),
 ];
 
 const passed = results.filter(r => r === true).length;

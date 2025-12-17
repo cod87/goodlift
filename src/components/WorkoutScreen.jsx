@@ -316,7 +316,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
         clearInterval(timerRef.current);
       }
     };
-  }, [workoutPlan]);
+  }, [workoutPlan, deloadMode]);
 
   // Load initial target values for current exercise when step changes
   useEffect(() => {

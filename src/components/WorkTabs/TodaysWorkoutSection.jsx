@@ -8,10 +8,15 @@ import {
   Typography, 
   Stack,
   Chip,
+  IconButton,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import { 
   PlayArrow,
   FitnessCenter,
+  MoreVert,
+  TrendingDown,
 } from '@mui/icons-material';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
 import { getSessionTypeDisplayName } from '../../utils/sessionTemplates';
@@ -29,6 +34,7 @@ import { getSessionTypeDisplayName } from '../../utils/sessionTemplates';
 const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
   const { weeklySchedule, loading: scheduleLoading } = useWeekScheduling();
   const [todaysWorkout, setTodaysWorkout] = useState(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
 
   // Get today's day of week
   useEffect(() => {
@@ -85,13 +91,48 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
           sessionType, 
           new Set(['all']), 
           todaysWorkout.exercises, 
-          todaysWorkout.supersetConfig || [2, 2, 2, 2]
+          todaysWorkout.supersetConfig || [2, 2, 2, 2],
+          false // false = not deload mode
         );
       }
     } else if (onStartWorkout) {
       // Fallback for other session types
-      onStartWorkout(sessionType, new Set(['all']), null, [2, 2, 2, 2]);
+      onStartWorkout(sessionType, new Set(['all']), null, [2, 2, 2, 2], false);
     }
+  };
+
+  const handleMenuOpen = (event) => {
+    event.stopPropagation();
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
+  const handleStartInDeloadMode = () => {
+    if (!todaysWorkout) {
+      handleMenuClose();
+      return;
+    }
+    
+    const sessionType = (todaysWorkout.sessionType || 'full').toLowerCase();
+    
+    // Only strength workouts can be started in deload mode
+    if (todaysWorkout.isSavedWorkout && todaysWorkout.exercises && onStartWorkout) {
+      onStartWorkout(
+        sessionType, 
+        new Set(['all']), 
+        todaysWorkout.exercises, 
+        todaysWorkout.supersetConfig || [2, 2, 2, 2],
+        true // true = deload mode
+      );
+    } else if (onStartWorkout) {
+      // Fallback for other session types
+      onStartWorkout(sessionType, new Set(['all']), null, [2, 2, 2, 2], true);
+    }
+    
+    handleMenuClose();
   };
 
   const handleSuggestionClick = (type) => {
@@ -132,31 +173,47 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
       >
         {todaysWorkout && todaysWorkout.sessionType && todaysWorkout.sessionType !== 'rest' ? (
           // Display assigned workout as full-area clickable button
-          <CardActionArea onClick={handleStartToday}>
-            <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
-              {/* Header */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <FitnessCenter sx={{ fontSize: '1rem', color: 'primary.main' }} />
-                <Typography 
-                  variant="overline" 
-                  sx={{ 
-                    color: 'primary.main',
-                    fontWeight: 600,
-                    fontSize: '0.75rem',
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  Today&apos;s Workout
-                </Typography>
-              </Box>
+          <Box sx={{ position: 'relative' }}>
+            <CardActionArea onClick={handleStartToday}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+                {/* Header */}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FitnessCenter sx={{ fontSize: '1rem', color: 'primary.main' }} />
+                    <Typography 
+                      variant="overline" 
+                      sx={{ 
+                        color: 'primary.main',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Today&apos;s Workout
+                    </Typography>
+                  </Box>
+                  <IconButton
+                    onClick={handleMenuOpen}
+                    size="small"
+                    sx={{ 
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      color: 'text.secondary',
+                      zIndex: 1,
+                    }}
+                  >
+                    <MoreVert fontSize="small" />
+                  </IconButton>
+                </Box>
 
-              {/* Workout Name and Start Button */}
-              <Stack spacing={1}>
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    fontWeight: 600,
-                    color: 'text.primary',
+                {/* Workout Name and Start Button */}
+                <Stack spacing={1}>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      fontWeight: 600,
+                      color: 'text.primary',
                     fontSize: '0.95rem',
                   }}
                 >
@@ -178,6 +235,7 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
               </Stack>
             </CardContent>
           </CardActionArea>
+        </Box>
         ) : todaysWorkout && todaysWorkout.sessionType === 'rest' ? (
           // Rest day - clickable area to go to log activity
           <CardActionArea onClick={handleStartToday}>
@@ -297,6 +355,18 @@ const TodaysWorkoutSection = memo(({ onStartWorkout, onNavigate }) => {
           </CardContent>
         )}
       </Card>
+      
+      {/* Menu for workout options */}
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleStartInDeloadMode}>
+          <TrendingDown sx={{ mr: 1 }} fontSize="small" />
+          Start in Deload Mode
+        </MenuItem>
+      </Menu>
     </Box>
   );
 });

@@ -37,7 +37,7 @@ const spin = keyframes`
  * Displays exercises in superset format, tracks time, and collects set data
  * Supports mid-workout exercise swapping and adding extra sets
  */
-const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, savedWorkoutId = null, savedWorkoutName = null, onSetComplete = null, onProgressUpdate = null, initialProgress = null }) => {
+const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, supersetConfig = [2, 2, 2, 2], setsPerSuperset = 3, savedWorkoutId = null, savedWorkoutName = null, onSetComplete = null, onProgressUpdate = null, initialProgress = null, deloadMode = false }) => {
   // Mutable workout plan that can be modified during workout
   const [workoutPlan, setWorkoutPlan] = useState(initialWorkoutPlan);
   const [currentStepIndex, setCurrentStepIndex] = useState(initialProgress?.currentStepIndex ?? 0);
@@ -273,31 +273,33 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
             reps: reps ? getClosestValidTargetReps(reps) : DEFAULT_TARGET_REPS
           };
           
-          // Get last performance from history
-          // Always track by weight since that's what the workout screen uses for input
-          const progression = progressiveOverloadService.getExerciseProgression(
-            history,
-            exerciseName,
-            'weight'
-          );
-          
-          if (progression.length > 0) {
-            const lastWorkout = progression[progression.length - 1];
-            // Get the sets from the last workout for this exercise
-            const lastWorkoutExerciseData = lastWorkout.workout?.exercises?.[exerciseName];
-            if (lastWorkoutExerciseData?.sets && lastWorkoutExerciseData.sets.length > 0) {
-              // Find the set with the highest weight (best performance)
-              // This ensures we show weight and reps from the same actual set
-              const bestSet = lastWorkoutExerciseData.sets.reduce((best, current) => {
-                const currentWeight = current.weight || 0;
-                const bestWeight = best.weight || 0;
-                return currentWeight > bestWeight ? current : best;
-              }, lastWorkoutExerciseData.sets[0]);
-              
-              lastPerf[exerciseName] = {
-                weight: bestSet.weight || 0,
-                reps: bestSet.reps || 0
-              };
+          // Get last performance from history (skip if deload mode is active)
+          if (!deloadMode) {
+            // Always track by weight since that's what the workout screen uses for input
+            const progression = progressiveOverloadService.getExerciseProgression(
+              history,
+              exerciseName,
+              'weight'
+            );
+            
+            if (progression.length > 0) {
+              const lastWorkout = progression[progression.length - 1];
+              // Get the sets from the last workout for this exercise
+              const lastWorkoutExerciseData = lastWorkout.workout?.exercises?.[exerciseName];
+              if (lastWorkoutExerciseData?.sets && lastWorkoutExerciseData.sets.length > 0) {
+                // Find the set with the highest weight (best performance)
+                // This ensures we show weight and reps from the same actual set
+                const bestSet = lastWorkoutExerciseData.sets.reduce((best, current) => {
+                  const currentWeight = current.weight || 0;
+                  const bestWeight = best.weight || 0;
+                  return currentWeight > bestWeight ? current : best;
+                }, lastWorkoutExerciseData.sets[0]);
+                
+                lastPerf[exerciseName] = {
+                  weight: bestSet.weight || 0,
+                  reps: bestSet.reps || 0
+                };
+              }
             }
           }
         })
@@ -642,8 +644,11 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
     const updatedWorkoutData = [...workoutData, newData];
     setWorkoutData(updatedWorkoutData);
     
-    // Calculate and show progressive overload suggestion only if weight wasn't changed
-    if (targetReps && reps > 0 && !exercisesWithChangedWeight.has(exerciseName)) {
+    // Calculate and show progressive overload suggestion only if:
+    // 1. Deload mode is not active
+    // 2. Weight wasn't changed during workout
+    // 3. Target reps exist
+    if (!deloadMode && targetReps && reps > 0 && !exercisesWithChangedWeight.has(exerciseName)) {
       const suggestion = calculateProgressiveOverload(weight, reps, targetReps);
       if (suggestion) {
         setProgressiveOverloadSuggestion(suggestion);
@@ -1055,6 +1060,24 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
         boxSizing: 'border-box',
       }}
     >
+      {/* Deload Mode Banner */}
+      {deloadMode && (
+        <Box sx={{ mb: 2, px: { xs: 0.5, sm: 0 } }}>
+          <Alert 
+            severity="info"
+            sx={{ 
+              borderRadius: 2,
+              fontWeight: 600,
+              '& .MuiAlert-icon': {
+                fontSize: { xs: 20, sm: 24 }
+              }
+            }}
+          >
+            Deload Mode Active - Progressive overload suggestions are turned off for this session
+          </Alert>
+        </Box>
+      )}
+      
       <Box sx={{ mb: 1.5, px: { xs: 0.5, sm: 0 } }}>
         <Box sx={{ 
           display: 'flex', 
@@ -2082,6 +2105,7 @@ WorkoutScreen.propTypes = {
     elapsedTime: PropTypes.number,
     currentPhase: PropTypes.string,
   }),
+  deloadMode: PropTypes.bool,
 };
 
 export default WorkoutScreen;

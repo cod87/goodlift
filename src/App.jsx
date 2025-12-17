@@ -70,6 +70,7 @@ function AppContent() {
   const [newAchievement, setNewAchievement] = useState(null);
   const [showAchievementDialog, setShowAchievementDialog] = useState(false);
   const [supersetConfig, setSupersetConfig] = useState([2, 2, 2, 2]); // Track superset configuration
+  const [deloadMode, setDeloadMode] = useState(false); // Track deload mode for current workout
   const { currentUser, isGuest, hasGuestData } = useAuth();
   
   // Desktop layout detection
@@ -321,8 +322,9 @@ function AppContent() {
     }
   };
 
-  const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null, supersetConfigParam = [2, 2, 2, 2]) => {
+  const handleStartWorkout = (type, equipmentFilter, preGeneratedWorkout = null, supersetConfigParam = [2, 2, 2, 2], deloadModeParam = false) => {
     setSupersetConfig(supersetConfigParam); // Store superset config
+    setDeloadMode(deloadModeParam); // Store deload mode for this workout
     
     const workout = preGeneratedWorkout || generateWorkout(type, equipmentFilter, supersetConfigParam);
     setCurrentWorkout(workout);
@@ -686,6 +688,7 @@ function AppContent() {
               onComplete={handleWorkoutComplete}
               onExit={handleWorkoutExit}
               supersetConfig={supersetConfig}
+              deloadMode={deloadMode}
             />
           )}
           

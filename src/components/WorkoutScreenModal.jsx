@@ -18,7 +18,8 @@ const WorkoutScreenModal = ({
   onComplete, 
   onExit, 
   supersetConfig, 
-  setsPerSuperset 
+  setsPerSuperset,
+  deloadMode = false,
 }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [wakeLockActive, setWakeLockActive] = useState(wakeLockManager.isActive());
@@ -418,6 +419,7 @@ const WorkoutScreenModal = ({
             onSetComplete={handleStartRestTimer}
             onProgressUpdate={handleProgressUpdate}
             initialProgress={workoutProgress}
+            deloadMode={deloadMode}
           />
         </DialogContent>
       </Dialog>
@@ -432,6 +434,7 @@ WorkoutScreenModal.propTypes = {
   onExit: PropTypes.func.isRequired,
   supersetConfig: PropTypes.arrayOf(PropTypes.number),
   setsPerSuperset: PropTypes.number,
+  deloadMode: PropTypes.bool,
 };
 
 export default WorkoutScreenModal;

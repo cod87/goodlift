@@ -267,6 +267,8 @@ const MonthCalendarView = ({
             const primaryType = getPrimaryWorkoutType(workoutsOnDay);
             const hasStrengthTraining = isCompleted && isStrengthType(primaryType);
             const isSickDay = isCompleted && isSickDayType(primaryType);
+            // Check if any workout on this day is a deload session
+            const isDeloadSession = isCompleted && workoutsOnDay.some(w => w.isDeload === true);
             // Calculate grid position for corner radius handling
             const totalRows = Math.ceil(cells.length / 7);
             const isLastRow = Math.floor(index / 7) === totalRows - 1;
@@ -284,10 +286,20 @@ const MonthCalendarView = ({
             const strengthBgDark = alpha(theme.palette.primary.main, 0.18);
             const strengthHoverLight = alpha(theme.palette.primary.main, 0.20);
             const strengthHoverDark = alpha(theme.palette.primary.main, 0.28);
+            
+            // Deload session background colors - darker green
+            const deloadBgLight = alpha(theme.palette.primary.main, 0.28);
+            const deloadBgDark = alpha(theme.palette.primary.main, 0.38);
+            const deloadHoverLight = alpha(theme.palette.primary.main, 0.36);
+            const deloadHoverDark = alpha(theme.palette.primary.main, 0.48);
 
-            // Get background color - strength training days get a prominent background
-            // Today with strength training gets the strength background (outline still shows today)
+            // Get background color - deload sessions get darker green background
+            // Today with deload gets the deload background (outline still shows today)
             const getBackgroundColor = () => {
+              if (isDeloadSession) {
+                // Use a darker green background for deload sessions
+                return theme.palette.mode === 'dark' ? deloadBgDark : deloadBgLight;
+              }
               if (hasStrengthTraining) {
                 // Use a tinted background for strength training days
                 return theme.palette.mode === 'dark' ? strengthBgDark : strengthBgLight;
@@ -339,9 +351,11 @@ const MonthCalendarView = ({
                   position: 'relative',
                   padding: { xs: '3px 2px', sm: '6px 4px' },
                   '&:hover': isCompleted ? {
-                    bgcolor: hasStrengthTraining 
-                      ? (theme.palette.mode === 'dark' ? strengthHoverDark : strengthHoverLight)
-                      : 'action.hover',
+                    bgcolor: isDeloadSession
+                      ? (theme.palette.mode === 'dark' ? deloadHoverDark : deloadHoverLight)
+                      : hasStrengthTraining 
+                        ? (theme.palette.mode === 'dark' ? strengthHoverDark : strengthHoverLight)
+                        : 'action.hover',
                     transform: 'scale(1.02)',
                     boxShadow: 1,
                     zIndex: 2,
@@ -383,7 +397,7 @@ const MonthCalendarView = ({
                       sx={{
                         fontSize: { xs: '0.65rem', sm: '0.75rem' },
                         fontWeight: 900,
-                        color: getWorkoutColor(primaryType),
+                        color: isDeloadSession ? 'primary.main' : getWorkoutColor(primaryType),
                         lineHeight: 1,
                         textShadow: '0 1px 2px rgba(0,0,0,0.1)',
                         marginTop: 'auto',
@@ -391,7 +405,7 @@ const MonthCalendarView = ({
                         letterSpacing: '0.5px',
                       }}
                     >
-                      {getWorkoutTypeLabel(primaryType)}
+                      {isDeloadSession ? 'DL' : getWorkoutTypeLabel(primaryType)}
                     </Typography>
                   )
                 )}

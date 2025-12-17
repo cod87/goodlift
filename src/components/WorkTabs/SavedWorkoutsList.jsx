@@ -29,6 +29,7 @@ import {
   FitnessCenter,
   Layers,
   ContentCopy,
+  TrendingDown,
 } from '@mui/icons-material';
 import { getSavedWorkouts, deleteSavedWorkout, updateSavedWorkout, duplicateSavedWorkout } from '../../utils/storage';
 import { useWeekScheduling } from '../../contexts/WeekSchedulingContext';
@@ -251,11 +252,43 @@ const SavedWorkoutsList = memo(({
 
       // Start the saved workout with superset config (or default if not defined)
       const config = workout.supersetConfig || [2, 2, 2, 2];
-      onStartWorkout(workout.type || 'full', 'all', workout.exercises, config);
+      onStartWorkout(workout.type || 'full', 'all', workout.exercises, config, false); // false = not deload mode
     } catch (error) {
       console.error('Error starting workout:', error);
       // Prevent blank screen by not changing navigation state
     }
+  };
+
+  const handleStartInDeloadMode = () => {
+    if (selectedWorkoutIndex === null) return;
+    
+    const workout = savedWorkouts[selectedWorkoutIndex];
+    
+    // Validate workout
+    if (!workout || !workout.exercises || workout.exercises.length === 0) {
+      console.warn('Cannot start workout: no exercises found in workout');
+      handleMenuClose();
+      return;
+    }
+
+    try {
+      // Validate that exercises have required fields
+      const validExercises = workout.exercises.every(ex => getExerciseName(ex) !== null);
+      
+      if (!validExercises) {
+        console.error('Invalid exercise data in workout');
+        handleMenuClose();
+        return;
+      }
+
+      // Start the saved workout with superset config in deload mode
+      const config = workout.supersetConfig || [2, 2, 2, 2];
+      onStartWorkout(workout.type || 'full', 'all', workout.exercises, config, true); // true = deload mode
+    } catch (error) {
+      console.error('Error starting workout in deload mode:', error);
+    }
+    
+    handleMenuClose();
   };
 
   const handleEditWorkout = () => {
@@ -484,6 +517,10 @@ const SavedWorkoutsList = memo(({
         open={Boolean(menuAnchorEl)}
         onClose={handleMenuClose}
       >
+        <MenuItem onClick={handleStartInDeloadMode}>
+          <TrendingDown sx={{ mr: 1 }} fontSize="small" />
+          Start in Deload Mode
+        </MenuItem>
         <MenuItem onClick={handleEditWorkout}>
           <Edit sx={{ mr: 1 }} fontSize="small" />
           Edit

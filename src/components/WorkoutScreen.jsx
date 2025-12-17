@@ -593,6 +593,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
       totalDuration: totalTime,
       hasModifications,
       modifiedWorkoutPlan: hasModifications ? workoutPlan : undefined,
+      isDeload: deloadMode, // Mark deload sessions for calendar display
     };
     
     workoutData.forEach(step => {
@@ -729,6 +730,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
       duration: totalTime,
       exercises: {},
       isPartial: true,
+      isDeload: deloadMode, // Mark deload sessions for calendar display
     };
     
     workoutData.forEach(step => {

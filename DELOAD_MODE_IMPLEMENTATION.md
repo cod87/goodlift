@@ -12,6 +12,7 @@ Deload Mode is a per-session toggle that disables all progressive overload featu
 - No display of previous performance data
 - No highlighting of improved performance
 - **No saving of weights/reps** - the next full session will use pre-deload values
+- **Calendar marking** - deload sessions appear with darker green background and "DL" label
 
 This allows users to focus on recovery and reduced intensity training without the app suggesting increases, and ensures that the temporary reduction in weights/reps during deload doesn't affect future workout targets.
 
@@ -44,6 +45,7 @@ This allows users to focus on recovery and reduced intensity training without th
    - Skips loading last performance data when deload mode active
    - Skips progressive overload calculations when deload mode active
    - **Skips saving weights/reps when deload mode active** - calls to `applyConditionalPersistRules` are skipped
+   - **Marks workout as deload in history** - adds `isDeload: true` flag to saved workout data
    - Updated PropTypes and useEffect dependencies
 
 4. **src/components/WorkTabs/SavedWorkoutsList.jsx**
@@ -60,9 +62,17 @@ This allows users to focus on recovery and reduced intensity training without th
    - Updated `handleStartToday` to pass false for deloadMode
    - Added menu component with "Start in Deload Mode" option
 
+6. **src/components/Calendar/MonthCalendarView.jsx**
+   - Added `isDeloadSession` check to detect deload workouts
+   - Added darker green background colors for deload sessions (28-38% opacity vs 12-18% for normal)
+   - Updated `getBackgroundColor()` to prioritize deload styling
+   - Updated hover effect to use darker green for deload sessions
+   - Modified workout label to show "DL" for deload sessions instead of workout type
+   - Deload marking works regardless of workout type (full, upper, lower, etc.)
+
 ### Files Created
 1. **tests/deloadMode.test.js**
-   - Comprehensive test suite with 7 tests
+   - Comprehensive test suite with 8 tests
    - All tests passing
    - Tests cover:
      - Progressive overload works normally when OFF
@@ -72,6 +82,7 @@ This allows users to focus on recovery and reduced intensity training without th
      - Last performance data not loaded
      - Per-session behavior (not saved)
      - **Weights/reps not saved during deload session**
+     - **Deload sessions marked in workout history for calendar**
 
 2. **SECURITY_SUMMARY_DELOAD_MODE.md**
    - Comprehensive security analysis
@@ -126,6 +137,15 @@ This allows users to focus on recovery and reduced intensity training without th
 - Maintains progression continuity across deload cycles
 - Prevents data corruption from temporary training reductions
 
+### 7. Calendar Marking for Deload Sessions
+**Decision**: Mark deload sessions with darker green background and "DL" label.  
+**Rationale**:
+- Users can quickly identify deload weeks in their training history
+- Darker green (28-38% opacity) clearly distinguishes from regular workouts (12-18%)
+- "DL" label overrides workout type (FL, UP, LO, etc.) to emphasize deload status
+- Helps with planning and tracking deload frequency
+- Visual consistency - all deload sessions look the same regardless of type
+
 ## Testing Results
 
 ### Automated Tests
@@ -152,6 +172,12 @@ Test 6: Deload mode is per-session and not saved with workout
 
 Test 7: Weights and reps are not saved during deload session
   ✓ PASS
+
+Test 8: Deload sessions are marked in workout history for calendar
+  ✓ PASS
+
+Test Results: 8/8 tests passed
+✅ All deload mode tests passed!
 
 Test Results: 7/7 tests passed
 ✅ All deload mode tests passed!

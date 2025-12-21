@@ -13,6 +13,7 @@ Deload Mode is a per-session toggle that disables all progressive overload featu
 - No highlighting of improved performance
 - **No saving of weights/reps** - the next full session will use pre-deload values
 - **Calendar marking** - deload sessions appear with darker green background and "DL" label
+- **Streak pause** - when a deload session is logged during a week (Sun-Sat), the streak is paused for the remainder of that week
 
 This allows users to focus on recovery and reduced intensity training without the app suggesting increases, and ensures that the temporary reduction in weights/reps during deload doesn't affect future workout targets.
 
@@ -70,6 +71,15 @@ This allows users to focus on recovery and reduced intensity training without th
    - Modified workout label to show "DL" for deload sessions instead of workout type
    - Deload marking works regardless of workout type (full, upper, lower, etc.)
 
+7. **src/utils/trackingMetrics.js**
+   - Added `isDeloadSession()` helper function to detect deload sessions
+   - Built map of weeks containing deload sessions (`weekHasDeload`)
+   - Modified `isValidStreakRange()` to implement deload pause logic
+   - Deload sessions are filtered out from `uniqueDatesArray` (like sick days)
+   - Updated streak calculation documentation to explain deload pause behavior
+   - When a deload is logged in a week, days on or after the deload (in same week) cannot extend the streak
+   - The streak resumes normally at the start of the next week (Sunday)
+
 ### Files Created
 1. **tests/deloadMode.test.js**
    - Comprehensive test suite with 8 tests
@@ -84,7 +94,20 @@ This allows users to focus on recovery and reduced intensity training without th
      - **Weights/reps not saved during deload session**
      - **Deload sessions marked in workout history for calendar**
 
-2. **SECURITY_SUMMARY_DELOAD_MODE.md**
+2. **tests/deloadStreakPause.test.js**
+   - Comprehensive test suite with 11 tests
+   - All tests passing
+   - Tests cover:
+     - Baseline behavior without deload
+     - Deload on different days of week (Sun, Tue, Sat)
+     - Multi-week streaks with deload in middle
+     - Current streak with deload today
+     - Deload week followed by normal week
+     - Multiple deloads in same week
+     - Edge cases with unlogged days
+     - Streak remaining constant during deload week
+
+3. **SECURITY_SUMMARY_DELOAD_MODE.md**
    - Comprehensive security analysis
    - No vulnerabilities found
    - Approved for production
@@ -146,6 +169,16 @@ This allows users to focus on recovery and reduced intensity training without th
 - Helps with planning and tracking deload frequency
 - Visual consistency - all deload sessions look the same regardless of type
 
+### 8. Streak Pause During Deload Week
+**Decision**: When a deload session is logged during a week (Sun-Sat), the streak is paused for the remainder of that week.  
+**Rationale**:
+- Deload weeks are intentional recovery periods that shouldn't penalize streaks
+- The streak doesn't break - it remains at its current value
+- Days on or after the deload session (within the same week) don't increment the streak
+- At the start of the next week (Sunday), the streak logic resumes normally
+- Example: Current streak is 33, deload logged on Tuesday → streak remains 33 regardless of subsequent activity until next Sunday
+- This allows users to take proper deload weeks without losing their hard-earned streaks
+
 ## Testing Results
 
 ### Automated Tests
@@ -177,6 +210,45 @@ Test 8: Deload sessions are marked in workout history for calendar
   ✓ PASS
 
 Test Results: 8/8 tests passed
+✅ All deload mode tests passed!
+
+=== Deload Streak Pause Tests ===
+
+Test 1: Two weeks of consecutive sessions (no deload) - baseline
+  ✓ PASS
+
+Test 2: Deload session on Tuesday - streak pauses for rest of week
+  ✓ PASS
+
+Test 3: Deload session on Sunday - entire week is paused
+  ✓ PASS
+
+Test 4: Deload session on Saturday - streak includes Sun-Fri
+  ✓ PASS
+
+Test 5: Multi-week streak with deload in middle week
+  ✓ PASS
+
+Test 6: Current streak with deload session logged today
+  ✓ PASS
+
+Test 7: Deload week followed by normal week - streak resumes
+  ✓ PASS
+
+Test 8: Multiple deload sessions in same week (Tuesday and Thursday)
+  ✓ PASS
+
+Test 9: Deload on Saturday does not affect next week
+  ✓ PASS
+
+Test 10: Deload on Tuesday, unlogged Wednesday - week still paused from Tuesday
+  ✓ PASS
+
+Test 11: Streak of 33, deload on Tuesday, remains 33
+  ✓ PASS
+
+Test Results: 11/11 tests passed
+✅ All deload streak pause tests passed!
 ✅ All deload mode tests passed!
 
 Test Results: 7/7 tests passed

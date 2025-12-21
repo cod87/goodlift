@@ -18,12 +18,14 @@
  * - If there is any rest day (logged or unlogged), then only 1 Active Recovery is allowed
  * - More than 1 rest day (including unlogged) breaks the streak
  * 
- * DELOAD PAUSE RULE:
+ * DELOAD PAUSE RULE (REVISED):
  * - When a deload session (isDeload: true) is logged at any point during a week,
- *   the streak is PAUSED for the remainder of that week (through Saturday)
- * - The streak does not increment for days on or after the deload session in that week
- * - Example: Current streak is 33, deload logged on Tuesday → streak remains 33
- *   regardless of subsequent activity until next Sunday
+ *   the streak pauses and reverts to the value it had at the end of that week's Sunday
+ * - The streak remains paused (at Sunday's value) for the entire week regardless of other sessions
+ * - No minimum requirements during the deload week; the streak stays active
+ * - Example 1: 30-day streak ending Saturday. Sunday session (31 days). Tuesday deload → streak = 31
+ * - Example 2: 30-day streak ending Saturday. Mon-Thu sessions (34 days). Friday deload → streak reverts to 31 (Sunday's value)
+ * - The reversion is retroactive: sessions after Sunday but before deload don't count
  * - At the start of the next week (Sunday), the streak logic resumes normally
  * 
  * Date handling: All dates are normalized to local midnight (00:00:00) for consistency.
@@ -199,33 +201,21 @@ export const calculateStreak = (workoutHistory = []) => {
    *   - 2 sick days in a week → minimum 2 strength training sessions required
    *   - 3 sick days in a week → minimum 1 strength training session required
    *   - 4+ sick days in a week → no minimum requirement
-   * - NEW: Deload pause logic:
-   *   - When a deload session is logged in a week, the streak is paused for the remainder of that week
-   *   - Days on or after the deload session date (in the same week) cannot extend the streak
-   *   - The streak resumes at the start of the next week (Sunday)
+   * - REVISED: Deload pause logic:
+   *   - When a deload session is logged in a week, the streak pauses and reverts to the value it had at the end of that week's Sunday
+   *   - The streak remains paused (at Sunday's value) for the entire week regardless of other sessions
+   *   - No minimum requirements during the deload week
+   *   - If deload is logged mid-week, the reversion is retroactive (sessions Mon-Fri don't count if deload logged Friday)
+   *   - The streak resumes normally at the start of the next week (Sunday)
    * 
    * @param {number} startDate - Start date timestamp of the streak
    * @param {number} endDate - End date timestamp of the streak
    * @returns {boolean} True if the streak is valid
    */
   const isValidStreakRange = (startDate, endDate) => {
-    // Check for deload pause violations (optimized)
-    // Instead of checking every day, check only the weeks that intersect with the streak range
-    for (const [weekStart, deloadDate] of weekHasDeload.entries()) {
-      const weekEnd = weekStart + (6 * MS_PER_DAY); // Saturday at end of week
-      
-      // Check if this deload week intersects with the streak range
-      if (endDate >= weekStart && startDate <= weekEnd) {
-        // Find the overlapping portion
-        const overlapStart = Math.max(startDate, weekStart);
-        const overlapEnd = Math.min(endDate, weekEnd);
-        
-        // If any part of the overlap is on or after the deload date, the streak is invalid
-        if (overlapEnd >= deloadDate) {
-          return false;
-        }
-      }
-    }
+    // For deload weeks, only Sunday counts toward the streak
+    // This is handled by countValidStreakDays
+    // Here we just validate the weekly requirements for non-deload weeks
     
     // Group days by week block and count rest/recovery/sick/strength days per week
     const weekRestDays = new Map(); // weekStart -> count of rest days (including unlogged)
@@ -237,6 +227,14 @@ export const calculateStreak = (workoutHistory = []) => {
     let currentDay = startDate;
     while (currentDay <= endDate) {
       const weekStart = getWeekStart(currentDay);
+      
+      // Skip weekly requirement checks for deload weeks
+      // In deload weeks, there are no minimum requirements
+      if (weekHasDeload.has(weekStart)) {
+        currentDay += MS_PER_DAY;
+        continue;
+      }
+      
       const hasSessions = dateToSessions.has(currentDay);
       const hasAnySessions = dateToAllSessions.has(currentDay);
       
@@ -319,6 +317,39 @@ export const calculateStreak = (workoutHistory = []) => {
   };
 
   /**
+   * Count the number of valid streak days in a date range
+   * Excludes Mon-Sat of deload weeks (only Sunday counts in deload weeks)
+   * 
+   * @param {number} startDate - Start date timestamp
+   * @param {number} endDate - End date timestamp
+   * @returns {number} Number of valid streak days
+   */
+  const countValidStreakDays = (startDate, endDate) => {
+    let count = 0;
+    let currentDay = startDate;
+    
+    while (currentDay <= endDate) {
+      const weekStart = getWeekStart(currentDay);
+      
+      // Check if this day is in a deload week
+      if (weekHasDeload.has(weekStart)) {
+        // In a deload week, only Sunday counts
+        if (currentDay === weekStart) {
+          count++;
+        }
+        // Skip Mon-Sat of deload weeks
+      } else {
+        // Normal week, all days count
+        count++;
+      }
+      
+      currentDay += MS_PER_DAY;
+    }
+    
+    return count;
+  };
+
+  /**
    * Find the longest valid streak ending at or before endDate
    * A valid streak follows the rules: unlogged days count as rest, 
    * max 1 rest day per week, and up to 2 active recovery days if no rest.
@@ -345,7 +376,8 @@ export const calculateStreak = (workoutHistory = []) => {
       }
       
       if (isValidStreakRange(startDate, endDate)) {
-        return days;
+        // Count actual valid days (excluding Mon-Sat of deload weeks)
+        return countValidStreakDays(startDate, endDate);
       }
     }
     

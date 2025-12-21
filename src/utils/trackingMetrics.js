@@ -209,24 +209,22 @@ export const calculateStreak = (workoutHistory = []) => {
    * @returns {boolean} True if the streak is valid
    */
   const isValidStreakRange = (startDate, endDate) => {
-    // Check for deload pause violations
-    // For each day in the range, if it falls on or after a deload session in the same week,
-    // the streak is invalid (because that day is in the "paused" period)
-    let checkDay = startDate;
-    while (checkDay <= endDate) {
-      const weekStart = getWeekStart(checkDay);
+    // Check for deload pause violations (optimized)
+    // Instead of checking every day, check only the weeks that intersect with the streak range
+    for (const [weekStart, deloadDate] of weekHasDeload.entries()) {
+      const weekEnd = weekStart + (6 * MS_PER_DAY); // Saturday at end of week
       
-      // Check if this week has a deload session
-      if (weekHasDeload.has(weekStart)) {
-        const deloadDate = weekHasDeload.get(weekStart);
+      // Check if this deload week intersects with the streak range
+      if (endDate >= weekStart && startDate <= weekEnd) {
+        // Find the overlapping portion
+        const overlapStart = Math.max(startDate, weekStart);
+        const overlapEnd = Math.min(endDate, weekEnd);
         
-        // If checkDay is on or after the deload date (in the same week), the streak is invalid
-        if (checkDay >= deloadDate) {
+        // If any part of the overlap is on or after the deload date, the streak is invalid
+        if (overlapEnd >= deloadDate) {
           return false;
         }
       }
-      
-      checkDay += MS_PER_DAY;
     }
     
     // Group days by week block and count rest/recovery/sick/strength days per week

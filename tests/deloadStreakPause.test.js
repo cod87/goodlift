@@ -265,14 +265,15 @@ console.log('Test 10: Deload on Tuesday, unlogged Wednesday - week still paused 
   sunday.setDate(sunday.getDate() - 7); // Last week's Sunday
   const weekDates = getWeekDates(sunday);
   
-  // Tuesday is deload, Wednesday is unlogged (no session)
-  const sessions = weekDates
-    .filter((_, i) => i !== 3) // Skip Wednesday
-    .map((d, originalIndex) => {
-      // Map back to original index
-      const i = originalIndex < 3 ? originalIndex : originalIndex + 1;
-      return createSession(d, 'strength', i === 2); // Tuesday is deload
-    });
+  // Create sessions for all days except Wednesday (index 3)
+  // Tuesday (index 2) is deload
+  const sessions = [];
+  weekDates.forEach((date, index) => {
+    if (index !== 3) { // Skip Wednesday
+      const isDeload = (index === 2); // Tuesday is deload
+      sessions.push(createSession(date, 'strength', isDeload));
+    }
+  });
   
   const result = calculateStreak(sessions);
   

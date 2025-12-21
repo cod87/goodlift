@@ -148,6 +148,8 @@ export const calculateStreak = (workoutHistory = []) => {
 
   // Get unique workout dates, normalized to midnight
   // Filter out sick days and deload sessions as they should not be considered in streak calculations
+  // NOTE: If a deload session is logged on Sunday, that Sunday doesn't count toward the streak (see Test 3)
+  // But if Sunday has a regular session and deload occurs later in the week, Sunday counts (see Test 7)
   const uniqueDatesArray = Array.from(new Set(sortedWorkouts
     .filter(w => !isSickDaySession(w) && !isDeloadSession(w)) // Exclude sick days and deload sessions
     .map(w => {
@@ -333,11 +335,11 @@ export const calculateStreak = (workoutHistory = []) => {
       
       // Check if this day is in a deload week
       if (weekHasDeload.has(weekStart)) {
-        // In a deload week, only Sunday counts
-        if (currentDay === weekStart) {
+        // In a deload week, only Sunday counts, and only if there's a session on Sunday
+        if (currentDay === weekStart && dateToSessions.has(currentDay)) {
           count++;
         }
-        // Skip Mon-Sat of deload weeks
+        // Skip Mon-Sat of deload weeks, and skip Sunday if no session
       } else {
         // Normal week, all days count
         count++;

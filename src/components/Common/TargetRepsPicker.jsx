@@ -117,31 +117,31 @@ const TargetRepsPicker = ({
   
   const handleInputChange = (e) => {
     const newValue = e.target.value;
+    // Only update the input display, don't call onChange yet
     setInputValue(newValue);
-    
-    // For bodyweight, allow typing any positive integer
-    if (isBodyweight) {
-      const numValue = parseInt(newValue, 10);
-      if (!isNaN(numValue) && numValue > 0) {
-        setDisplayValue(numValue);
-        onChange(numValue);
-      }
-    }
   };
   
-  const handleInputBlur = () => {
-    // Validate and correct the input value on blur
+  const validateAndApplyValue = (value) => {
+    // Shared validation logic for blur and direct input
     if (isBodyweight) {
-      const numValue = parseInt(inputValue, 10);
+      const numValue = parseInt(value, 10);
       if (isNaN(numValue) || numValue < 1) {
         // Reset to previous valid value if invalid
         setInputValue(String(displayValue));
+        return false;
       } else {
         setDisplayValue(numValue);
         setInputValue(String(numValue));
         onChange(numValue);
+        return true;
       }
     }
+    return false;
+  };
+  
+  const handleInputBlur = () => {
+    // Validate and apply the input value on blur
+    validateAndApplyValue(inputValue);
   };
   
   const canDecrease = isBodyweight ? displayValue > 1 : TARGET_REPS_OPTIONS.indexOf(displayValue) > 0;

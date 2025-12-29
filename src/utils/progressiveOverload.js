@@ -191,13 +191,15 @@ export const shouldReduceWeight = (sets, targetReps, minimumSets = 3) => {
 
 /**
  * Check if target reps should be reduced for bodyweight exercises
- * Target reps should be reduced if user completes 20% or more fewer reps than target across all sets
+ * Uses the same criteria as shouldReduceWeight (20% or more below target)
+ * This is a semantic wrapper to make bodyweight exercise logic clearer in calling code
  * @param {Array} sets - Array of set objects with reps property
  * @param {number} targetReps - Target reps per set
  * @param {number} minimumSets - Minimum number of sets required (default: 3)
  * @returns {boolean} True if target reps should be reduced
  */
 export const shouldReduceTargetReps = (sets, targetReps, minimumSets = 3) => {
-  // Use the same logic as shouldReduceWeight
+  // Bodyweight exercises use the same reduction criteria as weighted exercises
+  // (completing 20% or more fewer reps than target)
   return shouldReduceWeight(sets, targetReps, minimumSets);
 };

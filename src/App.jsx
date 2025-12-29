@@ -424,6 +424,11 @@ function AppContent() {
     // Calculate workout volume
     let workoutVolume = 0;
     
+    // Create a lookup map for exercises to avoid repeated find operations
+    const exerciseLookup = new Map(
+      currentWorkout.map(ex => [ex['Exercise Name'], ex])
+    );
+    
     // Process each exercise for weight/reps tracking and progression
     for (const [exerciseName, data] of Object.entries(workoutData.exercises)) {
       const lastSet = data.sets[data.sets.length - 1];
@@ -436,7 +441,7 @@ function AppContent() {
       }
       
       // Get exercise info to determine if it's bodyweight
-      const exercise = currentWorkout.find(ex => ex['Exercise Name'] === exerciseName);
+      const exercise = exerciseLookup.get(exerciseName);
       if (!exercise) continue;
       
       const isBodyweight = isBodyweightExercise(exercise['Equipment']);

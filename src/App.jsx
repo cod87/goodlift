@@ -25,7 +25,8 @@ import {
   saveUserStats, 
   getUserStats, 
   setExerciseWeight, 
-  getExerciseTargetReps, 
+  getExerciseTargetReps,
+  setExerciseTargetReps, 
   loadUserDataFromCloud,
   getUnlockedAchievements,
   addUnlockedAchievement,
@@ -39,7 +40,7 @@ import {
 import progressiveOverloadService from './services/ProgressiveOverloadService';
 import { cleanupExpiredBackups } from './utils/dataResetService';
 import { SETS_PER_EXERCISE, MUSCLE_GROUPS, WEIGHT_INCREMENTS } from './utils/constants';
-import { shouldReduceWeight } from './utils/progressiveOverload';
+import { shouldReduceWeight, shouldReduceTargetReps, isBodyweightExercise } from './utils/progressiveOverload';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider as CustomThemeProvider, useTheme as useCustomTheme } from './contexts/ThemeContext';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
@@ -423,7 +424,7 @@ function AppContent() {
     // Calculate workout volume
     let workoutVolume = 0;
     
-    // Process each exercise for weight tracking and progression
+    // Process each exercise for weight/reps tracking and progression
     for (const [exerciseName, data] of Object.entries(workoutData.exercises)) {
       const lastSet = data.sets[data.sets.length - 1];
       
@@ -434,56 +435,88 @@ function AppContent() {
         }
       }
       
-      if (lastSet?.weight > 0) {
-        const targetReps = await getExerciseTargetReps(exerciseName);
-        const allSetsMetTarget = data.sets.every(set => set.reps >= targetReps);
-        
+      // Get exercise info to determine if it's bodyweight
+      const exercise = currentWorkout.find(ex => ex['Exercise Name'] === exerciseName);
+      if (!exercise) continue;
+      
+      const isBodyweight = isBodyweightExercise(exercise['Equipment']);
+      const targetReps = await getExerciseTargetReps(exerciseName);
+      const allSetsMetTarget = data.sets.every(set => set.reps >= targetReps);
+      
+      // Handle bodyweight exercises (target reps progression)
+      if (isBodyweight) {
+        // For bodyweight exercises, track reps progression instead of weight
+        if (allSetsMetTarget && data.sets.length >= SETS_PER_EXERCISE) {
+          // User hit target reps in all sets - increment target reps by 1
+          const newTargetReps = targetReps + 1;
+          await setExerciseTargetReps(exerciseName, newTargetReps);
+          progressionNotifications.push({
+            exercise: exerciseName,
+            oldTargetReps: targetReps,
+            newTargetReps,
+            isBodyweight: true,
+          });
+          
+          // Increment PR count
+          await incrementTotalPRs();
+        } else {
+          // Check if target reps should be reduced
+          const shouldReduce = shouldReduceTargetReps(data.sets, targetReps, SETS_PER_EXERCISE);
+          
+          if (shouldReduce && targetReps > 1) {
+            // Reduce target reps by 1, but not below 1
+            const newTargetReps = Math.max(1, targetReps - 1);
+            await setExerciseTargetReps(exerciseName, newTargetReps);
+            reductionNotifications.push({
+              exercise: exerciseName,
+              oldTargetReps: targetReps,
+              newTargetReps,
+              isBodyweight: true,
+            });
+          }
+        }
+      } 
+      // Handle weighted exercises (weight progression)
+      else if (lastSet?.weight > 0) {
         // Check for progressive overload criteria (weight increase)
         if (allSetsMetTarget && data.sets.length >= SETS_PER_EXERCISE) {
-          const exercise = currentWorkout.find(ex => ex['Exercise Name'] === exerciseName);
-          if (exercise) {
-            const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
-            const weightIncrease = calculateWeightIncrease(primaryMuscle, exercise['Equipment']);
+          const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
+          const weightIncrease = calculateWeightIncrease(primaryMuscle, exercise['Equipment']);
 
-            if (weightIncrease > 0) {
-              const newWeight = lastSet.weight + weightIncrease;
-              await setExerciseWeight(exerciseName, newWeight);
-              progressionNotifications.push({
-                exercise: exerciseName,
-                oldWeight: lastSet.weight,
-                newWeight,
-                increase: weightIncrease,
-              });
-              
-              // Increment PR count
-              await incrementTotalPRs();
-            }
+          if (weightIncrease > 0) {
+            const newWeight = lastSet.weight + weightIncrease;
+            await setExerciseWeight(exerciseName, newWeight);
+            progressionNotifications.push({
+              exercise: exerciseName,
+              oldWeight: lastSet.weight,
+              newWeight,
+              increase: weightIncrease,
+              isBodyweight: false,
+            });
+            
+            // Increment PR count
+            await incrementTotalPRs();
           }
         } else {
           // Check for weight reduction criteria (completed 20% or more fewer reps than target)
           const shouldReduce = shouldReduceWeight(data.sets, targetReps, SETS_PER_EXERCISE);
           
           if (shouldReduce) {
-            const exercise = currentWorkout.find(ex => ex['Exercise Name'] === exerciseName);
-            if (exercise) {
-              const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
-              const weightDecrease = calculateWeightDecrease(primaryMuscle, exercise['Equipment']);
+            const primaryMuscle = exercise['Primary Muscle'].split('(')[0].trim();
+            const weightDecrease = calculateWeightDecrease(primaryMuscle, exercise['Equipment']);
 
-              if (weightDecrease > 0 && lastSet.weight > weightDecrease) {
-                const newWeight = lastSet.weight - weightDecrease;
-                await setExerciseWeight(exerciseName, newWeight);
-                reductionNotifications.push({
-                  exercise: exerciseName,
-                  oldWeight: lastSet.weight,
-                  newWeight,
-                  decrease: weightDecrease,
-                });
-              } else {
-                // If weight would go negative or to zero, just save current weight
-                await setExerciseWeight(exerciseName, lastSet.weight);
-              }
+            if (weightDecrease > 0 && lastSet.weight > weightDecrease) {
+              const newWeight = lastSet.weight - weightDecrease;
+              await setExerciseWeight(exerciseName, newWeight);
+              reductionNotifications.push({
+                exercise: exerciseName,
+                oldWeight: lastSet.weight,
+                newWeight,
+                decrease: weightDecrease,
+                isBodyweight: false,
+              });
             } else {
-              // Save current weight without change
+              // If weight would go negative or to zero, just save current weight
               await setExerciseWeight(exerciseName, lastSet.weight);
             }
           } else {
@@ -501,9 +534,13 @@ function AppContent() {
 
     // Display progression notification
     if (progressionNotifications.length > 0) {
-      const messages = progressionNotifications.map(prog => 
-        `${prog.exercise}: ${prog.oldWeight} → ${prog.newWeight} lbs (+${prog.increase} lbs)`
-      );
+      const messages = progressionNotifications.map(prog => {
+        if (prog.isBodyweight) {
+          return `${prog.exercise}: Target ${prog.oldTargetReps} → ${prog.newTargetReps} reps (+1 rep)`;
+        } else {
+          return `${prog.exercise}: ${prog.oldWeight} → ${prog.newWeight} lbs (+${prog.increase} lbs)`;
+        }
+      });
       setNotification({
         open: true,
         message: `🎉 Progressive Overload! You hit your target reps!\n\n${messages.join('\n')}`,
@@ -511,12 +548,16 @@ function AppContent() {
       });
     } else if (reductionNotifications.length > 0) {
       // Display weight reduction notification if no progressions occurred
-      const messages = reductionNotifications.map(red => 
-        `${red.exercise}: ${red.oldWeight} → ${red.newWeight} lbs (-${red.decrease} lbs)`
-      );
+      const messages = reductionNotifications.map(red => {
+        if (red.isBodyweight) {
+          return `${red.exercise}: Target ${red.oldTargetReps} → ${red.newTargetReps} reps (-1 rep)`;
+        } else {
+          return `${red.exercise}: ${red.oldWeight} → ${red.newWeight} lbs (-${red.decrease} lbs)`;
+        }
+      });
       setNotification({
         open: true,
-        message: `💪 Weight adjusted for next session. Keep pushing!\n\n${messages.join('\n')}`,
+        message: `💪 Target adjusted for next session. Keep pushing!\n\n${messages.join('\n')}`,
         severity: 'info',
       });
     }

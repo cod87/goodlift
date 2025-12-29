@@ -149,6 +149,17 @@ export const calculateWeightReduction = (primaryMuscle, equipment) => {
 };
 
 /**
+ * Check if an exercise is a bodyweight exercise based on equipment type
+ * @param {string} equipment - Equipment type (e.g., 'Bodyweight', 'Barbell', 'Dumbbell')
+ * @returns {boolean} True if exercise is bodyweight
+ */
+export const isBodyweightExercise = (equipment) => {
+  if (!equipment) return false;
+  const normalizedEquipment = equipment.toLowerCase();
+  return normalizedEquipment.includes('bodyweight') || normalizedEquipment.includes('body weight');
+};
+
+/**
  * Check if weight should be reduced based on total reps completed across all sets
  * Weight should be reduced if user completes 20% or more fewer reps than target across all sets
  * @param {Array} sets - Array of set objects with reps property
@@ -176,4 +187,17 @@ export const shouldReduceWeight = (sets, targetReps, minimumSets = 3) => {
   const threshold = totalTargetReps * 0.8;
   
   return totalActualReps <= threshold;
+};
+
+/**
+ * Check if target reps should be reduced for bodyweight exercises
+ * Target reps should be reduced if user completes 20% or more fewer reps than target across all sets
+ * @param {Array} sets - Array of set objects with reps property
+ * @param {number} targetReps - Target reps per set
+ * @param {number} minimumSets - Minimum number of sets required (default: 3)
+ * @returns {boolean} True if target reps should be reduced
+ */
+export const shouldReduceTargetReps = (sets, targetReps, minimumSets = 3) => {
+  // Use the same logic as shouldReduceWeight
+  return shouldReduceWeight(sets, targetReps, minimumSets);
 };

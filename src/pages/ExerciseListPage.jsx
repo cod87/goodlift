@@ -492,6 +492,7 @@ const ExerciseListPage = () => {
                         onChange={(newReps) => handleRepsChange(exerciseName, newReps)}
                         compact
                         showLabel={false}
+                        isBodyweight={exercise['Equipment']?.toLowerCase() === 'bodyweight'}
                       />
                     </TableCell>
                   </TableRow>

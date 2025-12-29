@@ -2037,6 +2037,7 @@ const WorkoutScreen = ({ workoutPlan: initialWorkoutPlan, onComplete, onExit, su
               value={pendingTargetReps || DEFAULT_TARGET_REPS}
               onChange={(newReps) => setPendingTargetReps(newReps)}
               showLabel
+              isBodyweight={isBodyweight}
             />
           </Box>
         </DialogContent>

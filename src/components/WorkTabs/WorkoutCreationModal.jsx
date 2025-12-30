@@ -275,6 +275,7 @@ const MyWorkoutExerciseItem = ({
           compact
           showLabel
           label="Reps"
+          isBodyweight={equipment?.toLowerCase() === 'bodyweight'}
         />
       </Box>
     </Box>

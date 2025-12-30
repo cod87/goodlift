@@ -77,6 +77,22 @@ const MonthCalendarView = ({
       return isSameDay(workoutDate, date);
     });
   };
+  
+  // Check if a date is in a deload week
+  // A week is considered a deload week if any workout in that week (Sun-Sat) has isDeload: true
+  const isDateInDeloadWeek = (date) => {
+    // Get the start of the week (Sunday) for this date
+    const weekStart = startOfWeek(date, { weekStartsOn: 0 }); // 0 = Sunday
+    const weekEnd = endOfWeek(date, { weekStartsOn: 0 });
+    
+    // Check if any workout in this week is a deload session
+    return workoutHistory.some(workout => {
+      const workoutDate = new Date(workout.date);
+      return workoutDate >= weekStart && 
+             workoutDate <= weekEnd && 
+             workout.isDeload === true;
+    });
+  };
 
   // hasCompletedWorkout function removed - using getWorkoutsForDay instead
 
@@ -269,6 +285,8 @@ const MonthCalendarView = ({
             const isSickDay = isCompleted && isSickDayType(primaryType);
             // Check if any workout on this day is a deload session
             const isDeloadSession = isCompleted && workoutsOnDay.some(w => w.isDeload === true);
+            // Check if this date is in a deload week
+            const isInDeloadWeek = isDateInDeloadWeek(date);
             // Calculate grid position for corner radius handling
             const totalRows = Math.ceil(cells.length / 7);
             const isLastRow = Math.floor(index / 7) === totalRows - 1;
@@ -281,6 +299,12 @@ const MonthCalendarView = ({
             const isBottomLeftCorner = isLastRow && isFirstColumn;
             const isBottomRightCorner = isLastRow && isLastColumn;
 
+            // Yellow/orange background colors for deload weeks
+            const deloadWeekBgLight = 'rgba(255, 193, 7, 0.15)'; // Amber/yellow tint
+            const deloadWeekBgDark = 'rgba(255, 193, 7, 0.20)';
+            const deloadWeekHoverLight = 'rgba(255, 193, 7, 0.25)';
+            const deloadWeekHoverDark = 'rgba(255, 193, 7, 0.30)';
+            
             // Strength training background colors using theme's primary color
             const strengthBgLight = alpha(theme.palette.primary.main, 0.12);
             const strengthBgDark = alpha(theme.palette.primary.main, 0.18);
@@ -293,12 +317,20 @@ const MonthCalendarView = ({
             const deloadHoverLight = alpha(theme.palette.primary.main, 0.36);
             const deloadHoverDark = alpha(theme.palette.primary.main, 0.48);
 
-            // Get background color - deload sessions get darker green background
-            // Today with deload gets the deload background (outline still shows today)
+            // Get background color priority:
+            // 1. Deload session (darker green - most specific)
+            // 2. Deload week (yellow - week-level indicator)
+            // 3. Strength training (light green)
+            // 4. Today (selected)
+            // 5. Transparent
             const getBackgroundColor = () => {
               if (isDeloadSession) {
                 // Use a darker green background for deload sessions
                 return theme.palette.mode === 'dark' ? deloadBgDark : deloadBgLight;
+              }
+              if (isInDeloadWeek) {
+                // Use yellow/amber background for entire deload week
+                return theme.palette.mode === 'dark' ? deloadWeekBgDark : deloadWeekBgLight;
               }
               if (hasStrengthTraining) {
                 // Use a tinted background for strength training days
@@ -353,9 +385,11 @@ const MonthCalendarView = ({
                   '&:hover': isCompleted ? {
                     bgcolor: isDeloadSession
                       ? (theme.palette.mode === 'dark' ? deloadHoverDark : deloadHoverLight)
-                      : hasStrengthTraining 
-                        ? (theme.palette.mode === 'dark' ? strengthHoverDark : strengthHoverLight)
-                        : 'action.hover',
+                      : isInDeloadWeek
+                        ? (theme.palette.mode === 'dark' ? deloadWeekHoverDark : deloadWeekHoverLight)
+                        : hasStrengthTraining 
+                          ? (theme.palette.mode === 'dark' ? strengthHoverDark : strengthHoverLight)
+                          : 'action.hover',
                     transform: 'scale(1.02)',
                     boxShadow: 1,
                     zIndex: 2,

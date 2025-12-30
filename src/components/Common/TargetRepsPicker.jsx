@@ -1,7 +1,8 @@
 /**
  * TargetRepsPicker - A dial picker component for selecting target reps
  * 
- * Only allows the standard rep ranges: 6, 8, 10, 12, 15 (default: 10)
+ * For weighted exercises: Only allows standard rep ranges: 6, 8, 10, 12, 15 (default: 10)
+ * For bodyweight exercises: Allows any positive integer value (freeform input)
  * Designed for a minimalist, clean UI that matches the app's style
  */
 
@@ -25,7 +26,8 @@ import { TARGET_REPS_OPTIONS, DEFAULT_TARGET_REPS } from '../../utils/repRangeWe
 /**
  * TargetRepsPicker Component
  * 
- * A dial/stepper component for selecting target reps from predefined options
+ * A dial/stepper component for selecting target reps from predefined options (weighted)
+ * or freeform input (bodyweight)
  * Styled to match MUI TextField/Select components for visual consistency
  * 
  * @param {number} value - Current target reps value
@@ -34,6 +36,7 @@ import { TARGET_REPS_OPTIONS, DEFAULT_TARGET_REPS } from '../../utils/repRangeWe
  * @param {boolean} compact - Whether to use compact styling
  * @param {string} label - Label text to display
  * @param {boolean} showLabel - Whether to show the label
+ * @param {boolean} isBodyweight - Whether this is for a bodyweight exercise (allows freeform input)
  */
 const TargetRepsPicker = ({
   value,
@@ -42,44 +45,107 @@ const TargetRepsPicker = ({
   compact = false,
   label = 'Reps',
   showLabel = true,
+  isBodyweight = false,
 }) => {
   
-  // Find current index in options array
-  const currentIndex = TARGET_REPS_OPTIONS.indexOf(value);
-  const validIndex = currentIndex >= 0 ? currentIndex : TARGET_REPS_OPTIONS.indexOf(DEFAULT_TARGET_REPS);
+  // For bodyweight exercises, allow any value; for weighted, use predefined options
+  const getInitialValue = () => {
+    if (isBodyweight) {
+      return value || DEFAULT_TARGET_REPS;
+    }
+    const currentIndex = TARGET_REPS_OPTIONS.indexOf(value);
+    const validIndex = currentIndex >= 0 ? currentIndex : TARGET_REPS_OPTIONS.indexOf(DEFAULT_TARGET_REPS);
+    return TARGET_REPS_OPTIONS[validIndex];
+  };
   
   // Internal state to track the display value
-  const [displayValue, setDisplayValue] = useState(
-    TARGET_REPS_OPTIONS[validIndex]
-  );
+  const [displayValue, setDisplayValue] = useState(getInitialValue());
+  const [inputValue, setInputValue] = useState(String(getInitialValue()));
   
   // Sync with external value
   useEffect(() => {
-    if (TARGET_REPS_OPTIONS.includes(value)) {
-      setDisplayValue(value);
+    if (isBodyweight) {
+      if (value && value > 0) {
+        setDisplayValue(value);
+        setInputValue(String(value));
+      }
+    } else {
+      if (TARGET_REPS_OPTIONS.includes(value)) {
+        setDisplayValue(value);
+        setInputValue(String(value));
+      }
     }
-  }, [value]);
+  }, [value, isBodyweight]);
   
   const handleDecrease = () => {
-    const currentIdx = TARGET_REPS_OPTIONS.indexOf(displayValue);
-    if (currentIdx > 0) {
-      const newValue = TARGET_REPS_OPTIONS[currentIdx - 1];
+    if (isBodyweight) {
+      // For bodyweight, decrement by 1 (minimum 1)
+      const newValue = Math.max(1, displayValue - 1);
       setDisplayValue(newValue);
+      setInputValue(String(newValue));
       onChange(newValue);
+    } else {
+      // For weighted, use predefined options
+      const currentIdx = TARGET_REPS_OPTIONS.indexOf(displayValue);
+      if (currentIdx > 0) {
+        const newValue = TARGET_REPS_OPTIONS[currentIdx - 1];
+        setDisplayValue(newValue);
+        setInputValue(String(newValue));
+        onChange(newValue);
+      }
     }
   };
   
   const handleIncrease = () => {
-    const currentIdx = TARGET_REPS_OPTIONS.indexOf(displayValue);
-    if (currentIdx < TARGET_REPS_OPTIONS.length - 1) {
-      const newValue = TARGET_REPS_OPTIONS[currentIdx + 1];
+    if (isBodyweight) {
+      // For bodyweight, increment by 1 (no maximum)
+      const newValue = displayValue + 1;
       setDisplayValue(newValue);
+      setInputValue(String(newValue));
       onChange(newValue);
+    } else {
+      // For weighted, use predefined options
+      const currentIdx = TARGET_REPS_OPTIONS.indexOf(displayValue);
+      if (currentIdx < TARGET_REPS_OPTIONS.length - 1) {
+        const newValue = TARGET_REPS_OPTIONS[currentIdx + 1];
+        setDisplayValue(newValue);
+        setInputValue(String(newValue));
+        onChange(newValue);
+      }
     }
   };
   
-  const canDecrease = TARGET_REPS_OPTIONS.indexOf(displayValue) > 0;
-  const canIncrease = TARGET_REPS_OPTIONS.indexOf(displayValue) < TARGET_REPS_OPTIONS.length - 1;
+  const handleInputChange = (e) => {
+    const newValue = e.target.value;
+    // Only update the input display, don't call onChange yet
+    setInputValue(newValue);
+  };
+  
+  const validateAndApplyValue = (value) => {
+    // Shared validation logic for blur and direct input
+    if (isBodyweight) {
+      const numValue = parseInt(value, 10);
+      if (isNaN(numValue) || numValue < 1) {
+        // Reset to previous valid value if invalid
+        setInputValue(String(displayValue));
+        return false;
+      } else {
+        setDisplayValue(numValue);
+        setInputValue(String(numValue));
+        onChange(numValue);
+        return true;
+      }
+    }
+    return false;
+  };
+  
+  const handleInputBlur = () => {
+    // Validate and apply the input value on blur
+    validateAndApplyValue(inputValue);
+  };
+  
+  const canDecrease = isBodyweight ? displayValue > 1 : TARGET_REPS_OPTIONS.indexOf(displayValue) > 0;
+  const canIncrease = isBodyweight ? true : TARGET_REPS_OPTIONS.indexOf(displayValue) < TARGET_REPS_OPTIONS.length - 1;
 
   // Use FormControl with OutlinedInput to match MUI Select styling
   // Width: 100-110px provides adequate space for +/- buttons and two-digit numbers
@@ -89,8 +155,10 @@ const TargetRepsPicker = ({
     <FormControl size="small" sx={{ width: compact ? 100 : 110, minWidth: compact ? 100 : 110 }}>
       {showLabel && <InputLabel shrink>{label}</InputLabel>}
       <OutlinedInput
-        value={displayValue}
-        readOnly
+        value={inputValue}
+        onChange={handleInputChange}
+        onBlur={handleInputBlur}
+        readOnly={!isBodyweight}
         disabled={disabled}
         size="small"
         label={showLabel ? label : undefined}
@@ -104,7 +172,7 @@ const TargetRepsPicker = ({
             py: 1,
             px: 0.5,
             minWidth: 28,
-            cursor: 'default',
+            cursor: isBodyweight ? 'text' : 'default',
           },
         }}
         startAdornment={
@@ -151,6 +219,7 @@ TargetRepsPicker.propTypes = {
   compact: PropTypes.bool,
   label: PropTypes.string,
   showLabel: PropTypes.bool,
+  isBodyweight: PropTypes.bool,
 };
 
 export default TargetRepsPicker;

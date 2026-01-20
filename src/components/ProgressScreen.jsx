@@ -518,14 +518,17 @@ const ProgressDashboard = () => {
                           </Box>
                         ) : (
                           <Typography variant="caption" sx={{ fontWeight: 600, color: '#FF6B35' }}>
-                            {Math.round((streakData.currentStreak / (streakData.longestStreak + 1)) * 100)}%
+                            {streakData.longestStreak === 0 
+                              ? '0%'
+                              : `${Math.round((streakData.currentStreak / (streakData.longestStreak + 1)) * 100)}%`
+                            }
                           </Typography>
                         )}
                       </Box>
                       <LinearProgress
                         variant="determinate"
                         value={
-                          streakData.longestStreak === 0 
+                          streakData.longestStreak === 0 || streakData.currentStreak === 0
                             ? 0 
                             : Math.min(100, (streakData.currentStreak / (streakData.longestStreak + 1)) * 100)
                         }

@@ -505,45 +505,58 @@ const ProgressDashboard = () => {
 
                     {/* Progress Bar to Personal Best */}
                     <Box sx={{ pt: 1 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          Progress to Personal Best
-                        </Typography>
-                        {streakData.currentStreak >= streakData.longestStreak && streakData.currentStreak > 0 ? (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <EmojiEvents sx={{ fontSize: 18, color: '#FFD700' }} />
-                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#FFD700' }}>
-                              New Record!
-                            </Typography>
-                          </Box>
-                        ) : (
-                          <Typography variant="caption" sx={{ fontWeight: 600, color: '#FF6B35' }}>
-                            {streakData.longestStreak === 0 
-                              ? '0%'
-                              : `${Math.round((streakData.currentStreak / (streakData.longestStreak + 1)) * 100)}%`
-                            }
-                          </Typography>
-                        )}
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={
-                          streakData.longestStreak === 0 || streakData.currentStreak === 0
-                            ? 0 
-                            : Math.min(100, (streakData.currentStreak / (streakData.longestStreak + 1)) * 100)
-                        }
-                        sx={{
-                          height: 8,
-                          borderRadius: 4,
-                          bgcolor: 'rgba(255, 107, 53, 0.2)',
-                          '& .MuiLinearProgress-bar': {
-                            borderRadius: 4,
-                            background: streakData.currentStreak >= streakData.longestStreak && streakData.currentStreak > 0
-                              ? 'linear-gradient(90deg, #FFD700 0%, #FFA500 100%)'
-                              : 'linear-gradient(90deg, #FF6B35 0%, #FF8C42 100%)',
-                          },
-                        }}
-                      />
+                      {(() => {
+                        // Check if user has achieved a new record (current >= longest and current > 0)
+                        const isNewRecord = streakData.currentStreak >= streakData.longestStreak && streakData.currentStreak > 0;
+                        
+                        // Calculate progress percentage (current / (longest + 1) * 100)
+                        // When longestStreak is 0 and currentStreak is 0, show 0%
+                        // When currentStreak >= longestStreak, show "New Record!" instead of percentage
+                        const progressPercentage = streakData.longestStreak === 0 
+                          ? 0
+                          : Math.round((streakData.currentStreak / (streakData.longestStreak + 1)) * 100);
+                        
+                        return (
+                          <>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                              <Typography variant="caption" color="text.secondary">
+                                Progress to Personal Best
+                              </Typography>
+                              {isNewRecord ? (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <EmojiEvents sx={{ fontSize: 18, color: '#FFD700' }} />
+                                  <Typography variant="caption" sx={{ fontWeight: 600, color: '#FFD700' }}>
+                                    New Record!
+                                  </Typography>
+                                </Box>
+                              ) : (
+                                <Typography variant="caption" sx={{ fontWeight: 600, color: '#FF6B35' }}>
+                                  {progressPercentage}%
+                                </Typography>
+                              )}
+                            </Box>
+                            <LinearProgress
+                              variant="determinate"
+                              value={
+                                streakData.longestStreak === 0 || streakData.currentStreak === 0
+                                  ? 0 
+                                  : Math.min(100, (streakData.currentStreak / (streakData.longestStreak + 1)) * 100)
+                              }
+                              sx={{
+                                height: 8,
+                                borderRadius: 4,
+                                bgcolor: 'rgba(255, 107, 53, 0.2)',
+                                '& .MuiLinearProgress-bar': {
+                                  borderRadius: 4,
+                                  background: isNewRecord
+                                    ? 'linear-gradient(90deg, #FFD700 0%, #FFA500 100%)'
+                                    : 'linear-gradient(90deg, #FF6B35 0%, #FF8C42 100%)',
+                                },
+                              }}
+                            />
+                          </>
+                        );
+                      })()}
                     </Box>
                   </Stack>
                 </CardContent>

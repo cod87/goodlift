@@ -467,38 +467,80 @@ const ProgressDashboard = () => {
                 }}
               >
                 <CardContent sx={{ p: 2.5 }}>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Whatshot sx={{ fontSize: 48, color: '#FF6B35' }} />
-                      <Box>
-                        <Typography variant="h2" sx={{ fontWeight: 700, color: '#FF6B35', lineHeight: 1 }}>
-                          {streakData.currentStreak}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
-                            Day Streak
+                  <Stack spacing={2}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Whatshot sx={{ fontSize: 48, color: '#FF6B35' }} />
+                        <Box>
+                          <Typography variant="h2" sx={{ fontWeight: 700, color: '#FF6B35', lineHeight: 1 }}>
+                            {streakData.currentStreak}
                           </Typography>
-                          <IconButton 
-                            size="small" 
-                            onClick={() => setStreakInfoOpen(true)}
-                            sx={{ 
-                              padding: 0.5, 
-                              color: 'text.secondary',
-                              '&:hover': { color: 'primary.main' }
-                            }}
-                          >
-                            <HelpOutline sx={{ fontSize: 16 }} />
-                          </IconButton>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
+                              Day Streak
+                            </Typography>
+                            <IconButton 
+                              size="small" 
+                              onClick={() => setStreakInfoOpen(true)}
+                              sx={{ 
+                                padding: 0.5, 
+                                color: 'text.secondary',
+                                '&:hover': { color: 'primary.main' }
+                              }}
+                            >
+                              <HelpOutline sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          </Box>
                         </Box>
                       </Box>
-                    </Box>
-                    <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Longest
-                      </Typography>
-                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                        {streakData.longestStreak}
-                      </Typography>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Longest
+                        </Typography>
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                          {streakData.longestStreak}
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    {/* Progress Bar to Personal Best */}
+                    <Box sx={{ pt: 1 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Progress to Personal Best
+                        </Typography>
+                        {streakData.currentStreak >= streakData.longestStreak && streakData.currentStreak > 0 ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <EmojiEvents sx={{ fontSize: 18, color: '#FFD700' }} />
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#FFD700' }}>
+                              New Record!
+                            </Typography>
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" sx={{ fontWeight: 600, color: '#FF6B35' }}>
+                            {Math.round((streakData.currentStreak / (streakData.longestStreak + 1)) * 100)}%
+                          </Typography>
+                        )}
+                      </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={
+                          streakData.longestStreak === 0 
+                            ? 0 
+                            : Math.min(100, (streakData.currentStreak / (streakData.longestStreak + 1)) * 100)
+                        }
+                        sx={{
+                          height: 8,
+                          borderRadius: 4,
+                          bgcolor: 'rgba(255, 107, 53, 0.2)',
+                          '& .MuiLinearProgress-bar': {
+                            borderRadius: 4,
+                            background: streakData.currentStreak >= streakData.longestStreak && streakData.currentStreak > 0
+                              ? 'linear-gradient(90deg, #FFD700 0%, #FFA500 100%)'
+                              : 'linear-gradient(90deg, #FF6B35 0%, #FF8C42 100%)',
+                          },
+                        }}
+                      />
                     </Box>
                   </Stack>
                 </CardContent>

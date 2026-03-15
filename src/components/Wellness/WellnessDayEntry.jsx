@@ -36,15 +36,18 @@ const WellnessDayEntry = ({ entry, onUpdate }) => {
     onUpdate(updated);
   }, [entry, onUpdate]);
 
-  const handleAddNote = useCallback((categoryId, noteText) => {
-    if (!noteText.trim()) return;
+  const handleAddNote = useCallback((categoryId, noteInput) => {
+    // Support both a single string and an array of strings
+    const items = Array.isArray(noteInput) ? noteInput : [noteInput];
+    const validNotes = items.map((n) => n.trim()).filter((n) => n.length > 0);
+    if (validNotes.length === 0) return;
     const updated = {
       ...entry,
       categories: {
         ...entry.categories,
         [categoryId]: {
           ...entry.categories[categoryId],
-          notes: [...(entry.categories[categoryId].notes || []), noteText.trim()],
+          notes: [...(entry.categories[categoryId].notes || []), ...validNotes],
         },
       },
     };
@@ -102,9 +105,10 @@ const CategoryRow = ({ category, data, isDark, onToggle, onAddNote, onRemoveNote
 
   const handleSubmitNote = () => {
     if (submittedRef.current) return;
-    if (noteInput.trim()) {
+    const lines = noteInput.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
+    if (lines.length > 0) {
       submittedRef.current = true;
-      onAddNote(noteInput);
+      onAddNote(lines);
       setNoteInput('');
       setShowInput(false);
       // Reset flag after a tick to allow future submissions
@@ -113,7 +117,7 @@ const CategoryRow = ({ category, data, isDark, onToggle, onAddNote, onRemoveNote
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       handleSubmitNote();
     } else if (e.key === 'Escape') {
@@ -197,10 +201,13 @@ const CategoryRow = ({ category, data, isDark, onToggle, onAddNote, onRemoveNote
                 setShowInput(false);
               }
             }}
-            placeholder={`Add a note for ${category.label}...`}
+            placeholder={`Add notes for ${category.label} (one per line)...`}
             size="small"
             fullWidth
             autoFocus
+            multiline
+            minRows={2}
+            maxRows={6}
             sx={{
               '& .MuiOutlinedInput-root': {
                 fontSize: '0.85rem',
@@ -210,7 +217,7 @@ const CategoryRow = ({ category, data, isDark, onToggle, onAddNote, onRemoveNote
                 '&.Mui-focused fieldset': { borderColor: category.color },
               },
             }}
-            inputProps={{ maxLength: 200 }}
+            inputProps={{ maxLength: 1000 }}
           />
         </Box>
       )}

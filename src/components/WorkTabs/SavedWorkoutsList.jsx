@@ -205,29 +205,6 @@ const SavedWorkoutsList = memo(({
     handleCloseDayPicker();
   };
 
-  const handleUnassignDay = async () => {
-    if (selectedWorkoutForDay !== null) {
-      try {
-        const workout = savedWorkouts[selectedWorkoutForDay];
-        
-        // Update the saved workout to remove the assigned day
-        const updatedWorkout = {
-          ...workout,
-          assignedDay: undefined,
-        };
-        
-        await updateSavedWorkout(selectedWorkoutForDay, updatedWorkout);
-        
-        // Reload workouts
-        const workouts = await getSavedWorkouts();
-        setSavedWorkouts(workouts || []);
-      } catch (error) {
-        console.error('Error unassigning workout from day:', error);
-      }
-    }
-    handleCloseDayPicker();
-  };
-
   const handleWorkoutClick = (workout) => {
     // Prevent click if no exercises or invalid workout
     if (!workout || !workout.exercises || workout.exercises.length === 0) {

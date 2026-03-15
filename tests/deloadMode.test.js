@@ -110,17 +110,6 @@ function testLastPerformanceDataSkipped() {
   console.log('\nTest 5: Last performance data loading is skipped in deload mode');
   
   const deloadMode = true;
-  const exerciseName = 'Bench Press';
-  const mockHistory = [
-    {
-      date: '2025-01-01',
-      exercises: {
-        'Bench Press': {
-          sets: [{ weight: 135, reps: 10 }]
-        }
-      }
-    }
-  ];
   
   // In WorkoutScreen.jsx, when deloadMode is true, we skip loading last performance
   if (!deloadMode) {
@@ -139,7 +128,6 @@ function testDeloadModeIsPerSession() {
   console.log('\nTest 6: Deload mode is per-session and not saved with workout');
   
   // Simulate starting a workout in deload mode
-  let deloadMode = true;
   console.log('  Starting workout with deloadMode = true');
   
   // Simulate completing and saving the workout
@@ -151,7 +139,7 @@ function testDeloadModeIsPerSession() {
     // deloadMode should NOT be here
   };
   
-  if (!savedWorkout.hasOwnProperty('deloadMode')) {
+  if (!Object.hasOwn(savedWorkout, 'deloadMode')) {
     console.log('  ✓ PASS: Deload mode not saved with workout');
     console.log('    Saved workout does not contain deloadMode field');
     return true;
@@ -166,10 +154,6 @@ function testWeightsNotSavedInDeload() {
   console.log('\nTest 7: Weights and reps are not saved during deload session');
   
   const deloadMode = true;
-  const mockWorkoutData = [
-    { exerciseName: 'Bench Press', setNumber: 1, weight: 150, reps: 8 },
-    { exerciseName: 'Bench Press', setNumber: 2, weight: 150, reps: 8 },
-  ];
   
   // In WorkoutScreen.jsx, when deloadMode is true, applyConditionalPersistRules is not called
   if (!deloadMode) {

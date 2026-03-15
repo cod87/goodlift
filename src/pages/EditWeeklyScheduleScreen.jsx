@@ -111,13 +111,6 @@ const EditWeeklyScheduleScreen = ({ onNavigate }) => {
     return strengthTypes.includes(type);
   };
 
-  // Check if workout type is timer-based
-  const isTimerWorkout = (type) => {
-    if (!type) return false;
-    const timerTypes = ['cardio', 'hiit', 'yoga', 'mobility', 'stretch'];
-    return timerTypes.includes(type);
-  };
-
   // Check if it's a rest day
   const isRestDay = (type) => {
     return type === 'rest';

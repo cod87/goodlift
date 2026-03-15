@@ -1428,7 +1428,7 @@ export const migrateAchievements = (oldAchievementIds) => {
     const newId = ACHIEVEMENT_MIGRATION_MAP[oldId];
     if (newId) {
       newAchievementIds.add(newId);
-    } else if (!ACHIEVEMENT_MIGRATION_MAP.hasOwnProperty(oldId)) {
+    } else if (!Object.hasOwn(ACHIEVEMENT_MIGRATION_MAP, oldId)) {
       // If the ID is not in the migration map, it might be a new badge or special badge
       // Check if it exists in the new system
       const exists = ACHIEVEMENT_BADGES.some(b => b.id === oldId);

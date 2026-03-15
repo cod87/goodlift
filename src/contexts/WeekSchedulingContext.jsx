@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import PropTypes from 'prop-types';
 import { useAuth } from './AuthContext';
 import { saveUserDataToFirebase, loadUserDataFromFirebase } from '../utils/firebaseStorage';
-import { startOfWeek, addWeeks, isAfter } from 'date-fns';
+import { startOfWeek, isAfter } from 'date-fns';
 
 const WeekSchedulingContext = createContext({});
 
@@ -45,7 +45,6 @@ export const WeekSchedulingProvider = ({ children }) => {
     if (!cycleStartDate) return 1;
     
     const startDate = new Date(cycleStartDate);
-    const now = new Date();
     const mostRecentSunday = new Date(getMostRecentSunday());
     
     // Calculate weeks elapsed

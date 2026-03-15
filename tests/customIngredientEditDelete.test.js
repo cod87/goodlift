@@ -12,18 +12,6 @@
  */
 
 /**
- * Mock update function
- */
-const mockUpdateCustomIngredient = async (id, updates) => {
-  // Simulate the update process
-  return {
-    id,
-    ...updates,
-    updatedAt: new Date().toISOString(),
-  };
-};
-
-/**
  * Mock delete function
  */
 const mockDeleteCustomIngredient = async (id) => {
@@ -153,17 +141,6 @@ let customIngredients = [
 
   // Test 4: Edit changes serving size
   console.log('Test 4: Edit custom ingredient with serving size change');
-  const originalIngredient = {
-    name: 'Protein Powder',
-    calories: 400, // per 100g
-    protein: 80,
-    carbs: 10,
-    fat: 5,
-    fiber: 2,
-    portion_grams: 30,
-    standard_portion: '1 scoop',
-  };
-
   // User edits: changes serving size from 30g to 35g
   const editedWithNewServingSize = {
     name: 'Protein Powder',

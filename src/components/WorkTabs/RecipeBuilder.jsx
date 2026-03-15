@@ -319,13 +319,12 @@ const RecipeBuilder = ({ open, onClose, editRecipe = null, onSave }) => {
                             <TextField
                               type="number"
                               value={food.grams}
-                              onChange={(e) => handleUpdateGrams(food.id, e.target.value, { 
-                                fdcId: food.fdcId, 
-                                description: food.name,
-                                foodNutrients: Object.keys(NUTRIENT_IDS).map(key => ({
-                                  nutrientId: NUTRIENT_IDS[key],
-                                  value: food.grams > 0 ? food.nutrition[key.toLowerCase()] / (food.grams / 100) : 0
-                                }))
+                              onChange={(e) => handleUpdateGrams(food.id, e.target.value, {
+                                calories: food.grams > 0 ? food.nutrition.calories / (food.grams / 100) : food.nutrition.calories,
+                                protein: food.grams > 0 ? food.nutrition.protein / (food.grams / 100) : food.nutrition.protein,
+                                carbs: food.grams > 0 ? food.nutrition.carbs / (food.grams / 100) : food.nutrition.carbs,
+                                fat: food.grams > 0 ? food.nutrition.fat / (food.grams / 100) : food.nutrition.fat,
+                                fiber: food.grams > 0 ? food.nutrition.fiber / (food.grams / 100) : food.nutrition.fiber,
                               })}
                               size="small"
                               sx={{ width: 80 }}

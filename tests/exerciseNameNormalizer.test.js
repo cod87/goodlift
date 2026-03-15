@@ -8,7 +8,6 @@
 import {
   normalizeExerciseNameToNewFormat,
   normalizeExerciseObject,
-  normalizeExerciseArray,
   normalizeWorkoutExercises,
 } from '../src/utils/exerciseNameNormalizer.js';
 

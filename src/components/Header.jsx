@@ -21,6 +21,7 @@ const TAB_DISPLAY_NAMES = {
   'mobility': 'Mobility',
   'log-activity': 'Log Activity',
   'edit-weekly-schedule': 'Weekly Schedule',
+  'wellness': 'Wellness',
 };
 
 /**

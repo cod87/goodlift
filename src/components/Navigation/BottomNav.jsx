@@ -6,6 +6,8 @@ import {
   TrendingUpOutlined,
   Settings,
   SettingsOutlined,
+  Spa,
+  SpaOutlined,
 } from '@mui/icons-material';
 import { touchTargets, zIndex, BREAKPOINTS } from '../../theme/responsive';
 
@@ -18,7 +20,7 @@ const ACTIVE_COLOR = '#1db584';
  * Features:
  * - Mobile/Tablet: Fixed bottom navigation
  * - Desktop (≥1024px): Vertical sidebar navigation on the left
- * - 3 navigation icons: Work, Progress, Settings
+ * - 4 navigation icons: Work, Progress, Wellness, Settings
  * - Touch-friendly targets (56-64px)
  * - Safe area padding for devices with home indicators
  * - Active state indication with primary color
@@ -51,6 +53,13 @@ const BottomNav = memo(({ currentScreen, onNavigate }) => {
       iconActive: TrendingUp,
       iconInactive: TrendingUpOutlined,
       screens: ['progress'],
+    },
+    {
+      id: 'wellness',
+      label: 'Wellness',
+      iconActive: Spa,
+      iconInactive: SpaOutlined,
+      screens: ['wellness'],
     },
     {
       id: 'settings',

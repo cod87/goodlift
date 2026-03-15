@@ -36,6 +36,8 @@ const GUEST_KEYS = {
   NUTRITION_RECIPES: 'goodlift_guest_nutrition_recipes',
   FAVORITE_FOODS: 'goodlift_guest_favorite_foods',
   CUSTOM_INGREDIENTS: 'goodlift_guest_custom_ingredients',
+  WELLNESS_JOURNAL: 'goodlift_guest_wellness_journal',
+  WELLNESS_STATS: 'goodlift_guest_wellness_stats',
 };
 
 /**

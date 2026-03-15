@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -98,12 +98,17 @@ WellnessDayEntry.propTypes = {
 const CategoryRow = ({ category, data, isDark, onToggle, onAddNote, onRemoveNote }) => {
   const [noteInput, setNoteInput] = useState('');
   const [showInput, setShowInput] = useState(false);
+  const submittedRef = useRef(false);
 
   const handleSubmitNote = () => {
+    if (submittedRef.current) return;
     if (noteInput.trim()) {
+      submittedRef.current = true;
       onAddNote(noteInput);
       setNoteInput('');
       setShowInput(false);
+      // Reset flag after a tick to allow future submissions
+      setTimeout(() => { submittedRef.current = false; }, 0);
     }
   };
 

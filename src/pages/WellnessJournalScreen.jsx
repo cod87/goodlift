@@ -51,13 +51,13 @@ const WellnessJournalScreen = () => {
   }, []);
 
   const goToNextDay = useCallback(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
     setSelectedDate((prev) => {
       const d = new Date(prev);
       d.setDate(d.getDate() + 1);
       // Don't go past today
-      if (d > tomorrow) return prev;
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (d > today) return prev;
       return d;
     });
   }, []);

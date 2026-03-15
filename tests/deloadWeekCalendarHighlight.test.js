@@ -7,7 +7,7 @@
 
 console.log('=== Deload Week Calendar Highlighting Tests ===\n');
 
-import { startOfWeek, endOfWeek, addDays } from 'date-fns';
+import { startOfWeek, endOfWeek } from 'date-fns';
 
 // Helper function to check if a date is in a deload week
 // This mirrors the logic from MonthCalendarView.jsx

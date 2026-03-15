@@ -142,7 +142,7 @@ mockLocalStorage.setItem = () => { throw new Error('Storage error'); };
 try {
   markWellnessShown('test'); // Should not throw
   resultOnError = true;
-} catch (err) {
+} catch (_err) {
   resultOnError = false;
 }
 mockLocalStorage.setItem = originalSetItem;

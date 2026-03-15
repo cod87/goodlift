@@ -8,7 +8,6 @@
 import { 
   migrateAchievements, 
   awardRetroactiveBadges,
-  getUnlockedAchievements 
 } from '../data/achievements.js';
 import { 
   getUnlockedAchievements as getStoredAchievements,

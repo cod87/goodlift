@@ -16,7 +16,6 @@ import {
   hasWeeklyConsistencyBonus, 
   getStreakMultiplier,
   calculateAchievementPoints,
-  calculateUserLevel
 } from '../data/achievements.js';
 
 const KEYS = {
@@ -253,7 +252,7 @@ export const evaluateWeeklyPerformance = (strengthSessionsLastWeek) => {
  * @param {Array} unlockedAchievements - Array of unlocked achievement objects
  * @returns {number} Total points from sessions + badges - penalties
  */
-export const getTotalPoints = (unlockedAchievements = []) => {
+export const getTotalPoints = (_unlockedAchievements = []) => {
   try {
     const pointsData = getUserPoints();
     return pointsData.totalPoints;
@@ -339,7 +338,7 @@ export const getLastRecordedStreak = () => {
       const value = localStorage.getItem(KEYS.LAST_STREAK_CHECK);
       return value ? parseInt(value) : 0;
     }
-  } catch (error) {
+  } catch (_error) {
     return 0;
   }
 };

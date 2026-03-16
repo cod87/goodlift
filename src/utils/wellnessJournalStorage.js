@@ -43,18 +43,26 @@ export const WELLNESS_CATEGORIES = [
 ];
 
 /**
- * Level thresholds - each level doubles the max.
- * Level 1: 50 drops, Level 2: 100 drops, Level 3: 200 drops, etc.
+ * Level thresholds:
+ * Level 1: 10 drops (up to 10), Level 2: 20 drops (11–30),
+ * Level 3: 20 drops (31–50), Level 4: 50 drops (51–100),
+ * Level 5+: 50 drops each (increments of 50)
  */
+const LEVEL_THRESHOLDS = [10, 20, 20, 50];
+
 export const getLevelInfo = (totalDrops) => {
   let level = 1;
-  let threshold = 50;
   let dropsAccountedFor = 0;
+
+  const getThreshold = (lvl) =>
+    lvl <= LEVEL_THRESHOLDS.length ? LEVEL_THRESHOLDS[lvl - 1] : 50;
+
+  let threshold = getThreshold(level);
 
   while (totalDrops >= dropsAccountedFor + threshold) {
     dropsAccountedFor += threshold;
     level++;
-    threshold = 50 * Math.pow(2, level - 1);
+    threshold = getThreshold(level);
   }
 
   const dropsInCurrentLevel = totalDrops - dropsAccountedFor;

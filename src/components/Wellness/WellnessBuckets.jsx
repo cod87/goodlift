@@ -8,7 +8,7 @@ import { WELLNESS_CATEGORIES, getLevelInfo } from '../../utils/wellnessJournalSt
  * 
  * Each category is represented as a vessel that fills with "drops".
  * The fill level shows progress within the current level.
- * Levels: L1 = 50, L2 = 100, L3 = 200, L4 = 400, etc.
+ * Levels: L1 = 10, L2 = 20, L3 = 20, L4 = 50, L5+ = 50 each
  */
 const WellnessBuckets = memo(({ stats }) => {
   const theme = useTheme();

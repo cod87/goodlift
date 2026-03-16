@@ -33,32 +33,22 @@ const ICON_MAP = {
   Park,
 };
 
-/** CSS keyframes for the water drop animation */
-const dropKeyframes = `
+/** CSS keyframes for the water drop animation - injected once at module level */
+if (typeof document !== 'undefined' && !document.getElementById('wellness-drop-keyframes')) {
+  const style = document.createElement('style');
+  style.id = 'wellness-drop-keyframes';
+  style.textContent = `
 @keyframes waterDrop {
-  0% {
-    transform: translateY(-20px) scale(1);
-    opacity: 1;
-  }
-  60% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(70px) scale(0.6);
-    opacity: 0;
-  }
+  0% { transform: translateY(-20px) scale(1); opacity: 1; }
+  60% { opacity: 1; }
+  100% { transform: translateY(70px) scale(0.6); opacity: 0; }
 }
 @keyframes ripple {
-  0% {
-    transform: scale(0);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
+  0% { transform: scale(0); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}`;
+  document.head.appendChild(style);
 }
-`;
 
 /**
  * WellnessBuckets - Visual "bucket fill" representation for each wellness category.
@@ -131,9 +121,6 @@ const WellnessBuckets = memo(({ stats, entry, onSubmitNotes }) => {
 
   return (
     <>
-      {/* Inject keyframe styles */}
-      <style>{dropKeyframes}</style>
-
       <Box
         sx={{
           display: 'grid',
@@ -233,7 +220,7 @@ const WellnessBuckets = memo(({ stats, entry, onSubmitNotes }) => {
                     '&.Mui-focused fieldset': { borderColor: selectedCategory.color },
                   },
                 }}
-                inputProps={{ maxLength: 2000 }}
+                inputProps={{ maxLength: 2000, 'aria-label': `Notes for ${selectedCategory.label}` }}
               />
               <Typography
                 sx={{

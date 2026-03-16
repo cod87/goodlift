@@ -1,4 +1,4 @@
-import { memo, useState, useCallback, useRef } from 'react';
+import { memo, useState, useCallback, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -10,6 +10,7 @@ import {
   DialogActions,
   Button,
   TextField,
+  Divider,
 } from '@mui/material';
 import {
   FitnessCenter,
@@ -60,46 +61,68 @@ const WellnessBuckets = memo(({ stats, entry, onSubmitNotes }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [noteText, setNoteText] = useState('');
+  const [noteLines, setNoteLines] = useState([]);
   const [animatingBucket, setAnimatingBucket] = useState(null);
   const [dropCount, setDropCount] = useState(0);
-  const textFieldRef = useRef(null);
+  const lineRefs = useRef([]);
+  const [focusLineIndex, setFocusLineIndex] = useState(null);
+
+  // Focus the target line after a state update commits the DOM
+  useEffect(() => {
+    if (focusLineIndex === null) return;
+    const input = lineRefs.current[focusLineIndex];
+    if (input) {
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+    setFocusLineIndex(null);
+  }, [focusLineIndex]);
 
   const handleOpenDialog = useCallback((cat) => {
     const existingNotes = entry?.categories?.[cat.id]?.notes || [];
-    if (existingNotes.length > 0) {
-      setNoteText(existingNotes.map((n, i) => `${i + 1}. ${n}`).join('\n'));
-    } else {
-      setNoteText('1. ');
-    }
+    lineRefs.current = [];
+    setNoteLines(existingNotes.length > 0 ? [...existingNotes] : ['']);
     setSelectedCategory(cat);
   }, [entry]);
 
   const handleCloseDialog = useCallback(() => {
     setSelectedCategory(null);
-    setNoteText('');
+    setNoteLines([]);
+    lineRefs.current = [];
   }, []);
 
-  const handleTextChange = useCallback((e) => {
-    setNoteText(e.target.value);
+  const handleLineChange = useCallback((index, value) => {
+    setNoteLines((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
   }, []);
 
-  const handleKeyDown = useCallback((e) => {
+  const handleLineKeyDown = useCallback((index, e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      const lines = noteText.split('\n');
-      const nextNum = lines.length + 1;
-      setNoteText(noteText + `\n${nextNum}. `);
+      setNoteLines((prev) => {
+        const updated = [...prev];
+        updated.splice(index + 1, 0, '');
+        return updated;
+      });
+      setFocusLineIndex(index + 1);
+    } else if (e.key === 'Backspace' && noteLines[index] === '' && noteLines.length > 1) {
+      e.preventDefault();
+      const prevIndex = Math.max(0, index - 1);
+      setNoteLines((prev) => {
+        const updated = [...prev];
+        updated.splice(index, 1);
+        return updated;
+      });
+      setFocusLineIndex(prevIndex);
     }
-  }, [noteText]);
+  }, [noteLines]);
 
   const handleSubmit = useCallback(() => {
     if (!selectedCategory) return;
-    // Parse lines: strip numbering, filter empty
-    const notes = noteText
-      .split('\n')
-      .map((line) => line.replace(/^\d+\.\s*/, '').trim())
-      .filter((line) => line.length > 0);
+    const notes = noteLines.map((l) => l.trim()).filter((l) => l.length > 0);
 
     const newDrops = notes.length;
     const prevNotes = entry?.categories?.[selectedCategory.id]?.notes || [];
@@ -117,7 +140,12 @@ const WellnessBuckets = memo(({ stats, entry, onSubmitNotes }) => {
         setDropCount(0);
       }, 1500);
     }
-  }, [selectedCategory, noteText, entry, onSubmitNotes, handleCloseDialog]);
+  }, [selectedCategory, noteLines, entry, onSubmitNotes, handleCloseDialog]);
+
+  // Collect categories that have notes for the review section
+  const categoriesWithNotes = WELLNESS_CATEGORIES.filter(
+    (cat) => (entry?.categories?.[cat.id]?.notes || []).length > 0,
+  );
 
   return (
     <>
@@ -150,6 +178,85 @@ const WellnessBuckets = memo(({ stats, entry, onSubmitNotes }) => {
           );
         })}
       </Box>
+
+      {/* Day's notes review section */}
+      {categoriesWithNotes.length > 0 && (
+        <Box sx={{ mt: 1 }}>
+          <Typography
+            sx={{
+              fontSize: { xs: '0.7rem', sm: '0.75rem' },
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              color: isDark ? 'rgba(255,255,255,0.4)' : 'text.secondary',
+              mb: 1.5,
+              textAlign: 'center',
+            }}
+          >
+            Day&apos;s Notes
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {categoriesWithNotes.map((cat) => {
+              const notes = entry.categories[cat.id].notes;
+              const IconComponent = ICON_MAP[cat.icon];
+              return (
+                <Box
+                  key={cat.id}
+                  sx={{
+                    background: isDark ? 'rgba(255,255,255,0.04)' : 'var(--color-surface)',
+                    borderRadius: 'var(--radius-md, 12px)',
+                    border: `1px solid ${isDark ? `${cat.color}25` : `${cat.color}35`}`,
+                    padding: { xs: '0.75rem', sm: '1rem' },
+                    cursor: 'pointer',
+                    '&:hover': { boxShadow: `0 2px 8px ${cat.color}20` },
+                  }}
+                  onClick={() => handleOpenDialog(cat)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpenDialog(cat); }}
+                  aria-label={`Edit ${cat.label} notes`}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
+                    {IconComponent && (
+                      <IconComponent sx={{ fontSize: '1rem', color: cat.color }} />
+                    )}
+                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: cat.color }}>
+                      {cat.label}
+                    </Typography>
+                  </Box>
+                  <Divider sx={{ mb: 0.75, borderColor: `${cat.color}20` }} />
+                  {notes.map((note, i) => (
+                    <Box key={i} sx={{ display: 'flex', gap: 0.75, mb: 0.3 }}>
+                      <Typography
+                        sx={{
+                          fontSize: '0.8rem',
+                          color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)',
+                          flexShrink: 0,
+                          fontFamily: 'monospace',
+                          minWidth: '20px',
+                          textAlign: 'right',
+                        }}
+                      >
+                        {i + 1}.
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                          color: isDark ? 'rgba(255,255,255,0.7)' : 'text.secondary',
+                          lineHeight: 1.4,
+                          wordBreak: 'break-word',
+                        }}
+                      >
+                        {note}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
+      )}
 
       {/* Entry dialog */}
       <Dialog
@@ -199,29 +306,49 @@ const WellnessBuckets = memo(({ stats, entry, onSubmitNotes }) => {
               >
                 {selectedCategory.description}
               </Typography>
-              <TextField
-                inputRef={textFieldRef}
-                value={noteText}
-                onChange={handleTextChange}
-                onKeyDown={handleKeyDown}
-                placeholder="1. Start typing..."
-                fullWidth
-                multiline
-                minRows={4}
-                maxRows={12}
-                autoFocus
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    fontSize: '0.9rem',
-                    fontFamily: 'monospace',
-                    borderRadius: '10px',
-                    '& fieldset': { borderColor: `${selectedCategory.color}40` },
-                    '&:hover fieldset': { borderColor: `${selectedCategory.color}80` },
-                    '&.Mui-focused fieldset': { borderColor: selectedCategory.color },
-                  },
-                }}
-                inputProps={{ maxLength: 2000, 'aria-label': `Notes for ${selectedCategory.label}` }}
-              />
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                {noteLines.map((line, i) => (
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                    <Typography
+                      sx={{
+                        minWidth: '22px',
+                        fontFamily: 'monospace',
+                        fontSize: '0.9rem',
+                        color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+                        userSelect: 'none',
+                        flexShrink: 0,
+                        textAlign: 'right',
+                      }}
+                    >
+                      {i + 1}.
+                    </Typography>
+                    <TextField
+                      inputRef={(el) => { lineRefs.current[i] = el; }}
+                      value={line}
+                      onChange={(e) => handleLineChange(i, e.target.value)}
+                      onKeyDown={(e) => handleLineKeyDown(i, e)}
+                      autoFocus={i === 0}
+                      placeholder={i === 0 ? 'Start typing...' : ''}
+                      fullWidth
+                      size="small"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.9rem',
+                          fontFamily: 'monospace',
+                          borderRadius: '8px',
+                          '& fieldset': { borderColor: `${selectedCategory.color}40` },
+                          '&:hover fieldset': { borderColor: `${selectedCategory.color}80` },
+                          '&.Mui-focused fieldset': { borderColor: selectedCategory.color },
+                        },
+                      }}
+                      inputProps={{
+                        maxLength: 500,
+                        'aria-label': `Note ${i + 1} for ${selectedCategory.label}`,
+                      }}
+                    />
+                  </Box>
+                ))}
+              </Box>
               <Typography
                 sx={{
                   fontSize: '0.7rem',

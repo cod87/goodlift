@@ -4,28 +4,35 @@ import { isGuestMode, getGuestData, setGuestData } from './guestStorage';
  * Wellness Journal Storage Module
  * 
  * Manages persistence for wellness journal entries.
- * Each entry tracks which of the 4 categories (Mind, Body, Spirit, Community)
- * were attended to on a given day, along with bulleted notes per category.
+ * Each entry tracks which of the 7 categories (Physical, Nutritional, Social,
+ * Spiritual, Intellectual, Financial, Environmental) were attended to on a
+ * given day, along with bulleted notes per category.
  * 
  * Data shape:
  * {
  *   [dateKey: string]: {
  *     date: string,           // ISO date string (YYYY-MM-DD)
  *     categories: {
- *       mind:      { checked: boolean, notes: string[] },
- *       body:      { checked: boolean, notes: string[] },
- *       spirit:    { checked: boolean, notes: string[] },
- *       community: { checked: boolean, notes: string[] },
+ *       physical:      { checked: boolean, notes: string[] },
+ *       nutritional:   { checked: boolean, notes: string[] },
+ *       social:        { checked: boolean, notes: string[] },
+ *       spiritual:     { checked: boolean, notes: string[] },
+ *       intellectual:  { checked: boolean, notes: string[] },
+ *       financial:     { checked: boolean, notes: string[] },
+ *       environmental: { checked: boolean, notes: string[] },
  *     }
  *   }
  * }
  * 
  * Stats shape:
  * {
- *   mind:      { totalDrops: number, level: number },
- *   body:      { totalDrops: number, level: number },
- *   spirit:    { totalDrops: number, level: number },
- *   community: { totalDrops: number, level: number },
+ *   physical:      { totalDrops: number },
+ *   nutritional:   { totalDrops: number },
+ *   social:        { totalDrops: number },
+ *   spiritual:     { totalDrops: number },
+ *   intellectual:  { totalDrops: number },
+ *   financial:     { totalDrops: number },
+ *   environmental: { totalDrops: number },
  * }
  */
 
@@ -36,10 +43,13 @@ const KEYS = {
 
 /** Wellness category definitions */
 export const WELLNESS_CATEGORIES = [
-  { id: 'mind', label: 'Mind', emoji: '🧠', color: '#7c3aed' },
-  { id: 'body', label: 'Body', emoji: '💪', color: '#e53e3e' },
-  { id: 'spirit', label: 'Spirit', emoji: '✨', color: '#f6ad55' },
-  { id: 'community', label: 'Community', emoji: '🤝', color: '#4299e1' },
+  { id: 'physical', label: 'Physical', emoji: '💪', color: '#e53e3e', description: 'Sleep quality and exercise' },
+  { id: 'nutritional', label: 'Nutritional', emoji: '🥗', color: '#38a169', description: 'Eating well-balanced whole foods and staying hydrated' },
+  { id: 'social', label: 'Social', emoji: '🤝', color: '#4299e1', description: 'Spending time with friends and family, establishing new connections, and building community' },
+  { id: 'spiritual', label: 'Spiritual', emoji: '✨', color: '#f6ad55', description: 'Journaling, meditating, practicing art, time in nature, or quiet reflection' },
+  { id: 'intellectual', label: 'Intellectual', emoji: '📚', color: '#7c3aed', description: 'Reading, learning, and practicing art' },
+  { id: 'financial', label: 'Financial', emoji: '💰', color: '#d69e2e', description: 'Good money management' },
+  { id: 'environmental', label: 'Environmental', emoji: '🌿', color: '#319795', description: 'Keeping your surroundings clean and organized' },
 ];
 
 /**
@@ -88,21 +98,16 @@ export const getDateKey = (date = new Date()) => {
 /** Create an empty entry for a given date */
 const createEmptyEntry = (dateKey) => ({
   date: dateKey,
-  categories: {
-    mind: { checked: false, notes: [] },
-    body: { checked: false, notes: [] },
-    spirit: { checked: false, notes: [] },
-    community: { checked: false, notes: [] },
-  },
+  categories: Object.fromEntries(
+    WELLNESS_CATEGORIES.map((cat) => [cat.id, { checked: false, notes: [] }])
+  ),
 });
 
 /** Create default stats */
-const createDefaultStats = () => ({
-  mind: { totalDrops: 0 },
-  body: { totalDrops: 0 },
-  spirit: { totalDrops: 0 },
-  community: { totalDrops: 0 },
-});
+const createDefaultStats = () =>
+  Object.fromEntries(
+    WELLNESS_CATEGORIES.map((cat) => [cat.id, { totalDrops: 0 }])
+  );
 
 /**
  * Load all wellness journal entries
@@ -162,8 +167,12 @@ export const saveWellnessEntry = (dateKey, entry, previousEntry) => {
     const stats = getWellnessStats();
 
     // Calculate drop changes by diffing previous vs current checked state
-    const categoryIds = ['mind', 'body', 'spirit', 'community'];
+    const categoryIds = WELLNESS_CATEGORIES.map((cat) => cat.id);
     for (const catId of categoryIds) {
+      // Ensure stats entry exists (handles migration from old categories)
+      if (!stats[catId]) {
+        stats[catId] = { totalDrops: 0 };
+      }
       const wasChecked = previousEntry?.categories?.[catId]?.checked || false;
       const isChecked = entry.categories[catId].checked;
 
@@ -203,7 +212,7 @@ export const recalculateStats = () => {
   const stats = createDefaultStats();
 
   for (const entry of Object.values(journal)) {
-    for (const catId of ['mind', 'body', 'spirit', 'community']) {
+    for (const catId of WELLNESS_CATEGORIES.map((cat) => cat.id)) {
       if (entry.categories?.[catId]?.checked) {
         stats[catId].totalDrops++;
       }

@@ -15,7 +15,7 @@ import { BREAKPOINTS } from '../theme/responsive';
  * WellnessJournalScreen - Main page for the wellness journal feature.
  * 
  * Layout:
- * 1. Bucket visualization at top (showing progress for Mind, Body, Spirit, Community)
+ * 1. Bucket visualization at top (showing progress for 7 wellness categories)
  * 2. Date navigation (prev/next day)
  * 3. Daily check-off and notes entry
  */

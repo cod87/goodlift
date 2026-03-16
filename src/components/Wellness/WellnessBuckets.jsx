@@ -1,6 +1,7 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography, useTheme, Collapse } from '@mui/material';
+import { InfoOutlined } from '@mui/icons-material';
 import { WELLNESS_CATEGORIES, getLevelInfo } from '../../utils/wellnessJournalStorage';
 
 /**
@@ -20,6 +21,11 @@ const WellnessBuckets = memo(({ stats }) => {
         gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
         gap: { xs: 1.5, sm: 2 },
         mb: 3,
+        '& > :last-child': {
+          gridColumn: { xs: '1 / -1', sm: 'auto' },
+          maxWidth: { xs: '50%', sm: '100%' },
+          justifySelf: { xs: 'center', sm: 'auto' },
+        },
       }}
     >
       {WELLNESS_CATEGORIES.map((cat) => {
@@ -49,6 +55,7 @@ WellnessBuckets.propTypes = {
 const BucketCard = memo(({ category, levelInfo, theme }) => {
   const fillPercent = Math.min(levelInfo.progress * 100, 100);
   const isDark = theme.palette.mode === 'dark';
+  const [showInfo, setShowInfo] = useState(false);
 
   return (
     <Box
@@ -72,6 +79,25 @@ const BucketCard = memo(({ category, levelInfo, theme }) => {
         },
       }}
     >
+      {/* Info toggle button */}
+      <Box
+        onClick={() => setShowInfo(!showInfo)}
+        sx={{
+          position: 'absolute',
+          top: 4,
+          right: 4,
+          cursor: 'pointer',
+          color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)',
+          '&:hover': { color: category.color },
+          transition: 'color 0.2s ease',
+          display: 'flex',
+          alignItems: 'center',
+          zIndex: 2,
+        }}
+      >
+        <InfoOutlined sx={{ fontSize: '0.9rem' }} />
+      </Box>
+
       {/* Category emoji */}
       <Typography sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem' }, lineHeight: 1 }}>
         {category.emoji}
@@ -89,6 +115,21 @@ const BucketCard = memo(({ category, levelInfo, theme }) => {
       >
         {category.label}
       </Typography>
+
+      {/* Description info (collapsible) */}
+      <Collapse in={showInfo} timeout={200}>
+        <Typography
+          sx={{
+            fontSize: { xs: '0.65rem', sm: '0.7rem' },
+            color: isDark ? 'rgba(255,255,255,0.6)' : 'text.secondary',
+            textAlign: 'center',
+            lineHeight: 1.3,
+            px: 0.5,
+          }}
+        >
+          {category.description}
+        </Typography>
+      </Collapse>
 
       {/* Bucket visualization */}
       <Box
@@ -211,6 +252,7 @@ BucketCard.propTypes = {
     label: PropTypes.string.isRequired,
     emoji: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
   }).isRequired,
   levelInfo: PropTypes.shape({
     level: PropTypes.number.isRequired,

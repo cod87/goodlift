@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Typography, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import { ChevronLeft, ChevronRight, Today } from '@mui/icons-material';
 import WellnessBuckets from '../components/Wellness/WellnessBuckets';
-import WellnessDayEntry from '../components/Wellness/WellnessDayEntry';
 import {
   getDateKey,
   getEntryForDate,
@@ -15,9 +14,8 @@ import { BREAKPOINTS } from '../theme/responsive';
  * WellnessJournalScreen - Main page for the wellness journal feature.
  * 
  * Layout:
- * 1. Bucket visualization at top (showing progress for 7 wellness categories)
- * 2. Date navigation (prev/next day)
- * 3. Daily check-off and notes entry
+ * 1. Date navigation
+ * 2. Bucket visualization (tap buckets to enter notes per category)
  */
 const WellnessJournalScreen = () => {
   const theme = useTheme();
@@ -66,13 +64,24 @@ const WellnessJournalScreen = () => {
     setSelectedDate(new Date());
   }, []);
 
-  // Handle entry updates from the day entry component
-  const handleEntryUpdate = useCallback((updatedEntry) => {
+  // Handle notes submission from bucket dialog
+  const handleSubmitNotes = useCallback((categoryId, notes) => {
+    const updatedEntry = {
+      ...entry,
+      categories: {
+        ...entry.categories,
+        [categoryId]: {
+          ...entry.categories[categoryId],
+          checked: notes.length > 0,
+          notes,
+        },
+      },
+    };
     const result = saveWellnessEntry(dateKey, updatedEntry, previousEntryRef.current);
     setEntry(updatedEntry);
     previousEntryRef.current = JSON.parse(JSON.stringify(updatedEntry));
     setStats(result.stats);
-  }, [dateKey]);
+  }, [entry, dateKey]);
 
   // Check if selected date is today
   const isToday = getDateKey(selectedDate) === getDateKey(new Date());
@@ -111,9 +120,6 @@ const WellnessJournalScreen = () => {
       >
         Wellness Journal
       </Typography>
-
-      {/* Bucket visualizations */}
-      <WellnessBuckets stats={stats} />
 
       {/* Date navigation */}
       <Box
@@ -178,10 +184,11 @@ const WellnessJournalScreen = () => {
         </IconButton>
       </Box>
 
-      {/* Day entry - checkboxes and notes */}
-      <WellnessDayEntry
+      {/* Bucket visualizations - tap to enter notes */}
+      <WellnessBuckets
+        stats={stats}
         entry={entry}
-        onUpdate={handleEntryUpdate}
+        onSubmitNotes={handleSubmitNotes}
       />
     </Box>
   );

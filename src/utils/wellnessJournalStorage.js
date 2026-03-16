@@ -166,22 +166,19 @@ export const saveWellnessEntry = (dateKey, entry, previousEntry) => {
     const journal = getWellnessJournal();
     const stats = getWellnessStats();
 
-    // Calculate drop changes by diffing previous vs current checked state
+    // Calculate drop changes by diffing previous vs current note counts.
+    // Each note line = 1 drop. Legacy checked entries with no notes = 1 drop.
     const categoryIds = WELLNESS_CATEGORIES.map((cat) => cat.id);
     for (const catId of categoryIds) {
       // Ensure stats entry exists (handles migration from old categories)
       if (!stats[catId]) {
         stats[catId] = { totalDrops: 0 };
       }
-      const wasChecked = previousEntry?.categories?.[catId]?.checked || false;
-      const isChecked = entry.categories[catId].checked;
-
-      if (!wasChecked && isChecked) {
-        // Newly checked → add a drop
-        stats[catId].totalDrops = (stats[catId].totalDrops || 0) + 1;
-      } else if (wasChecked && !isChecked) {
-        // Unchecked → remove a drop (minimum 0)
-        stats[catId].totalDrops = Math.max(0, (stats[catId].totalDrops || 0) - 1);
+      const prevNotes = previousEntry?.categories?.[catId]?.notes?.length || 0;
+      const currNotes = entry.categories?.[catId]?.notes?.length || 0;
+      const diff = currNotes - prevNotes;
+      if (diff !== 0) {
+        stats[catId].totalDrops = Math.max(0, (stats[catId].totalDrops || 0) + diff);
       }
     }
 
@@ -213,8 +210,11 @@ export const recalculateStats = () => {
 
   for (const entry of Object.values(journal)) {
     for (const catId of WELLNESS_CATEGORIES.map((cat) => cat.id)) {
-      if (entry.categories?.[catId]?.checked) {
-        stats[catId].totalDrops++;
+      const notes = entry.categories?.[catId]?.notes || [];
+      stats[catId].totalDrops += notes.length;
+      // Legacy: count checked entries with no notes as 1 drop
+      if (entry.categories?.[catId]?.checked && notes.length === 0) {
+        stats[catId].totalDrops += 1;
       }
     }
   }

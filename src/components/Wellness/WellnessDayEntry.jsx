@@ -7,15 +7,29 @@ import {
   IconButton,
   TextField,
   useTheme,
+  Collapse,
 } from '@mui/material';
-import { Add, Close } from '@mui/icons-material';
+import { Add, Close, InfoOutlined, FitnessCenter, Restaurant, Groups, SelfImprovement, MenuBook, AccountBalance, Park } from '@mui/icons-material';
 import { WELLNESS_CATEGORIES } from '../../utils/wellnessJournalStorage';
+
+/** Map icon name strings to MUI icon components */
+const ICON_MAP = {
+  FitnessCenter,
+  Restaurant,
+  Groups,
+  SelfImprovement,
+  MenuBook,
+  AccountBalance,
+  Park,
+};
 
 /**
  * WellnessDayEntry - Daily check-off and bulleted notes for each wellness category.
  * 
- * For each of the 4 categories (Mind, Body, Spirit, Community):
+ * For each of the 7 categories (Physical, Nutritional, Social, Spiritual,
+ * Intellectual, Financial, Environmental):
  * - A checkbox to mark it as attended
+ * - An info button to see the category description
  * - Bulleted notes that can be added/removed
  */
 const WellnessDayEntry = ({ entry, onUpdate }) => {
@@ -97,10 +111,11 @@ WellnessDayEntry.propTypes = {
   onUpdate: PropTypes.func.isRequired,
 };
 
-/** Single category row with checkbox, label, and notes */
+/** Single category row with checkbox, label, info, and notes */
 const CategoryRow = ({ category, data, isDark, onToggle, onAddNote, onRemoveNote }) => {
   const [noteInput, setNoteInput] = useState('');
   const [showInput, setShowInput] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const submittedRef = useRef(false);
 
   const handleSubmitNote = () => {
@@ -157,9 +172,12 @@ const CategoryRow = ({ category, data, isDark, onToggle, onAddNote, onRemoveNote
           inputProps={{ 'aria-label': `Mark ${category.label} as attended` }}
         />
 
-        <Typography sx={{ fontSize: '1.1rem', lineHeight: 1 }}>
-          {category.emoji}
-        </Typography>
+        {(() => {
+          const IconComponent = ICON_MAP[category.icon];
+          return IconComponent ? (
+            <IconComponent sx={{ fontSize: '1.1rem', color: category.color }} />
+          ) : null;
+        })()}
 
         <Typography
           sx={{
@@ -171,6 +189,19 @@ const CategoryRow = ({ category, data, isDark, onToggle, onAddNote, onRemoveNote
         >
           {category.label}
         </Typography>
+
+        <IconButton
+          size="small"
+          onClick={() => setShowInfo(!showInfo)}
+          sx={{
+            color: showInfo ? category.color : isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)',
+            '&:hover': { color: category.color, background: `${category.color}15` },
+            padding: '4px',
+          }}
+          aria-label={`Info about ${category.label}`}
+        >
+          <InfoOutlined sx={{ fontSize: '1rem' }} />
+        </IconButton>
 
         <IconButton
           size="small"
@@ -186,6 +217,22 @@ const CategoryRow = ({ category, data, isDark, onToggle, onAddNote, onRemoveNote
           <Add sx={{ fontSize: '1.1rem' }} />
         </IconButton>
       </Box>
+
+      {/* Category description (collapsible) */}
+      <Collapse in={showInfo} timeout={200}>
+        <Box sx={{ ml: 4.5, mt: 0.5, mb: 0.5 }}>
+          <Typography
+            sx={{
+              fontSize: { xs: '0.78rem', sm: '0.82rem' },
+              color: isDark ? 'rgba(255,255,255,0.5)' : 'text.secondary',
+              lineHeight: 1.4,
+              fontStyle: 'italic',
+            }}
+          >
+            {category.description}
+          </Typography>
+        </Box>
+      </Collapse>
 
       {/* Note input */}
       {showInput && (
@@ -284,8 +331,9 @@ CategoryRow.propTypes = {
   category: PropTypes.shape({
     id: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
-    emoji: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
   }).isRequired,
   data: PropTypes.shape({
     checked: PropTypes.bool.isRequired,

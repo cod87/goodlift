@@ -43,13 +43,13 @@ const KEYS = {
 
 /** Wellness category definitions */
 export const WELLNESS_CATEGORIES = [
-  { id: 'physical', label: 'Physical', emoji: '💪', color: '#e53e3e', description: 'Sleep quality and exercise' },
-  { id: 'nutritional', label: 'Nutritional', emoji: '🥗', color: '#38a169', description: 'Eating well-balanced whole foods and staying hydrated' },
-  { id: 'social', label: 'Social', emoji: '🤝', color: '#4299e1', description: 'Spending time with friends and family, establishing new connections, and building community' },
-  { id: 'spiritual', label: 'Spiritual', emoji: '✨', color: '#f6ad55', description: 'Journaling, meditating, practicing art, time in nature, or quiet reflection' },
-  { id: 'intellectual', label: 'Intellectual', emoji: '📚', color: '#7c3aed', description: 'Reading, learning, and practicing art' },
-  { id: 'financial', label: 'Financial', emoji: '💰', color: '#d69e2e', description: 'Good money management' },
-  { id: 'environmental', label: 'Environmental', emoji: '🌿', color: '#319795', description: 'Keeping your surroundings clean and organized' },
+  { id: 'physical', label: 'Physical', icon: 'FitnessCenter', color: '#e53e3e', description: 'Sleep quality and exercise' },
+  { id: 'nutritional', label: 'Nutritional', icon: 'Restaurant', color: '#38a169', description: 'Eating well-balanced whole foods and staying hydrated' },
+  { id: 'social', label: 'Social', icon: 'Groups', color: '#4299e1', description: 'Spending time with friends and family, establishing new connections, and building community' },
+  { id: 'spiritual', label: 'Spiritual', icon: 'SelfImprovement', color: '#f6ad55', description: 'Journaling, meditating, practicing art, time in nature, or quiet reflection' },
+  { id: 'intellectual', label: 'Intellectual', icon: 'MenuBook', color: '#7c3aed', description: 'Reading, learning, and practicing art' },
+  { id: 'financial', label: 'Financial', icon: 'AccountBalance', color: '#d69e2e', description: 'Good money management' },
+  { id: 'environmental', label: 'Environmental', icon: 'Park', color: '#319795', description: 'Keeping your surroundings clean and organized' },
 ];
 
 /**

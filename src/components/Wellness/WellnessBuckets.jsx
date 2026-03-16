@@ -1,8 +1,28 @@
 import { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, useTheme, Collapse } from '@mui/material';
-import { InfoOutlined } from '@mui/icons-material';
+import {
+  InfoOutlined,
+  FitnessCenter,
+  Restaurant,
+  Groups,
+  SelfImprovement,
+  MenuBook,
+  AccountBalance,
+  Park,
+} from '@mui/icons-material';
 import { WELLNESS_CATEGORIES, getLevelInfo } from '../../utils/wellnessJournalStorage';
+
+/** Map icon name strings to MUI icon components */
+const ICON_MAP = {
+  FitnessCenter,
+  Restaurant,
+  Groups,
+  SelfImprovement,
+  MenuBook,
+  AccountBalance,
+  Park,
+};
 
 /**
  * WellnessBuckets - Visual "bucket fill" representation for each wellness category.
@@ -98,10 +118,13 @@ const BucketCard = memo(({ category, levelInfo, theme }) => {
         <InfoOutlined sx={{ fontSize: '0.9rem' }} />
       </Box>
 
-      {/* Category emoji */}
-      <Typography sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem' }, lineHeight: 1 }}>
-        {category.emoji}
-      </Typography>
+      {/* Category icon */}
+      {(() => {
+        const IconComponent = ICON_MAP[category.icon];
+        return IconComponent ? (
+          <IconComponent sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem' }, color: category.color }} />
+        ) : null;
+      })()}
 
       {/* Category name */}
       <Typography
@@ -250,7 +273,7 @@ BucketCard.propTypes = {
   category: PropTypes.shape({
     id: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
-    emoji: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
   }).isRequired,

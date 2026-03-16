@@ -9,8 +9,19 @@ import {
   useTheme,
   Collapse,
 } from '@mui/material';
-import { Add, Close, InfoOutlined } from '@mui/icons-material';
+import { Add, Close, InfoOutlined, FitnessCenter, Restaurant, Groups, SelfImprovement, MenuBook, AccountBalance, Park } from '@mui/icons-material';
 import { WELLNESS_CATEGORIES } from '../../utils/wellnessJournalStorage';
+
+/** Map icon name strings to MUI icon components */
+const ICON_MAP = {
+  FitnessCenter,
+  Restaurant,
+  Groups,
+  SelfImprovement,
+  MenuBook,
+  AccountBalance,
+  Park,
+};
 
 /**
  * WellnessDayEntry - Daily check-off and bulleted notes for each wellness category.
@@ -161,9 +172,12 @@ const CategoryRow = ({ category, data, isDark, onToggle, onAddNote, onRemoveNote
           inputProps={{ 'aria-label': `Mark ${category.label} as attended` }}
         />
 
-        <Typography sx={{ fontSize: '1.1rem', lineHeight: 1 }}>
-          {category.emoji}
-        </Typography>
+        {(() => {
+          const IconComponent = ICON_MAP[category.icon];
+          return IconComponent ? (
+            <IconComponent sx={{ fontSize: '1.1rem', color: category.color }} />
+          ) : null;
+        })()}
 
         <Typography
           sx={{
@@ -317,7 +331,7 @@ CategoryRow.propTypes = {
   category: PropTypes.shape({
     id: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
-    emoji: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
   }).isRequired,

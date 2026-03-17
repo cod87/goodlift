@@ -165,6 +165,8 @@ const WellnessBuckets = memo(({ stats, entry, onSubmitNotes }) => {
           const catStats = stats[cat.id] || { totalDrops: 0 };
           const levelInfo = getLevelInfo(catStats.totalDrops);
 
+          const hasEntry = (entry?.categories?.[cat.id]?.notes || []).length > 0;
+
           return (
             <BucketCard
               key={cat.id}
@@ -174,6 +176,7 @@ const WellnessBuckets = memo(({ stats, entry, onSubmitNotes }) => {
               onClick={() => handleOpenDialog(cat)}
               isAnimating={animatingBucket === cat.id}
               animDropCount={animatingBucket === cat.id ? dropCount : 0}
+              hasEntry={hasEntry}
             />
           );
         })}
@@ -400,7 +403,7 @@ WellnessBuckets.propTypes = {
 };
 
 /** Individual bucket card for a single category */
-const BucketCard = memo(({ category, levelInfo, isDark, onClick, isAnimating, animDropCount }) => {
+const BucketCard = memo(({ category, levelInfo, isDark, onClick, isAnimating, animDropCount, hasEntry }) => {
   const fillPercent = Math.min(levelInfo.progress * 100, 100);
   const IconComponent = ICON_MAP[category.icon];
 
@@ -412,11 +415,14 @@ const BucketCard = memo(({ category, levelInfo, isDark, onClick, isAnimating, an
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
       aria-label={`Open ${category.label} entry`}
       sx={{
-        background: isDark
-          ? 'rgba(255,255,255,0.04)'
-          : 'var(--color-surface)',
+        background: hasEntry
+          ? (isDark ? `${category.color}18` : `${category.color}12`)
+          : (isDark ? 'rgba(255,255,255,0.04)' : 'var(--color-surface)'),
         borderRadius: 'var(--radius-md, 12px)',
-        border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'var(--color-border)'}`,
+        border: hasEntry
+          ? `2px solid ${category.color}70`
+          : `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'var(--color-border)'}`,
+        boxShadow: hasEntry ? `0 0 8px ${category.color}30` : 'none',
         padding: { xs: '0.5rem', sm: '0.75rem' },
         display: 'flex',
         flexDirection: 'column',
@@ -576,6 +582,7 @@ BucketCard.propTypes = {
   onClick: PropTypes.func.isRequired,
   isAnimating: PropTypes.bool,
   animDropCount: PropTypes.number,
+  hasEntry: PropTypes.bool,
 };
 
 /** Water drops falling animation */

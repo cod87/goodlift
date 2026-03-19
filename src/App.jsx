@@ -60,6 +60,7 @@ import { BREAKPOINTS } from './theme/responsive';
  */
 function AppContent() {
   const [currentScreen, setCurrentScreen] = useState('home');
+  const [logActivityDate, setLogActivityDate] = useState(null);
   const [currentWorkout, setCurrentWorkout] = useState([]);
   const [workoutType, setWorkoutType] = useState('full');
   const [selectedEquipment, setSelectedEquipment] = useState(new Set(['all']));
@@ -306,7 +307,12 @@ function AppContent() {
     }
   }, [allExercises]);
 
-  const handleNavigate = (screen) => {
+  const handleNavigate = (screen, params) => {
+    if (screen === 'log-activity' && params?.date) {
+      setLogActivityDate(params.date);
+    } else {
+      setLogActivityDate(null);
+    }
     setCurrentScreen(screen);
   };
 
@@ -756,7 +762,7 @@ function AppContent() {
             <UnifiedTimerScreen onNavigate={handleNavigate} />
           )}
 
-          {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} />}
+          {currentScreen === 'log-activity' && <UnifiedLogActivityScreen onNavigate={handleNavigate} initialDate={logActivityDate} />}
 
           {(currentScreen === 'stretch' || currentScreen === 'mobility') && <MobilityScreen />}
 

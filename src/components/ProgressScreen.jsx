@@ -80,7 +80,7 @@ import { calculateStreak, calculateBasicStreak, calculateAdherence } from '../ut
  * - Time frame filtering (7 days, 3 months, year, all time)
  * - Desktop: Enhanced multi-column grid layout
  */
-const ProgressDashboard = () => {
+const ProgressDashboard = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
   const [pinnedExercises, setPinnedExercisesState] = useState([]);
@@ -462,6 +462,7 @@ const ProgressDashboard = () => {
             <Box>
               <MonthCalendarView
                 workoutHistory={history}
+                onDayClick={(date) => onNavigate?.('log-activity', { date })}
               />
             </Box>
 
@@ -1124,6 +1125,8 @@ const ProgressDashboard = () => {
   );
 };
 
-ProgressDashboard.propTypes = {};
+ProgressDashboard.propTypes = {
+  onNavigate: PropTypes.func,
+};
 
 export default ProgressDashboard;

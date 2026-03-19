@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useAuth } from './AuthContext';
 import { saveUserDataToFirebase, loadUserDataFromFirebase } from '../utils/firebaseStorage';
 import { getWorkoutHistory, getStretchSessions, getHiitSessions, getCardioSessions } from '../utils/storage';
-import { calculateStreak } from '../utils/trackingMetrics';
+import { calculateStreak, calculateBasicStreak } from '../utils/trackingMetrics';
 
 const UserProfileContext = createContext({});
 
@@ -39,8 +39,22 @@ export const UserProfileProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
+  // Read the current streakMode preference from localStorage
+  const getStreakMode = useCallback(() => {
+    try {
+      const stored = localStorage.getItem('goodlift_preferences');
+      if (stored) {
+        const prefs = JSON.parse(stored);
+        return prefs.streakMode || 'advanced';
+      }
+    } catch {
+      // ignore
+    }
+    return 'advanced';
+  }, []);
+
   // Calculate stats from workout history
-  const calculateStats = useCallback(async () => {
+  const calculateStats = useCallback(async (streakMode = 'advanced') => {
     try {
       // Load ALL session types for accurate counting
       const [workoutHistory, stretchSessions, hiitSessions, cardioSessions] = await Promise.all([
@@ -62,7 +76,8 @@ export const UserProfileProvider = ({ children }) => {
       const totalWorkouts = allSessions.length;
       
       // Current streak using canonical function from trackingMetrics
-      const streakData = calculateStreak(allSessions);
+      const streakFn = streakMode === 'basic' ? calculateBasicStreak : calculateStreak;
+      const streakData = streakFn(allSessions);
       const currentStreak = streakData.currentStreak;
       const longestStreak = streakData.longestStreak;
       
@@ -160,7 +175,7 @@ export const UserProfileProvider = ({ children }) => {
           if (userData?.stats) {
             setStats(userData.stats);
           } else {
-            const calculatedStats = await calculateStats();
+            const calculatedStats = await calculateStats(getStreakMode());
             setStats(calculatedStats);
           }
         } else {
@@ -177,7 +192,7 @@ export const UserProfileProvider = ({ children }) => {
           }
           
           // Calculate stats for guest
-          const calculatedStats = await calculateStats();
+          const calculatedStats = await calculateStats(getStreakMode());
           setStats(calculatedStats);
         }
       } catch (error) {
@@ -191,7 +206,7 @@ export const UserProfileProvider = ({ children }) => {
     if (currentUser !== undefined) {
       loadProfile();
     }
-  }, [currentUser, isGuest, calculateStats]);
+  }, [currentUser, isGuest, calculateStats, getStreakMode]);
 
   // Save profile
   const saveProfile = useCallback(async (newProfile) => {
@@ -265,13 +280,13 @@ export const UserProfileProvider = ({ children }) => {
 
   // Refresh stats
   const refreshStats = useCallback(async () => {
-    const calculatedStats = await calculateStats();
+    const calculatedStats = await calculateStats(getStreakMode());
     setStats(calculatedStats);
     
     if (currentUser && !isGuest) {
       await saveUserDataToFirebase(currentUser.uid, { stats: calculatedStats });
     }
-  }, [calculateStats, currentUser, isGuest]);
+  }, [calculateStats, getStreakMode, currentUser, isGuest]);
 
   const value = {
     profile,

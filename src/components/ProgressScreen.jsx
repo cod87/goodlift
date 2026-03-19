@@ -66,7 +66,8 @@ import { BREAKPOINTS } from '../theme/responsive';
 import { StreakDisplay, AdherenceDisplay, VolumeTrendDisplay } from './Progress/TrackingCards';
 import MuscleVolumeTracker from './Progress/MuscleVolumeTracker';
 import { useUserProfile } from '../contexts/UserProfileContext';
-import { calculateStreak, calculateAdherence } from '../utils/trackingMetrics';
+import { usePreferences } from '../contexts/PreferencesContext';
+import { calculateStreak, calculateBasicStreak, calculateAdherence } from '../utils/trackingMetrics';
 
 /**
  * ProgressDashboard - Complete progress tracking dashboard
@@ -100,6 +101,10 @@ const ProgressDashboard = () => {
   
   // User profile context for weight tracking
   const { profile, addWeightEntry } = useUserProfile();
+  
+  // Streak tracking mode preference
+  const { preferences } = usePreferences();
+  const streakMode = preferences.streakMode || 'advanced';
   
   // New tracking metrics state
   const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0 });
@@ -289,7 +294,8 @@ const ProgressDashboard = () => {
       setUserStats(loadedStats);
 
       // Calculate tracking metrics using canonical functions from trackingMetrics.js
-      const streak = calculateStreak(allSessions);
+      const streakFn = streakMode === 'basic' ? calculateBasicStreak : calculateStreak;
+      const streak = streakFn(allSessions);
       setStreakData(streak);
 
       // Calculate adherence for last 30 days (activePlan is null since we removed planning features)
@@ -330,6 +336,14 @@ const ProgressDashboard = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history, timeFrame, customStartDate, customEndDate]);
+
+  // Recalculate streak when streakMode preference changes
+  useEffect(() => {
+    if (history.length > 0) {
+      const streakFn = streakMode === 'basic' ? calculateBasicStreak : calculateStreak;
+      setStreakData(streakFn(history));
+    }
+  }, [streakMode, history]);
 
   const handleRemovePinnedExercise = async (exerciseName) => {
     await progressiveOverloadService.removePinnedExercise(exerciseName);

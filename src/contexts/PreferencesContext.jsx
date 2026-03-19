@@ -32,6 +32,8 @@ const DEFAULT_PREFERENCES = {
   showWellnessOnAppOpen: false,
   // Barbell weight preference
   barbellWeight: 45, // Default barbell weight in lbs (standard Olympic barbell)
+  // Streak tracking mode: 'advanced' (default) or 'basic'
+  streakMode: 'advanced',
 };
 
 export const PreferencesProvider = ({ children }) => {

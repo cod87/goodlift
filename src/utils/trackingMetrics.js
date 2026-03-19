@@ -413,6 +413,152 @@ export const calculateStreak = (workoutHistory = []) => {
 };
 
 /**
+ * Calculate workout streak using Basic tracking mode.
+ *
+ * BASIC STREAK RULES:
+ * - A completed week (Sunday–Saturday) keeps the streak alive only if it contains
+ *   at least 3 strength training sessions.
+ * - The current (incomplete) week is always considered valid – it cannot "fail" yet.
+ * - Only days on which ANY workout is logged (any type, excluding rest/sick days)
+ *   advance the streak counter.
+ * - Rest days and sick days are ignored (they neither advance nor break the streak).
+ * - Grace period: the streak remains "active" if the user worked out during the
+ *   current week, OR if the previous completed week was valid and the user hasn't
+ *   yet started the new week.
+ *
+ * @param {Array} workoutHistory - Array of completed workout objects with date
+ * @returns {Object} { currentStreak: number, longestStreak: number }
+ */
+export const calculateBasicStreak = (workoutHistory = []) => {
+  if (!workoutHistory || workoutHistory.length === 0) {
+    return { currentStreak: 0, longestStreak: 0 };
+  }
+
+  const MS_PER_DAY = 1000 * 60 * 60 * 24;
+  const MS_PER_WEEK = 7 * MS_PER_DAY;
+
+  const isStrengthSession = (session) => {
+    const type = (session.type || session.sessionType || '').toLowerCase();
+    return ['upper', 'lower', 'full', 'push', 'pull', 'legs', 'strength', 'hypertrophy'].includes(type);
+  };
+
+  const isRestSession = (session) => {
+    const type = (session.type || session.sessionType || '').toLowerCase();
+    return type === 'rest';
+  };
+
+  const isSickDaySession = (session) => {
+    const type = (session.type || session.sessionType || '').toLowerCase();
+    return type === 'sick_day';
+  };
+
+  const getWeekStart = (date) => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const day = d.getDay(); // 0 = Sunday
+    d.setDate(d.getDate() - day);
+    return d.getTime();
+  };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayTime = today.getTime();
+  const currentWeekStart = getWeekStart(todayTime);
+
+  // Group sessions by week.
+  // strengthDays: unique days with at least one strength session
+  // workoutDays: unique days with any workout (excluding rest/sick)
+  const weekData = new Map(); // weekStart -> { strengthDays: Set<ts>, workoutDays: Set<ts> }
+
+  workoutHistory.forEach(session => {
+    if (isRestSession(session) || isSickDaySession(session)) return;
+
+    const d = new Date(session.date);
+    d.setHours(0, 0, 0, 0);
+    const dayTime = d.getTime();
+    const weekStart = getWeekStart(dayTime);
+
+    if (!weekData.has(weekStart)) {
+      weekData.set(weekStart, { strengthDays: new Set(), workoutDays: new Set() });
+    }
+
+    const data = weekData.get(weekStart);
+    data.workoutDays.add(dayTime);
+    if (isStrengthSession(session)) {
+      data.strengthDays.add(dayTime);
+    }
+  });
+
+  if (weekData.size === 0) {
+    return { currentStreak: 0, longestStreak: 0 };
+  }
+
+  // A completed (past) week is valid when it has >= 3 strength training days.
+  const isCompletedWeekValid = (weekStart) => {
+    const data = weekData.get(weekStart);
+    if (!data) return false;
+    return data.strengthDays.size >= 3;
+  };
+
+  // Walk backwards from endWeekStart, accumulating workout days from each valid week.
+  // The current (incomplete) week is always counted regardless of strength-session count.
+  const countStreakBackFrom = (endWeekStart) => {
+    let totalDays = 0;
+    let weekStart = endWeekStart;
+
+    while (true) {
+      if (weekStart === currentWeekStart) {
+        // Current week: always valid (in progress)
+        const data = weekData.get(weekStart);
+        totalDays += data ? data.workoutDays.size : 0;
+      } else {
+        // Completed week: must meet the 3-strength-session minimum
+        if (!isCompletedWeekValid(weekStart)) break;
+        const data = weekData.get(weekStart);
+        totalDays += data.workoutDays.size;
+      }
+
+      // Move to the previous week
+      weekStart -= MS_PER_WEEK;
+    }
+
+    return totalDays;
+  };
+
+  // Find the most recent workout date across all weeks
+  let mostRecentWorkoutTime = 0;
+  weekData.forEach((data) => {
+    data.workoutDays.forEach(day => {
+      if (day > mostRecentWorkoutTime) mostRecentWorkoutTime = day;
+    });
+  });
+
+  const mostRecentWorkoutWeekStart = getWeekStart(mostRecentWorkoutTime);
+  const prevWeekStart = currentWeekStart - MS_PER_WEEK;
+
+  // The streak is "active" (not expired) when:
+  // 1. The user worked out at some point during the current week, OR
+  // 2. The user last worked out during the previous week AND that week was valid
+  //    (streak carries into the new week until it is earned or lost)
+  const isStreakActive =
+    mostRecentWorkoutWeekStart === currentWeekStart ||
+    (mostRecentWorkoutWeekStart === prevWeekStart && isCompletedWeekValid(prevWeekStart));
+
+  const currentStreak = isStreakActive ? countStreakBackFrom(currentWeekStart) : 0;
+
+  // Longest streak: try each week as the potential end of the streak
+  let longestStreak = 0;
+  weekData.forEach((_, weekStart) => {
+    // For completed weeks, only consider valid ones as streak endpoints
+    if (weekStart !== currentWeekStart && !isCompletedWeekValid(weekStart)) return;
+    const days = countStreakBackFrom(weekStart);
+    if (days > longestStreak) longestStreak = days;
+  });
+
+  return { currentStreak, longestStreak };
+};
+
+/**
  * Calculate adherence percentage
  * If user's first session was less than 30 days ago, calculates adherence based on 
  * days since first session. Otherwise uses the last 30 days.

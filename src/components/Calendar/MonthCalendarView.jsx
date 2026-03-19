@@ -355,7 +355,7 @@ const MonthCalendarView = ({
             return (
               <Box
                 key={index}
-                onClick={() => isCompleted && onDayClick?.(date, workoutsOnDay[0])}
+                onClick={() => isCurrentMonth && onDayClick?.(date, workoutsOnDay[0] || null)}
                 sx={{
                   aspectRatio: '1',
                   display: 'flex',
@@ -363,7 +363,7 @@ const MonthCalendarView = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: getBorderRadius(),
-                  cursor: isCompleted ? 'pointer' : 'default',
+                  cursor: isCurrentMonth ? 'pointer' : 'default',
                   bgcolor: getBackgroundColor(),
                   opacity: isCurrentMonth ? (isSickDay ? 0.5 : 1) : 0.3,
                   // Subtle grid borders
@@ -382,7 +382,7 @@ const MonthCalendarView = ({
                   maxHeight: { xs: 44, sm: 60 },
                   position: 'relative',
                   padding: { xs: '3px 2px', sm: '6px 4px' },
-                  '&:hover': isCompleted ? {
+                  '&:hover': isCurrentMonth ? {
                     bgcolor: isDeloadSession
                       ? (theme.palette.mode === 'dark' ? deloadHoverDark : deloadHoverLight)
                       : isInDeloadWeek

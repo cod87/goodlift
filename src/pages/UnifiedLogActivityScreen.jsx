@@ -61,7 +61,7 @@ const CARDIO_TYPES = {
   HIIT: 'hiit',
 };
 
-const UnifiedLogActivityScreen = ({ onNavigate }) => {
+const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
   const [notification, setNotification] = useState({ show: false, message: '', severity: 'success' });
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [lastLoggedSession, setLastLoggedSession] = useState(null);
@@ -71,7 +71,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
   const { isAutoAssignWeek, assignWorkoutToDay, weeklySchedule } = useWeekScheduling();
 
   const initialValues = {
-    date: new Date(),
+    date: initialDate instanceof Date ? initialDate : (initialDate ? new Date(initialDate) : new Date()),
     duration: '',
     notes: '',
     sessionName: '', // Optional session name
@@ -545,6 +545,7 @@ const UnifiedLogActivityScreen = ({ onNavigate }) => {
 
 UnifiedLogActivityScreen.propTypes = {
   onNavigate: PropTypes.func,
+  initialDate: PropTypes.instanceOf(Date),
 };
 
 export default UnifiedLogActivityScreen;

@@ -656,6 +656,33 @@ const SettingsScreen = ({ onNavigate }) => {
                     </FormControl>
                   )}
                 </ListItem>
+                <Divider component="li" />
+
+                {/* Streak Tracking Mode */}
+                <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        <Apps sx={{ color: 'primary.main' }} />
+                      </ListItemIcon>
+                      <Typography variant="body2" fontWeight={500}>
+                        Streak Tracking
+                      </Typography>
+                    </Box>
+                    <Switch
+                      checked={(preferences.streakMode || 'advanced') === 'basic'}
+                      onChange={(e) => updatePreference('streakMode', e.target.checked ? 'basic' : 'advanced')}
+                      color="primary"
+                    />
+                  </Box>
+                  <Box sx={{ ml: 5, width: 'calc(100% - 40px)' }}>
+                    <Typography variant="caption" color="text.secondary">
+                      {(preferences.streakMode || 'advanced') === 'basic'
+                        ? 'Basic: 3 strength sessions per week keeps the streak. All workout days count toward the streak total.'
+                        : 'Advanced: Daily consistency required. Rest day limits and active recovery rules apply.'}
+                    </Typography>
+                  </Box>
+                </ListItem>
               </List>
             </CardContent>
           </Card>

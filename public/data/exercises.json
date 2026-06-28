@@ -9,6 +9,17 @@
     "Progression": "Progressive Overload",
     "image": "svg-muscles/archer-push-up.svg"
   },
+    {
+    "Exercise Name": "Austrailian Row",
+    "Primary Muscle": "Lats",
+    "Secondary Muscles": "Biceps, Core",
+    "Exercise Type": "Compound",
+    "Equipment": "Bodyweight",
+    "Workout Type": "Upper Body Strength, Full Body Strength",
+    "Progression": "Progressive Overload",
+    "Webp File": "dumbbell-bent-over-row.webp",
+    "image": "demos/dumbbell-bent-over-row.webp"
+  },
   {
     "Exercise Name": "Arnold Press, Dumbbell",
     "Primary Muscle": "Delts",

@@ -95,7 +95,7 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
         if (workouts && workouts.length > 0 && selectedSavedWorkoutId === null) {
           // Only default to saved workout if it has a valid id
           const firstId = workouts[0].id;
-          setSelectedSavedWorkoutId(firstId != null ? firstId : CUSTOM_WORKOUT_ID);
+          setSelectedSavedWorkoutId(firstId !== null && firstId !== undefined ? firstId : CUSTOM_WORKOUT_ID);
         } else if (!workouts || workouts.length === 0) {
           setSelectedSavedWorkoutId(CUSTOM_WORKOUT_ID);
         }

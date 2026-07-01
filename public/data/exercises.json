@@ -10,7 +10,7 @@
     "image": "svg-muscles/archer-push-up.svg"
   },
     {
-    "Exercise Name": "Austrailian Row",
+    "Exercise Name": "Australian Pull-Up",
     "Primary Muscle": "Lats",
     "Secondary Muscles": "Biceps, Core",
     "Exercise Type": "Compound",
@@ -1027,7 +1027,7 @@
     "image": "demos/pull-up.webp"
   },
   {
-    "Exercise Name": "Pull-Up, Cable",
+    "Exercise Name": "Chin-Up, Cable",
     "Primary Muscle": "Lats, Biceps",
     "Secondary Muscles": "Rear Delts, Core",
     "Exercise Type": "Compound",

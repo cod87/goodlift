@@ -14,6 +14,7 @@ import {
   MenuItem,
   Stack,
   Snackbar,
+  FormHelperText,
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import { 
@@ -28,13 +29,16 @@ import {
   saveUserStats,
   getUserStats,
   getSavedWorkouts,
+  saveSavedWorkout,
 } from '../utils/storage';
 import { useWeekScheduling } from '../contexts/WeekSchedulingContext';
+import WorkoutCreationModal from '../components/WorkTabs/WorkoutCreationModal';
 import AssignToDayDialog from '../components/Common/AssignToDayDialog';
 import SavedWorkoutLogStep from '../components/Workout/SavedWorkoutLogStep';
 
 // Sentinel value meaning "log without a saved workout template"
-const CUSTOM_WORKOUT_ID = '__custom__';
+const CUSTOM_WORKOUT_ID = '__custom__'; // Kept for backwards compatibility if needed, but not selectable
+const CREATE_NEW_ID = '__create_new__';
 
 // Constants
 const SECONDS_PER_MINUTE = 60;
@@ -82,6 +86,7 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
   const [step, setStep] = useState(1);
   // Captured form values when moving from step 1 → 2
   const [capturedFormValues, setCapturedFormValues] = useState(null);
+  const [showWorkoutCreator, setShowWorkoutCreator] = useState(false);
 
   const { isAutoAssignWeek, assignWorkoutToDay, weeklySchedule } = useWeekScheduling();
 
@@ -95,13 +100,13 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
         if (workouts && workouts.length > 0 && selectedSavedWorkoutId === null) {
           // Only default to saved workout if it has a valid id
           const firstId = workouts[0].id;
-          setSelectedSavedWorkoutId(firstId !== null && firstId !== undefined ? firstId : CUSTOM_WORKOUT_ID);
+          setSelectedSavedWorkoutId(firstId !== null && firstId !== undefined ? firstId : null);
         } else if (!workouts || workouts.length === 0) {
-          setSelectedSavedWorkoutId(CUSTOM_WORKOUT_ID);
+          setSelectedSavedWorkoutId(null);
         }
       } catch (err) {
         console.error('Error loading saved workouts:', err);
-        setSelectedSavedWorkoutId(CUSTOM_WORKOUT_ID);
+        setSelectedSavedWorkoutId(null);
       }
     };
     loadWorkouts();
@@ -111,25 +116,18 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
   // Determine if the current selection is a saved workout (not custom)
   const isUsingSavedWorkout = (sessionType) =>
     sessionType === SESSION_TYPES.STRENGTH &&
-    selectedSavedWorkoutId !== CUSTOM_WORKOUT_ID &&
-    selectedSavedWorkoutId !== null;
+    selectedSavedWorkoutId !== null && selectedSavedWorkoutId !== CREATE_NEW_ID;
 
   const getSelectedWorkout = () =>
     savedWorkouts.find((w) => w.id === selectedSavedWorkoutId) || null;
 
   const initialValues = {
     date: initialDate instanceof Date ? initialDate : (initialDate ? new Date(initialDate) : new Date()),
-    duration: '',
     notes: '',
-    sessionName: '', // Optional session name
     // Session type selection
     sessionType: SESSION_TYPES.STRENGTH,
     // Workout-specific fields (for strength sessions in custom mode)
-    workoutType: WORKOUT_TYPES.FULL,
-    // Cardio-specific fields
     cardioType: CARDIO_TYPES.GENERAL,
-    numExercises: '',
-    setsPerExercise: '',
   };
 
   const validate = (values) => {
@@ -138,29 +136,9 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
     if (!values.date) {
       errors.date = 'Date is required';
     }
-    
-    // Only validate duration for non-rest and non-sick-day sessions
-    if (values.sessionType !== SESSION_TYPES.REST && values.sessionType !== SESSION_TYPES.SICK_DAY) {
-      if (!values.duration) {
-        errors.duration = 'Duration is required';
-      } else if (isNaN(values.duration) || parseFloat(values.duration) <= 0) {
-        errors.duration = 'Duration must be a positive number';
-      }
-    }
 
-    // Only validate custom strength fields when NOT using a saved workout
     if (values.sessionType === SESSION_TYPES.STRENGTH && !isUsingSavedWorkout(values.sessionType)) {
-      if (!values.numExercises) {
-        errors.numExercises = 'Number of exercises is required';
-      } else if (isNaN(values.numExercises) || parseInt(values.numExercises) <= 0) {
-        errors.numExercises = 'Must be a positive number';
-      }
-
-      if (!values.setsPerExercise) {
-        errors.setsPerExercise = 'Sets per exercise is required';
-      } else if (isNaN(values.setsPerExercise) || parseInt(values.setsPerExercise) <= 0) {
-        errors.setsPerExercise = 'Must be a positive number';
-      }
+      errors.sessionType = 'Please select a saved workout or create a new one';
     }
     
     return errors;
@@ -187,8 +165,28 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
     if (!capturedFormValues) return;
     const { values, resetForm } = capturedFormValues;
     await persistWorkout(values, exercises, resetForm, () => {});
-    setStep(1);
-    setCapturedFormValues(null);
+    // Do not reset step here to prevent UI jump before redirect
+  };
+
+  const handleSaveNewWorkout = async (workout) => {
+    try {
+      const newWorkout = await saveSavedWorkout(workout);
+      const workouts = await getSavedWorkouts();
+      setSavedWorkouts(workouts || []);
+      if (newWorkout) setSelectedSavedWorkoutId(newWorkout.id);
+      setShowWorkoutCreator(false);
+    } catch (err) {
+      console.error('Error saving new workout:', err);
+    }
+  };
+
+  const handleWorkoutSelectChange = (e) => {
+    const val = e.target.value;
+    if (val === CREATE_NEW_ID) {
+      setShowWorkoutCreator(true);
+    } else {
+      setSelectedSavedWorkoutId(val);
+    }
   };
 
   const handleBackToForm = () => {
@@ -202,15 +200,12 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
   const persistWorkout = async (values, exercises, resetForm, setSubmitting) => {
     try {
       const timestamp = values.date.getTime();
-      // For rest days and sick days, set duration to 0 if not provided
-      const duration = (values.sessionType === SESSION_TYPES.REST || values.sessionType === SESSION_TYPES.SICK_DAY) && !values.duration 
-        ? 0 
-        : parseFloat(values.duration) * SECONDS_PER_MINUTE;
+      const duration = 0; // Duration is no longer collected
 
       // Determine workout type label
       const selectedWorkout = getSelectedWorkout();
       const workoutType = values.sessionType === SESSION_TYPES.STRENGTH
-        ? (selectedWorkout?.type || values.workoutType)
+        ? (selectedWorkout?.type || WORKOUT_TYPES.FULL)
         : values.sessionType === SESSION_TYPES.CARDIO
         ? values.cardioType
         : values.sessionType;
@@ -222,16 +217,12 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
         type: workoutType,
         exercises: exercises || {},
         notes: values.notes.trim(),
-        sessionName: values.sessionName.trim() || (selectedWorkout?.name ?? ''),
+        sessionName: selectedWorkout?.name ?? '',
         isManualLog: true,
         sessionType: values.sessionType,
       };
 
-      // Add strength-specific fields only for custom strength sessions
-      if (values.sessionType === SESSION_TYPES.STRENGTH && !isUsingSavedWorkout(values.sessionType)) {
-        workoutData.numExercises = parseInt(values.numExercises);
-        workoutData.setsPerExercise = parseInt(values.setsPerExercise);
-      }
+
 
       await saveWorkout(workoutData);
       
@@ -239,7 +230,7 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
       if (values.sessionType !== SESSION_TYPES.REST && values.sessionType !== SESSION_TYPES.SICK_DAY) {
         const stats = await getUserStats();
         stats.totalWorkouts += 1;
-        stats.totalTime += workoutData.duration;
+        
         await saveUserStats(stats);
       }
 
@@ -409,7 +400,7 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
               validate={validate}
               onSubmit={handleSubmit}
             >
-              {({ errors, touched, isSubmitting, isValid, dirty, values, setFieldValue }) => (
+              {({ errors, touched, isSubmitting, isValid, dirty, values, setFieldValue, submitCount }) => (
                 <Form>
                   <Stack spacing={2}>
                     {/* Date Field */}
@@ -451,42 +442,27 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
 
                     {/* ── Saved Workout selector (strength only) ── */}
                     {values.sessionType === SESSION_TYPES.STRENGTH && (
-                      <FormControl fullWidth>
+                      <FormControl fullWidth error={submitCount > 0 && !isUsingSavedWorkout(values.sessionType)}>
                         <InputLabel>Workout</InputLabel>
                         <Select
-                          value={selectedSavedWorkoutId ?? CUSTOM_WORKOUT_ID}
+                          value={selectedSavedWorkoutId ?? ''}
                           label="Workout"
-                          onChange={(e) => setSelectedSavedWorkoutId(e.target.value)}
+                          onChange={handleWorkoutSelectChange}
                         >
                           {savedWorkouts.map((w, idx) => (
                             <MenuItem key={w.id ?? idx} value={w.id}>
                               {w.name || `Workout ${idx + 1}`}
                             </MenuItem>
                           ))}
-                          <MenuItem value={CUSTOM_WORKOUT_ID}>Custom workout</MenuItem>
+                          <MenuItem value={CREATE_NEW_ID}>+ Create New Workout...</MenuItem>
                         </Select>
+                        {submitCount > 0 && !isUsingSavedWorkout(values.sessionType) && (
+                          <FormHelperText>Please select a saved workout or create a new one</FormHelperText>
+                        )}
                       </FormControl>
                     )}
 
-                    {/* Workout Type – only for custom strength sessions */}
-                    {values.sessionType === SESSION_TYPES.STRENGTH &&
-                      selectedSavedWorkoutId === CUSTOM_WORKOUT_ID && (
-                      <FormControl fullWidth>
-                        <InputLabel>Workout Type</InputLabel>
-                        <Select
-                          value={values.workoutType}
-                          label="Workout Type"
-                          onChange={(e) => setFieldValue('workoutType', e.target.value)}
-                        >
-                          <MenuItem value={WORKOUT_TYPES.FULL}>Full Body</MenuItem>
-                          <MenuItem value={WORKOUT_TYPES.UPPER}>Upper Body</MenuItem>
-                          <MenuItem value={WORKOUT_TYPES.PUSH}>Push</MenuItem>
-                          <MenuItem value={WORKOUT_TYPES.PULL}>Pull</MenuItem>
-                          <MenuItem value={WORKOUT_TYPES.LEGS}>Legs</MenuItem>
-                          <MenuItem value={WORKOUT_TYPES.CORE}>Core</MenuItem>
-                        </Select>
-                      </FormControl>
-                    )}
+                    
 
                     {/* Cardio Type for Cardio Sessions */}
                     {values.sessionType === SESSION_TYPES.CARDIO && (
@@ -506,75 +482,7 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
                       </FormControl>
                     )}
 
-                    {/* Duration Field - Hide for Rest Days and Sick Days */}
-                    {values.sessionType !== SESSION_TYPES.REST && values.sessionType !== SESSION_TYPES.SICK_DAY && (
-                      <Field name="duration">
-                        {({ field }) => (
-                          <TextField
-                            {...field}
-                            fullWidth
-                            type="number"
-                            label="Duration (minutes)"
-                            placeholder="e.g., 45"
-                            error={touched.duration && Boolean(errors.duration)}
-                            helperText={touched.duration && errors.duration}
-                            variant="outlined"
-                            inputProps={{ min: 0, step: 1 }}
-                          />
-                        )}
-                      </Field>
-                    )}
-
-                    {/* Custom strength fields – only visible when Custom workout is selected */}
-                    {values.sessionType === SESSION_TYPES.STRENGTH &&
-                      selectedSavedWorkoutId === CUSTOM_WORKOUT_ID && (
-                      <>
-                        <Field name="numExercises">
-                          {({ field }) => (
-                            <TextField
-                              {...field}
-                              fullWidth
-                              type="number"
-                              label="Number of Exercises"
-                              placeholder="e.g., 6"
-                              error={touched.numExercises && Boolean(errors.numExercises)}
-                              helperText={touched.numExercises && errors.numExercises}
-                              variant="outlined"
-                              inputProps={{ min: 1, step: 1 }}
-                            />
-                          )}
-                        </Field>
-
-                        <Field name="setsPerExercise">
-                          {({ field }) => (
-                            <TextField
-                              {...field}
-                              fullWidth
-                              type="number"
-                              label="Sets per Exercise"
-                              placeholder="e.g., 3"
-                              error={touched.setsPerExercise && Boolean(errors.setsPerExercise)}
-                              helperText={touched.setsPerExercise && errors.setsPerExercise}
-                              variant="outlined"
-                              inputProps={{ min: 1, step: 1 }}
-                            />
-                          )}
-                        </Field>
-                      </>
-                    )}
-
-                    {/* Session Name Field - Optional */}
-                    <Field name="sessionName">
-                      {({ field }) => (
-                        <TextField
-                          {...field}
-                          fullWidth
-                          label="Session Name (optional)"
-                          placeholder="e.g., Morning workout, Leg day, etc."
-                          variant="outlined"
-                        />
-                      )}
-                    </Field>
+                    
 
                     {/* Notes Field */}
                     <Field name="notes">
@@ -658,6 +566,12 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
           onAssign={handleAssignConfirm}
           workoutData={lastLoggedSession}
           currentSchedule={weeklySchedule}
+        />
+        <WorkoutCreationModal
+          open={showWorkoutCreator}
+          onClose={() => setShowWorkoutCreator(false)}
+          onSave={handleSaveNewWorkout}
+          exercises={[]}
         />
       </Box>
     </LocalizationProvider>

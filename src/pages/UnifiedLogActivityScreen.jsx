@@ -103,7 +103,6 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
       }
     };
     loadWorkouts();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Determine if the current selection is a saved workout (not custom)

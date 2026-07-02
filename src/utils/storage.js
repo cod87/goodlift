@@ -2049,7 +2049,7 @@ export const saveSavedWorkout = async (workout) => {
       }
     }
     
-    return workouts;
+    return newWorkout;
   } catch (error) {
     console.error('Error saving workout:', error);
     throw error;

@@ -89,24 +89,25 @@ function runTests() {
     console.log('\n--- Test 1: Cable Exercise Count ---');
     const cableExercises = exercises.filter(ex => ex.Equipment.includes('Cable'));
     totalTests++;
-    if (cableExercises.length === 8) {
-      pass(`Found exactly 8 cable exercises`);
+    if (cableExercises.length === 9) {
+      pass(`Found exactly 9 cable exercises`);
       passedTests++;
     } else {
-      fail(`Expected 8 cable exercises, found ${cableExercises.length}`);
+      fail(`Expected 9 cable exercises, found ${cableExercises.length}`);
     }
     
     // Test 2: Verify all expected cable exercises exist
     console.log('\n--- Test 2: Expected Cable Exercises ---');
     const expectedExercises = [
       'Lat Pulldown',
-      'Cable Pull-Up',
+      'Chin-Up, Cable',
       'Seated Cable Row',
       'V-Bar Seated Cable Row',
       'Close Grip Lat Pulldown',
-      'Rope Tricep Extension',
-      'Cable Skull Crusher',
-      'Cable Tricep Extension'
+      'Tricep Extension, Rope',
+      'Skull Crusher, Cable',
+      'Tricep Extension, Cable',
+      'V-Bar Pulldown'
     ];
     
     const cableExerciseNames = new Set(cableExercises.map(ex => ex['Exercise Name']));
@@ -137,11 +138,11 @@ function runTests() {
     console.log('\n--- Test 4: Equipment Filtering ---');
     const filteredCable = filterByEquipment(exercises, ['cable machine']);
     totalTests++;
-    if (filteredCable.length === 8) {
-      pass(`Filtering by "cable machine" returns 8 exercises`);
+    if (filteredCable.length === 9) {
+      pass(`Filtering by "cable machine" returns 9 exercises`);
       passedTests++;
     } else {
-      fail(`Expected 8 exercises when filtering by cable, got ${filteredCable.length}`);
+      fail(`Expected 9 exercises when filtering by cable, got ${filteredCable.length}`);
     }
     
     // Test 5: Verify cable exercise structure

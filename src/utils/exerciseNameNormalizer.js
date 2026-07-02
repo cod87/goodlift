@@ -86,7 +86,7 @@ const OLD_TO_NEW_NAME_MAP = {
   'Dumbbell Walking Lunge': 'Walking Lunge, Dumbbell',
   
   // Cable exercises
-  'Cable Pull-Up': 'Pull-Up, Cable',
+  'Cable Pull-Up': 'Chin-Up, Cable',
   'Cable Skull Crusher': 'Skull Crusher, Cable',
   'Cable Tricep Extension': 'Tricep Extension, Cable',
   

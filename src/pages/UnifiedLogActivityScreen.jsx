@@ -36,12 +36,10 @@ import WorkoutCreationModal from '../components/WorkTabs/WorkoutCreationModal';
 import AssignToDayDialog from '../components/Common/AssignToDayDialog';
 import SavedWorkoutLogStep from '../components/Workout/SavedWorkoutLogStep';
 
-// Sentinel value meaning "log without a saved workout template"
-const CUSTOM_WORKOUT_ID = '__custom__'; // Kept for backwards compatibility if needed, but not selectable
+// Sentinel value meaning "create and save a new workout template"
 const CREATE_NEW_ID = '__create_new__';
 
 // Constants
-const SECONDS_PER_MINUTE = 60;
 const NAVIGATION_DELAY_MS = 1500;
 
 const SESSION_TYPES = {
@@ -79,8 +77,8 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
 
   // Saved workouts list for the dropdown
   const [savedWorkouts, setSavedWorkouts] = useState([]);
-  // Selected saved workout id – CUSTOM_WORKOUT_ID means manual/custom fields
-  const [selectedSavedWorkoutId, setSelectedSavedWorkoutId] = useState(null); // null = use first available
+  // Selected saved workout id (must be explicitly chosen for strength sessions)
+  const [selectedSavedWorkoutId, setSelectedSavedWorkoutId] = useState(null);
 
   // Step 1 = the main form; Step 2 = exercise detail entry for saved workouts
   const [step, setStep] = useState(1);
@@ -96,12 +94,7 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
       try {
         const workouts = await getSavedWorkouts();
         setSavedWorkouts(workouts || []);
-        // Default to the first saved workout if available
-        if (workouts && workouts.length > 0 && selectedSavedWorkoutId === null) {
-          // Only default to saved workout if it has a valid id
-          const firstId = workouts[0].id;
-          setSelectedSavedWorkoutId(firstId !== null && firstId !== undefined ? firstId : null);
-        } else if (!workouts || workouts.length === 0) {
+        if (!workouts || workouts.length === 0) {
           setSelectedSavedWorkoutId(null);
         }
       } catch (err) {
@@ -110,7 +103,6 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
       }
     };
     loadWorkouts();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Determine if the current selection is a saved workout (not custom)
@@ -138,7 +130,7 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
     }
 
     if (values.sessionType === SESSION_TYPES.STRENGTH && !isUsingSavedWorkout(values.sessionType)) {
-      errors.sessionType = 'Please select a saved workout or create a new one';
+      errors.sessionType = 'Please select a saved workout';
     }
     
     return errors;
@@ -200,7 +192,6 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
   const persistWorkout = async (values, exercises, resetForm, setSubmitting) => {
     try {
       const timestamp = values.date.getTime();
-      const duration = 0; // Duration is no longer collected
 
       // Determine workout type label
       const selectedWorkout = getSelectedWorkout();
@@ -213,7 +204,6 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
       // Save workout with manual log details
       const workoutData = {
         date: timestamp,
-        duration: duration,
         type: workoutType,
         exercises: exercises || {},
         notes: values.notes.trim(),
@@ -449,6 +439,9 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
                           label="Workout"
                           onChange={handleWorkoutSelectChange}
                         >
+                          <MenuItem value="" disabled>
+                            Select a saved workout
+                          </MenuItem>
                           {savedWorkouts.map((w, idx) => (
                             <MenuItem key={w.id ?? idx} value={w.id}>
                               {w.name || `Workout ${idx + 1}`}
@@ -457,7 +450,7 @@ const UnifiedLogActivityScreen = ({ onNavigate, initialDate }) => {
                           <MenuItem value={CREATE_NEW_ID}>+ Create New Workout...</MenuItem>
                         </Select>
                         {submitCount > 0 && !isUsingSavedWorkout(values.sessionType) && (
-                          <FormHelperText>Please select a saved workout or create a new one</FormHelperText>
+                          <FormHelperText>Please select a saved workout</FormHelperText>
                         )}
                       </FormControl>
                     )}
